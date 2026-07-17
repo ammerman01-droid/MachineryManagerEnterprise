@@ -1,0 +1,24 @@
+<Solution>
+  <Folder Name="/src/" />
+  <Folder Name="/src/BuildingBlocks/">
+    <Project Path="src/BuildingBlocks/MachineryManager.SharedKernel.Abstractions/MachineryManager.SharedKernel.Abstractions.csproj" />
+    <Project Path="src/BuildingBlocks/MachineryManager.SharedKernel.Contracts/MachineryManager.SharedKernel.Contracts.csproj" />
+    <Project Path="src/BuildingBlocks/MachineryManager.SharedKernel.Infrastructure/MachineryManager.SharedKernel.Infrastructure.csproj" />
+    <Project Path="src/BuildingBlocks/MachineryManager.SharedKernel/MachineryManager.SharedKernel.csproj" />
+    <Project Path="src/BuildingBlocks/MachineryManager.UI/MachineryManager.UI.csproj" />
+  </Folder>
+  <Folder Name="/src/Host/">
+    <Project Path="src/Host/MachineryManager.Web/MachineryManager.Web.csproj" />
+  </Folder>
+  <Folder Name="/src/Modules/" />
+  <Folder Name="/src/Modules/Identity/">
+    <Project Path="src/Modules/Identity/Identity.Application/Identity.Application.csproj" />
+    <Project Path="src/Modules/Identity/Identity.Domain/Identity.Domain.csproj" />
+    <Project Path="src/Modules/Identity/Identity.Infrastructure/Identity.Infrastructure.csproj" />
+  </Folder>
+  <Folder Name="/src/Modules/Organization/">
+    <Project Path="src/Modules/Organization/Organization.Application/Organization.Application.csproj" />
+    <Project Path="src/Modules/Organization/Organization.Domain/Organization.Domain.csproj" />
+    <Project Path="src/Modules/Organization/Organization.Infrastructure/Organization.Infrastructure.csproj" />
+  </Folder>
+</Solution>

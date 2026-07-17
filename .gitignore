@@ -1,0 +1,42 @@
+# Visual Studio
+.vs/
+.vscode/
+
+# Build
+bin/
+obj/
+
+# User-specific files
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+# Rider
+.idea/
+
+# ReSharper
+_ReSharper*/
+*.DotSettings.user
+
+# Test Results
+TestResults/
+
+# NuGet
+*.nupkg
+
+# Logs
+*.log
+
+# Windows
+Thumbs.db
+Desktop.ini
+
+# Client Libraries
+**/wwwroot/lib/
+
+# Node
+node_modules/
+
+# npm
+package-lock.json
