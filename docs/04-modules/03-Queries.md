@@ -1,0 +1,726 @@
+# Queries
+
+**Document ID:** MME-MOD-003
+
+**Repository Path:** `docs/04-modules/03-Queries.md`
+
+**Version:** 1.0.0 (Draft)
+
+**Status:** In Progress
+
+**Related Documents**
+
+- 00-ApplicationArchitecture.md
+- 01-UseCases.md
+- 02-Commands.md
+- docs/03-domain/03-DomainModel.md
+- docs/03-domain/04-Aggregates.md
+
+---
+
+# 1. Purpose
+
+This document defines all Queries used by MachineryManagerEnterprise.
+
+Queries retrieve information from the system.
+
+Queries never modify business state.
+
+Queries are read-only.
+
+---
+
+# 2. Query Principles
+
+Every Query shall satisfy the following principles.
+
+- Read-only
+- Side-effect free
+- Technology independent
+- Business oriented
+- Independently executable
+- Optimized for reading
+
+A Query shall never publish Domain Events.
+
+---
+
+# 3. Query Categories
+
+```text
+Queries
+
+├── Asset Queries
+├── Engine Queries
+├── Component Queries
+├── Meter Queries
+├── Maintenance Queries
+├── Financial Queries
+├── Document Queries
+├── Forecast Queries
+├── Reporting Queries
+└── Administration Queries
+```
+
+---
+
+# 4. Query Structure
+
+Every Query shall contain:
+
+- QueryId
+- QueryType
+- RequestedAt
+- RequestedBy
+- Filters
+- Paging (optional)
+- Sorting (optional)
+
+Business-specific filters are defined by each Query.
+
+---
+
+# 5. Asset Queries
+
+## QRY-001
+
+GetAsset
+
+Returns one Asset.
+
+---
+
+## QRY-002
+
+SearchAssets
+
+Returns Assets matching search criteria.
+
+---
+
+## QRY-003
+
+GetAssetHistory
+
+Returns complete lifecycle history.
+
+---
+
+## QRY-004
+
+GetAssetCurrentConfiguration
+
+Returns current Engine, Meter and Components.
+
+---
+
+## QRY-005
+
+GetAssetTimeline
+
+Returns chronological business history.
+
+---
+
+## QRY-006
+
+GetAssetDashboard
+
+Returns summarized operational information.
+
+---
+
+# 6. Engine Queries
+
+## QRY-101
+
+GetEngine
+
+---
+
+## QRY-102
+
+SearchEngines
+
+---
+
+## QRY-103
+
+GetEngineInstallationHistory
+
+---
+
+## QRY-104
+
+GetCurrentInstalledEngine
+
+---
+
+## QRY-105
+
+GetEngineRepairHistory
+
+---
+
+## QRY-106
+
+GetEngineUsageHistory
+
+---
+
+# 7. Component Queries
+
+## QRY-201
+
+GetComponent
+
+---
+
+## QRY-202
+
+SearchComponents
+
+---
+
+## QRY-203
+
+GetComponentHistory
+
+---
+
+## QRY-204
+
+GetInstalledComponents
+
+---
+
+## QRY-205
+
+GetReplacementHistory
+
+---
+
+# 8. Meter Queries
+
+## QRY-301
+
+GetCurrentMeter
+
+---
+
+## QRY-302
+
+GetMeterHistory
+
+---
+
+## QRY-303
+
+GetMeterReadings
+
+---
+
+## QRY-304
+
+GetOperationalUsage
+
+---
+
+## QRY-305
+
+GetNonOperationalUsage
+
+---
+
+## QRY-306
+
+GetUsageCorrections
+
+
+---
+
+# 9. Maintenance Queries
+
+## QRY-401
+
+GetMaintenancePlan
+
+Returns the active maintenance plan for an Asset.
+
+---
+
+## QRY-402
+
+GetScheduledMaintenance
+
+Returns scheduled maintenance activities.
+
+---
+
+## QRY-403
+
+GetMaintenanceHistory
+
+Returns complete maintenance history.
+
+---
+
+## QRY-404
+
+GetInspectionHistory
+
+Returns inspection records.
+
+---
+
+## QRY-405
+
+GetFailureHistory
+
+Returns failure history.
+
+---
+
+## QRY-406
+
+GetRepairHistory
+
+Returns repair history.
+
+---
+
+## QRY-407
+
+GetOverhaulHistory
+
+Returns overhaul history.
+
+---
+
+## QRY-408
+
+GetUpcomingMaintenance
+
+Returns future maintenance requirements.
+
+---
+
+# 10. Financial Queries
+
+## QRY-501
+
+GetPurchaseInformation
+
+Returns acquisition information.
+
+---
+
+## QRY-502
+
+GetOperatingExpenses
+
+Returns operating expenses.
+
+---
+
+## QRY-503
+
+GetFuelConsumptionCost
+
+Returns fuel costs.
+
+---
+
+## QRY-504
+
+GetMaintenanceCost
+
+Returns maintenance expenses.
+
+---
+
+## QRY-505
+
+GetDepreciation
+
+Returns depreciation calculations.
+
+---
+
+## QRY-506
+
+GetCurrentAssetValue
+
+Returns current estimated Asset value.
+
+---
+
+## QRY-507
+
+GetOwnershipCost
+
+Returns Total Cost of Ownership.
+
+---
+
+## QRY-508
+
+GetFinancialTimeline
+
+Returns chronological financial history.
+
+---
+
+# 11. Document Queries
+
+## QRY-601
+
+GetDocument
+
+Returns one document.
+
+---
+
+## QRY-602
+
+GetDocuments
+
+Returns all documents associated with an Asset.
+
+---
+
+## QRY-603
+
+GetExpiredDocuments
+
+Returns expired documents.
+
+---
+
+## QRY-604
+
+GetDocumentsExpiringSoon
+
+Returns documents approaching expiration.
+
+---
+
+## QRY-605
+
+GetDocumentVersions
+
+Returns document version history.
+
+---
+
+## QRY-606
+
+GetDocumentPackage
+
+Returns a complete export package.
+
+---
+
+# 12. Forecast Queries
+
+## QRY-701
+
+GetFuelForecast
+
+Returns predicted fuel consumption.
+
+---
+
+## QRY-702
+
+GetLubricantForecast
+
+Returns lubricant forecasts.
+
+---
+
+## QRY-703
+
+GetMaintenanceForecast
+
+Returns maintenance predictions.
+
+---
+
+## QRY-704
+
+GetReplacementForecast
+
+Returns replacement predictions.
+
+---
+
+## QRY-705
+
+CompareForecasts
+
+Compares historical forecasts with actual values.
+
+---
+
+## QRY-706
+
+GetForecastHistory
+
+Returns previously generated forecasts.
+
+---
+
+# 13. Reporting Queries
+
+## QRY-801
+
+GetExecutiveDashboard
+
+Returns executive summary information.
+
+---
+
+## QRY-802
+
+GetAssetDashboard
+
+Returns operational dashboard.
+
+---
+
+## QRY-803
+
+GetFleetStatistics
+
+Returns fleet-wide statistics.
+
+---
+
+## QRY-804
+
+GetOperationalKPIs
+
+Returns operational performance indicators.
+
+---
+
+## QRY-805
+
+GetFinancialKPIs
+
+Returns financial performance indicators.
+
+---
+
+## QRY-806
+
+GetMaintenanceKPIs
+
+Returns maintenance indicators.
+
+---
+
+## QRY-807
+
+GetForecastKPIs
+
+Returns forecast accuracy indicators.
+
+---
+
+# 14. Administration Queries
+
+## QRY-901
+
+GetUsers
+
+---
+
+## QRY-902
+
+GetRoles
+
+---
+
+## QRY-903
+
+GetOrganizations
+
+---
+
+## QRY-904
+
+GetLocations
+
+---
+
+## QRY-905
+
+GetAuditLog
+
+---
+
+## QRY-906
+
+GetSystemConfiguration
+
+---
+
+# 15. Cross-Module Queries
+
+The following Queries combine information from multiple modules.
+
+---
+
+## QRY-1001
+
+GetCompleteAssetProfile
+
+Combines:
+
+- Asset
+- Engine
+- Components
+- Maintenance
+- Documents
+- Financial
+- Forecast
+
+---
+
+## QRY-1002
+
+GetOperationalSummary
+
+Combines:
+
+- Usage
+- Maintenance
+- Financial
+
+---
+
+## QRY-1003
+
+GetTechnicalSummary
+
+Combines:
+
+- Asset Model
+- Engine Model
+- Technical Library
+
+---
+
+## QRY-1004
+
+GetBusinessTimeline
+
+Returns a unified chronological history including:
+
+- Meter readings
+- Maintenance
+- Repairs
+- Financial transactions
+- Documents
+- Engine replacements
+
+---
+
+# 16. Query Validation
+
+Queries shall validate:
+
+- Authorization
+- Requested scope
+- Filter consistency
+- Paging limits
+- Sorting rules
+
+Invalid Queries shall never reach the data access layer.
+
+---
+
+# 17. Query Naming Rules
+
+Every Query shall:
+
+- begin with **Get**, **Search**, or **Compare**;
+- represent a business information request;
+- remain technology independent.
+
+Examples:
+
+- GetAsset
+- SearchAssets
+- GetMaintenanceHistory
+- CompareForecasts
+
+Avoid:
+
+- ReadTable
+- ExecuteSQL
+- SelectRows
+- LoadEntity
+
+---
+
+# 18. Query Execution
+
+Typical Query execution flow:
+
+```text
+Query
+
+↓
+
+Authorization
+
+↓
+
+Validation
+
+↓
+
+Query Handler
+
+↓
+
+Read Model
+
+↓
+
+Projection
+
+↓
+
+Response
+```
+
+Queries shall never modify business state.
+
+Queries shall never publish Domain Events.
+
+---
+
+# 19. Future Queries
+
+Future releases may introduce queries for:
+
+- Inventory
+- Procurement
+- Fleet Scheduling
+- AI Diagnostics
+- IoT Telemetry
+- Mobile Synchronization
+
+Every future Query shall follow the conventions defined in this document.
+
+---
+
+# Revision History
+
+| Version | Description |
+|----------|-------------|
+| 1.0.0 | Initial Query Catalogue |

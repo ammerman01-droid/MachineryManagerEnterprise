@@ -1,0 +1,286 @@
+# Application Services
+
+**Document ID:** MME-MOD-005
+
+**Repository Path:** `docs/04-modules/05-ApplicationServices.md`
+
+**Version:** 1.0.0 (Draft)
+
+**Status:** In Progress
+
+**Related Documents**
+
+- 00-ApplicationArchitecture.md
+- 01-UseCases.md
+- 02-Commands.md
+- 03-Queries.md
+- 04-Handlers.md
+- docs/03-domain/05-DomainServices.md
+
+---
+
+# 1. Purpose
+
+This document defines the responsibilities of Application Services.
+
+Application Services coordinate complex business workflows that span multiple Use Cases, Aggregates or external systems.
+
+Application Services are orchestration components.
+
+They are not part of the Domain Layer.
+
+---
+
+# 2. Responsibilities
+
+Application Services may:
+
+- Coordinate multiple Command Handlers
+- Coordinate multiple Query Handlers
+- Invoke Domain Services
+- Coordinate multiple Aggregates
+- Coordinate Infrastructure Services
+- Execute long-running workflows
+- Publish integration events
+
+Application Services shall never contain business rules.
+
+---
+
+# 3. Design Principles
+
+Every Application Service shall satisfy the following principles.
+
+- Stateless
+- Technology independent
+- Orchestration only
+- Transaction aware
+- Business oriented
+- Independently testable
+
+---
+
+# 4. When an Application Service is Required
+
+Application Services should be introduced when:
+
+- multiple Aggregates participate;
+- several Commands must execute together;
+- Infrastructure interactions are required;
+- a business workflow spans multiple modules;
+- a long-running business process exists.
+
+Simple operations should execute directly through a Command Handler.
+
+---
+
+# 5. Relationship with Command Handlers
+
+```text
+Controller
+
+↓
+
+Command
+
+↓
+
+Command Handler
+
+↓
+
+Application Service (optional)
+
+↓
+
+Domain
+
+↓
+
+Infrastructure
+```
+
+Application Services never replace Command Handlers.
+
+They coordinate them.
+
+---
+
+# 6. Relationship with Domain Services
+
+Application Services answer:
+
+"What should happen?"
+
+Domain Services answer:
+
+"How should business rules be applied?"
+
+Application Services may invoke one or more Domain Services.
+
+---
+
+# 7. Typical Application Services
+
+## AssetApplicationService
+
+Coordinates Asset-related workflows.
+
+Examples:
+
+- Purchase Used Asset
+- Dispose Asset
+- Transfer Asset
+
+---
+
+## EngineApplicationService
+
+Coordinates Engine lifecycle.
+
+Examples:
+
+- Install Engine
+- Replace Engine
+- Return Engine from Workshop
+
+---
+
+## MeterApplicationService
+
+Coordinates Meter lifecycle.
+
+Examples:
+
+- Replace Meter
+- Validate Meter Readings
+- Recalculate Operational Usage
+
+---
+
+## MaintenanceApplicationService
+
+Coordinates Maintenance workflows.
+
+Examples:
+
+- Complete Maintenance
+- Replace Component during Maintenance
+- Register Overhaul
+
+---
+
+## FinancialApplicationService
+
+Coordinates financial calculations.
+
+Examples:
+
+- Calculate Ownership Cost
+- Update Asset Value
+- Calculate Depreciation
+
+---
+
+## ForecastApplicationService
+
+Coordinates prediction workflows.
+
+Examples:
+
+- Generate Consumption Forecast
+- Generate Maintenance Forecast
+- Compare Forecast Accuracy
+
+---
+
+## DocumentApplicationService
+
+Coordinates document lifecycle.
+
+Examples:
+
+- Register Document
+- Renew Document
+- Generate Expiration Notifications
+
+---
+
+# 8. Transaction Management
+
+Application Services may execute:
+
+- one transaction;
+- multiple coordinated transactions;
+- compensating transactions when required.
+
+Transaction ownership remains inside the Application Layer.
+
+---
+
+# 9. Infrastructure Interaction
+
+Application Services may invoke:
+
+- Notification Service
+- File Storage
+- Email Service
+- SMS Service
+- Report Generator
+- AI Prediction Engine
+- External ERP
+- External Accounting Systems
+
+All external communication shall occur through interfaces.
+
+---
+
+# 10. Event Publishing
+
+Application Services may publish:
+
+- Integration Events
+- Notification Events
+- Background Processing Requests
+
+Business Domain Events remain the responsibility of the Domain Layer.
+
+---
+
+# 11. Naming Convention
+
+Application Services shall follow:
+
+```
+<BusinessArea>ApplicationService
+```
+
+Examples:
+
+- AssetApplicationService
+- EngineApplicationService
+- ForecastApplicationService
+- MaintenanceApplicationService
+
+---
+
+# 12. Future Application Services
+
+Future releases may introduce services for:
+
+- Inventory Management
+- Procurement
+- Fleet Scheduling
+- AI Diagnostics
+- IoT Synchronization
+- Mobile Offline Synchronization
+
+Every future Application Service shall follow the rules defined in this document.
+
+---
+
+# Revision History
+
+| Version | Description |
+|----------|-------------|
+| 1.0.0 | Initial Application Services architecture |
