@@ -3,11 +3,11 @@
 | Property | Value |
 |----------|-------|
 | **Document ID** | DOC-DEV-002 |
-| **Version** | 2.0.0 |
+| **Version** | 3.0.0 |
 | **Status** | Approved |
 | **Owner** | Solution Architect |
 | **Created** | 2026-07-18 |
-| **Last Updated** | 2026-07-18 |
+| **Last Updated** | 2026-07-19 |
 
 ---
 
@@ -78,15 +78,9 @@ The source code is divided into logical layers.
 ```text
 src
 
-SharedKernel
+BuildingBlocks
 
-Domain
-
-Application
-
-Infrastructure
-
-Presentation
+Modules
 
 Host
 ```
@@ -95,38 +89,98 @@ Each project has a single well-defined responsibility.
 
 ---
 
+## BuildingBlocks
+
+```text
+BuildingBlocks
+
+MachineryManager.SharedKernel
+
+MachineryManager.Contracts
+
+MachineryManager.Abstractions
+
+MachineryManager.UI
+```
+
+The BuildingBlocks layer contains reusable components shared by all modules.
+
+Business logic shall never be implemented in BuildingBlocks.
+
+---
+
+## Modules
+
+Business functionality shall be implemented as independent bounded contexts.
+
+Each module follows Clean Architecture internally.
+
+```text
+Modules
+
+AssetManagement
+
+AssetManagement.Domain
+
+AssetManagement.Application
+
+AssetManagement.Infrastructure
+
+AssetManagement.Presentation
+```
+
+The same structure shall be followed for every business module.
+
+---
+
+## Host
+
+```text
+Host
+
+MachineryManager.Server
+
+MachineryManager.Client
+```
+
+The Host layer composes the application and configures dependency injection, middleware and application startup.
+
+---
+
 # Dependency Direction
 
 Dependencies shall always point inward.
 
-```text
 Presentation
-        │
-        ▼
+
+↓
+
 Application
-        │
-        ▼
+
+↓
+
 Domain
-        │
-        ▼
-SharedKernel
-```
+
+↓
+
+BuildingBlocks
 
 Infrastructure supports higher layers but shall not introduce business logic.
 
 ---
 
-# Shared Kernel
+# BuildingBlocks
 
-The Shared Kernel contains:
+The BuildingBlocks layer contains reusable components shared across the entire solution.
 
-- Base abstractions
-- Common primitives
-- Shared value objects
-- Shared interfaces
-- Cross-cutting contracts
+It includes:
 
-The Shared Kernel shall never depend on higher layers.
+- SharedKernel
+- Contracts
+- Abstractions
+- UI Shared Components
+
+BuildingBlocks shall never depend on any business module.
 
 ---
 
@@ -195,19 +249,25 @@ Presentation shall not contain business rules.
 
 Testing projects shall mirror the production solution.
 
-```text
 tests
 
 SharedKernel.Tests
 
-Domain.Tests
+AssetManagement.Tests
 
-Application.Tests
+Maintenance.Tests
 
-Infrastructure.Tests
+Inventory.Tests
 
-Presentation.Tests
-```
+Fleet.Tests
+
+Procurement.Tests
+
+Workshop.Tests
+
+Reporting.Tests
+
+Identity.Tests
 
 ---
 
@@ -228,6 +288,12 @@ The solution structure is designed to support future expansion without major res
 
 New modules should be added through new projects or bounded contexts rather than modifying unrelated components.
 
+Every bounded context shall be implemented as an independent module.
+
+Modules communicate only through contracts and application boundaries.
+
+Future extraction into independent services shall not require architectural restructuring.
+
 ---
 
 # Compliance
@@ -246,6 +312,8 @@ Architectural deviations require an approved ADR.
 - DOC-DEV-003 (Project Structure)
 - DOC-DEV-005 (Dependency Rules)
 - ADR-0001
+- DOC-MOD-001 (Application Architecture)
+- DOC-DOM-002 (Bounded Contexts)
 
 ---
 
