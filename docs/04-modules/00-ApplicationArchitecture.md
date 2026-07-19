@@ -1,20 +1,13 @@
-# Application Architecture
+# Module Overview
 
-**Document ID:** MME-APP-000
-
-**Repository Path:** `docs/04-application/00-ApplicationArchitecture.md`
-
-**Version:** 1.0.0 (Draft)
-
-**Status:** In Progress
-
-**Related Documents**
-
-- docs/03-domain/03-DomainModel.md
-- docs/03-domain/04-Aggregates.md
-- docs/03-domain/05-DomainServices.md
-- docs/03-domain/06-DomainEvents.md
-- docs/03-domain/07-BusinessRules.md
+| Property | Value |
+|----------|-------|
+| **Document ID** | MOD-000 |
+| **Version** | 3.0.0 |
+| **Status** | Active |
+| **Owner** | Solution Architect |
+| **Created** | 2026-07-18 |
+| **Last Updated** | 2026-07-18 |
 
 ---
 
@@ -29,6 +22,23 @@ It acts as the orchestration layer between:
 - User Interface
 - Domain Layer
 - Infrastructure Layer
+
+---
+
+# Module Philosophy
+
+Modules are implementation units.
+
+Modules implement business capabilities defined by the Domain.
+
+A module owns its:
+
+- Application
+- Domain
+- Infrastructure
+- API
+
+Modules never own business concepts outside their capability boundary.
 
 ---
 
@@ -188,8 +198,29 @@ The Application Layer is further specified by:
 
 ---
 
-# Revision History
+# 10. Module Dependency Rules
 
-| Version | Description |
-|----------|-------------|
-| 1.0.0 | Initial Application Architecture |
+Modules shall:
+
+- Communicate through Application contracts.
+- Never reference Infrastructure of another module.
+- Exchange data only through Contracts.
+- Publish integration events when required.
+
+---
+
+# Related Documents
+
+- Capability Model
+- Bounded Contexts
+- Architecture Overview
+- Domain Model
+
+---
+
+# Change History
+
+| Version | Date | Description |
+|----------|------------|---------------------------------------------|
+| 1.0.0 | Initial | Initial module overview |
+| 3.0.0 | 2026-07-18 | Standardized according to Documentation Standard v3.0 |

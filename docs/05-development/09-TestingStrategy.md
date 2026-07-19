@@ -1,280 +1,253 @@
 # Testing Strategy
 
-**Document ID:** MME-DEV-009
-
-**Repository Path:** `docs/05-development/09-TestingStrategy.md`
-
-**Version:** 1.0.0 (Draft)
-
-**Status:** In Progress
-
-**Related Documents**
-
-- 00-DevelopmentPrinciples.md
-- 01-SolutionStructure.md
-- 02-ProjectStructure.md
-- 05-CodingStandards.md
-- 07-ErrorHandling.md
+| Property | Value |
+|----------|-------|
+| **Document ID** | DOC-DEV-010 |
+| **Version** | 2.0.0 |
+| **Status** | Approved |
+| **Owner** | Solution Architect |
+| **Created** | 2026-07-18 |
+| **Last Updated** | 2026-07-18 |
 
 ---
 
-# 1. Purpose
+# Purpose
 
-This document defines the testing strategy for MachineryManagerEnterprise.
+This document defines the testing strategy for the
+**MachineryManagerEnterprise** solution.
 
-Testing exists to verify business correctness, architectural integrity and long-term maintainability.
+Testing is considered an integral part of software development rather than
+a separate activity performed after implementation.
 
-Testing is considered part of development rather than a separate phase.
-
----
-
-# 2. Objectives
-
-The testing strategy shall ensure:
-
-- Business correctness
-- Architectural correctness
-- Regression prevention
-- Reliable refactoring
-- Long-term maintainability
+Every feature should be designed with testability in mind.
 
 ---
 
-# 3. Testing Pyramid
+# Objectives
 
-The solution follows the classic testing pyramid.
+The testing strategy shall:
+
+- Detect defects as early as possible.
+- Protect existing functionality.
+- Support continuous refactoring.
+- Increase confidence during deployment.
+- Provide fast feedback to developers.
+
+---
+
+# Testing Pyramid
+
+The project follows the classical Testing Pyramid.
 
 ```text
-            Functional Tests
-
-         Integration Tests
-
-      Unit Tests
+             UI Tests
+          Integration Tests
+             Unit Tests
 ```
 
-Most tests shall be Unit Tests.
+Most tests should remain at the Unit Test level.
 
 ---
 
-# 4. Test Categories
+# Test Categories
 
-The solution contains the following categories.
+The solution supports the following categories:
 
-```text
-Tests
-
-├── Unit Tests
-├── Integration Tests
-├── Functional Tests
-├── Performance Tests
-└── Architecture Tests
-```
+| Category | Purpose |
+|----------|---------|
+| Unit Tests | Verify isolated behavior |
+| Integration Tests | Verify collaboration between components |
+| Architecture Tests | Verify architectural rules |
+| UI Tests | Verify user interaction |
+| Smoke Tests | Verify deployment health |
 
 ---
 
-# 5. Unit Tests
+# Unit Tests
 
-Purpose
+Unit tests should:
 
-Verify business behavior in complete isolation.
+- Be deterministic.
+- Execute quickly.
+- Avoid external resources.
+- Test one behavior.
+- Be easy to understand.
 
-Characteristics
-
-- Fast
-- Deterministic
-- No database
-- No network
-- No file system
-
-Typical targets
-
-- Aggregates
-- Domain Services
-- Value Objects
-- Specifications
+Dependencies should be mocked where appropriate.
 
 ---
 
-# 6. Integration Tests
+# Integration Tests
 
-Purpose
+Integration tests verify collaboration between multiple components.
 
-Verify collaboration between components.
+Typical examples:
 
-Typical targets
-
-- Repository implementations
-- EF Core mappings
-- Infrastructure services
-- Transactions
-
-Integration tests may use a temporary database.
+- Database access
+- Repository behavior
+- API communication
+- Authentication
 
 ---
 
-# 7. Functional Tests
+# Architecture Tests
 
-Purpose
+Architecture tests verify project rules automatically.
 
-Verify complete business scenarios.
+Examples:
 
-Examples
-
-- Register Asset
-- Replace Engine
-- Complete Maintenance
-- Renew Document
-
-Functional tests verify complete workflows.
-
----
-
-# 8. Performance Tests
-
-Purpose
-
-Verify scalability and execution time.
-
-Typical scenarios
-
-- Large fleet queries
-- Forecast generation
-- Report generation
-- Dashboard loading
-
-Performance tests are executed separately from CI.
-
----
-
-# 9. Architecture Tests
-
-Architecture tests verify:
-
-- Dependency rules
-- Namespace rules
+- Forbidden dependencies
 - Layer boundaries
-- Forbidden references
-- Circular dependencies
+- Namespace rules
+- Project references
 
-Architecture violations shall fail the build.
+Recommended tools include:
 
----
-
-# 10. Test Naming
-
-Test classes
-
-```
-AssetTests
-
-EngineTests
-
-ForecastEngineTests
-```
-
-Test methods
-
-```
-Method_ShouldExpectedBehavior_WhenCondition
-```
-
-Example
-
-```
-ReplaceEngine_ShouldCreateHistory_WhenEngineChanges
-```
+- NetArchTest
+- ArchUnitNET
 
 ---
 
-# 11. Test Isolation
+# UI Tests
 
-Each test shall be independent.
+UI tests verify user interaction.
 
-Tests shall never depend on:
+Typical scenarios:
 
-- execution order
-- shared state
-- previous tests
+- Login
+- Navigation
+- Forms
+- Validation
+- Error display
 
-Tests shall be executable in parallel whenever practical.
-
----
-
-# 12. Mocking
-
-Mocks may be used for:
-
-- infrastructure
-- external services
-- notifications
-- email
-- AI providers
-
-Business behavior shall not be mocked.
+UI tests should focus on critical workflows.
 
 ---
 
-# 13. Test Data
+# Test Naming
 
-Test data shall be:
+Tests should follow the pattern:
 
-- deterministic
-- minimal
-- readable
-- reusable
+```text
+MethodName_State_ExpectedBehavior
+```
 
-Large random datasets shall be avoided unless explicitly required.
+Example:
 
----
-
-# 14. Coverage
-
-Code coverage is a measurement tool.
-
-It is not the primary quality indicator.
-
-Business-critical code should receive the highest test coverage.
+```text
+CreateMachine_WhenSerialExists_ShouldReturnValidationError
+```
 
 ---
 
-# 15. Continuous Integration
+# Arrange–Act–Assert
 
-Every Pull Request shall execute:
+All tests should follow the AAA pattern.
+
+```text
+Arrange
+
+Act
+
+Assert
+```
+
+---
+
+# Test Isolation
+
+Tests should never depend on:
+
+- Execution order
+- Shared state
+- External services
+- Previous test results
+
+Every test must be executable independently.
+
+---
+
+# Test Data
+
+Test data should be:
+
+- Minimal
+- Explicit
+- Readable
+
+Avoid unnecessarily large datasets.
+
+---
+
+# Mocking
+
+Mock only external dependencies.
+
+Do not mock:
+
+- Value Objects
+- Domain Entities
+- Pure business logic
+
+---
+
+# Code Coverage
+
+Code coverage is a useful indicator but not a goal.
+
+High-quality tests are preferred over artificially high coverage percentages.
+
+Coverage targets should focus on critical business logic.
+
+---
+
+# Continuous Integration
+
+Every Pull Request should execute:
 
 - Unit Tests
 - Architecture Tests
 
-Integration and Functional tests may execute in later pipeline stages.
+Additional test suites may execute during Release pipelines.
 
 ---
 
-# 16. Regression Policy
+# Regression Prevention
 
-Every discovered production defect shall receive:
-
-1. A failing automated test.
-2. A corrective implementation.
-3. A passing test.
-
-A defect is considered resolved only when its regression test exists.
+Whenever a defect is fixed, at least one automated test should be added to
+prevent regression.
 
 ---
 
-# 17. Future Testing
+# Performance
 
-Future versions may introduce:
+Tests should execute as quickly as practical.
 
-- Load testing
-- Stress testing
-- Security testing
-- Mutation testing
-- Chaos testing
-- AI-assisted test generation
+Long-running tests should be separated from fast developer feedback tests.
 
 ---
 
-# Revision History
+# Compliance
 
-| Version | Description |
-|----------|-------------|
-| 1.0.0 | Initial Testing Strategy |
+Every new feature shall include appropriate automated tests.
+
+Code without adequate tests should not be merged into the main development branch.
+
+---
+
+# Related Documents
+
+- DOC-CONVENTIONS
+- DOC-DEV-001 (Development Principles)
+- DOC-DEV-006 (Coding Standards)
+- DOC-DEV-008 (Error Handling)
+- DOC-DEV-009 (Logging Strategy)
+
+---
+
+# Change History
+
+| Version | Date | Description |
+|----------|------------|----------------------------------------------|
+| 1.0.0 | 2026-07-18 | Initial testing strategy |
+| 2.0.0 | 2026-07-18 | Standardized according to Documentation Standard v3.0 |

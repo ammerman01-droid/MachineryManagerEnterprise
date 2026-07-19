@@ -1,33 +1,47 @@
-# Use Cases
+# Module Design Principles
 
-**Document ID:** MME-MOD-001
-
-**Repository Path:** `docs/04-modules/01-UseCases.md`
-
-**Version:** 1.0.0 (Draft)
-
-**Status:** In Progress
-
-**Related Documents**
-
-- docs/03-domain/03-DomainModel.md
-- docs/03-domain/04-Aggregates.md
-- docs/03-domain/05-DomainServices.md
-- docs/03-domain/06-DomainEvents.md
-- docs/03-domain/07-BusinessRules.md
-- docs/03-domain/08-StateMachines.md
+| Property | Value |
+|----------|-------|
+| **Document ID** | MOD-001 |
+| **Version** | 3.0.0 |
+| **Status** | Active |
+| **Owner** | Solution Architect |
+| **Created** | 2026-07-18 |
+| **Last Updated** | 2026-07-18 |
 
 ---
 
 # 1. Purpose
 
-This document defines the business Use Cases of MachineryManagerEnterprise.
+This document defines the architectural principles governing all software
+modules within MachineryManagerEnterprise.
 
-A Use Case describes one complete business objective from the user's perspective.
+These principles ensure consistency, maintainability, scalability, and
+independent evolution of modules.
 
-Use Cases define what the system shall accomplish.
+---
 
-They do not describe implementation details.
+# Module Philosophy
+
+Modules are implementation boundaries derived from business capabilities.
+
+Each module owns its own application logic, domain model, infrastructure, and
+public contracts.
+
+Modules communicate through explicit interfaces rather than internal
+implementation details.
+
+---
+
+# Module Design Checklist
+
+Before introducing a new module, verify:
+
+- Does it represent a business capability?
+- Does it own a bounded context?
+- Does it expose explicit contracts?
+- Does it avoid direct infrastructure dependencies?
+- Can it evolve independently?
 
 ---
 
@@ -965,8 +979,18 @@ Each new module shall define its own Use Cases following this document.
 
 ---
 
-# Revision History
+# Related Documents
 
-| Version | Description |
-|----------|-------------|
-| 1.0.0 | Initial Use Case Catalogue |
+- 00-ModuleOverview.md
+- docs/02-architecture/01-Architecture.md
+- docs/03-domain/03-BoundedContexts.md
+- docs/03-domain/04-DomainModel.md
+
+---
+
+# Change History
+
+| Version | Date | Description |
+|----------|------------|----------------------------------------------|
+| 1.0.0 | Initial | Initial module principles |
+| 3.0.0 | 2026-07-18 | Standardized according to Documentation Standard v3.0 |

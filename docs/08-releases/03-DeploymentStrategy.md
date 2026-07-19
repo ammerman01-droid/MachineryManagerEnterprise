@@ -1,19 +1,13 @@
 # Deployment Strategy
 
-**Document ID:** MME-REL-003
-
-**Repository Path:** `docs/08-releases/03-DeploymentStrategy.md`
-
-**Version:** 1.0.0 (Draft)
-
-**Status:** In Progress
-
-**Related Documents**
-
-- 00-ReleaseStrategy.md
-- 01-VersioningPolicy.md
-- 02-ReleaseProcess.md
-- docs/05-development/10-BuildPipeline.md
+| Property | Value |
+|----------|-------|
+| **Document ID** | REL-003 |
+| **Version** | 3.0.0 |
+| **Status** | Active |
+| **Owner** | DevOps Lead |
+| **Created** | 2026-07-18 |
+| **Last Updated** | 2026-07-18 |
 
 ---
 
@@ -22,6 +16,20 @@
 This document defines the deployment strategy for MachineryManagerEnterprise.
 
 The deployment strategy ensures that software is delivered safely, consistently and predictably across all supported environments.
+
+---
+
+# Deployment Principles
+
+Deployments shall be:
+
+- repeatable;
+- automated;
+- traceable;
+- reversible;
+- environment independent.
+
+Deployment shall never modify application binaries.
 
 ---
 
@@ -79,6 +87,19 @@ Monitor
 ```
 
 Every stage shall complete successfully before the next stage begins.
+
+---
+
+# Deployment Responsibilities
+
+| Activity | Responsible |
+|----------|-------------|
+| Build | CI Pipeline |
+| Package | Build Pipeline |
+| Publish Artifact | Artifact Repository |
+| Deployment | DevOps |
+| Verification | QA / Operations |
+| Rollback | DevOps |
 
 ---
 
@@ -178,6 +199,7 @@ Where possible:
 - Blue-Green deployment
 - Zero-downtime migration
 
+The selected deployment strategy depends on infrastructure capabilities and service criticality.
 may be adopted.
 
 ---
@@ -235,8 +257,33 @@ Future deployment improvements may include:
 
 ---
 
-# Revision History
+# 16. Deployment Gate Checklist
 
-| Version | Description |
-|----------|-------------|
-| 1.0.0 | Initial Deployment Strategy |
+| Gate                     | Required |
+| ------------------------ | -------- |
+| Artifact Generated       | ✅        |
+| Configuration Validated  | ✅        |
+| Secrets Available        | ✅        |
+| Database Migration Ready | ✅        |
+| Health Checks            | ✅        |
+| Rollback Prepared        | ✅        |
+| Approval                 | ✅        |
+
+---
+
+# Related Documents
+
+- 00-ReleaseStrategy.md
+- 01-VersioningPolicy.md
+- 02-ReleaseProcess.md
+- docs/05-development/10-BuildPipeline.md
+- docs/09-operations/
+
+---
+
+# Change History
+
+| Version | Date | Description |
+|----------|------------|---------------------------------------------|
+| 1.0.0 | Initial | Initial Deployment Strategy |
+| 3.0.0 | 2026-07-18 | Standardized according to Documentation Standard v3.0 |

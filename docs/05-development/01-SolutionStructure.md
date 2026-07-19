@@ -1,320 +1,257 @@
 # Solution Structure
 
-**Document ID:** MME-DEV-001
-
-**Repository Path:** `docs/05-development/01-SolutionStructure.md`
-
-**Version:** 1.0.0 (Draft)
-
-**Status:** In Progress
-
-**Related Documents**
-
-- 00-DevelopmentPrinciples.md
-- docs/02-architecture/01-Architecture.md
-- docs/03-domain/00-DomainPrinciples.md
-- docs/04-modules/00-ApplicationArchitecture.md
+| Property | Value |
+|----------|-------|
+| **Document ID** | DOC-DEV-002 |
+| **Version** | 2.0.0 |
+| **Status** | Approved |
+| **Owner** | Solution Architect |
+| **Created** | 2026-07-18 |
+| **Last Updated** | 2026-07-18 |
 
 ---
 
-# 1. Purpose
+# Purpose
 
-This document defines the physical organization of the MachineryManagerEnterprise solution.
+This document defines the overall solution structure of the
+**MachineryManagerEnterprise** project.
 
-The Solution Structure specifies how projects are organized, how they depend on one another, and how new projects shall be introduced.
+The purpose of the solution structure is to ensure that every project has a
+clear responsibility, predictable dependencies, and long-term maintainability.
 
-It is the architectural blueprint of the Visual Studio solution.
-
----
-
-# 2. Objectives
-
-The solution structure shall provide:
-
-- High maintainability
-- Low coupling
-- High cohesion
-- Independent deployment where applicable
-- Predictable project organization
-- Long-term scalability
+The solution structure is the highest organizational level of the source code.
 
 ---
 
-# 3. Architectural Style
+# Objectives
 
-The solution follows **Clean Architecture**.
+The solution shall:
 
-Projects are organized around architectural responsibilities rather than technical frameworks.
-
-The solution shall remain independent from any specific UI technology.
+- Separate business concerns
+- Isolate infrastructure
+- Support modular development
+- Enable independent testing
+- Reduce coupling
+- Improve maintainability
 
 ---
 
-# 4. Solution Overview
+# Architectural Style
+
+The solution follows the principles of:
+
+- Domain-Driven Design (DDD)
+- Clean Architecture
+- Vertical Slice Architecture (where appropriate)
+- Dependency Inversion
+- SOLID Principles
+
+---
+
+# Solution Organization
+
+The solution is organized into multiple projects with clearly defined responsibilities.
+
+A typical high-level organization is shown below.
 
 ```text
 MachineryManagerEnterprise.sln
 
 │
-├── Domain
-├── Application
-├── Infrastructure
-├── Presentation
-├── Shared
-└── Tests
+├── src
+│
+├── tests
+│
+├── docs
+│
+├── build
+│
+└── tools
 ```
 
-Each project has one clearly defined responsibility.
-
 ---
 
-# 5. Project Groups
+# Source Projects
 
-The solution is divided into six logical groups.
+The source code is divided into logical layers.
 
 ```text
-Solution
+src
 
-├── Shared
-├── Domain
-├── Application
-├── Infrastructure
-├── Presentation
-└── Tests
-```
-
-Projects inside a group share the same architectural responsibility.
-
----
-
-# 6. Shared Layer
-
-Purpose
-
-Contains reusable components shared across multiple layers.
-
-Typical contents
-
-- Common abstractions
-- Shared kernel
-- Primitive extensions
-- Result types
-- Base interfaces
-- Shared constants
-
-Business rules shall never be placed here.
-
----
-
-# 7. Domain Layer
-
-Purpose
-
-Contains the business model.
-
-Typical contents
-
-- Aggregates
-- Entities
-- Value Objects
-- Domain Events
-- Domain Services
-- Business Rules
-- Specifications
-- Repository Interfaces
-
-The Domain Layer has no dependency on Infrastructure.
-
----
-
-# 8. Application Layer
-
-Purpose
-
-Coordinates business operations.
-
-Typical contents
-
-- Commands
-- Queries
-- Handlers
-- DTOs
-- Application Services
-- Validators
-- Interfaces
-- Workflow Coordinators
-
-Business rules shall not be implemented here.
-
----
-
-# 9. Infrastructure Layer
-
-Purpose
-
-Provides technical implementations.
-
-Typical contents
-
-- EF Core
-- Repositories
-- Database
-- File Storage
-- Email
-- Notifications
-- Logging
-- External Services
-- AI Providers
-
-Infrastructure depends on Application abstractions.
-
----
-
-# 10. Presentation Layer
-
-Purpose
-
-Exposes the application to external consumers.
-
-Possible implementations
-
-- ASP.NET Core Web API
-- Blazor
-- MAUI
-- Desktop
-- CLI
-- Background Workers
-
-Presentation contains no business logic.
-
----
-
-# 11. Test Layer
-
-Purpose
-
-Contains automated tests.
-
-Possible projects
-
-- Unit Tests
-- Integration Tests
-- Functional Tests
-- Performance Tests
-
-Production code shall never depend on test projects.
-
----
-
-# 12. Dependency Rules
-
-The dependency graph shall always follow this direction.
-
-```text
-Presentation
-
-↓
-
-Application
-
-↓
+SharedKernel
 
 Domain
 
-↑
+Application
 
 Infrastructure
+
+Presentation
+
+Host
 ```
 
-Shared components may be referenced where appropriate.
-
-No circular dependency is permitted.
+Each project has a single well-defined responsibility.
 
 ---
 
-# 13. Forbidden Dependencies
+# Dependency Direction
 
-The following dependencies are prohibited.
+Dependencies shall always point inward.
 
-Domain → Infrastructure
-
-Domain → Presentation
-
-Application → Presentation
-
-Infrastructure → Presentation
-
-Tests → Production implementation details
-
-Circular references are never allowed.
-
----
-
-# 14. Project Creation Rules
-
-A new project shall be created only when:
-
-- it introduces a distinct architectural responsibility;
-- it reduces coupling;
-- it improves maintainability.
-
-Projects shall not be created merely for organizational preference.
-
----
-
-# 15. Naming Convention
-
-Project names shall follow:
-
-```
-MachineryManagerEnterprise.<Layer>
-
-Examples
-
-MachineryManagerEnterprise.Domain
-
-MachineryManagerEnterprise.Application
-
-MachineryManagerEnterprise.Infrastructure
-
-MachineryManagerEnterprise.Api
-
-MachineryManagerEnterprise.Shared
+```text
+Presentation
+        │
+        ▼
+Application
+        │
+        ▼
+Domain
+        │
+        ▼
+SharedKernel
 ```
 
-Project names shall remain stable.
+Infrastructure supports higher layers but shall not introduce business logic.
 
 ---
 
-# 16. Scalability
+# Shared Kernel
 
-The solution shall support future expansion including:
+The Shared Kernel contains:
 
-- Inventory
-- Procurement
-- Fleet Scheduling
-- IoT
-- AI Diagnostics
-- Mobile Clients
+- Base abstractions
+- Common primitives
+- Shared value objects
+- Shared interfaces
+- Cross-cutting contracts
 
-New modules shall integrate without restructuring existing projects.
-
----
-
-# 17. Architectural Governance
-
-Any modification to the solution structure requires:
-
-- Architectural review
-- ADR creation
-- Documentation update
-
-The solution structure is considered an architectural asset.
+The Shared Kernel shall never depend on higher layers.
 
 ---
 
-# Revision History
+# Domain Layer
 
-| Version | Description |
-|----------|-------------|
-| 1.0.0 | Initial Solution Structure |
+The Domain layer contains:
+
+- Entities
+- Value Objects
+- Aggregates
+- Domain Services
+- Domain Events
+- Business Rules
+
+The Domain layer shall contain no infrastructure code.
+
+---
+
+# Application Layer
+
+The Application layer contains:
+
+- Use Cases
+- Commands
+- Queries
+- Validators
+- DTOs
+- Interfaces
+- Mapping
+
+Business workflows belong here.
+
+---
+
+# Infrastructure Layer
+
+Infrastructure contains technical implementations.
+
+Examples:
+
+- Entity Framework Core
+- Repositories
+- External Services
+- File Storage
+- Logging
+- Caching
+
+Infrastructure shall implement abstractions defined by higher layers.
+
+---
+
+# Presentation Layer
+
+Presentation contains:
+
+- Blazor UI
+- Components
+- Pages
+- View Models
+
+Presentation shall not contain business rules.
+
+---
+
+# Test Projects
+
+Testing projects shall mirror the production solution.
+
+```text
+tests
+
+SharedKernel.Tests
+
+Domain.Tests
+
+Application.Tests
+
+Infrastructure.Tests
+
+Presentation.Tests
+```
+
+---
+
+# Naming Principles
+
+Projects shall:
+
+- Use PascalCase
+- Match namespaces
+- Reflect responsibilities
+- Avoid ambiguous names
+
+---
+
+# Scalability
+
+The solution structure is designed to support future expansion without major restructuring.
+
+New modules should be added through new projects or bounded contexts rather than modifying unrelated components.
+
+---
+
+# Compliance
+
+All new projects introduced into the solution shall comply with this structure.
+
+Architectural deviations require an approved ADR.
+
+---
+
+# Related Documents
+
+- DOC-CONVENTIONS
+- DOC-README
+- DOC-DEV-001 (Development Principles)
+- DOC-DEV-003 (Project Structure)
+- DOC-DEV-005 (Dependency Rules)
+- ADR-0001
+
+---
+
+# Change History
+
+| Version | Date | Description |
+|----------|------------|----------------------------------------------|
+| 1.0.0 | 2026-07-18 | Initial solution structure |
+| 2.0.0 | 2026-07-18 | Standardized according to Documentation Standard v3.0 |

@@ -1,11 +1,13 @@
 # Capability Model
 
-**Document ID:** MME-ARCH-009  
-**Version:** 1.0.0  
-**Status:** Approved  
-**Category:** Architecture  
-**Owner:** Architecture Team  
-**Last Updated:** 2026-07-18
+| Property | Value |
+|----------|-------|
+| **Document ID** | ARCH-009 |
+| **Version** | 3.0.0 |
+| **Status** | Active |
+| **Owner** | Solution Architect |
+| **Created** | 2026-07-18 |
+| **Last Updated** | 2026-07-18 |
 
 ---
 
@@ -265,8 +267,21 @@ The platform may integrate with such systems but will not replace them.
 
 ---
 
+# Related Documents
+
+- 00-Vision.md
+- 01-Architecture.md
+- docs/03-domain/02-BoundedContexts.md
+- docs/04-modules
+- ADR-0001 — Adopt Clean Architecture
+
 # Revision History
 
+---
+
+# Change History
+
 | Version | Date | Description |
-|----------|------|-------------|
+|----------|------------|----------------------------------------------|
 | 1.0.0 | 2026-07-18 | Initial capability model |
+| 3.0.0 | 2026-07-18 | Standardized according to Documentation Standard v3.0 |

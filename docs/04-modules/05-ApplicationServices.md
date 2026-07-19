@@ -1,21 +1,13 @@
-# Application Services
+# Pipeline Behaviors
 
-**Document ID:** MME-MOD-005
-
-**Repository Path:** `docs/04-modules/05-ApplicationServices.md`
-
-**Version:** 1.0.0 (Draft)
-
-**Status:** In Progress
-
-**Related Documents**
-
-- 00-ApplicationArchitecture.md
-- 01-UseCases.md
-- 02-Commands.md
-- 03-Queries.md
-- 04-Handlers.md
-- docs/03-domain/05-DomainServices.md
+| Property | Value |
+|----------|-------|
+| **Document ID** | APP-005 |
+| **Version** | 3.0.0 |
+| **Status** | Active |
+| **Owner** | Solution Architect |
+| **Created** | 2026-07-18 |
+| **Last Updated** | 2026-07-18 |
 
 ---
 
@@ -28,6 +20,22 @@ Application Services coordinate complex business workflows that span multiple Us
 Application Services are orchestration components.
 
 They are not part of the Domain Layer.
+
+---
+
+# Pipeline Philosophy
+
+Pipeline Behaviors implement technical cross-cutting concerns.
+
+They never contain business logic.
+
+Business behavior always remains inside:
+
+- Aggregates
+- Domain Services
+
+Pipeline Behaviors are reusable infrastructure components executed before or
+after request handlers.
 
 ---
 
@@ -103,6 +111,55 @@ Infrastructure
 Application Services never replace Command Handlers.
 
 They coordinate them.
+
+---
+
+# Execution Order
+Request
+
+↓
+
+Logging
+
+↓
+
+Validation
+
+↓
+
+Authorization
+
+↓
+
+Performance
+
+↓
+
+Transaction
+
+↓
+
+Handler
+
+↓
+
+Commit
+
+↓
+
+Response
+
+---
+
+# Behavior Design Rules
+
+Every Behavior shall:
+
+- Be reusable.
+- Be stateless.
+- Never access UI.
+- Never access Infrastructure implementations directly.
+- Never contain business rules.
 
 ---
 
@@ -279,8 +336,40 @@ Every future Application Service shall follow the rules defined in this document
 
 ---
 
-# Revision History
+# 13. Command vs Query Behaviors
 
-| Version | Description |
-|----------|-------------|
-| 1.0.0 | Initial Application Services architecture |
+Mandatory for Commands
+
+- Validation
+- Logging
+- Authorization
+- Transaction
+
+Optional for Queries
+
+- Logging
+- Authorization
+- Performance
+
+Never for Queries
+
+- Transaction
+
+---
+
+# Related Documents
+
+- 02-Commands.md
+- 03-Queries.md
+- 04-Handlers.md
+- 06-Validation.md
+- ADR-0004 — Adopt CQRS
+
+---
+
+# Change History
+
+| Version | Date | Description |
+|----------|------------|----------------------------------------------|
+| 1.0.0 | Initial | Initial Pipeline Behaviors |
+| 3.0.0 | 2026-07-18 | Standardized according to Documentation Standard v3.0 |

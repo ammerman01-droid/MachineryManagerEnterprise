@@ -1,20 +1,13 @@
 # Queries
 
-**Document ID:** MME-MOD-003
-
-**Repository Path:** `docs/04-modules/03-Queries.md`
-
-**Version:** 1.0.0 (Draft)
-
-**Status:** In Progress
-
-**Related Documents**
-
-- 00-ApplicationArchitecture.md
-- 01-UseCases.md
-- 02-Commands.md
-- docs/03-domain/03-DomainModel.md
-- docs/03-domain/04-Aggregates.md
+| Property | Value |
+|----------|-------|
+| **Document ID** | APP-003 |
+| **Version** | 3.0.0 |
+| **Status** | Active |
+| **Owner** | Solution Architect |
+| **Created** | 2026-07-18 |
+| **Last Updated** | 2026-07-18 |
 
 ---
 
@@ -27,6 +20,29 @@ Queries retrieve information from the system.
 Queries never modify business state.
 
 Queries are read-only.
+
+---
+
+# Query Philosophy
+
+Queries retrieve information without modifying business state.
+
+Queries never execute business rules.
+
+Queries may compose data from multiple modules through read models when
+necessary.
+
+---
+
+# Query Design Rules
+
+Every Query shall:
+
+- Return data only.
+- Never modify business state.
+- Have exactly one Handler.
+- Never publish Domain Events.
+- Be optimized for read performance.
 
 ---
 
@@ -719,8 +735,19 @@ Every future Query shall follow the conventions defined in this document.
 
 ---
 
-# Revision History
+# Related Documents
 
-| Version | Description |
-|----------|-------------|
-| 1.0.0 | Initial Query Catalogue |
+- 00-ApplicationArchitecture.md
+- 02-Commands.md
+- 04-Handlers.md
+- docs/03-domain/04-DomainModel.md
+- ADR-0004 — Adopt CQRS
+
+---
+
+# Change History
+
+| Version | Date | Description |
+|----------|------------|----------------------------------------------|
+| 1.0.0 | Initial | Initial Query catalogue |
+| 3.0.0 | 2026-07-18 | Standardized according to Documentation Standard v3.0 |

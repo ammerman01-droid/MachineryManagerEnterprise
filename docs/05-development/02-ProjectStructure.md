@@ -1,260 +1,314 @@
 # Project Structure
 
-**Document ID:** MME-DEV-002
-
-**Repository Path:** `docs/05-development/02-ProjectStructure.md`
-
-**Version:** 1.0.0 (Draft)
-
-**Status:** In Progress
-
-**Related Documents**
-
-- 00-DevelopmentPrinciples.md
-- 01-SolutionStructure.md
-- docs/03-domain/00-DomainPrinciples.md
-- docs/04-modules/00-ApplicationArchitecture.md
+| Property | Value |
+|----------|-------|
+| **Document ID** | DOC-DEV-003 |
+| **Version** | 2.0.0 |
+| **Status** | Approved |
+| **Owner** | Solution Architect |
+| **Created** | 2026-07-18 |
+| **Last Updated** | 2026-07-18 |
 
 ---
 
-# 1. Purpose
+# Purpose
 
-This document defines the internal folder structure of every project within the MachineryManagerEnterprise solution.
+This document defines the internal structure that every project within the
+MachineryManagerEnterprise solution shall follow.
 
-The goal is to ensure every project follows the same organizational pattern.
+A consistent project structure improves:
 
----
+- Maintainability
+- Discoverability
+- Code Reviews
+- Scalability
+- Team Collaboration
 
-# 2. General Principles
-
-Every project shall:
-
-- have one clear responsibility;
-- expose a predictable folder structure;
-- avoid unnecessary nesting;
-- group related concepts together;
-- remain understandable without external documentation.
+Every project shall follow these conventions unless an approved Architecture
+Decision Record explicitly defines an exception.
 
 ---
 
-# 3. Shared Project
+# Objectives
 
-```
-Shared
+The project structure shall:
 
-├── Abstractions
-├── Common
-├── Constants
-├── Exceptions
-├── Extensions
-├── Results
-├── Utilities
-└── ValueTypes
-```
-
-The Shared project contains reusable technical components.
-
-No business logic shall exist here.
+- Keep related code together.
+- Minimize navigation complexity.
+- Encourage feature cohesion.
+- Reduce accidental dependencies.
+- Support long-term maintainability.
 
 ---
 
-# 4. Domain Project
+# General Principles
 
-```
-Domain
+Each project should:
 
-├── Aggregates
-├── Entities
-├── ValueObjects
-├── DomainEvents
-├── DomainServices
-├── Specifications
-├── Repositories
-├── Enumerations
-├── Exceptions
-└── Rules
-```
-
-Only business concepts belong inside the Domain project.
+- Have a single responsibility.
+- Contain only files relevant to that responsibility.
+- Avoid unnecessary folder nesting.
+- Follow the project's naming conventions.
+- Be organized consistently with similar projects.
 
 ---
 
-# 5. Application Project
+# Standard Project Layout
 
-```
-Application
+A typical project should follow this structure.
 
-├── Commands
-├── Queries
-├── Handlers
-├── Services
-├── DTOs
-├── Validators
-├── Interfaces
-├── Workflows
-├── Authorization
-└── Mappings
-```
+```text
+Project
 
-Application coordinates business execution.
-
-It does not implement business rules.
-
----
-
-# 6. Infrastructure Project
-
-```
-Infrastructure
-
-├── Persistence
-│   ├── Context
-│   ├── Configurations
-│   ├── Repositories
-│   └── Migrations
 │
-├── FileStorage
-├── Notifications
-├── Logging
-├── Email
-├── AI
-├── ExternalSystems
-└── DependencyInjection
-```
-
-Infrastructure contains implementation details.
-
----
-
-# 7. API Project
-
-```
-Api
-
-├── Controllers
+├── Abstractions
+│
+├── Configuration
+│
+├── Constants
+│
 ├── Contracts
-├── Filters
-├── Middleware
-├── Authentication
-├── Authorization
-├── Swagger
-├── DependencyInjection
-└── Configuration
+│
+├── Exceptions
+│
+├── Extensions
+│
+├── Features
+│
+├── Interfaces
+│
+├── Mapping
+│
+├── Models
+│
+├── Options
+│
+├── Services
+│
+├── Utilities
+│
+└── Validation
 ```
 
-Controllers should remain thin.
+Not every project requires every folder.
 
-Business execution belongs to the Application Layer.
+Folders shall only exist when needed.
 
 ---
 
-# 8. Test Projects
+# Feature Organization
 
-```
-Tests
-
-├── UnitTests
-├── IntegrationTests
-├── FunctionalTests
-├── TestUtilities
-└── TestData
-```
-
-Every test project shall mirror the production structure whenever practical.
-
----
-
-# 9. Folder Naming Rules
-
-Folder names shall:
-
-- use PascalCase;
-- represent business meaning;
-- avoid abbreviations;
-- remain singular when representing one concept.
-
-Examples:
-
-- Aggregates
-- DomainEvents
-- Specifications
-- Validators
-
-Avoid:
-
-- Misc
-- Utils
-- Temp
-- NewFolder
-
----
-
-# 10. Namespace Alignment
-
-Folder hierarchy shall match namespace hierarchy.
+Business functionality should be grouped by feature whenever possible.
 
 Example
 
+```text
+Features
+
+Inventory
+
+Maintenance
+
+Users
+
+Reports
+
+Dashboard
 ```
-Application
 
-└── Commands
+Each feature should remain as independent as practical.
 
-    └── Asset
+---
 
-        └── RegisterAsset
-```
+# Feature Layout
 
-Namespace
+A feature may contain:
 
 ```text
-MachineryManagerEnterprise.Application.Commands.Asset.RegisterAsset
+Inventory
+
+Commands
+
+Queries
+
+DTOs
+
+Validators
+
+Mappings
+
+Services
 ```
 
-Folder structure and namespace shall never diverge.
+This layout supports Vertical Slice Architecture while remaining compatible
+with Clean Architecture.
 
 ---
 
-# 11. File Organization
+# Configuration
 
-Each file shall contain one primary type.
+Configuration classes should be isolated.
 
-Preferred:
+```text
+Configuration
+
+DependencyInjection
+
+OptionsConfiguration
+
+MiddlewareConfiguration
+```
+
+---
+
+# Extensions
+
+Extension methods should be grouped by responsibility.
+
+Example
+
+```text
+Extensions
+
+ServiceCollectionExtensions
+
+ApplicationBuilderExtensions
+
+StringExtensions
+```
+
+---
+
+# Mapping
+
+Object mappings should be centralized.
+
+Supported mapping libraries should follow the same organization.
+
+Example
+
+```text
+Mapping
+
+InventoryProfile
+
+UserProfile
+
+MachineProfile
+```
+
+---
+
+# Validation
+
+Validators shall be grouped together.
+
+Example
+
+```text
+Validation
+
+CreateMachineValidator
+
+UpdateMachineValidator
+
+DeleteMachineValidator
+```
+
+---
+
+# Services
+
+Only business-related services should be placed here.
+
+Infrastructure services belong inside the Infrastructure project.
+
+---
+
+# Utilities
+
+Utility classes should remain small and stateless.
+
+Business logic must never be implemented inside utility classes.
+
+---
+
+# Naming Rules
+
+Folders:
+
+- PascalCase
+
+Files:
+
+- PascalCase
+
+Classes:
+
+- PascalCase
+
+Interfaces:
+
+- Prefix `I`
+
+Examples
 
 ```
-RegisterAssetCommand.cs
+MachineService
 
-RegisterAssetHandler.cs
+IMachineRepository
 
-RegisterAssetValidator.cs
+MachineProfile
+
+MachineValidator
 ```
 
-Avoid grouping unrelated classes in the same file.
+---
+
+# Folder Creation Policy
+
+Folders shall not be created in anticipation of future requirements.
+
+Only introduce a folder when:
+
+- It contains meaningful content.
+- Multiple files justify its existence.
+- It improves organization.
+
+Avoid empty folders.
 
 ---
 
-# 12. Growth Strategy
+# Scalability
 
-New folders shall only be introduced when:
+The project structure is intentionally designed to support future growth.
 
-- they represent a new responsibility;
-- existing folders become too large;
-- architectural clarity improves.
-
-Folder creation shall never be arbitrary.
+As modules evolve, new features should be added without restructuring unrelated
+parts of the project.
 
 ---
 
-# 13. Architectural Stability
+# Compliance
 
-The project structure is expected to remain stable throughout the lifetime of the system.
-
-Business evolution should primarily add new business types, not reorganize the folder hierarchy.
+Every newly created project shall follow this structure unless an approved ADR
+defines an alternative organization.
 
 ---
 
-# Revision History
+# Related Documents
 
-| Version | Description |
-|----------|-------------|
-| 1.0.0 | Initial Project Structure |
+- DOC-CONVENTIONS
+- DOC-README
+- DOC-DEV-001 (Development Principles)
+- DOC-DEV-002 (Solution Structure)
+- DOC-DEV-004 (Namespace Convention)
+- DOC-DEV-005 (Dependency Rules)
+
+---
+
+# Change History
+
+| Version | Date | Description |
+|----------|------------|----------------------------------------------|
+| 1.0.0 | 2026-07-18 | Initial project structure |
+| 2.0.0 | 2026-07-18 | Standardized according to Documentation Standard v3.0 |

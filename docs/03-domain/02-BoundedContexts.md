@@ -1,18 +1,13 @@
 # Bounded Contexts
 
-**Document ID:** MME-DOM-002
-
-**Repository Path:** `docs/03-domain/02-BoundedContexts.md`
-
-**Version:** 1.0.0 (Draft)
-
-**Status:** In Progress
-
-**Related Documents**
-
-- 00-DomainPrinciples.md
-- 01-CoreConcepts.md
-- 09-CapabilityModel.md
+| Property | Value |
+|----------|-------|
+| **Document ID** | DOM-003 |
+| **Version** | 3.0.0 |
+| **Status** | Active |
+| **Owner** | Solution Architect |
+| **Created** | 2026-07-18 |
+| **Last Updated** | 2026-07-18 |
 
 ---
 
@@ -38,6 +33,18 @@ The bounded contexts have been identified according to the following principles:
 - Minimal overlap
 
 Bounded Contexts are business boundaries rather than software layers.
+
+---
+
+# Domain Context Philosophy
+
+Each bounded context represents an independent business capability with
+exclusive ownership over its own ubiquitous language, business rules, entities,
+services, and lifecycle.
+
+A bounded context is a business boundary rather than a software boundary.
+
+Software modules are expected to evolve from these business boundaries.
 
 ---
 
@@ -454,8 +461,19 @@ New contexts shall not violate the ownership boundaries established in this docu
 
 ---
 
-# Revision History
+# Related Documents
+
+- 00-DomainPrinciples.md
+- 00-Glossary.md
+- 01-CoreConcepts.md
+- 09-CapabilityModel.md
+- 01-Architecture.md
+
+---
+
+# Change History
 
 | Version | Date | Description |
-|----------|------|-------------|
+|----------|------------|---------------------------------------------|
 | 1.0.0 | Initial | Initial bounded context definition |
+| 3.0.0 | 2026-07-18 | Standardized according to Documentation Standard v3.0 |

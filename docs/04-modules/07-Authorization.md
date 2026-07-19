@@ -1,22 +1,13 @@
 # Authorization
 
-**Document ID:** MME-MOD-007
-
-**Repository Path:** `docs/04-modules/07-Authorization.md`
-
-**Version:** 1.0.0 (Draft)
-
-**Status:** In Progress
-
-**Related Documents**
-
-- 00-ApplicationArchitecture.md
-- 01-UseCases.md
-- 02-Commands.md
-- 03-Queries.md
-- 04-Handlers.md
-- 05-ApplicationServices.md
-- 06-Workflows.md
+| Property | Value |
+|----------|-------|
+| **Document ID** | APP-007 |
+| **Version** | 3.0.0 |
+| **Status** | Active |
+| **Owner** | Solution Architect |
+| **Created** | 2026-07-18 |
+| **Last Updated** | 2026-07-18 |
 
 ---
 
@@ -29,6 +20,19 @@ Authorization determines **who is allowed to perform which business operation**.
 Authentication identifies the user.
 
 Authorization determines permissions.
+
+---
+
+# Authorization Philosophy
+
+Authorization protects business operations.
+
+Authorization never contains business logic.
+
+Business Rules remain inside the Domain.
+
+Authorization determines whether execution is allowed before the Application
+Layer invokes the Handler.
 
 ---
 
@@ -318,8 +322,41 @@ Future versions may support:
 
 ---
 
-# Revision History
+# 19. Permission Resolution
 
-| Version | Description |
-|----------|-------------|
-| 1.0.0 | Initial Authorization architecture |
+Authorization shall occur in the following order:
+
+1. Authenticate User
+2. Resolve Organization
+3. Resolve Roles
+4. Resolve Permissions
+5. Evaluate Policy
+6. Execute Handler
+
+---
+
+| Permission           | Command                    |
+| -------------------- | -------------------------- |
+| Asset.Create         | RegisterAssetCommand       |
+| Engine.Install       | InstallEngineCommand       |
+| Maintenance.Complete | CompleteMaintenanceCommand |
+
+---
+
+# Related Documents
+
+- 06-Workflows.md
+- 04-Handlers.md
+- 02-Commands.md
+- 03-Queries.md
+- docs/03-domain/07-BusinessRules.md
+- ADR-0006 — Authorization Model
+
+---
+
+# Change History
+
+| Version | Date | Description |
+|----------|------------|----------------------------------------------|
+| 1.0.0 | Initial | Initial Authorization model |
+| 3.0.0 | 2026-07-18 | Standardized according to Documentation Standard v3.0 |

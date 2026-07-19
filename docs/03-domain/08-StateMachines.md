@@ -1,20 +1,13 @@
 # State Machines
 
-**Document ID:** MME-DOM-008
-
-**Repository Path:** `docs/03-domain/08-StateMachines.md`
-
-**Version:** 1.0.0 (Draft)
-
-**Status:** In Progress
-
-**Related Documents**
-
-- 03-DomainModel.md
-- 04-Aggregates.md
-- 05-DomainServices.md
-- 06-DomainEvents.md
-- 07-BusinessRules.md
+| Property | Value |
+|----------|-------|
+| **Document ID** | DOM-008 |
+| **Version** | 3.0.0 |
+| **Status** | Active |
+| **Owner** | Solution Architect |
+| **Created** | 2026-07-18 |
+| **Last Updated** | 2026-07-18 |
 
 ---
 
@@ -33,6 +26,17 @@ A State Machine defines:
 
 ---
 
+# State Machine Philosophy
+
+State Machines define the legal lifecycle of business entities.
+
+Every transition represents a business decision and shall always satisfy the
+Business Rules, Aggregate Invariants, and Domain Principles.
+
+State transitions never occur outside the Aggregate boundary.
+
+---
+
 # 2. State Machine Principles
 
 Every State Machine shall satisfy the following principles.
@@ -43,6 +47,19 @@ Every State Machine shall satisfy the following principles.
 - Historical states are preserved.
 - Illegal transitions are rejected.
 - Transitions generate Domain Events.
+
+---
+
+# Lifecycle Modeling Rules
+
+All lifecycle models shall satisfy:
+
+- Exactly one current state
+- Explicit legal transitions
+- Explicit illegal transitions
+- Transition triggers
+- Domain Event publication
+- Aggregate consistency
 
 ---
 
@@ -505,8 +522,20 @@ Future versions may introduce additional State Machines for:
 
 ---
 
-# Revision History
+# Related Documents
 
-| Version | Description |
-|----------|-------------|
-| 1.0.0 | Initial State Machine definitions |
+- 07-BusinessRules.md
+- 06-DomainEvents.md
+- 05-DomainServices.md
+- 04-Aggregates.md
+- 03-DomainModel.md
+- 02-BoundedContexts.md
+
+---
+
+# Change History
+
+| Version | Date | Description |
+|----------|------------|----------------------------------------------|
+| 1.0.0 | Initial | Initial State Machine definitions |
+| 3.0.0 | 2026-07-18 | Standardized according to Documentation Standard v3.0 |

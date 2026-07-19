@@ -1,311 +1,261 @@
 # Dependency Rules
 
-**Document ID:** MME-DEV-004
-
-**Repository Path:** `docs/05-development/04-DependencyRules.md`
-
-**Version:** 1.0.0 (Draft)
-
-**Status:** In Progress
-
-**Related Documents**
-
-- 00-DevelopmentPrinciples.md
-- 01-SolutionStructure.md
-- 02-ProjectStructure.md
-- 03-NamespaceConvention.md
-- docs/02-architecture/01-Architecture.md
+| Property | Value |
+|----------|-------|
+| **Document ID** | DOC-DEV-005 |
+| **Version** | 2.0.0 |
+| **Status** | Approved |
+| **Owner** | Solution Architect |
+| **Created** | 2026-07-18 |
+| **Last Updated** | 2026-07-18 |
 
 ---
 
-# 1. Purpose
+# Purpose
 
-This document defines the dependency rules between projects, layers and components of MachineryManagerEnterprise.
+This document defines the dependency rules for the
+**MachineryManagerEnterprise** solution.
 
-Correct dependency management is one of the primary mechanisms used to preserve Clean Architecture.
+Correct dependency management is one of the most important architectural
+constraints of the project.
 
----
-
-# 2. Guiding Principle
-
-Dependencies shall always point toward the business core.
-
-Outer layers depend on inner layers.
-
-Inner layers shall never depend on outer layers.
+Every project shall comply with these rules.
 
 ---
 
-# 3. Dependency Direction
+# Architectural Principle
+
+The solution follows **Dependency Inversion** and **Clean Architecture**.
+
+Dependencies always point toward the business core.
+
+High-level modules never depend on implementation details.
+
+---
+
+# Dependency Direction
+
+The allowed dependency direction is:
 
 ```text
-           Presentation
-
-                 │
-
-                 ▼
-
-            Application
-
-                 │
-
-                 ▼
-
-               Domain
-
-                 ▲
-
-                 │
-
-          Infrastructure
+Presentation
+        │
+        ▼
+Application
+        │
+        ▼
+Domain
+        │
+        ▼
+SharedKernel
 ```
 
-Infrastructure implements interfaces defined by Application or Domain.
+Infrastructure provides implementations but depends on abstractions defined
+by the Application or Domain layers.
 
 ---
 
-# 4. Allowed Project References
+# Allowed Dependencies
+
+| Project | May Reference |
+|----------|---------------|
+| SharedKernel | — |
+| Domain | SharedKernel |
+| Application | Domain, SharedKernel |
+| Infrastructure | Application, Domain, SharedKernel |
+| Web (Presentation) | Application |
+
+---
+
+# Forbidden Dependencies
+
+The following dependencies are strictly prohibited.
 
 ## Domain
 
-May reference:
+Domain shall never reference:
 
-- Shared
-
-May NOT reference:
-
-- Application
 - Infrastructure
-- Api
-- Tests
+- Presentation
+- UI Frameworks
+- Entity Framework
+- Logging Frameworks
+- External Services
+
+---
+
+## SharedKernel
+
+SharedKernel shall never reference any other project.
+
+It is the lowest layer of the architecture.
 
 ---
 
 ## Application
 
-May reference:
+Application shall never depend on:
 
-- Domain
-- Shared
+- Infrastructure implementations
+- UI Components
+- Database Providers
 
-May NOT reference:
-
-- Api
-- Infrastructure (implementation)
+Application depends only on abstractions.
 
 ---
 
-## Infrastructure
+## Presentation
 
-May reference:
+Presentation shall never contain:
+
+- Business Rules
+- Persistence Logic
+- Repository Implementations
+
+---
+
+# Infrastructure
+
+Infrastructure may implement interfaces defined in:
 
 - Application
 - Domain
-- Shared
 
-May NOT reference:
-
-- Api
+Infrastructure shall not define business rules.
 
 ---
 
-## Api
+# Dependency Graph
 
-May reference:
+```text
+                Web
+                 │
+                 ▼
+          Application
+                 │
+                 ▼
+             Domain
+                 │
+                 ▼
+          SharedKernel
 
-- Application
-- Shared
-
-Infrastructure shall be injected through Dependency Injection.
-
----
-
-## Tests
-
-Test projects may reference production projects.
-
-Production projects shall never reference test projects.
-
----
-
-# 5. Dependency Matrix
-
-| From | Domain | Application | Infrastructure | Api | Shared |
-|------|:------:|:-----------:|:--------------:|:---:|:------:|
-| Domain | — | ❌ | ❌ | ❌ | ✅ |
-| Application | ✅ | — | ❌ | ❌ | ✅ |
-| Infrastructure | ✅ | ✅ | — | ❌ | ✅ |
-| Api | ❌ | ✅ | *(runtime only)* | — | ✅ |
-| Shared | ❌ | ❌ | ❌ | ❌ | — |
-
----
-
-# 6. Interface Ownership
-
-Interfaces belong to the consumer.
-
-Example
-
-Repository Interfaces
-
-```
-Domain
-
-└── Repositories
-
-    └── IAssetRepository
-```
-
-Implementation
-
-```
 Infrastructure
-
-└── Persistence
-
-    └── AssetRepository
+      │
+      └──────────────►
+ Application / Domain
 ```
+
+Infrastructure supports the core but is never the architectural center.
 
 ---
 
-# 7. Dependency Injection
+# Circular Dependencies
 
-Dependency Injection shall be the only mechanism used to connect implementations.
+Circular project references are forbidden.
 
-Business code shall never instantiate infrastructure services directly.
+Example (Invalid)
 
-Example
-
-```
+```text
 Application
 
 ↓
 
-IEmailSender
-
-↓
-
 Infrastructure
 
 ↓
 
-SmtpEmailSender
+Application
 ```
 
----
-
-# 8. Forbidden Dependencies
-
-The following dependencies are prohibited.
-
-Domain → Entity Framework
-
-Domain → ASP.NET Core
-
-Domain → SQL Server
-
-Domain → File System
-
-Application → EF Core DbContext
-
-Application → HttpContext
-
-Application → IConfiguration
-
-Business logic shall remain infrastructure independent.
+Every dependency graph must remain acyclic.
 
 ---
 
-# 9. External Libraries
+# Dependency Injection
 
-External packages shall remain isolated.
+Concrete implementations shall be registered through Dependency Injection.
 
-Examples
+Application defines interfaces.
 
-- Entity Framework Core
-- Serilog
-- MediatR
-- AutoMapper
-- FluentValidation
+Infrastructure provides implementations.
 
-Business objects shall not depend directly upon external packages unless explicitly approved.
+Presentation consumes abstractions.
 
 ---
 
-# 10. Circular Dependencies
+# Third-Party Libraries
 
-Circular dependencies are strictly prohibited.
+Third-party libraries should be isolated whenever practical.
 
 Example
 
-```
-Project A
+```text
+Infrastructure
 
-↓
+Entity Framework
 
-Project B
+Serilog
 
-↓
+FluentValidation
 
-Project C
-
-↓
-
-Project A ❌
+Redis
 ```
 
-The solution shall compile without cyclic references.
+Business layers should remain unaware of implementation libraries.
 
 ---
 
-# 11. Runtime Dependencies
+# Compile-Time Dependencies
 
-Runtime dependencies are acceptable when configured through Dependency Injection.
+Compile-time dependencies should be minimized.
 
-Compile-time dependencies shall still respect architectural boundaries.
-
----
-
-# 12. Cross-Cutting Concerns
-
-Cross-cutting services include:
-
-- Logging
-- Caching
-- Notifications
-- File Storage
-- Email
-- AI Providers
-
-These services shall be accessed only through abstractions.
+Projects should expose only the abstractions required by consumers.
 
 ---
 
-# 13. Future Expansion
+# Runtime Dependencies
 
-New projects shall follow the same dependency model.
+Runtime wiring shall occur through:
 
-No new project may violate these dependency rules.
+- Dependency Injection
+- Configuration
+- Composition Root
 
-Architectural exceptions require an ADR.
-
----
-
-# 14. Architectural Validation
-
-Dependency rules shall be verified during:
-
-- Architecture Review
-- Code Review
-- Build Pipeline
-- Automated Architecture Tests (future)
-
-Violations shall be corrected before merge.
+Never through direct object construction inside business logic.
 
 ---
 
-# Revision History
+# Future Expansion
 
-| Version | Description |
-|----------|-------------|
-| 1.0.0 | Initial Dependency Rules |
+As new bounded contexts are introduced, the same dependency rules shall apply.
+
+Every module should remain independently maintainable.
+
+---
+
+# Architectural Exceptions
+
+Any exception to these rules requires an approved Architecture Decision Record (ADR).
+
+Undocumented exceptions are not permitted.
+
+---
+
+# Related Documents
+
+- DOC-CONVENTIONS
+- DOC-README
+- DOC-DEV-001 (Development Principles)
+- DOC-DEV-002 (Solution Structure)
+- DOC-DEV-003 (Project Structure)
+- DOC-DEV-004 (Namespace Convention)
+- ADR-0001
+
+---
+
+# Change History
+
+| Version | Date | Description |
+|----------|------------|----------------------------------------------|
+| 1.0.0 | 2026-07-18 | Initial dependency rules |
+| 2.0.0 | 2026-07-18 | Standardized according to Documentation Standard v3.0 |

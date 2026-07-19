@@ -1,265 +1,291 @@
 # Logging Strategy
 
-**Document ID:** MME-DEV-008
-
-**Repository Path:** `docs/05-development/08-LoggingStrategy.md`
-
-**Version:** 1.0.0 (Draft)
-
-**Status:** In Progress
-
-**Related Documents**
-
-- 00-DevelopmentPrinciples.md
-- 07-ErrorHandling.md
-- docs/04-modules/04-Handlers.md
+| Property | Value |
+|----------|-------|
+| **Document ID** | DOC-DEV-009 |
+| **Version** | 2.0.0 |
+| **Status** | Approved |
+| **Owner** | Solution Architect |
+| **Created** | 2026-07-18 |
+| **Last Updated** | 2026-07-18 |
 
 ---
 
-# 1. Purpose
+# Purpose
 
-This document defines the logging strategy used throughout MachineryManagerEnterprise.
+This document defines the official logging strategy for the
+**MachineryManagerEnterprise** solution.
 
-Logging provides visibility into application behavior, assists troubleshooting, supports auditing and enables operational monitoring.
+A consistent logging strategy improves:
 
----
-
-# 2. Objectives
-
-Logging shall provide:
-
-- Observability
-- Traceability
+- Monitoring
 - Diagnostics
-- Auditing support
-- Operational monitoring
-- Performance insight
+- Production Support
+- Incident Investigation
+- Security Auditing
 
-Logging shall never change application behavior.
-
----
-
-# 3. Logging Principles
-
-Logging shall be:
-
-- Structured
-- Consistent
-- Meaningful
-- Minimal
-- Secure
-- Correlation-aware
-
-Log entries shall describe business context whenever possible.
+Logging shall provide operational visibility without exposing sensitive information.
 
 ---
 
-# 4. Log Categories
+# Objectives
 
-```text
-Logs
+The logging system shall:
 
-├── Application
-├── Business
-├── Security
-├── Infrastructure
-├── Audit
-└── Performance
+- Produce structured logs.
+- Support centralized log aggregation.
+- Minimize noise.
+- Preserve diagnostic context.
+- Protect confidential information.
+
+---
+
+# Logging Principles
+
+Logs should answer three questions:
+
+1. What happened?
+2. When did it happen?
+3. Why did it happen?
+
+Every log entry should provide useful operational information.
+
+---
+
+# Structured Logging
+
+The solution shall use structured logging.
+
+Example
+
+```csharp
+logger.LogInformation(
+    "Machine {MachineId} created by {UserId}",
+    machineId,
+    userId);
 ```
 
-Each category serves a different operational purpose.
+Avoid string concatenation.
+
+Incorrect
+
+```csharp
+logger.LogInformation(
+    "Machine " + machineId + " created");
+```
 
 ---
 
-# 5. Log Levels
+# Log Levels
 
-The following log levels shall be used.
-
-| Level | Purpose |
-|--------|---------|
-| Trace | Detailed diagnostics |
+| Level | Usage |
+|---------|--------------------------------|
+| Trace | Detailed execution flow |
 | Debug | Development diagnostics |
-| Information | Normal business execution |
-| Warning | Recoverable abnormal situations |
-| Error | Failed operation |
-| Critical | System-wide failure |
+| Information | Normal business operations |
+| Warning | Recoverable abnormal conditions |
+| Error | Operation failed |
+| Critical | Application instability |
 
 ---
 
-# 6. Information Logging
+# Information Logs
 
 Information logs should record:
 
-- Business workflow start
-- Business workflow completion
-- User operations
-- Important state transitions
-- Background job execution
+- Successful business operations
+- Important lifecycle events
+- User actions
+- Background jobs
 
-Routine framework activity should not be logged.
+Information logs should not become excessively verbose.
 
 ---
 
-# 7. Warning Logging
+# Warning Logs
 
-Warnings indicate unexpected but recoverable situations.
+Warnings indicate abnormal but recoverable situations.
 
 Examples
 
-- Duplicate request detected
-- Forecast data incomplete
-- External service temporarily unavailable
-- Document nearing expiration
-
-Warnings should not terminate execution.
+- Retry performed
+- Missing optional configuration
+- Slow response
+- Business constraint approaching limits
 
 ---
 
-# 8. Error Logging
+# Error Logs
 
-Errors shall record failures that prevent successful completion.
+Errors indicate failed operations.
 
-Examples
+Each error log should include:
 
-- Database failure
-- Validation failure after retries
-- External API failure
-- File storage failure
-
-Errors shall include sufficient diagnostic information.
+- Exception
+- Correlation Id
+- Operation
+- Context
 
 ---
 
-# 9. Critical Logging
+# Critical Logs
 
-Critical logs indicate severe failures.
+Critical logs indicate that the application may become unavailable.
 
 Examples
 
 - Database unavailable
-- Configuration corruption
 - Startup failure
-- Data consistency failure
-
-Critical events require immediate operational attention.
-
----
-
-# 10. Structured Logging
-
-Logs shall use structured properties.
-
-Preferred
-
-```text
-AssetId
-EngineId
-WorkflowId
-UserId
-CorrelationId
-OrganizationId
-```
-
-Avoid embedding important data inside free-form messages.
+- Data corruption
+- Unhandled fatal exception
 
 ---
 
-# 11. Correlation
+# Sensitive Information
 
-Every request shall include:
-
-- CorrelationId
-- RequestId
-
-Background operations shall preserve correlation whenever possible.
-
----
-
-# 12. Security Logging
-
-The following events shall always be logged.
-
-- Login
-- Logout
-- Authorization failure
-- Permission changes
-- User creation
-- User deactivation
-
-Passwords and secrets shall never appear in logs.
-
----
-
-# 13. Audit Logging
-
-Audit logs are immutable.
-
-Audit records shall include:
-
-- User
-- Operation
-- Resource
-- Time
-- Result
-- CorrelationId
-
-Audit logs support compliance rather than diagnostics.
-
----
-
-# 14. Performance Logging
-
-Performance logs may record:
-
-- Request duration
-- Database execution time
-- External API latency
-- Forecast execution duration
-- Background job duration
-
-Performance logging should avoid excessive overhead.
-
----
-
-# 15. Sensitive Information
-
-The following information shall never be logged.
+Never log:
 
 - Passwords
-- Access tokens
-- Refresh tokens
-- Secret keys
-- Connection strings
-- Personal confidential information
-
-Sensitive values shall be masked when necessary.
-
----
-
-# 16. Log Retention
-
-Log retention shall be configurable.
-
-Different categories may use different retention periods.
-
-Audit logs may require significantly longer retention.
+- Access Tokens
+- Refresh Tokens
+- Secrets
+- Connection Strings
+- Personal Identification Numbers
+- Payment Information
 
 ---
 
-# 17. Future Enhancements
+# Correlation ID
 
-Future versions may support:
+Every request should have a Correlation Id.
 
+The Correlation Id shall appear in every related log entry.
+
+This enables end-to-end request tracing.
+
+---
+
+# Exception Logging
+
+Unexpected exceptions should always include:
+
+- Exception type
+- Message
+- Stack trace
+- Inner exception
+- Correlation Id
+
+---
+
+# Performance Logging
+
+Long-running operations should record execution duration.
+
+Example
+
+```text
+GenerateMonthlyReport completed in 2143 ms.
+```
+
+---
+
+# Business Logging
+
+Business events may be logged independently from technical logs.
+
+Examples
+
+- Machine Registered
+- Maintenance Scheduled
+- User Logged In
+
+These events support auditing and reporting.
+
+---
+
+# Audit Logging
+
+Security-sensitive actions should always be logged.
+
+Examples
+
+- Authentication
+- Authorization failure
+- Role changes
+- Configuration changes
+- User management
+
+Audit logs should never be deleted manually.
+
+---
+
+# Log Retention
+
+Retention policies should be configurable.
+
+Suggested defaults
+
+| Log Type | Retention |
+|-----------|-----------|
+| Trace | Short |
+| Debug | Short |
+| Information | Medium |
+| Warning | Medium |
+| Error | Long |
+| Audit | Long |
+
+---
+
+# Log Destinations
+
+The logging infrastructure should support multiple targets.
+
+Examples
+
+- Console
+- File
+- Seq
 - OpenTelemetry
-- Distributed tracing
-- Centralized log aggregation
-- AI-assisted anomaly detection
-- Real-time operational dashboards
+- Elasticsearch
+- Azure Monitor
+
+The logging abstraction shall remain independent from any specific provider.
 
 ---
 
-# Revision History
+# Open Source Policy
 
-| Version | Description |
-|----------|-------------|
-| 1.0.0 | Initial Logging Strategy |
+Only approved open-source logging providers may be used.
+
+Technology selection requires:
+
+- Technology Evaluation (TE)
+- Approved ADR
+
+---
+
+# Compliance
+
+Every project shall follow this logging strategy.
+
+Architectural deviations require an approved ADR.
+
+---
+
+# Related Documents
+
+- DOC-CONVENTIONS
+- DOC-DEV-001 (Development Principles)
+- DOC-DEV-006 (Coding Standards)
+- DOC-DEV-008 (Error Handling)
+- DOC-DEV-010 (Testing Strategy)
+- ADR-0002
+
+---
+
+# Change History
+
+| Version | Date | Description |
+|----------|------------|----------------------------------------------|
+| 1.0.0 | 2026-07-18 | Initial logging strategy |
+| 2.0.0 | 2026-07-18 | Standardized according to Documentation Standard v3.0 |
