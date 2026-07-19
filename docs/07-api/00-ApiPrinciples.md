@@ -1,19 +1,13 @@
 # API Principles
 
-**Document ID:** MME-API-000
-
-**Repository Path:** `docs/07-api/00-ApiPrinciples.md`
-
-**Version:** 1.0.0 (Draft)
-
-**Status:** In Progress
-
-**Related Documents**
-
-- docs/02-architecture/01-Architecture.md
-- docs/03-domain/00-DomainPrinciples.md
-- docs/04-modules/00-ApplicationArchitecture.md
-- docs/05-development/00-DevelopmentPrinciples.md
+| Property | Value |
+|----------|-------|
+| **Document ID** | API-000 |
+| **Version** | 3.0.0 |
+| **Status** | Active |
+| **Owner** | Solution Architect |
+| **Created** | 2026-07-18 |
+| **Last Updated** | 2026-07-18 |
 
 ---
 
@@ -24,6 +18,16 @@ This document defines the architectural principles governing all external APIs e
 Every HTTP endpoint, request, response and integration contract shall conform to these principles.
 
 These principles take precedence over implementation preferences.
+
+---
+
+# API Design Philosophy
+
+The API exposes business capabilities rather than software implementation.
+
+API Contracts are long-lived public assets.
+
+Every API shall remain stable, explicit, versioned and independently consumable.
 
 ---
 
@@ -218,8 +222,33 @@ When API design decisions conflict:
 
 ---
 
-# Revision History
+# 18. API Layer Responsibilities
 
-| Version | Description |
-|----------|-------------|
-| 1.0.0 | Initial API Principles |
+The API Layer shall:
+
+- Translate HTTP requests into Commands or Queries.
+- Translate Application Results into HTTP responses.
+- Never implement business rules.
+- Never access persistence directly.
+- Never expose internal domain objects.
+
+---
+
+# Related Documents
+
+- Architecture Overview
+- Domain Principles
+- Module Overview
+- Authorization
+- Commands
+- Queries
+- ADR-0005 — API Strategy
+
+---
+
+# Change History
+
+| Version | Date | Description |
+|----------|------------|---------------------------------------------|
+| 1.0.0 | Initial | Initial API Principles |
+| 3.0.0 | 2026-07-18 | Standardized according to Documentation Standard v3.0 |

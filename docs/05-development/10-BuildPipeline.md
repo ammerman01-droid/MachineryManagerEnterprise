@@ -1,66 +1,115 @@
 # Build Pipeline
 
-**Document ID:** MME-DEV-010
-
-**Repository Path:** `docs/05-development/10-BuildPipeline.md`
-
-**Version:** 1.0.0 (Draft)
-
-**Status:** In Progress
-
-**Related Documents**
-
-- 00-DevelopmentPrinciples.md
-- 01-SolutionStructure.md
-- 04-DependencyRules.md
-- 05-CodingStandards.md
-- 08-LoggingStrategy.md
-- 09-TestingStrategy.md
+| Property | Value |
+|----------|-------|
+| **Document ID** | DOC-DEV-011 |
+| **Version** | 2.0.0 |
+| **Status** | Approved |
+| **Owner** | Solution Architect |
+| **Created** | 2026-07-18 |
+| **Last Updated** | 2026-07-18 |
 
 ---
 
-# 1. Purpose
+# Purpose
 
-This document defines the Build Pipeline strategy for MachineryManagerEnterprise.
+This document defines the Continuous Integration (CI) and Continuous Delivery (CD)
+pipeline strategy for the MachineryManagerEnterprise solution.
 
-The Build Pipeline ensures that every change entering the repository satisfies the project's quality requirements before becoming part of the main branch.
-
----
-
-# 2. Objectives
-
-The Build Pipeline shall guarantee:
-
-- Build reproducibility
-- Automated quality verification
-- Architectural consistency
-- Continuous validation
-- Reliable releases
+The goal is to ensure that every code change is validated automatically before
+being merged into the main development branches.
 
 ---
 
-# 3. Pipeline Philosophy
+# Objectives
 
-Every change shall be verified automatically.
+The pipeline shall:
 
-No manual verification shall replace automated validation.
-
-A successful build is a prerequisite for merging changes.
+- Build the solution automatically.
+- Execute automated tests.
+- Verify architectural rules.
+- Detect dependency issues.
+- Prevent broken code from being merged.
+- Produce reproducible builds.
 
 ---
 
-# 4. Pipeline Stages
+# Pipeline Principles
+
+The build pipeline shall be:
+
+- Automated
+- Repeatable
+- Deterministic
+- Fast
+- Transparent
+
+Manual build verification should never be required.
+
+---
+
+# Branch Strategy
+
+The pipeline follows the Git branching strategy.
 
 ```text
-Source
+main
+    │
+develop
+    │
+feature/*
+```
 
-↓
+Different branches execute different pipeline stages.
 
+---
+
+# Feature Branch Pipeline
+
+Every feature branch shall execute:
+
+- Restore packages
+- Build solution
+- Static analysis
+- Unit tests
+- Architecture tests
+
+No deployment shall occur.
+
+---
+
+# Develop Branch Pipeline
+
+The Develop pipeline additionally performs:
+
+- Integration tests
+- Package validation
+- Artifact generation
+
+---
+
+# Main Branch Pipeline
+
+The Main pipeline performs:
+
+- Full build
+- Full automated test suite
+- Release artifact generation
+- Version tagging
+- Deployment approval (when enabled)
+
+---
+
+# Pipeline Stages
+
+Typical execution order:
+
+```text
 Restore
 
 ↓
 
-Compile
+Build
 
 ↓
 
@@ -68,7 +117,7 @@ Static Analysis
 
 ↓
 
-Architecture Validation
+Architecture Tests
 
 ↓
 
@@ -80,176 +129,143 @@ Integration Tests
 
 ↓
 
-Package
-
-↓
-
 Publish Artifacts
 ```
 
-Each stage must complete successfully before the next stage begins.
+---
+
+# Build Configuration
+
+Default configuration:
+
+```text
+Release
+```
+
+Debug builds should only be used during local development.
 
 ---
 
-# 5. Restore
+# Static Analysis
 
-The pipeline shall:
+Static analysis shall execute before automated tests.
 
-- Restore NuGet packages
-- Validate package integrity
-- Verify package versions
+Recommended tools include:
 
-No package shall be downloaded from untrusted sources.
+- .NET SDK Analyzers
+- Roslyn Analyzers
 
----
-
-# 6. Compilation
-
-Compilation shall:
-
-- Treat warnings consistently
-- Produce deterministic builds
-- Use the project's configured SDK version
-
-Compilation failures immediately terminate the pipeline.
+Warnings should be treated as defects whenever practical.
 
 ---
 
-# 7. Static Analysis
-
-Static analysis shall verify:
-
-- Coding standards
-- Compiler warnings
-- Nullable reference rules
-- Analyzer rules
-
-New warnings should not be introduced.
-
----
-
-# 8. Architecture Validation
+# Architecture Validation
 
 Architecture validation shall verify:
 
-- Layer dependencies
-- Project references
-- Namespace conventions
-- Circular dependencies
-- Clean Architecture compliance
+- Dependency Rules
+- Layer Boundaries
+- Namespace Rules
 
-Architecture violations shall fail the build.
+Recommended tools:
+
+- NetArchTest
+- ArchUnitNET
 
 ---
 
-# 9. Automated Testing
+# Test Execution
 
 The pipeline shall execute:
 
 - Unit Tests
+- Integration Tests (Develop/Main)
 - Architecture Tests
 
-Integration Tests may execute in dedicated environments.
+Future additions may include:
 
-Functional tests may execute before release.
-
----
-
-# 10. Build Artifacts
-
-Successful builds shall produce:
-
-- Application binaries
-- Symbol packages
-- Documentation artifacts
-- Version metadata
-
-Artifacts shall be immutable.
+- UI Tests
+- Performance Tests
+- Security Scans
 
 ---
 
-# 11. Versioning
+# Artifacts
 
-Every successful build shall have:
+Successful builds should generate reproducible artifacts.
 
-- Build Number
-- Commit Identifier
-- Version
-- Build Timestamp
+Examples:
 
-Version information shall be traceable to source code.
+- Published application
+- Symbols
+- Packages
 
----
-
-# 12. Release Readiness
-
-A release candidate shall satisfy:
-
-- Successful build
-- Successful automated tests
-- Successful architecture validation
-- Successful packaging
-
-No release shall bypass pipeline validation.
+Artifacts should remain immutable.
 
 ---
 
-# 13. Deployment Strategy
+# Versioning
 
-The pipeline shall support multiple deployment targets.
+Versioning follows Semantic Versioning.
 
-Examples
+```text
+MAJOR.MINOR.PATCH
+```
 
-- Development
-- Test
-- Staging
-- Production
+Example:
 
-Deployment configuration shall remain external to application code.
+```text
+1.4.2
+```
 
 ---
 
-# 14. Security
+# Security
 
-The pipeline shall protect:
+The pipeline shall never expose:
 
 - Secrets
-- Certificates
-- Signing keys
-- Deployment credentials
+- API Keys
+- Tokens
+- Connection Strings
 
-Sensitive information shall never exist in source control.
-
----
-
-# 15. Quality Gates
-
-Every Pull Request shall satisfy the following quality gates.
-
-- Successful compilation
-- Zero architecture violations
-- Successful Unit Tests
-- Successful code review
-
-Merging shall be blocked until all quality gates succeed.
+Secrets shall be managed by the CI platform.
 
 ---
 
-# 16. Future Enhancements
+# Future Improvements
 
-Future pipeline capabilities may include:
+Future pipeline enhancements may include:
 
-- Automatic dependency scanning
-- Security vulnerability analysis
-- Container image generation
 - SBOM generation
-- Automated performance benchmarks
-- Automated release notes generation
+- Dependency vulnerability scanning
+- Container image scanning
+- Automated deployment
+- Blue-Green deployment
+- Canary deployment
 
 ---
 
-# Revision History
+# Compliance
 
-| Version | Description |
-|----------|-------------|
-| 1.0.0 | Initial Build Pipeline strategy |
+All Pull Requests must pass the required pipeline stages before merge approval.
+
+Direct commits to protected branches are prohibited.
+
+---
+
+# Related Documents
+
+- DOC-CONVENTIONS
+- DOC-DEV-005 (Dependency Rules)
+- DOC-DEV-006 (Coding Standards)
+- DOC-DEV-010 (Testing Strategy)
+
+---
+
+# Change History
+
+| Version | Date | Description |
+|----------|------------|----------------------------------------------|
+| 1.0.0 | 2026-07-18 | Initial build pipeline strategy |
+| 2.0.0 | 2026-07-18 | Standardized according to Documentation Standard v3.0 |

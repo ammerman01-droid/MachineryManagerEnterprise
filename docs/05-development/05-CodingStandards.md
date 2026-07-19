@@ -1,261 +1,311 @@
 # Coding Standards
 
-**Document ID:** MME-DEV-005
-
-**Repository Path:** `docs/05-development/05-CodingStandards.md`
-
-**Version:** 1.0.0 (Draft)
-
-**Status:** In Progress
-
-**Related Documents**
-
-- 00-DevelopmentPrinciples.md
-- 01-SolutionStructure.md
-- 02-ProjectStructure.md
-- 03-NamespaceConvention.md
-- 04-DependencyRules.md
+| Property | Value |
+|----------|-------|
+| **Document ID** | DOC-DEV-006 |
+| **Version** | 2.0.0 |
+| **Status** | Approved |
+| **Owner** | Solution Architect |
+| **Created** | 2026-07-18 |
+| **Last Updated** | 2026-07-18 |
 
 ---
 
-# 1. Purpose
+# Purpose
 
-This document defines the coding standards used throughout MachineryManagerEnterprise.
+This document defines the official coding standards for the
+**MachineryManagerEnterprise** solution.
 
-Coding standards ensure that the entire codebase remains consistent, readable and maintainable regardless of the number of contributors.
+The objective is to ensure that all contributors write code with a consistent
+style, predictable structure, and high maintainability.
+
+Coding standards are intended to reduce cognitive load during development,
+code reviews, debugging, and long-term maintenance.
 
 ---
 
-# 2. General Principles
+# General Principles
 
-Source code shall be:
+Every source file should be:
 
 - Readable
 - Predictable
-- Consistent
-- Maintainable
-- Self-documenting
+- Small
+- Focused
+- Easy to review
+- Easy to test
 
-Code is written primarily for humans.
-
-Compilers are secondary readers.
-
----
-
-# 3. SOLID Principles
-
-All production code shall follow SOLID.
-
-- Single Responsibility Principle
-- Open / Closed Principle
-- Liskov Substitution Principle
-- Interface Segregation Principle
-- Dependency Inversion Principle
-
-Violations require architectural justification.
+Code should always optimize for maintainability rather than cleverness.
 
 ---
 
-# 4. DRY
+# Code Formatting
 
-Duplicate logic shall be eliminated.
+The project follows the default formatting rules provided by the .NET SDK.
 
-Business logic shall exist in exactly one place.
+Formatting shall be enforced through:
 
-Shared behavior shall be extracted only when it improves clarity.
+- `.editorconfig`
+- `dotnet format`
 
----
-
-# 5. KISS
-
-Prefer the simplest solution that correctly solves the problem.
-
-Avoid unnecessary abstraction.
-
-Avoid speculative architecture.
+Manual formatting differences should not appear in Pull Requests.
 
 ---
 
-# 6. YAGNI
+# File Organization
 
-Features that are not currently required shall not be implemented.
+A source file should normally contain one public type.
 
-Future extensibility is achieved through architecture, not premature implementation.
+Recommended order:
 
----
-
-# 7. Class Design
-
-Classes shall:
-
-- have one responsibility;
-- remain cohesive;
-- expose minimal public surface;
-- hide implementation details.
-
-Large classes shall be decomposed.
+1. using directives
+2. namespace
+3. class declaration
+4. constants
+5. fields
+6. constructors
+7. public properties
+8. public methods
+9. private methods
 
 ---
 
-# 8. Method Design
+# Class Design
 
-Methods shall:
+Classes should:
 
-- perform one logical task;
-- remain short;
-- have descriptive names;
-- avoid side effects whenever practical.
+- Have a single responsibility.
+- Be cohesive.
+- Avoid excessive size.
+- Prefer composition over inheritance.
 
-Deep nesting should be avoided.
-
----
-
-# 9. Constructors
-
-Constructors shall only initialize dependencies and required state.
-
-Constructors shall never execute business logic.
+Large classes should be refactored.
 
 ---
 
-# 10. Dependency Injection
+# Methods
 
-Dependencies shall be injected.
+Methods should:
 
-Direct object creation using `new` shall be avoided except for:
+- Perform one logical task.
+- Have descriptive names.
+- Minimize nesting.
+- Return early when appropriate.
+- Remain short whenever practical.
 
-- Value Objects
-- DTOs
-- Primitive helper types
-
----
-
-# 11. Exceptions
-
-Exceptions represent exceptional situations.
-
-Business validation shall not rely on exceptions.
-
-Expected failures should be represented using explicit Result objects.
+Methods should not exceed approximately 40 lines unless justified.
 
 ---
 
-# 12. Asynchronous Programming
+# Naming
 
-I/O operations shall be asynchronous.
+Names should clearly describe intent.
 
-CPU-bound operations should remain synchronous unless parallel execution is justified.
-
-Avoid blocking asynchronous code.
-
----
-
-# 13. Null Handling
-
-Nullable references shall be minimized.
-
-Guard clauses shall validate required arguments.
-
-Null shall never represent business state when a Value Object or Enumeration is more appropriate.
-
----
-
-# 14. Comments
-
-Comments shall explain:
-
-- why;
-- business intent;
-- architectural decisions.
-
-Comments shall not explain obvious code.
-
-Bad example
+Prefer:
 
 ```csharp
-// Increment i
-i++;
+CalculateMachineAvailability()
 ```
 
-Good example
+Avoid:
 
 ```csharp
-// Preserve historical meter continuity during replacement.
+Calc()
 ```
 
 ---
 
-# 15. Regions
+# Comments
 
-`#region` shall not be used in production code except when explicitly approved.
+Code should explain *why*, not *what*.
 
-Proper class decomposition is preferred.
+Avoid:
+
+```csharp
+// Increment counter
+counter++;
+```
+
+Prefer:
+
+```csharp
+// Retry counter prevents infinite synchronization loops.
+counter++;
+```
+
+Dead code should never remain commented.
 
 ---
 
-# 16. Magic Values
+# Magic Numbers
 
-Magic numbers and magic strings are prohibited.
+Magic numbers are prohibited.
+
+Instead of:
+
+```csharp
+if (count > 5)
+```
 
 Use:
 
-- Constants
-- Enumerations
-- Value Objects
-- Configuration
+```csharp
+const int MaximumRetries = 5;
+```
 
 ---
 
-# 17. Formatting
+# Null Handling
 
-Formatting shall remain consistent across the solution.
+Nullable Reference Types shall remain enabled.
 
-Automatic formatting shall be enabled.
+Null should be handled explicitly.
 
-Manual formatting differences shall not appear in commits.
+Avoid suppressing compiler warnings with the null-forgiving operator (`!`) unless absolutely necessary.
 
 ---
 
-# 18. Code Reviews
+# Exceptions
 
-Every Pull Request shall verify:
+Exceptions should:
 
-- Architecture
+- Represent exceptional situations.
+- Include meaningful messages.
+- Preserve inner exceptions when rethrowing.
+
+Never swallow exceptions silently.
+
+---
+
+# Async Programming
+
+Prefer asynchronous APIs.
+
+Guidelines:
+
+- Avoid `.Result`
+- Avoid `.Wait()`
+- Avoid blocking threads
+- Use `CancellationToken` where applicable
+
+---
+
+# Dependency Injection
+
+Never instantiate infrastructure services directly.
+
+Incorrect:
+
+```csharp
+var repository = new MachineRepository();
+```
+
+Correct:
+
+```csharp
+public MachineService(IMachineRepository repository)
+```
+
+---
+
+# Logging
+
+Logging should:
+
+- Be structured.
+- Avoid sensitive information.
+- Use appropriate log levels.
+
+Business logic should not depend on logging implementations.
+
+---
+
+# Testing
+
+Code should be written with testing in mind.
+
+Avoid static state.
+
+Avoid hidden dependencies.
+
+Favor deterministic behavior.
+
+---
+
+# Performance
+
+Optimize only when evidence exists.
+
+Performance optimizations require measurement.
+
+Readability remains the default priority.
+
+---
+
+# Open Source Policy
+
+Only approved open-source libraries may be introduced.
+
+Every new dependency shall have:
+
+- Technology Evaluation (TE)
+- Architecture approval (ADR)
+
+See:
+
+- ADR-0002 — Open Source First Policy
+
+---
+
+# Static Analysis
+
+Warnings should be treated as defects.
+
+Recommended tools:
+
+- Roslyn Analyzers
+- .NET SDK Analyzers
+
+New warnings should not be introduced.
+
+---
+
+# Code Reviews
+
+Every Pull Request should verify:
+
 - Readability
-- Naming
-- Dependency rules
-- Business correctness
-- Test coverage
+- Simplicity
+- Architecture compliance
+- Dependency compliance
+- Testability
 
-Style issues should be resolved before merge.
-
----
-
-# 19. Static Analysis
-
-Static analysis tools should remain enabled.
-
-Warnings shall be resolved whenever practical.
-
-Suppressions require justification.
+Consistency is preferred over individual coding style.
 
 ---
 
-# 20. Future Standards
+# Compliance
 
-Future versions may define standards for:
+All contributors shall follow these standards.
 
-- Performance
-- Security
-- Multi-threading
-- Memory allocation
-- Native AOT
-- Distributed processing
+Project-wide deviations require an approved Architecture Decision Record.
 
 ---
 
-# Revision History
+# Related Documents
 
-| Version | Description |
-|----------|-------------|
-| 1.0.0 | Initial Coding Standards |
+- DOC-CONVENTIONS
+- DOC-README
+- DOC-DEV-001 (Development Principles)
+- DOC-DEV-005 (Dependency Rules)
+- DOC-DEV-007 (Naming Conventions)
+- ADR-0002
+
+---
+
+# Change History
+
+| Version | Date | Description |
+|----------|------------|----------------------------------------------|
+| 1.0.0 | 2026-07-18 | Initial coding standards |
+| 2.0.0 | 2026-07-18 | Standardized according to Documentation Standard v3.0 |

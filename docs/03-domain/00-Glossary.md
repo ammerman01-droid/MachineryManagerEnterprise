@@ -1,19 +1,32 @@
-# Machinery Manager Enterprise
-
 # Glossary
 
-  Field          Value
-  -------------- --------------
-  Document ID    DOC-003
-  Version        1.0
-  Status         Draft
-  Author         Project Team
-  Created        2026-07-17
-  Last Updated   2026-07-17
+| Property | Value |
+|----------|-------|
+| **Document ID** | DOM-001 |
+| **Version** | 3.0.0 |
+| **Status** | Active |
+| **Owner** | Solution Architect |
+| **Created** | 2026-07-18 |
+| **Last Updated** | 2026-07-18 |
 
 ## Purpose
 
-Defines the official ubiquitous language for the solution.
+Defines the official ubiquitous language used throughout the
+MachineryManagerEnterprise platform.
+
+All architecture documents, domain models, source code, ADRs, Technology
+Evaluations, and business documentation shall consistently use these terms.
+
+# Guiding Principles
+
+The glossary serves as the single source of truth for business terminology.
+
+Every new domain concept shall:
+
+- Use a unique identifier.
+- Have a precise definition.
+- Be technology independent.
+- Avoid ambiguous business language.
 
 ## GL-ORG-001 Company
 
@@ -102,3 +115,17 @@ Approval, Attachment, Notification, Audit Log.
 ## Future Reserved Terms
 
 GPS Tracking, IoT Device, Predictive Maintenance, Vendor, Contractor.
+
+# Related Documents
+
+- Domain Principles
+- Capability Model
+- Architecture Overview
+- ADR-0001
+
+# Change History
+
+| Version | Date | Description |
+|----------|------------|-------------------------------------------|
+| 1.0.0 | 2026-07-17 | Initial glossary |
+| 3.0.0 | 2026-07-18 | Standardized according to Documentation Standard v3.0 |

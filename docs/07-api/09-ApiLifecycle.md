@@ -1,19 +1,13 @@
 # API Lifecycle
 
-**Document ID:** MME-API-009
-
-**Repository Path:** `docs/07-api/09-ApiLifecycle.md`
-
-**Version:** 1.0.0 (Draft)
-
-**Status:** In Progress
-
-**Related Documents**
-
-- 00-ApiPrinciples.md
-- 06-Versioning.md
-- 08-OpenApiSpecification.md
-- docs/08-releases/ReleaseStrategy.md *(future)*
+| Property | Value |
+|----------|-------|
+| **Document ID** | API-009 |
+| **Version** | 3.0.0 |
+| **Status** | Active |
+| **Owner** | Solution Architect |
+| **Created** | 2026-07-18 |
+| **Last Updated** | 2026-07-18 |
 
 ---
 
@@ -22,6 +16,31 @@
 This document defines the lifecycle of public APIs exposed by MachineryManagerEnterprise.
 
 The objective is to provide a predictable process for introducing, maintaining, evolving and retiring APIs.
+
+---
+
+# Lifecycle Philosophy
+
+Public APIs are long-lived contracts.
+
+Every API shall evolve predictably.
+
+Breaking changes are exceptional and shall always follow a governed migration
+process.
+
+---
+
+# Lifecycle Responsibilities
+
+| Stage | Responsible |
+|--------|-------------|
+| Design | Solution Architect |
+| Development | Development Team |
+| Review | Architecture Review Board |
+| Release | Release Manager |
+| Maintenance | Product Team |
+| Deprecation | Product Owner + Architect |
+| Retirement | Architecture Board |
 
 ---
 
@@ -221,8 +240,33 @@ The API lifecycle is governed by the project's architecture documentation.
 
 ---
 
-# Revision History
+# 16. Lifecycle Deliverables
 
-| Version | Description |
-|----------|-------------|
-| 1.0.0 | Initial API Lifecycle definition |
+| Stage       | Deliverable          |
+| ----------- | -------------------- |
+| Design      | Approved API Design  |
+| Development | Implemented Endpoint |
+| Review      | Review Approval      |
+| Release     | Published OpenAPI    |
+| Maintenance | Patch Release        |
+| Deprecation | Deprecation Notice   |
+| Retirement  | Removed Endpoint     |
+
+---
+
+# Related Documents
+
+- 00-ApiPrinciples.md
+- 06-Versioning.md
+- 08-OpenApiSpecification.md
+- docs/06-adr/
+- docs/08-releases/ReleaseStrategy.md
+
+---
+
+# Change History
+
+| Version | Date | Description |
+|----------|------------|---------------------------------------------|
+| 1.0.0 | Initial | Initial API Lifecycle definition |
+| 3.0.0 | 2026-07-18 | Standardized according to Documentation Standard v3.0 |

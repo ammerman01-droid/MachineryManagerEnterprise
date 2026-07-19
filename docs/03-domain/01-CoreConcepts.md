@@ -1,19 +1,13 @@
 # Core Concepts
 
-**Document ID:** MME-DOM-001
-
-**Repository Path:** `docs/03-domain/01-CoreConcepts.md`
-
-**Version:** 1.0.0 (Draft)
-
-**Status:** In Progress
-
-**Related Documents**
-
-- 00-DomainPrinciples.md
-- 00-overview/Glossary.md
-- 09-CapabilityModel.md
-- PROJECT_CHARTER.md
+| Property | Value |
+|----------|-------|
+| **Document ID** | DOM-002 |
+| **Version** | 3.0.0 |
+| **Status** | Active |
+| **Owner** | Solution Architect |
+| **Created** | 2026-07-18 |
+| **Last Updated** | 2026-07-18 |
 
 ---
 
@@ -960,8 +954,19 @@ Future related documents include:
 
 ---
 
-# Revision History
+# Related Documents
+
+- 00-DomainPrinciples.md
+- 00-Glossary.md
+- 09-CapabilityModel.md
+- 01-Architecture.md
+- 00-Vision.md
+
+---
+
+# Change History
 
 | Version | Date | Description |
-|----------|------|-------------|
-| 1.0.0 | Initial | Initial Enterprise Core Concepts document |
+|----------|------------|----------------------------------------------|
+| 1.0.0 | Initial Draft | Initial Core Concepts |
+| 3.0.0 | 2026-07-18 | Standardized according to Documentation Standard v3.0 |

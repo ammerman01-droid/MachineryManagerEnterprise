@@ -1,21 +1,13 @@
 # OpenAPI Specification
 
-**Document ID:** MME-API-008
-
-**Repository Path:** `docs/07-api/08-OpenApiSpecification.md`
-
-**Version:** 1.0.0 (Draft)
-
-**Status:** In Progress
-
-**Related Documents**
-
-- 00-ApiPrinciples.md
-- 01-RestConventions.md
-- 02-EndpointDesign.md
-- 03-RequestResponseModel.md
-- 04-ErrorResponses.md
-- 07-AuthenticationAuthorization.md
+| Property | Value |
+|----------|-------|
+| **Document ID** | API-008 |
+| **Version** | 3.0.0 |
+| **Status** | Active |
+| **Owner** | Solution Architect |
+| **Created** | 2026-07-18 |
+| **Last Updated** | 2026-07-18 |
 
 ---
 
@@ -24,6 +16,42 @@
 This document defines how the OpenAPI specification shall be generated, maintained and published for MachineryManagerEnterprise.
 
 The OpenAPI document is the official machine-readable description of the public HTTP API.
+
+---
+
+# OpenAPI Philosophy
+
+The OpenAPI document is the authoritative machine-readable description of the public HTTP API.
+
+Documentation shall always be generated from source code.
+
+Generated documentation shall accurately represent the deployed API.
+
+---
+
+# OpenAPI Philosophy
+
+Source Code
+
+↓
+
+XML Comments
+
+↓
+
+OpenAPI Generator
+
+↓
+
+swagger.json
+
+↓
+
+Swagger UI
+
+↓
+
+Generated SDK
 
 ---
 
@@ -224,8 +252,36 @@ Future versions may include:
 
 ---
 
-# Revision History
+# 17. Documentation Quality Rules
 
-| Version | Description |
-|----------|-------------|
-| 1.0.0 | Initial OpenAPI Specification strategy |
+Every endpoint shall document:
+
+- Summary
+- Description
+- Parameters
+- Request Body
+- Response Model
+- Error Responses
+- Authentication
+- Example Payloads
+
+---
+
+# Related Documents
+
+- 00-ApiPrinciples.md
+- 01-RestConventions.md
+- 02-EndpointDesign.md
+- 03-RequestResponseModel.md
+- 04-ErrorResponses.md
+- 06-Versioning.md
+- ADR-0005 — API Strategy
+
+---
+
+# Change History
+
+| Version | Date | Description |
+|----------|------------|---------------------------------------------|
+| 1.0.0 | Initial | Initial OpenAPI Specification strategy |
+| 3.0.0 | 2026-07-18 | Standardized according to Documentation Standard v3.0 |

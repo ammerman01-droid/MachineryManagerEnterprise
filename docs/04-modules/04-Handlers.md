@@ -1,21 +1,13 @@
 # Handlers
 
-**Document ID:** MME-MOD-004
-
-**Repository Path:** `docs/04-modules/04-Handlers.md`
-
-**Version:** 1.0.0 (Draft)
-
-**Status:** In Progress
-
-**Related Documents**
-
-- 00-ApplicationArchitecture.md
-- 01-UseCases.md
-- 02-Commands.md
-- 03-Queries.md
-- docs/03-domain/05-DomainServices.md
-- docs/03-domain/06-DomainEvents.md
+| Property | Value |
+|----------|-------|
+| **Document ID** | APP-004 |
+| **Version** | 3.0.0 |
+| **Status** | Active |
+| **Owner** | Solution Architect |
+| **Created** | 2026-07-18 |
+| **Last Updated** | 2026-07-18 |
 
 ---
 
@@ -26,6 +18,35 @@ This document defines the responsibilities of Command Handlers and Query Handler
 Handlers coordinate execution of Application requests.
 
 Handlers do not contain business rules.
+
+---
+
+# Handler Philosophy
+
+Handlers coordinate execution.
+
+Handlers orchestrate application flow.
+
+Handlers never implement business rules.
+
+Business behavior always belongs to:
+
+- Aggregates
+- Domain Services
+
+Handlers connect the Application Layer to the Domain Layer.
+
+---
+
+# Handler Design Rules
+
+Every Handler shall:
+
+- Handle exactly one request.
+- Be stateless.
+- Depend only on abstractions.
+- Return Application Results.
+- Never expose domain entities directly.
 
 ---
 
@@ -304,6 +325,24 @@ If multiple Aggregates participate, consistency shall follow Domain rules.
 
 ---
 
+# Dependency Rules
+
+Handlers may depend on:
+
+- Repository Interfaces
+- Domain Services
+- Unit of Work
+- Logger
+- Application Services
+
+Handlers shall never depend directly on:
+
+- Entity Framework
+- SQL
+- Infrastructure Implementations
+
+---
+
 # 19. Error Handling
 
 Handlers shall translate:
@@ -361,8 +400,20 @@ All future handlers shall follow the principles defined in this document.
 
 ---
 
-# Revision History
+# Related Documents
 
-| Version | Description |
-|----------|-------------|
-| 1.0.0 | Initial Handler Architecture |
+- 02-Commands.md
+- 03-Queries.md
+- 05-PipelineBehaviors.md
+- docs/03-domain/05-DomainServices.md
+- docs/03-domain/06-DomainEvents.md
+- ADR-0004 — Adopt CQRS
+
+---
+
+# Change History
+
+| Version | Date | Description |
+|----------|------------|----------------------------------------------|
+| 1.0.0 | Initial | Initial Handler Architecture |
+| 3.0.0 | 2026-07-18 | Standardized according to Documentation Standard v3.0 |

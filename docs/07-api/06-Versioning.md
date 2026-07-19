@@ -1,18 +1,13 @@
 # API Versioning
 
-**Document ID:** MME-API-006
-
-**Repository Path:** `docs/07-api/06-Versioning.md`
-
-**Version:** 1.0.0 (Draft)
-
-**Status:** In Progress
-
-**Related Documents**
-
-- 00-ApiPrinciples.md
-- 01-RestConventions.md
-- 02-EndpointDesign.md
+| Property | Value |
+|----------|-------|
+| **Document ID** | API-006 |
+| **Version** | 3.0.0 |
+| **Status** | Active |
+| **Owner** | Solution Architect |
+| **Created** | 2026-07-18 |
+| **Last Updated** | 2026-07-18 |
 
 ---
 
@@ -21,6 +16,44 @@
 This document defines the API versioning strategy for MachineryManagerEnterprise.
 
 API versioning enables the system to evolve without breaking existing client applications.
+
+---
+
+# Versioning Philosophy
+
+API evolution shall prioritize backward compatibility.
+
+Clients shall migrate gradually.
+
+Breaking changes shall always require a new major API version.
+
+Public contracts evolve more slowly than internal implementations.
+
+---
+
+# Version Lifecycle
+
+New Version
+
+↓
+
+Preview (optional)
+
+↓
+
+Supported
+
+↓
+
+Deprecated
+
+↓
+
+Sunset
+
+↓
+
+Retired
 
 ---
 
@@ -203,8 +236,30 @@ The primary strategy remains URL versioning.
 
 ---
 
-# Revision History
+# Version Compatibility Matrix
 
-| Version | Description |
-|----------|-------------|
-| 1.0.0 | Initial API Versioning strategy |
+| Client    |  v1 |  v2 |
+| --------- | :-: | :-: |
+| v1 Client |  ✅  |  ❌  |
+| v2 Client |  ❌  |  ✅  |
+
+---
+
+# Related Documents
+
+- 00-ApiPrinciples.md
+- 01-RestConventions.md
+- 02-EndpointDesign.md
+- 03-RequestResponseModel.md
+- 04-ErrorResponses.md
+- 05-PaginationFilteringSorting.md
+- ADR-0005 — API Strategy
+
+---
+
+# Change History
+
+| Version | Date | Description |
+|----------|------------|---------------------------------------------|
+| 1.0.0 | Initial | Initial API Versioning strategy |
+| 3.0.0 | 2026-07-18 | Standardized according to Documentation Standard v3.0 |

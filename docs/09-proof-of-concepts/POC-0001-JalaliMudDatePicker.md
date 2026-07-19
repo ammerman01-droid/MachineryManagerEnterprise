@@ -1,8 +1,20 @@
 # Proof of Concept — Jalali Support for MudBlazor DatePicker
 
-**Document ID**
+| Property | Value |
+|----------|-------|
+| **Document ID** | POC-0001 |
+| **Version** | 3.0.0 |
+| **Status** | Pending |
+| **Owner** | Solution Architect |
+| **Created** | 2026-07-18 |
+| **Last Updated** | 2026-07-18 |
 
-POC-0001
+---
+
+# Purpose
+
+Evaluate the feasibility of implementing a Jalali calendar while preserving
+MudBlazor as the sole UI component framework.
 
 ---
 
@@ -35,6 +47,24 @@ The Proof of Concept is considered successful if all of the following conditions
 ## Calendar
 
 - Jalali calendar displayed correctly.
+
+# Performance
+
+Calendar rendering shall not introduce noticeable latency compared to the
+standard MudDatePicker.
+
+---
+
+# Evaluation Matrix
+
+| Requirement | Pass | Fail |
+|-------------|:----:|:----:|
+| Jalali Calendar | | |
+| RTL | | |
+| Validation | | |
+| Localization | | |
+| Browser Compatibility | | |
+| UI Consistency | | |
 
 ---
 
@@ -152,11 +182,19 @@ One of two conclusions:
 
 ## PASS
 
-MudBlazor Jalali Adapter is adopted.
+PASS
 
 ↓
 
-ADR-0009
+Create ADR
+
+↓
+
+Implement
+
+↓
+
+Architecture Approved
 
 Use MudBlazor Jalali Adapter
 
@@ -164,11 +202,19 @@ Use MudBlazor Jalali Adapter
 
 ## FAIL
 
-Blazor.PersianDatePicker is adopted.
+FAIL
 
 ↓
 
-ADR-0009
+Create ADR
+
+↓
+
+Select Alternative
+
+↓
+
+Architecture Approved
 
 Use Blazor.PersianDatePicker
 
@@ -177,3 +223,21 @@ Use Blazor.PersianDatePicker
 # Status
 
 Pending
+
+---
+
+# Related Documents
+
+- ADR-0009
+- docs/04-modules/06-Localization.md
+- docs/07-api/
+- MudBlazor Documentation
+
+---
+
+# Change History
+
+| Version | Date | Description |
+|----------|------------|---------------------------------------------|
+| 1.0.0 | Initial | Initial PoC definition |
+| 3.0.0 | 2026-07-18 | Standardized according to Documentation Standard v3.0 |

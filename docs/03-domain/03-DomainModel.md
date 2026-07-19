@@ -1,18 +1,13 @@
 # Domain Model
 
-**Document ID:** MME-DOM-003
-
-**Repository Path:** `docs/03-domain/03-DomainModel.md`
-
-**Version:** 1.0.0 (Draft)
-
-**Status:** In Progress
-
-**Related Documents**
-
-- 00-DomainPrinciples.md
-- 01-CoreConcepts.md
-- 02-BoundedContexts.md
+| Property | Value |
+|----------|-------|
+| **Document ID** | DOM-004 |
+| **Version** | 3.0.0 |
+| **Status** | Active |
+| **Owner** | Solution Architect |
+| **Created** | 2026-07-18 |
+| **Last Updated** | 2026-07-18 |
 
 ---
 
@@ -47,6 +42,18 @@ The Domain Model follows these principles.
 - Low coupling
 
 The model represents business concepts rather than software classes.
+
+---
+
+# Domain Modeling Philosophy
+
+The domain model represents the business reality rather than the technical implementation.
+
+Persistence concerns, infrastructure details, and framework-specific constructs
+must never influence the domain model.
+
+The model shall evolve according to business requirements while preserving the
+principles defined in Domain Principles.
 
 ---
 
@@ -954,8 +961,20 @@ The following documents extend this model:
 
 ---
 
-# Revision History
+# Related Documents
 
-| Version | Description |
-|----------|-------------|
-| 1.0.0 | Initial Enterprise Domain Model |
+- 00-DomainPrinciples.md
+- 01-Glossary.md
+- 02-CoreConcepts.md
+- 03-BoundedContexts.md
+- 01-Architecture.md
+- 09-CapabilityModel.md
+
+---
+
+# Change History
+
+| Version | Date | Description |
+|----------|------------|----------------------------------------------|
+| 1.0.0 | Initial | Initial Domain Model |
+| 3.0.0 | 2026-07-18 | Standardized according to Documentation Standard v3.0 |

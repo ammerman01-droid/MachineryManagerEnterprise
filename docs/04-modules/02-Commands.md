@@ -1,20 +1,13 @@
 # Commands
 
-**Document ID:** MME-MOD-002
-
-**Repository Path:** `docs/04-modules/02-Commands.md`
-
-**Version:** 1.0.0 (Draft)
-
-**Status:** In Progress
-
-**Related Documents**
-
-- 00-ApplicationArchitecture.md
-- 01-UseCases.md
-- docs/03-domain/03-DomainModel.md
-- docs/03-domain/04-Aggregates.md
-- docs/03-domain/05-DomainServices.md
+| Property | Value |
+|----------|-------|
+| **Document ID** | APP-002 |
+| **Version** | 3.0.0 |
+| **Status** | Active |
+| **Owner** | Solution Architect |
+| **Created** | 2026-07-18 |
+| **Last Updated** | 2026-07-18 |
 
 ---
 
@@ -29,6 +22,18 @@ A Command expresses user intention.
 A Command does not guarantee success.
 
 Only successful execution produces Domain Events.
+
+---
+
+# Command Philosophy
+
+Commands represent business intentions.
+
+A Command requests a state transition but never performs business logic itself.
+
+Business validation belongs to the Domain.
+
+Application validation belongs to the Application Layer.
 
 ---
 
@@ -708,8 +713,20 @@ Every future Command shall follow the conventions defined in this document.
 
 ---
 
-# Revision History
+# Related Documents
 
-| Version | Description |
-|----------|-------------|
-| 1.0.0 | Initial Command Catalogue |
+- 00-ApplicationArchitecture.md
+- 01-UseCases.md
+- 03-Queries.md
+- 04-Handlers.md
+- docs/03-domain/06-DomainEvents.md
+- ADR-0004 — Adopt CQRS
+
+---
+
+# Change History
+
+| Version | Date | Description |
+|----------|------------|----------------------------------------------|
+| 1.0.0 | Initial | Initial Command catalogue |
+| 3.0.0 | 2026-07-18 | Standardized according to Documentation Standard v3.0 |

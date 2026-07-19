@@ -1,18 +1,13 @@
 # Release Process
 
-**Document ID:** MME-REL-002
-
-**Repository Path:** `docs/08-releases/02-ReleaseProcess.md`
-
-**Version:** 1.0.0 (Draft)
-
-**Status:** In Progress
-
-**Related Documents**
-
-- 00-ReleaseStrategy.md
-- 01-VersioningPolicy.md
-- docs/05-development/10-BuildPipeline.md
+| Property | Value |
+|----------|-------|
+| **Document ID** | REL-002 |
+| **Version** | 3.0.0 |
+| **Status** | Active |
+| **Owner** | Release Manager |
+| **Created** | 2026-07-18 |
+| **Last Updated** | 2026-07-18 |
 
 ---
 
@@ -21,6 +16,16 @@
 This document defines the operational release process for MachineryManagerEnterprise.
 
 It describes how software moves from development into production through a controlled, repeatable and auditable process.
+
+---
+
+# Release Process Philosophy
+
+Releases shall be predictable, repeatable and auditable.
+
+Every production deployment shall follow an approved operational process.
+
+No production release shall bypass governance.
 
 ---
 
@@ -67,6 +72,19 @@ Production Release
 
 Monitoring
 ```
+
+---
+
+# Release Responsibilities
+
+| Activity | Responsible |
+|----------|-------------|
+| Feature Complete | Development Team |
+| Code Freeze | Release Manager |
+| Validation | QA Team |
+| Approval | Architecture Board |
+| Production Deployment | DevOps |
+| Monitoring | Operations |
 
 ---
 
@@ -173,7 +191,7 @@ Rollback shall be possible when:
 - Deployment fails.
 - Data integrity is threatened.
 
-Rollback procedures shall be documented before deployment.
+Rollback procedures shall be documented, validated and rehearsed before production deployment.
 
 ---
 
@@ -230,8 +248,33 @@ Lessons learned may improve:
 
 ---
 
-# Revision History
+# Release Gate Checklist
 
-| Version | Description |
-|----------|-------------|
-| 1.0.0 | Initial Release Process |
+| Gate                    | Required |
+| ----------------------- | -------- |
+| Code Review             | ✅        |
+| Architecture Validation | ✅        |
+| Unit Tests              | ✅        |
+| Integration Tests       | ✅        |
+| Documentation           | ✅        |
+| Migration Scripts       | ✅        |
+| Rollback Plan           | ✅        |
+| Approval                | ✅        |
+
+---
+
+# Related Documents
+
+- 00-ReleaseStrategy.md
+- 01-VersioningPolicy.md
+- docs/05-development/10-BuildPipeline.md
+- docs/09-operations/
+
+---
+
+# Change History
+
+| Version | Date | Description |
+|----------|------------|---------------------------------------------|
+| 1.0.0 | Initial | Initial Release Process |
+| 3.0.0 | 2026-07-18 | Standardized according to Documentation Standard v3.0 |

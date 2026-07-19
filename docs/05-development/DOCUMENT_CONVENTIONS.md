@@ -13,12 +13,12 @@
 
 # Purpose
 
-This document defines the official documentation standards for the
-MachineryManagerEnterprise project.
+This document defines the official documentation standard for the
+**MachineryManagerEnterprise** project.
 
-All documentation produced within the project shall conform to these standards.
+Every document created within this repository shall comply with the rules described in this standard.
 
-The objective is to ensure that documentation remains:
+The objective is to ensure that project documentation remains:
 
 - Consistent
 - Traceable
@@ -30,12 +30,12 @@ The objective is to ensure that documentation remains:
 
 # Scope
 
-This standard applies to every document contained within the `/docs` directory, including:
+This standard applies to every document contained inside the `/docs` directory, including:
 
 - Vision Documents
 - Architecture Documents
 - Domain Documents
-- Module Documents
+- Module Specifications
 - Technology Evaluations (TE)
 - Architecture Decision Records (ADR)
 - Proof of Concepts (POC)
@@ -50,17 +50,25 @@ This standard applies to every document contained within the `/docs` directory, 
 docs
 │
 ├── 01-vision
+│
 ├── 02-architecture
+│
 ├── 03-domain
+│
 ├── 04-modules
+│
 ├── 05-development
+│
 ├── 06-decisions
+│
 ├── 07-api
+│
 ├── 08-releases
+│
 └── 09-proof-of-concepts
 ```
 
-Each document shall be stored only in its designated directory.
+Each document shall reside only inside its designated directory.
 
 ---
 
@@ -69,7 +77,7 @@ Each document shall be stored only in its designated directory.
 | Category | Prefix | Example |
 |----------|--------|---------|
 | General Document | DOC | DOC-README |
-| Technology Evaluation | TE | TE-0004 |
+| Technology Evaluation | TE | TE-0005 |
 | Architecture Decision | ADR | ADR-0008 |
 | Proof of Concept | POC | POC-0001 |
 | API Document | API | API-0001 |
@@ -79,7 +87,7 @@ Each document shall be stored only in its designated directory.
 
 # File Naming Convention
 
-Every filename shall follow this pattern.
+Every document shall follow the naming pattern:
 
 ```
 PREFIX-NUMBER-ShortName.md
@@ -95,12 +103,13 @@ TE-0005-PersianDatePickerSelection.md
 POC-0001-JalaliMudDatePicker.md
 ```
 
-File names shall:
+Rules
 
-- use PascalCase
-- avoid spaces
-- avoid special characters
-- remain concise
+- PascalCase
+- No spaces
+- No special characters
+- Concise names
+- Stable filenames
 
 ---
 
@@ -123,9 +132,9 @@ Every document shall begin with the following metadata.
 
 ---
 
-# Versioning
+# Versioning Standard
 
-Documentation uses Semantic Versioning.
+Documentation follows Semantic Versioning.
 
 ```
 Major.Minor.Patch
@@ -135,8 +144,8 @@ Examples
 
 | Version | Meaning |
 |----------|---------|
-| 1.0.0 | Initial release |
-| 1.1.0 | New section added |
+| 1.0.0 | Initial publication |
+| 1.1.0 | Additional content |
 | 1.2.0 | Significant improvements |
 | 2.0.0 | Major restructuring |
 
@@ -144,91 +153,85 @@ Examples
 
 # Document Status
 
-Every document shall define its lifecycle state.
+Every document shall define its lifecycle status.
 
 | Status | Meaning |
 |----------|---------|
 | Draft | Initial work |
-| Review | Under technical review |
-| Approved | Official document |
+| Review | Under review |
+| Approved | Official project documentation |
 | Deprecated | Replaced by another document |
-| Archived | Historical reference only |
+| Archived | Historical reference |
 
 ---
 
-# Writing Language
+# Writing Standard
 
-Documentation shall follow these rules.
+Project documentation shall follow these principles.
 
-Business explanations:
+## Language
 
-- English
-
-Technical terminology:
+Business descriptions
 
 - English
 
-Identifiers:
+Technical terminology
+
+- English
+
+Identifiers
 
 - English only
 
-Examples:
-
-```
-Entity Framework Core
-
-MudBlazor
-
-Aggregate Root
-```
-
 ---
 
-# Markdown Standard
+## Markdown
 
 Documentation shall use:
 
-- Markdown only
 - ATX headings (`#`)
-- GitHub-compatible tables
-- Fenced code blocks
+- GitHub Markdown
+- Markdown tables
 - Relative links
+- Fenced code blocks
 
-HTML should be avoided unless absolutely necessary.
+Avoid HTML unless absolutely necessary.
 
 ---
 
 # Cross References
 
-Every document should reference related documentation.
+Whenever applicable, documents should reference related documentation.
 
 Example
 
 ```markdown
 # Related Documents
 
-- ADR-0002 — Open Source First Policy
-- TE-0004 — UI Framework Evaluation
+- ADR-0002
+- TE-0004
+- POC-0001
 ```
+
+Document IDs should be used instead of filenames.
 
 ---
 
 # Change History
 
-Documents should maintain a simple history.
+Every maintained document should include a change history.
 
 Example
 
-| Version | Description |
-|----------|-------------|
-| 1.0.0 | Initial version |
-| 2.0.0 | Major restructuring |
+| Version | Date | Description |
+|----------|------------|-------------|
+| 1.0.0 | YYYY-MM-DD | Initial version |
 
 ---
 
 # Documentation Lifecycle
 
-All significant technical decisions shall follow this process.
+All significant technical decisions shall follow the same lifecycle.
 
 ```text
 Business Requirement
@@ -252,7 +255,7 @@ Implementation
 
 Technology Evaluations compare available technical alternatives.
 
-A Technology Evaluation never represents the final decision.
+A Technology Evaluation **never represents the final architectural decision**.
 
 ---
 
@@ -260,23 +263,25 @@ A Technology Evaluation never represents the final decision.
 
 A Proof of Concept is required only when technical uncertainty exists.
 
-Typical examples:
+Typical examples include:
 
-- New infrastructure
 - Performance validation
-- Complex integrations
-- Architectural risks
+- Infrastructure evaluation
+- Architectural feasibility
+- Integration risks
 
 ---
 
 ## Architecture Decision Record
 
-An ADR records the final architectural decision.
+An Architecture Decision Record documents the final approved decision.
 
 Each ADR shall reference:
 
 - Related Technology Evaluation
 - Related Proof of Concept (if applicable)
+
+The ADR becomes the authoritative architectural decision.
 
 ---
 
@@ -284,18 +289,20 @@ Each ADR shall reference:
 
 Implementation shall begin only after the corresponding ADR has been approved.
 
+Production code shall always follow documented architectural decisions.
+
 ---
 
 # Documentation Principles
 
-All project documentation shall be:
+Every project document should be:
 
 - Consistent
 - Evidence-based
-- Reviewable
 - Traceable
-- Reproducible
+- Reviewable
 - Maintainable
+- Reproducible
 
 Undocumented architectural decisions are not considered part of the official project architecture.
 
@@ -304,5 +311,15 @@ Undocumented architectural decisions are not considered part of the official pro
 # Related Documents
 
 - DOC-README
-- PROJECT_CHARTER
-- PROJECT_PROGRESS
+- DOC-PROJECT-CHARTER
+- DOC-PROJECT-PROGRESS
+
+---
+
+# Change History
+
+| Version | Date | Description |
+|----------|------------|----------------------------------------------|
+| 1.0.0 | 2026-07-18 | Initial conventions |
+| 2.0.0 | 2026-07-18 | Added documentation lifecycle |
+| 3.0.0 | 2026-07-18 | Unified documentation standard for the entire project |

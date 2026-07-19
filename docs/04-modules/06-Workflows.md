@@ -1,22 +1,13 @@
 # Workflows
 
-**Document ID:** MME-MOD-006
-
-**Repository Path:** `docs/04-modules/06-Workflows.md`
-
-**Version:** 1.0.0 (Draft)
-
-**Status:** In Progress
-
-**Related Documents**
-
-- 00-ApplicationArchitecture.md
-- 01-UseCases.md
-- 02-Commands.md
-- 03-Queries.md
-- 04-Handlers.md
-- 05-ApplicationServices.md
-- docs/03-domain/06-DomainEvents.md
+| Property | Value |
+|----------|-------|
+| **Document ID** | APP-006 |
+| **Version** | 3.0.0 |
+| **Status** | Active |
+| **Owner** | Solution Architect |
+| **Created** | 2026-07-18 |
+| **Last Updated** | 2026-07-18 |
 
 ---
 
@@ -27,6 +18,18 @@ This document defines long-running business workflows.
 A Workflow coordinates multiple business operations to accomplish one business objective.
 
 A Workflow may span multiple Aggregates, Application Services and external systems.
+
+---
+
+# Workflow Philosophy
+
+A Workflow coordinates business operations spanning multiple modules.
+
+A Workflow never owns business rules.
+
+Business Rules remain inside Aggregates and Domain Services.
+
+A Workflow orchestrates their execution.
 
 ---
 
@@ -295,6 +298,19 @@ Each Workflow execution shall record:
 
 ---
 
+# Workflow Design Rules
+
+Every Workflow shall:
+
+- Have exactly one Trigger.
+- Produce one business outcome.
+- Publish zero or more Domain Events.
+- Never violate Aggregate boundaries.
+- Support recovery.
+- Be fully traceable.
+
+---
+
 # 14. Future Workflows
 
 Future releases may introduce workflows for:
@@ -308,8 +324,20 @@ Future releases may introduce workflows for:
 
 ---
 
-# Revision History
+# Related Documents
 
-| Version | Description |
-|----------|-------------|
-| 1.0.0 | Initial Workflow definitions |
+- Commands
+- Queries
+- Handlers
+- Domain Events
+- Business Rules
+- State Machines
+
+---
+
+# Change History
+
+| Version | Date | Description |
+|----------|------------|----------------------------------------------|
+| 1.0.0 | Initial | Initial Workflow catalogue |
+| 3.0.0 | 2026-07-18 | Standardized according to Documentation Standard v3.0 |

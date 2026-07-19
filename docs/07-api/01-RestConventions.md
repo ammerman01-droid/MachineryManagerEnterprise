@@ -1,16 +1,13 @@
 # REST Conventions
 
-**Document ID:** MME-API-001
-
-**Repository Path:** `docs/07-api/01-RestConventions.md`
-
-**Version:** 1.0.0 (Draft)
-
-**Status:** In Progress
-
-**Related Documents**
-
-- 00-ApiPrinciples.md
+| Property | Value |
+|----------|-------|
+| **Document ID** | API-001 |
+| **Version** | 3.0.0 |
+| **Status** | Active |
+| **Owner** | Solution Architect |
+| **Created** | 2026-07-18 |
+| **Last Updated** | 2026-07-18 |
 
 ---
 
@@ -19,6 +16,30 @@
 This document defines the REST conventions used throughout MachineryManagerEnterprise.
 
 Every HTTP endpoint shall follow these conventions.
+
+---
+
+# REST Philosophy
+
+REST resources expose business capabilities rather than implementation details.
+
+Resource URIs identify business concepts.
+
+HTTP methods describe the requested operation.
+
+The transport protocol shall never expose internal software architecture.
+
+---
+
+# URI Design Rules
+
+URIs shall:
+
+- identify resources.
+- never expose verbs unless representing exceptional business actions.
+- remain stable.
+- avoid implementation details.
+- avoid technology-specific identifiers.
 
 ---
 
@@ -168,7 +189,7 @@ Example
 PATCH /assets/{id}
 ```
 
-PATCH should modify only supplied fields.
+PATCH shall modify only explicitly supplied fields and shall never reset omitted values.
 
 ---
 
@@ -347,8 +368,30 @@ REST remains the primary integration style.
 
 ---
 
-# Revision History
+| HTTP   | CQRS    |
+| ------ | ------- |
+| GET    | Query   |
+| POST   | Command |
+| PUT    | Command |
+| PATCH  | Command |
+| DELETE | Command |
 
-| Version | Description |
-|----------|-------------|
-| 1.0.0 | Initial REST Conventions |
+---
+
+# Related Documents
+
+- 00-ApiPrinciples.md
+- 02-HttpStatusCodes.md
+- 03-ErrorResponses.md
+- 04-Pagination.md
+- 05-Filtering.md
+- ADR-0005 — API Strategy
+
+---
+
+# Change History
+
+| Version | Date | Description |
+|----------|------------|---------------------------------------------|
+| 1.0.0 | Initial | Initial REST Conventions |
+| 3.0.0 | 2026-07-18 | Standardized according to Documentation Standard v3.0 |

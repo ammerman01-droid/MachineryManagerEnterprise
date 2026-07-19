@@ -1,111 +1,89 @@
-# ADR-0007 — Use FluentValidation for Application Validation
+# Architecture Decision Record
 
-**Status:** Accepted
+| Property | Value |
+|----------|-------|
+| **Document ID** | ADR-0007 |
+| **Version** | 3.0.0 |
+| **Status** | Accepted |
+| **Owner** | Solution Architect |
+| **Created** | 2026-07-18 |
+| **Last Updated** | 2026-07-18 |
 
-**Date:** 2026-07-18
+---
 
-**Decision Makers**
+# Title
 
-- Solution Architect
-- Development Team
+Use FluentValidation
+
+---
+
+# Status
+
+Accepted
 
 ---
 
 # Context
 
-MachineryManagerEnterprise follows:
+The MachineryManagerEnterprise solution requires a modern validation framework
+that keeps validation rules independent from business entities, presentation
+logic, and persistence concerns.
 
-- Clean Architecture
-- Domain-Driven Design
-- CQRS
-- Vertical Slice Architecture
+The selected validation solution should:
 
-The application requires a validation framework capable of separating validation logic from business logic while remaining testable and maintainable.
-
-Validation must occur before command execution.
-
----
-
-# Problem
-
-The project requires validation for:
-
-- Commands
-- Queries (where applicable)
-- DTOs
-- User input
-- Business Rules at Application Layer
-
-Validation should not pollute:
-
-- Domain Entities
-- Controllers
-- UI Components
-
----
-
-# Considered Options
-
-## Option 1
-
-DataAnnotations
-
-### Advantages
-
-- Built into .NET
-- Simple
-
-### Disadvantages
-
-- Poor support for complex business rules
-- Validation logic mixed with models
-- Limited testability
-
----
-
-## Option 2
-
-Custom Validation Framework
-
-### Advantages
-
-- Full control
-
-### Disadvantages
-
-- Reinventing existing solutions
-- Increased maintenance cost
-
----
-
-## Option 3
-
-FluentValidation
-
-### Advantages
-
-- Mature ecosystem
-- Excellent readability
-- Excellent testability
-- Strong separation of concerns
-- Widely adopted in Clean Architecture
-- Pipeline integration support
-
-### Disadvantages
-
-- External dependency
+- Support clean separation of concerns
+- Integrate naturally with ASP.NET Core
+- Be fully testable
+- Be extensible
+- Produce readable validation rules
+- Support localization
+- Align with Clean Architecture
 
 ---
 
 # Decision
 
-The project adopts **FluentValidation** as the standard validation framework.
+The Application Layer shall use **FluentValidation** as the standard validation
+framework.
 
-Validation rules shall reside in the Application Layer.
+All input validation shall be implemented using FluentValidation validators.
 
-Each Command shall have its own Validator.
+Business entities shall not contain UI validation logic.
 
-Validation shall execute before command handlers.
+---
+
+# Decision Drivers
+
+- Separation of Concerns
+- Readability
+- Testability
+- ASP.NET Core Integration
+- Open Source
+- Extensibility
+- Maintainability
+
+---
+
+# Alternatives Considered
+
+## DataAnnotations
+
+Rejected because validation rules become tightly coupled to DTOs and attributes
+are less expressive for complex scenarios.
+
+---
+
+## Custom Validation Framework
+
+Rejected because it would duplicate existing, mature functionality while
+increasing maintenance cost.
+
+---
+
+## Manual Validation
+
+Rejected because it produces inconsistent validation logic and increases code
+duplication.
 
 ---
 
@@ -113,69 +91,101 @@ Validation shall execute before command handlers.
 
 ## Positive
 
-- High readability
-- Strong testability
-- Separation of concerns
-- Clean command handlers
+- Clean validation layer
+- Reusable validation rules
+- Easy unit testing
+- Improved maintainability
 - Consistent validation approach
-
----
+- Rich validation capabilities
 
 ## Negative
 
-- Additional dependency
-- Validators must be maintained
-
----
-
-# Constraints
-
-The following package shall **NOT** be used:
-
-```
-FluentValidation.AspNetCore
-```
-
-This package is considered legacy and is no longer recommended for new projects.
-
-Validation registration shall use the core FluentValidation package and dependency injection.
+- Developers must learn FluentValidation syntax.
+- Validators require explicit registration.
 
 ---
 
 # Architecture Impact
 
-```text
-Presentation
+FluentValidation shall exist only inside the **Application Layer**.
 
-↓
+Presentation invokes validation through the Application layer.
 
-Application
+Domain remains independent from FluentValidation.
 
-↓
-
-FluentValidation
-
-↓
-
-Command Handler
-
-↓
-
-Domain
-```
-
-Domain entities remain free from UI and infrastructure validation concerns.
+Infrastructure shall not contain business validators.
 
 ---
 
-# Related Decisions
+# Implementation Notes
 
-- ADR-002 — Use MediatR as CQRS Mediator (Planned)
+Validators shall be registered automatically through Dependency Injection.
+
+Each Request DTO should have a corresponding validator.
+
+Validation shall execute before business logic.
+
+---
+
+# Compliance Rules
+
+1. FluentValidation shall only exist inside Application.
+
+2. Domain shall never reference FluentValidation.
+
+3. Presentation shall never contain business validation rules.
+
+4. Every Request DTO shall have a corresponding validator.
+
+5. Business validation shall not be implemented using DataAnnotations.
+
+6. Validation logic shall remain independent from persistence.
+
+---
+
+# Related Technology Evaluation
+
+TE-0005 — FluentValidation
+
+---
+
+# Related Proof of Concept
+
+Not Required
+
+---
+
+# Related Documents
+
+- ADR-0001 — Adopt Clean Architecture
+- ADR-0002 — Adopt Open Source First Policy
+- ADR-0006 — Use Entity Framework Core
+- Dependency Catalog
 
 ---
 
 # References
 
-- FluentValidation Official Documentation
-- Clean Architecture Principles
-- Domain-Driven Design
+https://docs.fluentvalidation.net/
+
+https://github.com/FluentValidation/FluentValidation
+
+https://www.nuget.org/packages/FluentValidation
+
+---
+
+# Review
+
+| Role | Name | Date |
+|------|------|------|
+| Solution Architect | | |
+
+---
+
+# Change History
+
+| Version | Date | Description |
+|----------|------------|----------------------------------------------|
+| 1.0.0 | 2026-07-18 | Initial decision |
+| 2.0.0 | 2026-07-18 | Standardized |
+| 3.0.0 | 2026-07-18 | Rewritten according to ADR Template v3.0 |

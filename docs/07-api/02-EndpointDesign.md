@@ -1,17 +1,13 @@
 # Endpoint Design
 
-**Document ID:** MME-API-002
-
-**Repository Path:** `docs/07-api/02-EndpointDesign.md`
-
-**Version:** 1.0.0 (Draft)
-
-**Status:** In Progress
-
-**Related Documents**
-
-- 00-ApiPrinciples.md
-- 01-RestConventions.md
+| Property | Value |
+|----------|-------|
+| **Document ID** | API-002 |
+| **Version** | 3.0.0 |
+| **Status** | Active |
+| **Owner** | Solution Architect |
+| **Created** | 2026-07-18 |
+| **Last Updated** | 2026-07-18 |
 
 ---
 
@@ -30,6 +26,30 @@ Endpoints expose business capabilities.
 Endpoints do not expose database operations.
 
 Every endpoint shall represent a meaningful business action or business resource.
+
+---
+
+# Endpoint Lifecycle
+
+Every endpoint shall:
+
+1. Receive the HTTP request.
+2. Validate transport-level constraints.
+3. Invoke exactly one Command or Query.
+4. Return a stable contract.
+5. Never expose internal implementation details.
+
+---
+
+# Endpoint Design Rules
+
+Endpoints shall:
+
+- Represent business capabilities.
+- Remain technology independent.
+- Use stable URIs.
+- Return consistent response models.
+- Never expose database concepts.
 
 ---
 
@@ -167,7 +187,7 @@ POST /maintenance-orders/{id}/complete
 POST /documents/{id}/renew
 ```
 
-Business actions shall always use POST.
+Business actions that cannot be naturally represented as CRUD operations shall use POST.
 
 ---
 
@@ -336,8 +356,30 @@ Consistency shall be preserved across all future capabilities.
 
 ---
 
-# Revision History
+| Endpoint                   | Application            |
+| -------------------------- | ---------------------- |
+| `GET /assets`              | `GetAssetsQuery`       |
+| `GET /assets/{id}`         | `GetAssetByIdQuery`    |
+| `POST /assets`             | `RegisterAssetCommand` |
+| `PATCH /assets/{id}`       | `UpdateAssetCommand`   |
+| `POST /assets/{id}/retire` | `RetireAssetCommand`   |
 
-| Version | Description |
-|----------|-------------|
-| 1.0.0 | Initial Endpoint Design |
+---
+
+# Related Documents
+
+- 00-ApiPrinciples.md
+- 01-RestConventions.md
+- 03-ResponseModel.md
+- 04-ErrorResponses.md
+- 05-Versioning.md
+- ADR-0005 — API Strategy
+
+---
+
+# Change History
+
+| Version | Date | Description |
+|----------|------------|---------------------------------------------|
+| 1.0.0 | Initial | Initial Endpoint Design |
+| 3.0.0 | 2026-07-18 | Standardized according to Documentation Standard v3.0 |

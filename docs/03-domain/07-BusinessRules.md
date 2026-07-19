@@ -1,22 +1,13 @@
 # Business Rules
 
-**Document ID:** MME-DOM-007
-
-**Repository Path:** `docs/03-domain/07-BusinessRules.md`
-
-**Version:** 1.0.0 (Draft)
-
-**Status:** In Progress
-
-**Related Documents**
-
-- 00-DomainPrinciples.md
-- 01-CoreConcepts.md
-- 02-BoundedContexts.md
-- 03-DomainModel.md
-- 04-Aggregates.md
-- 05-DomainServices.md
-- 06-DomainEvents.md
+| Property | Value |
+|----------|-------|
+| **Document ID** | DOM-007 |
+| **Version** | 3.0.0 |
+| **Status** | Active |
+| **Owner** | Solution Architect |
+| **Created** | 2026-07-18 |
+| **Last Updated** | 2026-07-18 |
 
 ---
 
@@ -27,6 +18,18 @@ This document defines the official business rules governing MachineryManagerEnte
 Business Rules describe what is legally or logically permitted within the business domain.
 
 These rules are independent from software implementation.
+
+---
+
+# Rule Philosophy
+
+Business Rules represent the immutable policies of the business domain.
+
+They define what is legally, logically, and operationally valid regardless of
+software implementation.
+
+Aggregates, Domain Services, Domain Events, and Application logic shall always
+conform to these rules.
 
 ---
 
@@ -65,6 +68,18 @@ Business Rules
 ---
 
 # 4. Asset Rules
+
+| Category | Rules |
+|----------|------:|
+| Asset | 4 |
+| Component | 5 |
+| Meter | 5 |
+| Operational Usage | 5 |
+| Maintenance | 5 |
+| Financial | 5 |
+| Documents | 4 |
+| Forecast | 4 |
+| Historical Integrity | 3 |
 
 ## BR-001
 
@@ -450,8 +465,22 @@ All future rules shall follow the principles defined in this document.
 
 ---
 
-# Revision History
+# Related Documents
 
-| Version | Description |
-|----------|-------------|
-| 1.0.0 | Initial Business Rules definition |
+- 00-DomainPrinciples.md
+- 01-Glossary.md
+- 02-CoreConcepts.md
+- 03-BoundedContexts.md
+- 04-DomainModel.md
+- 05-Aggregates.md
+- 06-DomainServices.md
+- 07-DomainEvents.md
+
+---
+
+# Change History
+
+| Version | Date | Description |
+|----------|------------|----------------------------------------------|
+| 1.0.0 | Initial | Initial Business Rules definition |
+| 3.0.0 | 2026-07-18 | Standardized according to Documentation Standard v3.0 |

@@ -1,20 +1,13 @@
 # Domain Events
 
-**Document ID:** MME-DOM-006
-
-**Repository Path:** `docs/03-domain/06-DomainEvents.md`
-
-**Version:** 1.0.0 (Draft)
-
-**Status:** In Progress
-
-**Related Documents**
-
-- 01-CoreConcepts.md
-- 02-BoundedContexts.md
-- 03-DomainModel.md
-- 04-Aggregates.md
-- 05-DomainServices.md
+| Property | Value |
+|----------|-------|
+| **Document ID** | DOM-006 |
+| **Version** | 3.0.0 |
+| **Status** | Active |
+| **Owner** | Solution Architect |
+| **Created** | 2026-07-18 |
+| **Last Updated** | 2026-07-18 |
 
 ---
 
@@ -27,6 +20,17 @@ Domain Events represent business facts that have already occurred.
 A Domain Event is immutable.
 
 Once published, it shall never be modified.
+
+---
+
+# Event Philosophy
+
+Domain Events represent completed business facts.
+
+They are immutable records of business history.
+
+Events enable communication between bounded contexts while preserving loose
+coupling and protecting aggregate boundaries.
 
 ---
 
@@ -431,6 +435,28 @@ Each event represents a completed business fact.
 
 Events never represent intentions.
 
+
+Aggregate
+
+↓
+
+Business Rule
+
+↓
+
+State Changed
+
+↓
+
+Domain Event
+
+↓
+
+Application Layer
+
+↓
+
+Infrastructure
 ---
 
 # 13. Event Publishing Rules
@@ -525,8 +551,21 @@ Each future event shall follow the rules defined in this document.
 
 ---
 
-# Revision History
+# Related Documents
 
-| Version | Description |
-|----------|-------------|
-| 1.0.0 | Initial Domain Events definition |
+- 05-DomainServices.md
+- 04-Aggregates.md
+- 03-DomainModel.md
+- 02-BoundedContexts.md
+- 01-CoreConcepts.md
+- 00-DomainPrinciples.md
+- ADR-0001
+
+---
+
+# Change History
+
+| Version | Date | Description |
+|----------|------------|----------------------------------------------|
+| 1.0.0 | Initial | Initial Domain Events definition |
+| 3.0.0 | 2026-07-18 | Standardized according to Documentation Standard v3.0 |

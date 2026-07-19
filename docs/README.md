@@ -3,31 +3,22 @@
 | Property | Value |
 |----------|-------|
 | **Document ID** | DOC-README |
-| **Version** | 2.0.0 |
+| **Version** | 3.0.0 |
 | **Status** | Approved |
 | **Owner** | Solution Architect |
+| **Created** | 2026-07-18 |
 | **Last Updated** | 2026-07-18 |
 
 ---
 
 # Purpose
 
-This directory contains all official technical documentation for the
+This directory contains the official technical documentation for the
 **MachineryManagerEnterprise** project.
 
-The documentation is organized to support the complete software lifecycle:
+The documentation is structured to support the complete software development lifecycle, from business vision through implementation and long-term maintenance.
 
-- Vision
-- Architecture
-- Domain Design
-- Module Design
-- Development Standards
-- Architecture Decisions
-- API Standards
-- Release Documentation
-- Proof of Concepts
-
-Every architectural decision must be traceable through documented evidence.
+Every architectural decision, technology selection, and implementation strategy shall be documented and traceable.
 
 ---
 
@@ -40,7 +31,7 @@ docs
 │   Product vision and long-term goals
 │
 ├── 02-architecture
-│   Architecture overview and design principles
+│   System architecture and design principles
 │
 ├── 03-domain
 │   Domain model and business concepts
@@ -51,30 +42,29 @@ docs
 ├── 05-development
 │   Development standards
 │   Technology Evaluations (TE)
-│   Dependency catalog
 │
 ├── 06-decisions
 │   Architecture Decision Records (ADR)
 │
 ├── 07-api
-│   API standards and conventions
+│   API standards and specifications
 │
 ├── 08-releases
 │   Release documentation
 │
 └── 09-proof-of-concepts
-    Technical Proof of Concepts (POC)
+    Proof of Concepts (POC)
 ```
 
 ---
 
-# Document Types
+# Documentation Categories
 
 ## Vision Documents
 
-Describe the long-term direction of the product.
+Define the long-term product vision and strategic objectives.
 
-Location
+**Location**
 
 ```
 01-vision
@@ -84,9 +74,9 @@ Location
 
 ## Architecture Documents
 
-Describe architectural principles and system design.
+Describe architectural principles, system structure, and high-level design.
 
-Location
+**Location**
 
 ```
 02-architecture
@@ -96,9 +86,9 @@ Location
 
 ## Domain Documents
 
-Describe business concepts and domain boundaries.
+Describe business concepts, aggregates, bounded contexts, and ubiquitous language.
 
-Location
+**Location**
 
 ```
 03-domain
@@ -106,11 +96,11 @@ Location
 
 ---
 
-## Module Documents
+## Module Specifications
 
-Describe individual software modules.
+Describe the responsibilities and design of individual software modules.
 
-Location
+**Location**
 
 ```
 04-modules
@@ -118,17 +108,17 @@ Location
 
 ---
 
-## Technology Evaluation (TE)
+## Technology Evaluations (TE)
 
-Technology evaluations compare alternative solutions before any architectural decision is made.
+Technology Evaluations compare alternative technical solutions before an architectural decision is made.
 
-Naming
+**Naming**
 
 ```
 TE-0001-ORMSelection.md
 ```
 
-Location
+**Location**
 
 ```
 05-development
@@ -136,17 +126,17 @@ Location
 
 ---
 
-## Architecture Decision Record (ADR)
+## Architecture Decision Records (ADR)
 
-Architecture decisions document why a specific technology or architectural approach has been selected.
+Architecture Decision Records document the final architectural decision together with its rationale.
 
-Naming
+**Naming**
 
 ```
 ADR-0008-Use-MudBlazor.md
 ```
 
-Location
+**Location**
 
 ```
 06-decisions
@@ -154,19 +144,19 @@ Location
 
 ---
 
-## Proof of Concept (POC)
+## Proof of Concepts (POC)
 
-Proof of Concepts validate architectural assumptions through experimentation.
+Proof of Concepts validate technical assumptions through experimentation before final architectural approval.
 
-POCs exist only when a Technology Evaluation alone is insufficient to make a decision.
+A POC is created only when technical uncertainty exists.
 
-Naming
+**Naming**
 
 ```
 POC-0001-JalaliMudDatePicker.md
 ```
 
-Location
+**Location**
 
 ```
 09-proof-of-concepts
@@ -174,11 +164,11 @@ Location
 
 ---
 
-## API Standards
+## API Documentation
 
-API conventions and guidelines.
+Defines API standards, conventions, contracts, and integration guidelines.
 
-Location
+**Location**
 
 ```
 07-api
@@ -188,9 +178,9 @@ Location
 
 ## Release Documentation
 
-Release notes and version history.
+Contains release notes and version history.
 
-Location
+**Location**
 
 ```
 08-releases
@@ -200,7 +190,7 @@ Location
 
 # Architecture Governance Process
 
-Every important technical decision follows the same lifecycle.
+All significant technical decisions shall follow the same governance process.
 
 ```text
 Business Requirement
@@ -209,7 +199,7 @@ Business Requirement
 Technology Evaluation (TE)
         │
         ▼
-Proof of Concept (POC)   (if required)
+Proof of Concept (POC)   (Optional)
         │
         ▼
 Architecture Decision Record (ADR)
@@ -218,16 +208,19 @@ Architecture Decision Record (ADR)
 Implementation
 ```
 
-Not every Technology Evaluation requires a Proof of Concept.
+Technology Evaluations compare alternatives.
 
-POCs are created only for decisions involving significant technical uncertainty or architectural risk.
+Proof of Concepts validate uncertain solutions.
+
+Architecture Decision Records document the final approved decision.
 
 ---
 
-# Naming Conventions
+# Naming Convention
 
 | Document Type | Pattern |
 |--------------|---------|
+| General Document | `DOC-Name.md` |
 | Technology Evaluation | `TE-0001-Name.md` |
 | Architecture Decision | `ADR-0001-Name.md` |
 | Proof of Concept | `POC-0001-Name.md` |
@@ -236,15 +229,16 @@ POCs are created only for decisions involving significant technical uncertainty 
 
 # Related Documents
 
-- PROJECT_CHARTER.md
-- PROJECT_PROGRESS.md
-- DOCUMENT_CONVENTIONS.md
+- DOC-CONVENTIONS
+- DOC-PROJECT-CHARTER
+- DOC-PROJECT-PROGRESS
 
 ---
 
 # Change History
 
-| Version | Description |
-|----------|-------------|
-| 1.0.0 | Initial documentation structure |
-| 2.0.0 | Documentation architecture reorganized with TE, ADR and POC workflow |
+| Version | Date | Description |
+|----------|------------|----------------------------------------------|
+| 1.0.0 | 2026-07-18 | Initial documentation structure |
+| 2.0.0 | 2026-07-18 | Documentation architecture reorganized |
+| 3.0.0 | 2026-07-18 | Standardized according to Documentation Standard |

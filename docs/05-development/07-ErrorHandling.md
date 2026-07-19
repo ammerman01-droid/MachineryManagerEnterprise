@@ -1,277 +1,290 @@
-# Error Handling
+# Error Handling Strategy
 
-**Document ID:** MME-DEV-007
-
-**Repository Path:** `docs/05-development/07-ErrorHandling.md`
-
-**Version:** 1.0.0 (Draft)
-
-**Status:** In Progress
-
-**Related Documents**
-
-- 00-DevelopmentPrinciples.md
-- 04-DependencyRules.md
-- 05-CodingStandards.md
-- docs/03-domain/06-DomainEvents.md
+| Property | Value |
+|----------|-------|
+| **Document ID** | DOC-DEV-008 |
+| **Version** | 2.0.0 |
+| **Status** | Approved |
+| **Owner** | Solution Architect |
+| **Created** | 2026-07-18 |
+| **Last Updated** | 2026-07-18 |
 
 ---
 
-# 1. Purpose
+# Purpose
 
-This document defines the error handling strategy used throughout MachineryManagerEnterprise.
+This document defines the official error handling strategy for the
+**MachineryManagerEnterprise** solution.
 
-Its objective is to ensure that failures are predictable, traceable and recoverable.
+A consistent error handling strategy improves:
 
-Errors shall never compromise business consistency.
+- Reliability
+- Maintainability
+- Debugging
+- User Experience
+- Operational Monitoring
 
----
-
-# 2. Principles
-
-The error handling strategy shall satisfy the following principles.
-
-- Predictable
-- Explicit
-- Consistent
-- Recoverable
-- Observable
-- Auditable
-
-Unexpected behavior shall never be silently ignored.
+Errors should always be predictable, traceable, and meaningful.
 
 ---
 
-# 3. Error Categories
+# Objectives
 
-Errors are classified into five categories.
+The solution shall:
 
-```text
-Errors
-
-├── Validation Errors
-├── Business Errors
-├── Authorization Errors
-├── Infrastructure Errors
-└── Unexpected Errors
-```
-
-Each category requires different handling.
+- Detect errors early.
+- Preserve diagnostic information.
+- Avoid silent failures.
+- Prevent inconsistent system state.
+- Return meaningful feedback to users.
+- Produce structured logs for troubleshooting.
 
 ---
 
-# 4. Validation Errors
+# Error Classification
 
-Validation errors occur before business execution.
+Errors are classified into four categories.
 
-Examples
+| Category | Example |
+|----------|---------|
+| Validation Errors | Invalid input |
+| Business Errors | Business rule violation |
+| Infrastructure Errors | Database unavailable |
+| Unexpected Errors | Programming bug |
 
-- Missing required field
-- Invalid format
-- Invalid range
-- Invalid identifier
-
-Validation errors shall return immediately.
-
-Business execution shall not begin.
+Each category should be handled differently.
 
 ---
 
-# 5. Business Errors
+# Validation Errors
 
-Business errors occur when business rules reject an operation.
+Validation errors are expected.
 
-Examples
+They should:
 
-- Asset already retired
-- Engine already installed
-- Meter reading decreased
-- Maintenance already completed
+- Never throw exceptions.
+- Be returned to the caller.
+- Include clear validation messages.
 
-Business errors are expected.
-
-They shall not be treated as software failures.
+Validation shall primarily be implemented using FluentValidation.
 
 ---
 
-# 6. Authorization Errors
+# Business Errors
 
-Authorization errors occur when the current user lacks permission.
+Business rule violations are not system failures.
 
-Examples
+Examples:
 
-- Missing role
-- Missing permission
-- Invalid organization access
+- Machine already assigned
+- Duplicate serial number
+- Invalid workflow transition
 
-Authorization failures shall always be logged.
+Business errors may use domain-specific exceptions where appropriate.
 
 ---
 
-# 7. Infrastructure Errors
+# Infrastructure Errors
 
 Infrastructure failures include:
 
-- Database unavailable
-- File storage unavailable
-- Email failure
-- External API unavailable
-- Network timeout
+- Database connectivity
+- File system
+- External APIs
+- Network failures
 
-Infrastructure failures shall never corrupt business state.
-
----
-
-# 8. Unexpected Errors
-
-Unexpected errors represent programming defects or unknown failures.
-
-Examples
-
-- Null reference
-- Invalid state
-- Serialization failure
-- Unknown exception
-
-Unexpected errors shall be logged with full diagnostic information.
+Infrastructure should never expose implementation details to higher layers.
 
 ---
 
-# 9. Result Pattern
+# Unexpected Errors
 
-Application operations should return explicit Result objects.
+Unexpected errors indicate defects.
+
+Examples:
+
+- NullReferenceException
+- InvalidOperationException
+- Programming mistakes
+
+These errors should be logged with full diagnostic information.
+
+---
+
+# Exception Usage
+
+Exceptions shall be used only for exceptional situations.
+
+Do not use exceptions for:
+
+- Validation
+- Normal control flow
+- Expected business outcomes
+
+---
+
+# Exception Messages
+
+Messages should:
+
+- Clearly explain the failure.
+- Avoid sensitive information.
+- Help troubleshooting.
+
+Poor example
+
+```text
+Something went wrong.
+```
+
+Better example
+
+```text
+Machine with Id '42' could not be found.
+```
+
+---
+
+# Custom Exceptions
+
+Custom exceptions should derive from:
+
+```text
+Exception
+```
 
 Example
 
 ```text
-Success
+MachineNotFoundException
 
-Failure
-
-ValidationFailure
-
-BusinessFailure
-
-AuthorizationFailure
+LicenseExpiredException
 ```
 
-Expected business failures should not rely on exceptions.
+Each custom exception should represent one specific failure.
 
 ---
 
-# 10. Exception Usage
+# Inner Exceptions
 
-Exceptions are reserved for exceptional situations.
+When wrapping exceptions, always preserve the original exception.
 
-Exceptions shall not be used for normal business flow.
+Example
 
-Business validation shall prefer explicit results.
+```csharp
+throw new MachineSynchronizationException(
+    "Synchronization failed.",
+    ex);
+```
 
 ---
 
-# 11. Logging
+# Logging
 
-Every unexpected error shall record:
+Every unexpected exception should be logged.
+
+Logging should include:
 
 - Timestamp
-- User
+- Severity
 - Correlation Id
-- Request
 - Exception Type
 - Message
 - Stack Trace
 
-Sensitive information shall never be exposed to end users.
+Sensitive data must never be logged.
 
 ---
 
-# 12. User Messages
+# User Messages
 
-Technical details shall never be returned directly to users.
+Users should receive friendly messages.
 
-Users shall receive:
-
-- understandable;
-- business-oriented;
-- actionable messages.
-
----
-
-# 13. Transaction Safety
-
-If an error occurs during command execution:
-
-- the transaction shall be rolled back;
-- partial business changes shall not remain.
-
-Business consistency has higher priority than partial completion.
-
----
-
-# 14. Retry Policy
-
-Automatic retries are allowed only for transient infrastructure failures.
-
-Examples
-
-- Temporary network interruption
-- Temporary database connection loss
-
-Business operations shall never be retried automatically.
-
----
-
-# 15. Error Codes
-
-Every application error should expose a stable error code.
+Internal exception details must never be exposed.
 
 Example
 
+Instead of
+
 ```text
-VAL-001
-
-BUS-014
-
-AUTH-003
-
-INF-008
-
-SYS-001
+SqlException...
 ```
 
-Error codes shall remain stable across versions.
+Display
+
+```text
+An unexpected error occurred.
+Please contact your administrator.
+```
 
 ---
 
-# 16. Correlation
+# Global Exception Handling
 
-Every request shall receive a Correlation Id.
+Unhandled exceptions shall be processed through a centralized handler.
 
-The same Correlation Id shall appear in:
+Responsibilities:
 
-- Logs
-- Audit records
-- Background jobs
-- Integration events
-
-This enables end-to-end tracing.
+- Logging
+- Correlation Id generation
+- User-friendly response
+- Consistent formatting
 
 ---
 
-# 17. Future Enhancements
+# Blazor UI
 
-Future versions may introduce:
+Blazor components should:
 
-- Distributed tracing
-- OpenTelemetry
-- Centralized exception dashboards
-- Automatic incident reporting
-- AI-assisted diagnostics
+- Handle expected failures gracefully.
+- Display meaningful notifications.
+- Never expose stack traces.
 
 ---
 
-# Revision History
+# Retry Policy
 
-| Version | Description |
-|----------|-------------|
-| 1.0.0 | Initial Error Handling strategy |
+Retries should only be used for transient failures.
+
+Examples:
+
+- HTTP timeout
+- Temporary network issue
+
+Retries shall never be applied blindly.
+
+---
+
+# Fail Fast
+
+Invalid application state should fail immediately.
+
+Failing early is preferred over continuing with corrupted state.
+
+---
+
+# Compliance
+
+Every project within the solution shall follow this error handling strategy.
+
+Architectural exceptions require an approved ADR.
+
+---
+
+# Related Documents
+
+- DOC-CONVENTIONS
+- DOC-DEV-001 (Development Principles)
+- DOC-DEV-005 (Dependency Rules)
+- DOC-DEV-006 (Coding Standards)
+- DOC-DEV-009 (Logging Strategy)
+- ADR-0002
+
+---
+
+# Change History
+
+| Version | Date | Description |
+|----------|------------|----------------------------------------------|
+| 1.0.0 | 2026-07-18 | Initial error handling strategy |
+| 2.0.0 | 2026-07-18 | Standardized according to Documentation Standard v3.0 |
