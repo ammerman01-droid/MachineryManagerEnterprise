@@ -1,18 +1,13 @@
 # Request / Response Model
 
-**Document ID:** MME-API-003
-
-**Repository Path:** `docs/07-api/03-RequestResponseModel.md`
-
-**Version:** 1.0.0 (Draft)
-
-**Status:** In Progress
-
-**Related Documents**
-
-- 00-ApiPrinciples.md
-- 01-RestConventions.md
-- 02-EndpointDesign.md
+| Property | Value |
+|----------|-------|
+| **Document ID** | API-003 |
+| **Version** | 3.0.0 |
+| **Status** | Active |
+| **Owner** | Solution Architect |
+| **Created** | 2026-07-18 |
+| **Last Updated** | 2026-07-18 |
 
 ---
 
@@ -21,6 +16,17 @@
 This document defines the standard structure of every API request and response used by MachineryManagerEnterprise.
 
 A consistent request/response model simplifies client development, improves interoperability and reduces implementation ambiguity.
+
+---
+
+# Contract Philosophy
+
+API contracts represent public business interfaces.
+
+Contracts shall remain stable, explicit, implementation independent and
+backward compatible.
+
+Internal domain entities shall never be exposed directly.
 
 ---
 
@@ -98,6 +104,8 @@ Example
 ```
 
 Collection metadata is described in the Pagination document.
+
+Collection metadata (page, pageSize, totalCount, totalPages) is defined in the Pagination document and shall accompany paginated responses.
 
 ---
 
@@ -254,8 +262,45 @@ Such extensions shall remain backward compatible.
 
 ---
 
-# Revision History
+# 17. Response Envelope Policy
 
-| Version | Description |
-|----------|-------------|
-| 1.0.0 | Initial Request / Response Model |
+Responses shall return the business resource directly unless an envelope is
+required for:
+
+- pagination
+- metadata
+- asynchronous operations
+- standardized error reporting
+
+Avoid unnecessary wrapping of simple resources.
+
+---
+
+| Endpoint Type  | Request Body | Response Body  |
+| -------------- | ------------ | -------------- |
+| GET Collection | No           | Collection DTO |
+| GET Resource   | No           | Resource DTO   |
+| POST Create    | Create DTO   | Resource DTO   |
+| PUT Replace    | Replace DTO  | Resource DTO   |
+| PATCH Update   | Update DTO   | Resource DTO   |
+| DELETE         | No           | No Content     |
+
+---
+
+# Related Documents
+
+- 00-ApiPrinciples.md
+- 01-RestConventions.md
+- 02-EndpointDesign.md
+- 04-ErrorResponses.md
+- 05-Versioning.md
+- ADR-0005 — API Strategy
+
+---
+
+# Change History
+
+| Version | Date | Description |
+|----------|------------|----------------------------------------------|
+| 1.0.0 | Initial | Initial Request / Response Model |
+| 3.0.0 | 2026-07-18 | Standardized according to Documentation Standard v3.0 |

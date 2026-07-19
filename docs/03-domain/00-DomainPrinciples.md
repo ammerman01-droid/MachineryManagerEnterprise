@@ -1,10 +1,14 @@
 
 # Domain Principles
 
-**Document ID:** MME-DOM-000  
-**Repository Path:** `docs/03-domain/00-DomainPrinciples.md`  
-**Version:** 1.0.0  
-**Status:** Approved (Foundation)
+| Property | Value |
+|----------|-------|
+| **Document ID** | DOM-000 |
+| **Version** | 3.0.0 |
+| **Status** | Active |
+| **Owner** | Solution Architect |
+| **Created** | 2026-07-18 |
+| **Last Updated** | 2026-07-18 |
 
 ---
 
@@ -143,8 +147,18 @@ Before accepting any design decision verify:
 
 ---
 
-# Revision History
+# Related Documents
 
-| Version | Description |
-|----------|-------------|
-|1.0.0|Initial constitutional principles|
+- 00-Vision.md
+- 01-Architecture.md
+- 09-CapabilityModel.md
+- ADR-0001 — Adopt Clean Architecture
+
+---
+
+# Change History
+
+| Version | Date | Description |
+|----------|------------|---------------------------------------------|
+| 1.0.0 | 2026-07-18 | Initial constitutional principles |
+| 3.0.0 | 2026-07-18 | Standardized according to Documentation Standard v3.0 |

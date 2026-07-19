@@ -1,20 +1,13 @@
 # Domain Services
 
-**Document ID:** MME-DOM-005
-
-**Repository Path:** `docs/03-domain/05-DomainServices.md`
-
-**Version:** 1.0.0 (Draft)
-
-**Status:** In Progress
-
-**Related Documents**
-
-- 00-DomainPrinciples.md
-- 01-CoreConcepts.md
-- 02-BoundedContexts.md
-- 03-DomainModel.md
-- 04-Aggregates.md
+| Property | Value |
+|----------|-------|
+| **Document ID** | DOM-005 |
+| **Version** | 3.0.0 |
+| **Status** | Active |
+| **Owner** | Solution Architect |
+| **Created** | 2026-07-18 |
+| **Last Updated** | 2026-07-18 |
 
 ---
 
@@ -25,6 +18,18 @@ This document defines the Domain Services of MachineryManagerEnterprise.
 Domain Services encapsulate business behavior that cannot naturally belong to a single Entity or Aggregate.
 
 They coordinate multiple Aggregates while preserving the business rules of the domain.
+
+---
+
+# Service Philosophy
+
+Domain Services coordinate business operations that naturally span multiple
+Aggregates.
+
+They never replace Aggregate behavior.
+
+Whenever a business rule belongs entirely to one Aggregate, it shall remain
+inside that Aggregate.
 
 ---
 
@@ -565,6 +570,25 @@ OwnershipCostService
 
 Each service performs one business responsibility.
 
+
+Aggregate
+
+↓
+
+Domain Service
+
+↓
+
+Domain Event
+
+↓
+
+Application Layer
+
+↓
+
+Infrastructure
+
 ---
 
 # 13. Service Interaction Rules
@@ -610,8 +634,20 @@ Each new Domain Service shall satisfy the principles defined in this document.
 
 ---
 
-# Revision History
+# Related Documents
 
-| Version | Description |
-|----------|-------------|
-| 1.0.0 | Initial Domain Services definition |
+- 04-Aggregates.md
+- 03-DomainModel.md
+- 02-BoundedContexts.md
+- 01-CoreConcepts.md
+- 00-DomainPrinciples.md
+- 09-CapabilityModel.md
+
+---
+
+# Change History
+
+| Version | Date | Description |
+|----------|------------|----------------------------------------------|
+| 1.0.0 | Initial | Initial Domain Services definition |
+| 3.0.0 | 2026-07-18 | Standardized according to Documentation Standard v3.0 |

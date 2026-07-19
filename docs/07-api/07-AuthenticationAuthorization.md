@@ -1,19 +1,13 @@
 # Authentication and Authorization
 
-**Document ID:** MME-API-007
-
-**Repository Path:** `docs/07-api/07-AuthenticationAuthorization.md`
-
-**Version:** 1.0.0 (Draft)
-
-**Status:** In Progress
-
-**Related Documents**
-
-- 00-ApiPrinciples.md
-- 01-RestConventions.md
-- 04-ErrorResponses.md
-- docs/04-modules/07-Authorization.md
+| Property | Value |
+|----------|-------|
+| **Document ID** | API-007 |
+| **Version** | 3.0.0 |
+| **Status** | Active |
+| **Owner** | Solution Architect |
+| **Created** | 2026-07-18 |
+| **Last Updated** | 2026-07-18 |
 
 ---
 
@@ -24,6 +18,48 @@ This document defines the authentication and authorization strategy for Machiner
 Authentication verifies identity.
 
 Authorization determines whether an authenticated identity may perform a requested operation.
+
+---
+
+# Security Philosophy
+
+Authentication establishes identity.
+
+Authorization grants permissions.
+
+Business Rules remain inside the Domain.
+
+Security mechanisms shall never implement business behavior.
+
+---
+
+# Authentication Flow
+
+Client
+
+↓
+
+Bearer Token
+
+↓
+
+Authentication
+
+↓
+
+Claims
+
+↓
+
+Authorization
+
+↓
+
+Handler
+
+↓
+
+Response
 
 ---
 
@@ -162,7 +198,7 @@ Permissions
 TenantId
 ```
 
-Business logic shall not depend directly on raw claims.
+Business logic shall depend only on the Application User Context, never on raw JWT claims.
 
 ---
 
@@ -266,8 +302,30 @@ These additions shall remain compatible with the existing authorization model.
 
 ---
 
-# Revision History
+# 16. Endpoint Protection Matrix
 
-| Version | Description |
-|----------|-------------|
-| 1.0.0 | Initial Authentication and Authorization strategy |
+| Endpoint Type  | Authentication |     Authorization    |
+| -------------- | :------------: | :------------------: |
+| Public         |        ❌       |           ❌          |
+| Authenticated  |        ✅       |           ❌          |
+| Protected      |        ✅       |           ✅          |
+| Administrative |        ✅       | ✅ (Admin Permission) |
+
+---
+
+# Related Documents
+
+- 00-ApiPrinciples.md
+- 04-ErrorResponses.md
+- 05-Versioning.md
+- docs/04-modules/07-Authorization.md
+- ADR-0006 — Authorization Model
+
+---
+
+# Change History
+
+| Version | Date | Description |
+|----------|------------|---------------------------------------------|
+| 1.0.0 | Initial | Initial Authentication strategy |
+| 3.0.0 | 2026-07-18 | Standardized according to Documentation Standard v3.0 |

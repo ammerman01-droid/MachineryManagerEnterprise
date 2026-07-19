@@ -1,19 +1,13 @@
 # Support Lifecycle
 
-**Document ID:** MME-REL-004
-
-**Repository Path:** `docs/08-releases/04-SupportLifecycle.md`
-
-**Version:** 1.0.0 (Draft)
-
-**Status:** In Progress
-
-**Related Documents**
-
-- 00-ReleaseStrategy.md
-- 01-VersioningPolicy.md
-- 02-ReleaseProcess.md
-- 03-DeploymentStrategy.md
+| Property | Value |
+|----------|-------|
+| **Document ID** | REL-004 |
+| **Version** | 3.0.0 |
+| **Status** | Active |
+| **Owner** | Release Manager |
+| **Created** | 2026-07-18 |
+| **Last Updated** | 2026-07-18 |
 
 ---
 
@@ -22,6 +16,20 @@
 This document defines the support lifecycle for MachineryManagerEnterprise releases.
 
 It specifies how long released versions remain supported and what kinds of maintenance are provided during each stage.
+
+---
+
+# Support Philosophy
+
+Every released version has a clearly defined support lifecycle.
+
+Support shall be transparent, predictable and traceable.
+
+Clients shall always know:
+
+- which versions are supported;
+- which versions are deprecated;
+- when support ends.
 
 ---
 
@@ -64,6 +72,19 @@ End of Support
 
 Archived
 ```
+
+---
+
+# Support Responsibilities
+
+| Stage | Responsible |
+|--------|-------------|
+| Released | Release Manager |
+| Supported | Development Team |
+| Maintenance | Maintenance Team |
+| Deprecated | Product Owner |
+| End of Support | Architecture Board |
+| Archived | Documentation Team |
 
 ---
 
@@ -155,7 +176,7 @@ Unsupported versions shall not receive security patches.
 
 Upgrading between Patch releases should require no application changes.
 
-Minor upgrades should remain backward compatible.
+Minor upgrades shall remain backward compatible.
 
 Major upgrades may require migration.
 
@@ -199,8 +220,31 @@ Future versions may introduce:
 
 ---
 
-# Revision History
+# 15. Support Matrix
 
-| Version | Description |
-|----------|-------------|
-| 1.0.0 | Initial Support Lifecycle |
+| Version        | Bug Fix | Security | Documentation |
+| -------------- | :-----: | :------: | :-----------: |
+| Supported      |    ✅    |     ✅    |       ✅       |
+| Maintenance    |    ✅    |     ✅    |       ✅       |
+| Deprecated     |    ❌    |     ✅    |       ✅       |
+| End of Support |    ❌    |     ❌    |       ❌       |
+| Archived       |    ❌    |     ❌    |       ❌       |
+
+---
+
+# Related Documents
+
+- 00-ReleaseStrategy.md
+- 01-VersioningPolicy.md
+- 02-ReleaseProcess.md
+- 03-DeploymentStrategy.md
+- docs/07-api/05-ApiVersioning.md
+
+---
+
+# Change History
+
+| Version | Date | Description |
+|----------|------------|---------------------------------------------|
+| 1.0.0 | Initial | Initial Support Lifecycle |
+| 3.0.0 | 2026-07-18 | Standardized according to Documentation Standard v3.0 |

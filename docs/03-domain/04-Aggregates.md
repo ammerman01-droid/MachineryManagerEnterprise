@@ -1,29 +1,46 @@
 # Aggregates
 
-**Document ID:** MME-DOM-004
-
-**Repository Path:** `docs/03-domain/04-Aggregates.md`
-
-**Version:** 1.0.0 (Draft)
-
-**Status:** In Progress
-
-**Related Documents**
-
-- 00-DomainPrinciples.md
-- 01-CoreConcepts.md
-- 02-BoundedContexts.md
-- 03-DomainModel.md
+| Property | Value |
+|----------|-------|
+| **Document ID** | DOM-005 |
+| **Version** | 3.0.0 |
+| **Status** | Active |
+| **Owner** | Solution Architect |
+| **Created** | 2026-07-18 |
+| **Last Updated** | 2026-07-18 |
 
 ---
 
 # 1. Purpose
 
-This document defines the Aggregate structure of MachineryManagerEnterprise.
+This document defines the Aggregate design of the MachineryManagerEnterprise
+domain according to Domain Driven Design.
 
-Aggregates establish transactional consistency boundaries within the Domain Model.
+Aggregates define transactional consistency boundaries and encapsulate business
+rules that must always remain valid.
 
-The objective is to ensure that every business operation preserves domain integrity while keeping aggregates small, cohesive and independent.
+---
+
+# Aggregate Principles
+
+Every aggregate shall:
+
+- Have exactly one Aggregate Root.
+- Enforce business invariants.
+- Own transactional consistency.
+- Prevent external modification of internal entities.
+- Reference other aggregates only by identity.
+
+---
+
+# Aggregate Design Rules
+
+The following rules shall always be respected:
+
+- One transaction modifies only one aggregate.
+- Cross-aggregate consistency shall be eventual.
+- Aggregate Roots expose behavior, not data.
+- Internal entities are never accessed directly.
 
 ---
 
@@ -621,8 +638,18 @@ before implementation.
 
 ---
 
-# Revision History
+# Related Documents
 
-| Version | Description |
-|----------|-------------|
-| 1.0.0 | Initial Aggregate Design |
+- 04-DomainModel.md
+- 03-BoundedContexts.md
+- 00-DomainPrinciples.md
+- ADR-0001
+
+---
+
+# Change History
+
+| Version | Date | Description |
+|----------|------------|---------------------------------------------|
+| 1.0.0 | Initial | Initial aggregate definitions |
+| 3.0.0 | 2026-07-18 | Standardized according to Documentation Standard v3.0 |

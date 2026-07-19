@@ -1,19 +1,13 @@
 # Error Responses
 
-**Document ID:** MME-API-004
-
-**Repository Path:** `docs/07-api/04-ErrorResponses.md`
-
-**Version:** 1.0.0 (Draft)
-
-**Status:** In Progress
-
-**Related Documents**
-
-- 00-ApiPrinciples.md
-- 01-RestConventions.md
-- 03-RequestResponseModel.md
-- docs/05-development/07-ErrorHandling.md
+| Property | Value |
+|----------|-------|
+| **Document ID** | API-004 |
+| **Version** | 3.0.0 |
+| **Status** | Active |
+| **Owner** | Solution Architect |
+| **Created** | 2026-07-18 |
+| **Last Updated** | 2026-07-18 |
 
 ---
 
@@ -22,6 +16,21 @@
 This document defines the standard error response model for all HTTP APIs exposed by MachineryManagerEnterprise.
 
 Every failed request shall return a consistent, predictable and machine-readable response.
+
+---
+
+# Error Philosophy
+
+Errors represent business or technical failures in a standardized format.
+
+Error responses shall be:
+
+- Stable
+- Predictable
+- Machine readable
+- Safe
+
+Errors shall never expose internal implementation details.
 
 ---
 
@@ -64,6 +73,19 @@ Every error response shall follow the structure below.
 | message | Yes | Human-readable description |
 | correlationId | Yes | Request correlation identifier |
 | details | No | Validation or additional information |
+
+---
+
+# Error Classification
+
+| Category       | Prefix |
+| -------------- | ------ |
+| Validation     | VAL    |
+| Business       | BUS    |
+| Authentication | AUTH   |
+| Resource       | RES    |
+| Infrastructure | INF    |
+| System         | SYS    |
 
 ---
 
@@ -267,8 +289,33 @@ Existing fields shall never change semantic meaning.
 
 ---
 
-# Revision History
+# HTTP Mapping Table
 
-| Version | Description |
-|----------|-------------|
-| 1.0.0 | Initial Error Response specification |
+| HTTP | Category                         |
+| ---- | -------------------------------- |
+| 400  | Validation                       |
+| 401  | Authentication                   |
+| 403  | Authorization                    |
+| 404  | Resource                         |
+| 409  | Business                         |
+| 422  | Semantic Validation *(Reserved)* |
+| 500  | System                           |
+| 503  | Infrastructure                   |
+
+---
+
+# Related Documents
+
+- 00-ApiPrinciples.md
+- 03-RequestResponseModel.md
+- docs/05-development/07-ErrorHandling.md
+- ADR-0005 — API Strategy
+
+---
+
+# Change History
+
+| Version | Date | Description |
+|----------|------------|----------------------------------------------|
+| 1.0.0 | Initial | Initial Error Response specification |
+| 3.0.0 | 2026-07-18 | Standardized according to Documentation Standard v3.0 |

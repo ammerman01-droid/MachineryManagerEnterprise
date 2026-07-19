@@ -1,20 +1,13 @@
 # Release Checklist
 
-**Document ID:** MME-REL-005
-
-**Repository Path:** `docs/08-releases/05-ReleaseChecklist.md`
-
-**Version:** 1.0.0 (Draft)
-
-**Status:** In Progress
-
-**Related Documents**
-
-- 00-ReleaseStrategy.md
-- 01-VersioningPolicy.md
-- 02-ReleaseProcess.md
-- 03-DeploymentStrategy.md
-- 04-SupportLifecycle.md
+| Property | Value |
+|----------|-------|
+| **Document ID** | REL-005 |
+| **Version** | 3.0.0 |
+| **Status** | Active |
+| **Owner** | Release Manager |
+| **Created** | 2026-07-18 |
+| **Last Updated** | 2026-07-18 |
 
 ---
 
@@ -23,6 +16,16 @@
 This document defines the mandatory checklist that shall be completed before every production release of MachineryManagerEnterprise.
 
 No production deployment shall begin until every required item has been verified.
+
+---
+
+# Checklist Philosophy
+
+Production releases shall never depend on memory.
+
+Every deployment shall use a documented checklist.
+
+No checklist item may be skipped without formal approval.
 
 ---
 
@@ -36,6 +39,20 @@ The checklist shall be:
 - Independent of personnel
 
 Each completed checklist shall be archived with the corresponding release.
+
+---
+
+# Release Roles
+
+| Activity | Responsible |
+|----------|-------------|
+| Source Control | Development Team |
+| Build | CI Pipeline |
+| Testing | QA Team |
+| Database | DBA / DevOps |
+| Deployment | DevOps |
+| Verification | Operations |
+| Approval | Architecture Board |
 
 ---
 
@@ -58,6 +75,7 @@ Verify:
 - Build succeeds
 - No compilation errors
 - No critical warnings
+- Static code analysis completed successfully.
 - Build pipeline completed successfully
 - Artifacts generated successfully
 
@@ -189,8 +207,47 @@ Future versions may automate portions of this checklist through:
 
 ---
 
-# Revision History
+# Release Evidence
 
-| Version | Description |
-|----------|-------------|
-| 1.0.0 | Initial Release Checklist |
+Every completed checklist shall reference:
+
+- Build ID
+- Pipeline ID
+- Git Tag
+- Release Notes
+- Deployment Log
+- Verification Report
+
+---
+
+# Mandatory Release Gates
+
+| Gate                  | Mandatory |
+| --------------------- | :-------: |
+| Build Success         |     ✅     |
+| Tests Passed          |     ✅     |
+| Documentation Updated |     ✅     |
+| Database Ready        |     ✅     |
+| Rollback Prepared     |     ✅     |
+| Approval Granted      |     ✅     |
+| Health Check Passed   |     ✅     |
+
+---
+
+# Related Documents
+
+- 00-ReleaseStrategy.md
+- 01-VersioningPolicy.md
+- 02-ReleaseProcess.md
+- 03-DeploymentStrategy.md
+- 04-SupportLifecycle.md
+- docs/05-development/10-BuildPipeline.md
+
+---
+
+# Change History
+
+| Version | Date | Description |
+|----------|------------|---------------------------------------------|
+| 1.0.0 | Initial | Initial Release Checklist |
+| 3.0.0 | 2026-07-18 | Standardized according to Documentation Standard v3.0 |

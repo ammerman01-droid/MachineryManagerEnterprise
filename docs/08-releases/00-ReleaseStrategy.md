@@ -1,18 +1,13 @@
 # Release Strategy
 
-**Document ID:** MME-REL-000
-
-**Repository Path:** `docs/08-releases/00-ReleaseStrategy.md`
-
-**Version:** 1.0.0 (Draft)
-
-**Status:** In Progress
-
-**Related Documents**
-
-- docs/02-architecture/01-Architecture.md
-- docs/05-development/10-BuildPipeline.md
-- docs/07-api/06-Versioning.md
+| Property | Value |
+|----------|-------|
+| **Document ID** | REL-000 |
+| **Version** | 3.0.0 |
+| **Status** | Active |
+| **Owner** | Release Manager |
+| **Created** | 2026-07-18 |
+| **Last Updated** | 2026-07-18 |
 
 ---
 
@@ -46,6 +41,18 @@ Every release shall represent a stable, deployable product.
 Incomplete features shall not be released.
 
 Every released version shall be reproducible from source control.
+
+---
+
+# Release Governance
+
+Every release shall be:
+
+- reproducible;
+- approved;
+- documented;
+- traceable;
+- independently deployable.
 
 ---
 
@@ -133,7 +140,7 @@ Patch releases introduce:
 - Security fixes
 - Performance improvements
 
-No functional changes should occur.
+Patch releases shall not introduce new business functionality.
 
 Example
 
@@ -265,8 +272,32 @@ Future versions may introduce:
 
 ---
 
-# Revision History
+# 15. Release Deliverables
 
-| Version | Description |
-|----------|-------------|
-| 1.0.0 | Initial Release Strategy |
+| Stage             | Deliverable          |
+| ----------------- | -------------------- |
+| Planning          | Approved Scope       |
+| Development       | Implemented Features |
+| Testing           | Test Report          |
+| Validation        | Validation Approval  |
+| Release Candidate | RC Build             |
+| Production        | Release Package      |
+| Maintenance       | Patch Release        |
+
+---
+
+# Related Documents
+
+- docs/07-api/05-ApiVersioning.md
+- docs/05-development/10-BuildPipeline.md
+- docs/02-architecture/01-Architecture.md
+- docs/06-adr/
+
+---
+
+# Change History
+
+| Version | Date | Description |
+|----------|------------|----------------------------------------------|
+| 1.0.0 | Initial | Initial Release Strategy |
+| 3.0.0 | 2026-07-18 | Standardized according to Documentation Standard v3.0 |

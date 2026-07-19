@@ -1,18 +1,13 @@
 # Versioning Policy
 
-**Document ID:** MME-REL-001
-
-**Repository Path:** `docs/08-releases/01-VersioningPolicy.md`
-
-**Version:** 1.0.0 (Draft)
-
-**Status:** In Progress
-
-**Related Documents**
-
-- 00-ReleaseStrategy.md
-- docs/07-api/06-Versioning.md
-- docs/05-development/10-BuildPipeline.md
+| Property | Value |
+|----------|-------|
+| **Document ID** | REL-001 |
+| **Version** | 3.0.0 |
+| **Status** | Active |
+| **Owner** | Release Manager |
+| **Created** | 2026-07-18 |
+| **Last Updated** | 2026-07-18 |
 
 ---
 
@@ -21,6 +16,16 @@
 This document defines the versioning policy for MachineryManagerEnterprise.
 
 The versioning policy provides a consistent approach for identifying software releases, API compatibility and deployment artifacts.
+
+---
+
+# Versioning Philosophy
+
+Version numbers communicate compatibility.
+
+They do not describe implementation complexity.
+
+Every released artifact shall expose a deterministic and reproducible version.
 
 ---
 
@@ -55,6 +60,24 @@ Example
 
 2.0.0
 ```
+
+---
+
+# 3. Version Hierarchy
+
+Application Version
+
+↓
+
+Artifact Version
+
+↓
+
+Build Number
+
+↓
+
+Commit SHA
 
 ---
 
@@ -202,6 +225,7 @@ Documentation updates shall be traceable to the same release.
 # 11. API Version
 
 API versioning is independent from application versioning.
+Changes to internal application components shall never require a public API version change unless the external contract changes.
 
 Example
 
@@ -270,8 +294,32 @@ Future versions may introduce:
 
 ---
 
-# Revision History
+# Version Change Matrix
 
-| Version | Description |
-|----------|-------------|
-| 1.0.0 | Initial Versioning Policy |
+| Change                   | Version |
+| ------------------------ | ------- |
+| Breaking API             | Major   |
+| Breaking Domain Contract | Major   |
+| New Feature              | Minor   |
+| New Endpoint             | Minor   |
+| Bug Fix                  | Patch   |
+| Documentation            | Patch   |
+| Security Fix             | Patch   |
+
+---
+
+# Related Documents
+
+- 00-ReleaseStrategy.md
+- docs/07-api/05-ApiVersioning.md
+- docs/05-development/10-BuildPipeline.md
+- ADR-0008 — Versioning Policy
+
+---
+
+# Change History
+
+| Version | Date | Description |
+|----------|------------|---------------------------------------------|
+| 1.0.0 | Initial | Initial Versioning Policy |
+| 3.0.0 | 2026-07-18 | Standardized according to Documentation Standard v3.0 |

@@ -1,19 +1,13 @@
 # Release Notes Template
 
-**Document ID:** MME-REL-006
-
-**Repository Path:** `docs/08-releases/06-ReleaseNotesTemplate.md`
-
-**Version:** 1.0.0 (Draft)
-
-**Status:** In Progress
-
-**Related Documents**
-
-- 00-ReleaseStrategy.md
-- 01-VersioningPolicy.md
-- 02-ReleaseProcess.md
-- 05-ReleaseChecklist.md
+| Property | Value |
+|----------|-------|
+| **Document ID** | REL-006 |
+| **Version** | 3.0.0 |
+| **Status** | Active |
+| **Owner** | Release Manager |
+| **Created** | 2026-07-18 |
+| **Last Updated** | 2026-07-18 |
 
 ---
 
@@ -22,6 +16,19 @@
 This document defines the standard Release Notes template for MachineryManagerEnterprise.
 
 Every public release shall publish Release Notes using this structure.
+
+---
+
+# Template Principles
+
+Release Notes shall be:
+
+- concise;
+- factual;
+- customer-facing;
+- version specific.
+
+Every release shall publish one Release Notes document.
 
 ---
 
@@ -51,6 +58,17 @@ Every release shall include the following sections.
 | Release Type | Major / Minor / Patch |
 | Git Tag | |
 | Build Number | |
+
+---
+
+# Release Classification
+
+| Environment | |
+|-------------|--|
+| Development | |
+| Testing | |
+| Staging | |
+| Production | |
 
 ---
 
@@ -88,6 +106,17 @@ Example
 - Improved dashboard performance
 - Faster report generation
 - Better search capabilities
+
+---
+
+# Metrics
+
+| Metric | Value |
+|--------|-------|
+| Features | |
+| Improvements | |
+| Bug Fixes | |
+| Breaking Changes | |
 
 ---
 
@@ -220,8 +249,17 @@ Document:
 
 ---
 
-# Revision History
+# References
 
-| Version | Description |
-|----------|-------------|
-| 1.0.0 | Initial Release Notes Template |
+- Release Checklist
+- Deployment Report
+- Build Number
+- Git Tag
+---
+
+# Change History
+
+| Version | Date | Description |
+|----------|------------|---------------------------------------------|
+| 1.0.0 | Initial | Initial Release Notes Template |
+| 3.0.0 | 2026-07-18 | Standardized according to Documentation Standard v3.0 |

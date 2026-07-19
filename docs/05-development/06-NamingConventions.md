@@ -1,465 +1,450 @@
 # Naming Conventions
 
-**Document ID:** MME-DEV-006
-
-**Repository Path:** `docs/05-development/06-NamingConventions.md`
-
-**Version:** 1.0.0 (Draft)
-
-**Status:** In Progress
-
-**Related Documents**
-
-- 00-DevelopmentPrinciples.md
-- 02-ProjectStructure.md
-- 03-NamespaceConvention.md
-- 05-CodingStandards.md
+| Property | Value |
+|----------|-------|
+| **Document ID** | DOC-DEV-007 |
+| **Version** | 2.0.0 |
+| **Status** | Approved |
+| **Owner** | Solution Architect |
+| **Created** | 2026-07-18 |
+| **Last Updated** | 2026-07-18 |
 
 ---
 
-# 1. Purpose
+# Purpose
 
-This document defines the naming conventions used throughout MachineryManagerEnterprise.
+This document defines the official naming conventions used throughout the
+**MachineryManagerEnterprise** solution.
 
-Consistent naming improves readability, discoverability and long-term maintainability.
+Consistent naming improves:
 
----
+- Readability
+- Discoverability
+- Navigation
+- Refactoring
+- Communication between developers
 
-# 2. General Principles
-
-Names shall be:
-
-- Business oriented
-- Explicit
-- Descriptive
-- Consistent
-- Predictable
-
-Names shall communicate intent rather than implementation.
+Naming is considered part of the software architecture.
 
 ---
 
-# 3. Language
+# General Rules
 
-All source code shall be written in English.
+All identifiers shall:
 
-Business terminology shall follow the ubiquitous language defined by the Domain documentation.
+- Use English only.
+- Use meaningful names.
+- Avoid abbreviations unless universally accepted.
+- Describe intent rather than implementation.
+- Be consistent across the entire solution.
 
 ---
 
-# 4. Casing Rules
+# Casing Rules
 
-| Element | Convention |
-|----------|------------|
+| Item | Convention |
+|-------|------------|
 | Namespace | PascalCase |
 | Class | PascalCase |
+| Record | PascalCase |
+| Struct | PascalCase |
+| Enum | PascalCase |
 | Interface | PascalCase with `I` prefix |
 | Method | PascalCase |
 | Property | PascalCase |
-| Enum | PascalCase |
-| Enum Member | PascalCase |
-| Record | PascalCase |
 | Local Variable | camelCase |
 | Parameter | camelCase |
 | Private Field | `_camelCase` |
 | Constant | PascalCase |
-| Static Readonly | PascalCase |
+| Enum Member | PascalCase |
 
 ---
 
-# 5. Class Naming
+# Class Naming
 
-Classes shall be named using nouns.
+Classes should represent nouns.
 
-Examples
+Good examples:
 
-```
-Asset
-
-Engine
+```text
+Machine
 
 MaintenancePlan
 
-MeterReading
-
-ForecastResult
+InventoryService
 ```
 
-Avoid
+Avoid:
 
-```
-AssetManager
+```text
+MachineHelper
 
-EngineProcessor
+MachineManager2
 
-DataObject
-
-Helper
+DoSomething
 ```
 
 ---
 
-# 6. Interface Naming
+# Interface Naming
 
 Interfaces shall begin with `I`.
 
 Examples
 
-```
-IAssetRepository
+```text
+IMachineRepository
 
-IUnitOfWork
+IUserService
 
-IEmailSender
-
-IForecastProvider
+IClock
 ```
 
 ---
 
-# 7. Command Naming
+# Method Naming
 
-Commands shall begin with a verb.
+Methods should represent actions.
 
 Examples
 
-```
-RegisterAssetCommand
+```text
+CreateMachine()
 
-ReplaceEngineCommand
+CalculateAvailability()
 
-CompleteMaintenanceCommand
-
-GenerateForecastCommand
+GenerateReport()
 ```
 
----
-
-# 8. Query Naming
-
-Queries shall begin with:
-
-- Get
-- Search
-- Compare
-- Find
+Boolean methods should answer a question.
 
 Examples
 
-```
-GetAssetQuery
+```text
+IsActive()
 
-SearchAssetsQuery
+HasPermission()
 
-CompareForecastsQuery
-
-GetMaintenanceHistoryQuery
+CanDelete()
 ```
 
 ---
 
-# 9. Handler Naming
+# Variable Naming
 
-Command Handlers
+Variables should clearly describe their purpose.
 
+Prefer:
+
+```text
+availableMachines
+
+maintenanceSchedule
 ```
-RegisterAssetCommandHandler
 
-ReplaceEngineCommandHandler
+Avoid:
+
+```text
+tmp
+
+obj
+
+data
+
+x
 ```
 
-Query Handlers
-
-```
-GetAssetQueryHandler
-
-SearchAssetsQueryHandler
-```
+Except for short-lived loop variables.
 
 ---
 
-# 10. Event Naming
+# Collections
 
-Domain Events shall describe something that has already happened.
+Collections should use plural names.
 
 Examples
 
-```
-AssetRegistered
+```text
+machines
 
-EngineInstalled
+users
 
-MaintenanceCompleted
-
-MeterReplaced
-
-ForecastGenerated
+maintenancePlans
 ```
 
-Avoid imperative names.
-
-Incorrect
-
-```
-RegisterAsset
-
-ReplaceMeter
-```
+Single objects should use singular names.
 
 ---
 
-# 11. Aggregate Naming
+# Boolean Variables
 
-Aggregates shall use business nouns.
+Boolean variables should begin with words such as:
+
+- is
+- has
+- can
+- should
 
 Examples
 
-```
-Asset
+```text
+isActive
 
-Engine
+hasPermission
 
-MaintenanceOrder
+canEdit
 
-FinancialRecord
+shouldRetry
 ```
 
 ---
 
-# 12. Value Object Naming
+# Async Methods
 
-Value Objects shall describe immutable business concepts.
+Asynchronous methods shall end with:
+
+```text
+Async
+```
+
+Example
+
+```csharp
+LoadMachinesAsync()
+```
+
+---
+
+# Event Handlers
+
+Event handlers should follow:
+
+```text
+On<Event>
+
+Handle<Event>
+```
 
 Examples
 
-```
-Money
+```text
+OnMachineCreated
 
-HourMeter
-
-OperationalUsage
-
-SerialNumber
-
-RegistrationNumber
+HandleUserDeleted
 ```
 
 ---
 
-# 13. Enumeration Naming
+# DTOs
 
-Enumeration names shall be singular.
+DTO names should end with:
 
-Examples
-
-```
-AssetStatus
-
-MaintenanceType
-
-FuelType
-
-DocumentCategory
-```
-
-Enumeration members shall also use PascalCase.
-
-```
-Active
-
-Inactive
-
-Retired
-
-Disposed
-```
-
----
-
-# 14. Repository Naming
-
-Repository Interfaces
-
-```
-IAssetRepository
-
-IEngineRepository
-```
-
-Implementations
-
-```
-AssetRepository
-
-EngineRepository
-```
-
----
-
-# 15. Service Naming
-
-Application Services
-
-```
-AssetApplicationService
-
-ForecastApplicationService
-```
-
-Domain Services
-
-```
-MaintenanceScheduler
-
-DepreciationCalculator
-
-ForecastEngine
-```
-
----
-
-# 16. DTO Naming
-
-DTOs shall end with:
-
-```
+```text
 Dto
 ```
 
 Examples
 
-```
-AssetDto
+```text
+MachineDto
 
-EngineDto
+UserDto
 
-ForecastDto
+InventoryDto
 ```
 
 ---
 
-# 17. Validator Naming
+# Commands
 
-Validators shall end with:
+Commands should end with:
 
+```text
+Command
 ```
+
+Examples
+
+```text
+CreateMachineCommand
+
+DeleteMachineCommand
+```
+
+---
+
+# Queries
+
+Queries should end with:
+
+```text
+Query
+```
+
+Examples
+
+```text
+GetMachineQuery
+
+SearchInventoryQuery
+```
+
+---
+
+# Validators
+
+Validators should end with:
+
+```text
 Validator
 ```
 
 Examples
 
-```
-RegisterAssetCommandValidator
+```text
+CreateMachineValidator
 
-ReplaceEngineCommandValidator
+UserValidator
 ```
 
 ---
 
-# 18. Test Naming
+# Exceptions
 
-Test classes shall mirror production classes.
+Exceptions should end with:
+
+```text
+Exception
+```
 
 Examples
 
-```
-AssetTests
+```text
+MachineNotFoundException
 
-RegisterAssetCommandHandlerTests
-
-ForecastEngineTests
+InvalidLicenseException
 ```
 
-Test methods should follow:
+---
 
+# Enumerations
+
+Enum names should be singular.
+
+Examples
+
+```text
+MachineStatus
+
+MaintenancePriority
 ```
-MethodName_ShouldExpectedBehavior_WhenCondition
+
+Enum members use PascalCase.
+
+---
+
+# Database Tables
+
+Entity names remain singular.
+
+Examples
+
+```text
+Machine
+
+MaintenancePlan
+
+InventoryItem
 ```
+
+Entity Framework will determine pluralization where applicable.
+
+---
+
+# File Names
+
+File names shall match the public type.
 
 Example
 
-```
-ReplaceEngine_ShouldCreateHistory_WhenReplacementSucceeds
+```text
+MachineService.cs
+
+MachineDto.cs
+
+CreateMachineCommand.cs
 ```
 
 ---
 
-# 19. Forbidden Names
+# Namespace Consistency
 
-The following names shall not appear in production code.
+Namespaces shall always match folder names.
 
+Example
+
+Folder
+
+```text
+Features
+
+Inventory
+
+Commands
 ```
+
+Namespace
+
+```text
+MachineryManagerEnterprise.Application.Features.Inventory.Commands
+```
+
+---
+
+# Forbidden Names
+
+Avoid:
+
+```text
 Helper
 
-Manager
-
-Processor
-
-Utility
-
-Common
+Util
 
 Misc
 
-Temp
+CommonStuff
 
-Test123
+Manager
+
+Data
+
+Info
 ```
 
-Names shall always express business meaning.
+Names should communicate responsibility rather than generic purpose.
 
 ---
 
-# 20. Abbreviations
+# Compliance
 
-Avoid abbreviations unless universally accepted.
+Every new identifier introduced into the solution shall comply with these conventions.
 
-Allowed
-
-```
-DTO
-
-API
-
-URL
-
-ID
-
-HTTP
-
-JSON
-```
-
-Avoid
-
-```
-Cfg
-
-Tmp
-
-Mgr
-
-Proc
-
-Val
-```
+Exceptions require architectural approval.
 
 ---
 
-# 21. Stability
+# Related Documents
 
-Public names become part of the architecture.
-
-Renaming public types requires:
-
-- Architectural review
-- Documentation update
-- Refactoring of dependent code
+- DOC-CONVENTIONS
+- DOC-DEV-001 (Development Principles)
+- DOC-DEV-004 (Namespace Convention)
+- DOC-DEV-006 (Coding Standards)
 
 ---
 
-# Revision History
+# Change History
 
-| Version | Description |
-|----------|-------------|
-| 1.0.0 | Initial Naming Convention |
+| Version | Date | Description |
+|----------|------------|----------------------------------------------|
+| 1.0.0 | 2026-07-18 | Initial naming conventions |
+| 2.0.0 | 2026-07-18 | Standardized according to Documentation Standard v3.0 |

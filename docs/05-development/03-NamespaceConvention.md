@@ -1,273 +1,321 @@
 # Namespace Convention
 
-**Document ID:** MME-DEV-003
-
-**Repository Path:** `docs/05-development/03-NamespaceConvention.md`
-
-**Version:** 1.0.0 (Draft)
-
-**Status:** In Progress
-
-**Related Documents**
-
-- 00-DevelopmentPrinciples.md
-- 01-SolutionStructure.md
-- 02-ProjectStructure.md
+| Property | Value |
+|----------|-------|
+| **Document ID** | DOC-DEV-004 |
+| **Version** | 2.0.0 |
+| **Status** | Approved |
+| **Owner** | Solution Architect |
+| **Created** | 2026-07-18 |
+| **Last Updated** | 2026-07-18 |
 
 ---
 
-# 1. Purpose
+# Purpose
 
-This document defines the namespace conventions used throughout MachineryManagerEnterprise.
+This document defines the official namespace conventions for the
+**MachineryManagerEnterprise** solution.
 
-A consistent namespace hierarchy improves readability, discoverability, maintainability and long-term scalability.
+A consistent namespace hierarchy improves:
+
+- Readability
+- Navigation
+- Refactoring
+- Discoverability
+- Long-term maintainability
+
+Every project shall follow these conventions.
 
 ---
 
-# 2. General Principles
+# General Principles
 
 Namespaces shall:
 
-- reflect project structure;
-- reflect business responsibilities;
-- remain stable over time;
-- avoid unnecessary depth;
-- never expose implementation technology.
+- Reflect the physical project structure.
+- Be deterministic.
+- Avoid unnecessary nesting.
+- Follow project boundaries.
+- Never expose implementation details.
+
+Namespaces are part of the architecture and shall not be considered arbitrary.
 
 ---
 
-# 3. Root Namespace
+# Root Namespace
 
-All production projects shall begin with:
+Every project begins with the same root namespace.
 
 ```text
 MachineryManagerEnterprise
 ```
 
+---
+
+# Project Namespaces
+
+Each project extends the root namespace.
+
 Examples
 
 ```text
+MachineryManagerEnterprise.SharedKernel
+
 MachineryManagerEnterprise.Domain
 
 MachineryManagerEnterprise.Application
 
 MachineryManagerEnterprise.Infrastructure
 
-MachineryManagerEnterprise.Api
-
-MachineryManagerEnterprise.Shared
+MachineryManagerEnterprise.Web
 ```
 
 ---
 
-# 4. Namespace Hierarchy
+# Feature Namespaces
 
-The namespace hierarchy shall mirror the folder hierarchy.
+Business functionality should be grouped by feature.
 
 Example
 
 ```text
-Application
+MachineryManagerEnterprise.Application.Features.Inventory
 
-└── Commands
+MachineryManagerEnterprise.Application.Features.Users
 
-    └── Asset
-
-        └── RegisterAsset
-```
-
-Namespace
-
-```text
-MachineryManagerEnterprise.Application.Commands.Asset.RegisterAsset
-```
-
-Folder and namespace shall always match.
-
----
-
-# 5. Domain Namespaces
-
-Examples
-
-```text
-MachineryManagerEnterprise.Domain.Aggregates
-
-MachineryManagerEnterprise.Domain.Entities
-
-MachineryManagerEnterprise.Domain.ValueObjects
-
-MachineryManagerEnterprise.Domain.DomainEvents
-
-MachineryManagerEnterprise.Domain.DomainServices
-
-MachineryManagerEnterprise.Domain.Specifications
-
-MachineryManagerEnterprise.Domain.Repositories
+MachineryManagerEnterprise.Application.Features.Maintenance
 ```
 
 ---
 
-# 6. Application Namespaces
+# Commands
 
-Examples
+Commands shall be located under the corresponding feature.
+
+Example
 
 ```text
-MachineryManagerEnterprise.Application.Commands
-
-MachineryManagerEnterprise.Application.Queries
-
-MachineryManagerEnterprise.Application.Handlers
-
-MachineryManagerEnterprise.Application.Services
-
-MachineryManagerEnterprise.Application.DTOs
-
-MachineryManagerEnterprise.Application.Workflows
-
-MachineryManagerEnterprise.Application.Authorization
+MachineryManagerEnterprise.Application.Features.Inventory.Commands
 ```
 
 ---
 
-# 7. Infrastructure Namespaces
+# Queries
+
+Queries follow the same convention.
+
+```text
+MachineryManagerEnterprise.Application.Features.Inventory.Queries
+```
+
+---
+
+# Validators
+
+Validators belong beside their corresponding Commands or Queries.
+
+Example
+
+```text
+MachineryManagerEnterprise.Application.Features.Inventory.Validation
+```
+
+---
+
+# DTOs
+
+DTOs remain inside the owning feature.
+
+```text
+MachineryManagerEnterprise.Application.Features.Inventory.DTOs
+```
+
+---
+
+# Mapping
+
+Mapping profiles remain grouped by feature.
+
+```text
+MachineryManagerEnterprise.Application.Features.Inventory.Mapping
+```
+
+---
+
+# Domain
+
+Domain namespaces should reflect business concepts rather than technical layers.
+
+Example
+
+```text
+MachineryManagerEnterprise.Domain.Inventory
+
+MachineryManagerEnterprise.Domain.Users
+
+MachineryManagerEnterprise.Domain.Maintenance
+```
+
+Avoid namespaces such as:
+
+```text
+Domain.Entities
+
+Domain.Models
+
+Domain.Classes
+```
+
+The business concept is more important than the technical artifact.
+
+---
+
+# Infrastructure
+
+Infrastructure namespaces reflect implementation details.
 
 Examples
 
 ```text
 MachineryManagerEnterprise.Infrastructure.Persistence
 
-MachineryManagerEnterprise.Infrastructure.Persistence.Repositories
+MachineryManagerEnterprise.Infrastructure.Identity
 
 MachineryManagerEnterprise.Infrastructure.Logging
 
-MachineryManagerEnterprise.Infrastructure.Notifications
-
-MachineryManagerEnterprise.Infrastructure.FileStorage
-
-MachineryManagerEnterprise.Infrastructure.ExternalSystems
+MachineryManagerEnterprise.Infrastructure.Caching
 ```
 
 ---
 
-# 8. API Namespaces
+# Web
+
+Presentation namespaces should follow UI organization.
 
 Examples
 
 ```text
-MachineryManagerEnterprise.Api.Controllers
+MachineryManagerEnterprise.Web.Components
 
-MachineryManagerEnterprise.Api.Authentication
+MachineryManagerEnterprise.Web.Pages
 
-MachineryManagerEnterprise.Api.Authorization
+MachineryManagerEnterprise.Web.Layout
 
-MachineryManagerEnterprise.Api.Filters
-
-MachineryManagerEnterprise.Api.Middleware
+MachineryManagerEnterprise.Web.Shared
 ```
 
 ---
 
-# 9. Test Namespaces
+# Tests
 
-Examples
-
-```text
-MachineryManagerEnterprise.Tests.Unit
-
-MachineryManagerEnterprise.Tests.Integration
-
-MachineryManagerEnterprise.Tests.Functional
-```
-
-Test namespaces should resemble the production namespaces they verify.
-
----
-
-# 10. Feature Organization
-
-Features shall be grouped by business capability.
-
-Preferred
-
-```text
-Commands.Asset.RegisterAsset
-
-Commands.Asset.TransferAsset
-
-Commands.Asset.DisposeAsset
-```
-
-Avoid grouping unrelated features together.
-
----
-
-# 11. Forbidden Namespaces
-
-The following namespace names shall never appear:
-
-```text
-Common
-
-Misc
-
-Helpers
-
-Utils
-
-Temp
-
-NewFolder
-
-General
-```
-
-Every namespace must communicate business meaning.
-
----
-
-# 12. Namespace Length
-
-Namespaces should remain concise.
-
-Recommended maximum depth:
-
-```text
-6 levels
-```
+Test projects mirror production namespaces.
 
 Example
 
 ```text
-MachineryManagerEnterprise.Application.Commands.Asset.RegisterAsset
+MachineryManagerEnterprise.Application.Tests.Features.Inventory
 ```
 
-Avoid deeply nested namespaces without architectural value.
+This makes locating corresponding production code straightforward.
 
 ---
 
-# 13. Refactoring Rules
+# Naming Rules
 
-Namespace changes shall occur only when:
+Namespaces shall:
 
-- architectural responsibilities change;
-- project structure changes;
-- ADR approval exists.
-
-Namespace changes shall never be cosmetic.
-
----
-
-# 14. Stability
-
-Namespaces are considered part of the public architecture.
-
-Frequent namespace changes increase maintenance cost and shall be avoided.
+- Use PascalCase.
+- Never contain spaces.
+- Never use abbreviations unless universally accepted.
+- Never contain version numbers.
+- Never expose implementation technology.
 
 ---
 
-# Revision History
+# Maximum Namespace Depth
 
-| Version | Description |
-|----------|-------------|
-| 1.0.0 | Initial Namespace Convention |
+Excessively deep namespaces reduce readability.
+
+Recommended depth:
+
+```text
+MachineryManagerEnterprise.Application.Features.Inventory.Commands
+```
+
+Avoid structures such as:
+
+```text
+MachineryManagerEnterprise.Application.Features.Inventory.Commands.Create.Internal.Models
+```
+
+---
+
+# Namespace Equals Folder
+
+Every namespace should match its physical folder.
+
+Example
+
+```text
+Features
+
+Inventory
+
+Commands
+
+CreateMachineCommand.cs
+```
+
+Namespace
+
+```text
+MachineryManagerEnterprise.Application.Features.Inventory.Commands
+```
+
+This one-to-one relationship simplifies navigation and refactoring.
+
+---
+
+# Future Modules
+
+New bounded contexts should become new namespace roots.
+
+Example
+
+```text
+MachineryManagerEnterprise.Inventory
+
+MachineryManagerEnterprise.Finance
+
+MachineryManagerEnterprise.HumanResources
+```
+
+This keeps modules independent as the solution grows.
+
+---
+
+# Compliance
+
+Every newly created namespace shall comply with this document.
+
+Namespace deviations require architectural approval through an ADR.
+
+---
+
+# Related Documents
+
+- DOC-CONVENTIONS
+- DOC-README
+- DOC-DEV-001 (Development Principles)
+- DOC-DEV-002 (Solution Structure)
+- DOC-DEV-003 (Project Structure)
+- DOC-DEV-005 (Dependency Rules)
+
+---
+
+# Change History
+
+| Version | Date | Description |
+|----------|------------|----------------------------------------------|
+| 1.0.0 | 2026-07-18 | Initial namespace conventions |
+| 2.0.0 | 2026-07-18 | Standardized according to Documentation Standard v3.0 |

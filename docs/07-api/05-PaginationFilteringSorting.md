@@ -1,19 +1,13 @@
-# Pagination, Filtering and Sorting
+# API Versioning
 
-**Document ID:** MME-API-005
-
-**Repository Path:** `docs/07-api/05-PaginationFilteringSorting.md`
-
-**Version:** 1.0.0 (Draft)
-
-**Status:** In Progress
-
-**Related Documents**
-
-- 00-ApiPrinciples.md
-- 01-RestConventions.md
-- 02-EndpointDesign.md
-- 03-RequestResponseModel.md
+| Property | Value |
+|----------|-------|
+| **Document ID** | API-005 |
+| **Version** | 3.0.0 |
+| **Status** | Active |
+| **Owner** | Solution Architect |
+| **Created** | 2026-07-18 |
+| **Last Updated** | 2026-07-18 |
 
 ---
 
@@ -22,6 +16,42 @@
 This document defines the standard conventions for pagination, filtering and sorting used throughout MachineryManagerEnterprise.
 
 All collection endpoints shall follow these conventions.
+
+---
+
+# Versioning Philosophy
+
+API evolution shall prioritize backward compatibility.
+
+Clients shall be able to migrate gradually.
+
+Breaking changes shall always result in a new major API version.
+
+---
+
+# Version Lifecycle
+
+New Endpoint
+
+↓
+
+Preview (optional)
+
+↓
+
+Stable
+
+↓
+
+Deprecated
+
+↓
+
+Sunset
+
+↓
+
+Removed
 
 ---
 
@@ -262,8 +292,29 @@ Backward compatibility shall be preserved.
 
 ---
 
-# Revision History
+# 17. Version Compatibility Matrix
 
-| Version | Description |
-|----------|-------------|
-| 1.0.0 | Initial Pagination, Filtering and Sorting specification |
+| Client    | API v1 | API v2 |
+| --------- | :----: | :----: |
+| v1 Client |    ✅   |    ❌   |
+| v2 Client |    ❌   |    ✅   |
+
+---
+
+# Related Documents
+
+- 00-ApiPrinciples.md
+- 01-RestConventions.md
+- 02-EndpointDesign.md
+- 03-RequestResponseModel.md
+- 04-ErrorResponses.md
+- ADR-0005 — API Strategy
+
+---
+
+# Change History
+
+| Version | Date | Description |
+|----------|------------|---------------------------------------------|
+| 1.0.0 | Initial | Initial Versioning Strategy |
+| 3.0.0 | 2026-07-18 | Standardized according to Documentation Standard v3.0 |
