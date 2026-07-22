@@ -211,6 +211,14 @@ Examples:
 - Financial Management consumes Purchase and Maintenance information.
 - Reporting consumes data from all business capabilities.
 
+All business capabilities are designed to operate independently of deployment topology.
+
+Business operations may execute inside Enterprise, Project or User Workspaces without changing Business Rules.
+
+Distributed synchronization propagates validated business changes between Workspaces while preserving business consistency.
+
+This behavior is defined by ADR-0012 (Distributed Workspace Architecture).
+
 ---
 
 # Future Expansion
@@ -224,6 +232,9 @@ The capability model intentionally supports future expansion, including:
 - Predictive maintenance
 - AI-assisted diagnostics
 - Mobile applications
+- Distributed Workspace synchronization
+- Offline-first project execution
+- Bidirectional synchronization between Enterprise, Project and User Workspaces
 - External ERP integration
 - GIS integration
 - Digital inspections
@@ -274,6 +285,7 @@ The platform may integrate with such systems but will not replace them.
 - docs/03-domain/02-BoundedContexts.md
 - docs/04-modules
 - ADR-0001 — Adopt Clean Architecture
+- ADR-0012 — Distributed Workspace Architecture
 
 # Revision History
 
