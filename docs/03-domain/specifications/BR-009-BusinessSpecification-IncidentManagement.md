@@ -4,11 +4,11 @@
 |----------|-------|
 | **Document ID** | BR-007 |
 | **Capability ID** | DD-008 |
-| **Version** | 1.0.0 |
+| **Version** | 1.1.0 |
 | **Status** | Draft |
-| **Owner** | Domain Architect |
+| **Owner** | Solution Architect / Domain Architect |
 | **Created** | 2026-07-20 |
-| **Last Updated** | 2026-07-20 |
+| **Last Updated** | 2026-07-23 |
 
 ---
 
@@ -19,6 +19,14 @@ This specification defines the business capability responsible for managing oper
 Incident Management enables the organization to record, classify, investigate, monitor and resolve unexpected operational events affecting Assets, Tracked Components, Personnel or the operating environment.
 
 The capability establishes a complete business history of incidents from initial reporting through final resolution.
+
+It executes maintenance.
+
+It does not predict maintenance.
+
+It does not investigate Incidents.
+
+It records operational reality.
 
 ---
 
@@ -40,6 +48,9 @@ Examples include:
 - Theft
 - Vandalism
 - Unexpected operational abnormalities
+- repair quality cannot be evaluated
+- resource utilization cannot be analyzed
+- regulatory compliance becomes difficult
 
 Without a structured Incident Management capability:
 
@@ -94,6 +105,18 @@ This specification includes:
 - Incident Closure
 - Incident History
 - Incident Reporting
+- Maintenance Work Execution
+- Work Order Execution
+- Technician Assignment
+- Resource Assignment
+- Labor Recording
+- Parts Consumption
+- Component Replacement
+- Maintenance Measurements
+- Maintenance Results
+- Maintenance Completion
+- Maintenance History
+- Operational Traceability
 
 ---
 
@@ -109,6 +132,15 @@ The following capabilities are outside the scope of this specification:
 - Financial Accounting
 - Asset Lifecycle
 - Parts Catalog
+- Maintenance Forecast Generation
+- Incident Investigation
+- Procurement
+- Inventory Management
+- Parts Catalog
+- Asset Registration
+- Component Registration
+- Notification Management
+- Financial Accounting
 
 These capabilities consume Incident information but are governed by separate Business Specifications.
 
@@ -142,6 +174,16 @@ Every Incident possesses:
 - Affected Business Objects
 - Investigation History
 - Resolution History
+- Operation Type
+- Operation Status
+- Execution History
+- Responsible Organization
+- Responsible Personnel
+- Start Time
+- Finish Time
+- Consumed Resources
+- Produced Results
+- Business Traceability
 
 ---
 
@@ -197,6 +239,88 @@ Examples include:
 - Unauthorized Access
 
 Organizations may define additional Incident categories according to operational requirements.
+
+---
+
+## Business Objects
+
+A Maintenance Operation may affect one or more business objects.
+
+Typical business objects include:
+
+### Assets
+
+Examples:
+
+- Excavator
+- Bulldozer
+- Loader
+- Crane
+
+---
+
+### Tracked Components
+
+Examples:
+
+- Tire
+- Battery
+- Engine
+- Gearbox
+- Hydraulic Attachment
+
+---
+
+### Parts
+
+Examples:
+
+- Filters
+- Bearings
+- Belts
+- Hydraulic Hoses
+- Oils
+- Lubricants
+
+---
+
+### Personnel
+
+Examples:
+
+- Technician
+- Inspector
+- Supervisor
+
+---
+
+### External Organizations
+
+Examples:
+
+- Supplier
+- Contractor
+- Service Company
+
+---
+
+## Business Purpose
+
+Maintenance Operations exist to preserve operational reality.
+
+They answer questions such as:
+
+- What work was performed?
+- Who performed it?
+- Which Asset was serviced?
+- Which Components were replaced?
+- Which Parts were consumed?
+- How long did execution require?
+- What was the operational outcome?
+
+Every answer becomes permanent business history.
+
+---
 
 # 6. Incident Classification
 
@@ -418,6 +542,15 @@ Proper Incident Classification enables:
 - operational risk assessment;
 - continuous business improvement.
 
+---
+
+## 7. Business Objectives (System Capabilities)
+The system shall provide a unified execution process capable of:
+recording performed work; recording inspections; recording findings; recording repairs; recording replacements; recording installations; recording removals; recording adjustments; recording measurements; recording testing; recording labor; recording inventory consumption; recording downtime; recording financial impact; preserving complete operational history.
+
+
+---
+
 # 7. Incident Lifecycle
 
 ## Business Definition
@@ -637,6 +770,8 @@ A controlled Incident Lifecycle enables:
 - management reporting;
 - investigation traceability;
 - organizational learning.
+
+---
 
 # 8. Investigation Rules
 
@@ -1357,3 +1492,4 @@ Execution remains the responsibility of downstream capabilities.
 | Version | Date | Description |
 |----------|------------|-----------------------------------------------|
 | 1.0.0 | 2026-07-20 | Initial Business Specification for Incident Management |
+| 1.1.0 | 2026-07-23 | Unified version |

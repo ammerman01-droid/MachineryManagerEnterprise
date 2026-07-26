@@ -27,6 +27,18 @@ Do not describe implementation details.
 
 ---
 
+## Scope
+
+### In Scope
+
+This specification defines ...
+
+### Out of Scope
+
+This specification does not define implementation details, architectural decisions, or technical design.
+
+---
+
 # 1. Business Problem
 
 Describe the real-world business problem.
@@ -195,17 +207,27 @@ Reference all related documents.
 
 Typical examples:
 
-- Domain Principles
-- Core Concepts
-- Domain Discovery
-- Capability Model
-- ADRs
-- Other Business Specifications
+| Document | Purpose |
+|----------|---------|
+| 01-Architecture.md | Defines the architectural context. |
+| CapabilityModel.md | Defines related capabilities. |
+| ADR-xxx | Architectural decisions affecting this specification. |
+
+---
+
+## Traceability
+
+| Artifact | Reference |
+|----------|-----------|
+| Capability | |
+| ADR | |
+| Business Glossary | |
 
 ---
 
 # Revision History
 
-| Version | Date | Description |
-|----------|------------|--------------------------------|
-| 1.0.0 | YYYY-MM-DD | Initial template |
+| Version  | Date       | Author        | Description |
+|----------|------------|---------------|-------------|
+| 1.0.0    | YYYY-MM-DD | Ahmad Mojahed | Initial template |
+| 1.1      | 2026-07-23 | Ahmad Mojahed | Standardized document structure, completed references, improved consistency with project documentation standards. |

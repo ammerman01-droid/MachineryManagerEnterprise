@@ -77,22 +77,22 @@ No capability shall skip any stage.
 
 # 4. Business Specification Catalog
 
-| ID         | Business Capability          | Discovery  | Specification                                          | Depends On     | Priority | Status  |
-| ---------- | ---------------------------- | ---------- | -------------------------------------------------------| ---------------| -------- | --------|
-| BR-001     | Asset Relationships          | DD-002     | BR-001-BusinessSpecification-AssetRelationships.md     | —              | High     | Planned |
-| BR-002     | Tracked Components           | DD-003     | BR-002-BusinessSpecification-TrackedComponents.md      | BR-001         | High     | Draft   |
-| BR-003     | Tire Lifecycle Management    | DD-004     | BR-003-BusinessSpecification-TireLifecycle.md          | BR-002         | High     | Planned |
-| BR-004     | Battery Lifecycle Management | DD-005     | BR-004-BusinessSpecification-BatteryLifecycle.md       | BR-002         | High     | Planned |
-| BR-005     | Parts Catalog                | DD-006     | BR-005-BusinessSpecification-PartsCatalog.md           | —              | High     | Planned |
-| BR-006     | Part Cross Reference         | DD-007     | BR-006-BusinessSpecification-PartCrossReference.md     | BR-005         | High     | Planned |
-| BR-007     | Incident Management          | DD-008     | BR-007-BusinessSpecification-IncidentManagement.md     | BR-010         | High     | Planned |
-| BR-008     | Maintenance Forecast         | DD-009     | BR-008-BusinessSpecification-MaintenanceForecast.md    | BR-010         | High     | Planned |
-| BR-009     | Maintenance Operations       | DD-010     | BR-009-BusinessSpecification-MaintenanceOperations.md  | BR-001, BR-002 | High     | Planned |
-| BR-010     | Notification Center          | DD-011     | BR-010-BusinessSpecification-NotificationCenter.md     | —              | High     | Planned |
-| BR-011     | Internal Messaging           | DD-012     | BR-011-BusinessSpecification-InternalMessaging.md      | —              | Medium   | Planned |
-| BR-012     | AI Assistant                 | DD-013     | BR-012-BusinessSpecification-AIAssistant.md            | —              | Medium   | Planned |
-| BR-013     | Relationship Management      | DD-015     | BR-013-BusinessSpecification-RelationshipManagement.md | BR-001         | High     | Planned |
-
+| ID         | Business Capability                 | Discovery  | Specification                                                       | Depends On     | Priority | Status  |
+| ---------- | ----------------------------------- | ---------- | --------------------------------------------------------------------| ---------------| -------- | --------|
+| BR-003     | Asset Relationships                 | DD-002     | BR-003-BusinessSpecification-AssetRelationships.md                  | —              | High     | Planned |
+| BR-004     | Tracked Components                  | DD-003     | BR-004-BusinessSpecification-TrackedComponents.md                   | BR-001         | High     | Draft   |
+| BR-005     | Tire Lifecycle Management           | DD-004     | BR-005-BusinessSpecification-TireLifecycle.md                       | BR-002         | High     | Planned |
+| BR-006     | Battery Lifecycle Management        | DD-005     | BR-006-BusinessSpecification-BatteryLifecycle.md                    | BR-002         | High     | Planned |
+| BR-007     | Parts Catalog                       | DD-006     | BR-007-BusinessSpecification-PartsCatalog.md                        | —              | High     | Planned |
+| BR-008     | Part Cross Reference                | DD-007     | BR-008-BusinessSpecification-PartCrossReference.md                  | BR-005         | High     | Planned |
+| BR-009     | Incident Management                 | DD-008     | BR-009-BusinessSpecification-IncidentManagement.md                  | BR-010         | High     | Planned |
+| BR-010     | Maintenance Forecast                | DD-009     | BR-010-BusinessSpecification-MaintenanceForecast.md                 | BR-010         | High     | Planned |
+| BR-011     | Maintenance Operations              | DD-010     | BR-011-BusinessSpecification-MaintenanceOperations.md               | BR-001, BR-002 | High     | Planned |
+| BR-012     | Notification Center                 | DD-011     | BR-012-BusinessSpecification-NotificationCenter.md                  | —              | High     | Planned |
+| BR-013     | Internal Messaging                  | DD-012     | BR-013-BusinessSpecification-InternalMessaging.md                   | —              | Medium   | Planned |
+| BR-014     | AI Assistant                        | DD-013     | BR-014-BusinessSpecification-AIAssistant.md                         | —              | Medium   | Planned |
+| BR-015     | Relationship Management             | DD-015     | BR-015-BusinessSpecification-RelationshipManagement.md              | BR-001         | High     | Planned |
+| BR-016     | DistributedWorkspaceSynchronization | DD-015     | BR-016-BusinessSpecification-DistributedWorkspaceSynchronization.md | BR-001         | High     | Planned |
 
 
 ---
@@ -137,6 +137,10 @@ This order reflects architectural dependencies and minimizes future redesign.
 - 00-DomainPrinciples.md
 - 01-CoreConcepts.md
 - 02-BoundedContexts.md
+- 01-Architecture.md
+- CapabilityModel
+- AI_ENGINEERING_CONTRACT.md
+- REPOSITORY_GUIDE.md
 
 ---
 
