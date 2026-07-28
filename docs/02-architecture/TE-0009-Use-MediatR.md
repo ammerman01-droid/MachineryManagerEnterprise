@@ -3,11 +3,19 @@
 | Property | Value |
 |----------|-------|
 | **Document ID** | TE-0009 |
-| **Version** | 3.0.0 |
+| **Version** | 3.1.0 |
 | **Status** | Approved |
 | **Owner** | Solution Architect |
 | **Created** | 2026-07-18 |
-| **Last Updated** | 2026-07-18 |
+| **Last Updated** | 2026-07-28 |
+
+---
+
+# Evaluation Scope
+
+This Technology Evaluation only evaluates technology selection.
+
+Implementation details are defined by the corresponding Architecture Decision Records (ADRs).
 
 ---
 
@@ -174,8 +182,9 @@ https://github.com/jbogard/MediatR/wiki
 
 # Change History
 
-| Version | Date | Description |
-|----------|------------|----------------------------------------------|
-| 1.0.0 | 2026-07-18 | Initial evaluation |
-| 2.0.0 | 2026-07-18 | Standardized |
-| 3.0.0 | 2026-07-18 | Rewritten according to Documentation Standard v3.0 |
+| Version | Date       | Description |
+|---------|------------|--------------------|
+| 1.0.0   | 2026-07-18 | Initial evaluation |
+| 2.0.0   | 2026-07-18 | Standardized |
+| 3.0.0   | 2026-07-18 | Rewritten according to Documentation Standard v3.0 |
+| 3.1.0   | 2026-07-28 | New section added (Evaluation Scope) |

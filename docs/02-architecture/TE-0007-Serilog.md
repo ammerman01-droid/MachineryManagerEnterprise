@@ -3,11 +3,19 @@
 | Property | Value |
 |----------|-------|
 | **Document ID** | TE-0007 |
-| **Version** | 3.0.0 |
+| **Version** | 3.1.0 |
 | **Status** | Approved |
 | **Owner** | Solution Architect |
 | **Created** | 2026-07-18 |
-| **Last Updated** | 2026-07-18 |
+| **Last Updated** | 2026-07-28 |
+
+---
+
+# Evaluation Scope
+
+This Technology Evaluation only evaluates technology selection.
+
+Implementation details are defined by the corresponding Architecture Decision Records (ADRs).
 
 ---
 
@@ -271,8 +279,9 @@ https://www.nuget.org/packages/Serilog
 
 # Change History
 
-| Version | Date | Description |
-|----------|------------|----------------------------------------------|
-| 1.0.0 | 2026-07-18 | Initial evaluation |
-| 2.0.0 | 2026-07-18 | Standardized |
-| 3.0.0 | 2026-07-18 | Rewritten according to Technology Evaluation Template |
+| Version | Date       | Description |
+|---------|------------|--------------------|
+| 1.0.0   | 2026-07-18 | Initial evaluation |
+| 2.0.0   | 2026-07-18 | Standardized |
+| 3.0.0   | 2026-07-18 | Rewritten according to Technology Evaluation Template |
+| 3.1.0   | 2026-07-28 | New section added (Evaluation Scope) |

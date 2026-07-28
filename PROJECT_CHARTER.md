@@ -111,7 +111,7 @@ Every design decision should prioritize maintainability over short-term convenie
 
 Backend
 
-- .NET 9
+- .NET 10
 - ASP.NET Core
 - Blazor Server
 

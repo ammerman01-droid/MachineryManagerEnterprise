@@ -3,11 +3,19 @@
 | Property | Value |
 |----------|-------|
 | **Document ID** | TE-0006 |
-| **Version** | 3.0.0 |
+| **Version** | 3.1.0 |
 | **Status** | Approved |
 | **Owner** | Solution Architect |
 | **Created** | 2026-07-18 |
-| **Last Updated** | 2026-07-18 |
+| **Last Updated** | 2026-07-28 |
+
+---
+
+# Evaluation Scope
+
+This Technology Evaluation only evaluates technology selection.
+
+Implementation details are defined by the corresponding Architecture Decision Records (ADRs).
 
 ---
 
@@ -230,7 +238,7 @@ It aligns with the architectural goals of the project.
 # Related ADR
 
 - ADR-0002 — Open Source First Policy
-- ADR-0009 — Use Mapster
+- ADR-0008 — Use Mapster
 
 ---
 
@@ -254,8 +262,10 @@ https://www.nuget.org/packages/Mapster
 
 # Change History
 
-| Version | Date | Description |
-|----------|------------|----------------------------------------------|
-| 1.0.0 | 2026-07-18 | Initial evaluation |
-| 2.0.0 | 2026-07-18 | Standardized |
-| 3.0.0 | 2026-07-18 | Rewritten according to Technology Evaluation Template |
+| Version | Date       | Description |
+|---------|------------|--------------------|
+| 1.0.0   | 2026-07-18 | Initial evaluation |
+| 2.0.0   | 2026-07-18 | Standardized |
+| 3.0.0   | 2026-07-18 | Rewritten according to Technology Evaluation Template |
+| 3.0.1   | 2026-07-27 | Corrected Related ADR reference from ADR-0009 to ADR-0008 (ADR-0009 documents Serilog, not Mapster) |
+| 3.1.0   | 2026-07-28 | New section added (Evaluation Scope) |

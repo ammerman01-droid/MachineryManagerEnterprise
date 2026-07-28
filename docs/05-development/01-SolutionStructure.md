@@ -7,7 +7,7 @@
 | **Status** | Approved |
 | **Owner** | Solution Architect |
 | **Created** | 2026-07-18 |
-| **Last Updated** | 2026-07-19 |
+| **Last Updated** | 2026-07-26 |
 
 ---
 
@@ -33,6 +33,32 @@ The solution shall:
 - Enable independent testing
 - Reduce coupling
 - Improve maintainability
+
+---
+
+## Central Build Configuration
+
+The solution uses centralized MSBuild configuration.
+
+- Directory.Build.props contains common MSBuild properties shared by all projects.
+- Directory.Packages.props manages NuGet package versions centrally.
+- All project files inherit these settings automatically.
+- Project files must not duplicate shared MSBuild properties or package versions.
+
+All common MSBuild properties are inherited from Directory.Build.props.
+
+TargetFramework is defined centrally in Directory.Build.props.
+
+Individual project files must not redefine TargetFramework unless explicitly documented.
+
+Individual project files must only contain project-specific configuration such as:
+
+- SDK selection
+- OutputType
+- UserSecretsId
+- Razor-specific settings
+- ProjectReference
+- PackageReference
 
 ---
 
@@ -319,7 +345,8 @@ Architectural deviations require an approved ADR.
 
 # Change History
 
-| Version | Date | Description |
-|----------|------------|----------------------------------------------|
-| 1.0.0 | 2026-07-18 | Initial solution structure |
-| 2.0.0 | 2026-07-18 | Standardized according to Documentation Standard v3.0 |
+| Version | Date       | Description                |
+|---------|------------|----------------------------|
+| 1.0.0   | 2026-07-18 | Initial solution structure |
+| 2.0.0   | 2026-07-18 | Standardized according to Documentation Standard v3.0 |
+| 3.0.0   | 2026-07-26 | AI + Project Team | Updated solution bootstrap for .NET 10.0.302, centralized MSBuild configuration and Central Package Management.|

@@ -254,7 +254,7 @@ Major documents include:
 
 Backend
 
-- .NET 9
+- .NET 10
 - ASP.NET Core
 - Blazor Server
 - Entity Framework Core
