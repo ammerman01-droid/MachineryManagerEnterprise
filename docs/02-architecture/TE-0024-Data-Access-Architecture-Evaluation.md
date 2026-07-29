@@ -1,9 +1,9 @@
 | Property | Value |
 |----------|-------|
-| **Technology Evaluation ID** | TE-0024 |
+| **Document ID** | TE-0024 |
 | **Title** | Data Access Technology Evaluation |
-| **Version** | 1.3.0 |
-| **Status** | Proposed |
+| **Version** | 4.0.0 |
+| **Status** | Approved |
 | **Owner** | Solution Architect |
 | **Created** | 2026-07-27 |
 | **Last Updated** | 2026-07-28 |
@@ -881,9 +881,10 @@ https://www.learndapper.com/
 
 # Revision History
 
-| Version | Date | Author | Description |
-|----------|------|--------|-------------|
-| 1.0.0 | 2026-07-27 | Solution Architect | Initial evaluation; reaffirms ADR-0006 (EF Core), evaluates Dapper as a governed read-side complement, recommends Hybrid Persistence Strategy with five explicit governance rules |
-| 1.1.0 | 2026-07-27 | Solution Architect | Updated to reference ADR-0019, created to formalize the Hybrid Persistence Strategy's five Compliance Rules |
-| 1.1.1 | 2026-07-28 | File name Changed from (Data Access Technology Evaluation) |
+| Version | Date       | Author             | Description                               |
+|---------|------------|--------------------|-------------------------------------------|
+| 1.0.0   | 2026-07-27 | Solution Architect | Initial evaluation; reaffirms ADR-0006 (EF Core), evaluates Dapper as a governed read-side complement, recommends Hybrid Persistence Strategy with five explicit governance rules |
+| 1.1.0   | 2026-07-27 | Solution Architect | Updated to reference ADR-0019, created to formalize the Hybrid Persistence Strategy's five Compliance Rules |
+| 1.1.1   | 2026-07-28 | File name Changed from (Data Access Technology Evaluation)     |
 | 1.3.0   | 2026-07-28 | New section added (Evaluation Scope) |
+| 4.0.0   | 2026-07-28 | Solution Architect | Upgraded to Documentation Standard v4.0.0 |

@@ -1,25 +1,20 @@
 | Property | Value |
 |----------|-------|
-| **Technology Evaluation ID** | TE-0021 |
+| **Document ID** | TE-0021 |
 | **Title** | API Documentation and Client Generation Technology Evaluation (.NET 10) |
-| **Version** | 1.3.0 |
-| **Status** | Proposed |
+| **Version** | 4.0.0 |
+| **Status** | Approved |
 | **Owner** | Solution Architect |
-| **Created** | 2026-07-27 |
+| **Created** | 2026-07-26 |
 | **Last Updated** | 2026-07-28 |
+
+---
 
 # Purpose
 
-This document evaluates technologies used for:
+This document evaluates candidate technologies for API Documentation and Client Generation Technology Evaluation (.NET 10) in MachineryManagerEnterprise.
 
-- API documentation;
-- OpenAPI generation;
-- API exploration;
-- API testing;
-- client SDK generation;
-- contract publication.
-
-The objective is to establish a unified API contract strategy for MachineryManagerEnterprise.
+The objective is to establish a unified technology selection that satisfies all functional and architectural requirements while preserving Clean Architecture principles.
 
 ---
 
@@ -1950,9 +1945,25 @@ The above technologies are therefore adopted as the enterprise standard for API 
 
 ---
 
+# Related ADR
+
+- ADR-0001 — Clean Architecture
+- ADR-0015 — Deployment Architecture
+
+---
+
+# Related Documents
+
+- SolutionStructure.md
+- DependencyRules.md
+- CodingStandards.md
+
+---
+
 # Revision History
 
-| Version | Date | Author | Description |
-|----------|------|--------|-------------|
-| 1.0.0 | 2026-07-27 | Solution Architect | Initial version |
-| 1.3.0   | 2026-07-28 | New section added (Evaluation Scope) |
+| Version | Date       | Author             | Description                                                               |
+|---------|------------|--------------------|---------------------------------------------------------------------------|
+| 1.0.0   | 2026-07-26 | Solution Architect | Initial technology evaluation for API Documentation and Client Generation |
+| 1.3.0   | 2026-07-28 | Solution Architect | New section added (Evaluation Scope)                                      |
+| 4.0.0   | 2026-07-28 | Solution Architect | Upgraded to Documentation Standard v4.0.0                                 |

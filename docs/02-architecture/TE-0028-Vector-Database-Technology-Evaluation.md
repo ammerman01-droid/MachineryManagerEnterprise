@@ -1,9 +1,9 @@
 | Property | Value |
 |----------|-------|
-| **Technology Evaluation ID** | TE-0028 |
+| **Document ID** | TE-0028 |
 | **Title** | Vector Database Technology Evaluation |
-| **Version** | 1.1.0 |
-| **Status** | Proposed |
+| **Version** | 4.0.0 |
+| **Status** | Approved |
 | **Owner** | Solution Architect |
 | **Created** | 2026-07-28 |
 | **Last Updated** | 2026-07-28 |
@@ -223,6 +223,11 @@ The following technologies are evaluated.
 
 ---
 
+# Architecture Principle
+
+The evaluated component acts as an isolated infrastructure service, adhering strictly to Clean Architecture layer dependencies and domain isolation rules.
+
+---
 
 # 8. Qdrant Evaluation
 
@@ -1720,6 +1725,21 @@ The Architecture Review Board formally approves:
 
 ---
 
+# Related ADR
+
+- ADR-0001 — Clean Architecture
+- ADR-0015 — Deployment Architecture
+
+---
+
+# Related Documents
+
+- SolutionStructure.md
+- DependencyRules.md
+- CodingStandards.md
+
+---
+
 ## Consequences
 
 The following architectural work is required:
@@ -1745,7 +1765,8 @@ This Technology Evaluation shall be reviewed if:
 
 # 15. Revision History
 
-| Version | Date | Author | Description |
-|----------|------|--------|-------------|
-| 1.0.0 | 2026-07-28 | Solution Architect | Initial version |
-| 1.1.0 | 2026-07-28 | Solution Architect | Converted star-rating (⭐) tables to text ratings (Excellent/Good/Fair/Poor/Very Poor) for consistency with the rest of the documentation |
+| Version | Date       | Author             | Description                               |
+|---------|------------|--------------------|-------------------------------------------|
+| 1.0.0   | 2026-07-28 | Solution Architect | Initial version |
+| 1.1.0   | 2026-07-28 | Solution Architect | Converted star-rating (⭐) tables to text ratings (Excellent/Good/Fair/Poor/Very Poor) for consistency with the rest of the documentation |
+| 4.0.0   | 2026-07-28 | Solution Architect | Upgraded to Documentation Standard v4.0.0 |

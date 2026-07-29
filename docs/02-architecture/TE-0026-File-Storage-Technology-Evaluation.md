@@ -1,9 +1,9 @@
 | Property | Value |
 |----------|-------|
-| **Technology Evaluation ID** | TE-0026 |
+| **Document ID** | TE-0026 |
 | **Title** | File Storage Technology Evaluation |
-| **Version** | 1.3.0 |
-| **Status** | Proposed |
+| **Version** | 4.0.0 |
+| **Status** | Approved |
 | **Owner** | Solution Architect |
 | **Created** | 2026-07-27 |
 | **Last Updated** | 2026-07-28 |
@@ -1055,10 +1055,10 @@ https://docs.aws.amazon.com/AmazonS3/latest/API/Welcome.html
 ---
 
 # Revision History
-
-| Version | Date | Author | Description |
-|----------|------|--------|-------------|
-| 1.0.0 | 2026-07-27 | Solution Architect | Initial evaluation; recommends S3-Compatible Storage abstraction with MinIO as default self-hosted endpoint, resolving the Embedded File Storage gap from the Technology Gap Analysis |
-| 1.1.0 | 2026-07-27 | Solution Architect | Updated to reference ADR-0020, created to formalize the File Storage Strategy |
-| 1.2.0 | 2026-07-28 | Solution Architect | Table Added to Candidate Technologies |
-| 1.3.0   | 2026-07-28 | New section added (Evaluation Scope) |
+| Version | Date       | Author             | Description                                                                   |
+|---------|------------|--------------------|-------------------------------------------------------------------------------|
+| 1.0.0   | 2026-07-27 | Solution Architect | Initial evaluation; recommends S3-Compatible Storage abstraction with MinIO as default self-hosted endpoint, resolving the Embedded File Storage gap from the Technology Gap Analysis |
+| 1.1.0   | 2026-07-27 | Solution Architect | Updated to reference ADR-0020, created to formalize the File Storage Strategy |
+| 1.2.0   | 2026-07-28 | Solution Architect | Table Added to Candidate Technologies                                         |
+| 1.3.0   | 2026-07-28 | New section added (Evaluation Scope)                                                               |
+| 4.0.0   | 2026-07-28 | Solution Architect | Upgraded to Documentation Standard v4.0.0                                     |

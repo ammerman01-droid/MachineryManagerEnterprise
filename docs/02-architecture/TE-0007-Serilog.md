@@ -1,287 +1,149 @@
-# Technology Evaluation — Serilog
-
 | Property | Value |
 |----------|-------|
 | **Document ID** | TE-0007 |
-| **Version** | 3.1.0 |
+| **Title** | Serilog Logging Framework Evaluation |
+| **Version** | 4.0.0 |
 | **Status** | Approved |
 | **Owner** | Solution Architect |
-| **Created** | 2026-07-18 |
+| **Created** | 2026-07-26 |
 | **Last Updated** | 2026-07-28 |
 
 ---
 
-# Evaluation Scope
+# Purpose
 
-This Technology Evaluation only evaluates technology selection.
+This document evaluates candidate technologies for Serilog Logging Framework Evaluation in MachineryManagerEnterprise.
 
-Implementation details are defined by the corresponding Architecture Decision Records (ADRs).
-
----
-
-# Executive Summary
-
-This document evaluates **Serilog** as the structured logging framework for the
-MachineryManagerEnterprise solution.
-
-Serilog was selected because it provides structured logging, excellent
-performance, extensive sink support, strong integration with ASP.NET Core, and a
-mature open-source ecosystem.
-
----
-
-# Problem Statement
-
-The project requires a logging framework that provides:
-
-- Structured logging
-- High performance
-- Flexible output targets
-- Rich contextual information
-- Excellent .NET integration
-- Long-term maintainability
+The objective is to establish a unified technology selection that satisfies all functional and architectural requirements while preserving Clean Architecture principles.
 
 ---
 
 # Evaluation Scope
 
-Application Logging
+Evaluates logging libraries. Broader observability architecture is detailed in TE-0017.
 
-Structured Logging
+---
 
-Log Enrichment
+# Relationship with Previous Technology Evaluations
 
-Log Routing
+Baseline for TE-0017 (Observability and Telemetry Technology Evaluation).
 
-Log Persistence
+---
+
+# Architectural References
+
+- ADR-0001 — Clean Architecture
+- TE-0017 — Observability and Telemetry Evaluation
+
+---
+
+# Scope
+
+Evaluates Serilog vs NLog vs Microsoft.Extensions.Logging default providers.
+
+---
+
+# Functional Requirements
+
+Structured JSON logging, rich diagnostic sinks (Console, File, OpenTelemetry, Seq), contextual enrichment (CorrelationId, TenantId).
+
+---
+
+# Non-Functional Requirements
+
+Asynchronous non-blocking log ingestion, minimal performance overhead.
 
 ---
 
 # Candidate Technologies
 
-| Technology | Status |
-|------------|--------|
-| Serilog | Selected |
-| Microsoft.Extensions.Logging | Evaluated |
-| NLog | Evaluated |
-| log4net | Evaluated |
+| Technology | Purpose | Status |
+|------------|---------|--------|
+| Serilog | Structured Logging Framework | Selected |
+| NLog | Alternative Logging Library | Evaluated |
+| Default Console Logger | Built-in Microsoft Logger | Evaluated |
 
 ---
 
 # Evaluation Criteria
 
-The evaluation considered:
-
-- Open Source
-- Structured Logging
-- Performance
-- Extensibility
-- Sink Ecosystem
-- Community
-- Documentation
-- ASP.NET Core Integration
+| ID | Criterion | Weight |
+|----|-----------|--------|
+| A1 | Structured Logging & Enrichment | Critical |
+| A2 | OpenTelemetry Sink Integration | High |
 
 ---
 
-# Comparison Matrix
+# Architecture Principle
 
-| Criteria | Serilog | MEL | NLog | log4net |
-|----------|----------|------|-------|----------|
-| Structured Logging | Excellent | Limited | Good | Poor |
-| Performance | Excellent | Excellent | Excellent | Good |
-| Sink Ecosystem | Excellent | Moderate | Good | Limited |
-| Configuration | Excellent | Simple | Moderate | Moderate |
-| Community | Excellent | Excellent | Good | Mature |
+Infrastructure layer implements logging abstractions exposed via Microsoft.Extensions.Logging.
 
 ---
 
-# Advantages
+# 5. Candidate Deep-Dive Evaluations
 
-- Structured logging by design
-- Rich enrichment capabilities
-- Large sink ecosystem
-- Excellent ASP.NET Core integration
-- High performance
-- Easy configuration
-- Mature open-source project
-- Strong community support
+## Serilog Evaluation
 
----
+### Overview
+Serilog is the de-facto structured logging library for .NET applications.
 
-# Disadvantages
-
-- Requires sink selection and configuration.
-- Structured logging concepts require initial learning.
+### Architectural Strengths
+- Rich ecosystem of sinks (Elastic, Seq, OTLP, File, Console).
+- Powerful property enrichment and contextual logging.
 
 ---
 
-# Risks
+# Overall Technology Comparison
 
-Potential risks include:
-
-- Incorrect logging configuration
-- Excessive logging volume
-- Sensitive information accidentally logged
-
-These risks are manageable through coding standards and review.
+Serilog leads the .NET ecosystem in structured logging capabilities and OpenTelemetry integration.
 
 ---
 
-# Performance Considerations
+# Final Recommendation
 
-Serilog performs efficiently when configured correctly.
-
-Recommended practices:
-
-- Use asynchronous sinks where appropriate.
-- Avoid excessive object serialization.
-- Log only meaningful information.
-- Configure rolling log files when applicable.
+Adopt Serilog configured via ILogger abstractions.
 
 ---
 
-# Security Considerations
+# Final Decision
 
-Sensitive information shall never be written to logs.
-
-Examples:
-
-- Passwords
-- Access Tokens
-- Connection Strings
-- Personal Data
-
-Structured logging must comply with project security policies.
+| Component | Decision |
+|-----------|----------|
+| Serilog | Approved |
 
 ---
 
-# Licensing
+# Decision Summary
 
-License
-
-Apache License 2.0
-
-Commercial usage is permitted.
-
----
-
-# Community & Ecosystem
-
-Serilog provides:
-
-- Large GitHub community
-- Extensive documentation
-- Numerous official sinks
-- Active maintenance
-- Wide enterprise adoption
-
----
-
-# Proof of Concept
-
-No dedicated Proof of Concept was required.
-
-The framework is widely adopted within modern .NET applications.
-
----
-
-# Architecture Impact
-
-Serilog shall be configured only inside the **Infrastructure Layer**.
-
-Application and Domain layers shall depend only on logging abstractions.
-
-Logging implementation must remain replaceable.
-
----
-
-# Migration Complexity
-
-**Difficulty:** Low
-
-Replacing Serilog would primarily affect Infrastructure configuration while
-leaving application code largely unchanged.
-
----
-
-# Alternatives Considered
-
-## Microsoft.Extensions.Logging
-
-Excellent abstraction.
-
-Rejected because it is only a logging abstraction and lacks advanced structured
-logging capabilities by itself.
-
----
-
-## NLog
-
-Mature logging framework.
-
-Rejected because Serilog provides stronger structured logging support and a more
-modern ecosystem.
-
----
-
-## log4net
-
-Very mature project.
-
-Rejected because its architecture predates modern structured logging practices.
-
----
-
-# Decision
-
-Approved
-
----
-
-# Decision Rationale
-
-Serilog provides the best balance of:
-
-- Structured logging
-- Performance
-- Flexibility
-- Ecosystem
-- Maintainability
-
-It fully supports the observability goals of the project.
+- ✔ Clean Architecture
+- ✔ .NET 10 Compatibility
 
 ---
 
 # Related ADR
 
-- ADR-0002 — Open Source First Policy
-- ADR-0010 — Use Serilog
+- ADR-0001 — Clean Architecture
 
 ---
 
 # Related Documents
 
-- Dependency Catalog
-- Logging Strategy
-- Coding Standards
+- TE-0017 — Observability and Telemetry Evaluation
 
 ---
 
 # References
 
-https://serilog.net/
-
-https://github.com/serilog/serilog
-
-https://www.nuget.org/packages/Serilog
+- https://serilog.net/
 
 ---
 
-# Change History
+# Revision History
 
-| Version | Date       | Description |
-|---------|------------|--------------------|
-| 1.0.0   | 2026-07-18 | Initial evaluation |
-| 2.0.0   | 2026-07-18 | Standardized |
-| 3.0.0   | 2026-07-18 | Rewritten according to Technology Evaluation Template |
-| 3.1.0   | 2026-07-28 | New section added (Evaluation Scope) |
+| Version | Date       | Author             | Description |
+|---------|------------|--------------------|-------------|
+| 1.0.0   | 2026-07-18 | Solution Architect | Initial evaluation |
+| 2.0.0   | 2026-07-18 | Solution Architect | Standardized |
+| 3.0.0   | 2026-07-18 | Solution Architect | Rewritten according to Technology Evaluation Template |
+| 3.1.0   | 2026-07-28 | Solution Architect | New section added (Evaluation Scope) |
+| 4.0.0   | 2026-07-28 | Solution Architect | Upgraded to Documentation Standard v4.0.0 |

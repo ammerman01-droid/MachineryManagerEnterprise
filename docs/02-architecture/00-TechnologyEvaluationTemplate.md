@@ -1,13 +1,12 @@
-# Technology Evaluation Template
-
 | Property | Value |
 |----------|-------|
 | **Document ID** | TEMPLATE-TE |
-| **Version** | 4.0.0 |
+| **Title** | Technology Evaluation Template |
+| **Version** | N.N.N |
 | **Status** | Template |
 | **Owner** | Solution Architect |
 | **Created** | YYYY-MM-DD |
-| **Last Updated** | 2026-07-27 |
+| **Last Updated** | YYYY-MM-DD |
 
 ---
 

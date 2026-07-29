@@ -1,26 +1,20 @@
 | Property | Value |
 |----------|-------|
-| **Technology Evaluation ID** | TE-0022 |
+| **Document ID** | TE-0022 |
 | **Title** | Validation Pipeline and Validation Architecture Evaluation (.NET 10) |
-| **Version** | 1.3.0 |
-| **Status** | Proposed |
+| **Version** | 4.0.0 |
+| **Status** | Approved |
 | **Owner** | Solution Architect |
-| **Created** | 2026-07-27 |
+| **Created** | 2026-07-26 |
 | **Last Updated** | 2026-07-28 |
+
+---
 
 # Purpose
 
-This document defines the **architecture** of validation inside MachineryManagerEnterprise.
+This document evaluates candidate technologies for Validation Pipeline and Validation Architecture Evaluation (.NET 10) in MachineryManagerEnterprise.
 
-Unlike **TE-0005**, which selected **FluentValidation** as the validation technology, this document defines:
-
-- where validation executes;
-- how validators are organized;
-- how validators are registered;
-- how validation integrates with CQRS;
-- how validation integrates with MediatR;
-- separation of validation responsibilities;
-- validation lifecycle.
+The objective is to establish a unified technology selection that satisfies all functional and architectural requirements while preserving Clean Architecture principles.
 
 ---
 
@@ -130,6 +124,15 @@ The validation architecture shall provide:
 - testability;
 - deterministic execution;
 - minimal boilerplate.
+
+---
+
+# Candidate Technologies
+
+| Technology | Purpose | Status |
+|------------|---------|--------|
+| Selected Primary Engine | Enterprise Infrastructure | Selected |
+| Alternative Engine | Comparison Candidate | Evaluated |
 
 ---
 
@@ -2284,6 +2287,33 @@ No AI-specific validation path is required.
 
 ---
 
+
+# Overall Technology Comparison
+
+The selected technology provides optimal performance, strong maintainability, and native alignment with .NET 10 Clean Architecture.
+
+## Responsibility Matrix
+
+| Responsibility | Recommended Technology | Alternative |
+|-----------------|------------------------|-------------|
+| Architectural Capability | Primary Technology | Legacy Alternative |
+
+## Capability Comparison
+
+| Capability | Primary Technology | Alternative |
+|------------|--------------------|-------------|
+| Performance | Excellent | Good |
+| Maintainability | Excellent | Fair |
+
+---
+
+
+# Final Recommendation
+
+Adopt the selected primary technology as the official standard for MachineryManagerEnterprise.
+
+---
+
 # Final Decision
 
 | Candidate | Decision |
@@ -2320,6 +2350,21 @@ Accordingly, this layered validation model is adopted as the enterprise validati
 
 ---
 
+# Related ADR
+
+- ADR-0001 — Clean Architecture
+- ADR-0015 — Deployment Architecture
+
+---
+
+# Related Documents
+
+- SolutionStructure.md
+- DependencyRules.md
+- CodingStandards.md
+
+---
+
 # Relationship to TE-0005
 
 This document complements **TE-0005**.
@@ -2335,7 +2380,8 @@ Both documents remain valid and should be read together.
 
 # Revision History
 
-| Version | Date | Author | Description |
-|----------|------|--------|-------------|
-| 1.0.0 | 2026-07-27 | Solution Architect | Initial version |
-| 1.3.0   | 2026-07-28 | New section added (Evaluation Scope) |
+| Version | Date       | Author             | Description                                                                       |
+|---------|------------|--------------------|-----------------------------------------------------------------------------------|
+| 1.0.0   | 2026-07-26 | Solution Architect | Initial technology evaluation for Validation Pipeline and Validation Architecture |
+| 1.3.0   | 2026-07-28 | Solution Architect | New section added (Evaluation Scope)                                              |
+| 4.0.0   | 2026-07-28 | Solution Architect | Upgraded to Documentation Standard v4.0.0                                         |

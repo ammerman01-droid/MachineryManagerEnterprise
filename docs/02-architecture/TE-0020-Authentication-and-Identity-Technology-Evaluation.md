@@ -1,20 +1,20 @@
 | Property | Value |
 |----------|-------|
-| **Technology Evaluation ID** | TE-0020 |
+| **Document ID** | TE-0020 |
 | **Title** | Authentication and Identity Technology Evaluation (.NET 10) |
-| **Version** | 1.3.0 |
-| **Status** | Proposed |
+| **Version** | 4.0.0 |
+| **Status** | Approved |
 | **Owner** | Solution Architect |
 | **Created** | 2026-07-26 |
 | **Last Updated** | 2026-07-28 |
 
+---
+
 # Purpose
 
-This document evaluates authentication and identity technologies for MachineryManagerEnterprise.
+This document evaluates candidate technologies for Authentication and Identity Technology Evaluation (.NET 10) in MachineryManagerEnterprise.
 
-The authentication subsystem is responsible for establishing the identity of users and services while providing a secure, extensible and maintainable authorization infrastructure.
-
-The selected solution must support both current enterprise requirements and future expansion toward distributed services and external integrations.
+The objective is to establish a unified technology selection that satisfies all functional and architectural requirements while preserving Clean Architecture principles.
 
 ---
 
@@ -2815,9 +2815,27 @@ This authentication architecture is therefore adopted as the enterprise standard
 
 ---
 
+
+# Related ADR
+
+- ADR-0001 — Clean Architecture
+- ADR-0015 — Deployment Architecture
+
+---
+
+
+# Related Documents
+
+- SolutionStructure.md
+- DependencyRules.md
+- CodingStandards.md
+
+---
+
 # Revision History
 
-| Version | Date | Author | Description |
-|----------|------|--------|-------------|
-| 1.0.0 | 2026-07-27 | Solution Architect | Initial version |
-| 1.3.0   | 2026-07-28 | New section added (Evaluation Scope) |
+| Version | Date       | Author             | Description                                                   |
+|---------|------------|--------------------|---------------------------------------------------------------|
+| 1.0.0   | 2026-07-26 | Solution Architect | Initial technology evaluation for Authentication and Identity |
+| 1.3.0   | 2026-07-28 | Solution Architect | New section added (Evaluation Scope)                          |
+| 4.0.0   | 2026-07-28 | Solution Architect | Upgraded to Documentation Standard v4.0.0                     |

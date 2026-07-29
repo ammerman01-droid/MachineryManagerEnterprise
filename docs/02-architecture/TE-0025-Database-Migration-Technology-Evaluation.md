@@ -1,9 +1,9 @@
 | Property | Value |
 |----------|-------|
-| **Technology Evaluation ID** | TE-0025 |
+| **Document ID** | TE-0025 |
 | **Title** | Database Migration Technology Evaluation |
-| **Version** | 1.3.0 |
-| **Status** | Proposed |
+| **Version** | 4.0.0 |
+| **Status** | Approved |
 | **Owner** | Solution Architect |
 | **Created** | 2026-07-27 |
 | **Last Updated** | 2026-07-28 |
@@ -958,7 +958,8 @@ https://www.liquibase.org/
 
 # Revision History
 
-| Version | Date | Author | Description |
-|----------|------|--------|-------------|
-| 1.0.0 | 2026-07-27 | Solution Architect | Initial evaluation; formalizes EF Core Migrations as sole schema owner, evaluates and rejects DbUp, Flyway, and Liquibase, closes the schema-ownership question deferred from TE-0024 |
-| 1.3.0   | 2026-07-28 | New section added (Evaluation Scope) |
+| Version | Date       | Author             | Description                                           |
+|---------|------------|--------------------|-------------------------------------------------------|
+| 1.0.0   | 2026-07-27 | Solution Architect | Initial evaluation; formalizes EF Core Migrations as sole schema owner, evaluates and rejects DbUp, Flyway, and Liquibase, closes the schema-ownership question deferred from TE-0024 |
+| 1.3.0   | 2026-07-28 | New section added (Evaluation Scope)                                       |
+| 4.0.0   | 2026-07-28 | Solution Architect | Upgraded to Documentation Standard v4.0.0             |

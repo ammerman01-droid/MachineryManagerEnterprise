@@ -1,9 +1,9 @@
 | Property | Value |
 |----------|-------|
-| **Technology Evaluation ID** | TE-0023 |
+| **Document ID** | TE-0023 |
 | **Title** | Object Mapping Technology Evaluation |
-| **Version** | 1.3.0 |
-| **Status** | Proposed |
+| **Version** | 4.0.0 |
+| **Status** | Approved |
 | **Owner** | Solution Architect |
 | **Created** | 2026-07-27 |
 | **Last Updated** | 2026-07-28 |
@@ -1200,8 +1200,9 @@ https://dotnetfoundation.org/news-events/detail/automapper-graduates-from-the-.n
 
 # Revision History
 
-| Version | Date | Author | Description |
-|----------|------|--------|-------------|
-| 1.0.0 | 2026-07-27 | Solution Architect | Initial re-evaluation, rewritten to full project-standard depth; reaffirms ADR-0008 (Mapster), adds Mapperly, updates AutoMapper rejection rationale for licensing change, formalizes Manual Mapping as a scoped complement |
-| 1.0.1 | 2026-07-28 | File name Changed from (Object Mapping Technology Evaluation) |
-| 1.3.0   | 2026-07-28 | New section added (Evaluation Scope) |
+| Version | Date       | Author             | Description                               |
+|---------|------------|--------------------|-------------------------------------------|
+| 1.0.0   | 2026-07-27 | Solution Architect | Initial re-evaluation, rewritten to full project-standard depth; reaffirms ADR-0008 (Mapster), adds Mapperly, updates AutoMapper rejection rationale for licensing change, formalizes Manual Mapping as a scoped complement |
+| 1.0.1   | 2026-07-28 | File name Changed from (Object Mapping Technology Evaluation)  |
+| 1.3.0   | 2026-07-28 | New section added (Evaluation Scope)                           |
+| 4.0.0   | 2026-07-28 | Solution Architect | Upgraded to Documentation Standard v4.0.0 |

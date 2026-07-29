@@ -1,288 +1,148 @@
-# Technology Evaluation — OpenTelemetry
-
 | Property | Value |
 |----------|-------|
 | **Document ID** | TE-0008 |
-| **Version** | 3.1.0 |
+| **Title** | OpenTelemetry Standards Evaluation |
+| **Version** | 4.0.0 |
 | **Status** | Approved |
 | **Owner** | Solution Architect |
-| **Created** | 2026-07-18 |
+| **Created** | 2026-07-26 |
 | **Last Updated** | 2026-07-28 |
 
 ---
 
-# Evaluation Scope
+# Purpose
 
-This Technology Evaluation only evaluates technology selection.
+This document evaluates candidate technologies for OpenTelemetry Standards Evaluation in MachineryManagerEnterprise.
 
-Implementation details are defined by the corresponding Architecture Decision Records (ADRs).
-
----
-
-# Executive Summary
-
-This document evaluates **OpenTelemetry** as the observability framework for the
-MachineryManagerEnterprise solution.
-
-OpenTelemetry was selected because it is the industry standard for collecting
-distributed traces, metrics, and telemetry data while remaining vendor-neutral
-and fully open source.
-
----
-
-# Problem Statement
-
-Modern enterprise systems require complete observability.
-
-Traditional logging alone cannot provide:
-
-- Distributed tracing
-- Request correlation
-- Performance metrics
-- End-to-end diagnostics
-- Cross-service visibility
+The objective is to establish a unified technology selection that satisfies all functional and architectural requirements while preserving Clean Architecture principles.
 
 ---
 
 # Evaluation Scope
 
-Distributed Tracing
+Evaluates open standards for telemetry. Full observability pipeline is detailed in TE-0017.
 
-Metrics
+---
 
-Telemetry Collection
+# Relationship with Previous Technology Evaluations
 
-Observability
+Baseline standard for TE-0017 (Observability and Telemetry).
 
-Instrumentation
+---
+
+# Architectural References
+
+- ADR-0001 — Clean Architecture
+- TE-0017 — Observability and Telemetry Evaluation
+
+---
+
+# Scope
+
+Evaluates OpenTelemetry standard vs proprietary APM agents (Datadog, AppInsights SDK).
+
+---
+
+# Functional Requirements
+
+Unified collection of distributed traces, metrics, and logs across .NET services.
+
+---
+
+# Non-Functional Requirements
+
+Vendor-neutral exporter protocol (OTLP), low performance overhead, cloud neutrality.
 
 ---
 
 # Candidate Technologies
 
-| Technology | Status |
-|------------|--------|
-| OpenTelemetry | Selected |
-| Application Insights SDK | Evaluated |
-| Elastic APM | Evaluated |
-| Jaeger Native SDK | Evaluated |
+| Technology | Purpose | Status |
+|------------|---------|--------|
+| OpenTelemetry (.NET) | Telemetry Collection Standard | Selected |
+| Proprietary APM SDKs | Vendor Lock-in Agents | Rejected |
 
 ---
 
 # Evaluation Criteria
 
-The evaluation considered:
-
-- Open Source
-- Vendor Neutrality
-- Industry Adoption
-- Performance
-- Instrumentation
-- Community
-- Documentation
-- .NET Integration
+| ID | Criterion | Weight |
+|----|-----------|--------|
+| A1 | Cloud Neutrality & Open Standard | Critical |
+| A2 | .NET 10 Activity/Meter Support | High |
 
 ---
 
-# Comparison Matrix
+# Architecture Principle
 
-| Criteria | OpenTelemetry | App Insights | Elastic APM | Jaeger SDK |
-|----------|---------------|--------------|-------------|------------|
-| Open Source | Excellent | Partial | Excellent | Excellent |
-| Vendor Neutral | Excellent | Poor | Moderate | Moderate |
-| Industry Standard | Excellent | Good | Good | Good |
-| .NET Support | Excellent | Excellent | Good | Moderate |
-| Ecosystem | Excellent | Excellent | Good | Moderate |
+Instrumentation uses standard System.Diagnostics APIs natively built into .NET 10.
 
 ---
 
-# Advantages
+# 5. Candidate Deep-Dive Evaluations
 
-- CNCF standard
-- Vendor neutral
-- Open specification
-- Excellent .NET support
-- Distributed tracing
-- Metrics support
-- Automatic instrumentation
-- Future-proof architecture
-- Large ecosystem
+## OpenTelemetry Evaluation
+
+### Overview
+OpenTelemetry (OTel) is a CNCF vendor-neutral observability framework.
+
+### Architectural Strengths
+- Eliminates vendor lock-in; allows swapping telemetry backends (Grafana Tempo, Prometheus, Datadog) without code changes.
 
 ---
 
-# Disadvantages
+# Overall Technology Comparison
 
-- Initial configuration complexity.
-- Requires understanding of observability concepts.
-
----
-
-# Risks
-
-Potential risks include:
-
-- Excessive telemetry generation
-- Incorrect sampling configuration
-- Storage costs if telemetry volume grows
-
-These risks are manageable through proper configuration.
+OpenTelemetry is the industry standard for modern cloud-native observability.
 
 ---
 
-# Performance Considerations
+# Final Recommendation
 
-OpenTelemetry is designed with low runtime overhead.
-
-Recommended practices:
-
-- Configure sampling.
-- Export asynchronously.
-- Avoid collecting unnecessary telemetry.
+Adopt OpenTelemetry for all distributed tracing and metric collection.
 
 ---
 
-# Security Considerations
+# Final Decision
 
-Telemetry should never contain:
-
-- Passwords
-- Tokens
-- Personal information
-- Sensitive business data
-
-Export endpoints must be secured.
+| Component | Decision |
+|-----------|----------|
+| OpenTelemetry | Approved |
 
 ---
 
-# Licensing
+# Decision Summary
 
-License
-
-Apache License 2.0
-
-Commercial usage is permitted.
-
----
-
-# Community & Ecosystem
-
-OpenTelemetry is supported by:
-
-- CNCF
-- Microsoft
-- Google
-- AWS
-- Grafana Labs
-- Elastic
-- Numerous cloud providers
-
-Community activity is excellent.
-
----
-
-# Proof of Concept
-
-No dedicated Proof of Concept was required.
-
-The framework has become the industry standard for modern cloud-native systems.
-
----
-
-# Architecture Impact
-
-OpenTelemetry shall be configured only inside the **Infrastructure Layer**.
-
-Application code should remain independent from telemetry implementation.
-
-Instrumentation should occur through framework integrations whenever possible.
-
----
-
-# Migration Complexity
-
-**Difficulty:** Very Low
-
-Because OpenTelemetry is based on open standards, migration between monitoring
-platforms remains straightforward.
-
----
-
-# Alternatives Considered
-
-## Application Insights SDK
-
-Excellent Azure integration.
-
-Rejected because it introduces vendor lock-in.
-
----
-
-## Elastic APM
-
-Good monitoring solution.
-
-Rejected because OpenTelemetry supports Elastic while remaining vendor neutral.
-
----
-
-## Jaeger SDK
-
-Good tracing support.
-
-Rejected because OpenTelemetry already exports directly to Jaeger.
-
----
-
-# Decision
-
-Approved
-
----
-
-# Decision Rationale
-
-OpenTelemetry provides the best balance of:
-
-- Vendor neutrality
-- Open standards
-- Performance
-- Long-term maintainability
-- Ecosystem support
-
-It perfectly aligns with the project's Open Source First policy.
+- ✔ Clean Architecture
+- ✔ .NET 10 Compatibility
+- ✔ Cloud Neutrality
 
 ---
 
 # Related ADR
 
-- ADR-0002 — Open Source First Policy
-- ADR-0011 — Use OpenTelemetry
+- ADR-0001 — Clean Architecture
 
 ---
 
 # Related Documents
 
-- TE-0007 — Serilog
-- Logging Strategy
-- Dependency Catalog
+- TE-0017 — Observability and Telemetry Evaluation
 
 ---
 
 # References
 
-https://opentelemetry.io/
-
-https://github.com/open-telemetry
-
-https://learn.microsoft.com/dotnet/core/diagnostics/observability-with-otel
+- https://opentelemetry.io/
 
 ---
 
-# Change History
+# Revision History
 
-| Version | Date       | Description |
-|---------|------------|--------------------|
-| 1.0.0   | 2026-07-18 | Initial evaluation |
-| 2.0.0   | 2026-07-18 | Standardized |
-| 3.0.0   | 2026-07-18 | Rewritten according to Technology Evaluation Template |
-| 3.1.0   | 2026-07-28 | New section added (Evaluation Scope) |
+| Version | Date       | Author             | Description        |
+|---------|------------|--------------------|--------------------|
+| 1.0.0   | 2026-07-18 | Solution Architect | Initial evaluation |
+| 2.0.0   | 2026-07-18 | Solution Architect | Standardized |
+| 3.0.0   | 2026-07-18 | Solution Architect | Rewritten according to Technology Evaluation Template |
+| 3.1.0   | 2026-07-28 | Solution Architect | New section added (Evaluation Scope) |
+| 4.0.0   | 2026-07-28 | Solution Architect | Upgraded to Documentation Standard v4.0.0 |
