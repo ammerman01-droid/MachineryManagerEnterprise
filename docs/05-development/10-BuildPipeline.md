@@ -3,11 +3,11 @@
 | Property | Value |
 |----------|-------|
 | **Document ID** | DOC-DEV-011 |
-| **Version** | 2.0.0 |
+| **Version** | 3.0.0 |
 | **Status** | Approved |
 | **Owner** | Solution Architect |
 | **Created** | 2026-07-18 |
-| **Last Updated** | 2026-07-18 |
+| **Last Updated** | 2026-07-26 |
 
 ---
 
@@ -144,6 +144,10 @@ Release
 
 Debug builds should only be used during local development.
 
+TargetFramework is defined centrally in Directory.Build.props.
+
+Individual project files must not redefine TargetFramework unless explicitly documented.
+
 ---
 
 # Static Analysis
@@ -265,7 +269,8 @@ Direct commits to protected branches are prohibited.
 
 # Change History
 
-| Version | Date | Description |
-|----------|------------|----------------------------------------------|
-| 1.0.0 | 2026-07-18 | Initial build pipeline strategy |
-| 2.0.0 | 2026-07-18 | Standardized according to Documentation Standard v3.0 |
+| Version | Date       | Description                     |
+|---------|------------|---------------------------------|
+| 1.0.0   | 2026-07-18 | Initial build pipeline strategy |
+| 2.0.0   | 2026-07-18 | Standardized according to Documentation Standard v3.0 |
+| 3.0.0   | 2026-07-26 | Updated project structure documentation to reflect centralized build configuration and package management introduced during Bootstrap. |

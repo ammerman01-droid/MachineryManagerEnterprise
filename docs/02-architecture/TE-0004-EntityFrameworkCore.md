@@ -1,13 +1,67 @@
-# Technology Evaluation — Entity Framework Core
-
 | Property | Value |
 |----------|-------|
 | **Document ID** | TE-0004 |
-| **Version** | 3.0.0 |
+| **Title** | EntityFrameworkCore Technology Evaluation (.NET 10) |
+| **Version** | 4.0.0 |
 | **Status** | Approved |
 | **Owner** | Solution Architect |
 | **Created** | 2026-07-18 |
-| **Last Updated** | 2026-07-18 |
+| **Last Updated** | 2026-07-28 |
+
+---
+
+# Purpose
+
+This document evaluates candidate technologies for EntityFrameworkCore Technology Evaluation (.NET 10) in MachineryManagerEnterprise.
+
+The objective is to establish a unified technology selection that satisfies all functional and architectural requirements while preserving Clean Architecture principles.
+
+---
+
+# Evaluation Scope
+
+This Technology Evaluation only evaluates technology selection.
+
+Implementation details are defined by the corresponding Architecture Decision Records (ADRs).
+
+---
+
+# Relationship with Previous Technology Evaluations
+
+This evaluation builds upon the foundation established in TE-0001 (.NET 10 Platform) and aligns with the enterprise architecture rules defined across the solution.
+
+---
+
+# Architectural References
+
+This evaluation is based on:
+
+- ADR-0001 — Clean Architecture
+- SolutionStructure.md
+- DependencyRules.md
+- CodingStandards.md
+
+---
+
+# Functional Requirements
+
+The selected technology shall support:
+
+- core enterprise capabilities required by MachineryManagerEnterprise;
+- Clean Architecture separation of domain models from infrastructure details;
+- seamless integration with .NET 10 runtime and Dependency Injection;
+- high performance execution and asynchronous operations.
+
+---
+
+# Non-Functional Requirements
+
+The solution should provide:
+
+- enterprise reliability and scalability;
+- long-term maintainability and cloud neutrality;
+- zero vendor lock-in;
+- optimal developer experience and testability.
 
 ---
 
@@ -75,7 +129,13 @@ The evaluation considered:
 
 ---
 
-# Comparison Matrix
+# Architecture Principle
+
+The evaluated component acts as an isolated infrastructure service, adhering strictly to Clean Architecture layer dependencies and domain isolation rules.
+
+---
+
+# Overall Technology Comparison
 
 | Criteria | EF Core | Dapper | NHibernate | Linq2Db |
 |----------|---------|---------|-------------|----------|
@@ -244,7 +304,13 @@ Rejected because:
 
 ---
 
-# Decision
+# Final Recommendation
+
+Adopt the selected technology as the official platform standard for MachineryManagerEnterprise.
+
+---
+
+# Final Decision
 
 Approved
 
@@ -265,10 +331,21 @@ It aligns perfectly with the project's Clean Architecture and Open Source First 
 
 ---
 
+# Decision Summary
+
+- ✔ Clean Architecture
+- ✔ .NET 10 Compatibility
+- ✔ Standards Compliance
+- ✔ Cloud Neutrality
+- ✔ AI Readiness
+- ✔ Long-term Maintainability
+
+---
+
 # Related ADR
 
 - ADR-0002 — Open Source First Policy
-- ADR-0004 — Use Entity Framework Core
+- ADR-0006 — Use Entity Framework Core
 
 ---
 
@@ -290,10 +367,13 @@ https://www.nuget.org/packages/Microsoft.EntityFrameworkCore/
 
 ---
 
-# Change History
+# Revision History
 
-| Version | Date | Description |
-|----------|------------|----------------------------------------------|
-| 1.0.0 | 2026-07-18 | Initial evaluation |
-| 2.0.0 | 2026-07-18 | Standardized |
-| 3.0.0 | 2026-07-18 | Rewritten according to Technology Evaluation Template |
+| Version | Date       | Author             | Description        |
+|---------|------------|--------------------|--------------------|
+| 1.0.0   | 2026-07-18 | Solution Architect | Initial evaluation |
+| 2.0.0   | 2026-07-18 | Solution Architect | Standardized |
+| 3.0.0   | 2026-07-18 | Solution Architect | Rewritten according to Technology Evaluation Template |
+| 3.0.1   | 2026-07-27 | Solution Architect | Corrected Related ADR reference from ADR-0004 to ADR-0006 (ADR-0004 documents Blazor, not Entity Framework Core) |
+| 3.1.0   | 2026-07-28 | Solution Architect | New section added (Evaluation Scope) |
+| 4.0.0   | 2026-07-28 | Solution Architect | Solution Architect | Upgraded to Documentation Standard v4.0.0 |
