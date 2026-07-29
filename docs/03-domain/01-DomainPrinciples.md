@@ -4,11 +4,11 @@
 | Property | Value |
 |----------|-------|
 | **Document ID** | DOM-000 |
-| **Version** | 3.0.0 |
+| **Version** | 3.1.0 |
 | **Status** | Active |
 | **Owner** | Solution Architect |
 | **Created** | 2026-07-18 |
-| **Last Updated** | 2026-07-18 |
+| **Last Updated** | 2026-07-20 |
 
 ---
 
@@ -117,6 +117,50 @@ The domain defines the database.
 ## P-10 Documentation Is Part of the Product
 
 Documentation is a deliverable and evolves with the product.
+
+---
+
+## P-11 Asset Relationships Are First-Class Business Concepts
+
+Business Assets may form operational configurations.
+
+Relationships between Assets are business entities with their own lifecycle and history.
+
+Operational usage may propagate through these relationships according to business rules.
+
+---
+
+## P-12 Installation History Must Be Preserved
+
+Installation, removal and relocation of Components and Assets are business events.
+
+The platform shall preserve complete installation history for all movable business objects.
+
+---
+
+## P-13 Forecast Before Execution
+
+Maintenance planning begins with business observations.
+
+Forecasts are independent business objects and shall exist before Work Orders.
+
+A Forecast may result in zero, one or many Work Orders.
+
+---
+
+## P-14 Knowledge Is a Business Asset
+
+Business observations, failures, maintenance history and operational data together create organizational knowledge.
+
+The platform shall preserve and expose this knowledge for future analysis and decision support.
+
+---
+
+## P-15 Business Events Drive Cross-Cutting Behavior
+
+Significant business state changes shall generate domain events.
+
+Notifications, reporting, analytics and integrations should react to business events rather than directly querying business logic.
 
 ---
 

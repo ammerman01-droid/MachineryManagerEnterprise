@@ -1,9 +1,8 @@
-# Technology Evaluation Template
-
 | Property | Value |
 |----------|-------|
 | **Document ID** | TEMPLATE-TE |
-| **Version** | 3.0.0 |
+| **Title** | Technology Evaluation Template |
+| **Version** | N.N.N |
 | **Status** | Template |
 | **Owner** | Solution Architect |
 | **Created** | YYYY-MM-DD |
@@ -11,41 +10,82 @@
 
 ---
 
-# Executive Summary
+# Purpose
 
-Provide a concise summary of the technology being evaluated.
+Explain what this Technology Evaluation covers.
 
-This section should explain:
+This section should state:
 
-- What the technology is.
-- Why it is being evaluated.
-- The expected outcome.
-
----
-
-# Problem Statement
-
-Describe the problem this technology is intended to solve.
-
-Include:
-
-- Current limitations
-- Existing pain points
-- Business requirements
+- what capability or architectural concern is being addressed;
+- why the evaluation is being performed now;
+- the expected outcome (a recommended technology stack, not a final ADR).
 
 ---
 
 # Evaluation Scope
 
-Define exactly what is included in this evaluation.
+This Technology Evaluation only evaluates technology selection.
+
+Implementation details are defined by the corresponding Architecture Decision Records (ADRs).
+
+---
+
+# Relationship with Previous Technology Evaluations
+
+If this evaluation extends, complements, or re-evaluates a previously approved
+Technology Evaluation and ADR, state that relationship explicitly here.
 
 Examples:
 
-- Framework
-- ORM
-- Validation Library
-- Logging Framework
-- UI Component Library
+- This evaluation builds on TE-000X / ADR-000X and does not replace it.
+- This evaluation re-evaluates TE-000X / ADR-000X. The previously approved
+  technology is included as the incumbent candidate.
+
+If there is no relationship with prior evaluations, state:
+
+```text
+This evaluation does not supersede or depend on any previously approved
+Technology Evaluation.
+```
+
+---
+
+# Architectural References
+
+List the approved documents this evaluation is grounded in.
+
+Examples:
+
+- ADR-000X — <Title>
+- SolutionStructure.md
+- DependencyRules.md
+- CodingStandards.md
+
+---
+
+# Scope
+
+Define exactly what is included in this evaluation, and what is explicitly
+out of scope.
+
+---
+
+# Functional Requirements
+
+List the capabilities the selected solution shall support.
+
+---
+
+# Non-Functional Requirements
+
+List qualities the solution should provide, for example:
+
+- performance;
+- maintainability;
+- .NET 10 compatibility;
+- cloud neutrality;
+- security;
+- developer experience.
 
 ---
 
@@ -53,189 +93,237 @@ Examples:
 
 List every technology considered.
 
-Example
+| Technology | Purpose | Status |
+|------------|---------|--------|
+| Candidate A | | Evaluated |
+| Candidate B | | Evaluated |
+| Candidate C | | Evaluated |
 
-| Technology | Status |
-|------------|--------|
-| Candidate A | Evaluated |
-| Candidate B | Evaluated |
-| Candidate C | Evaluated |
+If this evaluation re-evaluates a previously approved technology, mark it
+explicitly as **Incumbent**.
 
 ---
 
 # Evaluation Criteria
 
-Each candidate shall be evaluated using consistent criteria.
+| ID | Criterion | Weight |
+|----|-----------|--------|
+| A1 | Standards Compliance | Critical |
+| A2 | .NET 10 Compatibility | Critical |
+| A3 | Clean Architecture Compatibility | Critical |
+| A4 | Developer Experience | High |
+| A5 | Performance | High |
+| A6 | Maintainability | High |
+| A7 | Community & Maturity | High |
+| A8 | Security | High |
 
-Typical criteria include:
-
-- Open Source
-- License
-- Community
-- Documentation
-- Long-Term Support
-- Performance
-- Learning Curve
-- Ecosystem
-- Integration
-- Testability
-- Maintainability
+Adjust criteria to fit the specific technology domain being evaluated.
 
 ---
 
-# Comparison Matrix
+# Architecture Principle
 
-| Criteria | Candidate A | Candidate B | Candidate C |
-|----------|-------------|-------------|-------------|
-| License | | | |
-| Performance | | | |
-| Documentation | | | |
-| Community | | | |
-| Maintainability | | | |
-| Integration | | | |
+State the guiding architectural principle for this domain, ideally supported
+by a short ASCII flow diagram showing how the candidate technologies fit into
+the existing Clean Architecture layers.
 
 ---
 
-# Advantages
+# Candidate Deep-Dive Evaluations
 
-List the strengths of the selected technology.
+For **every** candidate technology, produce a numbered section following this
+exact structure. Numbering continues sequentially starting after the fixed
+sections above (Architecture Principle is typically section 4, so the first
+candidate deep-dive is section 5).
+
+## N. `<Candidate Name>` Evaluation
+
+### Overview
+
+What the technology is and what problem it solves.
+
+### Architectural Role
+
+Where the technology sits in the layered architecture. Include an ASCII
+diagram when it clarifies the data/dependency flow.
+
+### Architectural Strengths
+
+Bullet list of advantages.
+
+### Architectural Weaknesses
+
+Bullet list of disadvantages and limitations.
+
+### Operational Characteristics
+
+How the technology behaves at runtime / in operation.
+
+### Scalability
+
+Assessment of how the technology scales with data volume, load, or team size.
+
+### Reliability
+
+(Include when relevant to the domain, e.g. background processing, messaging.)
+
+### Security
+
+Known security model, considerations, and any risks.
+
+### Standards Compliance
+
+(Include when relevant, e.g. OpenAPI, OAuth2, OpenID Connect.)
+
+### Deployment Flexibility
+
+Cross-platform / cloud-neutral characteristics (Windows, Linux, Containers,
+Kubernetes, Cloud, Hybrid, On-Premise).
+
+### AI Compatibility
+
+How well the technology supports or integrates with AI tooling, agents, or
+future AI-driven features, where relevant.
+
+### Maintainability
+
+Long-term maintenance cost and complexity.
+
+### Typical Usage / Recommended Usage
+
+Suitable and unsuitable scenarios for this technology.
+
+### Architectural Fit
+
+| Criterion | Assessment |
+|-----------|------------|
+| ... | ... |
+
+### Relationship with `<Related Candidate or Existing Technology>`
+
+(Include when the candidate composes with, competes with, or depends on
+another candidate or an already-approved technology.)
+
+### Comparison with `<Related Candidate>`
+
+(Include when a direct head-to-head comparison clarifies the decision.)
+
+### Preliminary Conclusion
+
+Short conclusion for this specific candidate before the overall comparison.
 
 ---
 
-# Disadvantages
+# Overall Technology Comparison
 
-List known weaknesses.
+## Responsibility Matrix
 
----
+| Responsibility | Recommended Technology | Alternative | Purpose |
+|-----------------|------------------------|--------------|---------|
+| | | | |
 
-# Risks
+## Capability Comparison
 
-Document technical risks.
+| Capability | Candidate A | Candidate B | Candidate C |
+|------------|-------------|-------------|-------------|
+| | | | |
 
-Examples
+## Cloud Neutrality Assessment
+
+## Enterprise Suitability
+
+## AI Compatibility
+
+## Clean Architecture Compliance
+
+## Cost Comparison
+
+## Risk Assessment
+
+Examples:
 
 - Vendor lock-in
 - Low community activity
 - Breaking changes
 - Migration complexity
 
----
+## Overall Evaluation
 
-# Performance Considerations
-
-Summarize any performance observations.
-
-Benchmarks may be referenced when available.
+Summarize the comparison across all candidates before the final
+recommendation.
 
 ---
 
-# Security Considerations
+# Final Recommendation
 
-Document:
+## Core Technology Stack
 
-- Known vulnerabilities
-- Security model
-- Update frequency
+| Responsibility | Selected Technology | Rationale |
+|-----------------|----------------------|-----------|
+| | | |
 
----
+## Recommended Architecture
 
-# Licensing
+ASCII diagram showing how the selected technologies compose together.
 
-Document:
+## Build Pipeline Integration
 
-- License type
-- Commercial restrictions
-- Compatibility with project policy
+(Include when the technology affects the build/CI pipeline.)
 
----
+## Security Recommendations
 
-# Community & Ecosystem
+## Cloud Neutrality
 
-Evaluate:
-
-- GitHub activity
-- Release frequency
-- Issue response
-- Documentation quality
+## AI Readiness
 
 ---
 
-# Proof of Concept
+# Final Decision
 
-Reference any POC performed.
-
-Example
-
-```
-POC-0003
-```
-
-If no POC was required, explain why.
+| Component | Decision |
+|-----------|----------|
+| | Approved / Rejected |
 
 ---
 
-# Architecture Impact
+# Decision Summary
 
-Explain how this technology affects the architecture.
+Checklist confirming the recommended stack satisfies architectural goals, for
+example:
 
-Examples
+- Clean Architecture
+- .NET 10 Compatibility
+- Standards Compliance
+- Developer Experience
+- Cloud Neutrality
+- Maintainability
+- AI Readiness
 
-- Dependency changes
-- Layer boundaries
-- Infrastructure changes
-
----
-
-# Alternatives Considered
-
-Briefly explain why other options were rejected.
-
----
-
-# Decision
-
-Clearly state the selected technology.
-
-Example
-
-```
-Approved
-```
-
-or
-
-```
-Rejected
-```
-
----
-
-# Decision Rationale
-
-Explain why the selected technology is preferred.
-
-This section should summarize the evaluation.
+State clearly whether this evaluation supersedes a prior ADR, or whether it
+reaffirms one.
 
 ---
 
 # Related ADR
 
-Reference the Architecture Decision Record.
-
-Example
+Reference the Architecture Decision Record that will formalize this
+evaluation's outcome.
 
 ```
-ADR-0007
+ADR-000X
 ```
+
+If this evaluation reaffirms an existing ADR rather than requiring a new one,
+state that explicitly.
 
 ---
 
 # Related Documents
 
 - ADR
-- POC
+- POC (if applicable)
 - Dependency Catalog
-- Open Source Policy
+- Related TEs
 
 ---
 
@@ -251,8 +339,8 @@ Independent articles
 
 ---
 
-# Change History
+# Revision History
 
-| Version | Date | Description |
-|----------|------|-------------|
-| 1.0.0 | YYYY-MM-DD | Initial evaluation |
+| Version | Date | Author | Description |
+|----------|------|--------|-------------|
+| 1.0.0 | YYYY-MM-DD | Solution Architect | Initial version |

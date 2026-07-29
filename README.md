@@ -9,6 +9,17 @@ Last Updated: 2026-07-17
 
 ---
 
+## AI Contributors
+
+Any AI assistant participating in this repository must first read:
+
+1. AI_ENGINEERING_CONTRACT.md
+2. docs/README.md
+
+before generating any implementation.
+
+---
+
 # Overview
 
 MachineryManagerEnterprise is an Enterprise Asset Management (EAM) platform designed for organizations that own, operate, maintain and manage heavy machinery and industrial equipment.
@@ -243,7 +254,7 @@ Major documents include:
 
 Backend
 
-- .NET 9
+- .NET 10
 - ASP.NET Core
 - Blazor Server
 - Entity Framework Core

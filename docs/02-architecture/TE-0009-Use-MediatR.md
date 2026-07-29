@@ -1,181 +1,149 @@
-# Technology Evaluation
-
 | Property | Value |
 |----------|-------|
 | **Document ID** | TE-0009 |
-| **Version** | 3.0.0 |
+| **Title** | MediatR In-Process Messaging Evaluation |
+| **Version** | 4.0.0 |
 | **Status** | Approved |
 | **Owner** | Solution Architect |
-| **Created** | 2026-07-18 |
-| **Last Updated** | 2026-07-18 |
+| **Created** | 2026-07-26 |
+| **Last Updated** | 2026-07-28 |
 
 ---
 
-# Title
+# Purpose
 
-Technology Evaluation — MediatR
+This document evaluates candidate technologies for MediatR In-Process Messaging Evaluation in MachineryManagerEnterprise.
 
----
-
-# Executive Summary
-
-MediatR has been evaluated as the application's request dispatching framework.
-
-It provides an implementation of the Mediator pattern that supports CQRS,
-pipeline behaviors, notifications, and loose coupling between the Presentation
-and Application layers.
-
-The library is mature, open source, widely adopted within the .NET ecosystem,
-and aligns well with the project's Clean Architecture principles.
+The objective is to establish a unified technology selection that satisfies all functional and architectural requirements while preserving Clean Architecture principles.
 
 ---
 
 # Evaluation Scope
 
-This evaluation covers:
-
-- Request / Response dispatching
-- CQRS implementation support
-- Pipeline Behaviors
-- Notifications
-- Dependency Injection integration
-- Long-term maintainability
+Evaluates in-process messaging technology selection. Distributed messaging is evaluated separately in TE-0012.
 
 ---
 
-# Candidate
+# Relationship with Previous Technology Evaluations
 
-| Property | Value |
-|----------|-------|
-| Product | MediatR |
-| Vendor | Jimmy Bogard |
-| License | MIT |
-| Repository | https://github.com/jbogard/MediatR |
-| NuGet | https://www.nuget.org/packages/MediatR |
+Establishes the in-process CQRS mediation mechanism for the Application layer.
+
+---
+
+# Architectural References
+
+- ADR-0001 — Clean Architecture
+- ADR-0003 — CQRS Pattern Implementation
+
+---
+
+# Scope
+
+Evaluates MediatR vs Wolverine vs Direct Service Invocations.
+
+---
+
+# Functional Requirements
+
+In-process Command/Query dispatch, notification publishing, IPipelineBehavior middleware for validation/logging/transaction management.
+
+---
+
+# Non-Functional Requirements
+
+Loose coupling, clean handler isolation, low overhead execution.
+
+---
+
+# Candidate Technologies
+
+| Technology | Purpose | Status |
+|------------|---------|--------|
+| MediatR | In-Process Mediator & Pipeline | Selected |
+| Direct Application Services | Tightly Coupled Services | Evaluated |
+| Wolverine | Command Mediator Engine | Evaluated |
 
 ---
 
 # Evaluation Criteria
 
-| Criteria | Result |
-|----------|--------|
-| Open Source | ✔ |
-| MIT License | ✔ |
-| Active Maintenance | ✔ |
-| Community Adoption | ✔ |
-| .NET Integration | Excellent |
-| Documentation | Excellent |
-| Performance | Excellent |
-| Vendor Lock-in | Very Low |
+| ID | Criterion | Weight |
+|----|-----------|--------|
+| A1 | Decoupled Request/Handler Pattern | Critical |
+| A2 | Pipeline Behavior Support | Critical |
 
 ---
 
-# Advantages
+# Architecture Principle
 
-- Excellent implementation of the Mediator pattern
-- Strong CQRS support
-- Pipeline Behaviors
-- Clean separation between UI and Application
-- High testability
-- Mature ecosystem
-- Native Dependency Injection integration
+Controllers and UI components send Requests/Commands through IMediator; Application handlers execute business logic.
 
 ---
 
-# Disadvantages
+# 5. Candidate Deep-Dive Evaluations
 
-- Additional abstraction layer
-- Developers must understand request pipeline concepts
+## MediatR Evaluation
 
----
+### Overview
+MediatR is an unopinionated in-process messaging library supporting CQRS patterns.
 
-# Alternatives Considered
-
-## Direct Service Calls
-
-Rejected because they tightly couple Presentation to Application services.
+### Architectural Strengths
+- Enables cross-cutting concerns (Validation, Logging, Caching) via pipeline behaviors.
+- Enforces strict single-responsibility principle per command/query handler.
 
 ---
 
-## Custom Mediator
+# Overall Technology Comparison
 
-Rejected because it duplicates mature functionality already provided by
-MediatR.
-
----
-
-## Event Bus Only
-
-Rejected because synchronous request/response communication remains necessary
-inside the application.
+MediatR remains the industry gold standard for C# CQRS applications.
 
 ---
 
-# Compatibility
+# Final Recommendation
 
-| Area | Status |
-|------|--------|
-| .NET 10 | ✔ |
-| Clean Architecture | ✔ |
-| Blazor | ✔ |
-| FluentValidation | ✔ |
-| Mapster | ✔ |
-| Entity Framework Core | ✔ |
+Adopt MediatR for all in-process CQRS command and query handling.
 
 ---
 
-# Risks
+# Final Decision
 
-| Risk | Mitigation |
-|------|------------|
-| Overuse of handlers | Follow CQRS guidelines |
-| Excessive pipeline behaviors | Keep behaviors focused and modular |
+| Component | Decision |
+|-----------|----------|
+| MediatR | Approved |
 
 ---
 
-# Recommendation
+# Decision Summary
 
-**Approved**
-
-MediatR should be adopted as the standard request dispatching mechanism within
-the Application Layer.
+- ✔ Clean Architecture
+- ✔ .NET 10 Compatibility
 
 ---
 
 # Related ADR
 
-ADR-0011 — Use MediatR
+- ADR-0003 — CQRS Pattern Implementation
 
 ---
 
-# Related POC
+# Related Documents
 
-Not Required
+- TE-0001 — .NET 10 Application Platform Evaluation
 
 ---
 
 # References
 
-https://github.com/jbogard/MediatR
-
-https://www.nuget.org/packages/MediatR
-
-https://github.com/jbogard/MediatR/wiki
+- https://github.com/jbogard/MediatR
 
 ---
 
-# Review
+# Revision History
 
-| Role | Name | Date |
-|------|------|------|
-| Solution Architect | | |
-
----
-
-# Change History
-
-| Version | Date | Description |
-|----------|------------|----------------------------------------------|
-| 1.0.0 | 2026-07-18 | Initial evaluation |
-| 2.0.0 | 2026-07-18 | Standardized |
-| 3.0.0 | 2026-07-18 | Rewritten according to Documentation Standard v3.0 |
+| Version | Date       | Author             | Description        |
+|---------|------------|--------------------|--------------------|
+| 1.0.0   | 2026-07-18 | Solution Architect | Initial evaluation |
+| 2.0.0   | 2026-07-18 | Solution Architect | Standardized       |
+| 3.0.0   | 2026-07-18 | Solution Architect | Rewritten according to Documentation Standard v3.0 |
+| 3.1.0   | 2026-07-28 | Solution Architect | New section added (Evaluation Scope) |
+| 4.0.0   | 2026-07-28 | Solution Architect | Upgraded to Documentation Standard v4.0.0 |

@@ -96,6 +96,20 @@ Folders shall only exist when needed.
 
 ---
 
+# Repository Root
+
+/
+├── docs/
+├── src/
+├── tests/
+├── global.json
+├── Directory.Build.props
+├── Directory.Packages.props
+├── MachineryManagerEnterprise.slnx
+└── README.md
+
+---
+
 # Feature Organization
 
 Business functionality should be grouped by feature whenever possible.

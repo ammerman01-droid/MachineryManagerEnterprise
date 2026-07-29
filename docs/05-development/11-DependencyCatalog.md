@@ -91,7 +91,12 @@ No package may bypass this process.
 
 # Central Package Management
 
-All NuGet package versions shall be managed centrally.
+All NuGet package versions are managed centrally through Directory.Packages.props.
+Project files contain PackageReference elements without Version attributes.
+
+Package versions are managed centrally through Directory.Packages.props.
+
+Project files must not define Version attributes in PackageReference elements.
 
 The single source of truth is:
 

@@ -3,11 +3,11 @@
 | Property | Value |
 |----------|-------|
 | **Document ID** | ARCH-009 |
-| **Version** | 3.0.0 |
+| **Version** | 4.0.0 |
 | **Status** | Active |
 | **Owner** | Solution Architect |
 | **Created** | 2026-07-18 |
-| **Last Updated** | 2026-07-18 |
+| **Last Updated** | 2026-07-28 |
 
 ---
 
@@ -211,6 +211,14 @@ Examples:
 - Financial Management consumes Purchase and Maintenance information.
 - Reporting consumes data from all business capabilities.
 
+All business capabilities are designed to operate independently of deployment topology.
+
+Business operations may execute inside Enterprise, Project or User Workspaces without changing Business Rules.
+
+Distributed synchronization propagates validated business changes between Workspaces while preserving business consistency.
+
+This behavior is defined by ADR-0012 (Distributed Workspace Architecture).
+
 ---
 
 # Future Expansion
@@ -224,6 +232,9 @@ The capability model intentionally supports future expansion, including:
 - Predictive maintenance
 - AI-assisted diagnostics
 - Mobile applications
+- Distributed Workspace synchronization
+- Offline-first project execution
+- Bidirectional synchronization between Enterprise, Project and User Workspaces
 - External ERP integration
 - GIS integration
 - Digital inspections
@@ -269,11 +280,14 @@ The platform may integrate with such systems but will not replace them.
 
 # Related Documents
 
-- 00-Vision.md
-- 01-Architecture.md
-- docs/03-domain/02-BoundedContexts.md
-- docs/04-modules
-- ADR-0001 — Adopt Clean Architecture
+- `../01-vision/00-Vision.md`
+- `../01-vision/01-DocumentationRoadmap.md`
+- `00-TechnologyEvaluationTemplate.md`
+- `01-Architecture.md`
+- `03-TechnologyGapAnalysis.md`
+- `../06-decisions/000-ADR-INDEX.md`
+- `TE-0001-.NET10.md` through `TE-0035-Reporting-Technology-Evaluation.md`
+- `../03-domain/02-BoundedContexts.md`
 
 # Revision History
 
@@ -281,7 +295,8 @@ The platform may integrate with such systems but will not replace them.
 
 # Change History
 
-| Version | Date | Description |
-|----------|------------|----------------------------------------------|
-| 1.0.0 | 2026-07-18 | Initial capability model |
-| 3.0.0 | 2026-07-18 | Standardized according to Documentation Standard v3.0 |
+| Version | Date     | Author | Description |
+|---------|----------|--------|-------------|
+| 1.0.0 | 2026-07-18 | Solution Architect | Initial capability model |
+| 3.0.0 | 2026-07-18 | Solution Architect | Standardized according to Documentation Standard v3.0 |
+| 4.0.0 | 2026-07-28 | Solution Architect | Upgraded to Documentation Standard v4.0.0; added links to ADR Master Index and all 35 TEs |
