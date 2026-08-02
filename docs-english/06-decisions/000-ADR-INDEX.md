@@ -2,11 +2,11 @@
 |----------|-------|
 | **Document ID** | ADR-INDEX |
 | **Title** | Architecture Decision Record Index |
-| **Version** | 4.0.0 |
+| **Version** | 4.1.0 |
 | **Status** | Active |
 | **Owner** | Solution Architect |
 | **Created** | 2026-07-18 |
-| **Last Updated** | 2026-07-28 |
+| **Last Updated** | 2026-08-02 |
 
 ---
 
@@ -138,10 +138,11 @@ All Architecture Decisions must enforce strict separation of concerns, keeping D
 | ADR-0023 | AI Provider Strategy | Multi-Provider Router Engine | Single LLM Vendor |
 | ADR-0024 | Enterprise Testing | xUnit, Moq, Testcontainers | Manual Testing |
 | ADR-0025 | Build Pipeline | GitHub Actions & Nuke Build | Jenkins |
-| ADR-0026 | Security Architecture | OpenID Connect & Keycloak | Custom Auth |
+| ADR-0026 | Security Architecture | Data Protection, AES-256 & X.509 (Transport/Encryption) | Custom Crypto Implementation |
 | ADR-0027 | Performance Testing | K6 & NBomber Engine | JMeter |
 | ADR-0028 | Client UI Architecture | Blazor Hybrid & MAUI Controls | Web View Wrapper |
 | ADR-0029 | Reporting Architecture | QuestPDF & FastReport OpenSource | SSRS |
+| ADR-0030 | Identity & Access Management | ASP.NET Core Identity & OpenIddict | Duende IdentityServer, Keycloak |
 
 ---
 
@@ -153,13 +154,13 @@ Maintain and enforce all approved ADRs across all development teams and automate
 
 # Final Decision
 
-All 29 Architecture Decision Records listed in the Master Directory below are formally **Approved** and active.
+All 30 Architecture Decision Records listed in the Master Directory below are formally **Approved** and active.
 
 ---
 
 # Decision Summary
 
-- ✔ 29/29 ADRs Approved
+- ✔ 30/30 ADRs Approved
 - ✔ 35/35 TEs Completed & Linked
 - ✔ Clean Architecture Enforced
 - ✔ Documentation Standard v4.0.0 Compliant
@@ -195,10 +196,11 @@ All 29 Architecture Decision Records listed in the Master Directory below are fo
 | ADR-0023 | AI Provider Strategy | Approved | Multi-Provider Model Router | `../02-architecture/TE-0029-Artificial-Intelligence-Provider-Technology-Evaluation.md` |
 | ADR-0024 | Enterprise Testing Strategy | Approved | xUnit & Testcontainers | `../02-architecture/TE-0030-Testing-Technology-Evaluation.md` |
 | ADR-0025 | Build & Deployment Architecture | Approved | GitHub Actions / Nuke | `../02-architecture/TE-0031-Build-Packaging-and-Deployment-Technology-Evaluation.md` |
-| ADR-0026 | Enterprise Security Strategy | Approved | OpenID Connect & Keycloak | `../02-architecture/TE-0020-Authentication-and-Identity-Technology-Evaluation.md`, `../02-architecture/TE-0032-Security-Technology-Evaluation.md` |
+| ADR-0026 | Enterprise Security Strategy | Approved | Data Protection, AES-256 & X.509 | `../02-architecture/TE-0032-Security-Technology-Evaluation.md` |
 | ADR-0027 | Enterprise Performance Testing Strategy | Approved | K6 & NBomber | `../02-architecture/TE-0033-Performance-and-Load-Testing-Technology-Evaluation.md` |
 | ADR-0028 | Client UI Architecture | Approved | Blazor Hybrid & MAUI | `../02-architecture/TE-0034-Client-UI-Technology-Evaluation.md` |
 | ADR-0029 | Enterprise Reporting Architecture | Approved | QuestPDF & FastReport | `../02-architecture/TE-0035-Reporting-Technology-Evaluation.md` |
+| ADR-0030 | Identity and Access Management Architecture | Approved | ASP.NET Core Identity & OpenIddict | `../02-architecture/TE-0020-Authentication-and-Identity-Technology-Evaluation.md` |
 
 ---
 
@@ -276,3 +278,4 @@ All 29 Architecture Decision Records listed in the Master Directory below are fo
 | 3.4.0   | 2026-07-27 | Solution Architect | Closed the previously flagged gap: added ADR-0013 through ADR-0018 to the index (all Status: Proposed, no Related TE), and added a new "Cross-Cutting / Platform Architecture" category for ADR-0012 through ADR-0018 |
 | 3.5.0   | 2026-07-28 | Solution Architect | Added ADR-0022 (AI Knowledge Retrieval Architecture), ADR-0023 (Artificial Intelligence Provider Strategy), ADR-0024 (Enterprise Testing Strategy), and ADR-0025 (Build and Deployment Architecture, created to close the gap for TE-0031); added new "Artificial Intelligence" and "Quality & Testing" categories; moved ADR-0017 from Cross-Cutting into the new Artificial Intelligence category |
 | 4.0.0   | 2026-07-28 | Solution Architect | Upgraded to Documentation Standard v4.0.0; consolidated all 29 ADRs and 35 TEs |
+| 4.1.0   | 2026-08-02 | Solution Architect | Added ADR-0030 (Identity and Access Management Architecture), ratifying TE-0020's Final Recommendation and classifying Identity as a platform module; corrected ADR-0026's rows in both tables, which had incorrectly listed "OpenID Connect & Keycloak" and TE-0020 — ADR-0026's actual Decision section covers Data Protection/AES-256/X.509 only and explicitly defers authentication to a separate document; that gap is now closed by ADR-0030 |

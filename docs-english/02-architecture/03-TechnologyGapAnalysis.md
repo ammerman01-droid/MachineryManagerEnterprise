@@ -3,11 +3,11 @@
 | Property | Value |
 |----------|-------|
 | **Document ID** | ARCH-009 |
-| **Version** | 4.0.0 |
+| **Version** | 4.1.0 |
 | **Status** | Active |
 | **Owner** | Solution Architect |
 | **Created** | 2026-07-18 |
-| **Last Updated** | 2026-07-28 |
+| **Last Updated** | 2026-08-02 |
 
 ---
 
@@ -47,7 +47,7 @@ This document covers:
 - Artificial Intelligence, Vector Engine & Provider Router technologies (Semantic Kernel, Qdrant, Ollama)
 - Enterprise Full-Text Search technologies (Meilisearch, Elasticsearch)
 - File Storage technologies (MinIO / S3 Object Store)
-- Security, Authentication & Identity Management (OpenID Connect, Keycloak)
+- Security, Authentication & Identity Management (ASP.NET Core Identity, OpenIddict)
 - Testing, Quality Assurance & Performance Testing (xUnit, Testcontainers, K6, NBomber)
 - Build, Packaging, Deployment & CI/CD Pipelines (GitHub Actions, Docker, Kubernetes)
 - Reporting & BI Output engines (QuestPDF, FastReport)
@@ -119,7 +119,7 @@ The following matrix evaluates every major architectural capability against the 
 | GAP-017 | Enterprise Observability Pipeline | Prometheus, Grafana, OpenTelemetry | ADR-0011 | `TE-0017-Observability-and-Telemetry-Technology-Evaluation.md` | High | Approved ✅ |
 | GAP-018 | Secrets & Config Management | Environment & HashiCorp Vault | ADR-0018 | `TE-0018-Configuration-and-Secrets-Management-Technology-Evaluation.md` | High | Approved ✅ |
 | GAP-019 | Job Scheduling Strategy | Quartz.NET Engine | ADR-0015 | `TE-0019-Background-Processing-and-Job-Scheduling-Technology-Evaluation.md` | Medium | Approved ✅ |
-| GAP-020 | Identity & Security | Keycloak / OpenID Connect | ADR-0026 | `TE-0020-Authentication-and-Identity-Technology-Evaluation.md` | High | Approved ✅ |
+| GAP-020 | Identity & Security | ASP.NET Core Identity & OpenIddict | ADR-0030 | `TE-0020-Authentication-and-Identity-Technology-Evaluation.md` | High | Approved ✅ |
 | GAP-021 | API Client Generation | OpenAPI & NSwag | ADR-0005 | `TE-0021-API-Documentation-and-Client-Generation-Technology-Evaluation.md` | Medium | Approved ✅ |
 | GAP-022 | Validation Pipeline | MediatR Validation Behavior | ADR-0007 | `TE-0022-Validation-Pipeline-and-Validation-Architecture-Evaluation.md` | High | Approved ✅ |
 | GAP-023 | High-Performance Mapping | Mapster Compiler Projections | ADR-0010 | `TE-0023-Object-Mapping-Strategy-and-Technology-Evaluation.md` | Medium | Approved ✅ |
@@ -200,3 +200,4 @@ All 35 technology gaps identified across the platform have completed their corre
 |---------|------|--------|-------------|
 | 1.0.0 | 2026-07-26 | Solution Architect | Initial Technology Gap Analysis |
 | 4.0.0 | 2026-07-28 | Solution Architect | Upgraded to Documentation Standard v4.0.0; expanded gap matrix to cover all 35 TEs and 29 ADRs |
+| 4.1.0 | 2026-08-02 | Solution Architect | Corrected GAP-020: replaced incorrect "Keycloak / OpenID Connect" / ADR-0026 reference with the actual TE-0020 recommendation (ASP.NET Core Identity & OpenIddict) and its ratifying ADR-0030 |

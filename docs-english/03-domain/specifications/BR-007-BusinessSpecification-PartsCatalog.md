@@ -3,7 +3,7 @@
 | **Document ID** | BR-005 |
 | **Capability ID** | DD-006 |
 | **Version** | 4.0.0 |
-| **Status** | Draft |
+| **Status** | Approved |
 | **Owner** | Domain Architect |
 | **Created** | 2026-07-20 |
 | **Last Updated** | 2026-07-28 |

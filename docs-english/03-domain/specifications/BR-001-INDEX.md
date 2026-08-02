@@ -1,11 +1,11 @@
 | Property | Value |
 |----------|-------|
 | **Document ID** | BR-INDEX |
-| **Version** | 4.0.0 |
+| **Version** | 4.1.0 |
 | **Status** | Active |
 | **Owner** | Solution Architect |
 | **Created** | 2026-07-20 |
-| **Last Updated** | 2026-07-28 |
+| **Last Updated** | 2026-08-02 |
 
 ---
 
@@ -77,6 +77,7 @@ No capability shall skip any stage.
 
 | ID         | Business Capability                 | Discovery  | Specification                                                       | Depends On     | Priority | Status  |
 | ---------- | ----------------------------------- | ---------- | --------------------------------------------------------------------| ---------------| -------- | --------|
+| BR-017     | Organization Management             | —          | BR-017-BusinessSpecification-OrganizationManagement.md              | —              | High     | Draft   |
 | BR-003     | Asset Relationships                 | DD-002     | BR-003-BusinessSpecification-AssetRelationships.md                  | —              | High     | Planned |
 | BR-004     | Tracked Components                  | DD-003     | BR-004-BusinessSpecification-TrackedComponents.md                   | BR-001         | High     | Draft   |
 | BR-005     | Tire Lifecycle Management           | DD-004     | BR-005-BusinessSpecification-TireLifecycle.md                       | BR-002         | High     | Planned |
@@ -99,6 +100,7 @@ No capability shall skip any stage.
 
 The recommended implementation sequence is:
 
+0. Organization Management
 1. Asset Relationships
 2. Tracked Components
 3. Tire Lifecycle Management
@@ -114,6 +116,8 @@ The recommended implementation sequence is:
 13. Relationship Management
 
 This order reflects architectural dependencies and minimizes future redesign.
+
+Organization Management is placed ahead of Asset Relationships because `04-DomainModel.md` defines Organization as the business owner of Assets (`Organization → Owns → Assets`); Asset ownership assignment therefore depends on Organization existing as a modeled capability.
 
 ---
 
@@ -160,3 +164,4 @@ This order reflects architectural dependencies and minimizes future redesign.
 | 1.2.0   | 2026-07-20 | Solution Architect | Added dependency tracking and introduced Maintenance Operations as a root Business Specification. |
 | 3.0.0   | 2026-07-18 | Solution Architect | Standardized according to Documentation Standard v3.0                             |
 | 4.0.0   | 2026-07-28 | Solution Architect | Upgraded to Documentation Standard v4.0.0                                         |
+| 4.1.0   | 2026-08-02 | Solution Architect | Added BR-017 Organization Management (Status: Draft); placed at priority 0 ahead of Asset Relationships |
