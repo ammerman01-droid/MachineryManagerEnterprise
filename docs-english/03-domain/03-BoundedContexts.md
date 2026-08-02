@@ -1,11 +1,11 @@
 | Property | Value |
 |----------|-------|
 | **Document ID** | DOM-003 |
-| **Version** | 4.0.0 |
+| **Version** | 4.1.0 |
 | **Status** | Active |
 | **Owner** | Solution Architect |
 | **Created** | 2026-07-18 |
-| **Last Updated** | 2026-07-28 |
+| **Last Updated** | 2026-08-02 |
 
 ---
 
@@ -49,7 +49,7 @@ Software modules are expected to evolve from these business boundaries.
 # 3. Context Map Overview
 
 ```text
-                     Organization
+                  Organization Context
 
                            │
 
@@ -86,7 +86,47 @@ Software modules are expected to evolve from these business boundaries.
 
 ---
 
-# 4. Asset Context
+# 4. Organization Context
+
+## Purpose
+
+Responsible for representing the business entity that owns and operates Assets, and for defining the organizational boundary used throughout the platform.
+
+## Owns
+
+- Organization Identity
+- Organizational Structure
+- Asset Ownership
+
+## Responsibilities
+
+- Organization registration
+- Ownership assignment for Assets
+- Providing the organizational boundary consumed by authorization
+
+## Does NOT own
+
+- Asset lifecycle
+- Financial calculations
+- User authentication or credentials
+
+These belong to other contexts.
+
+## Relationship to Identity
+
+The Organization Context defines **business ownership boundaries** (which Organization owns which Assets).
+
+It is distinct from the Identity platform component, which handles **authentication and access boundaries** (which User may act on behalf of which Organization).
+
+Authorization decisions consume both: an authenticated User's identity (from Identity) and the Organization boundary being acted upon (from this context).
+
+## Documentation Status
+
+This section formalizes, as a Bounded Context, a capability already listed in `PROJECT_CHARTER.md` (Organization Management) and referenced in `04-DomainModel.md` (Organization owns Assets) and `04-modules/07-Authorization.md` (Organization-scoped permissions). Detailed business rules are defined separately in the corresponding Business Specification.
+
+---
+
+# 5. Asset Context
 
 ## Purpose
 
@@ -119,7 +159,7 @@ These belong to other contexts.
 
 ---
 
-# 5. Component Context
+# 6. Component Context
 
 ## Purpose
 
@@ -148,7 +188,7 @@ Engine is the primary example.
 
 ---
 
-# 6. Usage Context
+# 7. Usage Context
 
 ## Purpose
 
@@ -175,7 +215,7 @@ It only observes them.
 
 ---
 
-# 7. Maintenance Context
+# 8. Maintenance Context
 
 ## Purpose
 
@@ -202,7 +242,7 @@ Maintenance consumes Operational Usage but never owns it.
 
 ---
 
-# 8. Finance Context
+# 9. Finance Context
 
 ## Purpose
 
@@ -238,7 +278,7 @@ The Finance Context consumes information from other contexts but owns all financ
 
 ---
 
-# 9. Document Context
+# 10. Document Context
 
 ## Purpose
 
@@ -270,7 +310,7 @@ Expired documents remain part of business history.
 
 ---
 
-# 10. Knowledge Context
+# 11. Knowledge Context
 
 ## Purpose
 
@@ -296,7 +336,7 @@ Knowledge belongs to Models rather than individual Assets whenever possible.
 
 ---
 
-# 11. Media Context
+# 12. Media Context
 
 ## Purpose
 
@@ -330,7 +370,7 @@ Media files are business evidence.
 
 ---
 
-# 12. Forecast Context
+# 13. Forecast Context
 
 ## Purpose
 
@@ -365,7 +405,7 @@ They never modify historical records.
 
 ---
 
-# 13. Relationships Between Contexts
+# 14. Relationships Between Contexts
 
 The following diagram illustrates the primary relationships between bounded contexts.
 
@@ -394,7 +434,7 @@ Contexts should avoid direct ownership of each other's entities.
 
 ---
 
-# 14. Context Ownership Rules
+# 15. Context Ownership Rules
 
 Each business object shall have exactly one owning context.
 
@@ -402,6 +442,7 @@ Examples:
 
 | Business Object | Owning Context |
 |-----------------|----------------|
+| Organization | Organization Context |
 | Asset | Asset Context |
 | Engine | Component Context |
 | Meter Device | Usage Context |
@@ -421,7 +462,7 @@ Other contexts may reference these objects but shall not redefine their business
 
 ---
 
-# 15. Integration Principles
+# 16. Integration Principles
 
 Contexts communicate using business events.
 
@@ -442,7 +483,7 @@ Business events preserve loose coupling between contexts.
 
 ---
 
-# 16. Future Evolution
+# 17. Future Evolution
 
 Additional bounded contexts may be introduced as the platform evolves.
 
@@ -488,3 +529,4 @@ New contexts shall not violate the ownership boundaries established in this docu
 | 1.0.0   | 2026-07-18 | Solution Architect | Initial | Initial bounded context definition          |
 | 3.0.0   | 2026-07-18 | Solution Architect | Standardized according to Documentation Standard v3.0 |
 | 4.0.0   | 2026-07-28 | Solution Architect | Upgraded to Documentation Standard v4.0.0             |
+| 4.1.0   | 2026-08-02 | Solution Architect | Added Organization Context (Section 4); renumbered subsequent sections; updated Context Map and Context Ownership Rules |

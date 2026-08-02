@@ -3,7 +3,7 @@
 | **Document ID** | BR-014 |
 | **Document Name** | Business Specification – Distributed Workspace Synchronization |
 | **Version** | 4.0.0 |
-| **Status** | Draft |
+| **Status** | Approved |
 | **Owner** | Product Owner |
 | **Created** | 2026-07-22 |
 | **Last Updated** | 2026-07-28 |

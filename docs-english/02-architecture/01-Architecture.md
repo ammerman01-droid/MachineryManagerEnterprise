@@ -3,11 +3,11 @@
 | Property | Value |
 |----------|-------|
 | **Document ID** | ARCH-001 |
-| **Version** | 4.0.0 |
+| **Version** | 4.1.0 |
 | **Status** | Active |
 | **Owner** | Solution Architect |
 | **Created** | 2026-07-18 |
-| **Last Updated** | 2026-07-28 |
+| **Last Updated** | 2026-08-02 |
 
 ---
 
@@ -81,7 +81,7 @@ Responsible for:
 - Web User Interface (Blazor Server & MudBlazor)
 - Desktop & Mobile Client Apps (.NET MAUI & Blazor Hybrid)
 - RESTful HTTP API Endpoints & OpenAPI Specifications
-- Authentication, Authorization & Identity Management (OpenID Connect / Keycloak)
+- Authentication, Authorization & Identity Management (ASP.NET Core Identity / OpenIddict)
 
 ---
 
@@ -208,7 +208,7 @@ Observability is built directly into all application layers:
 | File Storage | MinIO / S3 Object Store | ADR-0020 / TE-0026 |
 | Search Engine | Meilisearch / Elasticsearch | ADR-0021 / TE-0027 |
 | Testing Engine | xUnit, Testcontainers, K6 | ADR-0024, ADR-0027 / TE-0030, TE-0033 |
-| Security & Identity | OpenID Connect & Keycloak | ADR-0026 / TE-0020, TE-0032 |
+| Security & Identity | ASP.NET Core Identity & OpenIddict | ADR-0030 / TE-0020; (Encryption: ADR-0026 / TE-0032) |
 | Build & Deploy | Docker, Kubernetes, GitHub Actions | ADR-0015, ADR-0025 / TE-0031 |
 | Reporting | QuestPDF & FastReport | ADR-0029 / TE-0035 |
 
@@ -304,3 +304,4 @@ No architectural change shall bypass the ADR process.
 | 1.0.0   | 2026-07-18 | Solution Architect | Initial architecture notes |
 | 3.0.0   | 2026-07-18 | Solution Architect | Standardized according to Documentation Standard v3.0 |
 | 4.0.0   | 2026-07-28 | Solution Architect | Upgraded to Documentation Standard v4.0.0; fully linked all 35 TE files and ADR Master Index |
+| 4.1.0   | 2026-08-02 | Solution Architect | Corrected Security & Identity references: replaced incorrect "OpenID Connect & Keycloak" / ADR-0026 with the actual TE-0020 recommendation (ASP.NET Core Identity & OpenIddict) and its ratifying ADR-0030 |

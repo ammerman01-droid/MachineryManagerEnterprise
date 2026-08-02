@@ -2,7 +2,7 @@
 |----------|-------|
 | **Document ID** | BR-001 |
 | **Version** | 4.0.0 |
-| **Status** | Draft |
+| **Status** | Approved |
 | **Owner** | Domain Architect |
 | **Created** | 2026-07-20 |
 | **Last Updated** | 2026-07-28 |
