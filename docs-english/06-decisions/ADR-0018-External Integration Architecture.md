@@ -1,12 +1,12 @@
-| Property | Value |
-|----------|-------|
-| **Document ID** | ADR-0018 |
-| **Title** | External Integration Architecture |
-| **Version** | 4.0.0 |
-| **Status** | Proposed |
-| **Owner** | Solution Architect |
-| **Created** | 2026-07-26 |
-| **Last Updated** | 2026-07-28 |
+| Property         | Value              |
+|------------------|--------------------|
+| **Document ID**  | ADR-0018           |
+| **Title**        | External Integration Architecture |
+| **Version**      | 4.1.0              |
+| **Status**       | Approved           |
+| **Owner**        | Solution Architect |
+| **Created**      | 2026-07-26         |
+| **Last Updated** | 2026-08-08         |
 
 # Purpose
 
@@ -383,7 +383,6 @@ All future external integrations shall comply with this architecture before impl
 
 Future work includes:
 
-- Technology evaluation of integration mechanisms.
 - Authentication and federation strategies.
 - Integration monitoring.
 - API versioning.
@@ -392,6 +391,31 @@ Future work includes:
 - Integration governance.
 
 These implementation decisions shall be documented separately through Technical Evaluation documents.
+
+> Technology evaluation of integration mechanisms, previously listed
+> here as future work, is now complete — see Section 11a below.
+
+---
+
+# 11a. Technology Selection (Formalized)
+
+TE-0036 — External Integration and Connector Technology Evaluation
+evaluated a MassTransit-based connector framework, Azure Logic Apps, and
+NServiceBus Adapters.
+
+The platform adopts a **Connector Framework built on the already-approved
+MassTransit / RabbitMQ stack** (ADR-0016) as the default external
+integration mechanism, with a dedicated Adapter per external system.
+**Azure Logic Apps** is approved only as an optional, non-default path
+for Azure-hosted deployments. NServiceBus Adapters are not adopted.
+
+| Responsibility | Selected Technology |
+|-----------------|---------------------|
+| Default External Integration Mechanism | MassTransit-based Connector Framework |
+| Optional Azure-specific Path | Azure Logic Apps (non-default, opt-in) |
+
+This closes the technology selection that was previously deferred, and
+corrects the prior erroneous "TE-0012" reference recorded below.
 
 ---
 
@@ -409,7 +433,7 @@ These implementation decisions shall be documented separately through Technical 
 
 ## Technical Evaluation
 
-- TE-0012 — External Integration Technology Evaluation *(Planned)*
+- TE-0036 — External Integration and Connector Technology Evaluation *(Approved — MassTransit-based Connector Framework, see Section 11a. Corrected from an erroneous TE-0012 reference on 2026-08-02.)*
 
 ## Development
 
@@ -433,6 +457,7 @@ These implementation decisions shall be documented separately through Technical 
 
 | Version | Date       | Author             | Description                                           |
 |---------|------------|--------------------|-------------------------------------------------------|
-| 1.0.0 | 2026-07-26 | Initial Architecture Decision Record |
-| 3.0.0   | 2026-07-18 | Solution Architect | Standardized according to Documentation Standard v3.0 |
+| 1.0.0   | 2026-07-26 | Solution Architect | Initial Architecture Decision Record                  |
+| 3.0.0   | 2026-07-26 | Solution Architect | Standardized according to Documentation Standard v3.0 |
 | 4.0.0   | 2026-07-28 | Solution Architect | Upgraded to Documentation Standard v4.0.0             |
+| 4.1.0   | 2026-08-02 | Solution Architect | Formalized technology selection (MassTransit-based Connector Framework / Azure Logic Apps opt-in), closing new TE-0036 and correcting prior erroneous TE-0012 reference |

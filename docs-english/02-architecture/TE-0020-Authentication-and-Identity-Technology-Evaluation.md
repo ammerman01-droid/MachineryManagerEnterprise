@@ -1,12 +1,12 @@
-| Property | Value |
-|----------|-------|
-| **Document ID** | TE-0020 |
-| **Title** | Authentication and Identity Technology Evaluation (.NET 10) |
-| **Version** | 4.0.0 |
-| **Status** | Approved |
-| **Owner** | Solution Architect |
-| **Created** | 2026-07-26 |
-| **Last Updated** | 2026-07-28 |
+| Property         | Value              |
+|------------------|--------------------|
+| **Document ID**  | TE-0020            |
+| **Title**        | Authentication and Identity Technology Evaluation (.NET 10) |
+| **Version**      | 4.1.0              |
+| **Status**       | Approved           |
+| **Owner**        | Solution Architect |
+| **Created**      | 2026-07-26         |
+| **Last Updated** | 2026-08-08         |
 
 ---
 
@@ -2815,7 +2815,6 @@ This authentication architecture is therefore adopted as the enterprise standard
 
 ---
 
-
 # Related ADR
 
 - ADR-0001 — Clean Architecture
@@ -2823,19 +2822,19 @@ This authentication architecture is therefore adopted as the enterprise standard
 
 ---
 
-
 # Related Documents
 
-- SolutionStructure.md
-- DependencyRules.md
-- CodingStandards.md
+- ../05-development/01-SolutionStructure.md
+- ../05-development/04-DependencyRules.md
+- ../05-development/05-CodingStandards.md
 
 ---
 
 # Revision History
 
-| Version | Date       | Author             | Description                                                   |
-|---------|------------|--------------------|---------------------------------------------------------------|
+| Version | Date       | Author             | Description                                           |
+|---------|------------|--------------------|-------------------------------------------------------|
 | 1.0.0   | 2026-07-26 | Solution Architect | Initial technology evaluation for Authentication and Identity |
-| 1.3.0   | 2026-07-28 | Solution Architect | New section added (Evaluation Scope)                          |
-| 4.0.0   | 2026-07-28 | Solution Architect | Upgraded to Documentation Standard v4.0.0                     |
+| 1.3.0   | 2026-07-28 | Solution Architect | New section added (Evaluation Scope)                  |
+| 4.0.0   | 2026-07-28 | Solution Architect | Upgraded to Documentation Standard v4.0.0             |
+| 4.1.0   | 2026-08-08 | Solution Architect | Review and synchronize with the latest changes        |

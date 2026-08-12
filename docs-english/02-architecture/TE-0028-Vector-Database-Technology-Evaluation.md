@@ -1,12 +1,14 @@
-| Property | Value |
-|----------|-------|
-| **Document ID** | TE-0028 |
-| **Title** | Vector Database Technology Evaluation |
-| **Version** | 4.0.0 |
-| **Status** | Approved |
-| **Owner** | Solution Architect |
-| **Created** | 2026-07-28 |
-| **Last Updated** | 2026-07-28 |
+| Property         | Value              |
+|------------------|--------------------|
+| **Document ID**  | TE-0028            |
+| **Title**        | Vector Database Technology Evaluation |
+| **Version**      | 4.1.0              |
+| **Status**       | Approved           |
+| **Owner**        | Solution Architect |
+| **Created**      | 2026-07-27         |
+| **Last Updated** | 2026-08-08         |
+
+---
 
 # Purpose
 
@@ -1734,10 +1736,9 @@ The Architecture Review Board formally approves:
 
 # Related Documents
 
-- SolutionStructure.md
-- DependencyRules.md
-- CodingStandards.md
-
+- ../05-development/01-SolutionStructure.md
+- ../05-development/04-DependencyRules.md
+- ../05-development/05-CodingStandards.md
 ---
 
 ## Consequences
@@ -1765,8 +1766,9 @@ This Technology Evaluation shall be reviewed if:
 
 # 15. Revision History
 
-| Version | Date       | Author             | Description                               |
-|---------|------------|--------------------|-------------------------------------------|
-| 1.0.0   | 2026-07-28 | Solution Architect | Initial version |
+| Version | Date       | Author             | Description                                    |
+|---------|------------|--------------------|------------------------------------------------|
+| 1.0.0   | 2026-07-28 | Solution Architect | Initial version                                |
 | 1.1.0   | 2026-07-28 | Solution Architect | Converted star-rating (⭐) tables to text ratings (Excellent/Good/Fair/Poor/Very Poor) for consistency with the rest of the documentation |
-| 4.0.0   | 2026-07-28 | Solution Architect | Upgraded to Documentation Standard v4.0.0 |
+| 4.0.0   | 2026-07-28 | Solution Architect | Upgraded to Documentation Standard v4.0.0      |
+| 4.1.0   | 2026-08-08 | Solution Architect | Review and synchronize with the latest changes |

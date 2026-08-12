@@ -1,12 +1,12 @@
-| Property | Value |
-|----------|-------|
-| **Document ID** | API-008 |
-| **Title** | OpenAPI Specification |
-| **Version** | 4.0.0 |
-| **Status** | Active |
-| **Owner** | Solution Architect |
-| **Created** | 2026-07-18 |
-| **Last Updated** | 2026-07-28 |
+| Property         | Value              |
+|------------------|--------------------|
+| **Document ID**  | API-008            |
+| **Title**        | OpenAPI Specification |
+| **Version**      | 4.2.0              |
+| **Status**       | Approved           |
+| **Owner**        | Solution Architect |
+| **Created**      | 2026-07-18         |
+| **Last Updated** | 2026-08-08         |
 
 ---
 
@@ -28,8 +28,9 @@ Generated documentation shall accurately represent the deployed API.
 
 ---
 
-# OpenAPI Philosophy
+# Documentation Generation Pipeline
 
+```text
 Source Code
 
 ↓
@@ -42,15 +43,20 @@ OpenAPI Generator
 
 ↓
 
-swagger.json
+openapi.json
 
 ↓
 
-Swagger UI
+Scalar (primary interactive documentation)
 
 ↓
 
-Generated SDK
+Generated SDK (NSwag)
+```
+
+Swagger UI remains available only for backward compatibility with
+existing tooling, per ADR-0035 (API Documentation and Client Generation
+Architecture); it is not the primary documentation UI.
 
 ---
 
@@ -171,7 +177,7 @@ Typical documented responses include:
 
 Protected endpoints shall declare their authentication scheme.
 
-Swagger UI should support authenticated testing.
+Scalar (and Swagger UI, where retained for compatibility) should support authenticated testing.
 
 Authentication requirements shall be visible before execution.
 
@@ -283,7 +289,7 @@ Every endpoint shall document:
 - 03-RequestResponseModel.md
 - 04-ErrorResponses.md
 - 06-Versioning.md
-- ADR-0005 — API Strategy
+- ADR-0035 — API Documentation and Client Generation Architecture
 
 ---
 
@@ -294,3 +300,5 @@ Every endpoint shall document:
 | 1.0.0   | 2026-07-18 | Solution Architect | Initial OpenAPI Specification strategy                |
 | 3.0.0   | 2026-07-18 | Solution Architect | Standardized according to Documentation Standard v3.0 |
 | 4.0.0   | 2026-07-28 | Solution Architect | Upgraded to Documentation Standard v4.0.0             |
+| 4.1.0   | 2026-08-02 | Solution Architect | Corrected reference from non-existent "ADR-0005 — API Strategy" to the actual governing ADR-0035 (API Documentation and Client Generation Architecture) |
+| 4.2.0   | 2026-08-02 | Solution Architect | Fixed duplicate "OpenAPI Philosophy" heading (second occurrence was actually the generation pipeline); updated the pipeline and authentication-testing text to name Scalar as the primary documentation UI per ADR-0035, with Swagger UI retained only for compatibility |

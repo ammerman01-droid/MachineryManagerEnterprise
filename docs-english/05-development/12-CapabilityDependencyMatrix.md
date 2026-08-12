@@ -1,12 +1,12 @@
-| Property | Value |
-|----------|-------|
-| **Document ID** | DD-013 |
-| **Title** | Capability Dependency Matrix |
-| **Version** | 4.0.0 |
-| **Status** | Draft |
-| **Owner** | Domain Architect |
-| **Created** | 2026-07-20 |
-| **Last Updated** | 2026-07-28 |
+| Property         | Value              |
+|------------------|--------------------|
+| **Document ID**  | DOC-DEV-013        |
+| **Title**        | Capability Dependency Matrix |
+| **Version**      | 4.2.0              |
+| **Status**       | Approved           |
+| **Owner**        | Solution Architect |
+| **Created**      | 2026-07-20         |
+| **Last Updated** | 2026-08-08         |
 
 ---
 
@@ -421,19 +421,27 @@ It represents business dependency only.
 
 | Capability | Depends On | Dependency Type | Strength |
 |------------|------------|-----------------|----------|
-| BR-001 Asset Management | — | — | Independent |
-| BR-002 Tracked Components | BR-001 | Foundational | Required |
-| BR-003 Meter Management | BR-001 | Foundational | Required |
-| BR-004 Condition Monitoring | BR-001, BR-003 | Operational | Required |
-| BR-005 Parts Catalog | — | — | Independent |
-| BR-006 Inventory Management | BR-005 | Foundational | Required |
-| BR-007 Incident Management | BR-001 | Foundational | Required |
-| BR-008 Maintenance Forecast | BR-001, BR-002, BR-003, BR-004, BR-005, BR-007 | Operational | Required |
-| BR-009 Maintenance Operations | BR-001, BR-002, BR-005, BR-006, BR-008 | Operational | Required |
-| BR-010 Notification Center | BR-013 | Integration | Required |
-| BR-011 Internal Messaging | BR-013 | Context | Recommended |
-| BR-012 AI Assistant | BR-001, BR-002, BR-003, BR-004, BR-005, BR-006, BR-007, BR-008, BR-009, BR-010, BR-011, BR-013 | Context | Required |
-| BR-013 Relationship Management | — | — | Independent |
+| Asset Management (DD-001; no dedicated Business Specification) | — | — | Independent |
+| BR-004 Tracked Components | Asset Management | Foundational | Required |
+| Meter Management (no dedicated Business Specification) | Asset Management | Foundational | Required |
+| Condition Monitoring (no dedicated Business Specification) | Asset Management, Meter Management | Operational | Required |
+| BR-007 Parts Catalog | — | — | Independent |
+| Inventory Management (Future — not yet built, see 01-UseCases.md Future Expansion) | BR-007 Parts Catalog | Foundational | Required |
+| BR-009 Incident Management | Asset Management | Foundational | Required |
+| BR-010 Maintenance Forecast | Asset Management, BR-004, Meter Management, Condition Monitoring, BR-007, BR-009 | Operational | Required |
+| BR-011 Maintenance Operations | Asset Management, BR-004, BR-007, Inventory Management, BR-010 | Operational | Required |
+| BR-012 Notification Center | BR-015 | Integration | Required |
+| BR-013 Internal Messaging | BR-015 | Context | Recommended |
+| BR-014 AI Assistant | Asset Management, BR-004, Meter Management, Condition Monitoring, BR-007, BR-009, BR-010, BR-011, BR-012, BR-013, BR-015 | Context | Required |
+| BR-015 Relationship Management | — | — | Independent |
+
+> **Note:** Four capabilities — Asset Management, Meter Management,
+> Condition Monitoring, and Inventory Management — do not correspond to
+> any dedicated BR-XXX specification and are marked accordingly rather
+> than given a fabricated number. Asset Management is capability DD-001
+> with no dedicated spec, Inventory Management is future/unbuilt, and
+> Meter Management / Condition Monitoring have no dedicated
+> specification.
 
 ---
 
@@ -528,11 +536,11 @@ Foundation
 
 ────────────────────────────────────
 
-BR-001  Asset Management
+Asset Management
 
-BR-005  Parts Catalog
+BR-007  Parts Catalog
 
-BR-013  Relationship Management
+BR-015  Relationship Management
 
 ────────────────────────────────────
 
@@ -543,13 +551,13 @@ Core Business
 
 ────────────────────────────────────
 
-BR-002  Tracked Components
+BR-004  Tracked Components
 
-BR-003  Meter Management
+Meter Management
 
-BR-006  Inventory Management
+Inventory Management (Future)
 
-BR-007  Incident Management
+BR-009  Incident Management
 
 ────────────────────────────────────
 
@@ -560,9 +568,9 @@ Operational Intelligence
 
 ────────────────────────────────────
 
-BR-004  Condition Monitoring
+Condition Monitoring
 
-BR-008  Maintenance Forecast
+BR-010  Maintenance Forecast
 
 ────────────────────────────────────
 
@@ -573,7 +581,7 @@ Operations
 
 ────────────────────────────────────
 
-BR-009  Maintenance Operations
+BR-011  Maintenance Operations
 
 ────────────────────────────────────
 
@@ -584,9 +592,9 @@ Enterprise Services
 
 ────────────────────────────────────
 
-BR-010  Notification Center
+BR-012  Notification Center
 
-BR-011  Internal Messaging
+BR-013  Internal Messaging
 
 ────────────────────────────────────
 
@@ -597,7 +605,7 @@ Enterprise Intelligence
 
 ────────────────────────────────────
 
-BR-012  AI Assistant
+BR-014  AI Assistant
 
 ────────────────────────────────────
 ```
@@ -799,9 +807,9 @@ The following capabilities establish the enterprise foundation.
 
 | Order | Capability | Reason |
 |--------|------------|--------|
-| 1 | BR-001 Asset Management | Core enterprise entity |
-| 2 | BR-005 Parts Catalog | Shared enterprise reference |
-| 3 | BR-013 Relationship Management | Enterprise relationship infrastructure |
+| 1 | Asset Management | Core enterprise entity |
+| 2 | BR-007 Parts Catalog | Shared enterprise reference |
+| 3 | BR-015 Relationship Management | Enterprise relationship infrastructure |
 
 These capabilities have no business dependencies.
 
@@ -815,10 +823,10 @@ The following capabilities extend the domain model.
 
 | Order | Capability | Depends On |
 |--------|------------|------------|
-| 4 | BR-002 Tracked Components | BR-001 |
-| 5 | BR-003 Meter Management | BR-001 |
-| 6 | BR-006 Inventory Management | BR-005 |
-| 7 | BR-007 Incident Management | BR-001 |
+| 4 | BR-004 Tracked Components | Asset Management |
+| 5 | Meter Management | Asset Management |
+| 6 | Inventory Management (Future) | BR-007 |
+| 7 | BR-009 Incident Management | Asset Management |
 
 These capabilities provide operational business information.
 
@@ -830,8 +838,8 @@ Planning capabilities consume business information.
 
 | Order | Capability | Depends On |
 |--------|------------|------------|
-| 8 | BR-004 Condition Monitoring | BR-001, BR-003 |
-| 9 | BR-008 Maintenance Forecast | BR-001, BR-002, BR-003, BR-004, BR-005, BR-007 |
+| 8 | Condition Monitoring | Asset Management, Meter Management |
+| 9 | BR-010 Maintenance Forecast | Asset Management, BR-004, Meter Management, Condition Monitoring, BR-007, BR-009 |
 
 Forecasting shall be implemented before operational execution.
 
@@ -843,7 +851,7 @@ Operational execution follows planning.
 
 | Order | Capability | Depends On |
 |--------|------------|------------|
-| 10 | BR-009 Maintenance Operations | BR-008 |
+| 10 | BR-011 Maintenance Operations | BR-010 |
 
 Maintenance Operations consume Forecasts.
 
@@ -857,8 +865,8 @@ Enterprise communication services are implemented after operational capabilities
 
 | Order | Capability | Depends On |
 |--------|------------|------------|
-| 11 | BR-010 Notification Center | BR-013 |
-| 12 | BR-011 Internal Messaging | BR-013 |
+| 11 | BR-012 Notification Center | BR-015 |
+| 12 | BR-013 Internal Messaging | BR-015 |
 
 Both capabilities rely upon organizational relationships.
 
@@ -870,7 +878,7 @@ The AI Assistant is implemented last.
 
 | Order | Capability | Depends On |
 |--------|------------|------------|
-| 13 | BR-012 AI Assistant | All previous capabilities |
+| 13 | BR-014 AI Assistant | All previous capabilities |
 
 The AI Assistant consumes enterprise context.
 
@@ -1013,9 +1021,9 @@ Establish the foundational business model.
 
 Capabilities
 
-- BR-001 Asset Management
-- BR-005 Parts Catalog
-- BR-013 Relationship Management
+- Asset Management
+- BR-007 Parts Catalog
+- BR-015 Relationship Management
 
 Deliverables
 
@@ -1039,10 +1047,10 @@ Model enterprise operational data.
 
 Capabilities
 
-- BR-002 Tracked Components
-- BR-003 Meter Management
-- BR-006 Inventory Management
-- BR-007 Incident Management
+- BR-004 Tracked Components
+- Meter Management
+- Inventory Management (Future)
+- BR-009 Incident Management
 
 Deliverables
 
@@ -1065,8 +1073,8 @@ Introduce maintenance intelligence.
 
 Capabilities
 
-- BR-004 Condition Monitoring
-- BR-008 Maintenance Forecast
+- Condition Monitoring
+- BR-010 Maintenance Forecast
 
 Deliverables
 
@@ -1088,7 +1096,7 @@ Execute maintenance work.
 
 Capabilities
 
-- BR-009 Maintenance Operations
+- BR-011 Maintenance Operations
 
 Deliverables
 
@@ -1110,8 +1118,8 @@ Provide enterprise communication services.
 
 Capabilities
 
-- BR-010 Notification Center
-- BR-011 Internal Messaging
+- BR-012 Notification Center
+- BR-013 Internal Messaging
 
 Deliverables
 
@@ -1133,7 +1141,7 @@ Deliver enterprise reasoning capabilities.
 
 Capabilities
 
-- BR-012 AI Assistant
+- BR-014 AI Assistant
 
 Deliverables
 
@@ -1290,27 +1298,26 @@ It is independent from project scheduling.
 The primary Critical Path of MachineryManagerEnterprise is:
 
 ```text
-BR-001
 Asset Management
 
 ↓
 
-BR-002
+BR-004
 Tracked Components
 
 ↓
 
-BR-008
+BR-010
 Maintenance Forecast
 
 ↓
 
-BR-009
+BR-011
 Maintenance Operations
 
 ↓
 
-BR-012
+BR-014
 AI Assistant
 ```
 
@@ -1323,17 +1330,16 @@ This represents the minimum business sequence required to achieve enterprise mai
 A second foundational path exists.
 
 ```text
-BR-005
+BR-007
 Parts Catalog
 
 ↓
 
-BR-006
-Inventory Management
+Inventory Management (Future)
 
 ↓
 
-BR-009
+BR-011
 Maintenance Operations
 ```
 
@@ -1348,22 +1354,22 @@ Maintenance cannot execute without Inventory.
 Enterprise governance follows a separate critical path.
 
 ```text
-BR-013
+BR-015
 Relationship Management
 
 ↓
 
-BR-010
+BR-012
 Notification Center
 
 ↓
 
-BR-011
+BR-013
 Internal Messaging
 
 ↓
 
-BR-012
+BR-014
 AI Assistant
 ```
 
@@ -1389,7 +1395,6 @@ Some capabilities are intentionally isolated from the primary path.
 Example
 
 ```text
-BR-003
 Meter Management
 ```
 
@@ -1410,12 +1415,12 @@ The highest-impact capabilities are:
 
 | Capability | Reason |
 |------------|--------|
-| BR-001 Asset Management | Root business entity |
-| BR-005 Parts Catalog | Root reference data |
-| BR-013 Relationship Management | Enterprise governance |
-| BR-008 Maintenance Forecast | Enables Maintenance |
-| BR-009 Maintenance Operations | Core business execution |
-| BR-012 AI Assistant | Consumes entire enterprise context |
+| Asset Management | Root business entity |
+| BR-007 Parts Catalog | Root reference data |
+| BR-015 Relationship Management | Enterprise governance |
+| BR-010 Maintenance Forecast | Enables Maintenance |
+| BR-011 Maintenance Operations | Core business execution |
+| BR-014 AI Assistant | Consumes entire enterprise context |
 
 These capabilities form the primary architectural bottlenecks.
 
@@ -1461,19 +1466,19 @@ Blocked capabilities:
 
 | Risk Level | Capability |
 |------------|------------|
-| Very High | BR-001 |
-| Very High | BR-013 |
-| High | BR-005 |
-| High | BR-008 |
-| High | BR-009 |
-| Medium | BR-002 |
-| Medium | BR-006 |
-| Medium | BR-010 |
-| Low | BR-003 |
-| Low | BR-004 |
-| Low | BR-007 |
-| Low | BR-011 |
-| Low | BR-012 (implementation only after previous capabilities) |
+| Very High | Asset Management |
+| Very High | BR-015 Relationship Management |
+| High | BR-007 Parts Catalog |
+| High | BR-010 Maintenance Forecast |
+| High | BR-011 Maintenance Operations |
+| Medium | BR-004 Tracked Components |
+| Medium | Inventory Management (Future) |
+| Medium | BR-012 Notification Center |
+| Low | Meter Management |
+| Low | Condition Monitoring |
+| Low | BR-009 Incident Management |
+| Low | BR-013 Internal Messaging |
+| Low | BR-014 AI Assistant (implementation only after previous capabilities) |
 
 ---
 
@@ -1847,9 +1852,9 @@ Architectural Constraints provide:
 
 The following architectural documents define the structural foundation of this matrix.
 
-- 02-architecture/01-Architecture.md
-- 02-architecture/09-CapabilityModel.md
-- 02-architecture/06-decisions/ADR-0012-DistributedWorkspaceArchitecture.md
+- ../02-architecture/01-Architecture.md
+- ../02-architecture/02-CapabilityModel.md
+- ../06-decisions/ADR-0012-DistributedWorkspaceArchitecture.md
 
 ---
 
@@ -1857,12 +1862,12 @@ The following architectural documents define the structural foundation of this m
 
 The following development documents complement this specification.
 
-- 05-development/01-SolutionStructure.md
-- 05-development/02-ProjectStructure.md
-- 05-development/03-DependencyCatalog.md
-- 05-development/04-DependencyRules.md
-- 05-development/05-BuildPipeline.md
-- 03-development/12-DomainPatterns.md
+- 01-SolutionStructure.md
+- 02-ProjectStructure.md
+- 11-DependencyCatalog.md
+- 04-DependencyRules.md
+- 10-BuildPipeline.md
+- ../03-domain/12-DomainPatterns.md
 
 ---
 
@@ -1870,19 +1875,19 @@ The following development documents complement this specification.
 
 Capability Dependency Matrix references the following Business Specifications.
 
-- BR-001 Asset Management
-- BR-002 Tracked Components
-- BR-003 Meter Management
-- BR-004 Condition Monitoring
-- BR-005 Parts Catalog
-- BR-006 Inventory Management
-- BR-007 Incident Management
-- BR-008 Maintenance Forecast
-- BR-009 Maintenance Operations
-- BR-010 Notification Center
-- BR-011 Internal Messaging
-- BR-012 AI Assistant
-- BR-013 Relationship Management
+- Asset Management (DD-001; no dedicated Business Specification)
+- BR-004 Tracked Components
+- Meter Management (no dedicated Business Specification)
+- Condition Monitoring (no dedicated Business Specification)
+- BR-007 Parts Catalog
+- Inventory Management (Future — not yet built)
+- BR-009 Incident Management
+- BR-010 Maintenance Forecast
+- BR-011 Maintenance Operations
+- BR-012 Notification Center
+- BR-013 Internal Messaging
+- BR-014 AI Assistant
+- BR-015 Relationship Management
 
 ---
 
@@ -1893,10 +1898,8 @@ The implementation sequence defined by this document assumes the reusable archit
 - DP-001 Business Operation Pattern
 - DP-003 Lifecycle Pattern
 - DP-004 Relationship Pattern
-- DP-006 Business Traceability Pattern
 - DP-009 Hierarchical Relationship Pattern
-
----
+- DP-015 Business Traceability Pattern
 
 ## Relationship to Implementation
 
@@ -1937,5 +1940,7 @@ It only defines how validated business changes are propagated between Workspaces
 | Version | Date       | Author             | Description                                           |
 |---------|------------|--------------------|-------------------------------------------------------|
 | 1.0.0   | 2026-07-20 | Solution Architect | Initial Capability Dependency Matrix                  |
-| 3.0.0   | 2026-07-18 | Solution Architect | Standardized according to Documentation Standard v3.0 |
+| 3.0.0   | 2026-07-20 | Solution Architect | Standardized according to Documentation Standard v3.0 |
 | 4.0.0   | 2026-07-28 | Solution Architect | Upgraded to Documentation Standard v4.0.0             |
+| 4.1.0   | 2026-08-02 | Solution Architect | Corrected pre-renumbering BR references throughout (this document predates the 15-specification renumbering and used old IDs consistently); for the 9 capabilities with a dedicated Business Specification, IDs now match the current filenames. 4 capabilities referenced by this matrix — Asset Management, Meter Management, Condition Monitoring, and Inventory Management — do not correspond to any dedicated BR-XXX specification and are now marked accordingly instead of given a fabricated number (per product owner decision); Asset Management is capability DD-001 with no dedicated spec, Inventory Management is explicitly future/unbuilt (see 01-UseCases.md), and Meter Management / Condition Monitoring have no dedicated specification. Also fixed a broken ADR-0012 path and a wrong folder reference for 12-DomainPatterns.md |
+| 4.2.0   | 2026-08-08 | Solution Architect | Correction to 4.1.0: "DP-006 Business Traceability Pattern" was removed as a phantom reference, but this was itself an error — the pattern is real, consistently used across 6 Business Specifications, and has been formally added to 12-DomainPatterns.md as DP-015. Restored the reference with the corrected number |

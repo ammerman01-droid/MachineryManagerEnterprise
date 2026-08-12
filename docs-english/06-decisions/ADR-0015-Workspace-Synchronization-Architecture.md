@@ -1,12 +1,12 @@
-| Property | Value |
-|----------|-------|
-| **Document ID** | ADR-0015 |
-| **Title** | Workspace Synchronization Architecture |
-| **Version** | 4.0.0 |
-| **Status** | Proposed |
-| **Owner** | Solution Architect |
-| **Created** | 2026-07-26 |
-| **Last Updated** | 2026-07-28 |
+| Property         | Value              |
+|------------------|--------------------|
+| **Document ID**  | ADR-0015           |
+| **Title**        | Workspace Synchronization Architecture |
+| **Version**      | 4.1.0              |
+| **Status**       | Approved           |
+| **Owner**        | Solution Architect |
+| **Created**      | 2026-07-26         |
+| **Last Updated** | 2026-08-08         |
 
 # Purpose
 
@@ -405,6 +405,7 @@ Technology selection shall not modify the architectural principles established b
 
 | Version | Date       | Author             | Description                                           |
 |---------|------------|--------------------|-------------------------------------------------------|
-| 1.0.0 | 2026-07-26 | Initial Architecture Decision Record |
-| 3.0.0   | 2026-07-18 | Solution Architect | Standardized according to Documentation Standard v3.0 |
+| 1.0.0   | 2026-07-26 | Solution Architect | Initial Architecture Decision Record                  |
+| 3.0.0   | 2026-07-26 | Solution Architect | Standardized according to Documentation Standard v3.0 |
 | 4.0.0   | 2026-07-28 | Solution Architect | Upgraded to Documentation Standard v4.0.0             |
+| 4.1.0   | 2026-08-02 | Solution Architect | Status changed from Proposed to Approved              |

@@ -1,12 +1,12 @@
-| Property | Value |
-|----------|-------|
-| **Document ID** | REL-005 |
-| **Title** | Release Checklist |
-| **Version** | 4.0.0 |
-| **Status** | Active |
-| **Owner** | Release Manager |
-| **Created** | 2026-07-18 |
-| **Last Updated** | 2026-07-28 |
+| Property         | Value              |
+|------------------|--------------------|
+| **Document ID**  | REL-005            |
+| **Title**        | Release Checklist  |
+| **Version**      | 4.1.0              |
+| **Status**       | Approved           |
+| **Owner**        | Solution Architect |
+| **Created**      | 2026-07-18         |
+| **Last Updated** | 2026-08-08         |
 
 ---
 
@@ -260,3 +260,4 @@ Every completed checklist shall reference:
 | 1.0.0   | 2026-07-18 | Solution Architect | Initial Release Checklist                             |
 | 3.0.0   | 2026-07-18 | Solution Architect | Standardized according to Documentation Standard v3.0 |
 | 4.0.0   | 2026-07-28 | Solution Architect | Upgraded to Documentation Standard v4.0.0             |
+| 4.1.0   | 2026-08-08 | Solution Architect | Review and synchronize with the latest changes        |

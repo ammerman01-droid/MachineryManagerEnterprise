@@ -1,12 +1,12 @@
-| Property | Value |
-|----------|-------|
-| **Document ID** | ADR-0023 |
-| **Title** | Artificial Intelligence Provider Strategy |
-| **Version** | 4.0.0 |
-| **Status** | Accepted |
-| **Owner** | Solution Architect |
-| **Created** | 2026-07-28 |
-| **Last Updated** | 2026-07-28 |
+| Property         | Value              |
+|------------------|--------------------|
+| **Document ID**  | ADR-0023           |
+| **Title**        | Artificial Intelligence Provider Strategy |
+| **Version**      | 4.1.0              |
+| **Status**       | Approved           |
+| **Owner**        | Solution Architect |
+| **Created**      | 2026-07-28         |
+| **Last Updated** | 2026-08-08         |
 
 ---
 
@@ -366,7 +366,7 @@ Future provider replacement would require application refactoring.
 # Related Documents
 
 - ADR-0001 — Clean Architecture
-- ADR-0002 — CQRS Architecture
+- ADR-0011 — CQRS Architecture
 - ADR-0022 — AI Knowledge Retrieval Architecture
 - TE-0029 — Artificial Intelligence Provider Technology Evaluation
 
@@ -393,3 +393,4 @@ MachineryManagerEnterprise adopts a Hybrid AI Provider Strategy in which:
 | 1.1.0   | 2026-07-28 | Solution Architect | Header reformatted to comply with the official Standard Document Header in DOCUMENT_CONVENTIONS.md |
 | 3.0.0   | 2026-07-18 | Solution Architect | Standardized according to Documentation Standard v3.0 |
 | 4.0.0   | 2026-07-28 | Solution Architect | Upgraded to Documentation Standard v4.0.0             |
+| 4.1.0   | 2026-08-08 | Solution Architect | Review and synchronize with the latest changes        |

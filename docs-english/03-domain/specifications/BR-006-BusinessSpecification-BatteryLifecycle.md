@@ -1,12 +1,12 @@
-| Property | Value |
-|----------|-------|
-| **Document ID** | BR-004 |
-| **Capability ID** | DD-005 |
-| **Version** | 4.0.0 |
-| **Status** | Approved |
-| **Owner** | Domain Architect |
-| **Created** | 2026-07-20 |
-| **Last Updated** | 2026-07-28 |
+| Property         | Value              |
+|------------------|--------------------|
+| **Document ID**  | BR-006             |
+| **Title**        | BatteryLifecycle   |
+| **Version**      | 4.2.0              |
+| **Status**       | Approved           |
+| **Owner**        | Solution Architect |
+| **Created**      | 2026-07-20         |
+| **Last Updated** | 2026-08-08         |
 
 ---
 
@@ -16,7 +16,7 @@ This specification defines the business lifecycle and operational behavior of Ba
 
 This specification extends:
 
-**BR-002 — Tracked Components**
+**BR-004 — Tracked Components**
 
 Only Battery-specific business behavior is defined here.
 
@@ -451,7 +451,7 @@ Maintenance may:
 
 ## Related Business Specifications
 
-- BR-009 — Maintenance Operations
+- BR-011 — Maintenance Operations
 
 ---
 
@@ -590,17 +590,16 @@ This specification shall extend these patterns rather than redefine them.
 
 ## Domain
 
-- 09-DomainDiscovery.md
-- 03-DomainModel.md
-- 12-DomainPatterns.md
-- 06-DomainEvents.md
-- 07-BusinessRules.md
-
+- ../10-DomainDiscovery.md
+- ../04-DomainModel.md
+- ../12-DomainPatterns.md
+- ../07-DomainEvents.md
+- ../08-BusinessRules.md
 ## Business Specifications
 
-- BR-002 — Tracked Components
-- BR-007 — Maintenance Forecast
-- BR-009 — Maintenance Operations
+- BR-004 — Tracked Components
+- BR-010 — Maintenance Forecast
+- BR-011 — Maintenance Operations
 
 ---
 
@@ -620,5 +619,7 @@ This specification shall extend these patterns rather than redefine them.
 | Version | Date       | Author             | Description                                           |
 |---------|------------|--------------------|-------------------------------------------------------|
 | 1.0.0   | 2026-07-20 | Solution Architect | Initial Battery Lifecycle Business Specification      |
-| 3.0.0   | 2026-07-18 | Solution Architect | Standardized according to Documentation Standard v3.0 |
+| 3.0.0   | 2026-07-20 | Solution Architect | Standardized according to Documentation Standard v3.0 |
 | 4.0.0   | 2026-07-28 | Solution Architect | Upgraded to Documentation Standard v4.0.0             |
+| 4.1.0   | 2026-08-02 | Solution Architect | Fixed stale pre-renumbering BR references (BR-002/007/009 → BR-004/010/011) and a missing relative path for 12-DomainPatterns.md |
+| 4.2.0   | 2026-08-08 | Solution Architect | Fixed additional stale inline reference (BR-002 Tracked Components -> BR-004) found in the extension statement, outside the main Related Documents footer |

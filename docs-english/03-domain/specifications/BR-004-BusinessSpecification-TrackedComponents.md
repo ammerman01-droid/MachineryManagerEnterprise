@@ -1,11 +1,12 @@
-| Property | Value |
-|----------|-------|
-| **Document ID** | BR-002 |
-| **Version** | 4.0.0 |
-| **Status** | Approved |
-| **Owner** | Solution Architect |
-| **Created** | 2026-07-20 |
-| **Last Updated** | 2026-07-28 |
+| Property         | Value              |
+|------------------|--------------------|
+| **Document ID**  | BR-004             |
+| **Title**        | Tracked Components |
+| **Version**      | 4.1.0              |
+| **Status**       | Approved           |
+| **Owner**        | Solution Architect |
+| **Created**      | 2026-07-20         |
+| **Last Updated** | 2026-08-08         |
 
 ---
 
@@ -315,11 +316,11 @@ Specialized specifications may introduce additional analytical capabilities.
 
 This specification serves as the foundation for:
 
-- BR-003 — Tire Lifecycle Management
-- BR-004 — Battery Lifecycle Management
-- BR-005 — Engine Lifecycle Management
-- BR-006 — Gearbox Lifecycle Management
-- BR-007 — Attachment Lifecycle Management
+- BR-005 — Tire Lifecycle Management (exists)
+- BR-006 — Battery Lifecycle Management (exists)
+- Engine Lifecycle Management (not yet written)
+- Gearbox Lifecycle Management (not yet written)
+- Attachment Lifecycle Management (not yet written)
 - Future tracked component specifications
 
 Derived specifications shall extend this document rather than duplicate its rules.
@@ -328,10 +329,10 @@ Derived specifications shall extend this document rather than duplicate its rule
 
 # 18. Related Documents
 
-- BR-001 Business Specification — Asset Relationships
-- DOM-009 Domain Discovery
-- DOM-000 Domain Principles
-- DG-00 Domain Governance
+- BR-003-BusinessSpecification-AssetRelationships.md
+- ../10-DomainDiscovery.md
+- ../01-DomainPrinciples.md
+- ../DG-00-DomainGovernance.md
 
 ---
 
@@ -351,5 +352,6 @@ Derived specifications shall extend this document rather than duplicate its rule
 | Version | Date       | Author             | Description                                                       |
 |---------|------------|--------------------|-------------------------------------------------------------------|
 | 1.0.0   | 2026-07-20 | Solution Architect | Initial specification for common tracked component business rules |
-| 3.0.0   | 2026-07-18 | Solution Architect | Standardized according to Documentation Standard v3.0             |
+| 3.0.0   | 2026-07-20 | Solution Architect | Standardized according to Documentation Standard v3.0             |
 | 4.0.0   | 2026-07-28 | Solution Architect | Upgraded to Documentation Standard v4.0.0                         |
+| 4.1.0   | 2026-08-08 | Solution Architect | Fixed Derived Specifications list (fabricated IDs/non-existent Engine, Gearbox, Attachment specs) and Related Documents (stale filenames) |

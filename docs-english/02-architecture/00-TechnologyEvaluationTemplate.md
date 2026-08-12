@@ -1,12 +1,12 @@
-| Property | Value |
-|----------|-------|
-| **Document ID** | TEMPLATE-TE |
-| **Title** | Technology Evaluation Template |
-| **Version** | N.N.N |
-| **Status** | Template |
-| **Owner** | Solution Architect |
-| **Created** | YYYY-MM-DD |
-| **Last Updated** | YYYY-MM-DD |
+| Property         | Value              |
+|------------------|--------------------|
+| **Document ID**  | TEMPLATE-TE        |
+| **Title**        | Technology Evaluation Template |
+| **Version**      | N.N.N              |
+| **Status**       | Template           |
+| **Owner**        | Solution Architect |
+| **Created**      | YYYY-MM-DD         |
+| **Last Updated** | YYYY-MM-DD         |
 
 ---
 
@@ -57,10 +57,9 @@ List the approved documents this evaluation is grounded in.
 Examples:
 
 - ADR-000X — <Title>
-- SolutionStructure.md
-- DependencyRules.md
-- CodingStandards.md
-
+- ../05-development/01-SolutionStructure.md
+- ../05-development/04-DependencyRules.md
+- ../05-development/05-CodingStandards.md
 ---
 
 # Scope
@@ -341,6 +340,7 @@ Independent articles
 
 # Revision History
 
-| Version | Date | Author | Description |
-|----------|------|--------|-------------|
-| 1.0.0 | YYYY-MM-DD | Solution Architect | Initial version |
+| Version | Date       | Author             | Description                                    |
+|---------|------------|--------------------|------------------------------------------------|
+| 1.0.0   | YYYY-MM-DD | Solution Architect | Initial version                                |
+| 4.1.0   | 2026-08-08 | Solution Architect | Review and synchronize with the latest changes |

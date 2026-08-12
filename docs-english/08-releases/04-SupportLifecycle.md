@@ -1,12 +1,12 @@
-| Property | Value |
-|----------|-------|
-| **Document ID** | REL-004 |
-| **Title** | Support Lifecycle |
-| **Version** | 4.0.0 |
-| **Status** | Active |
-| **Owner** | Release Manager |
-| **Created** | 2026-07-18 |
-| **Last Updated** | 2026-07-28 |
+| Property         | Value              |
+|------------------|--------------------|
+| **Document ID**  | REL-004            |
+| **Title**        | Support Lifecycle  |
+| **Version**      | 4.1.0              |
+| **Status**       | Approved           |
+| **Owner**        | Solution Architect |
+| **Created**      | 2026-07-18         |
+| **Last Updated** | 2026-08-08         |
 
 ---
 
@@ -74,7 +74,7 @@ Archived
 
 ---
 
-# Support Responsibilities
+# Stage Ownership
 
 | Stage | Responsible |
 |--------|-------------|
@@ -246,7 +246,7 @@ Future versions may introduce:
 - 01-VersioningPolicy.md
 - 02-ReleaseProcess.md
 - 03-DeploymentStrategy.md
-- docs/07-api/05-ApiVersioning.md
+- docs/07-api/06-Versioning.md
 
 ---
 
@@ -257,3 +257,4 @@ Future versions may introduce:
 | 1.0.0   | 2026-07-18 | Solution Architect | Initial Support Lifecycle                             |
 | 3.0.0   | 2026-07-18 | Solution Architect | Standardized according to Documentation Standard v3.0 |
 | 4.0.0   | 2026-07-28 | Solution Architect | Upgraded to Documentation Standard v4.0.0             |
+| 4.1.0   | 2026-08-08 | Solution Architect | Renamed the informal "Support Responsibilities" stage-ownership table to "Stage Ownership" to avoid confusion with the later, formal Section 13 of the same name |

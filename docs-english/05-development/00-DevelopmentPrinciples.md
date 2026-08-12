@@ -1,12 +1,12 @@
-| Property | Value |
-|----------|-------|
-| **Document ID** | DOC-DEV-001 |
-| **Title** | Development Principles |
-| **Version** | 4.0.0 |
-| **Status** | Approved |
-| **Owner** | Solution Architect |
-| **Created** | 2026-07-18 |
-| **Last Updated** | 2026-07-28 |
+| Property         | Value              |
+|------------------|--------------------|
+| **Document ID**  | DOC-DEV-001        |
+| **Title**        | Development Principles |
+| **Version**      | 4.1.0              |
+| **Status**       | Approved           |
+| **Owner**        | Solution Architect |
+| **Created**      | 2026-07-18         |
+| **Last Updated** | 2026-08-08         |
 
 ---
 
@@ -231,8 +231,8 @@ Exceptions require documented architectural approval through an ADR.
 
 - DOC-CONVENTIONS
 - DOC-README
-- DOC-DEV-004 (Dependency Rules)
-- DOC-DEV-005 (Coding Standards)
+- DOC-DEV-005 (Dependency Rules)
+- DOC-DEV-006 (Coding Standards)
 - ADR-0002
 
 ---
@@ -255,3 +255,4 @@ Exceptions require documented architectural approval through an ADR.
 | 1.0.0   | 2026-07-18 | Solution Architect | Initial development principles                        |
 | 3.0.0   | 2026-07-18 | Solution Architect | Standardized according to Documentation Standard v3.0 |
 | 4.0.0   | 2026-07-28 | Solution Architect | Upgraded to Documentation Standard v4.0.0             |
+| 4.1.0   | 2026-08-08 | Solution Architect | Fixed DOC-DEV-XXX ID mismatches in Related Documents (Dependency Rules is DOC-DEV-005, not 004; Coding Standards is DOC-DEV-006, not 005) |

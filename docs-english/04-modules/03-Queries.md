@@ -1,12 +1,12 @@
-| Property | Value |
-|----------|-------|
-| **Document ID** | APP-003 |
-| **Title** | Query catalogue |
-| **Version** | 4.0.0 |
-| **Status** | Active |
-| **Owner** | Solution Architect |
-| **Created** | 2026-07-18 |
-| **Last Updated** | 2026-07-28 |
+| Property         | Value              |
+|------------------|--------------------|
+| **Document ID**  | MOD-003            |
+| **Title**        | Query catalogue    |
+| **Version**      | 4.6.0              |
+| **Status**       | Approved           |
+| **Owner**        | Solution Architect |
+| **Created**      | 2026-07-18         |
+| **Last Updated** | 2026-08-08         |
 
 ---
 
@@ -582,6 +582,148 @@ GetSystemConfiguration
 
 ---
 
+# 14a. Organization Queries
+
+Formalized from BR-017 (Business Specification — Organization
+Management). Extends QRY-903 GetOrganizations (Section 14) with
+single-record and ownership queries.
+
+## QRY-950
+
+GetOrganization
+
+---
+
+## QRY-951
+
+GetOrganizationAssets
+
+---
+
+# 14b. Notification Queries
+
+Formalized from BR-012 (Business Specification — Notification Center).
+
+## QRY-960
+
+GetNotifications
+
+---
+
+## QRY-961
+
+GetNotification
+
+---
+
+## QRY-962
+
+GetNotificationPreferences
+
+---
+
+# 14c. Internal Messaging Queries
+
+Formalized from BR-013 (Business Specification — Internal Messaging).
+
+## QRY-970
+
+GetConversations
+
+---
+
+## QRY-971
+
+GetConversation
+
+---
+
+## QRY-972
+
+GetMessages
+
+---
+
+## QRY-973
+
+GetMessageAttachments
+
+---
+
+# 14d. AI Assistant Queries
+
+Formalized from BR-014 (Business Specification — AI Assistant).
+
+## QRY-980
+
+GetRecommendations
+
+---
+
+## QRY-981
+
+GetRecommendationExplanation
+
+---
+
+## QRY-982
+
+GetAIInteractionHistory
+
+---
+
+# 14e. Relationship Management Queries
+
+Formalized from BR-015 (Business Specification — Relationship
+Management).
+
+## QRY-990
+
+GetRelationship
+
+---
+
+## QRY-991
+
+GetRelationshipsForEntity
+
+---
+
+## QRY-992
+
+GetRelationshipHistory
+
+---
+
+# 14f. Distributed Workspace Synchronization Queries
+
+Formalized from BR-016 (Business Specification — Distributed Workspace
+Synchronization).
+
+## QRY-1000
+
+GetSynchronizationHistory
+
+---
+
+## QRY-1001
+
+GetSynchronizationPackage
+
+---
+
+## QRY-1002
+
+GetSynchronizationConflicts
+
+---
+
+## QRY-1003
+
+GetWorkingSet
+
+---
+
 # 15. Cross-Module Queries
 
 The following Queries combine information from multiple modules.
@@ -749,7 +891,7 @@ Every future Query shall follow the conventions defined in this document.
 - 02-Commands.md
 - 04-Handlers.md
 - docs/03-domain/04-DomainModel.md
-- ADR-0004 — Adopt CQRS
+- ADR-0011 — Adopt CQRS
 
 ---
 
@@ -760,3 +902,8 @@ Every future Query shall follow the conventions defined in this document.
 | 1.0.0   | 2026-07-18 | Solution Architect | Initial Query catalogue                               |
 | 3.0.0   | 2026-07-18 | Solution Architect | Standardized according to Documentation Standard v3.0 |
 | 4.0.0   | 2026-07-28 | Solution Architect | Upgraded to Documentation Standard v4.0.0             |
+| 4.1.0   | 2026-08-02 | Solution Architect | Added Section 14a Organization Queries (QRY-950, QRY-951), formalized from BR-017 |
+| 4.2.0   | 2026-08-02 | Solution Architect | Added Section 14b Notification Queries (QRY-960 through QRY-962), formalized from BR-012 |
+| 4.3.0   | 2026-08-02 | Solution Architect | Added Section 14c Internal Messaging Queries (QRY-970 through QRY-973), formalized from BR-013 |
+| 4.4.0   | 2026-08-02 | Solution Architect | Added Section 14d AI Assistant Queries (QRY-980 through QRY-982), formalized from BR-014 || 4.5.0   | 2026-08-02 | Solution Architect | Added Section 14e Relationship Management Queries (QRY-990 through QRY-992), formalized from BR-015 |
+| 4.6.0   | 2026-08-08 | Solution Architect | Added Section 14f Distributed Workspace Synchronization Queries (QRY-1000 through QRY-1003), formalized from BR-016. This completes all 6 previously-missing module query sets |

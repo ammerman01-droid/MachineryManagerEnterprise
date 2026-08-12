@@ -1,12 +1,12 @@
-| Property | Value |
-|----------|-------|
-| **Document ID** | TE-0021 |
-| **Title** | API Documentation and Client Generation Technology Evaluation (.NET 10) |
-| **Version** | 4.0.0 |
-| **Status** | Approved |
-| **Owner** | Solution Architect |
-| **Created** | 2026-07-26 |
-| **Last Updated** | 2026-07-28 |
+| Property         | Value              |
+|------------------|--------------------|
+| **Document ID**  | TE-0021            |
+| **Title**        | API Documentation and Client Generation Technology Evaluation (.NET 10) |
+| **Version**      | 4.1.0              |
+| **Status**       | Approved           |
+| **Owner**        | Solution Architect |
+| **Created**      | 2026-07-26         |
+| **Last Updated** | 2026-08-08         |
 
 ---
 
@@ -33,9 +33,8 @@ This evaluation is based on:
 - ADR-0001 — Clean Architecture
 - ADR-0005 — API Architecture
 - ADR-0015 — Deployment Architecture
-- SolutionStructure.md
-- DependencyRules.md
-
+- ../05-development/01-SolutionStructure.md
+- ../05-development/04-DependencyRules.md
 ---
 
 # Scope
@@ -1928,6 +1927,12 @@ The Architecture Review Board approves the following technology stack.
 
 ---
 
+# Related Architecture Decision
+
+- ADR-0035 — API Documentation and Client Generation Architecture
+
+---
+
 # Decision Summary
 
 The selected solution satisfies all architectural goals.
@@ -1954,16 +1959,17 @@ The above technologies are therefore adopted as the enterprise standard for API 
 
 # Related Documents
 
-- SolutionStructure.md
-- DependencyRules.md
-- CodingStandards.md
+- ../05-development/01-SolutionStructure.md
+- ../05-development/04-DependencyRules.md
+- ../05-development/05-CodingStandards.md
 
 ---
 
 # Revision History
 
-| Version | Date       | Author             | Description                                                               |
-|---------|------------|--------------------|---------------------------------------------------------------------------|
+| Version | Date       | Author             | Description                                           |
+|---------|------------|--------------------|-------------------------------------------------------|
 | 1.0.0   | 2026-07-26 | Solution Architect | Initial technology evaluation for API Documentation and Client Generation |
-| 1.3.0   | 2026-07-28 | Solution Architect | New section added (Evaluation Scope)                                      |
-| 4.0.0   | 2026-07-28 | Solution Architect | Upgraded to Documentation Standard v4.0.0                                 |
+| 1.3.0   | 2026-07-28 | Solution Architect | New section added (Evaluation Scope)                  |
+| 4.0.0   | 2026-07-28 | Solution Architect | Upgraded to Documentation Standard v4.0.0             |
+| 4.1.0   | 2026-08-08 | Solution Architect | Review and synchronize with the latest changes        |

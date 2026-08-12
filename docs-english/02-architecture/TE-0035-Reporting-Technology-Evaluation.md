@@ -1,12 +1,12 @@
-| Property | Value |
-|----------|-------|
-| **Document ID** | TE-0035 |
-| **Title** | Reporting Technology Evaluation |
-| **Version** | 4.0.0 |
-| **Status** | Approved |
-| **Owner** | Solution Architect |
-| **Created** | 2026-07-28 |
-| **Last Updated** | 2026-07-28 |
+| Property         | Value              |
+|------------------|--------------------|
+| **Document ID**  | TE-0035            |
+| **Title**        | Reporting Technology Evaluation |
+| **Version**      | 4.1.0              |
+| **Status**       | Approved           |
+| **Owner**        | Solution Architect |
+| **Created**      | 2026-07-28         |
+| **Last Updated** | 2026-08-08         |
 
 # Purpose
 
@@ -57,7 +57,7 @@ This Technology Evaluation supports:
 It depends upon:
 
 - ADR-0001 — Clean Architecture
-- ADR-0003 — Modular Monolith Architecture
+- ADR-0001 — Modular Monolith Architecture
 - ADR-0028 — Client UI Architecture
 
 ---
@@ -1434,10 +1434,9 @@ Implementation of this Technology Evaluation requires:
 
 # Related Documents
 
-- SolutionStructure.md
-- DependencyRules.md
-- CodingStandards.md
-
+- ../05-development/01-SolutionStructure.md
+- ../05-development/04-DependencyRules.md
+- ../05-development/05-CodingStandards.md
 ---
 
 # 15. Revision History
@@ -1447,3 +1446,4 @@ Implementation of this Technology Evaluation requires:
 | 1.0.0   | 2026-07-28 | Solution Architect | Initial technology evaluation for Reporting Technology |
 | 1.1.0   | 2026-07-28 | Solution Architect | Converted star-rating (⭐) tables to text ratings (Excellent/Good/Fair/Poor/Very Poor) for consistency with the rest of the documentation |
 | 4.0.0   | 2026-07-28 | Solution Architect | Upgraded to Documentation Standard v4.0.0              |
+| 4.1.0   | 2026-08-08 | Solution Architect | Review and synchronize with the latest changes         |

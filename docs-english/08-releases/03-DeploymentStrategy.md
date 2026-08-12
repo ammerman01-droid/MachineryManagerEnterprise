@@ -1,12 +1,12 @@
-| Property | Value |
-|----------|-------|
-| **Document ID** | REL-003 |
-| **Title** | Deployment Strategy |
-| **Version** | 4.0.0 |
-| **Status** | Active |
-| **Owner** | DevOps Lead |
-| **Created** | 2026-07-18 |
-| **Last Updated** | 2026-07-28 |
+| Property         | Value              |
+|------------------|--------------------|
+| **Document ID**  | REL-003            |
+| **Title**        | Deployment Strategy |
+| **Version**      | 4.1.0              |
+| **Status**       | Approved           |
+| **Owner**        | Solution Architect |
+| **Created**      | 2026-07-18         |
+| **Last Updated** | 2026-08-08         |
 
 ---
 
@@ -284,8 +284,7 @@ Future deployment improvements may include:
 - 00-ReleaseStrategy.md
 - 01-VersioningPolicy.md
 - 02-ReleaseProcess.md
-- docs/05-development/10-BuildPipeline.md
-- docs/09-operations/
+- ../05-development/10-BuildPipeline.md
 
 ---
 
@@ -296,3 +295,4 @@ Future deployment improvements may include:
 | 1.0.0   | 2026-07-18 | Solution Architect | Initial Deployment Strategy                           |
 | 3.0.0   | 2026-07-18 | Solution Architect | Standardized according to Documentation Standard v3.0 |
 | 4.0.0   | 2026-07-28 | Solution Architect | Upgraded to Documentation Standard v4.0.0             |
+| 4.1.0   | 2026-08-08 | Solution Architect | Removed broken reference to non-existent docs/09-operations/ folder (real 09 folder is 09-proof-of-concepts, an unrelated purpose) |

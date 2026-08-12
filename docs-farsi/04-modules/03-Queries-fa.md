@@ -279,7 +279,7 @@
 - `02-Commands-fa.md`
 - `04-Handlers-fa.md`
 - `04-DomainModel-fa.md`
-- `ADR-0004 — Adopt CQRS`
+- `ADR-0011 — Adopt CQRS`
 
 ---
 

@@ -1,12 +1,12 @@
-| Property | Value |
-|----------|-------|
-| **Document ID** | DOC-DEV-004 |
-| **Title** | Namespace Convention |
-| **Version** | 4.0.0 |
-| **Status** | Approved |
-| **Owner** | Solution Architect |
-| **Created** | 2026-07-18 |
-| **Last Updated** | 2026-07-28 |
+| Property         | Value              |
+|------------------|--------------------|
+| **Document ID**  | DOC-DEV-004        |
+| **Title**        | Namespace Convention |
+| **Version**      | 4.1.0              |
+| **Status**       | Approved           |
+| **Owner**        | Solution Architect |
+| **Created**      | 2026-07-18         |
+| **Last Updated** | 2026-08-08         |
 
 ---
 
@@ -327,6 +327,7 @@ Namespace deviations require architectural approval through an ADR.
 
 | Version | Date       | Author             | Description                                           |
 |---------|------------|--------------------|-------------------------------------------------------|
-| 1.0.0 | 2026-07-18 | Initial namespace conventions |
+| 1.0.0   | Solution Architect | 2026-07-18 | Initial namespace conventions                         |
 | 3.0.0   | 2026-07-18 | Solution Architect | Standardized according to Documentation Standard v3.0 |
 | 4.0.0   | 2026-07-28 | Solution Architect | Upgraded to Documentation Standard v4.0.0             |
+| 4.1.0   | 2026-08-08 | Solution Architect | Review and synchronize with the latest changes        |

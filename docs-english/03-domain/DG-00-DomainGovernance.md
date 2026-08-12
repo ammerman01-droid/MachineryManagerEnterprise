@@ -1,11 +1,12 @@
-| Property | Value |
-|----------|-------|
-| **Document ID** | DG-000 |
-| **Version** | 4.0.0 |
-| **Status** | Active |
-| **Owner** | Solution Architect |
-| **Created** | 2026-07-20 |
-| **Last Updated** | 2026-07-28 |
+| Property         | Value              |
+|------------------|--------------------|
+| **Document ID**  | DG-000             |
+| **Title**        | Domain Governance  |
+| **Version**      | 4.1.0              |
+| **Status**       | Approved           |
+| **Owner**        | Solution Architect |
+| **Created**      | 2026-07-18         |
+| **Last Updated** | 2026-08-08         |
 
 ---
 
@@ -128,7 +129,7 @@ Business Specification defines:
 Reference:
 
 ```
-specifications/BR-00-BusinessSpecificationTemplate.md
+specifications/BR-002-BusinessSpecificationTemplate.md
 ```
 
 ---
@@ -493,10 +494,10 @@ The following principles always apply.
 
 # Related Documents
 
-- 00-DomainPrinciples.md
-- 09-DomainDiscovery.md
-- specifications/BR-INDEX.md
-- specifications/BR-00-BusinessSpecificationTemplate.md
+- 01-DomainPrinciples.md
+- 10-DomainDiscovery.md
+- specifications/BR-001-INDEX.md
+- specifications/BR-002-BusinessSpecificationTemplate.md
 - ADR-0001 — Adopt Clean Architecture
 
 ---
@@ -505,7 +506,8 @@ The following principles always apply.
 
 | Version | Date       | Author             | Description                                           |
 |---------|------------|--------------------|-------------------------------------------------------|
-| 1.0.0   | 2026-07-20 | Solution Architect | Initial domain governance document                    |
-| 1.1.0   | 2026-07-20 | Solution Architect | Added architectural governance rules for Business Operations, Business Events and Business History |
+| 1.0.0   | 2026-07-18 | Solution Architect | Initial domain governance document                    |
+| 1.1.0   | 2026-07-18 | Solution Architect | Added architectural governance rules for Business Operations, Business Events and Business History |
 | 3.0.0   | 2026-07-18 | Solution Architect | Standardized according to Documentation Standard v3.0 |
 | 4.0.0   | 2026-07-28 | Solution Architect | Upgraded to Documentation Standard v4.0.0             |
+| 4.1.0   | 2026-08-08 | Solution Architect | Review and synchronize with the latest changes        |

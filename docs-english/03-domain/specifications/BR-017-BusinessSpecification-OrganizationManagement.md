@@ -1,11 +1,12 @@
-| Property | Value |
-|----------|-------|
-| **Document ID** | BR-015 |
-| **Version** | 1.0.0 |
-| **Status** | Approved |
-| **Owner** | Solution Architect |
-| **Created** | 2026-08-02 |
-| **Last Updated** | 2026-08-02 |
+| Property         | Value              |
+|------------------|--------------------|
+| **Document ID**  | BR-017             |
+| **Title**        | Organization Management |
+| **Version**      | 4.1.0              |
+| **Status**       | Approved           |
+| **Owner**        | Solution Architect |
+| **Created**      | 2026-08-02         |
+| **Last Updated** | 2026-08-08         |
 
 ---
 
@@ -62,12 +63,12 @@ Today, the approved documentation (`04-DomainModel.md`, `03-BoundedContexts.md`)
 The following rules are derived directly from already-approved documentation. No new business rule is introduced beyond what those documents already imply.
 
 ```
-BR-015-1 (from 04-DomainModel.md, Section 9 and Section 10)
+BR-017-1 (from 04-DomainModel.md, Section 9 and Section 10)
 Every Asset shall have exactly one owning Organization.
 ```
 
 ```
-BR-015-2 (from 04-modules/07-Authorization.md)
+BR-017-2 (from 04-modules/07-Authorization.md)
 Every Organization-scoped permission shall be evaluated within the boundary of a single resolved Organization.
 ```
 
@@ -129,9 +130,18 @@ The following are explicitly **not** answered by any currently approved document
 - Can an Organization contain sub-organizations or departments?
 - Can Asset ownership be transferred between Organizations, and if so, how is history preserved?
 - What is the full lifecycle of an Organization (registration, suspension, deactivation)?
-- Does the platform support a single Organization per deployment, or multiple Organizations (multi-tenancy) in the same deployment?
 
 These questions should be resolved through Domain Discovery before the Application layer for this module is implemented.
+
+## Resolved (2026-08-02)
+
+- **Multi-tenancy:** The platform is multi-tenant. Multiple Organizations
+  (customer companies) use the platform concurrently from a single web
+  deployment at one address; Organization is the tenant boundary,
+  confirmed by the product owner. This is distinct from `Company` (see
+  `00-Glossary.md`, GL-FLT-003a), which refers to an equipment
+  manufacturer brand (e.g. Caterpillar, Komatsu) and is unrelated to
+  tenancy.
 
 ---
 
@@ -177,3 +187,5 @@ Organization Management is a foundational capability: it is the business owner o
 | Version | Date       | Author             | Description                                           |
 |---------|------------|--------------------|-------------------------------------------------------|
 | 1.0.0   | 2026-08-02 | Solution Architect | Initial draft, synthesized from PROJECT_CHARTER.md, 04-DomainModel.md, 03-BoundedContexts.md, and 04-modules/07-Authorization.md |
+| 1.1.0   | 2026-08-02 | Solution Architect | Resolved the multi-tenancy open question per product owner clarification (Organization is the multi-tenant boundary, distinct from Company/manufacturer); corrected internal rule ID prefix from BR-015 to BR-017 to match the corrected Document ID |
+| 4.1.0   | 2026-08-08 | Solution Architect | Review and synchronize with the latest changes        |

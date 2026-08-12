@@ -1,12 +1,12 @@
-| Property | Value |
-|----------|-------|
-| **Document ID** | MOD-001 |
-| **Title** | Module Design Principles |
-| **Version** | 4.0.0 |
-| **Status** | Active |
-| **Owner** | Solution Architect |
-| **Created** | 2026-07-18 |
-| **Last Updated** | 2026-07-28 |
+| Property         | Value              |
+|------------------|--------------------|
+| **Document ID**  | MOD-001            |
+| **Title**        | Module Design Principles |
+| **Version**      | 4.7.0              |
+| **Status**       | Approved           |
+| **Owner**        | Solution Architect |
+| **Created**      | 2026-07-18         |
+| **Last Updated** | 2026-08-08         |
 
 ---
 
@@ -76,7 +76,13 @@ Modules
 ├── Forecasting
 ├── Reporting
 ├── Administration
-└── Configuration
+├── Configuration
+├── Organization Management
+├── Notification Center
+├── Internal Messaging
+├── AI Assistant
+├── Relationship Management
+└── Distributed Workspace Synchronization
 ```
 
 Each module owns its own Use Cases.
@@ -851,6 +857,324 @@ Manage Notification Rules
 
 ---
 
+# 16a. Organization Management Module
+
+## Purpose
+
+Manages Organizations, the business owners of Assets and the
+authorization scope boundary, per BR-017 (Business Specification —
+Organization Management).
+
+> **Note:** BR-017 leaves sub-organizations, ownership transfer, and
+> full lifecycle beyond registration unresolved; use cases for those
+> are intentionally excluded until Domain Discovery resolves them.
+
+---
+
+## Use Cases
+
+### UC-1301
+
+Register Organization
+
+---
+
+### UC-1302
+
+View Organization
+
+---
+
+### UC-1303
+
+Associate User with Organization
+
+---
+
+### UC-1304
+
+View Organization-Owned Assets
+
+---
+
+# 16b. Notification Center Module
+
+## Purpose
+
+Manages the delivery, viewing, and lifecycle of Business Notifications,
+per BR-012 (Business Specification — Notification Center).
+
+> **Note:** Notification Center only transforms events raised by other
+> modules; it never creates business events itself.
+
+---
+
+## Use Cases
+
+### UC-1401
+
+View Notifications
+
+---
+
+### UC-1402
+
+View Notification Detail
+
+---
+
+### UC-1403
+
+Acknowledge Notification
+
+---
+
+### UC-1404
+
+Archive Notification
+
+---
+
+### UC-1405
+
+Cancel Notification
+
+---
+
+### UC-1406
+
+Manage Notification Preferences
+
+---
+
+# 16c. Internal Messaging Module
+
+## Purpose
+
+Manages business conversations, messages, and attachments between
+platform users, per BR-013 (Business Specification — Internal
+Messaging).
+
+---
+
+## Use Cases
+
+### UC-1501
+
+Start Conversation
+
+---
+
+### UC-1502
+
+Add Participant to Conversation
+
+---
+
+### UC-1503
+
+Send Message
+
+---
+
+### UC-1504
+
+Attach File to Message
+
+---
+
+### UC-1505
+
+Read Message
+
+---
+
+### UC-1506
+
+Archive Message
+
+---
+
+### UC-1507
+
+Delete Message
+
+---
+
+### UC-1508
+
+Close Conversation
+
+---
+
+### UC-1509
+
+Reopen Conversation
+
+---
+
+# 16d. AI Assistant Module
+
+## Purpose
+
+Provides advisory business assistance — question answering,
+recommendations, summaries, and explanations — per BR-014 (Business
+Specification — AI Assistant).
+
+> **Note:** Every AI Assistant capability is advisory only; accepting
+> or rejecting a recommendation belongs to the owning module.
+
+---
+
+## Use Cases
+
+### UC-1601
+
+Ask Business Question
+
+---
+
+### UC-1602
+
+Request Recommendation
+
+---
+
+### UC-1603
+
+View Historical Summary
+
+---
+
+### UC-1604
+
+Discover Related Business Knowledge
+
+---
+
+### UC-1605
+
+View Business Risk Assessment
+
+---
+
+### UC-1606
+
+Explain Recommendation
+
+---
+
+# 16e. Relationship Management Module
+
+## Purpose
+
+Manages business relationships between entities (ownership,
+hierarchical, assignment, installation, replacement, equivalence,
+dependency, reference, communication, advisory) and their independent
+lifecycle, per BR-015 (Business Specification — Relationship
+Management).
+
+---
+
+## Use Cases
+
+### UC-1701
+
+Create Relationship
+
+---
+
+### UC-1702
+
+Activate Relationship
+
+---
+
+### UC-1703
+
+Modify Relationship
+
+---
+
+### UC-1704
+
+Expire Relationship
+
+---
+
+### UC-1705
+
+View Relationship
+
+---
+
+### UC-1706
+
+View Relationship History
+
+---
+
+# 16f. Distributed Workspace Synchronization Module
+
+## Purpose
+
+Manages synchronization of validated business changes between
+Enterprise, Project, and User Workspaces through Synchronization
+Packages and Working Sets, per BR-016 (Business Specification —
+Distributed Workspace Synchronization) and ADR-0012.
+
+---
+
+## Use Cases
+
+### UC-1801
+
+Initiate Workspace Synchronization
+
+---
+
+### UC-1802
+
+Create Synchronization Package
+
+---
+
+### UC-1803
+
+Validate Received Synchronization Package
+
+---
+
+### UC-1804
+
+Apply Synchronization Package
+
+---
+
+### UC-1805
+
+Request Working Set
+
+---
+
+### UC-1806
+
+View Synchronization History
+
+---
+
+### UC-1807
+
+View Synchronization Conflicts
+
+---
+
+### UC-1808
+
+Resolve Synchronization Conflict
+
+---
+
 # 17. Cross-Module Use Cases
 
 The following business processes involve multiple modules simultaneously.
@@ -989,7 +1313,7 @@ Each new module shall define its own Use Cases following this document.
 
 # Related Documents
 
-- 00-ModuleOverview.md
+- 00-ApplicationArchitecture.md
 - docs/02-architecture/01-Architecture.md
 - docs/03-domain/03-BoundedContexts.md
 - docs/03-domain/04-DomainModel.md
@@ -1003,3 +1327,10 @@ Each new module shall define its own Use Cases following this document.
 | 1.0.0   | 2026-07-18 | Solution Architect | Initial module principles                             |
 | 3.0.0   | 2026-07-18 | Solution Architect | Standardized according to Documentation Standard v3.0 |
 | 4.0.0   | 2026-07-28 | Solution Architect | Upgraded to Documentation Standard v4.0.0             |
+| 4.1.0   | 2026-08-02 | Solution Architect | Added Section 16a Organization Management Module (UC-1301 through UC-1304), formalized from BR-017. This module and 5 others (Notification Center, Internal Messaging, AI Assistant, Relationship Management, Distributed Workspace Sync) were missing entirely, as this document predates those Business Specifications |
+| 4.2.0   | 2026-08-02 | Solution Architect | Added Section 16b Notification Center Module (UC-1401 through UC-1406), formalized from BR-012 |
+| 4.3.0   | 2026-08-02 | Solution Architect | Added Section 16c Internal Messaging Module (UC-1501 through UC-1509), formalized from BR-013 |
+| 4.4.0   | 2026-08-02 | Solution Architect | Added Section 16d AI Assistant Module (UC-1601 through UC-1606), formalized from BR-014 |
+| 4.5.0   | 2026-08-02 | Solution Architect | Added Section 16e Relationship Management Module (UC-1701 through UC-1706), formalized from BR-015 |
+| 4.6.0   | 2026-08-02 | Solution Architect | Added Section 16f Distributed Workspace Synchronization Module (UC-1801 through UC-1808), formalized from BR-016. This completes all 6 modules (Organization Management, Notification Center, Internal Messaging, AI Assistant, Relationship Management, Distributed Workspace Synchronization) that were missing from this document |
+| 4.7.0   | 2026-08-08 | Solution Architect | Updated the Section 3 Module Overview tree to list all 6 newly added modules |

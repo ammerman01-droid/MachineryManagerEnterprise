@@ -1,12 +1,12 @@
-| Property | Value |
-|----------|-------|
-| **Document ID** | TE-0022 |
-| **Title** | Validation Pipeline and Validation Architecture Evaluation (.NET 10) |
-| **Version** | 4.0.0 |
-| **Status** | Approved |
-| **Owner** | Solution Architect |
-| **Created** | 2026-07-26 |
-| **Last Updated** | 2026-07-28 |
+| Property         | Value              |
+|------------------|--------------------|
+| **Document ID**  | TE-0022            |
+| **Title**        | Validation Pipeline and Validation Architecture Evaluation (.NET 10) |
+| **Version**      | 4.1.0              |
+| **Status**       | Approved           |
+| **Owner**        | Solution Architect |
+| **Created**      | 2026-07-26         |
+| **Last Updated** | 2026-08-08         |
 
 ---
 
@@ -75,9 +75,8 @@ This evaluation is based on:
 - ADR-0003 — CQRS
 - ADR-0004 — MediatR
 - ADR-0007 — FluentValidation
-- SolutionStructure.md
-- DependencyRules.md
-
+- ../05-development/01-SolutionStructure.md
+- ../05-development/04-DependencyRules.md
 ---
 
 # Scope
@@ -2326,6 +2325,12 @@ Adopt the selected primary technology as the official standard for MachineryMana
 
 ---
 
+# Related Architecture Decision
+
+- ADR-0036 — Validation Pipeline Architecture
+
+---
+
 # Decision Summary
 
 The approved validation architecture consists of:
@@ -2359,10 +2364,9 @@ Accordingly, this layered validation model is adopted as the enterprise validati
 
 # Related Documents
 
-- SolutionStructure.md
-- DependencyRules.md
-- CodingStandards.md
-
+- ../05-development/01-SolutionStructure.md
+- ../05-development/04-DependencyRules.md
+- ../05-development/05-CodingStandards.md
 ---
 
 # Relationship to TE-0005
@@ -2380,8 +2384,9 @@ Both documents remain valid and should be read together.
 
 # Revision History
 
-| Version | Date       | Author             | Description                                                                       |
-|---------|------------|--------------------|-----------------------------------------------------------------------------------|
+| Version | Date       | Author             | Description                                           |
+|---------|------------|--------------------|-------------------------------------------------------|
 | 1.0.0   | 2026-07-26 | Solution Architect | Initial technology evaluation for Validation Pipeline and Validation Architecture |
-| 1.3.0   | 2026-07-28 | Solution Architect | New section added (Evaluation Scope)                                              |
-| 4.0.0   | 2026-07-28 | Solution Architect | Upgraded to Documentation Standard v4.0.0                                         |
+| 1.3.0   | 2026-07-28 | Solution Architect | New section added (Evaluation Scope)                  |
+| 4.0.0   | 2026-07-28 | Solution Architect | Upgraded to Documentation Standard v4.0.0             |
+| 4.1.0   | 2026-08-08 | Solution Architect | Review and synchronize with the latest changes        |

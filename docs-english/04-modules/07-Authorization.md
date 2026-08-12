@@ -1,12 +1,12 @@
-| Property | Value |
-|----------|-------|
-| **Document ID** | APP-007 |
-| **Title** | Authorization model |
-| **Version** | 4.0.0 |
-| **Status** | Active |
-| **Owner** | Solution Architect |
-| **Created** | 2026-07-18 |
-| **Last Updated** | 2026-07-28 |
+| Property         | Value              |
+|------------------|--------------------|
+| **Document ID**  | MOD-007            |
+| **Title**        | Authorization model |
+| **Version**      | 4.1.0              |
+| **Status**       | Approved           |
+| **Owner**        | Solution Architect |
+| **Created**      | 2026-07-18         |
+| **Last Updated** | 2026-08-08         |
 
 ---
 
@@ -101,6 +101,7 @@ Permissions
 The following roles are considered part of the core platform.
 
 - System Administrator
+- Organization Administrator
 - Fleet Manager
 - Maintenance Manager
 - Maintenance Technician
@@ -110,6 +111,12 @@ The following roles are considered part of the core platform.
 - Procurement Officer
 - Document Controller
 - Read-Only Auditor
+
+The System Administrator role operates at the platform level, across
+Organizations. The Organization Administrator role is scoped to a
+single Organization (tenant) and holds `Organization.Manage` and other
+Organization-scoped administrative permissions (see Section 14) within
+that boundary only.
 
 Organizations may define additional roles.
 
@@ -357,8 +364,8 @@ Authorization shall occur in the following order:
 - 04-Handlers.md
 - 02-Commands.md
 - 03-Queries.md
-- docs/03-domain/07-BusinessRules.md
-- ADR-0006 — Authorization Model
+- docs/03-domain/08-BusinessRules.md
+- ADR-0030-Identity and Access Management Architecture
 
 ---
 
@@ -369,3 +376,5 @@ Authorization shall occur in the following order:
 | 1.0.0   | 2026-07-18 | Solution Architect | Initial Authorization model                           |
 | 3.0.0   | 2026-07-18 | Solution Architect | Standardized according to Documentation Standard v3.0 |
 | 4.0.0   | 2026-07-28 | Solution Architect | Upgraded to Documentation Standard v4.0.0             |
+| 4.1.0   | 2026-08-02 | Solution Architect | Corrected reference from ADR-0026 (Data Protection & Encryption, unrelated) to ADR-0030 (Identity and Access Management Architecture) |
+| 4.2.0   | 2026-08-08 | Solution Architect | Added Organization Administrator to Standard Roles — 01-vision/00-Vision.md names it as a primary target user, and this document already referenced Organization-scoped permissions (Organization.Manage) without a role holding them |

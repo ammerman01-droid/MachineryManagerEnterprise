@@ -1,12 +1,12 @@
-| Property | Value |
-|----------|-------|
-| **Document ID** | API-005 |
-| **Title** | API Versioning |
-| **Version** | 4.0.0 |
-| **Status** | Active |
-| **Owner** | Solution Architect |
-| **Created** | 2026-07-18 |
-| **Last Updated** | 2026-07-28 |
+| Property         | Value              |
+|------------------|--------------------|
+| **Document ID**  | API-005            |
+| **Title**        | Pagination, Filtering, and Sorting |
+| **Version**      | 4.2.0              |
+| **Status**       | Approved           |
+| **Owner**        | Solution Architect |
+| **Created**      | 2026-07-18         |
+| **Last Updated** | 2026-08-08         |
 
 ---
 
@@ -15,42 +15,6 @@
 This document defines the standard conventions for pagination, filtering and sorting used throughout MachineryManagerEnterprise.
 
 All collection endpoints shall follow these conventions.
-
----
-
-# Versioning Philosophy
-
-API evolution shall prioritize backward compatibility.
-
-Clients shall be able to migrate gradually.
-
-Breaking changes shall always result in a new major API version.
-
----
-
-# Version Lifecycle
-
-New Endpoint
-
-↓
-
-Preview (optional)
-
-↓
-
-Stable
-
-↓
-
-Deprecated
-
-↓
-
-Sunset
-
-↓
-
-Removed
 
 ---
 
@@ -291,15 +255,6 @@ Backward compatibility shall be preserved.
 
 ---
 
-# 17. Version Compatibility Matrix
-
-| Client    | API v1 | API v2 |
-| --------- | :----: | :----: |
-| v1 Client |    ✅   |    ❌   |
-| v2 Client |    ❌   |    ✅   |
-
----
-
 # Decision Summary
 
 - ✔ Clean Architecture
@@ -316,7 +271,7 @@ Backward compatibility shall be preserved.
 - 02-EndpointDesign.md
 - 03-RequestResponseModel.md
 - 04-ErrorResponses.md
-- ADR-0005 — API Strategy
+- ADR-0035 — API Documentation and Client Generation Architecture
 
 ---
 
@@ -327,3 +282,5 @@ Backward compatibility shall be preserved.
 | 1.0.0   | 2026-07-18 | Solution Architect | Initial Versioning Strategy                           |
 | 3.0.0   | 2026-07-18 | Solution Architect | Standardized according to Documentation Standard v3.0 |
 | 4.0.0   | 2026-07-28 | Solution Architect | Upgraded to Documentation Standard v4.0.0             |
+| 4.1.0   | 2026-08-02 | Solution Architect | Corrected reference from non-existent "ADR-0005 — API Strategy" to the actual governing ADR-0035 (API Documentation and Client Generation Architecture) |
+| 4.2.0   | 2026-08-02 | Solution Architect | Removed "Versioning Philosophy" and "Version Compatibility Matrix" sections that belonged to 06-Versioning.md, not this document; corrected the file's own Title field, which still read "API Versioning" |

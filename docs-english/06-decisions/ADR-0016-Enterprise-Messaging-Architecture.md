@@ -1,12 +1,12 @@
-| Property | Value |
-|----------|-------|
-| **Document ID** | ADR-0016 |
-| **Title** | Enterprise Messaging Architecture |
-| **Version** | 4.0.0 |
-| **Status** | Proposed |
-| **Owner** | Solution Architect |
-| **Created** | 2026-07-26 |
-| **Last Updated** | 2026-07-28 |
+| Property         | Value              |
+|------------------|--------------------|
+| **Document ID**  | ADR-0016           |
+| **Title**        | Enterprise Messaging Architecture |
+| **Version**      | 4.1.0              |
+| **Status**       | Approved           |
+| **Owner**        | Solution Architect |
+| **Created**      | 2026-07-26         |
+| **Last Updated** | 2026-08-08         |
 
 # Purpose
 
@@ -361,6 +361,30 @@ Future work includes:
 
 ---
 
+# 11a. Technology Selection (Formalized)
+
+TE-0012 — Enterprise Messaging Technology Evaluation evaluated RabbitMQ,
+Apache Kafka, Azure Service Bus, MassTransit, and NServiceBus against the
+architectural principles established above.
+
+The platform adopts **MassTransit** as the messaging abstraction framework
+and **RabbitMQ** as the underlying message broker.
+
+| Responsibility | Selected Technology |
+|-----------------|---------------------|
+| Messaging Abstraction / Bus Framework | MassTransit |
+| Message Broker | RabbitMQ |
+
+All Domain Events, Integration Events, and Notifications defined in this
+ADR shall be published and consumed through MassTransit, which shall be
+configured to use RabbitMQ as its transport in all deployment
+environments.
+
+This closes the technology selection that was previously deferred to
+TE-0012 and corrects the prior "Planned" status recorded below.
+
+---
+
 # 12. Related Documents
 
 ## Architecture
@@ -373,20 +397,12 @@ Future work includes:
 
 ## Technical Evaluation
 
-- TE-0012 — Enterprise Messaging Technology Evaluation *(Planned)*
+- TE-0012 — Enterprise Messaging Technology Evaluation *(Approved — MassTransit / RabbitMQ, see Section 11a)*
 
 ## Development
 
 - Solution Structure
 - Dependency Rules
-
----
-
-# 13. Revision History
-
-| Version | Date | Author | Description |
-|----------|------|--------|-------------|
-| 1.0.0 | 2026-07-26 | Solution Architect | Initial version |
 
 ---
 
@@ -406,5 +422,6 @@ Future work includes:
 | Version | Date       | Author             | Description                                           |
 |---------|------------|--------------------|-------------------------------------------------------|
 | 1.0.0   | 2026-07-26 | Solution Architect | Initial Architecture Decision Record                  |
-| 3.0.0   | 2026-07-18 | Solution Architect | Standardized according to Documentation Standard v3.0 |
+| 3.0.0   | 2026-07-26 | Solution Architect | Standardized according to Documentation Standard v3.0 |
 | 4.0.0   | 2026-07-28 | Solution Architect | Upgraded to Documentation Standard v4.0.0             |
+| 4.1.0   | 2026-08-02 | Solution Architect | Formalized technology selection (MassTransit / RabbitMQ), closing TE-0012 |

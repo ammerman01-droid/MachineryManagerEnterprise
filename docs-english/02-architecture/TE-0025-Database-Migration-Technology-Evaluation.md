@@ -1,12 +1,12 @@
-| Property | Value |
-|----------|-------|
-| **Document ID** | TE-0025 |
-| **Title** | Database Migration Technology Evaluation |
-| **Version** | 4.0.0 |
-| **Status** | Approved |
-| **Owner** | Solution Architect |
-| **Created** | 2026-07-27 |
-| **Last Updated** | 2026-07-28 |
+| Property         | Value              |
+|------------------|--------------------|
+| **Document ID**  | TE-0025            |
+| **Title**        | Database Migration Technology Evaluation |
+| **Version**      | 4.1.0              |
+| **Status**       | Approved           |
+| **Owner**        | Solution Architect |
+| **Created**      | 2026-07-27         |
+| **Last Updated** | 2026-08-08         |
 
 # Purpose
 
@@ -70,9 +70,8 @@ This evaluation is based on:
 - ADR-0006 — Use Entity Framework Core
 - TE-0004 — Entity Framework Core
 - TE-0024 — Data Access Technology Evaluation
-- DependencyRules.md
-- CodingStandards.md
-
+- ../05-development/04-DependencyRules.md
+- ../05-development/05-CodingStandards.md
 ---
 
 # Scope
@@ -908,6 +907,12 @@ Not applicable to this evaluation.
 
 ---
 
+# Related Architecture Decision
+
+- ADR-0037 — Database Migration Strategy
+
+---
+
 # Decision Summary
 
 - ✔ Clean Architecture preserved
@@ -963,3 +968,4 @@ https://www.liquibase.org/
 | 1.0.0   | 2026-07-27 | Solution Architect | Initial evaluation; formalizes EF Core Migrations as sole schema owner, evaluates and rejects DbUp, Flyway, and Liquibase, closes the schema-ownership question deferred from TE-0024 |
 | 1.3.0   | 2026-07-28 | New section added (Evaluation Scope)                                       |
 | 4.0.0   | 2026-07-28 | Solution Architect | Upgraded to Documentation Standard v4.0.0             |
+| 4.1.0   | 2026-08-08 | Solution Architect | Review and synchronize with the latest changes        |

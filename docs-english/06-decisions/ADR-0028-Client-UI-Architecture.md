@@ -1,12 +1,28 @@
-| Property | Value |
-|----------|-------|
-| **Document ID** | ADR-0028 |
-| **Title** | Client UI Architecture |
-| **Status** | Accepted |
-| **Version** | 4.0.0 |
-| **Decision Date** | 2026-07-28 |
-| **Owner** | Solution Architect |
-| **Related TE** | TE-0034 – Client UI Technology Evaluation |
+| Property         | Value              |
+|------------------|--------------------|
+| **Document ID**  | ADR-0028           |
+| **Title**        | Client UI Architecture |
+| **Version**      | 4.1.0              |
+| **Status**       | Superseded         |
+| **Owner**        | Solution Architect |
+| **Created**      | 2026-07-28         |
+| **Last Updated** | 2026-08-08         |
+| **Related TE** | TE-0034 – Client UI Technology Evaluation *(Superseded)* |
+
+---
+
+> **⚠ Superseded Notice (2026-08-02):** This ADR's decision (Avalonia UI +
+> FluentAvalonia + CommunityToolkit.Mvvm) directly conflicted with
+> **TE-0010 — Desktop-Mobile Framework Evaluation**, which selected
+> **.NET MAUI** and named **ADR-0013 — Client Application Architecture**
+> as its governing decision. Neither document referenced the other at
+> the time of approval.
+>
+> By architectural review decision, **.NET MAUI is the standardized
+> cross-platform client framework** for MachineryManagerEnterprise. This
+> ADR (and TE-0034) is retained for historical record only and shall
+> not be used as a basis for implementation. See ADR-0013 and TE-0010
+> for the current, binding decision.
 
 ---
 
@@ -344,7 +360,7 @@ Cross-platform capability is an architectural requirement.
 # Related Documents
 
 - ADR-0001 — Clean Architecture
-- ADR-0003 — Modular Monolith Architecture
+- ADR-0001 — Modular Monolith Architecture
 - ADR-0024 — Enterprise Testing Strategy
 - TE-0034 — Client UI Technology Evaluation
 
@@ -374,5 +390,6 @@ within a strict MVVM architecture where:
 | Version | Date       | Author             | Description                                           |
 |---------|------------|--------------------|-------------------------------------------------------|
 | 1.0.0   | 2026-07-28 | Solution Architect | Initial version                                       |
-| 3.0.0   | 2026-07-18 | Solution Architect | Standardized according to Documentation Standard v3.0 |
+| 3.0.0   | 2026-07-28 | Solution Architect | Standardized according to Documentation Standard v3.0 |
 | 4.0.0   | 2026-07-28 | Solution Architect | Upgraded to Documentation Standard v4.0.0             |
+| 4.1.0   | 2026-08-08 | Solution Architect | Review and synchronize with the latest changes        |

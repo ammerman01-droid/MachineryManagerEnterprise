@@ -1,11 +1,12 @@
-| Property | Value |
-|----------|-------|
-| **Document ID** | ADR-0027 |
-| **Title** | Enterprise Performance Testing Strategy |
-| **Status** | Accepted |
-| **Version** | 4.0.0 |
-| **Decision Date** | 2026-07-28 |
-| **Owner** | Solution Architect |
+| Property         | Value              |
+|------------------|--------------------|
+| **Document ID**  | ADR-0027           |
+| **Title**        | terprise Performance Testing Strategy |
+| **Version**      | 4.1.0              |
+| **Status**       | Approved           |
+| **Owner**        | Solution Architect |
+| **Created**      | 2026-07-28         |
+| **Last Updated** | 2026-08-08         |
 | **Related TE** | TE-0033 – Performance and Load Testing Technology Evaluation |
 
 ---
@@ -332,5 +333,6 @@ Each technology is responsible for one distinct architectural layer of performan
 | Version | Date       | Author             | Description                                           |
 |---------|------------|--------------------|-------------------------------------------------------|
 | 1.0.0   | 2026-07-28 | Solution Architect | Initial version                                       |
-| 3.0.0   | 2026-07-18 | Solution Architect | Standardized according to Documentation Standard v3.0 |
+| 3.0.0   | 2026-07-28 | Solution Architect | Standardized according to Documentation Standard v3.0 |
 | 4.0.0   | 2026-07-28 | Solution Architect | Upgraded to Documentation Standard v4.0.0             |
+| 4.1.0   | 2026-08-08 | Solution Architect | Review and synchronize with the latest changes        |

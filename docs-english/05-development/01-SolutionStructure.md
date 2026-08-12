@@ -1,12 +1,12 @@
-| Property | Value |
-|----------|-------|
-| **Document ID** | DOC-DEV-002 |
-| **Title** | Solution Structure |
-| **Version** | 4.0.0 |
-| **Status** | Approved |
-| **Owner** | Solution Architect |
-| **Created** | 2026-07-18 |
-| **Last Updated** | 2026-07-28 |
+| Property         | Value              |
+|------------------|--------------------|
+| **Document ID**  | DOC-DEV-002        |
+| **Title**        | Solution Structure |
+| **Version**      | 4.1.0              |
+| **Status**       | Approved           |
+| **Owner**        | Solution Architect |
+| **Created**      | 2026-07-18         |
+| **Last Updated** | 2026-08-08         |
 
 ---
 
@@ -346,8 +346,8 @@ Architectural deviations require an approved ADR.
 - DOC-DEV-003 (Project Structure)
 - DOC-DEV-005 (Dependency Rules)
 - ADR-0001
-- DOC-MOD-001 (Application Architecture)
-- DOC-DOM-002 (Bounded Contexts)
+- MOD-000 (Application Architecture)
+- DOM-003 (Bounded Contexts)
 
 ---
 
@@ -359,3 +359,4 @@ Architectural deviations require an approved ADR.
 | 3.0.0   | 2026-07-18 | Solution Architect | Standardized according to Documentation Standard v3.0 |
 | 3.1.0   | 2026-07-26 | Solution Architect | AI + Project Team | Updated solution bootstrap for .NET 10.0.302, centralized MSBuild configuration and Central Package Management.|
 | 4.0.0   | 2026-07-28 | Solution Architect | Upgraded to Documentation Standard v4.0.0             |
+| 4.1.0   | 2026-08-02 | Solution Architect | Fixed malformed references DOC-MOD-001 and DOC-DOM-002 (wrong prefix and wrong number) to the real MOD-000 and DOM-003 |

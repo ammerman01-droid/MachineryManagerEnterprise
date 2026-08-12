@@ -1,12 +1,12 @@
-| Property | Value |
-|----------|-------|
-| **Document ID** | ADR-0013 |
-| **Title** | Client Application Architecture |
-| **Version** | 4.0.0 |
-| **Status** | Proposed |
-| **Owner** | Solution Architect |
-| **Created** | 2026-07-26 |
-| **Last Updated** | 2026-07-28 |
+| Property         | Value              |
+|------------------|--------------------|
+| **Document ID**  | ADR-0013           |
+| **Title**        | Client Application Architecture |
+| **Version**      | 4.1.0              |
+| **Status**       | Approved           |
+| **Owner**        | Solution Architect |
+| **Created**      | 2026-07-18         |
+| **Last Updated** | 2026-08-08         |
 
 ---
 
@@ -320,8 +320,7 @@ Future client technologies shall not be evaluated until this Architecture Decisi
 ## Architecture
 
 - 01-Architecture.md
-- 09-CapabilityModel.md
-- 10-ArchitecturalCapabilities.md
+- 02-CapabilityModel.md
 - 03-TechnologyGapAnalysis.md
 
 ## Architecture Decision Records
@@ -331,9 +330,9 @@ Future client technologies shall not be evaluated until this Architecture Decisi
 
 ## Development
 
-- SolutionStructure.md
-- ProjectStructure.md
-- DependencyRules.md
+- ../05-development/01-SolutionStructure.md
+- ../05-development/02-ProjectStructure.md
+- ../05-development/04-DependencyRules.md
 
 ## Technical Evaluations
 
@@ -348,3 +347,4 @@ Future client technologies shall not be evaluated until this Architecture Decisi
 | 1.0.0   | 2026-07-26 | Solution Architect | Initial Client Application Architecture decision      |
 | 3.0.0   | 2026-07-18 | Solution Architect | Standardized according to Documentation Standard v3.0 |
 | 4.0.0   | 2026-07-28 | Solution Architect | Upgraded to Documentation Standard v4.0.0             |
+| 4.1.0   | 2026-08-08 | Solution Architect | Review and synchronize with the latest changes        |

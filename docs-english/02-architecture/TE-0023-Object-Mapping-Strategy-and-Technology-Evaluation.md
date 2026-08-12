@@ -1,12 +1,12 @@
-| Property | Value |
-|----------|-------|
-| **Document ID** | TE-0023 |
-| **Title** | Object Mapping Technology Evaluation |
-| **Version** | 4.0.0 |
-| **Status** | Approved |
-| **Owner** | Solution Architect |
-| **Created** | 2026-07-27 |
-| **Last Updated** | 2026-07-28 |
+| Property         | Value              |
+|------------------|--------------------|
+| **Document ID**  | TE-0023            |
+| **Title**        | Object Mapping Technology Evaluation |
+| **Version**      | 4.1.0              |
+| **Status**       | Approved           |
+| **Owner**        | Solution Architect |
+| **Created**      | 2026-07-26         |
+| **Last Updated** | 2026-08-08         |
 
 # Purpose
 
@@ -84,11 +84,10 @@ This evaluation is based on:
 - ADR-0013 — Client Application Architecture (.NET MAUI)
 - TE-0006 — Mapster (original evaluation)
 - TE-0010 — Desktop & Mobile Framework Evaluation
-- SolutionStructure.md
-- ProjectStructure.md
-- DependencyRules.md
-- CodingStandards.md
-
+- ../05-development/01-SolutionStructure.md
+- ../05-development/02-ProjectStructure.md
+- ../05-development/04-DependencyRules.md
+- ../05-development/05-CodingStandards.md
 ---
 
 # Scope
@@ -1200,9 +1199,10 @@ https://dotnetfoundation.org/news-events/detail/automapper-graduates-from-the-.n
 
 # Revision History
 
-| Version | Date       | Author             | Description                               |
-|---------|------------|--------------------|-------------------------------------------|
+| Version | Date       | Author             | Description                                    |
+|---------|------------|--------------------|------------------------------------------------|
 | 1.0.0   | 2026-07-27 | Solution Architect | Initial re-evaluation, rewritten to full project-standard depth; reaffirms ADR-0008 (Mapster), adds Mapperly, updates AutoMapper rejection rationale for licensing change, formalizes Manual Mapping as a scoped complement |
-| 1.0.1   | 2026-07-28 | File name Changed from (Object Mapping Technology Evaluation)  |
-| 1.3.0   | 2026-07-28 | New section added (Evaluation Scope)                           |
-| 4.0.0   | 2026-07-28 | Solution Architect | Upgraded to Documentation Standard v4.0.0 |
+| 1.0.1   | 2026-07-28 | File name Changed from (Object Mapping Technology Evaluation)       |
+| 1.3.0   | 2026-07-28 | New section added (Evaluation Scope)                                |
+| 4.0.0   | 2026-07-28 | Solution Architect | Upgraded to Documentation Standard v4.0.0      |
+| 4.1.0   | 2026-08-08 | Solution Architect | Review and synchronize with the latest changes |

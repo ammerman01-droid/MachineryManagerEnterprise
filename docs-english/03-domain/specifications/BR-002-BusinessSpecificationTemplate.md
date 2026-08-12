@@ -1,12 +1,12 @@
-| Property | Value |
-|----------|-------|
-| **Document ID** | BR-XXX |
-| **Version** | 4.0.0 |
-| **Status** | Draft / Active / Approved |
-| **Owner** | Domain Architect |
-| **Created** | YYYY-MM-DD |
-| **Last Updated** | 2026-07-28 |
-
+| Property         | Value              |
+|------------------|--------------------|
+| **Document ID**  | BR-XXX             |
+| **Title**        | Business Specification Template |
+| **Version**      | 4.1.0              |
+| **Status**       | Draft / Active / Approved |
+| **Owner**        | Solution Architect |
+| **Created**      | 2026-07-18         |
+| **Last Updated** | 2026-08-08         |
 ---
 
 # Purpose
@@ -238,5 +238,6 @@ Typical examples:
 |---------|------------|--------------------|-------------------------------------------------------|
 | 1.0.0   | YYYY-MM-DD | Solution Architect | Initial template                                      |
 | 1.1     | 2026-07-23 | Solution Architect | Standardized document structure, completed references, improved consistency with project documentation standards. |
-| 3.0.0   | 2026-07-18 | Solution Architect | Standardized according to Documentation Standard v3.0 |
+| 3.0.0   | 2026-07-23 | Solution Architect | Standardized according to Documentation Standard v3.0 |
 | 4.0.0   | 2026-07-28 | Solution Architect | Upgraded to Documentation Standard v4.0.0             |
+| 4.1.0   | 2026-08-08 | Solution Architect | Review and synchronize with the latest changes        |

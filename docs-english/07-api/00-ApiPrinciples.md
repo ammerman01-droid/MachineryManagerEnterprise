@@ -1,12 +1,12 @@
-| Property | Value |
-|----------|-------|
-| **Document ID** | API-000 |
-| **Title** | API Principles |
-| **Version** | 4.0.0 |
-| **Status** | Active |
-| **Owner** | Solution Architect |
-| **Created** | 2026-07-18 |
-| **Last Updated** | 2026-07-28 |
+| Property         | Value              |
+|------------------|--------------------|
+| **Document ID**  | API-000            |
+| **Title**        | API Principles     |
+| **Version**      | 4.1.0              |
+| **Status**       | Approved           |
+| **Owner**        | Solution Architect |
+| **Created**      | 2026-07-18         |
+| **Last Updated** | 2026-08-08         |
 
 ---
 
@@ -250,7 +250,7 @@ The API Layer shall:
 - Authorization
 - Commands
 - Queries
-- ADR-0005 — API Strategy
+- ADR-0035 — API Documentation and Client Generation Architecture
 
 ---
 
@@ -261,3 +261,4 @@ The API Layer shall:
 | 1.0.0   | 2026-07-18 | Solution Architect | Initial API Principles                                |
 | 3.0.0   | 2026-07-18 | Solution Architect | Standardized according to Documentation Standard v3.0 |
 | 4.0.0   | 2026-07-28 | Solution Architect | Upgraded to Documentation Standard v4.0.0             |
+| 4.1.0   | 2026-08-08 | Solution Architect | Corrected reference from non-existent "ADR-0005 — API Strategy" to the actual governing ADR-0035 (API Documentation and Client Generation Architecture) |

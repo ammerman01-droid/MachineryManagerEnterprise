@@ -1,12 +1,12 @@
-| Property | Value |
-|----------|-------|
-| **Document ID** | TE-0006 |
-| **Title** | Mapster Object Mapping Technology Evaluation |
-| **Version** | 4.0.0 |
-| **Status** | Approved |
-| **Owner** | Solution Architect |
-| **Created** | 2026-07-26 |
-| **Last Updated** | 2026-07-28 |
+| Property         | Value              |
+|------------------|--------------------|
+| **Document ID**  | TE-0006            |
+| **Title**        | Mapster Object Mapping Technology Evaluation |
+| **Version**      | 4.1.0              |
+| **Status**       | Approved           |
+| **Owner**        | Solution Architect |
+| **Created**      | 2026-07-18         |
+| **Last Updated** | 2026-08-08         |
 
 ---
 
@@ -140,11 +140,12 @@ Adopt Mapster as the official object mapping engine.
 
 # Revision History
 
-| Version | Date       | Author             | Description |
-|---------|------------|--------------------|-------------|
-| 1.0.0   | 2026-07-18 | Solution Architect | Initial evaluation |
-| 2.0.0   | 2026-07-18 | Solution Architect | Standardized |
+| Version | Date       | Author             | Description                                           |
+|---------|------------|--------------------|-------------------------------------------------------|
+| 1.0.0   | 2026-07-18 | Solution Architect | Initial evaluation                                    |
+| 2.0.0   | 2026-07-18 | Solution Architect | Standardized                                          |
 | 3.0.0   | 2026-07-18 | Solution Architect | Rewritten according to Technology Evaluation Template |
 | 3.0.1   | 2026-07-27 | Solution Architect | Corrected Related ADR reference from ADR-0009 to ADR-0008 (ADR-0009 documents Serilog, not Mapster) |
-| 3.1.0   | 2026-07-28 | Solution Architect | New section added (Evaluation Scope) |
-| 4.0.0   | 2026-07-28 | Solution Architect | Upgraded to Documentation Standard v4.0.0 |
+| 3.1.0   | 2026-07-28 | Solution Architect | New section added (Evaluation Scope)                  |
+| 4.0.0   | 2026-07-28 | Solution Architect | Upgraded to Documentation Standard v4.0.0             |
+| 4.1.0   | 2026-08-08 | Solution Architect | Review and synchronize with the latest changes        |

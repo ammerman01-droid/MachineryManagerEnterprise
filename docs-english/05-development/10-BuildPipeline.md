@@ -1,12 +1,12 @@
-| Property | Value |
-|----------|-------|
-| **Document ID** | DOC-DEV-011 |
-| **Title** | Build Pipeline |
-| **Version** | 4.0.0 |
-| **Status** | Approved |
-| **Owner** | Solution Architect |
-| **Created** | 2026-07-18 |
-| **Last Updated** | 2026-07-28 |
+| Property         | Value              |
+|------------------|--------------------|
+| **Document ID**  | DOC-DEV-011        |
+| **Title**        | Build Pipeline     |
+| **Version**      | 4.1.0              |
+| **Status**       | Approved           |
+| **Owner**        | Solution Architect |
+| **Created**      | 2026-07-18         |
+| **Last Updated** | 2026-08-08         |
 
 ---
 
@@ -30,6 +30,22 @@ The pipeline shall:
 - Detect dependency issues.
 - Prevent broken code from being merged.
 - Produce reproducible builds.
+
+---
+
+# Approved Technology Stack
+
+Formalized by ADR-0025 (Build and Deployment Architecture):
+
+| Responsibility | Approved Technology |
+|-----------------|---------------------|
+| CI/CD Platform | GitHub Actions |
+| Containerization | Docker |
+| Local Multi-Service Orchestration | .NET Aspire |
+
+**Kubernetes is not an approved platform standard.** No ADR currently
+authorizes Kubernetes; introducing it requires a new Technology
+Evaluation and ADR.
 
 ---
 
@@ -232,7 +248,10 @@ The pipeline shall never expose:
 - Tokens
 - Connection Strings
 
-Secrets shall be managed by the CI platform.
+Secrets shall be managed by the CI platform's native secret store during
+pipeline execution, and by HashiCorp Vault (or the Azure Key Vault
+alternative) at runtime, per ADR-0034 (Configuration and Secrets
+Management Architecture).
 
 ---
 
@@ -263,6 +282,8 @@ Direct commits to protected branches are prohibited.
 - DOC-DEV-005 (Dependency Rules)
 - DOC-DEV-006 (Coding Standards)
 - DOC-DEV-010 (Testing Strategy)
+- ADR-0025 — Build and Deployment Architecture
+- ADR-0034 — Configuration and Secrets Management Architecture
 
 ---
 
@@ -285,3 +306,4 @@ Direct commits to protected branches are prohibited.
 | 3.0.0   | 2026-07-18 | Solution Architect | Standardized according to Documentation Standard v3.0 |
 | 3.1.0   | 2026-07-26 | Solution Architect | Updated project structure documentation to reflect centralized build configuration and package management introduced during Bootstrap |
 | 4.0.0   | 2026-07-28 | Solution Architect | Upgraded to Documentation Standard v4.0.0             |
+| 4.1.0   | 2026-08-08 | Solution Architect | Synced with approved stack (ADR-0025/ADR-0034): named GitHub Actions, Docker, .NET Aspire, HashiCorp Vault; explicitly noted Kubernetes is not approved |

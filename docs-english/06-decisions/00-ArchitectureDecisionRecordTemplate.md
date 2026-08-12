@@ -1,12 +1,12 @@
-| Property | Value |
-|----------|-------|
-| **Document ID** | ADR-XXXX |
-| **Title** | Architecture Decision Record Template |
-| **Version** | 4.0.0 |
-| **Status** | Proposed / Accepted / Superseded / Deprecated |
-| **Owner** | Solution Architect |
-| **Created** | YYYY-MM-DD |
-| **Last Updated** | 2026-07-28 |
+| Property         | Value              |
+|------------------|--------------------|
+| **Document ID**  | ADR-XXXX           |
+| **Title**        | Architecture Decision Record Template |
+| **Version**      | 4.1.0              |
+| **Status**       | Proposed / Approved / Superseded / Deprecated |
+| **Owner**        | Solution Architect |
+| **Created**      | YYYY-MM-DD         |
+| **Last Updated** | 2026-08-08         |
 
 ---
 
@@ -213,3 +213,4 @@ External standards
 | 1.0.0   | YYYY-MM-DD | Solution Architect | Initial decision                                      |
 | 3.0.0   | 2026-07-18 | Solution Architect | Standardized according to Documentation Standard v3.0 |
 | 4.0.0   | 2026-07-28 | Solution Architect | Upgraded to Documentation Standard v4.0.0             |
+| 4.1.0   | 2026-08-08 | Solution Architect | Review and synchronize with the latest changes        |

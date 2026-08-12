@@ -1,12 +1,12 @@
-| Property | Value |
-|----------|-------|
-| **Document ID** | TE-0029 |
-| **Title** | Artificial Intelligence Provider Technology Evaluation |
-| **Version** | 4.0.0 |
-| **Status** | Approved |
-| **Owner** | Solution Architect |
-| **Created** | 2026-07-28 |
-| **Last Updated** | 2026-07-28 |
+| Property         | Value              |
+|------------------|--------------------|
+| **Document ID**  | TE-0029            |
+| **Title**        | Artificial Intelligence Provider Technology Evaluation |
+| **Version**      | 4.1.0              |
+| **Status**       | Approved           |
+| **Owner**        | Solution Architect |
+| **Created**      | 2026-07-28         |
+| **Last Updated** | 2026-08-08         |
 
 # Purpose
 
@@ -1783,16 +1783,16 @@ Implementation of this Technology Evaluation requires:
 
 # Related Documents
 
-- SolutionStructure.md
-- DependencyRules.md
-- CodingStandards.md
-
+- ../05-development/01-SolutionStructure.md
+- ../05-development/04-DependencyRules.md
+- ../05-development/05-CodingStandards.md
 ---
 
 # 15. Revision History
 
-| Version | Date       | Author             | Description                               |
-|---------|------------|--------------------|-------------------------------------------|
-| 1.0.0   | 2026-07-28 | Solution Architect | Initial version |
+| Version | Date       | Author             | Description                                    |
+|---------|------------|--------------------|------------------------------------------------|
+| 1.0.0   | 2026-07-28 | Solution Architect | Initial version                                |
 | 1.1.0   | 2026-07-28 | Solution Architect | Converted star-rating tables to text ratings for consistency |
-| 4.0.0   | 2026-07-28 | Solution Architect | Upgraded to Documentation Standard v4.0.0 |
+| 4.0.0   | 2026-07-28 | Solution Architect | Upgraded to Documentation Standard v4.0.0      |
+| 4.1.0   | 2026-08-08 | Solution Architect | Review and synchronize with the latest changes |
