@@ -1,14 +1,12 @@
-# Business Specification — Tire Lifecycle Management
-
-| Property | Value |
-|----------|-------|
-| **Document ID** | BR-003 |
-| **Capability ID** | DD-004 |
-| **Version** | 4.0.0 |
-| **Status** | Approved |
-| **Owner** | Domain Architect |
-| **Created** | 2026-07-20 |
-| **Last Updated** | 2026-07-28 |
+| Property         | Value              |
+|------------------|--------------------|
+| **Document ID**  | BR-005             |
+| **Title**        | Tire Lifecycle Management |
+| **Version**      | 4.2.0              |
+| **Status**       | Approved           |
+| **Owner**        | Solution Architect |
+| **Created**      | 2026-07-20         |
+| **Last Updated** | 2026-08-08         |
 
 ---
 
@@ -483,8 +481,8 @@ Subsequent business rules may generate Forecasts.
 
 ## Related Business Specifications
 
-- BR-007 Maintenance Forecast
-- BR-009 Maintenance Operations
+- BR-010 Maintenance Forecast
+- BR-011 Maintenance Operations
 
 ---
 
@@ -636,7 +634,7 @@ Maintenance itself shall not modify historical observations.
 
 ## Related Business Specifications
 
-- BR-009 — Maintenance Operations
+- BR-011 — Maintenance Operations
 
 ---
 
@@ -729,17 +727,16 @@ Business behavior defined in this specification shall not duplicate these Domain
 
 ## Domain
 
-- 09-DomainDiscovery.md
-- 03-DomainModel.md
-- 12-DomainPatterns.md
-- 06-DomainEvents.md
-- 07-BusinessRules.md
-
+- ../10-DomainDiscovery.md
+- ../04-DomainModel.md
+- ../12-DomainPatterns.md
+- ../07-DomainEvents.md
+- ../08-BusinessRules.md
 ## Business Specifications
 
-- BR-002 — Tracked Components
-- BR-007 — Maintenance Forecast
-- BR-009 — Maintenance Operations
+- BR-004 — Tracked Components
+- BR-010 — Maintenance Forecast
+- BR-011 — Maintenance Operations
 
 ---
 
@@ -759,5 +756,7 @@ Business behavior defined in this specification shall not duplicate these Domain
 | Version | Date       | Author             | Description                                           |
 |---------|------------|--------------------|-------------------------------------------------------|
 | 1.0.0   | 2026-07-20 | Solution Architect | Initial Tire Lifecycle Business Specification         |
-| 3.0.0   | 2026-07-18 | Solution Architect | Standardized according to Documentation Standard v3.0 |
+| 3.0.0   | 2026-07-20 | Solution Architect | Standardized according to Documentation Standard v3.0 |
 | 4.0.0   | 2026-07-28 | Solution Architect | Upgraded to Documentation Standard v4.0.0             |
+| 4.1.0   | 2026-08-02 | Solution Architect | Fixed stale pre-renumbering BR references in Related Documents (each was 2 lower than the actual filename) and missing relative paths for 12-DomainPatterns.md / DG-00-DomainGovernance.md |
+| 4.2.0   | 2026-08-08 | Solution Architect | Fixed two additional stale inline BR references (BR-009 Maintenance Forecast -> BR-010) found outside the main Related Documents footer |

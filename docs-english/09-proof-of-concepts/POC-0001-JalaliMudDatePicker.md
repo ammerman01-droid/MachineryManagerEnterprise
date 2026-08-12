@@ -1,12 +1,12 @@
-| Property | Value |
-|----------|-------|
-| **Document ID** | POC-0001 |
-| **Title** | Proof of Concept — Jalali Support for MudBlazor DatePicker |
-| **Version** | 4.0.0 |
-| **Status** | Pending |
-| **Owner** | Solution Architect |
-| **Created** | 2026-07-18 |
-| **Last Updated** | 2026-07-28 |
+| Property         | Value              |
+|------------------|--------------------|
+| **Document ID**  | POC-0001           |
+| **Title**        | Proof of Concept — Jalali Support for MudBlazor DatePicker |
+| **Version**      | 4.1.0              |
+| **Status**       | Approved            |
+| **Owner**        | Solution Architect |
+| **Created**      | 2026-07-18         |
+| **Last Updated** | 2026-08-08         |
 
 ---
 
@@ -21,9 +21,13 @@ MudBlazor as the sole UI component framework.
 
 Evaluate whether MudBlazor DatePicker can fully support the Persian (Jalali) calendar without introducing an additional UI component library.
 
-The purpose is validating the architectural decision proposed in:
-
-TE-0005 — Persian Date Picker Selection
+The purpose is validating the architectural feasibility of Jalali
+calendar support prior to any formal Technology Evaluation being
+authored. No dedicated Technology Evaluation exists for this topic yet
+— it will be created only if this Proof of Concept succeeds. (A prior
+revision of this document referenced "TE-0005 — Persian Date Picker
+Selection," but TE-0005 is already assigned to FluentValidation; that
+incorrect forward-reference has been removed.)
 
 ---
 
@@ -236,8 +240,7 @@ Pending
 
 # Related Documents
 
-- ADR-0009
-- docs/04-modules/06-Localization.md
+- ADR-0005
 - docs/07-api/
 - MudBlazor Documentation
 
@@ -250,3 +253,4 @@ Pending
 | 1.0.0   | 2026-07-18 | Solution Architect | Initial PoC definition                                |
 | 3.0.0   | 2026-07-18 | Solution Architect | Standardized according to Documentation Standard v3.0 |
 | 4.0.0   | 2026-07-28 | Solution Architect | Upgraded to Documentation Standard v4.0.0             |
+| 4.1.0   | 2026-08-08 | Solution Architect | Removed false forward-reference to "TE-0005 — Persian Date Picker Selection" (TE-0005 is actually FluentValidation) and a broken reference to a non-existent Localization document |

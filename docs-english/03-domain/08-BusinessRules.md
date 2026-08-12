@@ -1,11 +1,12 @@
-| Property | Value |
-|----------|-------|
-| **Document ID** | DOM-007 |
-| **Version** | 4.0.0 |
-| **Status** | Active |
-| **Owner** | Solution Architect |
-| **Created** | 2026-07-18 |
-| **Last Updated** | 2026-07-28 |
+| Property         | Value              |
+|------------------|--------------------|
+| **Document ID**  | DOM-008            |
+| **Title**        | Business Rules     |
+| **Version**      | 4.1.0              |
+| **Status**       | Approved           |
+| **Owner**        | Solution Architect |
+| **Created**      | 2026-07-18         |
+| **Last Updated** | 2026-08-08         |
 
 ---
 
@@ -477,8 +478,8 @@ All future rules shall follow the principles defined in this document.
 
 # Related Documents
 
-- 00-DomainPrinciples.md
-- 01-Glossary.md
+- 01-DomainPrinciples.md
+- 00-Glossary.md
 - 02-CoreConcepts.md
 - 03-BoundedContexts.md
 - 04-DomainModel.md
@@ -495,3 +496,4 @@ All future rules shall follow the principles defined in this document.
 | 1.0.0   | 2026-07-18 | Solution Architect | Initial | Initial Business Rules definition           |
 | 3.0.0   | 2026-07-18 | Solution Architect | Standardized according to Documentation Standard v3.0 |
 | 4.0.0   | 2026-07-28 | Solution Architect | Upgraded to Documentation Standard v4.0.0             |
+| 4.1.0   | 2026-08-08 | Solution Architect | Fixed Document ID: was DOM-007 (collided with corrected 07-DomainEvents.md), corrected to DOM-008 |

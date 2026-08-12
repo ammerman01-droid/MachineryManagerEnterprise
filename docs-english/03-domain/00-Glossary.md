@@ -1,11 +1,12 @@
-| Property | Value |
-|----------|-------|
-| **Document ID** | DOM-001 |
-| **Version** | 4.0.0 |
-| **Status** | Active |
-| **Owner** | Solution Architect |
-| **Created** | 2026-07-18 |
-| **Last Updated** | 2026-07-28 |
+| Property         | Value              |
+|------------------|--------------------|
+| **Document ID**  | DOM-000            |
+| **Title**        | Glossary           |
+| **Version**      | 4.2.0              |
+| **Status**       | Approved           |
+| **Owner**        | Solution Architect |
+| **Created**      | 2026-07-18         |
+| **Last Updated** | 2026-08-08         |
 
 ## Purpose
 
@@ -26,17 +27,20 @@ Every new domain concept shall:
 - Be technology independent.
 - Avoid ambiguous business language.
 
-## GL-ORG-001 Company
+## GL-ORG-001 Organization
 
 Type: Aggregate Root
 
-A legal tenant that owns projects, assets, personnel and users.
+A tenant that owns projects, assets, personnel and users. Organizations
+are the multi-tenancy boundary: multiple Organizations (customer
+companies) use the platform concurrently from a single web deployment,
+each isolated within its own Organization boundary.
 
 ## GL-ORG-002 Project
 
 Type: Aggregate Root
 
-Operational unit belonging to a Company.
+Operational unit belonging to an Organization.
 
 ## GL-IDN-001 User
 
@@ -48,7 +52,7 @@ Collection of permissions assignable to users.
 
 ## GL-FLT-001 Asset
 
-Company-owned equipment managed through its lifecycle.
+Organization-owned equipment managed through its lifecycle.
 
 ## GL-FLT-002 Asset Category
 
@@ -57,6 +61,13 @@ Excavator, Loader, Dozer, Grader, Generator and future categories.
 ## GL-FLT-003 Asset Model
 
 Manufacturer specification shared by many assets.
+
+## GL-FLT-003a Company
+
+A manufacturer brand of equipment or components (e.g. Caterpillar,
+Komatsu). Distinct from GL-ORG-001 Organization, which is the platform
+tenant boundary. Currently represented as the Manufacturer attribute of
+Asset Model and Engine Model; not yet modeled as an independent entity.
 
 ## GL-FLT-004 Asset Assignment
 
@@ -68,7 +79,7 @@ Current cumulative operating meter.
 
 ## GL-PRS-001 Personnel
 
-Company employee.
+Organization employee.
 
 ## GL-PRS-002 Personnel Assignment
 
@@ -140,3 +151,5 @@ GPS Tracking, IoT Device, Predictive Maintenance, Vendor, Contractor.
 | 1.0.0   | 2026-07-17 | Solution Architect | Initial glossary                                      |
 | 3.0.0   | 2026-07-18 | Solution Architect | Standardized according to Documentation Standard v3.0 |
 | 4.0.0   | 2026-07-28 | Solution Architect | Upgraded to Documentation Standard v4.0.0             |
+| 4.1.0   | 2026-08-08 | Solution Architect | Renamed GL-ORG-001 from "Company" to "Organization" (the multi-tenant platform boundary, confirmed by product owner); added distinct GL-FLT-003a "Company" for equipment manufacturer brands (e.g. Caterpillar, Komatsu), which is a separate concept that had been conflated with the tenant term |
+| 4.2.0   | 2026-08-08 | Solution Architect | Fixed Document ID collision: was DOM-001 (duplicate of 01-DomainPrinciples.md), corrected to DOM-000 |

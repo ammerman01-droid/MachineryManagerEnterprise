@@ -1,12 +1,12 @@
-| Property | Value |
-|----------|-------|
-| **Document ID** | BR-013 |
-| **Capability ID** | DD-014 |
-| **Version** | 4.0.0 |
-| **Status** | Approved |
-| **Owner** | Domain Architect |
-| **Created** | 2026-07-20 |
-| **Last Updated** | 2026-07-28 |
+| Property         | Value              |
+|------------------|--------------------|
+| **Document ID**  | BR-015             |
+| **Title**        | Relationship Management |
+| **Version**      | 4.3.0              |
+| **Status**       | Approved           |
+| **Owner**        | Solution Architect |
+| **Created**      | 2026-07-20         |
+| **Last Updated** | 2026-08-08         |
 
 ---
 
@@ -3154,7 +3154,7 @@ It does not redefine them.
 | DP-001 | Business Operation Pattern |
 | DP-003 | Lifecycle Pattern |
 | DP-004 | Relationship Pattern |
-| DP-006 | Business Traceability Pattern |
+| DP-015 | Business Traceability Pattern |
 | DP-009 | Hierarchical Relationship Pattern |
 
 ---
@@ -3188,7 +3188,7 @@ BR-013 provides the business implementation of that pattern.
 
 ---
 
-## DP-006 — Business Traceability Pattern
+## DP-015 — Business Traceability Pattern
 
 Every relationship transition remains permanently traceable.
 
@@ -3253,9 +3253,9 @@ The combined patterns provide:
 
 ## Domain Documents
 
-- DG-00 — Domain Governance
-- 09-DomainDiscovery.md
-- 12-DomainPatterns.md
+- ../DG-00-DomainGovernance.md
+- ../10-DomainDiscovery.md
+- ../12-DomainPatterns.md
 
 ---
 
@@ -3263,16 +3263,16 @@ The combined patterns provide:
 
 Relationship Management supports:
 
-- BR-001 Asset Relationships
-- BR-002 Tracked Components
-- BR-005 Parts Catalog
-- BR-006 Part Cross Reference
-- BR-007 Incident Management
-- BR-008 Maintenance Forecast
-- BR-009 Maintenance Operations
-- BR-010 Notification Center
-- BR-011 Internal Messaging
-- BR-012 AI Assistant
+- BR-003 Asset Relationships
+- BR-004 Tracked Components
+- BR-007 Parts Catalog
+- BR-008 Part Cross Reference
+- BR-009 Incident Management
+- BR-010 Maintenance Forecast
+- BR-011 Maintenance Operations
+- BR-012 Notification Center
+- BR-013 Internal Messaging
+- BR-014 AI Assistant
 
 ---
 
@@ -3423,5 +3423,8 @@ Business ownership always remains with the originating Business Capability.
 | Version | Date       | Author             | Description                                                |
 |---------|------------|--------------------|------------------------------------------------------------|
 | 1.0.0   | 2026-07-20 | Solution Architect | Initial Business Specification for Relationship Management |
-| 3.0.0   | 2026-07-18 | Solution Architect | Standardized according to Documentation Standard v3.0      |
+| 3.0.0   | 2026-07-20 | Solution Architect | Standardized according to Documentation Standard v3.0      |
 | 4.0.0   | 2026-07-28 | Solution Architect | Upgraded to Documentation Standard v4.0.0                  |
+| 4.1.0   | 2026-08-02 | Solution Architect | Corrected Capability ID from DD-014 to DD-015, matching 10-DomainDiscovery.md's DD-015 (Relationship Management), whose Future Specification field names this document |
+| 4.2.0   | 2026-08-02 | Solution Architect | Fixed stale pre-renumbering BR references in Related Documents (each was 2 lower than the actual filename) and missing relative paths for 12-DomainPatterns.md / DG-00-DomainGovernance.md |
+| 4.3.0   | 2026-08-08 | Solution Architect | Corrected local Business Traceability Pattern number to DP-015, the newly formalized canonical number in 12-DomainPatterns.md (this specification had used an inconsistent local number relative to other specifications defining the same pattern) |

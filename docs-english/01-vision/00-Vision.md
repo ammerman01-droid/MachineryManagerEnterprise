@@ -1,12 +1,12 @@
-| Property | Value |
-|----------|-------|
-| **Document ID** | DOC-001 |
-| **Title** | Product Vision |
-| **Version** | 4.0.0 |
-| **Status** | Active |
-| **Owner** | Solution Architect |
-| **Created** | 2026-07-18 |
-| **Last Updated** | 2026-07-30 |
+| Property         | Value              |
+|------------------|--------------------|
+| **Document ID**  | DOC-001            |
+| **Title**        | Product Vision     |
+| **Version**      | 4.1.0              |
+| **Status**       | Approved           |
+| **Owner**        | Solution Architect |
+| **Created**      | 2026-07-18         |
+| **Last Updated** | 2026-08-08         |
 
 ---
 
@@ -52,7 +52,7 @@ The platform shall enable organizations to:
 Primary users include:
 
 - Enterprise administrators
-- Company administrators
+- Organization administrators
 - Maintenance managers
 - Warehouse managers
 - Procurement officers
@@ -150,3 +150,4 @@ The project will be considered successful when it provides:
 | 1.0.0   | 2026-07-18 | Solution Architect | Initial project vision                             |
 | 3.0.0   | 2026-07-18 | Solution Architect | Rewritten according to Documentation Standard v3.0 |
 | 4.0.0   | 2026-07-28 | Solution Architect | Upgraded to Documentation Standard v4.0.0          |
+| 4.1.0   | 2026-08-08 | Solution Architect | Corrected "Company administrators" to "Organization administrators" per the Glossary's Company/Organization split |

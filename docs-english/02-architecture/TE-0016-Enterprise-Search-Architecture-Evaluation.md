@@ -1,12 +1,27 @@
-| Property | Value |
-|----------|-------|
-| **Document ID** | TE-0016 |
-| **Title** | Enterprise Search Architecture Evaluation |
-| **Version** | 4.0.0 |
-| **Status** | Approved |
-| **Owner** | Solution Architect |
-| **Created** | 2026-07-26 |
-| **Last Updated** | 2026-07-28 |
+| Property         | Value              |
+|------------------|--------------------|
+| **Document ID**  | TE-0016            |
+| **Title**        | Enterprise Search Architecture Evaluation |
+| **Version**      | 4.1.0              |
+| **Status**       | Approved           |
+| **Owner**        | Solution Architect |
+| **Created**      | 2026-07-26         |
+| **Last Updated** | 2026-08-08         |
+
+---
+
+> **⚠ Superseded Notice (2026-08-02):** This evaluation's recommendation
+> (PostgreSQL Full-Text Search + OpenSearch + Qdrant as a mandatory
+> standardized search stack) directly conflicted with the independently
+> conducted **TE-0027 — Search Engine Technology Evaluation**, which
+> reached a different conclusion (SQL Server FTS as default, OpenSearch
+> only as an opt-in escalation path). TE-0027's recommendation was
+> formally adopted in **ADR-0021 — Search Strategy** (Accepted).
+>
+> By architectural review decision, **ADR-0021 / TE-0027 is authoritative**
+> for search technology. This document (TE-0016) is retained for
+> historical record only and shall not be used as a basis for
+> implementation. See ADR-0021 for the current, binding decision.
 
 ---
 
@@ -1450,10 +1465,9 @@ The selected technology stack satisfies all architectural requirements.
 
 # Related Documents
 
-- SolutionStructure.md
-- DependencyRules.md
-- CodingStandards.md
-
+- ../05-development/01-SolutionStructure.md
+- ../05-development/04-DependencyRules.md
+- ../05-development/05-CodingStandards.md
 ---
 
 # Revision History
@@ -1463,3 +1477,4 @@ The selected technology stack satisfies all architectural requirements.
 | 1.0.0   | 2026-07-26 | Solution Architect | Initial technology evaluation for Search Architecture |
 | 1.3.0   | 2026-07-28 | Solution Architect | New section added (Evaluation Scope)                  |
 | 4.0.0   | 2026-07-28 | Solution Architect | Upgraded to Documentation Standard v4.0.0             |
+| 4.1.0   | 2026-08-08 | Solution Architect | Review and synchronize with the latest changes        |

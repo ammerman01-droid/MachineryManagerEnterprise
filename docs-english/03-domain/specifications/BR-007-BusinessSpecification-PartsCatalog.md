@@ -1,12 +1,12 @@
-| Property | Value |
-|----------|-------|
-| **Document ID** | BR-005 |
-| **Capability ID** | DD-006 |
-| **Version** | 4.0.0 |
-| **Status** | Approved |
-| **Owner** | Domain Architect |
-| **Created** | 2026-07-20 |
-| **Last Updated** | 2026-07-28 |
+| Property         | Value              |
+|------------------|--------------------|
+| **Document ID**  | BR-007             |
+| **Title**        | Parts Catalog      |
+| **Version**      | 4.1.0              |
+| **Status**       | Approved           |
+| **Owner**        | Solution Architect |
+| **Created**      | 2026-07-20         |
+| **Last Updated** | 2026-08-08         |
 
 ---
 
@@ -614,14 +614,14 @@ This specification relies upon:
 
 ## Domain
 
-- 09-DomainDiscovery.md
-- 12-DomainPatterns.md
+- ../10-DomainDiscovery.md
+- ../12-DomainPatterns.md
 - DG-00-DomainGovernance.md
 
 ## Business Specifications
 
-- BR-006 — Part Cross Reference
-- BR-009 — Maintenance Operations
+- BR-008 — Part Cross Reference
+- BR-011 — Maintenance Operations
 
 ---
 
@@ -641,5 +641,6 @@ This specification relies upon:
 | Version | Date       | Author             | Description                                           |
 |---------|------------|--------------------|-------------------------------------------------------|
 | 1.0.0   | 2026-07-20 | Solution Architect | Initial Parts Catalog Business Specification          |
-| 3.0.0   | 2026-07-18 | Solution Architect | Standardized according to Documentation Standard v3.0 |
+| 3.0.0   | 2026-07-20 | Solution Architect | Standardized according to Documentation Standard v3.0 |
 | 4.0.0   | 2026-07-28 | Solution Architect | Upgraded to Documentation Standard v4.0.0             |
+| 4.1.0   | 2026-08-02 | Solution Architect | Fixed stale pre-renumbering BR references in Related Documents (each was 2 lower than the actual filename) and missing relative paths for 12-DomainPatterns.md / DG-00-DomainGovernance.md |

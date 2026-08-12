@@ -1,12 +1,12 @@
-| Property | Value |
-|----------|-------|
-| **Document ID** | REL-001 |
-| **Title** | Versioning Policy |
-| **Version** | 4.0.0 |
-| **Status** | Active |
-| **Owner** | Release Manager |
-| **Created** | 2026-07-18 |
-| **Last Updated** | 2026-07-28 |
+| Property         | Value              |
+|------------------|--------------------|
+| **Document ID**  | REL-001            |
+| **Title**        | Versioning Policy  |
+| **Version**      | 4.1.0              |
+| **Status**       | Approved           |
+| **Owner**        | Solution Architect |
+| **Created**      | 2026-07-18         |
+| **Last Updated** | 2026-08-08         |
 
 ---
 
@@ -319,9 +319,11 @@ Future versions may introduce:
 # Related Documents
 
 - 00-ReleaseStrategy.md
-- docs/07-api/05-ApiVersioning.md
+- docs/07-api/06-Versioning.md
 - docs/05-development/10-BuildPipeline.md
-- ADR-0008 — Versioning Policy
+
+> **Note:** No dedicated ADR governs versioning policy — this document
+> and the linked documents above are the authoritative source.
 
 ---
 
@@ -332,3 +334,4 @@ Future versions may introduce:
 | 1.0.0   | 2026-07-18 | Solution Architect | Initial Versioning Policy                             |
 | 3.0.0   | 2026-07-18 | Solution Architect | Standardized according to Documentation Standard v3.0 |
 | 4.0.0   | 2026-07-28 | Solution Architect | Upgraded to Documentation Standard v4.0.0             |
+| 4.1.0   | 2026-08-08 | Solution Architect | Removed fabricated "ADR-0008 — Versioning Policy" reference (ADR-0008 is actually "Use Mapster"); corrected broken path reference from 05-ApiVersioning.md to 06-Versioning.md |

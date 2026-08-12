@@ -1,12 +1,12 @@
-# AI Engineering Contract
-
-| Property | Value |
-|----------|-------|
-| Document ID | AI-0001 |
-| Version | 1.0.0 |
-| Status | Approved |
-| Owner | Solution Architect |
-| Scope | Entire Repository |
+| Property         | Value              |
+|------------------|--------------------|
+| **Document ID**  | AI-0001            |
+| **Title**        | AI Engineering Contract |
+| **Version**      | 4.1.0              |
+| **Status**       | Approved           |
+| **Owner**        | Solution Architect |
+| **Created**      | 2026-07-18         |
+| **Last Updated** | 2026-08-08         |
 
 ---
 
@@ -840,7 +840,7 @@ feature/project-bootstrap
 Repository already contains:
 
 ```text
-docs/
+docs-english/
 ```
 
 Git workflow is established.
@@ -890,6 +890,10 @@ The AI has successfully fulfilled this contract when every implementation:
 
 # Revision History
 
-| Version | Description |
-|----------|-------------|
-| 1.0.0 | Initial AI Engineering Contract |
+| Version | Date       | Author             | Description                                           |
+|---------|------------|--------------------|-------------------------------------------------------|
+| 1.0.0   | 2026-07-18 | Solution Architect | Initial AI Engineering Contract                       |
+| 2.0.0   | 2026-07-18 | Solution Architect | Documentation architecture reorganized                |
+| 3.0.0   | 2026-07-18 | Solution Architect | Standardized according to Documentation Standard v3.0 |
+| 4.0.0   | 2026-07-28 | Solution Architect | Upgraded to Documentation Standard v4.0.0             |
+| 4.1.0   | 2026-08-08 | Solution Architect | Review and synchronize with the latest changes        |

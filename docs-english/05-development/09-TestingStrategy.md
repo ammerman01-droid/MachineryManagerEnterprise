@@ -1,12 +1,12 @@
-| Property | Value |
-|----------|-------|
-| **Document ID** | DOC-DEV-010 |
-| **Title** | Testing Strategy |
-| **Version** | 4.0.0 |
-| **Status** | Approved |
-| **Owner** | Solution Architect |
-| **Created** | 2026-07-18 |
-| **Last Updated** | 2026-07-28 |
+| Property         | Value              |
+|------------------|--------------------|
+| **Document ID**  | DOC-DEV-010        |
+| **Title**        | Testing Strategy   |
+| **Version**      | 4.1.0              |
+| **Status**       | Approved           |
+| **Owner**        | Solution Architect |
+| **Created**      | 2026-07-18         |
+| **Last Updated** | 2026-08-08         |
 
 ---
 
@@ -72,7 +72,10 @@ Unit tests should:
 - Test one behavior.
 - Be easy to understand.
 
-Dependencies should be mocked where appropriate.
+Dependencies should be mocked where appropriate, using the approved
+mocking framework (see Mocking section below).
+
+Unit tests are written using **xUnit** (approved by ADR-0024).
 
 ---
 
@@ -86,6 +89,11 @@ Typical examples:
 - Repository behavior
 - API communication
 - Authentication
+
+Integration tests requiring real infrastructure (databases, message
+brokers, external services) shall run against ephemeral containers
+provisioned with **Testcontainers** (approved by ADR-0024), not against
+shared or mocked infrastructure.
 
 ---
 
@@ -180,7 +188,7 @@ Avoid unnecessarily large datasets.
 
 # Mocking
 
-Mock only external dependencies.
+Mock only external dependencies, using **Moq** (approved by ADR-0024).
 
 Do not mock:
 
@@ -224,6 +232,23 @@ Tests should execute as quickly as practical.
 
 Long-running tests should be separated from fast developer feedback tests.
 
+Dedicated performance and load testing is out of scope for the regular
+test suite and is governed separately by ADR-0027 (Enterprise
+Performance Testing Strategy), using **k6** and **NBomber**.
+
+---
+
+# Approved Technology Stack
+
+Formalized by ADR-0024 and ADR-0027:
+
+| Responsibility | Approved Technology |
+|-----------------|---------------------|
+| Unit Test Framework | xUnit |
+| Mocking Framework | Moq |
+| Integration Test Infrastructure | Testcontainers |
+| Load / Performance Testing | k6, NBomber |
+
 ---
 
 # Compliance
@@ -241,6 +266,8 @@ Code without adequate tests should not be merged into the main development branc
 - DOC-DEV-006 (Coding Standards)
 - DOC-DEV-008 (Error Handling)
 - DOC-DEV-009 (Logging Strategy)
+- ADR-0024 — Enterprise Testing Strategy
+- ADR-0027 — Enterprise Performance Testing Strategy
 
 ---
 
@@ -262,3 +289,4 @@ Code without adequate tests should not be merged into the main development branc
 | 1.0.0   | 2026-07-18 | Solution Architect | Initial testing strategy                              |
 | 3.0.0   | 2026-07-18 | Solution Architect | Standardized according to Documentation Standard v3.0 |
 | 4.0.0   | 2026-07-28 | Solution Architect | Upgraded to Documentation Standard v4.0.0             |
+| 4.1.0   | 2026-08-08 | Solution Architect | Synced with approved stack (ADR-0024/ADR-0027): named xUnit, Moq, Testcontainers, k6, NBomber |

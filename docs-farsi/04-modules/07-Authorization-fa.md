@@ -13,7 +13,7 @@
 
 # ۱. هدف
 
-این سند مدل احراز دسترسی و صلاحیت (Authorization Model) سیستم MachineryManagerEnterprise را تعریف می‌کند.
+این سند مدل احراز دسترسی و صلاحیت () سیستم MachineryManagerEnterprise را تعریف می‌کند.
 
 احراز دسترسی مشخص می‌کند **چه کسی مجاز به انجام چه عملیات کسب‌وکاری است**.
 
@@ -189,7 +189,7 @@
 - `04-Handlers-fa.md`
 - `06-Workflows-fa.md`
 - `08-BusinessRules-fa.md`
-- `ADR-0006 — Authorization Model`
+- `ADR-0026-Enterprise Security Strategy`
 
 ---
 

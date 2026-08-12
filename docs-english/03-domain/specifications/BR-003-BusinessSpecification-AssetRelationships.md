@@ -1,11 +1,12 @@
-| Property | Value |
-|----------|-------|
-| **Document ID** | BR-001 |
-| **Version** | 4.0.0 |
-| **Status** | Approved |
-| **Owner** | Domain Architect |
-| **Created** | 2026-07-20 |
-| **Last Updated** | 2026-07-28 |
+| Property         | Value              |
+|------------------|--------------------|
+| **Document ID**  | BR-003             |
+| **Title**        | Asset Relationships |
+| **Version**      | 4.1.0              |
+| **Status**       | Approved           |
+| **Owner**        | Solution Architect |
+| **Created**      | 2026-07-20         |
+| **Last Updated** | 2026-08-08         |
 
 ---
 
@@ -1895,8 +1896,9 @@ Any deviation from this specification shall require formal architectural review 
 
 # Revision History
 
-| Version | Date       | Author             | Description                                            |
-|---------|------------|--------------------|--------------------------------------------------------|
+| Version | Date       | Author             | Description                                           |
+|---------|------------|--------------------|-------------------------------------------------------|
 | 1.0.0   | 2026-07-20 | Solution Architect | Initial business specification for Asset Relationships |
-| 3.0.0   | 2026-07-18 | Solution Architect | Standardized according to Documentation Standard v3.0  |
-| 4.0.0   | 2026-07-28 | Solution Architect | Upgraded to Documentation Standard v4.0.0              |
+| 3.0.0   | 2026-07-20 | Solution Architect | Standardized according to Documentation Standard v3.0 |
+| 4.0.0   | 2026-07-28 | Solution Architect | Upgraded to Documentation Standard v4.0.0             |
+| 4.1.0   | 2026-08-08 | Solution Architect | Review and synchronize with the latest changes        |

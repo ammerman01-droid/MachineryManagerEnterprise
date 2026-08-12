@@ -1,12 +1,12 @@
-| Property | Value |
-|----------|-------|
-| **Document ID** | BR-006 |
-| **Capability ID** | DD-007 |
-| **Version** | 4.0.0 |
-| **Status** | Approved |
-| **Owner** | Domain Architect |
-| **Created** | 2026-07-20 |
-| **Last Updated** | 2026-07-28 |
+| Property         | Value              |
+|------------------|--------------------|
+| **Document ID**  | BR-008             |
+| **Title**        | Part Cross Reference |
+| **Version**      | 4.1.0              |
+| **Status**       | Approved           |
+| **Owner**        | Solution Architect |
+| **Created**      | 2026-07-20         |
+| **Last Updated** | 2026-08-08         |
 
 ---
 
@@ -740,9 +740,9 @@ Historical relationship definitions remain reproducible.
 
 ## Domain Documents
 
-- DG-00 — Domain Governance
-- 09-DomainDiscovery.md
-- 12-DomainPatterns.md
+- ../DG-00-DomainGovernance.md
+- ../10-DomainDiscovery.md
+- ../12-DomainPatterns.md
 
 ---
 
@@ -750,13 +750,13 @@ Historical relationship definitions remain reproducible.
 
 ### Upstream
 
-- BR-005 — Parts Catalog
+- BR-007 — Parts Catalog
 
 ---
 
 ### Downstream
 
-- BR-009 — Maintenance Operations
+- BR-011 — Maintenance Operations
 
 Maintenance Operations consume Cross References when selecting Parts during maintenance execution.
 
@@ -829,5 +829,6 @@ It supplies business knowledge used by operational capabilities.
 | Version | Date       | Author             | Description                                             |
 |---------|------------|--------------------|---------------------------------------------------------|
 | 1.0.0   | 2026-07-20 | Solution Architect | Initial Business Specification for Part Cross Reference |
-| 3.0.0   | 2026-07-18 | Solution Architect | Standardized according to Documentation Standard v3.0   |
+| 3.0.0   | 2026-07-20 | Solution Architect | Standardized according to Documentation Standard v3.0   |
 | 4.0.0   | 2026-07-28 | Solution Architect | Upgraded to Documentation Standard v4.0.0               |
+| 4.1.0   | 2026-08-08 | Solution Architect | Fixed stale pre-renumbering BR references in Related Documents (each was 2 lower than the actual filename) and missing relative paths for 12-DomainPatterns.md / DG-00-DomainGovernance.md |

@@ -1,11 +1,12 @@
-| Property | Value |
-|----------|-------|
-| **Document ID** | DOM-002 |
-| **Version** | 4.0.0 |
-| **Status** | Active |
-| **Owner** | Solution Architect |
-| **Created** | 2026-07-18 |
-| **Last Updated** | 2026-07-28 |
+| Property         | Value              |
+|------------------|--------------------|
+| **Document ID**  | DOM-002            |
+| **Title**        | Core Concepts      |
+| **Version**      | 4.1.0              |
+| **Status**       | Approved           |
+| **Owner**        | Solution Architect |
+| **Created**      | 2026-07-18         |
+| **Last Updated** | 2026-08-08         |
 
 ---
 
@@ -939,17 +940,16 @@ Prediction engines shall consume Operational Usage rather than raw Meter Reading
 
 This document shall be interpreted together with:
 
-- 00-DomainPrinciples.md
-- Glossary.md
-- 09-CapabilityModel.md
+- 01-DomainPrinciples.md
+- 00-Glossary.md
+- ../02-architecture/02-CapabilityModel.md
 - PROJECT_CHARTER.md
 
 Future related documents include:
 
-- 02-BoundedContexts.md
-- 03-DomainModel.md
-- 04-Aggregates.md
-
+- 03-BoundedContexts.md
+- 04-DomainModel.md
+- 05-Aggregates.md
 ---
 
 
@@ -966,9 +966,9 @@ Future related documents include:
 
 # Related Documents
 
-- 00-DomainPrinciples.md
+- 01-DomainPrinciples.md
 - 00-Glossary.md
-- 09-CapabilityModel.md
+- ../02-architecture/02-CapabilityModel.md
 - 01-Architecture.md
 - 00-Vision.md
 
@@ -976,8 +976,9 @@ Future related documents include:
 
 # Revision History
 
-| Version | Date       | Author             | Description                               |
-|---------|------------|--------------------|-------------------------------------------|
-| 1.0.0 | Initial Draft | Initial Core Concepts                                         |
-| 3.0.0 | 2026-07-18 | Standardized according to Documentation Standard v3.0            |
-| 4.0.0   | 2026-07-28 | Solution Architect | Upgraded to Documentation Standard v4.0.0 |
+| Version | Date       | Author             | Description                                           |
+|---------|------------|--------------------|-------------------------------------------------------|
+| 1.0.0   | 2026-07-18 | Solution Architect | Initial Draft | Initial Core Concepts                 |
+| 3.0.0   | 2026-07-18 | Solution Architect | Standardized according to Documentation Standard v3.0 |
+| 4.0.0   | 2026-07-28 | Solution Architect | Upgraded to Documentation Standard v4.0.0             |
+| 4.1.0   | 2026-08-08 | Solution Architect | Review and synchronize with the latest changes        |

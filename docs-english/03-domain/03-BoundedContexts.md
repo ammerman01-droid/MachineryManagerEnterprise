@@ -1,11 +1,12 @@
-| Property | Value |
-|----------|-------|
-| **Document ID** | DOM-003 |
-| **Version** | 4.1.0 |
-| **Status** | Active |
-| **Owner** | Solution Architect |
-| **Created** | 2026-07-18 |
-| **Last Updated** | 2026-08-02 |
+| Property         | Value              |
+|------------------|--------------------|
+| **Document ID**  | DOM-003            |
+| **Title**        | Bounded Contexts   |
+| **Version**      | 4.1.0              |
+| **Status**       | Approved           |
+| **Owner**        | Solution Architect |
+| **Created**      | 2026-07-18         |
+| **Last Updated** | 2026-08-08         |
 
 ---
 
@@ -514,10 +515,10 @@ New contexts shall not violate the ownership boundaries established in this docu
 
 # Related Documents
 
-- 00-DomainPrinciples.md
+- 01-DomainPrinciples.md
 - 00-Glossary.md
-- 01-CoreConcepts.md
-- 09-CapabilityModel.md
+- 02-CoreConcepts.md
+- ../02-architecture/02-CapabilityModel.md
 - 01-Architecture.md
 
 ---
@@ -529,4 +530,4 @@ New contexts shall not violate the ownership boundaries established in this docu
 | 1.0.0   | 2026-07-18 | Solution Architect | Initial | Initial bounded context definition          |
 | 3.0.0   | 2026-07-18 | Solution Architect | Standardized according to Documentation Standard v3.0 |
 | 4.0.0   | 2026-07-28 | Solution Architect | Upgraded to Documentation Standard v4.0.0             |
-| 4.1.0   | 2026-08-02 | Solution Architect | Added Organization Context (Section 4); renumbered subsequent sections; updated Context Map and Context Ownership Rules |
+| 4.1.0   | 2026-08-08 | Solution Architect | Added Organization Context (Section 4); renumbered subsequent sections; updated Context Map and Context Ownership Rules |

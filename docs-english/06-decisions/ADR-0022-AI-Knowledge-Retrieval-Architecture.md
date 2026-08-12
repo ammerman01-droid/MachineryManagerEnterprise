@@ -1,12 +1,12 @@
-| Property | Value |
-|----------|-------|
-| **Document ID** | ADR-0022 |
-| **Title** | AI Knowledge Retrieval Architecture |
-| **Version** | 4.0.0 |
-| **Status** | Accepted |
-| **Owner** | Solution Architect |
-| **Created** | 2026-07-28 |
-| **Last Updated** | 2026-07-28 |
+| Property         | Value              |
+|------------------|--------------------|
+| **Document ID**  | ADR-0022           |
+| **Title**        | AI Knowledge Retrieval Architecture |
+| **Version**      | 4.1.0              |
+| **Status**       | Approved           |
+| **Owner**        | Solution Architect |
+| **Created**      | 2026-07-27         |
+| **Last Updated** | 2026-08-08         |
 
 ---
 
@@ -445,7 +445,7 @@ High latency and unacceptable runtime cost.
 # Related Documents
 
 - ADR-0001 — Clean Architecture
-- ADR-0002 — CQRS Architecture
+- ADR-0011 — CQRS Architecture
 - ADR-000x — SQL Server Persistence Architecture
 - TE-0028 — Vector Database Technology Evaluation
 
@@ -472,3 +472,4 @@ The approved AI Knowledge Retrieval Architecture for MachineryManagerEnterprise 
 | 1.1.0   | 2026-07-28 | Solution Architect | Header reformatted to comply with the official Standard Document Header in DOCUMENT_CONVENTIONS.md |
 | 3.0.0   | 2026-07-18 | Solution Architect | Standardized according to Documentation Standard v3.0 |
 | 4.0.0   | 2026-07-28 | Solution Architect | Upgraded to Documentation Standard v4.0.0             |
+| 4.1.0   | 2026-08-08 | Solution Architect | Review and synchronize with the latest changes        |

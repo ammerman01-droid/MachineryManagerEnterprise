@@ -1,12 +1,12 @@
-| Property | Value |
-|----------|-------|
-| **Document ID** | TE-0010 |
-| **Title** | Desktop and Mobile Framework Evaluation |
-| **Version** | 4.0.0 |
-| **Status** | Approved |
-| **Owner** | Solution Architect |
-| **Created** | 2026-07-26 |
-| **Last Updated** | 2026-07-28 |
+| Property         | Value              |
+|------------------|--------------------|
+| **Document ID**  | TE-0010            |
+| **Title**        | sktop and Mobile Framework Evaluation |
+| **Version**      | 4.1.0              |
+| **Status**       | Approved           |
+| **Owner**        | Solution Architect |
+| **Created**      | 2026-07-26         |
+| **Last Updated** | 2026-08-08         |
 
 ---
 
@@ -30,10 +30,9 @@ This Technology Evaluation builds upon the foundation established in TE-0001 (.N
 This evaluation is based on:
 
 - ADR-0001 — Clean Architecture
-- SolutionStructure.md
-- DependencyRules.md
-- CodingStandards.md
-
+- ../05-development/01-SolutionStructure.md
+- ../05-development/04-DependencyRules.md
+- ../05-development/05-CodingStandards.md
 ---
 
 # Functional Requirements
@@ -632,6 +631,9 @@ Therefore, .NET MAUI is approved as the preferred implementation technology for 
 
 - ADR-0013 — Client Application Architecture
 
+> **Note:** .NET MAUI is the standardized client framework. TE-0034
+> and ADR-0028 (Avalonia UI) are Superseded in favor of this decision.
+
 ---
 
 # Related Proof of Concept
@@ -692,10 +694,9 @@ The selected technology stack satisfies all architectural requirements.
 
 # Related Documents
 
-- SolutionStructure.md
-- DependencyRules.md
-- CodingStandards.md
-
+- ../05-development/01-SolutionStructure.md
+- ../05-development/04-DependencyRules.md
+- ../05-development/05-CodingStandards.md
 ---
 
 # Revision History
@@ -731,9 +732,9 @@ The selected technology stack satisfies all architectural requirements.
 
 # Related Documents
 
-- SolutionStructure.md
-- DependencyRules.md
-- CodingStandards.md
+- ../05-development/01-SolutionStructure.md
+- ../05-development/04-DependencyRules.md
+- ../05-development/05-CodingStandards.md
 
 ---
 
@@ -744,3 +745,4 @@ The selected technology stack satisfies all architectural requirements.
 | 1.0.0   | 2026-07-26 | Solution Architect | Initial evaluation of Desktop and Mobile client frameworks |
 | 1.3.0   | 2026-07-28 | Solution Architect | New section added (Evaluation Scope)                       |
 | 4.0.0   | 2026-07-28 | Solution Architect | Upgraded to Documentation Standard v4.0.0                  |
+| 4.1.0   | 2026-08-08 | Solution Architect | Related Architecture Decision is Changed                   |

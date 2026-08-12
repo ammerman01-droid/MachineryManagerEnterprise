@@ -1,11 +1,12 @@
-| Property | Value |
-|----------|-------|
-| **Document ID** | BR-009 |
-| **Version** | 4.0.0 |
-| **Status** | Approved |
-| **Owner** | Solution Architect |
-| **Created** | 2026-07-20 |
-| **Last Updated** | 2026-07-28 |
+| Property         | Value              |
+|------------------|--------------------|
+| **Document ID**  | BR-011             |
+| **Title**        | Maintenance Operations |
+| **Version**      | 4.1.0              |
+| **Status**       | Approved           |
+| **Owner**        | Solution Architect |
+| **Created**      | 2026-07-20         |
+| **Last Updated** | 2026-08-08         |
 
 ---
 
@@ -1190,13 +1191,13 @@ This separation supports:
 
 # 35. Related Documents
 
-- BR-001 Business Specification — Asset Relationships
-- BR-002 Business Specification — Tracked Components
-- BR-007 Business Specification — Incident Management
-- BR-008 Business Specification — Maintenance Forecast
-- DOM-000 Domain Principles
-- DOM-009 Domain Discovery
-- DG-00 Domain Governance
+- BR-003 Business Specification — Asset Relationships
+- BR-004 Business Specification — Tracked Components
+- BR-009 Business Specification — Incident Management
+- BR-010 Business Specification — Maintenance Forecast
+- DOM-001 Domain Principles
+- DOM-010 Domain Discovery
+- ../DG-00-DomainGovernance.md
 
 ---
 
@@ -1216,5 +1217,6 @@ This separation supports:
 | Version | Date       | Author             | Description                                               |
 |---------|------------|--------------------|-----------------------------------------------------------|
 | 1.0.0   | 2026-07-20 | Solution Architect | Initial Business Specification for Maintenance Operations |
-| 3.0.0   | 2026-07-18 | Solution Architect | Standardized according to Documentation Standard v3.0     |
+| 3.0.0   | 2026-07-20 | Solution Architect | Standardized according to Documentation Standard v3.0     |
 | 4.0.0   | 2026-07-28 | Solution Architect | Upgraded to Documentation Standard v4.0.0                 |
+| 4.1.0   | 2026-08-08 | Solution Architect | Fixed stale references in Section 35 Related Documents (BR-001/002/007/008 -> BR-003/004/009/010; DOM-000/009 -> DOM-001/010; DG-00 -> full relative path), missed by earlier reference-cleanup passes |

@@ -1,12 +1,12 @@
-| Property | Value |
-|----------|-------|
-| **Document ID** | API-007 |
-| **Title** | Authentication and Authorization |
-| **Version** | 4.0.0 |
-| **Status** | Active |
-| **Owner** | Solution Architect |
-| **Created** | 2026-07-18 |
-| **Last Updated** | 2026-07-28 |
+| Property         | Value              |
+|------------------|--------------------|
+| **Document ID**  | API-007            |
+| **Title**        | Authentication and Authorization |
+| **Version**      | 4.2.0              |
+| **Status**       | Approved           |
+| **Owner**        | Solution Architect |
+| **Created**      | 2026-07-18         |
+| **Last Updated** | 2026-08-08         |
 
 ---
 
@@ -193,8 +193,6 @@ OrganizationId
 Roles
 
 Permissions
-
-TenantId
 ```
 
 Business logic shall depend only on the Application User Context, never on raw JWT claims.
@@ -203,11 +201,18 @@ Business logic shall depend only on the Application User Context, never on raw J
 
 # 9. Multi-Tenant Context
 
-When multi-tenancy is enabled:
+The platform is multi-tenant: multiple Organizations (customer
+companies) use the platform concurrently from a single web deployment
+at one address (see `00-Glossary.md`, GL-ORG-001). This is not an
+optional or conditionally enabled feature.
 
-Every authenticated request shall execute within exactly one tenant context.
+Every authenticated request shall execute within exactly one
+Organization (tenant) context, resolved from `OrganizationId`.
 
 Cross-tenant access is prohibited unless explicitly authorized.
+
+> **Note:** Multi-tenancy is confirmed platform architecture, not an
+> optional feature. `OrganizationId` is the tenant identifier.
 
 ---
 
@@ -325,9 +330,10 @@ These additions shall remain compatible with the existing authorization model.
 
 - 00-ApiPrinciples.md
 - 04-ErrorResponses.md
-- 05-Versioning.md
+- 06-Versioning.md
 - docs/04-modules/07-Authorization.md
-- ADR-0006 — Authorization Model
+- ADR-0030 — Identity and Access Management Architecture
+- ADR-0026 — Enterprise Security Strategy (Data Protection & Encryption)
 
 ---
 
@@ -338,3 +344,5 @@ These additions shall remain compatible with the existing authorization model.
 | 1.0.0   | 2026-07-18 | Solution Architect | Initial Authentication strategy                       |
 | 3.0.0   | 2026-07-18 | Solution Architect | Standardized according to Documentation Standard v3.0 |
 | 4.0.0   | 2026-07-28 | Solution Architect | Upgraded to Documentation Standard v4.0.0             |
+| 4.1.0   | 2026-08-02 | Solution Architect | Corrected reference from ADR-0026 (Data Protection & Encryption, unrelated) to ADR-0030 (Identity and Access Management Architecture) as the primary governing ADR |
+| 4.2.0   | 2026-08-02 | Solution Architect | Clarified multi-tenancy as confirmed, mandatory platform architecture (was described as conditional); removed redundant TenantId claim, since OrganizationId is the tenant identifier |

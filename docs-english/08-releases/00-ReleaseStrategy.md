@@ -1,12 +1,12 @@
-| Property | Value |
-|----------|-------|
-| **Document ID** | REL-000 |
-| **Title** | Release Strategy |
-| **Version** | 4.0.0 |
-| **Status** | Active |
-| **Owner** | Release Manager |
-| **Created** | 2026-07-18 |
-| **Last Updated** | 2026-07-28 |
+| Property         | Value              |
+|------------------|--------------------|
+| **Document ID**  | REL-000            |
+| **Title**        | Release Strategy   |
+| **Version**      | 4.1.0              |
+| **Status**       | Approved           |
+| **Owner**        | Solution Architect |
+| **Created**      | 2026-07-18         |
+| **Last Updated** | 2026-08-08         |
 
 ---
 
@@ -296,10 +296,10 @@ Future versions may introduce:
 
 # Related Documents
 
-- docs/07-api/05-ApiVersioning.md
+- docs/07-api/06-Versioning.md
 - docs/05-development/10-BuildPipeline.md
 - docs/02-architecture/01-Architecture.md
-- docs/06-adr/
+- docs/06-decisions/
 
 ---
 
@@ -307,6 +307,7 @@ Future versions may introduce:
 
 | Version | Date       | Author             | Description                                           |
 |---------|------------|--------------------|-------------------------------------------------------|
-| 1.0.0 | Initial | Initial Release Strategy |
+| 1.0.0   | 2026-07-18 | Solution Architect | Initial | Initial Release Strategy                    |
 | 3.0.0   | 2026-07-18 | Solution Architect | Standardized according to Documentation Standard v3.0 |
 | 4.0.0   | 2026-07-28 | Solution Architect | Upgraded to Documentation Standard v4.0.0             |
+| 4.1.0   | 2026-08-08 | Solution Architect | Fixed broken folder reference from non-existent docs/06-adr/ to the real docs/06-decisions/ |

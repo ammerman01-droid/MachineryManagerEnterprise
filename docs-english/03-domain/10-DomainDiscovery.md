@@ -1,11 +1,12 @@
-| Property | Value |
-|----------|-------|
-| **Document ID** | DOM-009 |
-| **Version** | 4.0.0 |
-| **Status** | Active |
-| **Owner** | Solution Architect |
-| **Created** | 2026-07-20 |
-| **Last Updated** | 2026-07-28 |
+| Property         | Value              |
+|------------------|--------------------|
+| **Document ID**  | DOM-010            |
+| **Title**        | Domain Discovery   |
+| **Version**      | 4.1.0              |
+| **Status**       | Approved           |
+| **Owner**        | Solution Architect |
+| **Created**      | 2026-07-18         |
+| **Last Updated** | 2026-08-08         |
 
 ---
 
@@ -709,8 +710,8 @@ Business capabilities shall be specified in the following order.
 |--------|--------------|
 | Phase 1 | Asset Management |
 | Phase 2 | Asset Relationships |
-| Phase 3 | Tire Management |
-| Phase 4 | Battery Management |
+| Phase 3 | Tire Lifecycle Management |
+| Phase 4 | Battery Lifecycle Management |
 | Phase 5 | Parts Catalog |
 | Phase 6 | Part Cross Reference |
 | Phase 7 | Incident Management |
@@ -731,16 +732,18 @@ The following Business Specification documents shall be produced in order.
 
 | Order | Specification |
 |--------|---------------|
-| 1 | BusinessSpecification-AssetRelationships.md |
-| 2 | BusinessSpecification-TireManagement.md |
-| 3 | BusinessSpecification-BatteryManagement.md |
-| 4 | BusinessSpecification-PartsCatalog.md |
-| 5 | BusinessSpecification-PartCrossReference.md |
-| 6 | BusinessSpecification-IncidentManagement.md |
-| 7 | BusinessSpecification-MaintenanceForecast.md |
-| 8 | BusinessSpecification-Notifications.md |
-| 9 | BusinessSpecification-Messaging.md |
-| 10 | BusinessSpecification-AIAssistant.md |
+| 1 | BR-003-BusinessSpecification-AssetRelationships.md |
+| 2 | BR-005-BusinessSpecification-TireLifecycle.md |
+| 3 | BR-006-BusinessSpecification-BatteryLifecycle.md |
+| 4 | BR-007-BusinessSpecification-PartsCatalog.md |
+| 5 | BR-008-BusinessSpecification-PartCrossReference.md |
+| 6 | BR-009-BusinessSpecification-IncidentManagement.md |
+| 7 | BR-010-BusinessSpecification-MaintenanceForecast.md |
+| 8 | BR-012-BusinessSpecification-NotificationCenter.md |
+| 9 | BR-013-BusinessSpecification-InternalMessaging.md |
+| 10 | BR-014-BusinessSpecification-AIAssistant.md |
+
+
 
 Each specification shall be completed and approved before its implementation begins.
 
@@ -891,11 +894,11 @@ These areas are intentionally postponed until business priorities require them.
 
 # 8. Related Documents
 
-- 00-DomainPrinciples.md
-- 01-CoreConcepts.md
-- 02-BoundedContexts.md
-- 03-DomainModel.md
-- 09-CapabilityModel.md
+- 01-DomainPrinciples.md
+- 02-CoreConcepts.md
+- 03-BoundedContexts.md
+- 04-DomainModel.md
+- ../02-architecture/02-CapabilityModel.md
 
 ---
 
@@ -917,3 +920,4 @@ These areas are intentionally postponed until business priorities require them.
 | 1.2.0   | 2026-07-20 | Solution Architect | Added Maintenance Operations as a core discovered business capability and renumbered subsequent capabilities. |
 | 3.0.0   | 2026-07-18 | Solution Architect | Standardized according to Documentation Standard v3.0 |
 | 4.0.0   | 2026-07-28 | Solution Architect | Upgraded to Documentation Standard v4.0.0             |
+| 4.1.0   | 2026-08-08 | Solution Architect | Fixed Document ID: was DOM-009 (collided with corrected 09-StateMachines.md), corrected to DOM-010, filling a gap that had left DOM-010 unused |

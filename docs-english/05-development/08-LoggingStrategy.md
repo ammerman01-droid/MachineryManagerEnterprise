@@ -1,12 +1,12 @@
-| Property | Value |
-|----------|-------|
-| **Document ID** | DOC-DEV-009 |
-| **Title** | Logging Strategy |
-| **Version** | 4.0.0 |
-| **Status** | Approved |
-| **Owner** | Solution Architect |
-| **Created** | 2026-07-18 |
-| **Last Updated** | 2026-07-28 |
+| Property         | Value              |
+|------------------|--------------------|
+| **Document ID**  | DOC-DEV-009        |
+| **Title**        | Logging Strategy   |
+| **Version**      | 4.1.0              |
+| **Status**       | Approved           |
+| **Owner**        | Solution Architect |
+| **Created**      | 2026-07-18         |
+| **Last Updated** | 2026-08-08         |
 
 ---
 
@@ -237,18 +237,39 @@ Suggested defaults
 
 # Log Destinations
 
-The logging infrastructure should support multiple targets.
+The logging infrastructure shall support multiple targets through the
+approved observability stack (ADR-0033):
 
-Examples
+- Console (development)
+- File (local fallback)
+- Grafana Tempo (distributed traces, via OpenTelemetry)
+- Prometheus (metrics)
+- Grafana (dashboards / visualization)
 
-- Console
-- File
-- Seq
-- OpenTelemetry
-- Elasticsearch
-- Azure Monitor
+The logging abstraction shall remain independent from any specific
+provider. Elasticsearch, Seq, and Azure Monitor are not approved
+platform standards and shall not be introduced without a new
+Technology Evaluation and ADR.
 
-The logging abstraction shall remain independent from any specific provider.
+---
+
+# Approved Technology Stack
+
+Formalized by ADR-0009 and ADR-0033:
+
+| Responsibility | Approved Technology |
+|-----------------|---------------------|
+| Logging Abstraction | Microsoft.Extensions.Logging |
+| Structured Logging Provider | Serilog |
+| Telemetry Standard | OpenTelemetry |
+| Metrics Backend | Prometheus |
+| Dashboards | Grafana |
+| Distributed Trace Backend | Grafana Tempo |
+
+Business modules shall never depend directly on Serilog, OpenTelemetry
+SDKs, Prometheus, or Grafana Tempo; these shall remain isolated within
+the Infrastructure layer, consumed only through
+`Microsoft.Extensions.Logging` abstractions.
 
 ---
 
@@ -279,6 +300,9 @@ Architectural deviations require an approved ADR.
 - DOC-DEV-008 (Error Handling)
 - DOC-DEV-010 (Testing Strategy)
 - ADR-0002
+- ADR-0009 — Use Serilog
+- ADR-0010 — Use OpenTelemetry
+- ADR-0033 — Enterprise Observability Architecture
 
 ---
 
@@ -300,3 +324,4 @@ Architectural deviations require an approved ADR.
 | 1.0.0   | 2026-07-18 | Solution Architect | Initial logging strategy                              |
 | 3.0.0   | 2026-07-18 | Solution Architect | Standardized according to Documentation Standard v3.0 |
 | 4.0.0   | 2026-07-28 | Solution Architect | Upgraded to Documentation Standard v4.0.0             |
+| 4.1.0   | 2026-08-08 | Solution Architect | Synced with approved stack (ADR-0009/ADR-0033); removed unapproved Elasticsearch/Seq/Azure Monitor examples |

@@ -1,12 +1,12 @@
-| Property | Value |
-|----------|-------|
-| **Document ID** | DOC-CONVENTIONS |
-| **Title** | Documentation Standard |
-| **Version** | 4.0.0 |
-| **Status** | Approved |
-| **Owner** | Solution Architect |
-| **Created** | 2026-07-18 |
-| **Last Updated** | 2026-07-28 |
+| Property         | Value              |
+|------------------|--------------------|
+| **Document ID**  | DOC-CONVENTIONS    |
+| **Title**        | Documentation Standard |
+| **Version**      | 4.1.0              |
+| **Status**       | Approved           |
+| **Owner**        | Solution Architect |
+| **Created**      | 2026-07-18         |
+| **Last Updated** | 2026-08-08         |
 
 ---
 
@@ -95,9 +95,9 @@ PREFIX-NUMBER-ShortName.md
 Examples
 
 ```
-ADR-0008-Use-MudBlazor.md
+ADR-0005-Use-MudBlazor.md
 
-TE-0005-PersianDatePickerSelection.md
+TE-0036-External-Integration-and-Connector-Technology-Evaluation.md
 
 POC-0001-JalaliMudDatePicker.md
 ```
@@ -335,3 +335,4 @@ Undocumented architectural decisions are not considered part of the official pro
 | 2.0.0   | 2026-07-18 | Solution Architect | Added documentation lifecycle                         |
 | 3.0.0   | 2026-07-18 | Solution Architect | Standardized according to Documentation Standard v3.0 |
 | 4.0.0   | 2026-07-28 | Solution Architect | Upgraded to Documentation Standard v4.0.0             |
+| 4.1.0   | 2026-08-08 | Solution Architect | Fixed naming-convention example that collided with the real TE-0005 (FluentValidation) |

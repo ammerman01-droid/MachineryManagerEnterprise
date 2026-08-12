@@ -1,12 +1,12 @@
-| Property | Value |
-|----------|-------|
-| **Document ID** | ADR-0020 |
-| **Title** | File Storage Strategy |
-| **Version** | 4.0.0 |
-| **Status** | Accepted |
-| **Owner** | Solution Architect |
-| **Created** | 2026-07-27 |
-| **Last Updated** | 2026-07-28 |
+| Property         | Value              |
+|------------------|--------------------|
+| **Document ID**  | ADR-0020           |
+| **Title**        | File Storage Strategy |
+| **Version**      | 4.1.0              |
+| **Status**       | Approved           |
+| **Owner**        | Solution Architect |
+| **Created**      | 2026-07-27         |
+| **Last Updated** | 2026-08-08         |
 
 ---
 
@@ -263,9 +263,9 @@ https://docs.aws.amazon.com/AmazonS3/latest/API/Welcome.html
 
 #  Revision History
 
-| Version | Date       | Author             | Description                                                                    |
-|---------|------------|--------------------|--------------------------------------------------------------------------------|
+| Version | Date       | Author             | Description                                           |
+|---------|------------|--------------------|-------------------------------------------------------|
 | 1.0.0   | 2026-07-27 | Solution Architect | Initial decision, formalizing the File Storage Strategy recommended by TE-0026 |
-| 1.1.0   | 2026-07-28 | Solution Architect | Migration Strategy added                                                       |
-| 3.0.0   | 2026-07-18 | Solution Architect | Standardized according to Documentation Standard v3.0                          |
-| 4.0.0   | 2026-07-28 | Solution Architect | Upgraded to Documentation Standard v4.0.0                                      |
+| 1.1.0   | 2026-07-28 | Solution Architect | Migration Strategy added                              |
+| 3.0.0   | 2026-07-28 | Solution Architect | Standardized according to Documentation Standard v3.0 |
+| 4.0.0   | 2026-07-28 | Solution Architect | Upgraded to Documentation Standard v4.0.0             |

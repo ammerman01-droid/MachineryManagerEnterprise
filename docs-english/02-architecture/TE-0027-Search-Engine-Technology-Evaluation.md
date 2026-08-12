@@ -1,12 +1,12 @@
-| Property | Value |
-|----------|-------|
-| **Document ID** | TE-0027 |
-| **Title** | Search Engine Technology Evaluation |
-| **Version** | 4.0.0 |
-| **Status** | Approved |
-| **Owner** | Solution Architect |
-| **Created** | 2026-07-27 |
-| **Last Updated** | 2026-07-28 |
+| Property         | Value              |
+|------------------|--------------------|
+| **Document ID**  | TE-0027            |
+| **Title**        | Solution Architect |
+| **Version**      | 4.1.0              |
+| **Status**       | Approved           |
+| **Owner**        | Solution Architect |
+| **Created**      | 2026-07-27         |
+| **Last Updated** | 2026-08-08         |
 
 # Purpose
 
@@ -68,8 +68,7 @@ This evaluation is based on:
 - ADR-0006 — Use Entity Framework Core
 - ADR-0019 — Hybrid Persistence Strategy for Read-Heavy Queries
 - 02-CapabilityModel.md
-- DependencyRules.md
-
+- ../05-development/04-DependencyRules.md
 ---
 
 # Scope
@@ -1368,11 +1367,12 @@ https://learn.microsoft.com/azure/search/
 
 # Revision History
 
-| Version | Date       | Author             | Description                                                             |
-|---------|------------|--------------------|-------------------------------------------------------------------------|
+| Version | Date       | Author             | Description                                           |
+|---------|------------|--------------------|-------------------------------------------------------|
 | 1.0.0   | 2026-07-27 | Solution Architect | Initial evaluation; recommends SQL Server Full-Text Search as default with OpenSearch as escalation path; adds SQL Server FTS and Azure AI Search candidates beyond the original list; defines Hybrid Search as the future direction pending TE-0028 |
 | 1.1.0   | 2026-07-27 | Solution Architect | Updated to reference ADR-0021, created to formalize the Search Strategy |
-| 1.2.0   | 2026-07-28 | New section added (Future AI Compatibility)                                                  |
-| 1.3.0   | 2026-07-28 | New section added (Evaluation Scope)                                                         |
+| 1.2.0   | 2026-07-28 | New section added (Future AI Compatibility)                                |
+| 1.3.0   | 2026-07-28 | New section added (Evaluation Scope)                                       |
 | 1.4.0   | 2026-07-28 | Solution Architect | Closed the pgvector dependency on TE-0028: TE-0028 selected Qdrant, not pgvector, so PostgreSQL Full-Text Search remains rejected and no re-evaluation is required |
-| 4.0.0   | 2026-07-28 | Solution Architect | Upgraded to Documentation Standard v4.0.0                               |
+| 4.0.0   | 2026-07-28 | Solution Architect | Upgraded to Documentation Standard v4.0.0             |
+| 4.1.0   | 2026-08-08 | Solution Architect | Review and synchronize with the latest changes        |

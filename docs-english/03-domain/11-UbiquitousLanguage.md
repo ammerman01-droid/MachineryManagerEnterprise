@@ -1,12 +1,12 @@
-| Property | Value |
-|----------|-------|
-| **Document ID** | DOM-011 |
-| **Title** | Ubiquitous Language |
-| **Version** | 4.0.0 |
-| **Status** | Active |
-| **Owner** | Solution Architect |
-| **Created** | 2026-07-18 |
-| **Last Updated** | 2026-07-28 |
+| Property         | Value              |
+|------------------|--------------------|
+| **Document ID**  | DOM-011            |
+| **Title**        | Ubiquitous Language |
+| **Version**      | 4.1.0              |
+| **Status**       | Approved           |
+| **Owner**        | Solution Architect |
+| **Created**      | 2026-07-18         |
+| **Last Updated** | 2026-08-08         |
 
 ---
 
@@ -96,7 +96,7 @@ The following terms are strictly **BANNED** in source code, documentation, and d
 | `Equipment` / `Machine` | `Asset` | Violates Ubiquitous Language standardizing on `Asset`. |
 | `FixTicket` / `Task` | `WorkOrder` | Vague terminology; `WorkOrder` is the domain standard. |
 | `Item` / `Stuff` | `Part` / `Asset` | Non-descriptive and generic. |
-| `UserCompany` | `Company` / `Tenant` | Confuses Identity with Organization hierarchy. |
+| `UserCompany` | `Organization` | Confuses Identity with Organization hierarchy; `Company` is a distinct concept (equipment manufacturer brand), not the tenant. |
 | `DeviceData` | `MeterReading` / `Telemetry` | Technical jargon; lacks business meaning. |
 
 ---
@@ -135,3 +135,4 @@ The following terms are strictly **BANNED** in source code, documentation, and d
 | 1.0.0   | 2026-07-18 | Solution Architect | Initial Ubiquitous Language Specification             |
 | 3.0.0   | 2026-07-18 | Solution Architect | Standardized according to Documentation Standard v3.0 |
 | 4.0.0   | 2026-07-28 | Solution Architect | Upgraded to Documentation Standard v4.0.0             |
+| 4.1.0   | 2026-08-08 | Solution Architect | Corrected UserCompany forbidden-term mapping to Organization, consistent with the Glossary's Company/Organization split |

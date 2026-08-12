@@ -275,7 +275,7 @@
 - `05-ApplicationServices-fa.md`
 - `05-DomainServices-fa.md`
 - `06-DomainEvents-fa.md`
-- `ADR-0004 — Adopt CQRS`
+- `ADR-0011 — Adopt CQRS`
 
 ---
 

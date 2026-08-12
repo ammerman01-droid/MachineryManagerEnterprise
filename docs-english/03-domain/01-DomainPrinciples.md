@@ -1,12 +1,12 @@
-| Property | Value |
-|----------|-------|
-| **Document ID** | DOM-000 |
-| **Title** | Domain Principles |
-| **Version** | 4.0.0 |
-| **Status** | Active |
-| **Owner** | Solution Architect |
-| **Created** | 2026-07-18 |
-| **Last Updated** | 2026-07-28 |
+| Property         | Value              |
+|------------------|--------------------|
+| **Document ID**  | DOM-001            |
+| **Title**        | Domain Principles  |
+| **Version**      | 4.1.0              |
+| **Status**       | Approved           |
+| **Owner**        | Solution Architect |
+| **Created**      | 2026-07-18         |
+| **Last Updated** | 2026-08-08         |
 
 ---
 
@@ -202,7 +202,7 @@ Before accepting any design decision verify:
 
 - 00-Vision.md
 - 01-Architecture.md
-- 09-CapabilityModel.md
+- ../02-architecture/02-CapabilityModel.md
 - ADR-0001 — Adopt Clean Architecture
 
 ---
@@ -214,3 +214,4 @@ Before accepting any design decision verify:
 | 1.0.0   | 2026-07-18 | Solution Architect | Initial constitutional principles                     |
 | 3.0.0   | 2026-07-18 | Solution Architect | Standardized according to Documentation Standard v3.0 |
 | 4.0.0   | 2026-07-28 | Solution Architect | Upgraded to Documentation Standard v4.0.0             |
+| 4.1.0   | 2026-08-08 | Solution Architect | Fixed Document ID collision: was DOM-000 (duplicate of 00-Glossary.md), corrected to DOM-001 |

@@ -1,11 +1,13 @@
-# MachineryManagerEnterprise
+| Property         | Value              |
+|------------------|--------------------|
+| **Document ID**  | MME-README-001     |
+| **Title**        | Enterprise Asset Lifecycle Management Platform for Heavy Equipment & Machinery |
+| **Version**      | 4.1.0              |
+| **Status**       | Approved           |
+| **Owner**        | Solution Architect |
+| **Created**      | 2026-07-18         |
+| **Last Updated** | 2026-08-08         |
 
-> Enterprise Asset Lifecycle Management Platform for Heavy Equipment & Machinery
-
-Version: 1.0.0  
-Status: Approved  
-Document ID: MME-README-001  
-Last Updated: 2026-07-17
 
 ---
 
@@ -14,7 +16,7 @@ Last Updated: 2026-07-17
 Any AI assistant participating in this repository must first read:
 
 1. AI_ENGINEERING_CONTRACT.md
-2. docs/README.md
+2. docs-english/README.md
 
 before generating any implementation.
 
@@ -235,7 +237,7 @@ Financial capabilities include:
 
 # Documentation
 
-Project documentation is located inside the **docs/** directory.
+Project documentation is located inside the **docs-english/** directory.
 
 Major documents include:
 
@@ -252,13 +254,42 @@ Major documents include:
 
 # Technology Stack
 
-Backend
+Web Backend & UI
 
 - .NET 10
 - ASP.NET Core
-- Blazor Server
-- Entity Framework Core
-- SQL Server
+- Blazor (Server / WebAssembly)
+- MudBlazor
+
+Desktop & Mobile Client
+
+- .NET MAUI (see `docs-english/06-decisions/ADR-0013-Client Application Architecture.md`)
+
+Data & Caching
+
+- Entity Framework Core (SQL Server)
+- SQLite / LiteDB (embedded workspace databases)
+- FusionCache (IMemoryCache + Redis)
+
+Messaging & Background Processing
+
+- MassTransit / RabbitMQ
+- Quartz.NET
+
+AI & Search
+
+- Semantic Kernel (Azure OpenAI / OpenAI / Ollama)
+- Qdrant (vector search)
+- SQL Server Full-Text Search (default) / OpenSearch (escalation)
+
+Identity & Security
+
+- ASP.NET Core Identity / OpenIddict
+- HashiCorp Vault
+
+Observability
+
+- Serilog, OpenTelemetry, Prometheus, Grafana
 
 Architecture
 
@@ -272,18 +303,20 @@ Development
 - Git
 - GitHub
 
+See `docs-english/02-architecture/01-Architecture.md` and
+`docs-english/05-development/11-DependencyCatalog.md` for the complete,
+authoritative technology stack and every underlying ADR.
+
 ---
 
 # User Interface
 
-The application is designed as a responsive web application.
+The platform provides two client experiences:
 
-Supported devices include:
-
-- Desktop
-- Laptop
-- Tablet
-- Mobile Phone
+- A responsive Blazor web application (Desktop, Laptop, Tablet, Mobile
+  Browser).
+- A native .NET MAUI application for Desktop and Mobile, per
+  ADR-0013 / TE-0010.
 
 The UI supports multiple visual themes allowing users to switch color schemes without affecting functionality.
 
@@ -312,7 +345,7 @@ src/
 
     BuildingBlocks/
 
-docs/
+docs-english/
 
 tests/
 
@@ -345,3 +378,15 @@ All Rights Reserved.
 # Acknowledgments
 
 This project is being developed with a long-term enterprise vision emphasizing maintainability, scalability, traceability and operational excellence.
+
+---
+
+#  Revision History
+
+| Version | Date       | Author             | Description                                           |
+|---------|------------|--------------------|-------------------------------------------------------|
+| 1.0.0   | 2026-07-18 | Solution Architect | Initial documentation structure                       |
+| 2.0.0   | 2026-07-18 | Solution Architect | Documentation architecture reorganized                |
+| 3.0.0   | 2026-07-18 | Solution Architect | Standardized according to Documentation Standard v3.0 |
+| 4.0.0   | 2026-07-28 | Solution Architect | Upgraded to Documentation Standard v4.0.0             |
+| 4.1.0   | 2026-08-08 | Solution Architect | Review and synchronize with the latest changes        |

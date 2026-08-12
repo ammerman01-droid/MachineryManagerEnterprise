@@ -1,12 +1,12 @@
-| Property | Value |
-|----------|-------|
-| **Document ID** | APP-004 |
-| **Title** | Handlers Architecture |
-| **Version** | 4.0.0 |
-| **Status** | Active |
-| **Owner** | Solution Architect |
-| **Created** | 2026-07-18 |
-| **Last Updated** | 2026-07-28 |
+| Property         | Value              |
+|------------------|--------------------|
+| **Document ID**  | MOD-004            |
+| **Title**        | Handlers Architecture |
+| **Version**      | 4.7.0              |
+| **Status**       | Approved           |
+| **Owner**        | Solution Architect |
+| **Created**      | 2026-07-18         |
+| **Last Updated** | 2026-08-08         |
 
 ---
 
@@ -229,14 +229,22 @@ Return Result
 
 | Command | Handler |
 |----------|---------|
+| RequestMaintenance | RequestMaintenanceHandler |
 | CreateMaintenancePlan | CreateMaintenancePlanHandler |
+| ApproveMaintenancePlan | ApproveMaintenancePlanHandler |
 | ScheduleMaintenance | ScheduleMaintenanceHandler |
 | StartMaintenance | StartMaintenanceHandler |
 | CompleteMaintenance | CompleteMaintenanceHandler |
+| VerifyMaintenance | VerifyMaintenanceHandler |
+| CloseMaintenance | CloseMaintenanceHandler |
+| CancelMaintenance | CancelMaintenanceHandler |
+| SuspendMaintenance | SuspendMaintenanceHandler |
+| ResumeMaintenance | ResumeMaintenanceHandler |
 | RegisterFailure | RegisterFailureHandler |
 | RegisterRepair | RegisterRepairHandler |
 | RegisterInspection | RegisterInspectionHandler |
 | RegisterOverhaul | RegisterOverhaulHandler |
+| ReplaceMaintenanceComponent | ReplaceMaintenanceComponentHandler |
 
 ---
 
@@ -274,9 +282,90 @@ Return Result
 | Command | Handler |
 |----------|---------|
 | GenerateFuelForecast | GenerateFuelForecastHandler |
+| GenerateLubricantForecast | GenerateLubricantForecastHandler |
+| GenerateCoolantForecast | GenerateCoolantForecastHandler |
 | GenerateMaintenanceForecast | GenerateMaintenanceForecastHandler |
+| GenerateSparePartsForecast | GenerateSparePartsForecastHandler |
 | GenerateReplacementForecast | GenerateReplacementForecastHandler |
 | RefreshForecastModels | RefreshForecastModelsHandler |
+| ValidateForecast | ValidateForecastHandler |
+| ApproveForecast | ApproveForecastHandler |
+| ScheduleForecast | ScheduleForecastHandler |
+| ConsumeForecast | ConsumeForecastHandler |
+| CompleteForecast | CompleteForecastHandler |
+| CancelForecast | CancelForecastHandler |
+
+---
+
+# 15a. Organization Command Handlers
+
+| Command | Handler |
+|----------|---------|
+| RegisterOrganization | RegisterOrganizationHandler |
+| AssociateUserWithOrganization | AssociateUserWithOrganizationHandler |
+
+---
+
+# 15b. Notification Command Handlers
+
+| Command | Handler |
+|----------|---------|
+| AcknowledgeNotification | AcknowledgeNotificationHandler |
+| ArchiveNotification | ArchiveNotificationHandler |
+| CancelNotification | CancelNotificationHandler |
+| UpdateNotificationPreferences | UpdateNotificationPreferencesHandler |
+
+---
+
+# 15c. Internal Messaging Command Handlers
+
+| Command | Handler |
+|----------|---------|
+| StartConversation | StartConversationHandler |
+| AddConversationParticipant | AddConversationParticipantHandler |
+| SendMessage | SendMessageHandler |
+| AttachFileToMessage | AttachFileToMessageHandler |
+| MarkMessageAsRead | MarkMessageAsReadHandler |
+| ArchiveMessage | ArchiveMessageHandler |
+| DeleteMessage | DeleteMessageHandler |
+| CloseConversation | CloseConversationHandler |
+| ReopenConversation | ReopenConversationHandler |
+
+---
+
+# 15d. AI Assistant Command Handlers
+
+| Command | Handler |
+|----------|---------|
+| AskBusinessQuestion | AskBusinessQuestionHandler |
+| RequestRecommendation | RequestRecommendationHandler |
+| RequestHistoricalSummary | RequestHistoricalSummaryHandler |
+| RequestKnowledgeDiscovery | RequestKnowledgeDiscoveryHandler |
+| RequestRiskAssessment | RequestRiskAssessmentHandler |
+
+---
+
+# 15e. Relationship Management Command Handlers
+
+| Command | Handler |
+|----------|---------|
+| CreateRelationship | CreateRelationshipHandler |
+| ActivateRelationship | ActivateRelationshipHandler |
+| ModifyRelationship | ModifyRelationshipHandler |
+| ExpireRelationship | ExpireRelationshipHandler |
+
+---
+
+# 15f. Distributed Workspace Synchronization Command Handlers
+
+| Command | Handler |
+|----------|---------|
+| CreateSynchronizationPackage | CreateSynchronizationPackageHandler |
+| TransferSynchronizationPackage | TransferSynchronizationPackageHandler |
+| ValidateSynchronizationPackage | ValidateSynchronizationPackageHandler |
+| ApplySynchronizationPackage | ApplySynchronizationPackageHandler |
+| RequestWorkingSet | RequestWorkingSetHandler |
+| ResolveSynchronizationConflict | ResolveSynchronizationConflictHandler |
 
 ---
 
@@ -415,10 +504,10 @@ All future handlers shall follow the principles defined in this document.
 
 - 02-Commands.md
 - 03-Queries.md
-- 05-PipelineBehaviors.md
-- docs/03-domain/05-DomainServices.md
-- docs/03-domain/06-DomainEvents.md
-- ADR-0004 — Adopt CQRS
+- ../06-decisions/ADR-0036-Validation-Pipeline-Architecture.md
+- docs/03-domain/06-DomainServices.md
+- docs/03-domain/07-DomainEvents.md
+- ADR-0011 — Adopt CQRS
 
 ---
 
@@ -429,3 +518,10 @@ All future handlers shall follow the principles defined in this document.
 | 1.0.0   | 2026-07-18 | Solution Architect | Initial Handler Architecture                          |
 | 3.0.0   | 2026-07-18 | Solution Architect | Standardized according to Documentation Standard v3.0 |
 | 4.0.0   | 2026-07-28 | Solution Architect | Upgraded to Documentation Standard v4.0.0             |
+| 4.1.0   | 2026-08-02 | Solution Architect | Completed Maintenance and Forecast Command Handler tables to match all commands in 02-Commands.md (several were already missing before the recent lifecycle expansion, e.g. CancelMaintenance, ReplaceMaintenanceComponent, and 2 of 6 Forecast Generate commands) |
+| 4.2.0   | 2026-08-02 | Solution Architect | Added Section 15a Organization Command Handlers, matching the new commands in 02-Commands.md |
+| 4.3.0   | 2026-08-02 | Solution Architect | Added Section 15b Notification Command Handlers, matching the new commands in 02-Commands.md |
+| 4.4.0   | 2026-08-02 | Solution Architect | Added Section 15c Internal Messaging Command Handlers, matching the new commands in 02-Commands.md |
+| 4.5.0   | 2026-08-02 | Solution Architect | Added Section 15d AI Assistant Command Handlers, matching the new commands in 02-Commands.md |
+| 4.6.0   | 2026-08-02 | Solution Architect | Added Section 15e Relationship Management Command Handlers, matching the new commands in 02-Commands.md |
+| 4.7.0   | 2026-08-08 | Solution Architect | Added Section 15f Distributed Workspace Synchronization Command Handlers, matching the new commands in 02-Commands.md. This completes all 6 previously-missing module handler sets |

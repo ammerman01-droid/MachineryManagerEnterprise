@@ -1,13 +1,12 @@
-| Property | Value |
-|----------|-------|
-| **Document ID** | ADR-0012 |
-| **Title** | Distributed Workspace Architecture |
-| **Version** | 4.0.0 |
-| **Status** | Accepted |
-| **Owner** | Enterprise Architecture Board |
-| **Category** | Architecture |
-| **Created** | 2026-07-20 |
-| **Last Updated** | 2026-07-28 |
+| Property         | Value              |
+|------------------|--------------------|
+| **Document ID**  | ADR-0012           |
+| **Title**        | Distributed Workspace Architecture |
+| **Version**      | 4.1.0              |
+| **Status**       | Approved           |
+| **Owner**        | Solution Architect |
+| **Created**      | 2026-07-18         |
+| **Last Updated** | 2026-08-08         |
 
 ---
 
@@ -2251,7 +2250,7 @@ Synchronization remains recursive.
 ## Architecture
 
 - 02-architecture/01-Architecture.md
-- 02-architecture/09-CapabilityModel.md
+- 02-architecture/02-CapabilityModel.md
 
 ---
 
@@ -2259,11 +2258,11 @@ Synchronization remains recursive.
 
 - 05-development/01-SolutionStructure.md
 - 05-development/02-ProjectStructure.md
-- 05-development/03-DependencyCatalog.md
+- 05-development/11-DependencyCatalog.md
 - 05-development/04-DependencyRules.md
 - 05-development/12-DomainPatterns.md
-- 05-development/13-CapabilityDependencyMatrix.md
-- 05-development/14-AggregateDependencyMatrix.md
+- 05-development/12-CapabilityDependencyMatrix.md
+- 05-development/13-AggregateDependencyMatrix.md
 
 ---
 
@@ -2305,3 +2304,4 @@ This ADR introduces the architectural foundation for:
 | 2.0.0   | 2026-07-18 | Solution Architect | Standardized                                          |
 | 3.0.0   | 2026-07-18 | Solution Architect | Standardized according to Documentation Standard v3.0 |
 | 4.0.0   | 2026-07-28 | Solution Architect | Upgraded to Documentation Standard v4.0.0             |
+| 4.1.0   | 2026-08-08 | Solution Architect | Review and synchronize with the latest changes        |

@@ -1,12 +1,12 @@
-| Property | Value |
-|----------|-------|
-| **Document ID** | ADR-0021 |
-| **Title** | Search Strategy |
-| **Version** | 4.0.0 |
-| **Status** | Accepted |
-| **Owner** | Solution Architect |
-| **Created** | 2026-07-27 |
-| **Last Updated** | 2026-07-28 |
+| Property         | Value              |
+|------------------|--------------------|
+| **Document ID**  | ADR-0021           |
+| **Title**        | Search Strategy    |
+| **Version**      | 4.1.0              |
+| **Status**       | Approved           |
+| **Owner**        | Solution Architect |
+| **Created**      | 2026-07-27         |
+| **Last Updated** | 2026-08-08         |
 
 ---
 
@@ -262,6 +262,7 @@ Not Required
 - ADR-0019 — Hybrid Persistence Strategy for Read-Heavy Queries
 - ADR-0020 — File Storage Strategy
 - TE-0027 — Search Engine Technology Evaluation
+- TE-0016 — Enterprise Search Architecture Evaluation *(Superseded by this ADR — see TE-0016 superseded notice)*
 - 02-CapabilityModel.md
 
 ---
@@ -280,5 +281,6 @@ https://opensearch.org/docs/latest/
 |---------|------------|--------------------|--------------------------------------------------------------------------|
 | 1.0.0   | 2026-07-27 | Solution Architect | Initial decision, formalizing the Search Strategy recommended by TE-0027 |
 | 1.1.0   | 2026-07-28 | Solution Architect | New Section Added (Search Flow)                                          |
-| 3.0.0   | 2026-07-18 | Solution Architect | Standardized according to Documentation Standard v3.0                    |
+| 3.0.0   | 2026-07-28 | Solution Architect | Standardized according to Documentation Standard v3.0                    |
 | 4.0.0   | 2026-07-28 | Solution Architect | Upgraded to Documentation Standard v4.0.0                                |
+| 4.1.0   | 2026-08-08 | Solution Architect | Confirmed authoritative over TE-0016 (Superseded); cross-referenced      |

@@ -1,12 +1,12 @@
-| Property | Value |
-|----------|-------|
-| **Document ID** | DD-014 |
-| **Title** | Aggregate Dependency Matrix |
-| **Version** | 4.0.0 |
-| **Status** | Draft |
-| **Owner** | Domain Architect |
-| **Created** | 2026-07-20 |
-| **Last Updated** | 2026-07-28 |
+| Property         | Value              |
+|------------------|--------------------|
+| **Document ID**  | DOC-DEV-014        |
+| **Title**        | Aggregate Dependency Matrix |
+| **Version**      | 4.2.0              |
+| **Status**       | Approved           |
+| **Owner**        | Solution Architect |
+| **Created**      | 2026-07-20         |
+| **Last Updated** | 2026-08-08         |
 
 ---
 
@@ -2161,8 +2161,8 @@ Aggregate Integration Rules provide:
 
 The following architectural documents provide the structural foundation for this specification.
 
-- 02-architecture/01-Architecture.md
-- 02-architecture/09-CapabilityModel.md
+- ../02-architecture/01-Architecture.md
+- ../02-architecture/02-CapabilityModel.md
 
 ---
 
@@ -2170,13 +2170,13 @@ The following architectural documents provide the structural foundation for this
 
 The following development documents complement this specification.
 
-- 05-development/01-SolutionStructure.md
-- 05-development/02-ProjectStructure.md
-- 05-development/03-DependencyCatalog.md
-- 05-development/04-DependencyRules.md
-- 05-development/05-BuildPipeline.md
-- 03-development/12-DomainPatterns.md
-- 05-development/12-CapabilityDependencyMatrix.md
+- 01-SolutionStructure.md
+- 02-ProjectStructure.md
+- 11-DependencyCatalog.md
+- 04-DependencyRules.md
+- 10-BuildPipeline.md
+- ../03-domain/12-DomainPatterns.md
+- 12-CapabilityDependencyMatrix.md
 
 ---
 
@@ -2184,19 +2184,19 @@ The following development documents complement this specification.
 
 Aggregate definitions originate from the Business Specifications.
 
-- BR-001 Asset Management
-- BR-002 Tracked Components
-- BR-003 Meter Management
-- BR-004 Condition Monitoring
-- BR-005 Parts Catalog
-- BR-006 Inventory Management
-- BR-007 Incident Management
-- BR-008 Maintenance Forecast
-- BR-009 Maintenance Operations
-- BR-010 Notification Center
-- BR-011 Internal Messaging
-- BR-012 AI Assistant
-- BR-013 Relationship Management
+- Asset Management (DD-001; no dedicated Business Specification)
+- BR-004 Tracked Components
+- Meter Management (no dedicated Business Specification)
+- Condition Monitoring (no dedicated Business Specification)
+- BR-007 Parts Catalog
+- Inventory Management (Future — not yet built)
+- BR-009 Incident Management
+- BR-010 Maintenance Forecast
+- BR-011 Maintenance Operations
+- BR-012 Notification Center
+- BR-013 Internal Messaging
+- BR-014 AI Assistant
+- BR-015 Relationship Management
 
 ---
 
@@ -2205,13 +2205,11 @@ Aggregate definitions originate from the Business Specifications.
 Aggregate interactions assume the reusable behaviors defined by:
 
 - DP-001 Business Operation Pattern
-- DP-002 Aggregate Pattern
 - DP-003 Lifecycle Pattern
 - DP-004 Relationship Pattern
-- DP-005 Notification Pattern
-- DP-006 Business Traceability Pattern
 - DP-009 Hierarchical Relationship Pattern
-- DP-010 AI Advisory Pattern
+- DP-010 Advisory Intelligence Pattern
+- DP-015 Business Traceability Pattern
 
 ---
 
@@ -2294,5 +2292,7 @@ Every Aggregate implementation shall be traceable to this document.
 | Version | Date       | Author             | Description                                           |
 |---------|------------|--------------------|-------------------------------------------------------|
 | 1.0.0   | 2026-07-20 | Solution Architect | Initial Aggregate Dependency Matrix                   |
-| 3.0.0   | 2026-07-18 | Solution Architect | Standardized according to Documentation Standard v3.0 |
+| 3.0.0   | 2026-07-20 | Solution Architect | Standardized according to Documentation Standard v3.0 |
 | 4.0.0   | 2026-07-28 | Solution Architect | Upgraded to Documentation Standard v4.0.0             |
+| 4.1.0   | 2026-08-02 | Solution Architect | Corrected pre-renumbering BR references (Asset Management, Meter Management, Condition Monitoring, and Inventory Management marked as having no dedicated Business Specification, per product owner decision); fixed 2 wrong Domain Pattern names (DP-002, DP-005 were cited with the wrong pattern name) and broken relative paths to 02-architecture/ and 03-domain/12-DomainPatterns.md |
+| 4.2.0   | 2026-08-08 | Solution Architect | Correction to 4.1.0: "DP-006 Business Traceability Pattern" was flagged and removed as wrongly-numbered, but the pattern itself is real — it has been formally added to 12-DomainPatterns.md as DP-015. Restored the reference with the corrected number |

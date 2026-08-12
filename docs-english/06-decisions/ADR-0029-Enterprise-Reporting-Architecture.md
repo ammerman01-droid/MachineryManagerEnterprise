@@ -1,11 +1,12 @@
-| Property | Value |
-|----------|-------|
-| **Document ID** | ADR-0029 |
-| **Title** | Enterprise Reporting Architecture |
-| **Status** | Accepted |
-| **Version** | 4.0.0 |
-| **Decision Date** | 2026-07-28 |
-| **Owner** | Solution Architect |
+| Property         | Value              |
+|------------------|--------------------|
+| **Document ID**  | ADR-0029           |
+| **Title**        | Enterprise Reporting Architecture |
+| **Version**      | 4.1.0              |
+| **Status**       | Approved           |
+| **Owner**        | Solution Architect |
+| **Created**      | 2026-07-28         |
+| **Last Updated** | 2026-08-08         |
 | **Related TE** | TE-0035 – Reporting Technology Evaluation |
 
 ---
@@ -365,7 +366,7 @@ Using multiple reporting engines for identical responsibilities unnecessarily in
 # Related Documents
 
 - ADR-0001 — Clean Architecture
-- ADR-0003 — Modular Monolith Architecture
+- ADR-0001 — Modular Monolith Architecture
 - ADR-0025 — Build & Deployment Architecture
 - TE-0035 — Reporting Technology Evaluation
 
@@ -391,3 +392,4 @@ Designer-based reporting technologies are excluded from the approved architectur
 | 1.0.0   | 2026-07-28 | Solution Architect | Initial version                                       |
 | 3.0.0   | 2026-07-18 | Solution Architect | Standardized according to Documentation Standard v3.0 |
 | 4.0.0   | 2026-07-28 | Solution Architect | Upgraded to Documentation Standard v4.0.0             |
+| 4.1.0   | 2026-08-08 | Solution Architect | Review and synchronize with the latest changes        |

@@ -1,12 +1,12 @@
-| Property | Value |
-|----------|-------|
-| **Document ID** | TE-0004 |
-| **Title** | EntityFrameworkCore Technology Evaluation (.NET 10) |
-| **Version** | 4.0.0 |
-| **Status** | Approved |
-| **Owner** | Solution Architect |
-| **Created** | 2026-07-18 |
-| **Last Updated** | 2026-07-28 |
+| Property         | Value              |
+|------------------|--------------------|
+| **Document ID**  | TE-0004            |
+| **Title**        | EntityFrameworkCore Technology Evaluation (.NET 10) |
+| **Version**      | 4.1.0              |
+| **Status**       | Approved           |
+| **Owner**        | Solution Architect |
+| **Created**      | 2026-07-18         |
+| **Last Updated** | 2026-08-08         |
 
 ---
 
@@ -37,10 +37,9 @@ This evaluation builds upon the foundation established in TE-0001 (.NET 10 Platf
 This evaluation is based on:
 
 - ADR-0001 — Clean Architecture
-- SolutionStructure.md
-- DependencyRules.md
-- CodingStandards.md
-
+- ../05-development/01-SolutionStructure.md
+- ../05-development/04-DependencyRules.md
+- ../05-development/05-CodingStandards.md
 ---
 
 # Functional Requirements
@@ -369,11 +368,12 @@ https://www.nuget.org/packages/Microsoft.EntityFrameworkCore/
 
 # Revision History
 
-| Version | Date       | Author             | Description        |
-|---------|------------|--------------------|--------------------|
-| 1.0.0   | 2026-07-18 | Solution Architect | Initial evaluation |
-| 2.0.0   | 2026-07-18 | Solution Architect | Standardized |
+| Version | Date       | Author             | Description                                           |
+|---------|------------|--------------------|-------------------------------------------------------|
+| 1.0.0   | 2026-07-18 | Solution Architect | Initial evaluation                                    |
+| 2.0.0   | 2026-07-18 | Solution Architect | Standardized                                          |
 | 3.0.0   | 2026-07-18 | Solution Architect | Rewritten according to Technology Evaluation Template |
 | 3.0.1   | 2026-07-27 | Solution Architect | Corrected Related ADR reference from ADR-0004 to ADR-0006 (ADR-0004 documents Blazor, not Entity Framework Core) |
-| 3.1.0   | 2026-07-28 | Solution Architect | New section added (Evaluation Scope) |
-| 4.0.0   | 2026-07-28 | Solution Architect | Solution Architect | Upgraded to Documentation Standard v4.0.0 |
+| 3.1.0   | 2026-07-28 | Solution Architect | New section added (Evaluation Scope)                  |
+| 4.0.0   | 2026-07-28 | Solution Architect | Upgraded to Documentation Standard v4.0.0             |
+| 4.1.0   | 2026-08-08 | Solution Architect | Review and synchronize with the latest changes        |

@@ -1,12 +1,12 @@
-| Property | Value |
-|----------|-------|
-| **Document ID** | BR-010 |
-| **Capability ID** | DD-011 |
-| **Version** | 4.0.0 |
-| **Status** | Approved |
-| **Owner** | Domain Architect |
-| **Created** | 2026-07-20 |
-| **Last Updated** | 2026-07-28 |
+| Property         | Value              |
+|------------------|--------------------|
+| **Document ID**  | BR-012             |
+| **Title**        | Notification Center |
+| **Version**      | 4.3.0              |
+| **Status**       | Approved           |
+| **Owner**        | Solution Architect |
+| **Created**      | 2026-07-20         |
+| **Last Updated** | 2026-08-08         |
 
 ---
 
@@ -308,7 +308,7 @@ Examples:
 - Incident Closed
 - Incident Escalated
 
-Incident Notifications originate from BR-007.
+Incident Notifications originate from BR-009.
 
 ---
 
@@ -322,7 +322,7 @@ Examples:
 - Predictive Maintenance Forecast
 - Condition-Based Forecast
 
-Forecast Notifications originate from BR-008.
+Forecast Notifications originate from BR-010.
 
 ---
 
@@ -337,7 +337,7 @@ Examples:
 - Maintenance Completed
 - Maintenance Cancelled
 
-Maintenance Notifications originate from BR-009.
+Maintenance Notifications originate from BR-011.
 
 ---
 
@@ -750,7 +750,7 @@ Examples:
 
 Notifications communicate Incident lifecycle.
 
-Incident ownership remains within BR-007.
+Incident ownership remains within BR-009.
 
 ---
 
@@ -763,7 +763,7 @@ Examples:
 - Forecast Expiring
 - Forecast Deferred
 
-Forecast Notifications originate from BR-008.
+Forecast Notifications originate from BR-010.
 
 ---
 
@@ -777,7 +777,7 @@ Examples:
 - Maintenance Completed
 - Maintenance Cancelled
 
-Operational execution remains governed by BR-009.
+Operational execution remains governed by BR-011.
 
 ---
 
@@ -2106,7 +2106,7 @@ The capability extends these patterns without redefining them.
 | DP-001 | Business Operation Pattern |
 | DP-004 | Relationship Pattern |
 | DP-005 | Planning vs Execution Pattern |
-| DP-008 | Business Traceability Pattern |
+| DP-015 | Business Traceability Pattern |
 
 ---
 
@@ -2169,7 +2169,7 @@ The pattern guarantees that planning notifications and execution notifications r
 
 ---
 
-## DP-008 — Business Traceability Pattern
+## DP-015 — Business Traceability Pattern
 
 Every Notification preserves complete business traceability.
 
@@ -2243,9 +2243,9 @@ Using these Domain Patterns ensures:
 
 ## Domain Documents
 
-- DG-00 — Domain Governance
-- 09-DomainDiscovery.md
-- 12-DomainPatterns.md
+- ../DG-00-DomainGovernance.md
+- ../10-DomainDiscovery.md
+- ../12-DomainPatterns.md
 
 ---
 
@@ -2253,15 +2253,15 @@ Using these Domain Patterns ensures:
 
 Notification Center consumes events from:
 
-- BR-001 — Asset Relationships
-- BR-002 — Tracked Components
-- BR-003 — Tire Lifecycle Management
-- BR-004 — Battery Lifecycle Management
-- BR-005 — Parts Catalog
-- BR-006 — Part Cross Reference
-- BR-007 — Incident Management
-- BR-008 — Maintenance Forecast
-- BR-009 — Maintenance Operations
+- BR-003 — Asset Relationships
+- BR-004 — Tracked Components
+- BR-005 — Tire Lifecycle Management
+- BR-006 — Battery Lifecycle Management
+- BR-007 — Parts Catalog
+- BR-008 — Part Cross Reference
+- BR-009 — Incident Management
+- BR-010 — Maintenance Forecast
+- BR-011 — Maintenance Operations
 
 ---
 
@@ -2392,5 +2392,8 @@ It guarantees that:
 | Version | Date       | Author             | Description                                            |
 |---------|------------|--------------------|--------------------------------------------------------|
 | 1.0.0   | 2026-07-20 | Solution Architect | Initial Business Specification for Notification Center |
-| 3.0.0   | 2026-07-18 | Solution Architect | Standardized according to Documentation Standard v3.0  |
+| 3.0.0   | 2026-07-20 | Solution Architect | Standardized according to Documentation Standard v3.0  |
 | 4.0.0   | 2026-07-28 | Solution Architect | Upgraded to Documentation Standard v4.0.0              |
+| 4.1.0   | 2026-08-02 | Solution Architect | Fixed stale pre-renumbering BR references in Related Documents (each was 2 lower than the actual filename) and missing relative paths for 12-DomainPatterns.md / DG-00-DomainGovernance.md |
+| 4.2.0   | 2026-08-02 | Solution Architect | Corrected local Business Traceability Pattern number to DP-015, the newly formalized canonical number in 12-DomainPatterns.md (this specification had used an inconsistent local number relative to other specifications defining the same pattern) |
+| 4.3.0   | 2026-08-08 | Solution Architect | Fixed 5 additional stale pre-renumbering BR references in the document body (BR-007/008/009 -> BR-009/010/011 depending on context), missed by the earlier reference-only cleanup pass |

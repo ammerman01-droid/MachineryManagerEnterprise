@@ -1,9 +1,12 @@
-# MachineryManagerEnterprise Project Charter
-
-**Document ID:** MME-CHARTER-001  
-**Version:** 1.0.0  
-**Status:** Approved  
-**Last Updated:** 2026-07-17
+| Property         | Value              |
+|------------------|--------------------|
+| **Document ID**  | MME-CHARTER-001    |
+| **Title**        | MachineryManagerEnterprise Project Charter |
+| **Version**      | 4.1.0              |
+| **Status**       | Approved           |
+| **Owner**        | Solution Architect |
+| **Created**      | 2026-07-18         |
+| **Last Updated** | 2026-08-08         |
 
 ---
 
@@ -49,7 +52,10 @@ The project shall provide capabilities for:
 - Image Gallery
 - Reporting
 - Analytics
-- Decision Support
+- AI-Assisted Decision Support
+- Internal Messaging
+- Relationship Management
+- Distributed Workspace Synchronization
 
 ---
 
@@ -109,17 +115,29 @@ Every design decision should prioritize maintainability over short-term convenie
 
 # Technology Stack
 
-Backend
+Web Backend & UI
 
 - .NET 10
 - ASP.NET Core
-- Blazor Server
+- Blazor (Server / WebAssembly)
+- MudBlazor
+
+Desktop & Mobile Client
+
+- .NET MAUI (ADR-0013 / TE-0010)
 
 Database
 
 - SQL Server
 - Entity Framework Core
+- SQLite / LiteDB (embedded workspace databases)
 - Code First
+
+Messaging, AI & Search
+
+- MassTransit / RabbitMQ
+- Semantic Kernel, Qdrant
+- SQL Server Full-Text Search (default) / OpenSearch (escalation)
 
 Architecture
 
@@ -127,13 +145,22 @@ Architecture
 - Clean Architecture
 - Modular Monolith
 
+The complete, authoritative technology stack and every underlying ADR
+are maintained in `docs-english/02-architecture/01-Architecture.md` and
+`docs-english/05-development/11-DependencyCatalog.md`; this section is
+a summary only and is not independently maintained.
+
 ---
 
 # User Interface Principles
 
-The application is designed as a responsive web application.
+The platform provides two client experiences:
 
-Supported platforms:
+- A responsive Blazor web application.
+- A native .NET MAUI application for Desktop and Mobile (ADR-0013 /
+  TE-0010).
+
+Supported platforms for the web application:
 
 - Desktop
 - Laptop
@@ -286,7 +313,7 @@ Every feature follows this order:
 ```
 src/
 tests/
-docs/
+docs-english/
 tools/
 ```
 
@@ -304,7 +331,9 @@ Major categories include:
 - Modules
 - Development
 - Decisions
+- API
 - Releases
+- Proof of Concepts
 
 ---
 
@@ -377,3 +406,15 @@ The project is successful when:
 > Build software that remains understandable ten years from now.
 
 Every design decision shall prioritize clarity, maintainability and long-term value over short-term speed.
+
+---
+
+#  Revision History
+
+| Version | Date       | Author             | Description                                           |
+|---------|------------|--------------------|-------------------------------------------------------|
+| 1.0.0   | 2026-07-18 | Solution Architect | Initial Project Charter                               |
+| 2.0.0   | 2026-07-18 | Solution Architect | Documentation architecture reorganized                |
+| 3.0.0   | 2026-07-18 | Solution Architect | Standardized according to Documentation Standard v3.0 |
+| 4.0.0   | 2026-07-28 | Solution Architect | Upgraded to Documentation Standard v4.0.0             |
+| 4.1.0   | 2026-08-08 | Solution Architect | Review and synchronize with the latest changes        |

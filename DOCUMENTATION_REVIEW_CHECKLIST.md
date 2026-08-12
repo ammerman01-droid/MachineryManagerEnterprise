@@ -1,13 +1,12 @@
-# Documentation Review Checklist
-
-| Property | Value |
-|----------|-------|
-| **Document ID** | DOC-REVIEW-001 |
-| **Version** | 3.0.0 |
-| **Status** | Active |
-| **Owner** | Solution Architect |
-| **Created** | 2026-07-18 |
-| **Last Updated** | 2026-07-18 |
+| Property         | Value              |
+|------------------|--------------------|
+| **Document ID**  | DOC-REVIEW-001     |
+| **Title**        | Documentation Review Checklist |
+| **Version**      | 4.1.0              |
+| **Status**       | Approved           |
+| **Owner**        | Solution Architect |
+| **Created**      | 2026-07-18         |
+| **Last Updated** | 2026-08-08         |
 
 ---
 
@@ -122,6 +121,9 @@ maintainability across the entire documentation set.
 
 # Change History
 
-| Version | Date | Description |
-|----------|------------|-------------------------------------------|
-| 3.0.0 | 2026-07-18 | Initial Documentation Review Checklist |
+| Version | Date       | Author             | Description                                           |
+|---------|------------|--------------------|-------------------------------------------------------|
+| 1.0.0   | 2026-07-18 | Solution Architect | Initial Documentation Review Checklist                |
+| 3.0.0   | 2026-07-18 | Solution Architect | Standardized according to Documentation Standard v3.0 |
+| 4.0.0   | 2026-07-28 | Solution Architect | Upgraded to Documentation Standard v4.0.0             |
+| 4.1.0   | 2026-08-08 | Solution Architect | Review and synchronize with the latest changes        |

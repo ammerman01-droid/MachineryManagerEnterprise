@@ -1,11 +1,12 @@
-| Property | Value |
-|----------|-------|
-| **Document ID** | DOM-004 |
-| **Version** | 4.0.0 |
-| **Status** | Active |
-| **Owner** | Solution Architect |
-| **Created** | 2026-07-20 |
-| **Last Updated** | 2026-07-28 |
+| Property         | Value              |
+|------------------|--------------------|
+| **Document ID**  | DOM-012            |
+| **Title**        | Domain Patterns    |
+| **Version**      | 4.5.0              |
+| **Status**       | Approved           |
+| **Owner**        | Solution Architect |
+| **Created**      | 2026-07-18         |
+| **Last Updated** | 2026-08-08         |
 
 ---
 
@@ -348,9 +349,9 @@ Current Engine Projection
 
 ## Related Business Specifications
 
-- BR-001 Asset Relationships
-- BR-002 Tracked Components
-- BR-009 Maintenance Operations
+- BR-003 Asset Relationships
+- BR-004 Tracked Components
+- BR-011 Maintenance Operations
 
 ---
 
@@ -583,9 +584,9 @@ Almost every business entity eventually exposes a Current State projection.
 
 ## Related Business Specifications
 
-- BR-001 Asset Relationships
-- BR-002 Tracked Components
-- BR-009 Maintenance Operations
+- BR-003 Asset Relationships
+- BR-004 Tracked Components
+- BR-011 Maintenance Operations
 
 ---
 
@@ -898,9 +899,9 @@ Examples:
 
 ## Related Business Specifications
 
-- BR-001 Asset Relationships
-- BR-002 Tracked Components
-- BR-009 Maintenance Operations
+- BR-003 Asset Relationships
+- BR-004 Tracked Components
+- BR-011 Maintenance Operations
 
 ---
 
@@ -1148,8 +1149,8 @@ Examples:
 
 ## Related Business Specifications
 
-- BR-001 Asset Relationships
-- BR-009 Maintenance Operations
+- BR-003 Asset Relationships
+- BR-011 Maintenance Operations
 
 ---
 
@@ -1406,9 +1407,9 @@ Maintenance Operation
 
 ## Related Business Specifications
 
-- BR-007 Maintenance Forecast
-- BR-008 Notification Center
-- BR-009 Maintenance Operations
+- BR-010 Maintenance Forecast
+- BR-012 Notification Center
+- BR-011 Maintenance Operations
 
 ---
 
@@ -1628,8 +1629,8 @@ Referenced by Inventory
 
 ## Related Business Specifications
 
-- BR-005 — Parts Catalog
-- BR-006 — Part Cross Reference
+- BR-007 — Parts Catalog
+- BR-008 — Part Cross Reference
 
 ---
 
@@ -1850,9 +1851,9 @@ Publication
 
 ## Related Business Specifications
 
-- BR-005 — Parts Catalog
-- BR-008 — Maintenance Forecast
-- BR-013 — Relationship Management
+- BR-007 — Parts Catalog
+- BR-010 — Maintenance Forecast
+- BR-015 — Relationship Management
 
 ---
 
@@ -2088,8 +2089,8 @@ Every version remains available.
 
 ## Related Business Specifications
 
-- BR-005 — Parts Catalog
-- BR-006 — Part Cross Reference
+- BR-007 — Parts Catalog
+- BR-008 — Part Cross Reference
 
 ---
 
@@ -2274,14 +2275,17 @@ Hierarchy belongs to Relationship Management.
 ## Related Patterns
 
 - DP-004 Relationship Pattern
-- DP-006 Business Traceability Pattern
+- DP-015 Business Traceability Pattern
+
+> **Note:** DP-006 is Master Data Pattern; Business Traceability
+> Pattern is DP-015 (see Section 3).
 
 ---
 
 ## Related Business Specifications
 
-- BR-010 Notification Center
-- BR-013 Relationship Management
+- BR-012 Notification Center
+- BR-015 Relationship Management
 
 ---
 
@@ -2679,10 +2683,10 @@ AI Assistant
 
 ## Related Business Specifications
 
-- BR-010 Notification Center
-- BR-011 Internal Messaging
-- BR-012 AI Assistant
-- BR-013 Relationship Management
+- BR-012 Notification Center
+- BR-013 Internal Messaging
+- BR-014 AI Assistant
+- BR-015 Relationship Management
 
 ---
 
@@ -2787,9 +2791,9 @@ This pattern guarantees:
 
 ## Related Business Specifications
 
-- BR-008 Maintenance Forecast
-- BR-009 Maintenance Operations
-- BR-012 AI Assistant
+- BR-010 Maintenance Forecast
+- BR-011 Maintenance Operations
+- BR-014 AI Assistant
 
 ---
 
@@ -2942,7 +2946,7 @@ This pattern guarantees:
 
 ## Related Business Specifications
 
-- BR-014 — Distributed Workspace Synchronization
+- BR-016 — Distributed Workspace Synchronization
 
 ---
 
@@ -3436,13 +3440,13 @@ Conflict management is delegated to:
 
 Primary specification
 
-- BR-014 — Distributed Workspace Synchronization
+- BR-016 — Distributed Workspace Synchronization
 
 Supporting specifications
 
-- BR-011 — Asset Management
-- BR-012 — AI Assistant
-- BR-013 — Relationship Management
+- Asset Management
+- BR-014 — AI Assistant
+- BR-015 — Relationship Management
 
 ---
 
@@ -3839,13 +3843,13 @@ Extended by
 
 Primary
 
-- BR-014 — Distributed Workspace Synchronization
+- BR-016 — Distributed Workspace Synchronization
 
 Supporting
 
-- BR-011 — Asset Management
-- BR-009 — Maintenance Operations
-- BR-008 — Forecasting
+- Asset Management
+- BR-011 — Maintenance Operations
+- BR-010 — Maintenance Forecast
 
 ---
 
@@ -4069,12 +4073,68 @@ Uses
 
 Primary
 
-- BR-014 — Distributed Workspace Synchronization
+- BR-016 — Distributed Workspace Synchronization
 
 Supporting
 
-- BR-011 — Asset Management
-- BR-009 — Maintenance Operations
+- Asset Management
+- BR-011 — Maintenance Operations
+
+---
+
+# DP-015 — Business Traceability Pattern
+
+## Purpose
+
+Provide a reusable architectural pattern guaranteeing that every
+business artifact preserves a complete, reproducible chain from its
+originating business event or object through every derived artifact,
+regardless of business domain.
+
+## Pattern Description
+
+```text
+Originating Business Object / Event
+
+↓
+
+Derived Artifact(s)
+
+↓
+
+Delivery / Action
+
+↓
+Historical Record
+```
+
+Every derived artifact preserves a reference to its origin. Historical
+records are never deleted or overwritten; they remain reproducible for
+audit, investigation, and reporting purposes.
+
+## Business Rules
+
+- Every derived artifact shall record its originating object or event.
+- Historical traceability chains shall never be broken by updates.
+- Traceability data shall remain queryable independent of the current
+  state of the originating object.
+
+## Related Patterns
+
+- DP-001 — Business Operation Pattern
+- DP-003 — Lifecycle Pattern
+
+## Related Business Specifications
+
+> **Note:** This pattern is used consistently across six Business
+> Specifications, listed below.
+
+- BR-009 — Incident Management (traceability across Investigation, Corrective Actions, Maintenance, Notifications, Reports)
+- BR-010 — Maintenance Forecast (traceability across Evidence, Forecast, Planning, Work Orders, Maintenance Operations)
+- BR-012 — Notification Center (traceability across Business Event, Notification, Delivery)
+- BR-013 — Internal Messaging (traceability across Business Object, Conversation, Message, Attachment, Read History, Business History)
+- BR-014 — AI Assistant (traceability across Business Knowledge, Reasoning, Recommendation)
+- BR-015 — Relationship Management (traceability across relationship transitions)
 
 ---
 
@@ -4233,20 +4293,19 @@ Patterns shall describe business behavior rather than technical implementation.
 
 # 8. Related Documents
 
-- 00-DomainPrinciples.md
-- 01-CoreConcepts.md
-- 02-BoundedContexts.md
-- 03-DomainModel.md
-- 04-Aggregates.md
-- 05-DomainServices.md
-- 06-DomainEvents.md
-- 07-BusinessRules.md
-- 08-StateMachines.md
-- 09-DomainDiscovery.md
-- BR-012 Business Specification — AI Assistant
+- 01-DomainPrinciples.md
+- 02-CoreConcepts.md
+- 03-BoundedContexts.md
+- 04-DomainModel.md
+- 05-Aggregates.md
+- 06-DomainServices.md
+- 07-DomainEvents.md
+- 08-BusinessRules.md
+- 09-StateMachines.md
+- 10-DomainDiscovery.md
+- BR-014 Business Specification — AI Assistant
 - DG-00 Domain Governance
-- BR-INDEX.md
-
+- specifications/BR-001-INDEX.md
 ### Core Patterns
 
 Core Patterns define the architectural foundations of the business domain.
@@ -4423,18 +4482,18 @@ Only after architectural approval may a pattern become part of the official Doma
 
 ## Domain Foundation
 
-- 00-DomainPrinciples.md
+- 01-DomainPrinciples.md
 - 00-Glossary.md
-- 01-CoreConcepts.md
-- 02-BoundedContexts.md
-- 03-DomainModel.md
-- 04-Aggregates.md
-- 05-DomainServices.md
-- 06-DomainEvents.md
-- 07-BusinessRules.md
-- 08-StateMachines.md
-- 09-DomainDiscovery.md
-- 10-UbiquitousLanguage.md
+- 02-CoreConcepts.md
+- 03-BoundedContexts.md
+- 04-DomainModel.md
+- 05-Aggregates.md
+- 06-DomainServices.md
+- 07-DomainEvents.md
+- 08-BusinessRules.md
+- 09-StateMachines.md
+- 10-DomainDiscovery.md
+- 11-UbiquitousLanguage.md
 - DG-00-DomainGovernance.md
 
 ---
@@ -4445,10 +4504,10 @@ Domain Patterns provide reusable architectural guidance for Business Specificati
 
 Initially referenced by:
 
-- BR-001 — Asset Relationships
-- BR-002 — Tracked Components
-- BR-003 — Tire Lifecycle
-- BR-009 — Maintenance Operations
+- BR-003 — Asset Relationships
+- BR-004 — Tracked Components
+- BR-005 — Tire Lifecycle
+- BR-011 — Maintenance Operations
 
 Additional Business Specifications shall reference Domain Patterns whenever applicable.
 
@@ -4456,14 +4515,14 @@ Additional Business Specifications shall reference Domain Patterns whenever appl
 
 ## Future Pattern Candidates
 
-The following candidate patterns have been identified through Business Specification BR-014.
+The following candidate patterns have been identified through Business Specification BR-016.
 
 | Pattern | Name | Source |
 |----------|------|--------|
-| DP-011 | Working Set Pattern | BR-014 |
-| DP-012 | Synchronization Pattern | BR-014 |
-| DP-013 | Synchronization Package Pattern | BR-014 |
-| DP-014 | Conflict Resolution Pattern | BR-014 |
+| DP-011 | Working Set Pattern | BR-016 |
+| DP-012 | Synchronization Pattern | BR-016 |
+| DP-013 | Synchronization Package Pattern | BR-016 |
+| DP-014 | Conflict Resolution Pattern | BR-016 |
 
 ---
 
@@ -4471,8 +4530,14 @@ The following candidate patterns have been identified through Business Specifica
 
 | Version | Date       | Author             | Description                                              |
 |---------|------------|--------------------|----------------------------------------------------------|
+
 | 1.0.0   | 2026-07-20 | Solution Architect | Initial Domain Pattern catalog created                   |
 | 1.1.0   | 2026-07-20 | Solution Architect | Added Pattern Classification and Dependency Model        |
 | 1.2.0   | 2026-07-20 | Solution Architect | Added Pattern Governance, Usage Rules and Review Process |
 | 3.0.0   | 2026-07-18 | Solution Architect | Standardized according to Documentation Standard v3.0    |
 | 4.0.0   | 2026-07-28 | Solution Architect | Upgraded to Documentation Standard v4.0.0                |
+| 4.1.0   | 2026-08-02 | Solution Architect | Fixed stale pre-renumbering BR references (BR-012→BR-014 for AI Assistant; BR-001/002/003/009→BR-003/004/005/011); corrected Future Pattern Candidates source from BR-014 to BR-016 (Distributed Workspace Synchronization), which is what actually defines and cites DP-011 through DP-014 |
+| 4.2.0   | 2026-08-02 | Solution Architect | Fixed Document ID collision: was DOM-004 (duplicate of 04-DomainModel.md), corrected to DOM-012 |
+| 4.3.0   | 2026-08-02 | Solution Architect | Fixed Document ID collision: was DOM-004 (duplicate of 04-DomainModel.md), corrected to DOM-012 |
+| 4.4.0   | 2026-08-02 | Solution Architect | Fixed 42 additional stale pre-renumbering BR references scattered throughout the document (a much larger set than the earlier 4.1.0 pass caught), corrected 3 "BR-011 — Asset Management" references (Asset Management has no dedicated Business Specification), and fixed the sentence still citing BR-014 instead of BR-016 as the source of DP-011–014 |
+| 4.5.0   | 2026-08-08 | Solution Architect | Correction to 4.3.0: "DP-006 Business Traceability Pattern" had been removed as a phantom reference, but this was itself an error — Business Traceability Pattern is a real, consistently-defined pattern used across 6 Business Specifications (BR-009, 010, 012, 013, 014, 015), each with an inconsistent local number (DP-006 or DP-008), never formally added to this catalog. Added as DP-015 with content synthesized from its 6 existing usages; corrected all 6 specifications and the two dependency matrices to cite DP-015 |

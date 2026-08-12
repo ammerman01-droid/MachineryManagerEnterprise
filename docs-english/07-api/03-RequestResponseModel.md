@@ -1,12 +1,12 @@
-| Property | Value |
-|----------|-------|
-| **Document ID** | API-003 |
-| **Title** | Request / Response Model |
-| **Version** | 4.0.0 |
-| **Status** | Active |
-| **Owner** | Solution Architect |
-| **Created** | 2026-07-18 |
-| **Last Updated** | 2026-07-28 |
+| Property         | Value              |
+|------------------|--------------------|
+| **Document ID**  | API-003            |
+| **Title**        | Request / Response Model |
+| **Version**      | 4.1.0              |
+| **Status**       | Approved           |
+| **Owner**        | Solution Architect |
+| **Created**      | 2026-07-18         |
+| **Last Updated** | 2026-08-08         |
 
 ---
 
@@ -301,8 +301,8 @@ Avoid unnecessary wrapping of simple resources.
 - 01-RestConventions.md
 - 02-EndpointDesign.md
 - 04-ErrorResponses.md
-- 05-Versioning.md
-- ADR-0005 — API Strategy
+- 06-Versioning.md
+- ADR-0035 — API Documentation and Client Generation Architecture
 
 ---
 
@@ -313,3 +313,4 @@ Avoid unnecessary wrapping of simple resources.
 | 1.0.0   | 2026-07-18 | Solution Architect | Initial Request / Response Model                      |
 | 3.0.0   | 2026-07-18 | Solution Architect | Standardized according to Documentation Standard v3.0 |
 | 4.0.0   | 2026-07-28 | Solution Architect | Upgraded to Documentation Standard v4.0.0             |
+| 4.1.0   | 2026-08-02 | Solution Architect | Corrected reference from non-existent "ADR-0005 — API Strategy" to the actual governing ADR-0035 (API Documentation and Client Generation Architecture) |

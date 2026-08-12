@@ -1,12 +1,12 @@
-| Property | Value |
-|----------|-------|
-| **Document ID** | REL-002 |
-| **Title** | Release Process |
-| **Version** | 4.0.0 |
-| **Status** | Active |
-| **Owner** | Release Manager |
-| **Created** | 2026-07-18 |
-| **Last Updated** | 2026-07-28 |
+| Property         | Value              |
+|------------------|--------------------|
+| **Document ID**  | REL-002            |
+| **Title**        | Release Process    |
+| **Version**      | 4.1.0              |
+| **Status**       | Approved           |
+| **Owner**        | Solution Architect |
+| **Created**      | 2026-07-18         |
+| **Last Updated** | 2026-08-08         |
 
 ---
 
@@ -275,8 +275,7 @@ Lessons learned may improve:
 
 - 00-ReleaseStrategy.md
 - 01-VersioningPolicy.md
-- docs/05-development/10-BuildPipeline.md
-- docs/09-operations/
+- ../05-development/10-BuildPipeline.md
 
 ---
 
@@ -287,3 +286,4 @@ Lessons learned may improve:
 | 1.0.0   | 2026-07-18 | Solution Architect | Initial Release Process                               |
 | 3.0.0   | 2026-07-18 | Solution Architect | Standardized according to Documentation Standard v3.0 |
 | 4.0.0   | 2026-07-28 | Solution Architect | Upgraded to Documentation Standard v4.0.0             |
+| 4.1.0   | 2026-08-08 | Solution Architect | Removed broken reference to non-existent docs/09-operations/ folder (real 09 folder is 09-proof-of-concepts, an unrelated purpose) |

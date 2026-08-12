@@ -1,12 +1,12 @@
-| Property | Value |
-|----------|-------|
-| **Document ID** | ADR-0017 |
-| **Title** | Artificial Intelligence Integration Architecture |
-| **Version** | 4.0.0 |
-| **Status** | Proposed |
-| **Owner** | Solution Architect |
-| **Created** | 2026-07-26 |
-| **Last Updated** | 2026-07-28 |
+| Property         | Value              |
+|------------------|--------------------|
+| **Document ID**  | ADR-0017           |
+| **Title**        | Artificial Intelligence Integration Architecture |
+| **Version**      | 4.1.0              |
+| **Status**       | Approved           |
+| **Owner**        | Solution Architect |
+| **Created**      | 2026-07-26         |
+| **Last Updated** | 2026-08-08         |
 
 # Purpose
 
@@ -419,8 +419,6 @@ Artificial Intelligence implementations shall comply with this Architecture Deci
 
 Future work includes:
 
-- AI Technology Evaluation
-- AI Provider Evaluation
 - Prompt Management Strategy
 - AI Model Governance
 - AI Monitoring Strategy
@@ -429,6 +427,28 @@ Future work includes:
 - Responsible AI Guidelines
 
 These topics shall be documented independently from the architectural decisions defined by this ADR.
+
+> AI Technology Evaluation and AI Provider Evaluation, previously listed
+> here as future work, are now complete — see Section 11a below and
+> ADR-0023.
+
+---
+
+# 11a. Technology Selection (Formalized)
+
+TE-0013 — Artificial Intelligence Technology Evaluation evaluated
+candidate AI orchestration frameworks and recommends **Semantic Kernel**
+as the AI integration framework for MachineryManagerEnterprise.
+
+Concrete AI provider selection (Azure OpenAI / OpenAI / Ollama) behind
+the `IAIProvider` abstraction is governed separately by
+**ADR-0023 — Artificial Intelligence Provider Strategy**, which remains
+authoritative for provider selection.
+
+| Responsibility | Selected Technology |
+|-----------------|---------------------|
+| AI Orchestration Framework | Semantic Kernel |
+| AI Provider Selection | See ADR-0023 |
 
 ---
 
@@ -445,7 +465,11 @@ These topics shall be documented independently from the architectural decisions 
 
 ## Technical Evaluation
 
-- TE-0012 — Artificial Intelligence Technology Evaluation *(Planned)*
+- TE-0013 — Artificial Intelligence Technology Evaluation *(Approved — Semantic Kernel, see Section 11a. Corrected from an erroneous TE-0012 reference on 2026-08-02.)*
+
+## Related Decision
+
+- ADR-0023 — Artificial Intelligence Provider Strategy *(governs the concrete AI provider — Azure OpenAI / OpenAI / Ollama — behind the IAIProvider abstraction used by Semantic Kernel)*
 
 ## Development
 
@@ -469,6 +493,7 @@ These topics shall be documented independently from the architectural decisions 
 
 | Version | Date       | Author             | Description                                           |
 |---------|------------|--------------------|-------------------------------------------------------|
-| 1.0.0 | 2026-07-26 | Initial Architecture Decision Record |
-| 3.0.0   | 2026-07-18 | Solution Architect | Standardized according to Documentation Standard v3.0 |
+| 1.0.0   | 2026-07-26 | Solution Architect | Initial Architecture Decision Record                  |
+| 3.0.0   | 2026-07-26 | Solution Architect | Standardized according to Documentation Standard v3.0 |
 | 4.0.0   | 2026-07-28 | Solution Architect | Upgraded to Documentation Standard v4.0.0             |
+| 4.1.0   | 2026-08-02 | Solution Architect | Finalize AI Technology Evaluation                     |

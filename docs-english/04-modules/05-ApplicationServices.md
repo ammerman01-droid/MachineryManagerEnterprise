@@ -1,12 +1,12 @@
-| Property | Value |
-|----------|-------|
-| **Document ID** | APP-005 |
-| **Title** | Pipeline Behaviors |
-| **Version** | 4.0.0 |
-| **Status** | Active |
-| **Owner** | Solution Architect |
-| **Created** | 2026-07-18 |
-| **Last Updated** | 2026-07-28 |
+| Property         | Value              |
+|------------------|--------------------|
+| **Document ID**  | MOD-005            |
+| **Title**        | Pipeline Behaviors |
+| **Version**      | 4.1.0              |
+| **Status**       | Approved           |
+| **Owner**        | Solution Architect |
+| **Created**      | 2026-07-18         |
+| **Last Updated** | 2026-08-08         |
 
 ---
 
@@ -370,8 +370,9 @@ Never for Queries
 - 02-Commands.md
 - 03-Queries.md
 - 04-Handlers.md
-- 06-Validation.md
-- ADR-0004 — Adopt CQRS
+- ../06-decisions/ADR-0007-Use-FluentValidation.md
+- ../06-decisions/ADR-0036-Validation-Pipeline-Architecture.md
+- ADR-0011 — Adopt CQRS
 
 ---
 
@@ -382,3 +383,4 @@ Never for Queries
 | 1.0.0   | 2026-07-18 | Solution Architect | Initial Pipeline Behaviors                            |
 | 3.0.0   | 2026-07-18 | Solution Architect | Standardized according to Documentation Standard v3.0 |
 | 4.0.0   | 2026-07-28 | Solution Architect | Upgraded to Documentation Standard v4.0.0             |
+| 4.1.0   | 2026-08-08 | Solution Architect | Review and synchronize with the latest changes        |

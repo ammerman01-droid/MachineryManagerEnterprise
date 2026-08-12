@@ -1,11 +1,12 @@
-| Property | Value |
-|----------|-------|
-| **Document ID** | DOM-005 |
-| **Version** | 4.0.0 |
-| **Status** | Active |
-| **Owner** | Solution Architect |
-| **Created** | 2026-07-18 |
-| **Last Updated** | 2026-07-28 |
+| Property         | Value              |
+|------------------|--------------------|
+| **Document ID**  | DOM-002            |
+| **Title**        | Domain Services    |
+| **Version**      | 4.1.0              |
+| **Status**       | Approved           |
+| **Owner**        | Solution Architect |
+| **Created**      | 2026-07-18         |
+| **Last Updated** | 2026-08-08         |
 
 ---
 
@@ -646,12 +647,12 @@ Each new Domain Service shall satisfy the principles defined in this document.
 
 # Related Documents
 
-- 04-Aggregates.md
-- 03-DomainModel.md
-- 02-BoundedContexts.md
-- 01-CoreConcepts.md
-- 00-DomainPrinciples.md
-- 09-CapabilityModel.md
+- 05-Aggregates.md
+- 04-DomainModel.md
+- 03-BoundedContexts.md
+- 02-CoreConcepts.md
+- 01-DomainPrinciples.md
+- ../02-architecture/02-CapabilityModel.md
 
 ---
 
@@ -662,3 +663,4 @@ Each new Domain Service shall satisfy the principles defined in this document.
 | 1.0.0   | 2026-07-18 | Solution Architect | Initial | Initial Domain Services definition          |
 | 3.0.0   | 2026-07-18 | Solution Architect | Standardized according to Documentation Standard v3.0 |
 | 4.0.0   | 2026-07-28 | Solution Architect | Upgraded to Documentation Standard v4.0.0             |
+| 4.1.0   | 2026-08-08 | Solution Architect | Fixed Document ID collision: was DOM-005 (duplicate of 05-Aggregates.md), corrected to DOM-006 |

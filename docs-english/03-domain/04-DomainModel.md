@@ -1,11 +1,12 @@
-| Property | Value |
-|----------|-------|
-| **Document ID** | DOM-004 |
-| **Version** | 4.0.0 |
-| **Status** | Active |
-| **Owner** | Solution Architect |
-| **Created** | 2026-07-18 |
-| **Last Updated** | 2026-07-28 |
+| Property         | Value              |
+|------------------|--------------------|
+| **Document ID**  | DOM-004            |
+| **Title**        | Domain Model       |
+| **Version**      | 4.1.0              |
+| **Status**       | Approved           |
+| **Owner**        | Solution Architect |
+| **Created**      | 2026-07-18         |
+| **Last Updated** | 2026-08-08         |
 
 ---
 
@@ -854,7 +855,7 @@ Children include:
 Actual aggregate implementation will be specified in:
 
 ```
-docs/03-domain/04-Aggregates.md
+docs/03-domain/05-Aggregates.md
 ```
 
 ---
@@ -945,18 +946,16 @@ These topics belong to later design phases.
 
 This document depends on:
 
-- 00-DomainPrinciples.md
-- 01-CoreConcepts.md
-- 02-BoundedContexts.md
-
+- 01-DomainPrinciples.md
+- 02-CoreConcepts.md
+- 03-BoundedContexts.md
 The following documents extend this model:
 
-- 04-Aggregates.md
-- 05-DomainServices.md
-- 06-DomainEvents.md
-- 07-BusinessRules.md
-- 08-StateMachines.md
-
+- 05-Aggregates.md
+- 06-DomainServices.md
+- 07-DomainEvents.md
+- 08-BusinessRules.md
+- 09-StateMachines.md
 ---
 
 
@@ -973,12 +972,12 @@ The following documents extend this model:
 
 # Related Documents
 
-- 00-DomainPrinciples.md
-- 01-Glossary.md
+- 01-DomainPrinciples.md
+- 00-Glossary.md
 - 02-CoreConcepts.md
 - 03-BoundedContexts.md
 - 01-Architecture.md
-- 09-CapabilityModel.md
+- ../02-architecture/02-CapabilityModel.md
 
 ---
 
@@ -989,3 +988,4 @@ The following documents extend this model:
 | 1.0.0   | 2026-07-18 | Solution Architect | Initial | Initial Domain Model                        |
 | 3.0.0   | 2026-07-18 | Solution Architect | Standardized according to Documentation Standard v3.0 |
 | 4.0.0   | 2026-07-28 | Solution Architect | Upgraded to Documentation Standard v4.0.0             |
+| 4.1.0   | 2026-08-08 | Solution Architect | Review and synchronize with the latest changes        |

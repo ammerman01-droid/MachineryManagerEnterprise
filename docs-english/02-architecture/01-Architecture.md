@@ -1,13 +1,12 @@
-# System Architecture
-
-| Property | Value |
-|----------|-------|
-| **Document ID** | ARCH-001 |
-| **Version** | 4.1.0 |
-| **Status** | Active |
-| **Owner** | Solution Architect |
-| **Created** | 2026-07-18 |
-| **Last Updated** | 2026-08-02 |
+| Property         | Value              |
+|------------------|--------------------|
+| **Document ID**  | ARCH-001           |
+| **Title**        | System Architecture |
+| **Version**      | 4.2.0              |
+| **Status**       | Approved           |
+| **Owner**        | Solution Architect |
+| **Created**      | 2026-07-18         |
+| **Last Updated** | 2026-08-08         |
 
 ---
 
@@ -192,25 +191,34 @@ Observability is built directly into all application layers:
 
 | Layer | Primary Technology | Related ADR / TE |
 |-------|--------------------|------------------|
-| Runtime | .NET 10 | ADR-0001 / TE-0001 |
-| Web UI | Blazor Server | ADR-0004 / TE-0002 |
-| UI Components | MudBlazor | ADR-0008 / TE-0003 |
-| Client UI | .NET MAUI & Blazor Hybrid | ADR-0013, ADR-0028 / TE-0010, TE-0034 |
+| Runtime | .NET 10 | ADR-0003 / TE-0001 |
+| Web UI | Blazor (Server / WebAssembly) | ADR-0004 / TE-0002 |
+| UI Components | MudBlazor | ADR-0005 / TE-0003 |
+| Client UI (Desktop & Mobile) | .NET MAUI | ADR-0013 / TE-0010 |
 | ORM & Data Access | Entity Framework Core 10 & Dapper | ADR-0006, ADR-0019 / TE-0004, TE-0024 |
+| Database Migration | EF Core Migrations | ADR-0037 / TE-0025 |
 | Embedded DB | SQLite & LiteDB | ADR-0014 / TE-0011 |
-| Validation | FluentValidation | ADR-0007 / TE-0005, TE-0022 |
-| Object Mapping | Mapster | ADR-0010 / TE-0006, TE-0023 |
-| CQRS Engine | MediatR | ADR-0003, ADR-0009 / TE-0009 |
-| API Generation | REST OpenAPI / NSwag | ADR-0005 / TE-0021 |
-| Logging & Telemetry | Serilog & OpenTelemetry | ADR-0011 / TE-0007, TE-0008, TE-0017 |
+| Validation | FluentValidation & MediatR Pipeline Behavior | ADR-0007, ADR-0036 / TE-0005, TE-0022 |
+| Object Mapping | Mapster | ADR-0008 / TE-0006, TE-0023 |
+| CQRS Engine | MediatR | ADR-0011 / TE-0009 |
+| API Documentation & Client Generation | OpenAPI, Scalar, NSwag | ADR-0035 / TE-0021 |
+| Logging & Telemetry | Serilog, OpenTelemetry, Prometheus, Grafana | ADR-0009, ADR-0010, ADR-0033 / TE-0007, TE-0008, TE-0017 |
 | Messaging Engine | MassTransit & RabbitMQ | ADR-0016 / TE-0012 |
-| AI Architecture | Semantic Kernel & Qdrant | ADR-0017, ADR-0022, ADR-0023 / TE-0013, TE-0028, TE-0029 |
+| External Integration | MassTransit-based Connector Framework (+ Azure Logic Apps, opt-in) | ADR-0018 / TE-0036 |
+| AI Architecture | Semantic Kernel, Qdrant, Azure OpenAI / OpenAI / Ollama | ADR-0017, ADR-0022, ADR-0023 / TE-0013, TE-0028, TE-0029 |
 | File Storage | MinIO / S3 Object Store | ADR-0020 / TE-0026 |
-| Search Engine | Meilisearch / Elasticsearch | ADR-0021 / TE-0027 |
-| Testing Engine | xUnit, Testcontainers, K6 | ADR-0024, ADR-0027 / TE-0030, TE-0033 |
-| Security & Identity | ASP.NET Core Identity & OpenIddict | ADR-0030 / TE-0020; (Encryption: ADR-0026 / TE-0032) |
-| Build & Deploy | Docker, Kubernetes, GitHub Actions | ADR-0015, ADR-0025 / TE-0031 |
-| Reporting | QuestPDF & FastReport | ADR-0029 / TE-0035 |
+| Search Engine | SQL Server FTS (default) + OpenSearch (escalation) | ADR-0021 / TE-0027 |
+| Configuration & Secrets | Microsoft.Extensions.Configuration/Options & HashiCorp Vault | ADR-0034 / TE-0018 |
+| Caching | FusionCache, IMemoryCache, Redis (L2) | ADR-0031 / TE-0015 |
+| Background Processing & Scheduling | Quartz.NET & System.Threading.Channels | ADR-0032 / TE-0014, TE-0019 |
+| Testing Engine | xUnit, Moq, Testcontainers, k6, NBomber | ADR-0024, ADR-0027 / TE-0030, TE-0033 |
+| Security & Identity | ASP.NET Core Identity & OpenIddict (Identity); Data Protection, AES-256, X.509 (Encryption) | ADR-0030 / TE-0020; ADR-0026 / TE-0032 |
+| Build & Deploy | Docker, GitHub Actions, .NET Aspire | ADR-0025 / TE-0031 |
+| Reporting | QuestPDF (FastReport & RDLC excluded) | ADR-0029 / TE-0035 |
+
+> **Note:** Avalonia UI (TE-0034 / ADR-0028) was independently evaluated
+> for the Client UI layer and is **Superseded** in favor of .NET MAUI
+> above. It is not part of the active stack.
 
 ---
 
@@ -305,3 +313,4 @@ No architectural change shall bypass the ADR process.
 | 3.0.0   | 2026-07-18 | Solution Architect | Standardized according to Documentation Standard v3.0 |
 | 4.0.0   | 2026-07-28 | Solution Architect | Upgraded to Documentation Standard v4.0.0; fully linked all 35 TE files and ADR Master Index |
 | 4.1.0   | 2026-08-02 | Solution Architect | Corrected Security & Identity references: replaced incorrect "OpenID Connect & Keycloak" / ADR-0026 with the actual TE-0020 recommendation (ASP.NET Core Identity & OpenIddict) and its ratifying ADR-0030 |
+| 4.2.0   | 2026-08-08 | Solution Architect | Fully rebuilt the Technology Stack table: most ADR ID references were incorrect (e.g. MediatR listed under ADR-0003/0009 instead of ADR-0011; Mapster under ADR-0010 instead of ADR-0008; .NET 10 under ADR-0001 instead of ADR-0003); Search Engine corrected from "Meilisearch/Elasticsearch" to the actual decision (SQL Server FTS + OpenSearch escalation); Reporting corrected to exclude FastReport; Build & Deploy corrected to remove Kubernetes (not approved) and the unrelated ADR-0015; Client UI corrected to .NET MAUI only (Avalonia/ADR-0028/TE-0034 noted as Superseded); added missing rows for External Integration (ADR-0018/TE-0036), Configuration & Secrets (ADR-0034), Caching (ADR-0031), Background Processing (ADR-0032), and Database Migration (ADR-0037) |

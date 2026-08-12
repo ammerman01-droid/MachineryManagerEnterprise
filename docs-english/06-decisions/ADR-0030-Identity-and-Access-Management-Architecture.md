@@ -1,11 +1,12 @@
-| Property | Value |
-|----------|-------|
-| **Document ID** | ADR-0030 |
-| **Title** | Identity and Access Management Architecture |
-| **Status** | Accepted |
-| **Version** | 1.0.0 |
-| **Decision Date** | 2026-08-02 |
-| **Owner** | Solution Architect |
+| Property         | Value              |
+|------------------|--------------------|
+| **Document ID**  | ADR-0030           |
+| **Title**        | Identity and Access Management Architecture |
+| **Version**      | 4.1.0              |
+| **Status**       | Approved           |
+| **Owner**        | Solution Architect |
+| **Created**      | 2026-08-02         |
+| **Last Updated** | 2026-08-08         |
 | **Related TE** | TE-0020 – Authentication and Identity Technology Evaluation |
 
 ---
@@ -167,3 +168,4 @@ MachineryManagerEnterprise adopts ASP.NET Core Identity, OpenIddict, and JWT as 
 | Version | Date       | Author             | Description                                           |
 |---------|------------|--------------------|-------------------------------------------------------|
 | 1.0.0   | 2026-08-02 | Solution Architect | Initial version — ratifies TE-0020 Final Recommendation and classifies Identity as a platform module |
+| 4.1.0   | 2026-08-08 | Solution Architect | Review and synchronize with the latest changes        |
