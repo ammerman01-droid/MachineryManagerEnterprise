@@ -5,4 +5,20 @@
     <BlazorDisableThrowNavigationException>true</BlazorDisableThrowNavigationException>
   </PropertyGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\..\BuildingBlocks\MachineryManager.SharedKernel\MachineryManager.SharedKernel.csproj" />
+    <ProjectReference Include="..\..\BuildingBlocks\MachineryManager.SharedKernel.Abstractions\MachineryManager.SharedKernel.Abstractions.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- UI [TE-0003 (MudBlazor / ADR-0005)] -->
+    <PackageReference Include="MudBlazor" />
+
+    <!-- Logging & Observability [TE-0007 (Serilog / ADR-0009), TE-0008 & TE-0017 (OpenTelemetry / ADR-0010, ADR-0033)] -->
+    <PackageReference Include="Serilog.AspNetCore" />
+    <PackageReference Include="Serilog.Sinks.Console" />
+    <PackageReference Include="OpenTelemetry.Extensions.Hosting" />
+    <PackageReference Include="OpenTelemetry.Instrumentation.AspNetCore" />
+  </ItemGroup>
+
 </Project>

@@ -460,4 +460,4 @@ corrects the prior erroneous "TE-0012" reference recorded below.
 | 1.0.0   | 2026-07-26 | Solution Architect | Initial Architecture Decision Record                  |
 | 3.0.0   | 2026-07-26 | Solution Architect | Standardized according to Documentation Standard v3.0 |
 | 4.0.0   | 2026-07-28 | Solution Architect | Upgraded to Documentation Standard v4.0.0             |
-| 4.1.0   | 2026-08-02 | Solution Architect | Formalized technology selection (MassTransit-based Connector Framework / Azure Logic Apps opt-in), closing new TE-0036 and correcting prior erroneous TE-0012 reference |
+| 4.1.0   | 2026-08-08 | Solution Architect | Formalized technology selection (MassTransit-based Connector Framework / Azure Logic Apps opt-in), closing new TE-0036 and correcting prior erroneous TE-0012 reference |

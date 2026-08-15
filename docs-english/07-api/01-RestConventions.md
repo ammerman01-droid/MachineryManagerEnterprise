@@ -402,4 +402,4 @@ REST remains the primary integration style.
 | 1.0.0   | 2026-07-18 | Solution Architect | Initial REST Conventions                              |
 | 3.0.0   | 2026-07-18 | Solution Architect | Standardized according to Documentation Standard v3.0 |
 | 4.0.0   | 2026-07-28 | Solution Architect | Upgraded to Documentation Standard v4.0.0             |
-| 4.1.0   | 2026-08-02 | Solution Architect | Corrected reference from non-existent "ADR-0005 — API Strategy" to the actual governing ADR-0035 (API Documentation and Client Generation Architecture) |
+| 4.1.0   | 2026-08-08 | Solution Architect | Corrected reference from non-existent "ADR-0005 — API Strategy" to the actual governing ADR-0035 (API Documentation and Client Generation Architecture) |

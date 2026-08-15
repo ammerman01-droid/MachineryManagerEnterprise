@@ -1,23 +1,22 @@
-# شاخص مشخصات کسب‌وکار (Business Specification Index)
-
 | ویژگی | مقدار |
-|----------|-------|
+|---|---|
 | **شناسه سند** | BR-INDEX |
-| **نسخه** | 4.0.0 |
-| **وضعیت** | فعال |
-| **مالک** | معمار راهکار (Solution Architect) |
+| **عنوان** | نمایه مشخصات کسب‌وکار (Business Specifications INDEX) |
+| **نسخه** | 4.4.0 |
+| **وضعیت** | تصویب‌شده (Approved) |
+| **مالک سند** | معمار راهکار (Solution Architect) |
 | **تاریخ ایجاد** | 2026-07-20 |
-| **آخرین به‌روزرسانی** | 2026-07-28 |
+| **آخرین به‌روزرسانی** | 2026-08-08 |
 
 ---
 
-# ۱. هدف
+# ۱. هدف (Purpose)
 
-این سند شاخص اصلی تمامی مشخصات کسب‌وکار (Business Specifications) در پلتفرم MachineryManagerEnterprise است.
+این سند نمایه اصلی تمامی مشخصات کسب‌وکار (Business Specifications) در راهکار MachineryManagerEnterprise است.
 
-هر قابلیت کسب‌وکاری کشف‌شده در فاز کشف دامنه (Domain Discovery) در نهایت توسط یک سند مشخصات کسب‌وکار بازنمایی می‌شود.
+هر قابلیت کسب‌وکار شناسایی‌شده در فاز اکتشاف دامنه (Domain Discovery) در نهایت توسط یک سند مشخصه کسب‌وکار بازنمایی خواهد شد.
 
-این شاخص مرجع واحدی برای پیگیری موارد زیر ارائه می‌دهد:
+این نمایه مکان واحدی را برای پیگیری موارد زیر فراهم می‌کند:
 
 - قابلیت‌های کسب‌وکار
 - پیشرفت تحلیل
@@ -26,134 +25,146 @@
 
 ---
 
-# ۲. چرخه حیات
+# ۲. چرخه حیات (Lifecycle)
 
-هر قابلیت کسب‌وکاری از چرخه حیات زیر پیروی می‌کند:
+هر قابلیت کسب‌وکار باید از چرخه حیات زیر پیروی نماید:
 
 ```text
-کشف دامنه (Domain Discovery)
+Domain Discovery (اکتشاف دامنه)
 
 ↓
 
-مشخصات کسب‌وکار (Business Specification)
+Business Specification (مشخصات کسب‌وکار)
 
 ↓
 
-مدل دامنه (Domain Model)
+Domain Model (مدل دامنه)
 
 ↓
 
-طراحی برنامه (Application Design)
+Application Design (طراحی کاربردی)
 
 ↓
 
-پیاده‌سازی (Implementation)
+Implementation (پیاده‌سازی)
 
 ↓
 
-تست (Testing)
+Testing (آزمون)
 
 ↓
 
-محیط عملیاتی (Production)
+Production (محیط عملیاتی)
 ```
 
-هیچ قابلیت کسب‌وکاری نباید هیچ مرحله‌ای را حذف کند.
+هیچ قابلیتی نباید از هیچ مرحله‌ای عبور کند یا آن را نادیده بگیرد.
 
 ---
 
-# ۳. تعاریف وضعیت‌ها
+# ۳. تعاریف وضعیت (Status Definitions)
 
-| وضعیت | شرح |
-|----------|-------------|
-| برنامه‌ریزی‌شده (Planned) | شناسایی‌شده اما نوشتن مشخصات هنوز آغاز نشده است |
-| پیش‌نویس (Draft) | مشخصات کسب‌وکار در حال نگارش است |
-| در حال بررسی (Under Review) | در انتظار بررسی کسب‌وکاری یا معماری |
-| تاییدشده (Approved) | مشخصات کسب‌وکار تایید شده است |
-| مدل‌سازی‌شده (Modeled) | مدل دامنه تکمیل شده است |
-| پیاده‌سازی‌شده (Implemented) | قابلیت به طور کامل پیاده‌سازی شده است |
-
----
-
-# ۴. کاتالوگ مشخصات کسب‌وکار
-
-| شناسه | قابلیت کسب‌وکار | کشف دامنه | سند مشخصات | پیش‌نیازها | اولویت | وضعیت |
-| ---------- | ----------------------------------- | ---------- | --------------------------------------------------------------------| ---------------| -------- | --------|
-| BR-003 | روابط دارایی‌ها (Asset Relationships) | DD-002 | BR-003-BusinessSpecification-AssetRelationships.md | — | بالا | برنامه‌ریزی‌شده |
-| BR-004 | قطعات دارای کدردیابی (Tracked Components) | DD-003 | BR-004-BusinessSpecification-TrackedComponents.md | BR-001 | بالا | پیش‌نویس |
-| BR-005 | مدیریت چرخه حیات تایرها (Tire Lifecycle Management) | DD-004 | BR-005-BusinessSpecification-TireLifecycle.md | BR-002 | بالا | برنامه‌ریزی‌شده |
-| BR-006 | مدیریت چرخه حیات باتری (Battery Lifecycle Management) | DD-005 | BR-006-BusinessSpecification-BatteryLifecycle.md | BR-002 | بالا | برنامه‌ریزی‌شده |
-| BR-007 | کاتالوگ قطعات (Parts Catalog) | DD-006 | BR-007-BusinessSpecification-PartsCatalog.md | — | بالا | برنامه‌ریزی‌شده |
-| BR-008 | ارجاع متقابل قطعات (Part Cross Reference) | DD-007 | BR-008-BusinessSpecification-PartCrossReference.md | BR-005 | بالا | برنامه‌ریزی‌شده |
-| BR-009 | مدیریت حوادث و ایمنی (Incident Management) | DD-008 | BR-009-BusinessSpecification-IncidentManagement.md | BR-010 | بالا | برنامه‌ریزی‌شده |
-| BR-010 | پیش‌بینی نت (Maintenance Forecast) | DD-009 | BR-010-BusinessSpecification-MaintenanceForecast.md | BR-010 | بالا | برنامه‌ریزی‌شده |
-| BR-011 | عملیات نت (Maintenance Operations) | DD-010 | BR-011-BusinessSpecification-MaintenanceOperations.md | BR-001, BR-002 | بالا | برنامه‌ریزی‌شده |
-| BR-012 | مرکز اعلان‌ها (Notification Center) | DD-011 | BR-012-BusinessSpecification-NotificationCenter.md | — | بالا | برنامه‌ریزی‌شده |
-| BR-013 | پیام‌رسانی داخلی (Internal Messaging) | DD-012 | BR-013-BusinessSpecification-InternalMessaging.md | — | متوسط | برنامه‌ریزی‌شده |
-| BR-014 | دستیار هوش مصنوعی (AI Assistant) | DD-013 | BR-014-BusinessSpecification-AIAssistant.md | — | متوسط | برنامه‌ریزی‌شده |
-| BR-015 | مدیریت روابط (Relationship Management) | DD-015 | BR-015-BusinessSpecification-RelationshipManagement.md | BR-001 | بالا | برنامه‌ریزی‌شده |
-| BR-016 | همگام‌سازی توزیع‌شده محیط کاری (Distributed Workspace Sync) | DD-015 | BR-016-BusinessSpecification-DistributedWorkspaceSynchronization.md | BR-001 | بالا | برنامه‌ریزی‌شده |
+| وضعیت (Status) | توصیف (Description) |
+|---|---|
+| Planned (برنامه‌ریزی‌شده) | شناسایی شده اما نگارش مشخصات هنوز آغاز نشده است |
+| Draft (پیش‌نویس) | مشخصات کسب‌وکار در حال نگارش است |
+| Under Review (تحت بررسی) | در انتظار بازبینی کسب‌وکار یا معماری |
+| Approved (تصویب‌شده) | مشخصات کسب‌وکار تصویب شده است |
+| Modeled (مدل‌سازی‌شده) | مدل دامنه تکمیل شده است |
+| Implemented (پیاده‌سازی‌شده) | قابلیت به طور کامل پیاده‌سازی شده است |
 
 ---
 
-# ۵. ترتیب اولویت پیاده‌سازی
+# ۴. کاتالوگ مشخصات کسب‌وکار (Business Specification Catalog)
 
-ترتیب پیشنهادی پیاده‌سازی به شرح زیر است:
+| شناسه | قابلیت کسب‌وکار | شناسه کشف | سند مشخصه | وابسته به | اولویت | وضعیت |
+|---|---|---|---|---|---|---|
+| BR-017 | Organization Management (مدیریت سازمان) | — | BR-017-BusinessSpecification-OrganizationManagement.md | — | بالا | Draft |
+| BR-003 | Asset Relationships (روابط دارایی‌ها) | DD-002 | BR-003-BusinessSpecification-AssetRelationships.md | — | بالا | Planned |
+| BR-004 | Tracked Components (مؤلفه‌های دارای قابلیت ردیابی) | DD-003 | BR-004-BusinessSpecification-TrackedComponents.md | BR-003 | بالا | Draft |
+| BR-005 | Tire Lifecycle Management (مدیریت چرخه حیات لاستیک) | DD-004 | BR-005-BusinessSpecification-TireLifecycle.md | BR-004 | بالا | Planned |
+| BR-006 | Battery Lifecycle Management (مدیریت چرخه حیات باتری) | DD-005 | BR-006-BusinessSpecification-BatteryLifecycle.md | BR-004 | بالا | Planned |
+| BR-007 | Parts Catalog (کاتالوگ قطعات) | DD-006 | BR-007-BusinessSpecification-PartsCatalog.md | — | بالا | Planned |
+| BR-008 | Part Cross Reference (ارجاع متقابل قطعات) | DD-007 | BR-008-BusinessSpecification-PartCrossReference.md | BR-007 | بالا | Planned |
+| BR-009 | Incident Management (مدیریت حوادث و وقایع) | DD-008 | BR-009-BusinessSpecification-IncidentManagement.md | BR-012 | بالا | Planned |
+| BR-010 | Maintenance Forecast (پیش‌بینی نگهداری) | DD-009 | BR-010-BusinessSpecification-MaintenanceForecast.md | BR-012 | بالا | Planned |
+| BR-011 | Maintenance Operations (عملیات نگهداری و تعمیرات) | DD-010 | BR-011-BusinessSpecification-MaintenanceOperations.md | BR-003, BR-004 | بالا | Planned |
+| BR-012 | Notification Center (مرکز اعلان‌ها) | DD-011 | BR-012-BusinessSpecification-NotificationCenter.md | — | بالا | Planned |
+| BR-013 | Internal Messaging (پیام‌رسانی داخلی) | DD-012 | BR-013-BusinessSpecification-InternalMessaging.md | — | متوسط | Planned |
+| BR-014 | AI Assistant (دستیار هوش مصنوعی) | DD-013 | BR-014-BusinessSpecification-AIAssistant.md | — | متوسط | Planned |
+| BR-015 | Relationship Management (مدیریت روابط) | DD-015 | BR-015-BusinessSpecification-RelationshipManagement.md | BR-003 | بالا | Planned |
+| BR-016 | DistributedWorkspaceSynchronization (همگام‌سازی توزیع‌شده فضای کاری) | — | BR-016-BusinessSpecification-DistributedWorkspaceSynchronization.md | BR-003 | بالا | Planned |
 
+---
+
+# ۵. ترتیب اولویت اجرایی (Priority Order)
+
+توالی پیشنهادی پیاده‌سازی عبارت است از:
+
+0. مدیریت سازمان (Organization Management)
 1. روابط دارایی‌ها (Asset Relationships)
-2. قطعات دارای کدردیابی (Tracked Components)
-3. مدیریت چرخه حیات تایرها (Tire Lifecycle Management)
+2. مؤلفه‌های دارای قابلیت ردیابی (Tracked Components)
+3. مدیریت چرخه حیات لاستیک (Tire Lifecycle Management)
 4. مدیریت چرخه حیات باتری (Battery Lifecycle Management)
 5. کاتالوگ قطعات (Parts Catalog)
 6. ارجاع متقابل قطعات (Part Cross Reference)
-7. عملیات نت (Maintenance Operations)
-8. پیش‌بینی نت (Maintenance Forecast)
-9. مدیریت حوادث (Incident Management)
+7. عملیات نگهداری و تعمیرات (Maintenance Operations)
+8. پیش‌بینی نگهداری (Maintenance Forecast)
+9. مدیریت حوادث و وقایع (Incident Management)
 10. مرکز اعلان‌ها (Notification Center)
 11. پیام‌رسانی داخلی (Internal Messaging)
 12. دستیار هوش مصنوعی (AI Assistant)
 13. مدیریت روابط (Relationship Management)
 
-این ترتیب منعکس‌کننده وابستگی‌های معماری است و بازطراحی‌های آتی را به حداقل می‌رساند.
+این ترتیب منعکس‌کننده وابستگی‌های معماری است و نیاز به بازطراحی‌های آینده را به حداقل می‌رساند.
+
+مدیریت سازمان پیش از روابط دارایی‌ها قرار گرفته است زیرا سند `04-DomainModel.md` سازمان (Organization) را مالک تجاری دارایی‌ها تعریف می‌کند (`Organization → Owns → Assets`)؛ بنابراین انتساب مالکیت دارایی به وجود داشتن سازمان به عنوان یک قابلیت مدل‌سازی‌شده وابسته است.
 
 ---
 
-# ۶. قوانین نگهداری
+# ۶. قواعد نگهداری مستندات (Maintenance Rules)
 
-- هر قابلیت کشف‌شده باید به این شاخص اضافه شود.
-- هر مشخصات کسب‌وکاری باید دارای یک شناسه BR منحصربه‌فرد باشد.
-- وضعیت هر قابلیت باید با پیشرفت آن به‌روزرسانی شود.
-- تغییر در اولویت یا ترتیب پیاده‌سازی مستلزم بررسی معماری است.
-- هر مشخصات کسب‌وکاری باید صریحاً مشخصات پیش‌نیاز خود را اعلام کند.
-- مفاهیم عرضی دامنه باید در اسناد اصول دامنه یا حاکمیت دامنه مستند شوند مگر اینکه نیازمند رفتار کسب‌وکاری مستقل باشند.
-
----
-
-# ۷. اسناد مرتبط
-
-- `10-DomainDiscovery-fa.md`
-- `BR-002-BusinessSpecificationTemplate-fa.md`
-- `01-DomainPrinciples-fa.md`
-- `02-CoreConcepts-fa.md`
-- `03-BoundedContexts-fa.md`
-- `01-Architecture-fa.md`
+- هر قابلیت کشف‌شده باید به این نمایه افزوده شود.
+- هر مشخصه کسب‌وکار باید دارای یک شناسه یکتای BR باشد.
+- وضعیت هر قابلیت باید همگام با پیشرفت آن به‌روزرسانی گردد.
+- هرگونه تغییر در اولویت یا توالی پیاده‌سازی نیازمند بازبینی معماری است.
+- هر مشخصه کسب‌وکار باید مشخصات پیش‌نیاز خود را صراحتاً اعلام نماید.
+- مفاهیم فرابخشی دامنه باید در اصول دامنه یا حاکمیت دامنه مستند شوند مگر اینکه نیازمند رفتارهای تجاری مستقل باشند.
 
 ---
 
-# خلاصه تصمیمات
+# ۷. اسناد مرتبط (Related Documents)
 
-- ✔ معماری پاک (Clean Architecture)
-- ✔ سازگاری با .NET 10
-- ✔ رعایت استانداردها
-- ✔ خنثی بودن نسبت به ابر (Cloud Neutrality)
-- ✔ آمادگی برای هوش مصنوعی
+- ../10-DomainDiscovery.md
+- BR-002-BusinessSpecificationTemplate.md
+- ../01-DomainPrinciples.md
+- ../02-CoreConcepts.md
+- ../03-BoundedContexts.md
+- 01-Architecture.md
+- CapabilityModel
+- AI_ENGINEERING_CONTRACT.md
+- REPOSITORY_GUIDE.md
+
+---
+
+# خلاصه تصمیم (Decision Summary)
+
+- ✔ معماری تمیز (Clean Architecture)
+- ✔ سازگاری با NET 10.
+- ✔ انطباق با استانداردها
+- ✔ بی‌طرفی نسبت به ابر (Cloud Neutrality)
+- ✔ آمادگی برای هوش مصنوعی (AI Readiness)
 - ✔ قابلیت نگهداری بلندمدت
 
-# تاریخچه تغییرات
+# تاریخچه بازنگری (Revision History)
 
-| نسخه | تاریخ | نویسنده / نقش | شرح |
-|---------|------------|---------------------|--------------------------------------|
-| 1.0.0 | 2026-07-20 | معمار راهکار | شاخص مشخصات کسب‌وکار اولیه |
-| 1.1.0 | 2026-07-20 | معمار راهکار | افزودن BR-002 قطعات دارای کدردیابی و شماره‌گذاری مجدد مشخصات بعدی |
-| 1.2.0 | 2026-07-20 | معمار راهکار | افزودن پیگیری وابستگی‌ها و معرفی عملیات نت به عنوان مشخصات کسب‌وکار پایه |
-| 4.0.0 | 2026-07-28 | معمار راهکار | ارتقا به استاندارد مستندسازی نسخه 4.0.0 |
+| نسخه | تاریخ | نویسنده | توصیف |
+|---|---|---|---|
+| 1.0.0 | 2026-07-20 | معمار راهکار | نمایه اولیه مشخصات کسب‌وکار |
+| 1.1.0 | 2026-07-20 | معمار راهکار | افزودن BR-002 مؤلفه‌های دارای قابلیت ردیابی و بازشماری مشخصات بعدی |
+| 1.2.0 | 2026-07-20 | معمار راهکار | افزودن ردیابی وابستگی‌ها و معرفی عملیات نگهداری به عنوان مشخصه ریشه‌ای کسب‌وکار |
+| 3.0.0 | 2026-07-20 | معمار راهکار | استانداردسازی بر اساس استاندارد مستندسازی نسخه ۳.۰ |
+| 4.0.0 | 2026-07-28 | معمار راهکار | ارتقا به استاندارد مستندسازی نسخه ۴.۰.۰ |
+| 4.1.0 | 2026-08-02 | معمار راهکار | افزودن BR-017 مدیریت سازمان (وضعیت: پیش‌نویس) و قرارگیری در اولویت ۰ پیش از روابط دارایی‌ها |
+| 4.2.0 | 2026-08-02 | معمار راهکار | اصلاح فیلد متادیتای شناسه سند در تمام ۱۵ سند مشخصه (BR-003 تا BR-017) به گونه‌ای که با نام فایل همخوانی داشته باشد |
+| 4.3.0 | 2026-08-02 | معمار راهکار | اصلاح شناسه تکراری DD-015 برای BR-015 و اصلاح مقادیر جدول وابستگی‌ها |
+| 4.4.0 | 2026-08-08 | معمار راهکار | تطبیق و اصلاح شناسه‌های کشف بر اساس مرجع 10-DomainDiscovery.md |

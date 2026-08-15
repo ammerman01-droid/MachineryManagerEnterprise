@@ -345,4 +345,4 @@ These additions shall remain compatible with the existing authorization model.
 | 3.0.0   | 2026-07-18 | Solution Architect | Standardized according to Documentation Standard v3.0 |
 | 4.0.0   | 2026-07-28 | Solution Architect | Upgraded to Documentation Standard v4.0.0             |
 | 4.1.0   | 2026-08-02 | Solution Architect | Corrected reference from ADR-0026 (Data Protection & Encryption, unrelated) to ADR-0030 (Identity and Access Management Architecture) as the primary governing ADR |
-| 4.2.0   | 2026-08-02 | Solution Architect | Clarified multi-tenancy as confirmed, mandatory platform architecture (was described as conditional); removed redundant TenantId claim, since OrganizationId is the tenant identifier |
+| 4.2.0   | 2026-08-08 | Solution Architect | Clarified multi-tenancy as confirmed, mandatory platform architecture (was described as conditional); removed redundant TenantId claim, since OrganizationId is the tenant identifier |

@@ -1,202 +1,375 @@
-# احراز دسترسی و صلاحیت (Authorization)
-
 | ویژگی | مقدار |
-|----------|-------|
-| **شناسه سند** | APP-007 |
-| **نسخه** | 4.0.0 |
-| **وضعیت** | فعال |
-| **مالک** | معمار راهکار (Solution Architect) |
+|---|---|
+| **شناسه سند** | MOD-007 |
+| **عنوان** | مدل اعطای مجوز و دسترسی (Authorization model) |
+| **نسخه** | 4.1.0 |
+| **وضعیت** | تصویب‌شده (Approved) |
+| **مالک سند** | معمار راهکار (Solution Architect) |
 | **تاریخ ایجاد** | 2026-07-18 |
-| **آخرین به‌روزرسانی** | 2026-07-28 |
+| **آخرین به‌روزرسانی** | 2026-08-08 |
 
 ---
 
-# ۱. هدف
+# ۱. هدف (Purpose)
 
-این سند مدل احراز دسترسی و صلاحیت () سیستم MachineryManagerEnterprise را تعریف می‌کند.
+این سند، مدل اعطای مجوز (Authorization Model) پلتفرم MachineryManagerEnterprise را تعریف می‌کند.
 
-احراز دسترسی مشخص می‌کند **چه کسی مجاز به انجام چه عملیات کسب‌وکاری است**.
+اعطای مجوز تعیین می‌کند که **چه کسی مجاز است کدام عملیات تجاری را انجام دهد**.
 
-احراز هویت (Authentication) هویت کاربر را شناسایی می‌کند، در حالی که احراز دسترسی (Authorization) مجوزها و دسترسی‌ها را تعیین می‌نماید.
+احراز هویت (Authentication)، هویت کاربر را شناسایی می‌کند.
 
----
-
-# فلسفه احراز دسترسی
-
-احراز دسترسی محافظ عملیات کسب‌وکار است.
-
-احراز دسترسی هرگز شامل منطق کسب‌وکار نیست.
-
-قوانین کسب‌وکار داخل دامنه باقی می‌مانند.
-
-احراز دسترسی بررسی می‌کند آیا اجرای یک عملیات قبل از فراخوانی پردازنده توسط لایه کاربرد مجاز است یا خیر.
+اعطای مجوز (Authorization)، سطوح دسترسی و مجوزها را تعیین می‌نماید.
 
 ---
 
-# ۲. اصول احراز دسترسی
+# فلسفه اعطای مجوز (Authorization Philosophy)
 
-سیستم احراز دسترسی باید اصول زیر را برآورده سازد:
+اعطای مجوز از عملیات تجاری محافظت می‌کند.
+
+اعطای مجوز هرگز حاوی منطق تجاری نیست.
+
+قواعد تجاری (Business Rules) در درون لایه دامنه (Domain) باقی می‌مانند.
+
+اعطای مجوز تعیین می‌کند که آیا اجرای عملیات قبل از اینکه لایه کاربرد (Application Layer) اقدام به فراخوانی مدیریت‌کننده (Handler) کند مجاز است یا خیر.
+
+---
+
+# ۲. اصول اعطای مجوز (Authorization Principles)
+
+سیستم اعطای مجوز باید اصول زیر را برآورده سازد:
 
 - کنترل دسترسی مبتنی بر نقش (RBAC - Role Based Access Control)
-- حداقل سطح دسترسی (Least Privilege)
-- مجوزهای مبتنی بر مفاهیم کسب‌وکار (Business oriented permissions)
-- مدیریت متمرکز دسترسی (Centralized authorization)
+- اصل حداقل دسترسی (Least Privilege)
+- مجوزهای مبتنی بر کسب‌وکار (Business oriented permissions)
+- اعطای مجوز متمرکز (Centralized authorization)
 - تصمیمات قابل حسابرسی (Auditable decisions)
 - مستقل از فناوری (Technology independent)
 
-احراز دسترسی هرگز نباید به پیاده‌سازی رابط کاربری وابسته باشد.
+اعطای مجوز هرگز نباید به پیاده‌سازی رابط کاربری وابسته باشد.
 
 ---
 
-# ۳. مدل احراز دسترسی
+# ۳. مدل اعطای مجوز (Authorization Model)
 
 ```text
 کاربر (User)
-      │
-      ▼
+
+↓
+
 نقش (Role)
-      │
-      ▼
-مجوز / دسترسی (Permission)
-      │
-      ▼
-عملیات کسب‌وکار (Business Operation)
+
+↓
+
+مجوز (Permission)
+
+↓
+
+عملیات تجاری (Business Operation)
 ```
 
 یک کاربر می‌تواند دارای چندین نقش باشد.
 
-یک نقش می‌تواند شامل چندین مجوز دسترسی باشد.
+یک نقش می‌تواند شامل چندین مجوز باشد.
 
 ---
 
-# ۴. دسته‌بندی مجوزها
+# ۴. دسته‌بندی‌های مجوزها (Permission Categories)
 
-مجوزها بر اساس دامنه‌های کسب‌وکار گروه بندی می‌شوند:
+مجوزها بر اساس دامنه‌های تجاری گروه‌بندی می‌شوند:
 
-- دارایی (Asset)
-- موتور (Engine)
-- قطعات (Components)
-- کارکردسنج (Meter)
-- نگهداری و تعمیرات (Maintenance)
-- امور مالی (Financial)
-- اسناد (Documents)
-- پیش‌بینی (Forecast)
-- گزارش‌گیری (Reporting)
-- مدیریت سیستم (Administration)
-- پیکربندی (Configuration)
+```text
+مجوزها (Permissions)
+
+├── دارایی (Asset)
+├── موتور (Engine)
+├── قطعات و اجزا (Components)
+├── کنتور و کارکردسنج (Meter)
+├── نگهداری و تعمیرات (Maintenance)
+├── مالی (Financial)
+├── اسناد (Documents)
+├── پیش‌بینی (Forecast)
+├── گزارش‌گیری (Reporting)
+├── مدیریت سیستم (Administration)
+└── پیکربندی (Configuration)
+```
 
 ---
 
-# ۵. نقش‌های استاندارد
+# ۵. نقش‌های استاندارد (Standard Roles)
 
-نقش‌های زیر به عنوان نقش‌های پایه در پلتفرم تعریف شده‌اند:
+نقش‌های زیر به عنوان بخشی از هسته اصلی پلتفرم در نظر گرفته می‌شوند:
 
 - مدیر سیستم (System Administrator)
+- مدیر سازمان (Organization Administrator)
 - مدیر ناوگان (Fleet Manager)
 - مدیر نگهداری و تعمیرات (Maintenance Manager)
-- تکنسین نت (Maintenance Technician)
-- سرپرست تعمیرگاه (Workshop Supervisor)
-- اپراتور ماشین‌الآت (Operator)
-- مدیر مالی (Financial Officer)
-- مسئول تدارکات و تامین (Procurement Officer)
-- مسئول اسناد و مدارک (Document Controller)
-- حسابرس فقط‌خواندنی (Read-Only Auditor)
+- تکنسین نگهداری و تعمیرات (Maintenance Technician)
+- سرپرست کارگاه (Workshop Supervisor)
+- اپراتور (Operator)
+- مسئول مالی (Financial Officer)
+- مسئول تدارکات و خرید (Procurement Officer)
+- کنترل‌کننده اسناد (Document Controller)
+- حسابرس فقط-خواندنی (Read-Only Auditor)
 
-سازمان‌ها می‌توانند نقش‌های سفارشی اضافی نیز تعریف کنند.
+نقش «مدیر سیستم» در سطح کل پلتفرم و در سراسر سازمان‌ها عمل می‌کند. نقش «مدیر سازمان» محدود به یک سازمان (مستاجر / Tenant) واحد است و دارای مجوزهای مدیریتی در محدوده سازمان از جمله `Organization.Manage` (به بخش ۱۴ مراجعه فرمایید) تنها در داخل همان مرز سازمانی است.
 
----
-
-# ۶. قواعد نام‌گذاری مجوزها
-
-مجوزها از الگوی زیر پیروی می‌کنند:
-`<Module>.<Operation>`
-
-مثال‌ها:
-- `Asset.Create` / `Asset.Update` / `Asset.Dispose`
-- `Engine.Install` / `Engine.Remove`
-- `Maintenance.Create` / `Maintenance.Complete`
-- `Document.Upload` / `Document.Renew`
-- `Forecast.Generate`
+سازمان‌ها می‌توانند نقش‌های بیشتری را تعریف نمایند.
 
 ---
 
-# ۷. جریان احراز دسترسی (Authorization Flow)
+# ۶. قرارداد نام‌گذاری مجوزها (Permission Naming Convention)
+
+مجوزها باید از الگوی زیر پیروی کنند:
+
+```
+<Module>.<Operation>
+```
+
+نمونه‌ها:
+
+```
+Asset.Create
+Asset.Update
+Asset.Delete
+
+Engine.Install
+Engine.Remove
+
+Maintenance.Create
+Maintenance.Complete
+
+Document.Upload
+Document.Renew
+
+Forecast.Generate
+```
+
+---
+
+# ۷. مجوزهای دارایی (Asset Permissions)
+
+نمونه‌ها:
+
+- Asset.View
+- Asset.Create
+- Asset.Update
+- Asset.Transfer
+- Asset.Retire
+- Asset.Dispose
+- Asset.Export
+
+---
+
+# ۸. مجوزهای موتور (Engine Permissions)
+
+نمونه‌ها:
+
+- Engine.View
+- Engine.Register
+- Engine.Install
+- Engine.Remove
+- Engine.Replace
+- Engine.Rebuild
+
+---
+
+# ۹. مجوزهای نگهداری و تعمیرات (Maintenance Permissions)
+
+نمونه‌ها:
+
+- Maintenance.Plan
+- Maintenance.Schedule
+- Maintenance.Start
+- Maintenance.Complete
+- Maintenance.Cancel
+- Failure.Register
+- Inspection.Register
+
+---
+
+# ۱۰. مجوزهای مالی (Financial Permissions)
+
+نمونه‌ها:
+
+- Financial.View
+- Financial.RecordExpense
+- Financial.CalculateDepreciation
+- Financial.ViewOwnershipCost
+
+مجوزهای مالی باید با دقت و احتیاط اعطا شوند.
+
+---
+
+# ۱۱. مجوزهای اسناد (Document Permissions)
+
+نمونه‌ها:
+
+- Document.View
+- Document.Upload
+- Document.Replace
+- Document.Archive
+- Document.Export
+
+---
+
+# ۱۲. مجوزهای پیش‌بینی (Forecast Permissions)
+
+نمونه‌ها:
+
+- Forecast.View
+- Forecast.Generate
+- Forecast.Compare
+
+تولید پیش‌بینی ممکن است نیازمند سطوح دسترسی بالاتری باشد.
+
+---
+
+# ۱۳. مجوزهای گزارش‌گیری (Reporting Permissions)
+
+نمونه‌ها:
+
+- Report.View
+- Report.Generate
+- Report.Export
+
+---
+
+# ۱۴. مجوزهای مدیریتی (Administrative Permissions)
+
+نمونه‌ها:
+
+- User.Create
+- User.Disable
+- Role.Assign
+- Permission.Assign
+- Organization.Manage
+- Configuration.Manage
+
+مجوزهای مدیریتی باید محدود شوند.
+
+---
+
+# ۱۵. جریان اعطای مجوز (Authorization Flow)
+
+جریان معمول اعطای مجوز:
 
 ```text
 درخواست (Request)
-       │
-       ▼
+
+↓
+
 احراز هویت (Authentication)
-       │
-       ▼
-شناسایی کاربر (Resolve User)
-       │
-       ▼
-استخراج نقش‌ها (Resolve Roles)
-       │
-       ▼
-استخراج مجوزها (Resolve Permissions)
-       │
-       ▼
-ارزیابی سیاست دسترسی (Authorize)
-       │
-       ▼
-اجرای پردازنده (Execute Handler)
+
+↓
+
+تشخیص و حل کاربر (Resolve User)
+
+↓
+
+تشخیص نقش‌ها (Resolve Roles)
+
+↓
+
+تشخیص مجوزها (Resolve Permissions)
+
+↓
+
+اعطای مجوز (Authorize)
+
+↓
+
+اجرای مدیریت‌کننده (Execute Handler)
 ```
 
-احراز دسترسی همواره قبل از اجرای منطق کسب‌وکار رخ می‌دهد.
+اعطای مجوز باید قبل از اجرای منطق تجاری انجام شود.
 
 ---
 
-# ۸. عدم احراز دسترسی (Authorization Failures)
+# ۱۶. خطاهای اعطای مجوز (Authorization Failures)
 
-هنگامی که احراز دسترسی ناموفق باشد:
+هنگامی که اعطای مجوز با شکست مواجه می‌شود:
 
-- وضعیت کسب‌وکار بدون تغییر باقی می‌ماند؛
-- هیچ رویداد دامنه‌ای منتشر نمی‌شود؛
-- تلاش ناموفق در لاگ‌های امنیتی ثبت می‌شود.
-
----
-
-# ۹. الزامات حسابرسی (Audit Requirements)
-
-هر عملیات حساس به دسترسی باید موارد زیر را ثبت کند:
-
-- کاربر (`User`)
-- زمان دقیق (`Time`)
-- نوع عملیات (`Operation`)
-- منبع / شیء مورد دسترسی (`Resource`)
-- نتیجه (`Result`)
-- مبدا درخواست (`Source`)
-
-سوابق حسابرسی تغییرناپذیر هستند.
+- وضعیت تجاری باید بدون تغییر باقی بماند؛
+- هیچ رخداد دامنه‌ای (Domain Event) نباید منتشر شود؛
+- این تلاش باید لاگ و ثبت شود.
 
 ---
 
-# خلاصه تصمیمات
+# ۱۷. الزامات حسابرسی (Audit Requirements)
 
-- ✔ معماری پاک (Clean Architecture)
-- ✔ سازگاری با .NET 10
-- ✔ رعایت استانداردها
-- ✔ خنثی بودن نسبت به ابر (Cloud Neutrality)
-- ✔ آمادگی برای هوش مصنوعی
+هر عملیات حساس به اعطای مجوز باید موارد زیر را ثبت و ضبط کند:
+
+- کاربر (User)
+- زمان (Time)
+- عملیات (Operation)
+- منبع (Resource)
+- نتیجه (Result)
+- مبدا (Source)
+
+سوابق حسابرسی تغییرناپذیر (Immutable) هستند.
+
+---
+
+# ۱۸. قابلیت‌های آینده اعطای مجوز (Future Authorization Features)
+
+نسخه‌های آینده ممکن است از موارد زیر پشتیبانی کنند:
+
+- اعطای مجوز مبتنی بر منبع (Resource-based authorization)
+- مجوزهای سطح سازمان (Organization-level permissions)
+- مجوزهای موقت (Temporary permissions)
+- تفویض اختیار (Delegation)
+- گردش کارهای تاییدیه (Approval workflows)
+- احراز هویت چندعاملی برای عملیات حیاتی (Multi-factor authorization for critical operations)
+
+---
+
+# ۱۹. حل و بررسی مجوز (Permission Resolution)
+
+اعطای مجوز باید به ترتیب زیر انجام شود:
+
+۱. احراز هویت کاربر (Authenticate User)
+۲. تشخیص سازمان (Resolve Organization)
+۳. تشخیص نقش‌ها (Resolve Roles)
+۴. تشخیص مجوزها (Resolve Permissions)
+۵. ارزیابی خط‌مشی (Evaluate Policy)
+۶. اجرای مدیریت‌کننده (Execute Handler)
+
+---
+
+| مجوز (Permission) | فرمان (Command) |
+|---|---|
+| Asset.Create | RegisterAssetCommand |
+| Engine.Install | InstallEngineCommand |
+| Maintenance.Complete | CompleteMaintenanceCommand |
+
+---
+
+# خلاصه تصمیم (Decision Summary)
+
+- ✔ معماری تمیز (Clean Architecture)
+- ✔ سازگاری با NET 10.
+- ✔ انطباق با استانداردها
+- ✔ بی‌طرفی نسبت به ابر (Cloud Neutrality)
+- ✔ آمادگی برای هوش مصنوعی (AI Readiness)
 - ✔ قابلیت نگهداری بلندمدت
 
-# اسناد مرتبط
+# اسناد مرتبط (Related Documents)
 
-- `02-Commands-fa.md`
-- `03-Queries-fa.md`
-- `04-Handlers-fa.md`
-- `06-Workflows-fa.md`
-- `08-BusinessRules-fa.md`
-- `ADR-0026-Enterprise Security Strategy`
+- 06-Workflows.md
+- 04-Handlers.md
+- 02-Commands.md
+- 03-Queries.md
+- docs/03-domain/08-BusinessRules.md
+- ADR-0030-Identity and Access Management Architecture
 
 ---
 
-# تاریخچه تغییرات
+# تاریخچه بازنگری (Revision History)
 
-| نسخه | تاریخ | شرح |
-|----------|------------|----------------------------------------------|
-| 1.0.0 | اولیه | مدل اولیه احراز دسترسی |
-| 3.0.0 | 2026-07-18 | استانداردسازی مطابق با استاندارد مستندسازی نسخه 3.0 |
-| 4.0.0 | 2026-07-28 | ارتقا به استاندارد مستندسازی نسخه 4.0.0 |
+| نسخه | تاریخ | نویسنده | توصیف |
+|---|---|---|---|
+| 1.0.0 | 2026-07-18 | معمار راهکار | مدل اولیه اعطای مجوز |
+| 3.0.0 | 2026-07-18 | معمار راهکار | استانداردسازی بر اساس استاندارد مستندسازی نسخه ۳.۰ |
+| 4.0.0 | 2026-07-28 | معمار راهکار | ارتقا به استاندارد مستندسازی نسخه ۴.۰.۰ |
+| 4.1.0 | 2026-08-02 | معمار راهکار | اصلاح ارجاع از ADR-0026 (حفاظت داده و رمزنگاری، نامرتبط) به ADR-0030 (معماری مدیریت هویت و دسترسی) |
+| 4.2.0 | 2026-08-08 | معمار راهکار | افزودن مدیر سازمان به نقش‌های استاندارد — سند 01-vision/00-Vision.md آن را به عنوان یک کاربر هدف اصلی نام می‌برد، و این سند از قبل به مجوزهای در محدوده سازمان (Organization.Manage) بدون داشتن نقشی که آنها را داشته باشد ارجاع داده بود |

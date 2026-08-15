@@ -4,8 +4,4 @@
     <RootNamespace>MachineryManager.Organization.Domain</RootNamespace>
   </PropertyGroup>
 
-  <ItemGroup>
-    <ProjectReference Include="..\..\..\BuildingBlocks\MachineryManager.SharedKernel\MachineryManager.SharedKernel.csproj" />
-  </ItemGroup>
-
 </Project>

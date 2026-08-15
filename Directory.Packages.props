@@ -43,6 +43,7 @@
     <PackageVersion Include="Mapster.DependencyInjection" Version="7.4.0" />
 
     <!-- Enterprise Messaging & Background Processing [TE-0012 (MassTransit & RabbitMQ / ADR-0016; also backs External Integration Connector Framework, ADR-0018), TE-0014 & TE-0019 (Quartz.NET / ADR-0032)] -->
+    <PackageVersion Include="MediatR" Version="12.5.0" />
     <PackageVersion Include="MassTransit" Version="8.3.6" />
     <PackageVersion Include="MassTransit.RabbitMQ" Version="8.3.6" />
     <PackageVersion Include="Quartz" Version="3.13.1" />
@@ -53,12 +54,12 @@
     <PackageVersion Include="Serilog.AspNetCore" Version="9.0.0" />
     <PackageVersion Include="Serilog.Sinks.Console" Version="6.0.0" />
     <PackageVersion Include="Serilog.Sinks.File" Version="6.0.0" />
-    <PackageVersion Include="OpenTelemetry" Version="1.11.1" />
-    <PackageVersion Include="OpenTelemetry.Exporter.OpenTelemetryProtocol" Version="1.11.1" />
-    <PackageVersion Include="OpenTelemetry.Extensions.Hosting" Version="1.11.1" />
-    <PackageVersion Include="OpenTelemetry.Instrumentation.AspNetCore" Version="1.11.0" />
-    <PackageVersion Include="OpenTelemetry.Instrumentation.Http" Version="1.11.0" />
-    <PackageVersion Include="OpenTelemetry.Instrumentation.EntityFrameworkCore" Version="1.0.0-beta.12" />
+    <PackageVersion Include="OpenTelemetry" Version="1.17.0" />
+    <PackageVersion Include="OpenTelemetry.Exporter.OpenTelemetryProtocol" Version="1.17.0" />
+    <PackageVersion Include="OpenTelemetry.Extensions.Hosting" Version="1.17.0" />
+    <PackageVersion Include="OpenTelemetry.Instrumentation.AspNetCore" Version="1.17.0" />
+    <PackageVersion Include="OpenTelemetry.Instrumentation.Http" Version="1.17.0" />
+    <PackageVersion Include="OpenTelemetry.Instrumentation.EntityFrameworkCore" Version="1.17.0-beta.1" />
 
     <!-- Artificial Intelligence & Vector Engine [TE-0013 (Semantic Kernel / ADR-0017), TE-0029 (AI Provider Strategy / ADR-0023), TE-0028 (Qdrant Vector DB / ADR-0022)] -->
     <PackageVersion Include="Microsoft.SemanticKernel" Version="1.38.0" />

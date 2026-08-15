@@ -279,4 +279,4 @@ The API lifecycle is governed by the project's architecture documentation.
 | 1.0.0   | 2026-07-18 | Solution Architect | Initial API Lifecycle definition                      |
 | 3.0.0   | 2026-07-18 | Solution Architect | Standardized according to Documentation Standard v3.0 |
 | 4.0.0   | 2026-07-28 | Solution Architect | Upgraded to Documentation Standard v4.0.0             |
-| 4.1.0   | 2026-08-02 | Solution Architect | Fixed broken folder reference from non-existent docs/06-adr/ to the real ../06-decisions/ |
+| 4.1.0   | 2026-08-08 | Solution Architect | Fixed broken folder reference from non-existent docs/06-adr/ to the real ../06-decisions/ |
