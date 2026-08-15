@@ -1,397 +1,196 @@
-# طراحی نقاط پایانی (Endpoint Design)
-
 | ویژگی | مقدار |
-|----------|-------|
-| **شناسه مستند** | API-002 |
-| **نسخه** | 4.0.0 |
-| **وضعیت** | فعال (Active) |
-| **مالک** | معمار راهکار (Solution Architect) |
+|---|---|
+| **شناسه سند** | API-002 |
+| **عنوان** | طراحی اندپوینت (Endpoint Design) |
+| **نسخه** | 4.1.0 |
+| **وضعیت** | تصویب‌شده (Approved) |
+| **مالک سند** | معمار راهکار (Solution Architect) |
 | **تاریخ ایجاد** | 2026-07-18 |
-| **آخرین به‌روزرسانی** | 2026-07-28 |
+| **آخرین به‌روزرسانی** | 2026-08-08 |
 
 ---
 
 # ۱. هدف (Purpose)
 
-این مستند راهنمای طراحی نقاط پایانی (Endpoints) مورد استفاده در تمامی بخش‌های MachineryManagerEnterprise را تعریف می‌کند.
+این سند استانداردهای طراحی اندپوینت را برای MachineryManagerEnterprise تعریف می‌کند.
 
-هر نقطه پایانی باید یک رابط یکنواخت، قابل پیش‌بینی و مبتنی بر کسب‌وکار ارائه دهد.
-
----
-
-# ۲. فلسفه نقاط پایانی (Endpoint Philosophy)
-
-نقاط پایانی قابلیت‌های کسب‌وکار را افشا می‌کنند.
-
-نقاط پایانی عملیات دیتابیس را افشا نمی‌کنند.
-
-هر نقطه پایانی باید نشان‌دهنده یک اقدام معنی‌دار کسب‌وکار یا یک منبع کسب‌وکار باشد.
+تمامی اندپوینت‌های HTTP باید با این استانداردها مطابقت داشته باشند.
 
 ---
 
-# چرخه حیات نقطه پایانی (Endpoint Lifecycle)
+# ۲. ساختار پایه اندپوینت (Base Endpoint Structure)
 
-هر نقطه پایانی باید:
+اندپوینت‌های عمومی باید از ساختار زیر استفاده کنند:
 
-۱. درخواست HTTP را دریافت کند.
-۲. محدودیت‌های سطح ترابری (Transport-level) را اعتبارسنجی کند.
-۳. دقیقاً یک دستور (Command) یا پرس‌وجو (Query) را فراخوانی کند.
-۴. یک قرارداد پایدار بازگرداند.
-۵. هرگز جزئیات پیاده‌سازی داخلی را افشا نکند.
-
----
-
-# قوانین طراحی نقاط پایانی
-
-نقاط پایانی باید:
-
-- نشان‌دهنده قابلیت‌های کسب‌وکار باشند.
-- مستقل از فناوری باقی بمانند.
-- از شناسه‌های URI پایدار استفاده کنند.
-- مدل‌های پاسخ یکنواخت بازگردانند.
-- هرگز مفاهیم دیتابیس را افشا نکنند.
-
----
-
-# ۳. طراحی مبتنی بر منبع (Resource-Oriented Design)
-
-نقاط پایانی باید حول محور منابع (Resources) سازماندهی شوند.
+```
+/api/v1/{resource}
+```
 
 مثال‌ها:
 
-```text
-/assets
-
-/engines
-
-/components
-
-/maintenance-orders
-
-/documents
-
-/forecasts
 ```
+/api/v1/assets
 
-منابع نشان‌دهنده موجودیت‌های کسب‌وکار هستند.
+/api/v1/engines
+
+/api/v1/maintenance-orders
+```
 
 ---
 
-# ۴. نقاط پایانی مجموعه‌ها (Collection Endpoints)
+# ۳. اندپوینت‌های استاندارد (Standard Endpoints)
 
-نقاط پایانی مجموعه‌ها چندین منبع را بازمی‌گردانند.
+هر موجودیت اصلی کسب‌وکار می‌تواند اندپوینت‌های زیر را ارائه دهد:
 
-مثال‌ها:
-
-```text
-GET /assets
-
-GET /engines
-
-GET /documents
-```
-
-نقاط پایانی مجموعه‌ها باید از موارد زیر پشتیبانی کنند:
-
-- صفحه‌بندی (Pagination)
-- فیلترسازی (Filtering)
-- مرتب‌سازی (Sorting)
+| کنش | متد HTTP | اندپوینت | کد پاسخ |
+|---|---|---|---|
+| فهرست (List) | GET | `/api/v1/assets` | 200 OK |
+| دریافت با شناسه (Get by ID) | GET | `/api/v1/assets/{id}` | 200 OK |
+| ایجاد (Create) | POST | `/api/v1/assets` | 201 Created |
+| جایگزینی (Replace) | PUT | `/api/v1/assets/{id}` | 200 OK |
+| به‌روزرسانی (Update) | PATCH | `/api/v1/assets/{id}` | 200 OK |
+| حذف (Delete) | DELETE | `/api/v1/assets/{id}` | 204 No Content |
 
 ---
 
-# ۵. نقاط پایانی تک‌منبعی (Single Resource Endpoints)
+# ۴. اندپوینت‌های کنش (Action Endpoints)
 
-نقاط پایانی تک‌منبعی یک شیء کسب‌وکار مشخص را شناسایی می‌کنند.
-
-مثال‌ها:
-
-```text
-GET /assets/{assetId}
-
-GET /engines/{engineId}
-
-GET /documents/{documentId}
-```
-
-شناسه‌ها باید درون منبع خود به صورت یکتا در سطح سیستم (Globally Unique) باشند.
-
----
-
-# ۶. ایجاد منبع (Resource Creation)
-
-نقاط پایانی ایجاد منبع از متد POST استفاده می‌کنند.
-
-مثال‌ها:
-
-```text
-POST /assets
-
-POST /maintenance-orders
-
-POST /documents
-```
-
-بدنه درخواست (Request body) شامل مدل ایجاد است.
-
-پاسخ، منبع ایجادشده را بازمی‌گرداند.
-
----
-
-# ۷. به‌روزرسانی منبع (Resource Update)
-
-جایگزینی کامل منبع:
-
-```text
-PUT /assets/{assetId}
-```
-
-تغییر و به‌روزرسانی جزئی:
-
-```text
-PATCH /assets/{assetId}
-```
-
-درخواست‌های به‌روزرسانی باید قبل از ثبت در لایه ماندگاری، قوانین کسب‌وکار را اعتبارسنجی کنند.
-
----
-
-# ۸. حذف منبع (Resource Removal)
-
-نقاط پایانی حذف از متد DELETE استفاده می‌کنند.
+هنگامی که یک عملیات به‌جای جهش منبع (Resource Mutation)، نمایانگر یک گردش کار کسب‌وکار باشد:
 
 مثال:
 
-```text
-DELETE /documents/{documentId}
 ```
-
-حقیقی بودن (Physical) یا منطقی بودن (Logical) حذف به قوانین کسب‌وکار بستگی دارد.
-
----
-
-# ۹. عملیات‌های کسب‌وکار (Business Operations)
-
-برخی از عملیات‌های کسب‌وکار در قالب CRUD نمی‌گنجند.
-
-مثال‌ها:
-
-```text
-POST /assets/{assetId}/retire
-
-POST /engines/{engineId}/install
-
-POST /engines/{engineId}/remove
-
-POST /maintenance-orders/{id}/complete
-
-POST /documents/{id}/renew
-```
-
-اقدامات و عملیات‌های کسب‌وکار که نمی‌توان آن‌ها را به صورت طبیعی در قالب CRUD نشان داد، باید از متد POST استفاده کنند.
-
----
-
-# ۱۰. منابع فرزند (Child Resources)
-
-منابع فرزند نشان‌دهنده مالکیت (Ownership) هستند.
-
-مثال‌ها:
-
-```text
-GET /assets/{assetId}/engines
-
-GET /assets/{assetId}/documents
-
-GET /assets/{assetId}/maintenance-history
-```
-
-منابع توئیده‌شده باید روابط طبیعی کسب‌وکار را توصیف کنند.
-
----
-
-# ۱۱. نقاط پایانی جستجو (Search Endpoints)
-
-عملیات‌های جستجو همچنان مبتنی بر منبع باقی می‌مانند.
-
-روش ترجیحی:
-
-```text
-GET /assets?serialNumber=...
-
-GET /documents?status=...
-
-GET /engines?manufacturer=...
-```
-
-از ایجاد نقاط پایانی اختصاصی `/search` خودداری کنید، مگر اینکه پرس‌وجو برای فیلترسازی استاندارد بیش از حد پیچیده باشد.
-
----
-
-# ۱۲. نقاط پایانی پیش‌بینی (Forecast Endpoints)
-
-پیش‌بینی‌ها نتایج تولیدشده کسب‌وکار هستند.
-
-مثال‌ها:
-
-```text
-POST /forecasts
-
-GET /forecasts/{forecastId}
-
-GET /assets/{assetId}/forecasts
-```
-
-تولید پیش‌بینی می‌تواند به صورت همگام (Synchronous) یا ناهمگام (Asynchronous) باشد.
-
----
-
-# ۱۳. عملیات‌های زمان‌بر (Long Running Operations)
-
-عملیات‌هایی که نیازمند زمان قابل توجهی هستند باید کد زیر را بازگردانند:
-
-```text
-202 Accepted
+POST /api/v1/assets/{id}/retire
 ```
 
 مثال:
 
-```text
-POST /forecasts
+```
+POST /api/v1/engines/{id}/rebuild
 ```
 
-پاسخ شامل:
-
-```text
-OperationId
-
-Status
-
-Location
-```
-
-کلاینت‌ها می‌توانند بعداً وضعیت تکمیل عملیات را استعلام کنند.
+اندپوینت‌های کنش باید از متد POST استفاده کنند.
 
 ---
 
-# ۱۴. عملیات‌های حجمی و گروهی (Bulk Operations)
+# ۵. اندپوینت‌های پرس‌وجو (Query Endpoints)
 
-عملیات‌های حجمی باید به صورت صریح تعریف شوند.
+پرس‌وجوهای جستجو یا گزارش‌گیری با پارامترهای پیچیده می‌توانند از متد POST استفاده کنند.
+
+مثال:
+
+```
+POST /api/v1/assets/search
+```
+
+این امر از ایجاد رشته‌های پرس‌وجوی (Query Strings) طولانی و ناخوانا در URI جلوگیری می‌کند.
+
+---
+
+# ۶. اندپوینت‌های دسته‌ای (Bulk Endpoints)
+
+عملیات دسته‌ای باید از اندپوینت‌های اختصاصی استفاده کنند.
 
 مثال‌ها:
 
-```text
-POST /assets/bulk-import
+```
+POST /api/v1/assets/bulk-create
 
-POST /documents/bulk-update
-
-POST /maintenance-orders/bulk-close
+POST /api/v1/assets/bulk-delete
 ```
 
-عملیات‌های حجمی هرگز نباید نقاط پایانی استاندارد CRUD را بارگذاری اضافی (Overload) کنند.
+درخواست‌های دسته‌ای باید پیش از پردازش، تمام اقلام را اعتبارسنجی کنند.
 
 ---
 
-# ۱۵. قوانین نام‌گذاری نقاط پایانی
+# ۷. فرمت‌های پاسخ (Response Formats)
 
-اسامی نقاط پایانی باید:
+خواندن تکی (Read Single):
 
-- از اسم استفاده کنند؛
-- از افعال اجتناب کنند؛
-- با حروف کوچک نوشته شوند؛
-- پایدار بمانند.
-
-صحیح:
-
-```text
-/assets
-
-/engines
-
-/components
+```json
+{
+  "id": "guid",
+  "name": "Engine ABC",
+  "status": "Active"
+}
 ```
 
-نادرست:
+خواندن فهرست (Read List):
 
-```text
-/CreateAsset
+```json
+{
+  "items": [],
+  "totalCount": 100,
+  "page": 1,
+  "pageSize": 25
+}
+```
 
-/GetAssets
+پاسخ ایجاد (Creation Response):
 
-/DeleteEngine
+```json
+{
+  "id": "guid"
+}
+```
+
+کد وضعیت HTTP برای ایجاد:
+
+```
+201 Created
+```
+
+هدر (Header):
+
+```
+Location: /api/v1/assets/{id}
 ```
 
 ---
 
-# ۱۶. پایداری نقاط پایانی
+# ۸. پاسخ‌های خطا (Error Responses)
 
-نقاط پایانی عمومی به عنوان رابط‌های قراردادی تلقی می‌شوند.
+خطاها باید از اشیای استاندارد خطا استفاده کنند.
 
-تغییر یک نقطه پایانی نیازمند موارد زیر است:
+مثال:
 
-- بررسی نسخه API
-- به‌روزرسانی مستندات
-- ارزیابی سازگاری با نسخه‌های قبلی (Backward compatibility)
-
----
-
-# ۱۷. توسعه‌های آتی
-
-ماژول‌های آینده باید از همین ساختار نقطه پایانی تبعیت کنند.
-
-مثال‌ها:
-
-```text
-/inventory
-
-/procurement
-
-/contracts
-
-/fleet
-
-/iot
+```json
+{
+  "type": "https://errors.machinerymanager.com/validation-error",
+  "title": "Validation Failed",
+  "status": 400,
+  "detail": "One or more validation errors occurred.",
+  "errors": {
+    "Name": ["Name is required."]
+  }
+}
 ```
 
-یکنواختی و انسجام باید در تمامی قابلیت‌های آتی حفظ شود.
-
 ---
 
-# نمونه نگاشت نقطه پایانی به لایه Application
+# خلاصه تصمیمات (Decision Summary)
 
-| Endpoint                   | Application            |
-| -------------------------- | ---------------------- |
-| `GET /assets`              | `GetAssetsQuery`       |
-| `GET /assets/{id}`         | `GetAssetByIdQuery`    |
-| `POST /assets`             | `RegisterAssetCommand` |
-| `PATCH /assets/{id}`       | `UpdateAssetCommand`   |
-| `POST /assets/{id}/retire` | `RetireAssetCommand`   |
-
----
-
-# خلاصه تصمیمات
-
-- ✔ معماری پاک (Clean Architecture)
-- ✔ سازگاری با .NET 10
-- ✔ رعایت استانداردها
-- ✔ خنثی بودن نسبت به ابر (Cloud Neutrality)
-- ✔ آمادگی برای هوش مصنوعی
+- ✔ معماری تمیز (Clean Architecture)
+- ✔ سازگاری با NET 10.
+- ✔ انطباق با استانداردها
+- ✔ بی‌طرفی نسبت به محیط ابری (Cloud Neutrality)
+- ✔ آمادگی برای هوش مصنوعی (AI Readiness)
 - ✔ قابلیت نگهداری بلندمدت
 
-# اسناد مرتبط
+# اسناد مرتبط (Related Documents)
 
-- `00-ApiPrinciples.md`
-- `01-RestConventions.md`
-- `03-ResponseModel.md`
-- `04-ErrorResponses.md`
-- `05-Versioning.md`
-- ADR-0005 — استراتژی API
+- 01-RestConventions.md
+- 03-RequestResponseModel.md
+- 04-ErrorResponses.md
+- ADR-0035 — معماری مستندسازی API و تولید کلاینت (API Documentation and Client Generation Architecture)
 
 ---
 
-# تاریخچه تغییرات
+# تاریخچه بازنگری (Revision History)
 
-| نسخه | تاریخ | شرح |
-|----------|------------|---------------------------------------------|
-| 1.0.0 | اولیه | طراحی اولیه نقاط پایانی |
-| 3.0.0 | 2026-07-18 | استانداردسازی طبق استاندارد مستندسازی نسخه 3.0 |
-| 4.0.0 | 2026-07-28 | ارتقا به استاندارد مستندسازی نسخه 4.0.0 |
+| نسخه | تاریخ | نویسنده | توضیحات |
+|---|---|---|---|
+| 1.0.0 | 2026-07-18 | معمار راهکار | طراحی اولیه اندپوینت |
+| 3.0.0 | 2026-07-18 | معمار راهکار | استانداردسازی طبق استاندارد مستندسازی v3.0 |
+| 4.0.0 | 2026-07-28 | معمار راهکار | ارتقا به استاندارد مستندسازی v4.0.0 |
+| 4.1.0 | 2026-08-08 | معمار راهکار | اصلاح ارجاع از سند ناموجود «ADR-0005 — استراتژی API» به ADR-0035 حاکم اصلی (معماری مستندسازی API و تولید کلاینت) |

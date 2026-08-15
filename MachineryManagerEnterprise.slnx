@@ -3,8 +3,9 @@
   <Folder Name="/src/BuildingBlocks/">
     <Project Path="src/BuildingBlocks/MachineryManager.SharedKernel.Abstractions/MachineryManager.SharedKernel.Abstractions.csproj" />
     <Project Path="src/BuildingBlocks/MachineryManager.SharedKernel.Infrastructure/MachineryManager.SharedKernel.Infrastructure.csproj" />
-    <Project Path="src/BuildingBlocks/MachineryManager.SharedKernel/MachineryManager.SharedKernel.csproj" />
     <Project Path="src/BuildingBlocks/MachineryManager.UI/MachineryManager.UI.csproj" />
+    <Project Path="src/BuildingBlocks/MachineryManager.SharedKernel.Contracts/MachineryManager.SharedKernel.Contracts.csproj" />
+    <Project Path="src/BuildingBlocks/MachineryManager.SharedKernel/MachineryManager.SharedKernel.csproj" />
   </Folder>
   <Folder Name="/src/Host/">
     <Project Path="src/Host/MachineryManager.Web/MachineryManager.Web.csproj" />

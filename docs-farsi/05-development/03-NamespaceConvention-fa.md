@@ -1,47 +1,46 @@
-# قراردادهای فضای نام (Namespace Conventions)
-
 | ویژگی | مقدار |
-|----------|-------|
+|---|---|
 | **شناسه سند** | DOC-DEV-004 |
-| **نسخه** | 4.0.0 |
-| **وضعیت** | تصویب‌شده |
-| **مالک** | معمار راهکار (Solution Architect) |
+| **عنوان** | قرارداد فضای نام (Namespace Convention) |
+| **نسخه** | 4.1.0 |
+| **وضعیت** | تصویب‌شده (Approved) |
+| **مالک سند** | معمار راهکار (Solution Architect) |
 | **تاریخ ایجاد** | 2026-07-18 |
-| **آخرین به‌روزرسانی** | 2026-07-28 |
+| **آخرین به‌روزرسانی** | 2026-08-08 |
 
 ---
 
-# ۱. هدف
+# هدف (Purpose)
 
-این سند قراردادهای رسمی فضای نام (Namespace) را برای راهکار **MachineryManagerEnterprise** تعریف می‌کند.
+این سند، قراردادهای رسمی فضای نام (Namespace Conventions) را برای راهکار **MachineryManagerEnterprise** تعریف می‌کند.
 
-یک سلسله‌مراتب فضای نام یکنواخت و سازگار موارد زیر را بهبود می‌بخشد:
+یک سلسله‌مراتب فضای نام منسجم موارد زیر را ارتقا می‌دهد:
 
 - خوانایی (Readability)
-- قابلیت پیمایش (Navigation)
-- بازسازی کد (Refactoring)
-- قابلیت کشف (Discoverability)
+- ناوبری و جابجایی میان کدها (Navigation)
+- بازآفرینی و ریفکتورینگ (Refactoring)
+- قابلیت کشف‌پذیری (Discoverability)
 - قابلیت نگهداری بلندمدت (Long-term maintainability)
 
 هر پروژه باید از این قراردادها پیروی کند.
 
 ---
 
-# ۲. اصول عمومی
+# اصول عمومی (General Principles)
 
 فضاهای نام باید:
 
-- منعکس‌کننده ساختار فیزیکی پروژه باشند.
-- قطعی و تعیین‌شده باشند.
-- از تو در تویی غیرضروری اجتناب کنند.
-- مرزهای پروژه را دنبال کنند.
+- ساختار فیزیکی پروژه را منعکس کنند.
+- قطعی و مشخص (Deterministic) باشند.
+- از تودرتویی غیرضروری پرهیز کنند.
+- از مرزهای پروژه پیروی نمایند.
 - هرگز جزئیات پیاده‌سازی را افشا نکنند.
 
-فضاهای نام بخشی از معماری هستند و نباید تصادفی یا سلیقه‌ای تلقی شوند.
+فضاهای نام بخشی از معماری به شمار می‌روند و نباید اختیاری یا سلیقه‌ای در نظر گرفته شوند.
 
 ---
 
-# ۳. فضای نام ریشه (Root Namespace)
+# فضای نام ریشه (Root Namespace)
 
 هر پروژه با یک فضای نام ریشه یکسان آغاز می‌شود:
 
@@ -51,11 +50,11 @@ MachineryManagerEnterprise
 
 ---
 
-# ۴. فضاهای نام پروژه (Project Namespaces)
+# فضاهای نام پروژه (Project Namespaces)
 
 هر پروژه فضای نام ریشه را گسترش می‌دهد.
 
-مثال‌ها:
+نمونه‌ها:
 
 ```text
 MachineryManagerEnterprise.SharedKernel
@@ -71,11 +70,11 @@ MachineryManagerEnterprise.Web
 
 ---
 
-# ۵. فضاهای نام ویژگی (Feature Namespaces)
+# فضاهای نام ویژگی‌ها (Feature Namespaces)
 
-قابلیت‌های کسب‌وکار باید بر اساس ویژگی (Feature) گروه‌بندی شوند.
+کارکردهای تجاری باید بر اساس ویژگی (Feature) گروه‌بندی شوند.
 
-مثال:
+نمونه:
 
 ```text
 MachineryManagerEnterprise.Application.Features.Inventory
@@ -87,11 +86,11 @@ MachineryManagerEnterprise.Application.Features.Maintenance
 
 ---
 
-# ۶. دستورات (Commands)
+# فرمان‌ها (Commands)
 
-دستورات باید ذیل ویژگی مربوطه قرار گیرند.
+فرمان‌ها باید در زیر ویژگی متناظر خود قرار گیرند.
 
-مثال:
+نمونه:
 
 ```text
 MachineryManagerEnterprise.Application.Features.Inventory.Commands
@@ -99,9 +98,9 @@ MachineryManagerEnterprise.Application.Features.Inventory.Commands
 
 ---
 
-# ۷. پرس‌وجوها (Queries)
+# کوئری‌ها (Queries)
 
-پرس‌وجوها از همان قرارداد پیروی می‌کنند:
+کوئری‌ها از همین قرارداد پیروی می‌کنند:
 
 ```text
 MachineryManagerEnterprise.Application.Features.Inventory.Queries
@@ -109,11 +108,11 @@ MachineryManagerEnterprise.Application.Features.Inventory.Queries
 
 ---
 
-# ۸. اعتبارسنج‌ها (Validators)
+# اعتبارسنج‌ها (Validators)
 
-اعتبارسنج‌ها متعلق به کنار دستورات یا پرس‌وجوهای مربوط به خود هستند.
+اعتبارسنج‌ها متعلق به کنار فرمان‌ها یا کوئری‌های متناظر خود هستند.
 
-مثال:
+نمونه:
 
 ```text
 MachineryManagerEnterprise.Application.Features.Inventory.Validation
@@ -121,9 +120,9 @@ MachineryManagerEnterprise.Application.Features.Inventory.Validation
 
 ---
 
-# ۹. اشیاء انتقال داده (DTOs)
+# اشیاء انتقال داده (DTOs)
 
-DTOها درون ویژگی مالک خود باقی می‌مانند:
+اشیاء DTO در درون ویژگی مالک خود باقی می‌مانند:
 
 ```text
 MachineryManagerEnterprise.Application.Features.Inventory.DTOs
@@ -131,9 +130,9 @@ MachineryManagerEnterprise.Application.Features.Inventory.DTOs
 
 ---
 
-# ۱۰. نگاشت (Mapping)
+# نگاشت (Mapping)
 
-پروفایل‌های نگاشت بر اساس ویژگی گروه‌بندی می‌مانند:
+پروفایل‌های نگاشت به صورت گروه‌بندی‌شده بر اساس ویژگی باقی می‌مانند:
 
 ```text
 MachineryManagerEnterprise.Application.Features.Inventory.Mapping
@@ -141,11 +140,11 @@ MachineryManagerEnterprise.Application.Features.Inventory.Mapping
 
 ---
 
-# ۱۱. دامنه (Domain)
+# دامنه (Domain)
 
-فضاهای نام دامنه باید به جای لایه‌های فنی، مفاهیم کسب‌وکار را منعکس کنند.
+فضاهای نام دامنه باید مفاهیم تجاری را منعکس کنند نه لایه‌های فنی را.
 
-مثال:
+نمونه:
 
 ```text
 MachineryManagerEnterprise.Domain.Inventory
@@ -155,7 +154,7 @@ MachineryManagerEnterprise.Domain.Users
 MachineryManagerEnterprise.Domain.Maintenance
 ```
 
-از فضاهای نام مانند موارد زیر اجتناب کنید:
+از فضاهای نام مانند موارد زیر پرهیز کنید:
 
 ```text
 Domain.Entities
@@ -165,15 +164,15 @@ Domain.Models
 Domain.Classes
 ```
 
-مفهوم کسب‌وکار مهم‌تر از مصنوع فنی است.
+مفهوم تجاری بسیار بااهمیت‌تر از مصنوعات و ابزارهای فنی است.
 
 ---
 
-# ۱۲. زیرساخت (Infrastructure)
+# زیرساخت (Infrastructure)
 
-فضاهای نام زیرساخت، جزئیات پیاده‌سازی را منعکس می‌کنند.
+فضاهای نام زیرساخت جزئیات پیاده‌سازی را منعکس می‌کنند.
 
-مثال‌ها:
+نمونه‌ها:
 
 ```text
 MachineryManagerEnterprise.Infrastructure.Persistence
@@ -187,11 +186,11 @@ MachineryManagerEnterprise.Infrastructure.Caching
 
 ---
 
-# ۱۳. وب / لایه ارائه (Web)
+# وب و لایه ارائه (Web)
 
-فضاهای نام لایه ارائه باید از سازماندهی رابط کاربری پیروی کنند.
+فضاهای نام لایه ارائه باید از سازمان‌دهی رابط کاربری پیروی نمایند.
 
-مثال‌ها:
+نمونه‌ها:
 
 ```text
 MachineryManagerEnterprise.Web.Components
@@ -205,43 +204,43 @@ MachineryManagerEnterprise.Web.Shared
 
 ---
 
-# ۱۴. آزمون‌ها (Tests)
+# آزمون‌ها (Tests)
 
-پروژه‌های آزمون، فضاهای نام محیط تولید را منعکس می‌کنند.
+پروژه‌های آزمون، فضاهای نام بخش تولیدی را منعکس می‌کنند.
 
-مثال:
+نمونه:
 
 ```text
 MachineryManagerEnterprise.Application.Tests.Features.Inventory
 ```
 
-این امر یافتن کد مربوطه در محیط تولید را مستقیم و آسان می‌سازد.
+این تطابق، یافتن کدهای متناظر در بخش تولیدی را بسیار ساده می‌سازد.
 
 ---
 
-# ۱۵. قوانین نام‌گذاری
+# قواعد نام‌گذاری (Naming Rules)
 
 فضاهای نام باید:
 
-- از PascalCase استفاده کنند.
+- از نگارش PascalCase استفاده کنند.
 - هرگز شامل فاصله (Space) نباشند.
-- هرگز از حروف اختصاری استفاده نکنند مگر اینکه به صورت جهانی پذیرفته شده باشند.
-- هرگز شامل شماره نسخه نباشند.
+- هرگز از مخفف‌ها استفاده نکنند مگر اینکه به صورت جهانی پذیرفته شده باشند.
+- هرگز حاوی شماره نسخه نباشند.
 - هرگز فناوری پیاده‌سازی را افشا نکنند.
 
 ---
 
-# ۱۶. حداکثر عمق فضای نام (Maximum Namespace Depth)
+# حداکثر عمق فضای نام (Maximum Namespace Depth)
 
-فضاهای نام بیش از حد عمیق، خوانایی را کاهش می‌دهند.
+فضاهای نام بیش از حد عمیق موجب کاهش خوانایی می‌شوند.
 
-عمق پیشنهادی:
+عمق توصیه‌شده:
 
 ```text
 MachineryManagerEnterprise.Application.Features.Inventory.Commands
 ```
 
-از ساختارهایی مانند زیر اجتناب کنید:
+از ساختارهایی مانند نمونه زیر پرهیز کنید:
 
 ```text
 MachineryManagerEnterprise.Application.Features.Inventory.Commands.Create.Internal.Models
@@ -249,31 +248,37 @@ MachineryManagerEnterprise.Application.Features.Inventory.Commands.Create.Intern
 
 ---
 
-# ۱۷. انطباق فضای نام با پوشه (Namespace Equals Folder)
+# برابری فضای نام با پوشه (Namespace Equals Folder)
 
 هر فضای نام باید با پوشه فیزیکی خود مطابقت داشته باشد.
 
-مثال:
+نمونه:
 
-مسیر فیزیکی:
 ```text
-Features/Inventory/Commands/CreateMachineCommand.cs
+Features
+
+Inventory
+
+Commands
+
+CreateMachineCommand.cs
 ```
 
 فضای نام:
+
 ```text
 MachineryManagerEnterprise.Application.Features.Inventory.Commands
 ```
 
-این رابطه یک-به-یک، پیمایش و بازسازی کد را ساده می‌سازد.
+این رابطه یک‌به‌یک، ناوبری و ریفکتورینگ را ساده می‌کند.
 
 ---
 
-# ۱۸. ماژول‌های آتی (Future Modules)
+# ماژول‌های آینده (Future Modules)
 
-محیط‌های متناظر (Bounded Contexts) جدید باید به ریشه‌های جدید فضای نام تبدیل شوند.
+زمینه‌های مرزبندی‌شده جدید باید تبدیل به ریشه‌های جدید فضای نام شوند.
 
-مثال:
+نمونه:
 
 ```text
 MachineryManagerEnterprise.Inventory
@@ -283,42 +288,45 @@ MachineryManagerEnterprise.Finance
 MachineryManagerEnterprise.HumanResources
 ```
 
-این امر با رشد راهکار، ماژول‌ها را مستقل نگه می‌دارد.
+این امر ماژول‌ها را با رشد راهکار مستقل نگه می‌دارد.
 
 ---
 
-# ۱۹. انطباق و رعایت
+# انطباق (Compliance)
 
-هر فضای نام جدید ایجادشده باید با این سند منطبق باشد.
+هر فضای نام تازه ایجادشده باید با این سند مطابقت داشته باشد.
 
-انحرافات فضای نام نیازمند تاییدیه معماری از طریق ADR است.
+انحرافات فضای نام نیازمند تأییدیه معماری از طریق یک سند ADR است.
 
 ---
 
-# خلاصه تصمیمات
-
-- ✔ معماری پاک (Clean Architecture)
-- ✔ سازگاری با .NET 10
-- ✔ رعایت استانداردها
-- ✔ خنثی بودن نسبت به ابر (Cloud Neutrality)
-- ✔ آمادگی برای هوش مصنوعی
-- ✔ قابلیت نگهداری بلندمدت
-
-# اسناد مرتبط
+# اسناد مرتبط (Related Documents)
 
 - DOC-CONVENTIONS
 - DOC-README
-- DOC-DEV-001 (اصول توسعه)
-- DOC-DEV-002 (ساختار راهکار)
-- DOC-DEV-003 (ساختار پروژه)
-- DOC-DEV-005 (قوانین وابستگی)
+- DOC-DEV-001 (اصول توسعه / Development Principles)
+- DOC-DEV-002 (ساختار راهکار / Solution Structure)
+- DOC-DEV-003 (ساختار پروژه / Project Structure)
+- DOC-DEV-005 (قواعد وابستگی / Dependency Rules)
 
 ---
 
-# تاریخچه تغییرات
+# خلاصه تصمیم (Decision Summary)
 
-| نسخه | تاریخ | نویسنده / نقش | شرح |
-|----------|------------|-------------------|----------------------------------------------|
+- ✔ معماری تمیز (Clean Architecture)
+- ✔ سازگاری با NET 10.
+- ✔ انطباق با استانداردها
+- ✔ بی‌طرفی نسبت به ابر (Cloud Neutrality)
+- ✔ آمادگی برای هوش مصنوعی (AI Readiness)
+- ✔ قابلیت نگهداری بلندمدت
+
+---
+
+# تاریخچه بازنگری (Revision History)
+
+| نسخه | تاریخ | نویسنده | توصیف |
+|---|---|---|---|
 | 1.0.0 | 2026-07-18 | معمار راهکار | قراردادهای اولیه فضای نام |
-| 2.0.0 | 2026-07-18 | معمار راهکار | استانداردسازی بر اساس استاندارد مستندسازی نسخه 3.0 |
-| 4.0.0 | 2026-07-28 | معمار راهکار | ارتقا به استاندارد مستندسازی نسخه 4.0.0 |
+| 3.0.0 | 2026-07-18 | معمار راهکار | استانداردسازی بر اساس استاندارد مستندسازی نسخه ۳.۰ |
+| 4.0.0 | 2026-07-28 | معمار راهکار | ارتقا به استاندارد مستندسازی نسخه ۴.۰.۰ |
+| 4.1.0 | 2026-08-08 | معمار راهکار | بازبینی و همگام‌سازی با آخرین تغییرات |
