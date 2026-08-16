@@ -328,4 +328,4 @@ Existing fields shall never change semantic meaning.
 | 1.0.0   | 2026-07-18 | Solution Architect | Initial Request / Response Model                      |
 | 3.0.0   | 2026-07-18 | Solution Architect | Standardized according to Documentation Standard v3.0 |
 | 4.0.0   | 2026-07-28 | Solution Architect | Upgraded to Documentation Standard v4.0.0             |
-| 4.2.0 | 2026-08-02 | Removed ~315 lines of accidentally duplicated content from 03-RequestResponseModel.md (including its own header, "Document ID: API-003", and full body) that had been appended after this document's own Change History; this file now contains only its own content |
+| 4.2.0 | 2026-08-08 | Removed ~315 lines of accidentally duplicated content from 03-RequestResponseModel.md (including its own header, "Document ID: API-003", and full body) that had been appended after this document's own Change History; this file now contains only its own content |

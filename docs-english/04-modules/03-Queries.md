@@ -905,5 +905,6 @@ Every future Query shall follow the conventions defined in this document.
 | 4.1.0   | 2026-08-02 | Solution Architect | Added Section 14a Organization Queries (QRY-950, QRY-951), formalized from BR-017 |
 | 4.2.0   | 2026-08-02 | Solution Architect | Added Section 14b Notification Queries (QRY-960 through QRY-962), formalized from BR-012 |
 | 4.3.0   | 2026-08-02 | Solution Architect | Added Section 14c Internal Messaging Queries (QRY-970 through QRY-973), formalized from BR-013 |
-| 4.4.0   | 2026-08-02 | Solution Architect | Added Section 14d AI Assistant Queries (QRY-980 through QRY-982), formalized from BR-014 || 4.5.0   | 2026-08-02 | Solution Architect | Added Section 14e Relationship Management Queries (QRY-990 through QRY-992), formalized from BR-015 |
+| 4.4.0   | 2026-08-02 | Solution Architect | Added Section 14d AI Assistant Queries (QRY-980 through QRY-982), formalized from BR-014 |
+| 4.5.0   | 2026-08-02 | Solution Architect | Added Section 14e Relationship Management Queries (QRY-990 through QRY-992), formalized from BR-015 |
 | 4.6.0   | 2026-08-08 | Solution Architect | Added Section 14f Distributed Workspace Synchronization Queries (QRY-1000 through QRY-1003), formalized from BR-016. This completes all 6 previously-missing module query sets |

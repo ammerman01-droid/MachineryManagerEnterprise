@@ -2,11 +2,11 @@
 |------------------|--------------------|
 | **Document ID**  | DOC-DEV-002        |
 | **Title**        | Solution Structure |
-| **Version**      | 4.1.0              |
+| **Version**      | 4.2.0              |
 | **Status**       | Approved           |
 | **Owner**        | Solution Architect |
 | **Created**      | 2026-07-18         |
-| **Last Updated** | 2026-08-08         |
+| **Last Updated** | 2026-08-12         |
 
 ---
 
@@ -121,9 +121,11 @@ BuildingBlocks
 
 MachineryManager.SharedKernel
 
-MachineryManager.Contracts
+MachineryManager.SharedKernel.Contracts
 
-MachineryManager.Abstractions
+MachineryManager.SharedKernel.Abstractions
+
+MachineryManager.SharedKernel.Infrastructure
 
 MachineryManager.UI
 ```
@@ -203,6 +205,7 @@ It includes:
 - SharedKernel
 - Contracts
 - Abstractions
+- Infrastructure (cross-cutting implementations, e.g. shared MediatR pipeline behaviors)
 - UI Shared Components
 
 BuildingBlocks shall never depend on any business module.
@@ -359,4 +362,5 @@ Architectural deviations require an approved ADR.
 | 3.0.0   | 2026-07-18 | Solution Architect | Standardized according to Documentation Standard v3.0 |
 | 3.1.0   | 2026-07-26 | Solution Architect | AI + Project Team | Updated solution bootstrap for .NET 10.0.302, centralized MSBuild configuration and Central Package Management.|
 | 4.0.0   | 2026-07-28 | Solution Architect | Upgraded to Documentation Standard v4.0.0             |
-| 4.1.0   | 2026-08-02 | Solution Architect | Fixed malformed references DOC-MOD-001 and DOC-DOM-002 (wrong prefix and wrong number) to the real MOD-000 and DOM-003 |
+| 4.1.0   | 2026-08-12 | Solution Architect | Fixed malformed references DOC-MOD-001 and DOC-DOM-002 (wrong prefix and wrong number) to the real MOD-000 and DOM-003 |
+| 4.2.0   | 2026-08-12 | Solution Architect | Corrected the BuildingBlocks project names to match the actual scaffolded solution (MachineryManager.SharedKernel.Contracts / .Abstractions / .Infrastructure, not the previously documented MachineryManager.Contracts / .Abstractions without the SharedKernel prefix); added the missing Infrastructure sub-project |
