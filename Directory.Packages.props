@@ -71,6 +71,7 @@
 
     <!-- Identity & Access Management [TE-0020 (ASP.NET Core Identity & OpenIddict / ADR-0030)] -->
     <PackageVersion Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="10.0.0" />
+    <PackageVersion Include="Microsoft.Extensions.Identity.Stores" Version="10.0.0" /> <!-- TE-0020 (Identity domain model: IdentityUser<TKey>/IdentityRole<TKey>, framework-independent) -->
     <PackageVersion Include="OpenIddict.AspNetCore" Version="7.6.0" />
     <PackageVersion Include="OpenIddict.EntityFrameworkCore" Version="7.6.0" />
     <PackageVersion Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="10.0.0" /> <!-- Used by Business Modules / APIs to validate tokens issued by the Identity module -->
