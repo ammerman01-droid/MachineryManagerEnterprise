@@ -89,5 +89,9 @@
     <PackageVersion Include="Testcontainers.MsSql" Version="4.2.0" />
     <PackageVersion Include="Testcontainers.RabbitMq" Version="4.2.0" />
     <PackageVersion Include="NBomber" Version="5.7.0" /> <!-- TE-0033 (Enterprise Performance Testing / ADR-0027) -->
+
+    <!-- Security Overrides: Transitive Vulnerability Pins -->
+    <PackageVersion Include="System.Security.Cryptography.Xml" Version="10.0.10" /> <!-- Overrides vulnerable 9.0.0 pulled by EFCore.SqlServer/SqlClient — GHSA-23rf-6693-g89p, GHSA-37gx-xxp4-5rgx, GHSA-6588-8gv4-xfgh, GHSA-8q5v-6pqq-x66h, GHSA-cvvh-rhrc-wg4q, GHSA-g8r8-53c2-pm3f, GHSA-mmjf-rqrv-855v, GHSA-w3x6-4m5h-cxqf -->
+    <PackageVersion Include="Microsoft.OpenApi" Version="2.7.5" /> <!-- Overrides vulnerable 2.0.0 pulled by Microsoft.AspNetCore.OpenApi — GHSA-v5pm-xwqc-g5wc -->
   </ItemGroup>
 </Project>

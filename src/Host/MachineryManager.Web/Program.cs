@@ -1,8 +1,13 @@
+using MachineryManager.Organization.Application;
+using MachineryManager.Organization.Infrastructure;
+using MachineryManager.Organization.Presentation.Endpoints;
+using MachineryManager.SharedKernel.Infrastructure;
 using MachineryManager.Web.Components;
 using MudBlazor.Services;
 using OpenTelemetry;
 using OpenTelemetry.Metrics;
 using OpenTelemetry.Trace;
+using Scalar.AspNetCore;
 using Serilog;
 
 // Two-stage initialization (per ADR-0009 / ADR-0033): a bootstrap
@@ -35,6 +40,16 @@ try
     // UI [TE-0003 (MudBlazor / ADR-0005)]
     builder.Services.AddMudServices();
 
+    // API Documentation [TE-0021 (Scalar & NSwag / ADR-0035)]
+    builder.Services.AddOpenApi();
+
+    // Cross-cutting SharedKernel infrastructure (IDateTimeProvider).
+    builder.Services.AddSharedKernelInfrastructure();
+
+    // Organization module (Application + Infrastructure).
+    builder.Services.AddOrganizationApplication();
+    builder.Services.AddOrganizationInfrastructure(builder.Configuration);
+
     var app = builder.Build();
 
     // Configure the HTTP request pipeline.
@@ -43,6 +58,12 @@ try
         app.UseExceptionHandler("/Error", createScopeForErrors: true);
         // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
         app.UseHsts();
+    }
+    else
+    {
+        // API Documentation [TE-0021 (Scalar / ADR-0035)] - interactive docs in Development only.
+        app.MapOpenApi();
+        app.MapScalarApiReference();
     }
 
     app.UseSerilogRequestLogging();
@@ -56,6 +77,9 @@ try
     app.MapRazorComponents<App>()
         .AddInteractiveServerRenderMode();
 
+    // Organization module REST endpoints (07-api conventions, Section 8).
+    app.MapOrganizationEndpoints();
+
     app.Run();
 }
 catch (Exception ex) when (ex is not HostAbortedException)
@@ -66,4 +90,3 @@ finally
 {
     Log.CloseAndFlush();
 }
-

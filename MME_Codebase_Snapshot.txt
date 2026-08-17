@@ -1,0 +1,2602 @@
+﻿
+================================================================================
+  MACHINERYMANAGERENTERPRISE - CODEBASE SNAPSHOT
+  Generated: 2026-08-17 13:27:09
+  Source: C:\Users\i\source\repos\MachineryManagerEnterprise
+  Purpose: Complete source code reference for AI-assisted development
+  Excludes: .md, .gitignore, this script, build artifacts, binaries, IDE,
+            dependencies, client libs (wwwroot/lib), docs
+  
+================================================================================
+
+# SECTION 1: PROJECT STRUCTURE (Directory Tree)
+================================================================================
+
+MachineryManagerEnterprise
+|-- src
+|   |-- BuildingBlocks
+|   |   |-- MachineryManager.SharedKernel
+|   |   |   |-- AggregateRoot.cs
+|   |   |   |-- Entity.cs
+|   |   |   |-- Error.cs
+|   |   |   |-- ErrorType.cs
+|   |   |   |-- IDomainEvent.cs
+|   |   |   |-- MachineryManager.SharedKernel.csproj
+|   |   |   |-- Result.cs
+|   |   |   +-- ValueObject.cs
+|   |   |-- MachineryManager.SharedKernel.Abstractions
+|   |   |   |-- DependencyInjection.cs
+|   |   |   |-- ICurrentUserService.cs
+|   |   |   |-- IDateTimeProvider.cs
+|   |   |   |-- IRepository.cs
+|   |   |   |-- IUnitOfWork.cs
+|   |   |   |-- MachineryManager.SharedKernel.Abstractions.csproj
+|   |   |   +-- SystemDateTimeProvider.cs
+|   |   |-- MachineryManager.SharedKernel.Contracts
+|   |   |   +-- MachineryManager.SharedKernel.Contracts.csproj
+|   |   |-- MachineryManager.SharedKernel.Infrastructure
+|   |   |   +-- MachineryManager.SharedKernel.Infrastructure.csproj
+|   |   +-- MachineryManager.UI
+|   |       |-- wwwroot
+|   |       |-- _Imports.razor
+|   |       +-- MachineryManager.UI.csproj
+|   |-- Host
+|   |   +-- MachineryManager.Web
+|   |       |-- Components
+|   |       |   |-- Layout
+|   |       |   |   |-- MainLayout.razor
+|   |       |   |   |-- NavMenu.razor
+|   |       |   |   +-- ReconnectModal.razor
+|   |       |   |-- Pages
+|   |       |   |   |-- Counter.razor
+|   |       |   |   |-- Error.razor
+|   |       |   |   |-- Home.razor
+|   |       |   |   |-- NotFound.razor
+|   |       |   |   +-- Weather.razor
+|   |       |   |-- _Imports.razor
+|   |       |   |-- App.razor
+|   |       |   +-- Routes.razor
+|   |       |-- Properties
+|   |       |   +-- launchSettings.json
+|   |       |-- wwwroot
+|   |       |-- appsettings.Development.json
+|   |       |-- appsettings.json
+|   |       |-- MachineryManager.Web.csproj
+|   |       +-- Program.cs
+|   |-- Modules
+|   |   |-- Identity
+|   |   |   |-- Identity.Application
+|   |   |   |   +-- Identity.Application.csproj
+|   |   |   |-- Identity.Domain
+|   |   |   |   +-- Identity.Domain.csproj
+|   |   |   |-- Identity.Infrastructure
+|   |   |   |   +-- Identity.Infrastructure.csproj
+|   |   |   +-- Identity.Presentation
+|   |   |       +-- Identity.Presentation.csproj
+|   |   +-- Organization
+|   |       |-- Organization.Application
+|   |       |   |-- Abstractions
+|   |       |   |   +-- IOrganizationRepository.cs
+|   |       |   |-- Behaviors
+|   |       |   |   +-- ValidationBehavior.cs
+|   |       |   |-- Features
+|   |       |   |   +-- Organizations
+|   |       |   |       |-- Commands
+|   |       |   |       |   +-- RegisterOrganization
+|   |       |   |       |       |-- RegisterOrganizationCommand.cs
+|   |       |   |       |       |-- RegisterOrganizationCommandHandler.cs
+|   |       |   |       |       +-- RegisterOrganizationCommandValidator.cs
+|   |       |   |       |-- Dtos
+|   |       |   |       |   +-- OrganizationDto.cs
+|   |       |   |       +-- Queries
+|   |       |   |           |-- GetOrganizationById
+|   |       |   |           |   |-- GetOrganizationByIdQuery.cs
+|   |       |   |           |   |-- GetOrganizationByIdQueryHandler.cs
+|   |       |   |           |   +-- GetOrganizationByIdQueryValidator.cs
+|   |       |   |           +-- SearchOrganizations
+|   |       |   |               |-- SearchOrganizationsQuery.cs
+|   |       |   |               |-- SearchOrganizationsQueryHandler.cs
+|   |       |   |               +-- SearchOrganizationsQueryValidator.cs
+|   |       |   |-- DependencyInjection.cs
+|   |       |   +-- Organization.Application.csproj
+|   |       |-- Organization.Domain
+|   |       |   |-- Events
+|   |       |   |   +-- OrganizationRegistered.cs
+|   |       |   |-- Organization.cs
+|   |       |   |-- Organization.Domain.csproj
+|   |       |   |-- OrganizationErrors.cs
+|   |       |   +-- OrganizationId.cs
+|   |       |-- Organization.Infrastructure
+|   |       |   |-- Persistence
+|   |       |   |   |-- Configurations
+|   |       |   |   |   +-- OrganizationConfiguration.cs
+|   |       |   |   |-- OrganizationDbContext.cs
+|   |       |   |   +-- OrganizationRepository.cs
+|   |       |   |-- DependencyInjection.cs
+|   |       |   +-- Organization.Infrastructure.csproj
+|   |       +-- Organization.Presentation
+|   |           |-- Contracts
+|   |           |   +-- RegisterOrganizationRequest.cs
+|   |           |-- Endpoints
+|   |           |   |-- OrganizationEndpoints.cs
+|   |           |   +-- ResultExtensions.cs
+|   |           +-- Organization.Presentation.csproj
+|   +-- Shared
+|-- tests
+|-- .editorconfig
+|-- Directory.Build.props
+|-- Directory.Packages.props
+|-- global.json
++-- MachineryManagerEnterprise.slnx
+
+================================================================================
+
+# SECTION 2: SOURCE FILE CONTENTS
+================================================================================
+
+
+================================================================================
+FILE: .editorconfig
+SIZE: 0 KB
+================================================================================
+[EMPTY FILE]
+
+================================================================================
+FILE: Directory.Build.props
+SIZE: 0.57 KB
+================================================================================
+<Project>
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+
+    <EnableNETAnalyzers>true</EnableNETAnalyzers>
+    <AnalysisLevel>latest</AnalysisLevel>
+    <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
+
+    <Deterministic>true</Deterministic>
+    <ContinuousIntegrationBuild>true</ContinuousIntegrationBuild>
+
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+  </PropertyGroup>
+</Project>
+
+================================================================================
+FILE: Directory.Packages.props
+SIZE: 7.17 KB
+================================================================================
+<Project>
+  <PropertyGroup>
+    <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
+    <CentralPackageTransitivePinningEnabled>true</CentralPackageTransitivePinningEnabled>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- ASP.NET Core & Web Platform (.NET 10) [TE-0001, TE-0002, TE-0021] -->
+    <PackageVersion Include="Microsoft.AspNetCore.Components.Web" Version="10.0.0" />
+    <PackageVersion Include="Microsoft.AspNetCore.Components.WebAssembly" Version="10.0.0" />
+    <PackageVersion Include="Microsoft.AspNetCore.Components.WebAssembly.Server" Version="10.0.0" />
+    <PackageVersion Include="Microsoft.AspNetCore.OpenApi" Version="10.0.0" />
+    <PackageVersion Include="Scalar.AspNetCore" Version="2.1.5" /> <!-- TE-0021 (API Documentation / ADR-0035) -->
+    <PackageVersion Include="NSwag.MSBuild" Version="14.2.0" /> <!-- TE-0021 / ADR-0035 (client SDK generation) -->
+    <PackageVersion Include="Microsoft.Extensions.Hosting" Version="10.0.0" />
+    <PackageVersion Include="Microsoft.Extensions.Configuration.Binder" Version="10.0.0" />
+    <PackageVersion Include="Microsoft.Extensions.Caching.Hybrid" Version="10.0.0" /> <!-- TE-0015 (Caching Architecture / ADR-0031) -->
+    <PackageVersion Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="10.0.0" />
+    <PackageVersion Include="Microsoft.Extensions.Logging.Abstractions" Version="10.0.0" />
+    <PackageVersion Include="Microsoft.Extensions.Options" Version="10.0.0" /> <!-- TE-0018 (Configuration and Secrets Management / ADR-0034) -->
+    <PackageVersion Include="Microsoft.FeatureManagement" Version="4.0.0" /> <!-- TE-0018 / ADR-0034 -->
+    <PackageVersion Include="VaultSharp" Version="1.17.5.1" /> <!-- TE-0018 / ADR-0034 (HashiCorp Vault client) -->
+
+    <!-- UI & Cross-Platform Frameworks [TE-0003 (MudBlazor / ADR-0005), TE-0010 (.NET MAUI / ADR-0013 - the standardized client framework; TE-0034/ADR-0028 Avalonia UI is Superseded)] -->
+    <PackageVersion Include="MudBlazor" Version="8.0.0" />
+    <PackageVersion Include="Microsoft.AspNetCore.Components.WebView.Maui" Version="10.0.0" />
+
+    <!-- Data Access, ORM & Primary Relational DB [TE-0004 (EF Core 10 / ADR-0006), TE-0024 (Data Access Architecture / ADR-0019 Hybrid Persistence Strategy), TE-0025 (Migrations / ADR-0037)] -->
+    <PackageVersion Include="Microsoft.EntityFrameworkCore" Version="10.0.0" />
+    <PackageVersion Include="Microsoft.EntityFrameworkCore.SqlServer" Version="10.0.0" />
+    <PackageVersion Include="Microsoft.EntityFrameworkCore.Tools" Version="10.0.0" />
+    <PackageVersion Include="Microsoft.EntityFrameworkCore.Design" Version="10.0.0" />
+    <PackageVersion Include="EFCore.NamingConventions" Version="10.0.0" />
+
+    <!-- Embedded Local Workspace Databases [TE-0011 (Embedded Workspace DB / ADR-0014 SQLite & LiteDB)] -->
+    <PackageVersion Include="Microsoft.EntityFrameworkCore.Sqlite" Version="10.0.0" />
+    <PackageVersion Include="LiteDB" Version="5.0.21" />
+
+    <!-- Validation & Object Mapping [TE-0005 & TE-0022 (FluentValidation / ADR-0007, ADR-0036), TE-0006 & TE-0023 (Mapster / ADR-0008)] -->
+    <PackageVersion Include="FluentValidation" Version="11.11.0" />
+    <PackageVersion Include="FluentValidation.DependencyInjectionExtensions" Version="11.11.0" />
+    <PackageVersion Include="Mapster" Version="7.4.0" />
+    <PackageVersion Include="Mapster.DependencyInjection" Version="7.4.0" />
+
+    <!-- Enterprise Messaging & Background Processing [TE-0012 (MassTransit & RabbitMQ / ADR-0016; also backs External Integration Connector Framework, ADR-0018), TE-0014 & TE-0019 (Quartz.NET / ADR-0032)] -->
+    <PackageVersion Include="MediatR" Version="12.5.0" />
+    <PackageVersion Include="MassTransit" Version="8.3.6" />
+    <PackageVersion Include="MassTransit.RabbitMQ" Version="8.3.6" />
+    <PackageVersion Include="Quartz" Version="3.13.1" />
+    <PackageVersion Include="Quartz.Extensions.Hosting" Version="3.13.1" />
+
+    <!-- Logging & Observability [TE-0007 (Serilog / ADR-0009), TE-0008 & TE-0017 (OpenTelemetry / ADR-0010, ADR-0033)] -->
+    <PackageVersion Include="Serilog" Version="4.2.0" />
+    <PackageVersion Include="Serilog.AspNetCore" Version="9.0.0" />
+    <PackageVersion Include="Serilog.Sinks.Console" Version="6.0.0" />
+    <PackageVersion Include="Serilog.Sinks.File" Version="6.0.0" />
+    <PackageVersion Include="OpenTelemetry" Version="1.17.0" />
+    <PackageVersion Include="OpenTelemetry.Exporter.OpenTelemetryProtocol" Version="1.17.0" />
+    <PackageVersion Include="OpenTelemetry.Extensions.Hosting" Version="1.17.0" />
+    <PackageVersion Include="OpenTelemetry.Instrumentation.AspNetCore" Version="1.17.0" />
+    <PackageVersion Include="OpenTelemetry.Instrumentation.Http" Version="1.17.0" />
+    <PackageVersion Include="OpenTelemetry.Instrumentation.EntityFrameworkCore" Version="1.17.0-beta.1" />
+
+    <!-- Artificial Intelligence & Vector Engine [TE-0013 (Semantic Kernel / ADR-0017), TE-0029 (AI Provider Strategy / ADR-0023), TE-0028 (Qdrant Vector DB / ADR-0022)] -->
+    <PackageVersion Include="Microsoft.SemanticKernel" Version="1.38.0" />
+    <PackageVersion Include="Microsoft.SemanticKernel.Connectors.Ollama" Version="1.38.0-alpha" />
+    <PackageVersion Include="Qdrant.Client" Version="1.13.0" />
+
+    <!-- Enterprise Search Engine [TE-0027 (SQL Server FTS default / OpenSearch escalation / ADR-0021); TE-0016 is Superseded, see 02-architecture/TE-0016] -->
+    <PackageVersion Include="OpenSearch.Client" Version="1.7.1" />
+
+    <!-- Identity & Access Management [TE-0020 (ASP.NET Core Identity & OpenIddict / ADR-0030)] -->
+    <PackageVersion Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="10.0.0" />
+    <PackageVersion Include="OpenIddict.AspNetCore" Version="7.6.0" />
+    <PackageVersion Include="OpenIddict.EntityFrameworkCore" Version="7.6.0" />
+    <PackageVersion Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="10.0.0" /> <!-- Used by Business Modules / APIs to validate tokens issued by the Identity module -->
+    <PackageVersion Include="Microsoft.AspNetCore.Authentication.OpenIdConnect" Version="10.0.0" /> <!-- Used only for the optional external identity providers listed in TE-0020 (Microsoft Entra ID, Google Identity, GitHub Identity) -->
+
+    <!-- Enterprise Reporting Engine [TE-0035 (QuestPDF / ADR-0029; FastReport and RDLC are explicitly excluded)] -->
+    <PackageVersion Include="QuestPDF" Version="2025.1.2" />
+
+    <!-- Automated Testing & Testcontainers Infrastructure [TE-0030 (Testing Strategy / ADR-0024)] -->
+    <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="17.13.0" />
+    <PackageVersion Include="xunit" Version="2.9.3" />
+    <PackageVersion Include="xunit.runner.visualstudio" Version="3.0.1" />
+    <PackageVersion Include="FluentAssertions" Version="8.0.1" />
+    <PackageVersion Include="NSubstitute" Version="5.3.0" />
+    <PackageVersion Include="Testcontainers" Version="4.2.0" />
+    <PackageVersion Include="Testcontainers.MsSql" Version="4.2.0" />
+    <PackageVersion Include="Testcontainers.RabbitMq" Version="4.2.0" />
+    <PackageVersion Include="NBomber" Version="5.7.0" /> <!-- TE-0033 (Enterprise Performance Testing / ADR-0027) -->
+  </ItemGroup>
+</Project>
+
+================================================================================
+FILE: global.json
+SIZE: 0.05 KB
+================================================================================
+{
+  "sdk": {
+    "version": "10.0.302"
+  }
+}
+
+================================================================================
+FILE: MachineryManagerEnterprise.slnx
+SIZE: 1.74 KB
+================================================================================
+<Solution>
+  <Folder Name="/src/" />
+  <Folder Name="/src/BuildingBlocks/">
+    <Project Path="src/BuildingBlocks/MachineryManager.SharedKernel.Abstractions/MachineryManager.SharedKernel.Abstractions.csproj" />
+    <Project Path="src/BuildingBlocks/MachineryManager.SharedKernel.Infrastructure/MachineryManager.SharedKernel.Infrastructure.csproj" />
+    <Project Path="src/BuildingBlocks/MachineryManager.UI/MachineryManager.UI.csproj" />
+    <Project Path="src/BuildingBlocks/MachineryManager.SharedKernel.Contracts/MachineryManager.SharedKernel.Contracts.csproj" />
+    <Project Path="src/BuildingBlocks/MachineryManager.SharedKernel/MachineryManager.SharedKernel.csproj" />
+  </Folder>
+  <Folder Name="/src/Host/">
+    <Project Path="src/Host/MachineryManager.Web/MachineryManager.Web.csproj" />
+  </Folder>
+  <Folder Name="/src/Modules/" />
+  <Folder Name="/src/Modules/Identity/">
+    <Project Path="src/Modules/Identity/Identity.Domain/Identity.Domain.csproj" />
+    <Project Path="src/Modules/Identity/Identity.Application/Identity.Application.csproj" />
+    <Project Path="src/Modules/Identity/Identity.Infrastructure/Identity.Infrastructure.csproj" />
+    <Project Path="src/Modules/Identity/Identity.Presentation/Identity.Presentation.csproj" />
+  </Folder>
+  <Folder Name="/src/Modules/Organization/">
+    <Project Path="src/Modules/Organization/Organization.Domain/Organization.Domain.csproj" />
+    <Project Path="src/Modules/Organization/Organization.Application/Organization.Application.csproj" />
+    <Project Path="src/Modules/Organization/Organization.Infrastructure/Organization.Infrastructure.csproj" />
+    <Project Path="src/Modules/Organization/Organization.Presentation/Organization.Presentation.csproj" />
+  </Folder>
+</Solution>
+
+================================================================================
+FILE: src\BuildingBlocks\MachineryManager.SharedKernel.Abstractions\DependencyInjection.cs
+SIZE: 1.26 KB
+================================================================================
+using MachineryManager.SharedKernel.Abstractions;
+using Microsoft.Extensions.DependencyInjection;
+
+namespace MachineryManager.SharedKernel.Infrastructure;
+
+/// <summary>
+/// Registers cross-cutting infrastructure services shared by every module.
+/// </summary>
+public static class DependencyInjection
+{
+    /// <summary>
+    /// Registers the shared infrastructure implementations of the
+    /// SharedKernel abstractions.
+    /// </summary>
+    /// <remarks>
+    /// Only <see cref="IDateTimeProvider"/> is registered here.
+    /// <see cref="ICurrentUserService"/> is intentionally NOT registered
+    /// yet: no authentication mechanism exists until the Identity
+    /// module (ADR-0030) is implemented. Registering a stub here would
+    /// silently invent authentication behavior, which the AI Engineering
+    /// Contract prohibits — this is an explicit open item, not an
+    /// oversight.
+    /// </remarks>
+    /// <param name="services">The service collection to configure.</param>
+    /// <returns>The same <see cref="IServiceCollection"/> for chaining.</returns>
+    public static IServiceCollection AddSharedKernelInfrastructure(this IServiceCollection services)
+    {
+        services.AddSingleton<IDateTimeProvider, SystemDateTimeProvider>();
+
+        return services;
+    }
+}
+
+================================================================================
+FILE: src\BuildingBlocks\MachineryManager.SharedKernel.Abstractions\ICurrentUserService.cs
+SIZE: 0.81 KB
+================================================================================
+namespace MachineryManager.SharedKernel.Abstractions;
+
+/// <summary>
+/// Provides the Application User Context for the current request.
+/// Business logic shall depend only on this abstraction, never on raw
+/// JWT claims (07-api/07-AuthenticationAuthorization.md, Section 8).
+/// </summary>
+public interface ICurrentUserService
+{
+    /// <summary>The authenticated user's identifier, or null if unauthenticated.</summary>
+    Guid? UserId { get; }
+
+    /// <summary>
+    /// The Organization (tenant) boundary that every authenticated
+    /// request executes within (Section 9, Multi-Tenant Context).
+    /// Null only for unauthenticated or platform-level requests.
+    /// </summary>
+    Guid? OrganizationId { get; }
+
+    /// <summary>Whether the current request is authenticated.</summary>
+    bool IsAuthenticated { get; }
+}
+
+================================================================================
+FILE: src\BuildingBlocks\MachineryManager.SharedKernel.Abstractions\IDateTimeProvider.cs
+SIZE: 0.42 KB
+================================================================================
+namespace MachineryManager.SharedKernel.Abstractions;
+
+/// <summary>
+/// Provides the current time. Domain and Application code shall depend
+/// on this abstraction instead of calling <see cref="DateTimeOffset.UtcNow"/>
+/// directly, so business logic remains deterministic and testable.
+/// </summary>
+public interface IDateTimeProvider
+{
+    /// <summary>The current UTC time.</summary>
+    DateTimeOffset UtcNow { get; }
+}
+
+================================================================================
+FILE: src\BuildingBlocks\MachineryManager.SharedKernel.Abstractions\IRepository.cs
+SIZE: 1.02 KB
+================================================================================
+using MachineryManager.SharedKernel;
+
+namespace MachineryManager.SharedKernel.Abstractions;
+
+/// <summary>
+/// Base repository contract for an Aggregate Root. Per ADR-0006 (Use
+/// Entity Framework Core), Aggregates are persisted through EF Core;
+/// Dapper is used only for read-heavy queries per ADR-0019 and never
+/// implements this interface.
+/// </summary>
+/// <typeparam name="TAggregate">The Aggregate Root type.</typeparam>
+/// <typeparam name="TId">The Aggregate Root's strongly-typed identifier.</typeparam>
+public interface IRepository<TAggregate, in TId>
+    where TAggregate : AggregateRoot<TId>
+    where TId : notnull
+{
+    /// <summary>Retrieves the Aggregate by its identifier, or null if it does not exist.</summary>
+    Task<TAggregate?> GetByIdAsync(TId id, CancellationToken cancellationToken = default);
+
+    /// <summary>Adds a newly created Aggregate to the repository.</summary>
+    void Add(TAggregate aggregate);
+
+    /// <summary>Marks an existing Aggregate as updated.</summary>
+    void Update(TAggregate aggregate);
+}
+
+================================================================================
+FILE: src\BuildingBlocks\MachineryManager.SharedKernel.Abstractions\IUnitOfWork.cs
+SIZE: 0.48 KB
+================================================================================
+namespace MachineryManager.SharedKernel.Abstractions;
+
+/// <summary>
+/// Commits the changes made within the current business operation as a
+/// single atomic unit. Implemented in Infrastructure (EF Core), per
+/// ADR-0006 and ADR-0019 (Hybrid Persistence Strategy).
+/// </summary>
+public interface IUnitOfWork
+{
+    /// <summary>Persists all pending changes and dispatches any raised Domain Events.</summary>
+    Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);
+}
+
+================================================================================
+FILE: src\BuildingBlocks\MachineryManager.SharedKernel.Abstractions\MachineryManager.SharedKernel.Abstractions.csproj
+SIZE: 0.17 KB
+================================================================================
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" />
+  </ItemGroup>
+
+</Project>
+
+
+================================================================================
+FILE: src\BuildingBlocks\MachineryManager.SharedKernel.Abstractions\SystemDateTimeProvider.cs
+SIZE: 0.51 KB
+================================================================================
+using MachineryManager.SharedKernel.Abstractions;
+
+namespace MachineryManager.SharedKernel.Infrastructure;
+
+/// <summary>
+/// Default <see cref="IDateTimeProvider"/> implementation backed by the
+/// system clock. Registered for every module so business code never
+/// calls <see cref="DateTimeOffset.UtcNow"/> directly (06-development
+/// Coding Standards).
+/// </summary>
+public sealed class SystemDateTimeProvider : IDateTimeProvider
+{
+    /// <inheritdoc />
+    public DateTimeOffset UtcNow => DateTimeOffset.UtcNow;
+}
+
+
+================================================================================
+FILE: src\BuildingBlocks\MachineryManager.SharedKernel.Contracts\MachineryManager.SharedKernel.Contracts.csproj
+SIZE: 0.05 KB
+================================================================================
+<Project Sdk="Microsoft.NET.Sdk">
+
+</Project>
+
+================================================================================
+FILE: src\BuildingBlocks\MachineryManager.SharedKernel.Infrastructure\MachineryManager.SharedKernel.Infrastructure.csproj
+SIZE: 0.05 KB
+================================================================================
+<Project Sdk="Microsoft.NET.Sdk">
+
+</Project>
+
+================================================================================
+FILE: src\BuildingBlocks\MachineryManager.SharedKernel\AggregateRoot.cs
+SIZE: 1.7 KB
+================================================================================
+namespace MachineryManager.SharedKernel;
+
+/// <summary>
+/// Base class for Aggregate Roots, per docs-english/03-domain/05-Aggregates.md.
+/// An Aggregate Root is the only entry point for modifying its
+/// Aggregate; it is the sole publisher of the Domain Events that
+/// describe the business facts resulting from its own operations.
+/// </summary>
+/// <typeparam name="TId">The strongly-typed identifier type.</typeparam>
+public abstract class AggregateRoot<TId> : Entity<TId>
+    where TId : notnull
+{
+    private readonly List<IDomainEvent> _domainEvents = [];
+
+    /// <summary>
+    /// Initializes a new instance of the aggregate root with the specified identifier.
+    /// </summary>
+    /// <param name="id">The aggregate identifier.</param>
+    protected AggregateRoot(TId id)
+        : base(id)
+    {
+    }
+
+    /// <summary>
+    /// Initializes a new instance of the aggregate root.
+    /// </summary>
+    protected AggregateRoot()
+    {
+    }
+
+    /// <summary>Domain Events raised by this Aggregate Root that have not yet been dispatched.</summary>
+    public IReadOnlyCollection<IDomainEvent> DomainEvents => _domainEvents.AsReadOnly();
+
+    /// <summary>
+    /// Registers a domain event raised by this aggregate.
+    /// </summary>
+    /// <param name="domainEvent">The domain event to register.</param>
+    protected void RaiseDomainEvent(IDomainEvent domainEvent)
+    {
+        _domainEvents.Add(domainEvent);
+    }
+
+    /// <summary>
+    /// Called by Infrastructure (e.g. the EF Core SaveChanges pipeline)
+    /// after Domain Events have been dispatched. Application and
+    /// Domain code shall never call this directly.
+    /// </summary>
+    public void ClearDomainEvents()
+    {
+        _domainEvents.Clear();
+    }
+}
+
+================================================================================
+FILE: src\BuildingBlocks\MachineryManager.SharedKernel\Entity.cs
+SIZE: 2.02 KB
+================================================================================
+namespace MachineryManager.SharedKernel;
+
+/// <summary>
+/// Base class for entities with identity-based equality.
+/// Per ADR-0001 (Clean Architecture), entities never depend on
+/// Infrastructure, Application, or Presentation types.
+/// </summary>
+/// <typeparam name="TId">The strongly-typed identifier type.</typeparam>
+public abstract class Entity<TId> : IEquatable<Entity<TId>>
+    where TId : notnull
+{
+    /// <summary>The strongly-typed identifier of this entity.</summary>
+    public TId Id { get; protected set; }
+
+    /// <summary>
+    /// Initializes a new instance of the entity with the specified identifier.
+    /// </summary>
+    /// <param name="id">The entity identifier.</param>
+    protected Entity(TId id)
+    {
+        Id = id;
+    }
+
+    // Reserved for ORM materialization only. Never used by application code.
+    /// <summary>
+    /// Initializes a new instance of the entity.
+    /// </summary>
+    protected Entity()
+    {
+        Id = default!;
+    }
+
+    /// <summary>Determines whether this entity has the same identity as <paramref name="other"/>.</summary>
+    public bool Equals(Entity<TId>? other)
+    {
+        if (other is null)
+        {
+            return false;
+        }
+
+        if (ReferenceEquals(this, other))
+        {
+            return true;
+        }
+
+        if (GetType() != other.GetType())
+        {
+            return false;
+        }
+
+        return EqualityComparer<TId>.Default.Equals(Id, other.Id);
+    }
+
+    /// <inheritdoc />
+    public override bool Equals(object? obj) => Equals(obj as Entity<TId>);
+
+    /// <inheritdoc />
+    public override int GetHashCode() => HashCode.Combine(GetType(), Id);
+
+    /// <summary>Determines whether two entities have the same identity.</summary>
+    public static bool operator ==(Entity<TId>? left, Entity<TId>? right) =>
+        left is null ? right is null : left.Equals(right);
+
+    /// <summary>Determines whether two entities have different identities.</summary>
+    public static bool operator !=(Entity<TId>? left, Entity<TId>? right) => !(left == right);
+}
+
+================================================================================
+FILE: src\BuildingBlocks\MachineryManager.SharedKernel\Error.cs
+SIZE: 1.59 KB
+================================================================================
+namespace MachineryManager.SharedKernel;
+
+/// <summary>
+/// Represents a Business Error per 05-development/07-ErrorHandling.md:
+/// a violation of a business rule, returned as data rather than thrown
+/// as an exception.
+/// </summary>
+/// <param name="Code">A stable, machine-readable error code (e.g. "Asset.AlreadyRetired").</param>
+/// <param name="Message">A human-readable description of the violation.</param>
+/// <param name="Type">
+/// The category of the error, used by Presentation layers to translate
+/// it into a transport-specific response (07-api/06-ErrorHandling.md,
+/// Section 8.7). Defaults to <see cref="ErrorType.Failure"/>.
+/// </param>
+public sealed record Error(string Code, string Message, ErrorType Type = ErrorType.Failure)
+{
+    /// <summary>Represents the absence of an error, used only by a successful <see cref="Result"/>.</summary>
+    public static readonly Error None = new(string.Empty, string.Empty);
+
+    /// <summary>Creates a Not Found business error.</summary>
+    public static Error NotFound(string code, string message) => new(code, message, ErrorType.NotFound);
+
+    /// <summary>Creates a Validation business error.</summary>
+    public static Error Validation(string code, string message) => new(code, message, ErrorType.Validation);
+
+    /// <summary>Creates a Conflict business error.</summary>
+    public static Error Conflict(string code, string message) => new(code, message, ErrorType.Conflict);
+
+    /// <summary>Creates an unexpected-failure business error.</summary>
+    public static Error Failure(string code, string message) => new(code, message, ErrorType.Failure);
+}
+
+
+================================================================================
+FILE: src\BuildingBlocks\MachineryManager.SharedKernel\ErrorType.cs
+SIZE: 0.72 KB
+================================================================================
+namespace MachineryManager.SharedKernel;
+
+/// <summary>
+/// Categorizes a business <see cref="Error"/> for translation into a
+/// transport-specific response (e.g. HTTP status code), per
+/// 07-api/06-ErrorHandling.md, Section 8.7 (Error Response Structure).
+/// </summary>
+public enum ErrorType
+{
+    /// <summary>An unexpected failure not otherwise categorized (maps to 500 / SYS).</summary>
+    Failure,
+
+    /// <summary>The request failed input or business validation (maps to 400 / VAL).</summary>
+    Validation,
+
+    /// <summary>The requested resource does not exist (maps to 404 / RES).</summary>
+    NotFound,
+
+    /// <summary>The request conflicts with the current business state (maps to 409 / BUS).</summary>
+    Conflict,
+}
+
+
+================================================================================
+FILE: src\BuildingBlocks\MachineryManager.SharedKernel\IDomainEvent.cs
+SIZE: 0.48 KB
+================================================================================
+namespace MachineryManager.SharedKernel;
+
+/// <summary>
+/// Marker interface for Domain Events, catalogued in
+/// docs-english/03-domain/07-DomainEvents.md.
+/// Domain Events describe business facts that already happened; they
+/// are never used to request an action (see 01-DomainPrinciples.md).
+/// </summary>
+public interface IDomainEvent
+{
+    /// <summary>
+    /// UTC timestamp at which the underlying business fact occurred.
+    /// </summary>
+    DateTimeOffset OccurredOn { get; }
+}
+
+================================================================================
+FILE: src\BuildingBlocks\MachineryManager.SharedKernel\MachineryManager.SharedKernel.csproj
+SIZE: 0.05 KB
+================================================================================
+<Project Sdk="Microsoft.NET.Sdk">
+
+</Project>
+
+================================================================================
+FILE: src\BuildingBlocks\MachineryManager.SharedKernel\Result.cs
+SIZE: 2.82 KB
+================================================================================
+namespace MachineryManager.SharedKernel;
+
+/// <summary>
+/// Represents the outcome of an operation that can fail with a
+/// Business Error (05-development/07-ErrorHandling.md), without using
+/// exceptions for expected, non-exceptional business outcomes.
+/// </summary>
+public class Result
+{
+    /// <summary>
+    /// Initializes a new instance of the result.
+    /// </summary>
+    /// <param name="isSuccess">Indicates whether the operation succeeded.</param>
+    /// <param name="error">The error associated with the result.</param>
+    protected Result(bool isSuccess, Error error)
+    {
+        if (isSuccess && error != Error.None)
+        {
+            throw new InvalidOperationException("A successful result cannot carry an error.");
+        }
+
+        if (!isSuccess && error == Error.None)
+        {
+            throw new InvalidOperationException("A failed result must carry an error.");
+        }
+
+        IsSuccess = isSuccess;
+        Error = error;
+    }
+
+    /// <summary>Whether the operation succeeded.</summary>
+    public bool IsSuccess { get; }
+
+    /// <summary>Whether the operation failed.</summary>
+    public bool IsFailure => !IsSuccess;
+
+    /// <summary>The error describing why the operation failed, or <see cref="SharedKernel.Error.None"/> on success.</summary>
+    public Error Error { get; }
+
+    /// <summary>Creates a successful result with no value.</summary>
+    public static Result Success() => new(true, Error.None);
+
+    /// <summary>Creates a failed result carrying the given error.</summary>
+    public static Result Failure(Error error) => new(false, error);
+
+    /// <summary>Creates a successful result carrying the given value.</summary>
+    public static Result<TValue> Success<TValue>(TValue value) => new(value, true, Error.None);
+
+    /// <summary>Creates a failed result of the given value type, carrying the given error.</summary>
+    public static Result<TValue> Failure<TValue>(Error error) => new(default, false, error);
+}
+
+/// <summary>
+/// A <see cref="Result"/> that carries a value on success.
+/// </summary>
+/// <typeparam name="TValue">The type of the value returned on success.</typeparam>
+public sealed class Result<TValue> : Result
+{
+    private readonly TValue? _value;
+
+    internal Result(TValue? value, bool isSuccess, Error error)
+        : base(isSuccess, error)
+    {
+        _value = value;
+    }
+
+    /// <summary>
+    /// The success value. Accessing this on a failed Result throws,
+    /// because callers must check <see cref="Result.IsSuccess"/> first.
+    /// </summary>
+    public TValue Value => IsSuccess
+        ? _value!
+        : throw new InvalidOperationException("The value of a failed result cannot be accessed.");
+
+    /// <summary>Implicitly wraps a value into a successful <see cref="Result{TValue}"/>.</summary>
+    public static implicit operator Result<TValue>(TValue value) => Success(value);
+}
+
+
+================================================================================
+FILE: src\BuildingBlocks\MachineryManager.SharedKernel\ValueObject.cs
+SIZE: 1.58 KB
+================================================================================
+namespace MachineryManager.SharedKernel;
+
+/// <summary>
+/// Base class for Value Objects: immutable types compared by their
+/// component values rather than by identity.
+/// </summary>
+public abstract class ValueObject : IEquatable<ValueObject>
+{
+    /// <summary>
+    /// Returns the components that define structural equality for this
+    /// Value Object, in a stable, deterministic order.
+    /// </summary>
+    protected abstract IEnumerable<object?> GetEqualityComponents();
+
+    /// <summary>Determines whether this Value Object has the same components as <paramref name="other"/>.</summary>
+    public bool Equals(ValueObject? other)
+    {
+        if (other is null || GetType() != other.GetType())
+        {
+            return false;
+        }
+
+        return GetEqualityComponents().SequenceEqual(other.GetEqualityComponents());
+    }
+
+    /// <inheritdoc />
+    public override bool Equals(object? obj) => Equals(obj as ValueObject);
+
+    /// <inheritdoc />
+    public override int GetHashCode()
+    {
+        var hash = new HashCode();
+        foreach (var component in GetEqualityComponents())
+        {
+            hash.Add(component);
+        }
+
+        return hash.ToHashCode();
+    }
+
+    /// <summary>Determines whether two Value Objects have the same components.</summary>
+    public static bool operator ==(ValueObject? left, ValueObject? right) =>
+        left is null ? right is null : left.Equals(right);
+
+    /// <summary>Determines whether two Value Objects have different components.</summary>
+    public static bool operator !=(ValueObject? left, ValueObject? right) => !(left == right);
+}
+
+================================================================================
+FILE: src\BuildingBlocks\MachineryManager.UI\_Imports.razor
+SIZE: 0.04 KB
+================================================================================
+@using Microsoft.AspNetCore.Components.Web
+
+================================================================================
+FILE: src\BuildingBlocks\MachineryManager.UI\MachineryManager.UI.csproj
+SIZE: 0.23 KB
+================================================================================
+<Project Sdk="Microsoft.NET.Sdk.Razor">
+
+  <ItemGroup>
+    <SupportedPlatform Include="browser" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.Components.Web"/>
+  </ItemGroup>
+
+</Project>
+
+================================================================================
+FILE: src\Host\MachineryManager.Web\appsettings.Development.json
+SIZE: 0.12 KB
+================================================================================
+{
+  "Logging": {
+    "LogLevel": {
+      "Default": "Information",
+      "Microsoft.AspNetCore": "Warning"
+    }
+  }
+}
+
+================================================================================
+FILE: src\Host\MachineryManager.Web\appsettings.json
+SIZE: 0.54 KB
+================================================================================
+{
+  "ConnectionStrings": {
+    "MachineryManagerDatabase": "Server=(localdb)\\mssqllocaldb;Database=MachineryManagerEnterprise;Trusted_Connection=True;MultipleActiveResultSets=true"
+  },
+  "Serilog": {
+    "MinimumLevel": {
+      "Default": "Information",
+      "Override": {
+        "Microsoft.AspNetCore": "Warning"
+      }
+    },
+    "WriteTo": [
+      { "Name": "Console" }
+    ]
+  },
+  "Logging": {
+    "LogLevel": {
+      "Default": "Information",
+      "Microsoft.AspNetCore": "Warning"
+    }
+  },
+  "AllowedHosts": "*"
+}
+
+================================================================================
+FILE: src\Host\MachineryManager.Web\Components\_Imports.razor
+SIZE: 0.46 KB
+================================================================================
+@using System.Net.Http
+@using System.Net.Http.Json
+@using Microsoft.AspNetCore.Components.Forms
+@using Microsoft.AspNetCore.Components.Routing
+@using Microsoft.AspNetCore.Components.Web
+@using static Microsoft.AspNetCore.Components.Web.RenderMode
+@using Microsoft.AspNetCore.Components.Web.Virtualization
+@using Microsoft.JSInterop
+@using MachineryManager.Web
+@using MachineryManager.Web.Components
+@using MachineryManager.Web.Components.Layout
+@using MudBlazor
+
+================================================================================
+FILE: src\Host\MachineryManager.Web\Components\App.razor
+SIZE: 0.82 KB
+================================================================================
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <base href="/" />
+    <ResourcePreloader />
+    <link rel="stylesheet" href="_content/MudBlazor/MudBlazor.min.css" />
+    <link href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="@Assets["app.css"]" />
+    <link rel="stylesheet" href="@Assets["MachineryManager.Web.styles.css"]" />
+    <ImportMap />
+    <link rel="icon" type="image/png" href="favicon.png" />
+    <HeadOutlet />
+</head>
+
+<body>
+    <Routes />
+    <ReconnectModal />
+    <script src="@Assets["_framework/blazor.web.js"]"></script>
+    <script src="_content/MudBlazor/MudBlazor.min.js"></script>
+</body>
+
+</html>
+
+================================================================================
+FILE: src\Host\MachineryManager.Web\Components\Layout\MainLayout.razor
+SIZE: 0.63 KB
+================================================================================
+@inherits LayoutComponentBase
+
+<MudThemeProvider />
+<MudPopoverProvider />
+<MudDialogProvider />
+<MudSnackbarProvider />
+
+<div class="page">
+    <div class="sidebar">
+        <NavMenu />
+    </div>
+
+    <main>
+        <div class="top-row px-4">
+            <a href="https://learn.microsoft.com/aspnet/core/" target="_blank">About</a>
+        </div>
+
+        <article class="content px-4">
+            @Body
+        </article>
+    </main>
+</div>
+
+<div id="blazor-error-ui" data-nosnippet>
+    An unhandled error has occurred.
+    <a href="." class="reload">Reload</a>
+    <span class="dismiss">🗙</span>
+</div>
+
+
+================================================================================
+FILE: src\Host\MachineryManager.Web\Components\Layout\NavMenu.razor
+SIZE: 1.07 KB
+================================================================================
+<div class="top-row ps-3 navbar navbar-dark">
+    <div class="container-fluid">
+        <a class="navbar-brand" href="">MachineryManager.Web</a>
+    </div>
+</div>
+
+<input type="checkbox" title="Navigation menu" class="navbar-toggler" />
+
+<div class="nav-scrollable" onclick="document.querySelector('.navbar-toggler').click()">
+    <nav class="nav flex-column">
+        <div class="nav-item px-3">
+            <NavLink class="nav-link" href="" Match="NavLinkMatch.All">
+                <span class="bi bi-house-door-fill-nav-menu" aria-hidden="true"></span> Home
+            </NavLink>
+        </div>
+
+        <div class="nav-item px-3">
+            <NavLink class="nav-link" href="counter">
+                <span class="bi bi-plus-square-fill-nav-menu" aria-hidden="true"></span> Counter
+            </NavLink>
+        </div>
+
+        <div class="nav-item px-3">
+            <NavLink class="nav-link" href="weather">
+                <span class="bi bi-list-nested-nav-menu" aria-hidden="true"></span> Weather
+            </NavLink>
+        </div>
+    </nav>
+</div>
+
+
+
+================================================================================
+FILE: src\Host\MachineryManager.Web\Components\Layout\ReconnectModal.razor
+SIZE: 1.33 KB
+================================================================================
+<script type="module" src="@Assets["Components/Layout/ReconnectModal.razor.js"]"></script>
+
+<dialog id="components-reconnect-modal" data-nosnippet>
+    <div class="components-reconnect-container">
+        <div class="components-rejoining-animation" aria-hidden="true">
+            <div></div>
+            <div></div>
+        </div>
+        <p class="components-reconnect-first-attempt-visible">
+            Rejoining the server...
+        </p>
+        <p class="components-reconnect-repeated-attempt-visible">
+            Rejoin failed... trying again in <span id="components-seconds-to-next-attempt"></span> seconds.
+        </p>
+        <p class="components-reconnect-failed-visible">
+            Failed to rejoin.<br />Please retry or reload the page.
+        </p>
+        <button id="components-reconnect-button" class="components-reconnect-failed-visible">
+            Retry
+        </button>
+        <p class="components-pause-visible">
+            The session has been paused by the server.
+        </p>
+        <p class="components-resume-failed-visible">
+            Failed to resume the session.<br />Please retry or reload the page.
+        </p>
+        <button id="components-resume-button" class="components-pause-visible components-resume-failed-visible">
+            Resume
+        </button>
+    </div>
+</dialog>
+
+
+================================================================================
+FILE: src\Host\MachineryManager.Web\Components\Pages\Counter.razor
+SIZE: 0.35 KB
+================================================================================
+@page "/counter"
+@rendermode InteractiveServer
+
+<PageTitle>Counter</PageTitle>
+
+<h1>Counter</h1>
+
+<p role="status">Current count: @currentCount</p>
+
+<button class="btn btn-primary" @onclick="IncrementCount">Click me</button>
+
+@code {
+    private int currentCount = 0;
+
+    private void IncrementCount()
+    {
+        currentCount++;
+    }
+}
+
+
+================================================================================
+FILE: src\Host\MachineryManager.Web\Components\Pages\Error.razor
+SIZE: 1.19 KB
+================================================================================
+@page "/Error"
+@using System.Diagnostics
+
+<PageTitle>Error</PageTitle>
+
+<h1 class="text-danger">Error.</h1>
+<h2 class="text-danger">An error occurred while processing your request.</h2>
+
+@if (ShowRequestId)
+{
+    <p>
+        <strong>Request ID:</strong> <code>@RequestId</code>
+    </p>
+}
+
+<h3>Development Mode</h3>
+<p>
+    Swapping to <strong>Development</strong> environment will display more detailed information about the error that occurred.
+</p>
+<p>
+    <strong>The Development environment shouldn't be enabled for deployed applications.</strong>
+    It can result in displaying sensitive information from exceptions to end users.
+    For local debugging, enable the <strong>Development</strong> environment by setting the <strong>ASPNETCORE_ENVIRONMENT</strong> environment variable to <strong>Development</strong>
+    and restarting the app.
+</p>
+
+@code{
+    [CascadingParameter]
+    private HttpContext? HttpContext { get; set; }
+
+    private string? RequestId { get; set; }
+    private bool ShowRequestId => !string.IsNullOrEmpty(RequestId);
+
+    protected override void OnInitialized() =>
+        RequestId = Activity.Current?.Id ?? HttpContext?.TraceIdentifier;
+}
+
+
+================================================================================
+FILE: src\Host\MachineryManager.Web\Components\Pages\Home.razor
+SIZE: 0.1 KB
+================================================================================
+@page "/"
+
+<PageTitle>Home</PageTitle>
+
+<h1>Hello, world!</h1>
+
+Welcome to your new app.
+
+
+================================================================================
+FILE: src\Host\MachineryManager.Web\Components\Pages\NotFound.razor
+SIZE: 0.12 KB
+================================================================================
+@page "/not-found"
+@layout MainLayout
+
+<h3>Not Found</h3>
+<p>Sorry, the content you are looking for does not exist.</p>
+
+================================================================================
+FILE: src\Host\MachineryManager.Web\Components\Pages\Weather.razor
+SIZE: 1.88 KB
+================================================================================
+@page "/weather"
+@attribute [StreamRendering]
+
+<PageTitle>Weather</PageTitle>
+
+<h1>Weather</h1>
+
+<p>This component demonstrates showing data.</p>
+
+@if (forecasts == null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Date</th>
+                <th aria-label="Temperature in Celsius">Temp. (C)</th>
+                <th aria-label="Temperature in Fahrenheit">Temp. (F)</th>
+                <th>Summary</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var forecast in forecasts)
+            {
+                <tr>
+                    <td>@forecast.Date.ToShortDateString()</td>
+                    <td>@forecast.TemperatureC</td>
+                    <td>@forecast.TemperatureF</td>
+                    <td>@forecast.Summary</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+@code {
+    private WeatherForecast[]? forecasts;
+
+    protected override async Task OnInitializedAsync()
+    {
+        // Simulate asynchronous loading to demonstrate streaming rendering
+        await Task.Delay(500);
+
+        var startDate = DateOnly.FromDateTime(DateTime.Now);
+        var summaries = new[] { "Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching" };
+        forecasts = Enumerable.Range(1, 5).Select(index => new WeatherForecast
+        {
+            Date = startDate.AddDays(index),
+            TemperatureC = Random.Shared.Next(-20, 55),
+            Summary = summaries[Random.Shared.Next(summaries.Length)]
+        }).ToArray();
+    }
+
+    private class WeatherForecast
+    {
+        public DateOnly Date { get; set; }
+        public int TemperatureC { get; set; }
+        public string? Summary { get; set; }
+        public int TemperatureF => 32 + (int)(TemperatureC / 0.5556);
+    }
+}
+
+
+================================================================================
+FILE: src\Host\MachineryManager.Web\Components\Routes.razor
+SIZE: 0.29 KB
+================================================================================
+<Router AppAssembly="typeof(Program).Assembly" NotFoundPage="typeof(Pages.NotFound)">
+    <Found Context="routeData">
+        <RouteView RouteData="routeData" DefaultLayout="typeof(Layout.MainLayout)" />
+        <FocusOnNavigate RouteData="routeData" Selector="h1" />
+    </Found>
+</Router>
+
+
+================================================================================
+FILE: src\Host\MachineryManager.Web\MachineryManager.Web.csproj
+SIZE: 1.78 KB
+================================================================================
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <BlazorDisableThrowNavigationException>true</BlazorDisableThrowNavigationException>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\BuildingBlocks\MachineryManager.SharedKernel\MachineryManager.SharedKernel.csproj" />
+    <ProjectReference Include="..\..\BuildingBlocks\MachineryManager.SharedKernel.Abstractions\MachineryManager.SharedKernel.Abstractions.csproj" />
+    <ProjectReference Include="..\..\BuildingBlocks\MachineryManager.SharedKernel.Infrastructure\MachineryManager.SharedKernel.Infrastructure.csproj" />
+    <ProjectReference Include="..\..\BuildingBlocks\MachineryManager.UI\MachineryManager.UI.csproj" />
+    <ProjectReference Include="..\..\Modules\Organization\Organization.Application\Organization.Application.csproj" />
+    <ProjectReference Include="..\..\Modules\Organization\Organization.Infrastructure\Organization.Infrastructure.csproj" />
+    <ProjectReference Include="..\..\Modules\Organization\Organization.Presentation\Organization.Presentation.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- UI [TE-0003 (MudBlazor / ADR-0005)] -->
+    <PackageReference Include="MudBlazor" />
+
+    <!-- API Documentation [TE-0021 (Scalar & NSwag / ADR-0035)] -->
+    <PackageReference Include="Microsoft.AspNetCore.OpenApi" />
+    <PackageReference Include="Scalar.AspNetCore" />
+
+    <!-- Logging & Observability [TE-0007 (Serilog / ADR-0009), TE-0008 & TE-0017 (OpenTelemetry / ADR-0010, ADR-0033)] -->
+    <PackageReference Include="Serilog.AspNetCore" />
+    <PackageReference Include="Serilog.Sinks.Console" />
+    <PackageReference Include="OpenTelemetry.Extensions.Hosting" />
+    <PackageReference Include="OpenTelemetry.Instrumentation.AspNetCore" />
+  </ItemGroup>
+
+</Project>
+
+================================================================================
+FILE: src\Host\MachineryManager.Web\Program.cs
+SIZE: 2.95 KB
+================================================================================
+using MachineryManager.Organization.Application;
+using MachineryManager.Organization.Infrastructure;
+using MachineryManager.Organization.Presentation.Endpoints;
+using MachineryManager.SharedKernel.Infrastructure;
+using MachineryManager.Web.Components;
+using MudBlazor.Services;
+using OpenTelemetry;
+using OpenTelemetry.Metrics;
+using OpenTelemetry.Trace;
+using Scalar.AspNetCore;
+using Serilog;
+
+// Two-stage initialization (per ADR-0009 / ADR-0033): a bootstrap
+// logger captures any failure that happens before the host itself has
+// finished configuring the real logging pipeline.
+Log.Logger = new LoggerConfiguration()
+    .WriteTo.Console()
+    .CreateBootstrapLogger();
+
+try
+{
+    var builder = WebApplication.CreateBuilder(args);
+
+    builder.Host.UseSerilog((context, services, configuration) => configuration
+        .ReadFrom.Configuration(context.Configuration)
+        .ReadFrom.Services(services)
+        .Enrich.FromLogContext());
+
+    builder.Services
+        .AddOpenTelemetry()
+        .WithTracing(tracing => tracing
+            .AddAspNetCoreInstrumentation())
+        .WithMetrics(metrics => metrics
+            .AddAspNetCoreInstrumentation());
+
+    // Add services to the container.
+    builder.Services.AddRazorComponents()
+        .AddInteractiveServerComponents();
+
+    // UI [TE-0003 (MudBlazor / ADR-0005)]
+    builder.Services.AddMudServices();
+
+    // API Documentation [TE-0021 (Scalar & NSwag / ADR-0035)]
+    builder.Services.AddOpenApi();
+
+    // Cross-cutting SharedKernel infrastructure (IDateTimeProvider).
+    builder.Services.AddSharedKernelInfrastructure();
+
+    // Organization module (Application + Infrastructure).
+    builder.Services.AddOrganizationApplication();
+    builder.Services.AddOrganizationInfrastructure(builder.Configuration);
+
+    var app = builder.Build();
+
+    // Configure the HTTP request pipeline.
+    if (!app.Environment.IsDevelopment())
+    {
+        app.UseExceptionHandler("/Error", createScopeForErrors: true);
+        // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
+        app.UseHsts();
+    }
+    else
+    {
+        // API Documentation [TE-0021 (Scalar / ADR-0035)] - interactive docs in Development only.
+        app.MapOpenApi();
+        app.MapScalarApiReference();
+    }
+
+    app.UseSerilogRequestLogging();
+
+    app.UseStatusCodePagesWithReExecute("/not-found", createScopeForStatusCodePages: true);
+    app.UseHttpsRedirection();
+
+    app.UseAntiforgery();
+
+    app.MapStaticAssets();
+    app.MapRazorComponents<App>()
+        .AddInteractiveServerRenderMode();
+
+    // Organization module REST endpoints (07-api conventions, Section 8).
+    app.MapOrganizationEndpoints();
+
+    app.Run();
+}
+catch (Exception ex) when (ex is not HostAbortedException)
+{
+    Log.Fatal(ex, "MachineryManager.Web terminated unexpectedly during startup");
+}
+finally
+{
+    Log.CloseAndFlush();
+}
+
+================================================================================
+FILE: src\Host\MachineryManager.Web\Properties\launchSettings.json
+SIZE: 0.67 KB
+================================================================================
+{
+  "$schema": "https://json.schemastore.org/launchsettings.json",
+    "profiles": {
+      "http": {
+        "commandName": "Project",
+        "dotnetRunMessages": true,
+        "launchBrowser": true,
+        "applicationUrl": "http://localhost:5238",
+        "environmentVariables": {
+          "ASPNETCORE_ENVIRONMENT": "Development"
+        }
+      },
+      "https": {
+        "commandName": "Project",
+        "dotnetRunMessages": true,
+        "launchBrowser": true,
+        "applicationUrl": "https://localhost:7138;http://localhost:5238",
+        "environmentVariables": {
+          "ASPNETCORE_ENVIRONMENT": "Development"
+        }
+      }
+    }
+  }
+
+
+================================================================================
+FILE: src\Modules\Identity\Identity.Application\Identity.Application.csproj
+SIZE: 0.05 KB
+================================================================================
+<Project Sdk="Microsoft.NET.Sdk">
+
+</Project>
+
+================================================================================
+FILE: src\Modules\Identity\Identity.Domain\Identity.Domain.csproj
+SIZE: 0.05 KB
+================================================================================
+<Project Sdk="Microsoft.NET.Sdk">
+
+</Project>
+
+================================================================================
+FILE: src\Modules\Identity\Identity.Infrastructure\Identity.Infrastructure.csproj
+SIZE: 0.05 KB
+================================================================================
+<Project Sdk="Microsoft.NET.Sdk">
+
+</Project>
+
+================================================================================
+FILE: src\Modules\Identity\Identity.Presentation\Identity.Presentation.csproj
+SIZE: 0.05 KB
+================================================================================
+<Project Sdk="Microsoft.NET.Sdk">
+
+</Project>
+
+================================================================================
+FILE: src\Modules\Organization\Organization.Application\Abstractions\IOrganizationRepository.cs
+SIZE: 1.25 KB
+================================================================================
+using MachineryManager.SharedKernel;
+using MachineryManager.SharedKernel.Abstractions;
+using Organization.Domain;
+
+namespace MachineryManager.Organization.Application.Abstractions;
+
+/// <summary>
+/// Repository contract for the <see cref="global::Organization.Domain.Organization"/> aggregate,
+/// extending the generic aggregate root repository with search capabilities.
+/// </summary>
+public interface IOrganizationRepository
+    : IRepository<global::Organization.Domain.Organization, OrganizationId>
+{
+    /// <summary>
+    /// Performs a paginated search over organizations with an optional text filter.
+    /// </summary>
+    /// <param name="searchTerm">Optional text to filter by organization name.</param>
+    /// <param name="page">The one-based page number.</param>
+    /// <param name="pageSize">The number of items per page.</param>
+    /// <param name="cancellationToken">Token to cancel the asynchronous operation.</param>
+    /// <returns>A response containing the matching items and pagination metadata.</returns>
+    Task<Features.Organizations.Queries.SearchOrganizations.SearchOrganizationsResponse> SearchAsync(
+        string? searchTerm,
+        int page,
+        int pageSize,
+        CancellationToken cancellationToken = default);
+}
+
+================================================================================
+FILE: src\Modules\Organization\Organization.Application\Behaviors\ValidationBehavior.cs
+SIZE: 3.57 KB
+================================================================================
+using FluentValidation;
+using MachineryManager.SharedKernel;
+using MediatR;
+
+namespace MachineryManager.Organization.Application.Behaviors;
+
+/// <summary>
+/// MediatR pipeline behavior that executes FluentValidation validators
+/// before the request handler. Per ADR-0036, validation runs automatically
+/// and handlers shall NOT perform ad hoc input validation.
+/// </summary>
+/// <typeparam name="TRequest">The request type.</typeparam>
+/// <typeparam name="TResponse">The response type (expected to be Result or Result&lt;T&gt;).</typeparam>
+public sealed class ValidationBehavior<TRequest, TResponse>
+    : IPipelineBehavior<TRequest, TResponse>
+    where TRequest : notnull
+{
+    private readonly IEnumerable<IValidator<TRequest>> _validators;
+
+    /// <summary>
+    /// Initializes a new instance of the <see cref="ValidationBehavior{TRequest, TResponse}"/> class.
+    /// </summary>
+    /// <param name="validators">All registered validators for <typeparamref name="TRequest"/>.</param>
+    public ValidationBehavior(IEnumerable<IValidator<TRequest>> validators)
+    {
+        _validators = validators;
+    }
+
+    /// <summary>
+    /// Validates the request before delegating to the handler. If validation fails,
+    /// returns a <see cref="Result"/> failure without invoking the handler.
+    /// </summary>
+    /// <param name="request">The incoming request.</param>
+    /// <param name="next">The delegate to execute the handler.</param>
+    /// <param name="cancellationToken">Token to cancel the asynchronous operation.</param>
+    /// <returns>The handler response, or a validation failure result.</returns>
+    /// <exception cref="InvalidOperationException">
+    /// Thrown only when validation fails but the response type does not support
+    /// the Result pattern (indicates a programming error, not a validation error).
+    /// </exception>
+    public async Task<TResponse> Handle(
+        TRequest request,
+        RequestHandlerDelegate<TResponse> next,
+        CancellationToken cancellationToken)
+    {
+        if (!_validators.Any())
+        {
+            return await next();
+        }
+
+        var context = new ValidationContext<TRequest>(request);
+        var validationResults = await Task.WhenAll(
+            _validators.Select(v => v.ValidateAsync(context, cancellationToken)));
+
+        var failures = validationResults
+            .SelectMany(r => r.Errors)
+            .Where(f => f != null)
+            .ToList();
+
+        if (failures.Count == 0)
+        {
+            return await next();
+        }
+
+        var error = Error.Validation(
+            "Validation.General",
+            string.Join("; ", failures.Select(f => f.ErrorMessage)));
+
+        var responseType = typeof(TResponse);
+
+        if (responseType == typeof(Result))
+        {
+            return (TResponse)(object)Result.Failure(error);
+        }
+
+        if (responseType.IsGenericType &&
+            responseType.GetGenericTypeDefinition() == typeof(Result<>))
+        {
+            var valueType = responseType.GetGenericArguments()[0];
+            var method = typeof(Result)
+                .GetMethod(nameof(Result.Failure), 1, new[] { typeof(Error) })
+                ?.MakeGenericMethod(valueType);
+
+            if (method != null)
+            {
+                var result = method.Invoke(null, new object[] { error });
+                return (TResponse)result!;
+            }
+        }
+
+        throw new InvalidOperationException(
+            $"Validation failed but response type {responseType.Name} does not support Result pattern.");
+    }
+}
+
+================================================================================
+FILE: src\Modules\Organization\Organization.Application\DependencyInjection.cs
+SIZE: 1.24 KB
+================================================================================
+using FluentValidation;
+using MediatR;
+using Microsoft.Extensions.DependencyInjection;
+
+namespace MachineryManager.Organization.Application;
+
+/// <summary>
+/// Provides extension methods for registering Organization Application layer
+/// services into the dependency injection container.
+/// </summary>
+public static class DependencyInjection
+{
+    /// <summary>
+    /// Registers MediatR handlers, FluentValidation validators, and pipeline
+    /// behaviors (Validation per ADR-0036) from the Organization.Application assembly.
+    /// </summary>
+    /// <param name="services">The service collection to configure.</param>
+    /// <returns>The same <see cref="IServiceCollection"/> for chaining.</returns>
+    public static IServiceCollection AddOrganizationApplication(
+        this IServiceCollection services)
+    {
+        var assembly = typeof(DependencyInjection).Assembly;
+
+        services.AddMediatR(configuration =>
+        {
+            configuration.RegisterServicesFromAssembly(assembly);
+        });
+
+        services.AddValidatorsFromAssembly(assembly);
+
+        services.AddTransient(
+            typeof(IPipelineBehavior<,>),
+            typeof(Behaviors.ValidationBehavior<,>));
+
+        return services;
+    }
+}
+
+================================================================================
+FILE: src\Modules\Organization\Organization.Application\Features\Organizations\Commands\RegisterOrganization\RegisterOrganizationCommand.cs
+SIZE: 0.42 KB
+================================================================================
+using MachineryManager.SharedKernel;
+using MediatR;
+
+namespace MachineryManager.Organization.Application.Features.Organizations.Commands.RegisterOrganization;
+
+/// <summary>
+/// Command to register a new Organization (UC-1301 / CMD-950).
+/// </summary>
+/// <param name="Name">The display name of the organization to create.</param>
+public sealed record RegisterOrganizationCommand(string Name)
+    : IRequest<Result<Guid>>;
+
+================================================================================
+FILE: src\Modules\Organization\Organization.Application\Features\Organizations\Commands\RegisterOrganization\RegisterOrganizationCommandHandler.cs
+SIZE: 2.35 KB
+================================================================================
+using MachineryManager.Organization.Application.Abstractions;
+using MachineryManager.SharedKernel;
+using MachineryManager.SharedKernel.Abstractions;
+using MediatR;
+
+namespace MachineryManager.Organization.Application.Features.Organizations.Commands.RegisterOrganization;
+
+/// <summary>
+/// Handles <see cref="RegisterOrganizationCommand"/> by orchestrating domain
+/// registration, persisting the aggregate, and committing the unit of work.
+/// </summary>
+public sealed class RegisterOrganizationCommandHandler
+    : IRequestHandler<RegisterOrganizationCommand, Result<Guid>>
+{
+    private readonly IOrganizationRepository _organizationRepository;
+    private readonly IUnitOfWork _unitOfWork;
+    private readonly IDateTimeProvider _dateTimeProvider;
+
+    /// <summary>
+    /// Initializes a new instance of the <see cref="RegisterOrganizationCommandHandler"/> class.
+    /// </summary>
+    /// <param name="organizationRepository">The organization repository.</param>
+    /// <param name="unitOfWork">The unit of work for atomic persistence.</param>
+    /// <param name="dateTimeProvider">Provider for deterministic UTC timestamps.</param>
+    public RegisterOrganizationCommandHandler(
+        IOrganizationRepository organizationRepository,
+        IUnitOfWork unitOfWork,
+        IDateTimeProvider dateTimeProvider)
+    {
+        _organizationRepository = organizationRepository;
+        _unitOfWork = unitOfWork;
+        _dateTimeProvider = dateTimeProvider;
+    }
+
+    /// <summary>
+    /// Executes the registration use case.
+    /// </summary>
+    /// <param name="request">The registration command.</param>
+    /// <param name="cancellationToken">Token to cancel the asynchronous operation.</param>
+    /// <returns>A result containing the new organization's GUID on success.</returns>
+    public async Task<Result<Guid>> Handle(
+        RegisterOrganizationCommand request,
+        CancellationToken cancellationToken)
+    {
+        var result = global::Organization.Domain.Organization.Register(
+            request.Name,
+            _dateTimeProvider);
+
+        if (result.IsFailure)
+        {
+            return Result.Failure<Guid>(result.Error);
+        }
+
+        _organizationRepository.Add(result.Value);
+        await _unitOfWork.SaveChangesAsync(cancellationToken);
+
+        return Result.Success(result.Value.Id.Value);
+    }
+}
+
+================================================================================
+FILE: src\Modules\Organization\Organization.Application\Features\Organizations\Commands\RegisterOrganization\RegisterOrganizationCommandValidator.cs
+SIZE: 0.86 KB
+================================================================================
+using FluentValidation;
+
+namespace MachineryManager.Organization.Application.Features.Organizations.Commands.RegisterOrganization;
+
+/// <summary>
+/// Validates <see cref="RegisterOrganizationCommand"/> per ADR-0036.
+/// </summary>
+public sealed class RegisterOrganizationCommandValidator
+    : AbstractValidator<RegisterOrganizationCommand>
+{
+    /// <summary>
+    /// Initializes validation rules for the register organization command.
+    /// </summary>
+    public RegisterOrganizationCommandValidator()
+    {
+        int maxLength = global::Organization.Domain.Organization.MaxNameLength;
+
+        RuleFor(x => x.Name)
+            .NotEmpty()
+            .WithMessage("Organization name is required.")
+            .MaximumLength(maxLength)
+            .WithMessage(
+                $"Organization name shall not exceed {maxLength} characters.");
+    }
+}
+
+================================================================================
+FILE: src\Modules\Organization\Organization.Application\Features\Organizations\Dtos\OrganizationDto.cs
+SIZE: 0.39 KB
+================================================================================
+namespace MachineryManager.Organization.Application.Features.Organizations.Dtos;
+
+/// <summary>
+/// Data transfer object representing a read-only view of an Organization.
+/// </summary>
+/// <param name="Id">The unique identifier of the organization.</param>
+/// <param name="Name">The display name of the organization.</param>
+public sealed record OrganizationDto(
+    Guid Id,
+    string Name);
+
+================================================================================
+FILE: src\Modules\Organization\Organization.Application\Features\Organizations\Queries\GetOrganizationById\GetOrganizationByIdQuery.cs
+SIZE: 0.52 KB
+================================================================================
+using MachineryManager.Organization.Application.Features.Organizations.Dtos;
+using MachineryManager.SharedKernel;
+using MediatR;
+
+namespace MachineryManager.Organization.Application.Features.Organizations.Queries.GetOrganizationById;
+
+/// <summary>
+/// Query to retrieve a single organization by its unique identifier.
+/// </summary>
+/// <param name="OrganizationId">The GUID of the organization to retrieve.</param>
+public sealed record GetOrganizationByIdQuery(Guid OrganizationId)
+    : IRequest<Result<OrganizationDto>>;
+
+================================================================================
+FILE: src\Modules\Organization\Organization.Application\Features\Organizations\Queries\GetOrganizationById\GetOrganizationByIdQueryHandler.cs
+SIZE: 2.21 KB
+================================================================================
+using MachineryManager.Organization.Application.Abstractions;
+using MachineryManager.Organization.Application.Features.Organizations.Dtos;
+using MachineryManager.SharedKernel;
+using MediatR;
+using Organization.Domain;
+
+namespace MachineryManager.Organization.Application.Features.Organizations.Queries.GetOrganizationById;
+
+/// <summary>
+/// Handles <see cref="GetOrganizationByIdQuery"/> by loading the aggregate
+/// and projecting it into a read-only DTO.
+/// </summary>
+public sealed class GetOrganizationByIdQueryHandler
+    : IRequestHandler<GetOrganizationByIdQuery, Result<OrganizationDto>>
+{
+    private readonly IOrganizationRepository _organizationRepository;
+
+    /// <summary>
+    /// Initializes a new instance of the <see cref="GetOrganizationByIdQueryHandler"/> class.
+    /// </summary>
+    /// <param name="organizationRepository">The organization repository.</param>
+    public GetOrganizationByIdQueryHandler(IOrganizationRepository organizationRepository)
+    {
+        _organizationRepository = organizationRepository;
+    }
+
+    /// <summary>
+    /// Executes the query and returns the organization DTO if found.
+    /// </summary>
+    /// <param name="request">The query containing the organization identifier.</param>
+    /// <param name="cancellationToken">Token to cancel the asynchronous operation.</param>
+    /// <returns>A result containing the <see cref="OrganizationDto"/> or a not-found error.</returns>
+    public async Task<Result<OrganizationDto>> Handle(
+        GetOrganizationByIdQuery request,
+        CancellationToken cancellationToken)
+    {
+        var organizationId = OrganizationId.From(request.OrganizationId);
+        var organization = await _organizationRepository.GetByIdAsync(
+            organizationId,
+            cancellationToken);
+
+        if (organization is null)
+        {
+            return Result.Failure<OrganizationDto>(
+                Error.NotFound(
+                    "Organization.NotFound",
+                    $"Organization with id {request.OrganizationId} was not found."));
+        }
+
+        var dto = new OrganizationDto(
+            organization.Id.Value,
+            organization.Name);
+
+        return Result.Success(dto);
+    }
+}
+
+================================================================================
+FILE: src\Modules\Organization\Organization.Application\Features\Organizations\Queries\GetOrganizationById\GetOrganizationByIdQueryValidator.cs
+SIZE: 0.56 KB
+================================================================================
+using FluentValidation;
+
+namespace MachineryManager.Organization.Application.Features.Organizations.Queries.GetOrganizationById;
+
+/// <summary>
+/// Validates <see cref="GetOrganizationByIdQuery"/> per ADR-0036.
+/// </summary>
+public sealed class GetOrganizationByIdQueryValidator
+    : AbstractValidator<GetOrganizationByIdQuery>
+{
+    /// <summary>
+    /// Initializes validation rules for the get-by-id query.
+    /// </summary>
+    public GetOrganizationByIdQueryValidator()
+    {
+        RuleFor(x => x.OrganizationId)
+            .NotEmpty();
+    }
+}
+
+================================================================================
+FILE: src\Modules\Organization\Organization.Application\Features\Organizations\Queries\SearchOrganizations\SearchOrganizationsQuery.cs
+SIZE: 1.53 KB
+================================================================================
+using MachineryManager.Organization.Application.Features.Organizations.Dtos;
+using MachineryManager.SharedKernel;
+using MediatR;
+
+namespace MachineryManager.Organization.Application.Features.Organizations.Queries.SearchOrganizations;
+
+/// <summary>
+/// Query to perform a paginated search over organizations.
+/// </summary>
+/// <param name="SearchTerm">Optional text to filter by organization name.</param>
+/// <param name="Page">The one-based page number (default 1).</param>
+/// <param name="PageSize">The number of items per page (default 25, max 200).</param>
+public sealed record SearchOrganizationsQuery(
+    string? SearchTerm = null,
+    int Page = 1,
+    int PageSize = 25)
+    : IRequest<Result<SearchOrganizationsResponse>>;
+
+/// <summary>
+/// Paginated response for organization search queries.
+/// </summary>
+/// <param name="Items">The organizations matching the search criteria.</param>
+/// <param name="Page">The current page number.</param>
+/// <param name="PageSize">The number of items per page.</param>
+/// <param name="TotalItems">The total count of matching items across all pages.</param>
+/// <param name="TotalPages">The total number of pages.</param>
+/// <param name="HasNextPage">Whether a next page exists.</param>
+/// <param name="HasPreviousPage">Whether a previous page exists.</param>
+public sealed record SearchOrganizationsResponse(
+    IReadOnlyList<OrganizationDto> Items,
+    int Page,
+    int PageSize,
+    int TotalItems,
+    int TotalPages,
+    bool HasNextPage,
+    bool HasPreviousPage);
+
+================================================================================
+FILE: src\Modules\Organization\Organization.Application\Features\Organizations\Queries\SearchOrganizations\SearchOrganizationsQueryHandler.cs
+SIZE: 1.69 KB
+================================================================================
+using MachineryManager.Organization.Application.Abstractions;
+using MachineryManager.SharedKernel;
+using MediatR;
+
+namespace MachineryManager.Organization.Application.Features.Organizations.Queries.SearchOrganizations;
+
+/// <summary>
+/// Handles <see cref="SearchOrganizationsQuery"/> by delegating to the repository
+/// search projection.
+/// </summary>
+public sealed class SearchOrganizationsQueryHandler
+    : IRequestHandler<SearchOrganizationsQuery, Result<SearchOrganizationsResponse>>
+{
+    private readonly IOrganizationRepository _organizationRepository;
+
+    /// <summary>
+    /// Initializes a new instance of the <see cref="SearchOrganizationsQueryHandler"/> class.
+    /// </summary>
+    /// <param name="organizationRepository">The organization repository.</param>
+    public SearchOrganizationsQueryHandler(
+        IOrganizationRepository organizationRepository)
+    {
+        _organizationRepository = organizationRepository;
+    }
+
+    /// <summary>
+    /// Executes the search query and returns the paginated result.
+    /// </summary>
+    /// <param name="request">The search query parameters.</param>
+    /// <param name="cancellationToken">Token to cancel the asynchronous operation.</param>
+    /// <returns>A result containing the paginated search response.</returns>
+    public async Task<Result<SearchOrganizationsResponse>> Handle(
+        SearchOrganizationsQuery request,
+        CancellationToken cancellationToken)
+    {
+        var response = await _organizationRepository.SearchAsync(
+            request.SearchTerm,
+            request.Page,
+            request.PageSize,
+            cancellationToken);
+
+        return Result.Success(response);
+    }
+}
+
+================================================================================
+FILE: src\Modules\Organization\Organization.Application\Features\Organizations\Queries\SearchOrganizations\SearchOrganizationsQueryValidator.cs
+SIZE: 0.67 KB
+================================================================================
+using FluentValidation;
+
+namespace MachineryManager.Organization.Application.Features.Organizations.Queries.SearchOrganizations;
+
+/// <summary>
+/// Validates <see cref="SearchOrganizationsQuery"/> per ADR-0036 and API conventions.
+/// </summary>
+public sealed class SearchOrganizationsQueryValidator
+    : AbstractValidator<SearchOrganizationsQuery>
+{
+    /// <summary>
+    /// Initializes validation rules for the search organizations query.
+    /// </summary>
+    public SearchOrganizationsQueryValidator()
+    {
+        RuleFor(x => x.Page)
+            .GreaterThanOrEqualTo(1);
+
+        RuleFor(x => x.PageSize)
+            .InclusiveBetween(1, 200);
+    }
+}
+
+================================================================================
+FILE: src\Modules\Organization\Organization.Application\Organization.Application.csproj
+SIZE: 0.49 KB
+================================================================================
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <RootNamespace>MachineryManager.Organization.Application</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Organization.Domain\Organization.Domain.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="MediatR" />
+    <PackageReference Include="FluentValidation" />
+    <PackageReference Include="FluentValidation.DependencyInjectionExtensions" />
+  </ItemGroup>
+
+</Project>
+
+================================================================================
+FILE: src\Modules\Organization\Organization.Domain\Events\OrganizationRegistered.cs
+SIZE: 1.18 KB
+================================================================================
+using MachineryManager.SharedKernel;
+
+namespace Organization.Domain.Events;
+
+/// <summary>
+/// Raised when a new Organization is registered (UC-1301 / CMD-950).
+/// </summary>
+public sealed class OrganizationRegistered : IDomainEvent
+{
+    /// <summary>Gets the identifier of the registered organization.</summary>
+    public OrganizationId OrganizationId { get; }
+
+    /// <summary>Gets the name of the registered organization.</summary>
+    public string Name { get; }
+
+    /// <summary>Gets the UTC timestamp when the event occurred.</summary>
+    public DateTimeOffset OccurredOn { get; }
+
+    /// <summary>
+    /// Initializes a new instance of the <see cref="OrganizationRegistered"/> class.
+    /// </summary>
+    /// <param name="organizationId">The identifier of the registered organization.</param>
+    /// <param name="name">The name of the registered organization.</param>
+    /// <param name="occurredOn">The UTC timestamp when the event occurred.</param>
+    public OrganizationRegistered(OrganizationId organizationId, string name, DateTimeOffset occurredOn)
+    {
+        OrganizationId = organizationId;
+        Name = name;
+        OccurredOn = occurredOn;
+    }
+}
+
+================================================================================
+FILE: src\Modules\Organization\Organization.Domain\Organization.cs
+SIZE: 1.93 KB
+================================================================================
+using MachineryManager.SharedKernel;
+using MachineryManager.SharedKernel.Abstractions;
+using Organization.Domain.Events;
+
+namespace Organization.Domain;
+
+/// <summary>
+/// Organization (GL-ORG-001): the tenant boundary and business owner
+/// of Assets, per BR-017 (Business Specification — Organization
+/// Management).
+///
+/// This Aggregate is intentionally minimal. BR-017 explicitly leaves
+/// sub-organizations, ownership transfer, and any lifecycle beyond
+/// registration as open questions (Section 9) — behavior for those
+/// shall not be added here until Domain Discovery resolves them.
+/// </summary>
+public sealed class Organization : AggregateRoot<OrganizationId>
+{
+    /// <summary>The maximum allowed length for an organization name.</summary>
+    public const int MaxNameLength = 200;
+
+    /// <summary>Gets the name of the organization.</summary>
+    public string Name { get; private set; }
+
+    // Reserved for EF Core materialization only.
+    private Organization()
+    {
+        Name = string.Empty;
+    }
+
+    private Organization(OrganizationId id, string name)
+        : base(id)
+    {
+        Name = name;
+    }
+
+    /// <summary>
+    /// Registers a new Organization (UC-1301 / CMD-950). This is the
+    /// only way an Organization comes into existence.
+    /// </summary>
+    public static Result<Organization> Register(string name, IDateTimeProvider dateTimeProvider)
+    {
+        if (string.IsNullOrWhiteSpace(name))
+        {
+            return Result.Failure<Organization>(OrganizationErrors.NameRequired());
+        }
+
+        if (name.Length > MaxNameLength)
+        {
+            return Result.Failure<Organization>(OrganizationErrors.NameTooLong(MaxNameLength));
+        }
+
+        var organization = new Organization(OrganizationId.New(), name.Trim());
+
+        organization.RaiseDomainEvent(
+            new OrganizationRegistered(organization.Id, organization.Name, dateTimeProvider.UtcNow));
+
+        return organization;
+    }
+}
+
+================================================================================
+FILE: src\Modules\Organization\Organization.Domain\Organization.Domain.csproj
+SIZE: 0.35 KB
+================================================================================
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\BuildingBlocks\MachineryManager.SharedKernel\MachineryManager.SharedKernel.csproj" />
+    <ProjectReference Include="..\..\..\BuildingBlocks\MachineryManager.SharedKernel.Abstractions\MachineryManager.SharedKernel.Abstractions.csproj" />
+  </ItemGroup>
+
+</Project>
+
+================================================================================
+FILE: src\Modules\Organization\Organization.Domain\OrganizationErrors.cs
+SIZE: 0.99 KB
+================================================================================
+using MachineryManager.SharedKernel;
+
+namespace Organization.Domain;
+
+/// <summary>Business Errors for the Organization module (05-development/07-ErrorHandling.md).</summary>
+public static class OrganizationErrors
+{
+    /// <summary>Creates an error indicating that the organization name is required.</summary>
+    /// <returns>An <see cref="Error"/> representing the validation failure.</returns>
+    public static Error NameRequired() => Error.Validation(
+        "Organization.NameRequired",
+        "Organization name is required.");
+
+    /// <summary>Creates an error indicating that the organization name exceeds the maximum length.</summary>
+    /// <param name="maxLength">The maximum allowed length for the organization name.</param>
+    /// <returns>An <see cref="Error"/> representing the validation failure.</returns>
+    public static Error NameTooLong(int maxLength) => Error.Validation(
+        "Organization.NameTooLong",
+        $"Organization name shall not exceed {maxLength} characters.");
+}
+
+================================================================================
+FILE: src\Modules\Organization\Organization.Domain\OrganizationId.cs
+SIZE: 1.08 KB
+================================================================================
+using MachineryManager.SharedKernel;
+
+namespace Organization.Domain;
+
+/// <summary>Strongly-typed identifier for an Organization (GL-ORG-001).</summary>
+public sealed class OrganizationId : ValueObject
+{
+    /// <summary>Gets the underlying GUID value.</summary>
+    public Guid Value { get; }
+
+    private OrganizationId(Guid value)
+    {
+        Value = value;
+    }
+
+    /// <summary>Creates a new, unique OrganizationId.</summary>
+    /// <returns>A new <see cref="OrganizationId"/> instance.</returns>
+    public static OrganizationId New() => new(Guid.NewGuid());
+
+    /// <summary>Wraps an existing identifier value (e.g. read from persistence).</summary>
+    /// <param name="value">The existing GUID value.</param>
+    /// <returns>An <see cref="OrganizationId"/> instance wrapping the provided value.</returns>
+    public static OrganizationId From(Guid value) => new(value);
+
+    /// <inheritdoc />
+    protected override IEnumerable<object?> GetEqualityComponents()
+    {
+        yield return Value;
+    }
+
+    /// <inheritdoc />
+    public override string ToString() => Value.ToString();
+}
+
+================================================================================
+FILE: src\Modules\Organization\Organization.Infrastructure\DependencyInjection.cs
+SIZE: 1.85 KB
+================================================================================
+using MachineryManager.Organization.Application.Abstractions;
+using MachineryManager.Organization.Infrastructure.Persistence;
+using MachineryManager.SharedKernel.Abstractions;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
+
+namespace MachineryManager.Organization.Infrastructure;
+
+/// <summary>
+/// Registers the Organization module's Infrastructure layer services
+/// (ADR-0006 EF Core, ADR-0019 Hybrid Persistence Strategy).
+/// </summary>
+public static class DependencyInjection
+{
+    /// <summary>
+    /// Registers the Organization module's <see cref="OrganizationDbContext"/>,
+    /// repository, and unit of work.
+    /// </summary>
+    /// <remarks>
+    /// The connection string is resolved from the
+    /// <c>MachineryManagerDatabase</c> key. No connection string name
+    /// was documented in the approved references, so this key is an
+    /// explicit assumption — flagged in the completion report — not a
+    /// silently invented convention.
+    /// </remarks>
+    /// <param name="services">The service collection to configure.</param>
+    /// <param name="configuration">The application configuration, used to resolve the connection string.</param>
+    /// <returns>The same <see cref="IServiceCollection"/> for chaining.</returns>
+    public static IServiceCollection AddOrganizationInfrastructure(
+        this IServiceCollection services,
+        IConfiguration configuration)
+    {
+        services.AddDbContext<OrganizationDbContext>(options => options
+            .UseSqlServer(configuration.GetConnectionString("MachineryManagerDatabase")));
+
+        services.AddScoped<IOrganizationRepository, OrganizationRepository>();
+        services.AddScoped<IUnitOfWork>(serviceProvider =>
+            serviceProvider.GetRequiredService<OrganizationDbContext>());
+
+        return services;
+    }
+}
+
+
+================================================================================
+FILE: src\Modules\Organization\Organization.Infrastructure\Organization.Infrastructure.csproj
+SIZE: 0.56 KB
+================================================================================
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <ItemGroup>
+    <ProjectReference Include="..\Organization.Application\Organization.Application.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- Persistence [TE-0004 (EF Core 10 / ADR-0006), TE-0024 (Hybrid Persistence / ADR-0019), TE-0025 (Migrations / ADR-0037)] -->
+    <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.Binder" />
+  </ItemGroup>
+
+</Project>
+
+================================================================================
+FILE: src\Modules\Organization\Organization.Infrastructure\Persistence\Configurations\OrganizationConfiguration.cs
+SIZE: 1.23 KB
+================================================================================
+using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata.Builders;
+using Organization.Domain;
+
+namespace MachineryManager.Organization.Infrastructure.Persistence.Configurations;
+
+/// <summary>
+/// EF Core mapping for the <see cref="global::Organization.Domain.Organization"/> aggregate.
+/// </summary>
+public sealed class OrganizationConfiguration : IEntityTypeConfiguration<global::Organization.Domain.Organization>
+{
+    /// <summary>Configures the entity mapping.</summary>
+    /// <param name="builder">The entity type builder.</param>
+    public void Configure(EntityTypeBuilder<global::Organization.Domain.Organization> builder)
+    {
+        builder.ToTable("Organization");
+
+        builder.HasKey(organization => organization.Id);
+
+        builder.Property(organization => organization.Id)
+            .HasConversion(id => id.Value, value => OrganizationId.From(value))
+            .ValueGeneratedNever();
+
+        builder.Property(organization => organization.Name)
+            .HasMaxLength(global::Organization.Domain.Organization.MaxNameLength)
+            .IsRequired();
+
+        // Domain Events are transient behavior, never persisted state.
+        builder.Ignore(organization => organization.DomainEvents);
+    }
+}
+
+
+================================================================================
+FILE: src\Modules\Organization\Organization.Infrastructure\Persistence\OrganizationDbContext.cs
+SIZE: 2.79 KB
+================================================================================
+using MachineryManager.SharedKernel.Abstractions;
+using Microsoft.EntityFrameworkCore;
+
+namespace MachineryManager.Organization.Infrastructure.Persistence;
+
+/// <summary>
+/// EF Core persistence context for the Organization module (ADR-0006,
+/// ADR-0019 Hybrid Persistence Strategy). Owns the "organization" schema
+/// exclusively; per the Modular Monolith Rules (06-development, Section
+/// 6.1) no other module may reference these tables directly. Also
+/// serves as this module's <see cref="IUnitOfWork"/> implementation.
+/// </summary>
+public sealed class OrganizationDbContext : DbContext, IUnitOfWork
+{
+    /// <summary>Initializes a new instance of the <see cref="OrganizationDbContext"/> class.</summary>
+    /// <param name="options">The EF Core options for this context.</param>
+    public OrganizationDbContext(DbContextOptions<OrganizationDbContext> options)
+        : base(options)
+    {
+    }
+
+    /// <summary>Gets the set of Organization aggregates.</summary>
+    public DbSet<global::Organization.Domain.Organization> Organizations =>
+        Set<global::Organization.Domain.Organization>();
+
+    /// <inheritdoc />
+    protected override void OnModelCreating(ModelBuilder modelBuilder)
+    {
+        modelBuilder.HasDefaultSchema("organization");
+        modelBuilder.ApplyConfigurationsFromAssembly(typeof(OrganizationDbContext).Assembly);
+
+        base.OnModelCreating(modelBuilder);
+    }
+
+    /// <summary>
+    /// Persists all pending changes for this module as a single atomic
+    /// unit (ADR-0006). Domain Events raised by tracked aggregates are
+    /// cleared after a successful commit.
+    /// </summary>
+    /// <remarks>
+    /// Dispatching the collected events to subscribers is NOT wired yet:
+    /// no event dispatch mechanism has been approved for Infrastructure
+    /// (ADR-0011 restricts MediatR to the Application layer only), and
+    /// no Domain Event subscribers exist for this module yet either.
+    /// This is an explicit open item — see the completion report — not
+    /// a silent omission of Section 4.7's Event Publishing Rules.
+    /// </remarks>
+    /// <param name="cancellationToken">Token to cancel the asynchronous operation.</param>
+    /// <returns>The number of state entries written to the database.</returns>
+    public async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
+    {
+        var aggregatesWithEvents = ChangeTracker
+            .Entries<global::Organization.Domain.Organization>()
+            .Select(entry => entry.Entity)
+            .Where(aggregate => aggregate.DomainEvents.Count > 0)
+            .ToList();
+
+        var affectedRows = await base.SaveChangesAsync(cancellationToken);
+
+        foreach (var aggregate in aggregatesWithEvents)
+        {
+            aggregate.ClearDomainEvents();
+        }
+
+        return affectedRows;
+    }
+}
+
+
+================================================================================
+FILE: src\Modules\Organization\Organization.Infrastructure\Persistence\OrganizationRepository.cs
+SIZE: 2.77 KB
+================================================================================
+using MachineryManager.Organization.Application.Abstractions;
+using MachineryManager.Organization.Application.Features.Organizations.Dtos;
+using MachineryManager.Organization.Application.Features.Organizations.Queries.SearchOrganizations;
+using Microsoft.EntityFrameworkCore;
+using Organization.Domain;
+
+namespace MachineryManager.Organization.Infrastructure.Persistence;
+
+/// <summary>
+/// EF Core implementation of <see cref="IOrganizationRepository"/>.
+/// Per ADR-0019 (Hybrid Persistence Strategy), EF Core is the default
+/// for all reads and writes here; Dapper remains opt-in per query and
+/// is not used in this repository.
+/// </summary>
+public sealed class OrganizationRepository : IOrganizationRepository
+{
+    private readonly OrganizationDbContext _dbContext;
+
+    /// <summary>Initializes a new instance of the <see cref="OrganizationRepository"/> class.</summary>
+    /// <param name="dbContext">The Organization module's persistence context.</param>
+    public OrganizationRepository(OrganizationDbContext dbContext)
+    {
+        _dbContext = dbContext;
+    }
+
+    /// <inheritdoc />
+    public Task<global::Organization.Domain.Organization?> GetByIdAsync(
+        OrganizationId id,
+        CancellationToken cancellationToken = default) =>
+        _dbContext.Organizations.FirstOrDefaultAsync(organization => organization.Id == id, cancellationToken);
+
+    /// <inheritdoc />
+    public void Add(global::Organization.Domain.Organization aggregate) =>
+        _dbContext.Organizations.Add(aggregate);
+
+    /// <inheritdoc />
+    public void Update(global::Organization.Domain.Organization aggregate) =>
+        _dbContext.Organizations.Update(aggregate);
+
+    /// <inheritdoc />
+    public async Task<SearchOrganizationsResponse> SearchAsync(
+        string? searchTerm,
+        int page,
+        int pageSize,
+        CancellationToken cancellationToken = default)
+    {
+        var query = _dbContext.Organizations.AsNoTracking().AsQueryable();
+
+        if (!string.IsNullOrWhiteSpace(searchTerm))
+        {
+            query = query.Where(organization => organization.Name.Contains(searchTerm));
+        }
+
+        var totalItems = await query.CountAsync(cancellationToken);
+
+        var items = await query
+            .OrderBy(organization => organization.Name)
+            .Skip((page - 1) * pageSize)
+            .Take(pageSize)
+            .Select(organization => new OrganizationDto(organization.Id.Value, organization.Name))
+            .ToListAsync(cancellationToken);
+
+        var totalPages = totalItems == 0
+            ? 0
+            : (int)Math.Ceiling(totalItems / (double)pageSize);
+
+        return new SearchOrganizationsResponse(
+            items,
+            page,
+            pageSize,
+            totalItems,
+            totalPages,
+            page < totalPages,
+            page > 1);
+    }
+}
+
+
+================================================================================
+FILE: src\Modules\Organization\Organization.Presentation\Contracts\RegisterOrganizationRequest.cs
+SIZE: 0.3 KB
+================================================================================
+namespace MachineryManager.Organization.Presentation.Contracts;
+
+/// <summary>
+/// Request body for registering a new Organization (UC-1301 / CMD-950).
+/// </summary>
+/// <param name="Name">The display name of the organization to create.</param>
+public sealed record RegisterOrganizationRequest(string Name);
+
+
+================================================================================
+FILE: src\Modules\Organization\Organization.Presentation\Endpoints\OrganizationEndpoints.cs
+SIZE: 3.22 KB
+================================================================================
+using MachineryManager.Organization.Application.Features.Organizations.Commands.RegisterOrganization;
+using MachineryManager.Organization.Application.Features.Organizations.Queries.GetOrganizationById;
+using MachineryManager.Organization.Application.Features.Organizations.Queries.SearchOrganizations;
+using MachineryManager.Organization.Presentation.Contracts;
+using MediatR;
+using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Routing;
+
+namespace MachineryManager.Organization.Presentation.Endpoints;
+
+/// <summary>
+/// Maps the Organization module's REST endpoints per 07-api conventions
+/// (Section 8): base path <c>/api/v1/organizations</c>.
+/// </summary>
+public static class OrganizationEndpoints
+{
+    /// <summary>Registers the Organization module's endpoints on the application's route builder.</summary>
+    /// <param name="endpoints">The endpoint route builder.</param>
+    /// <returns>The same <see cref="IEndpointRouteBuilder"/> for chaining.</returns>
+    public static IEndpointRouteBuilder MapOrganizationEndpoints(this IEndpointRouteBuilder endpoints)
+    {
+        var group = endpoints
+            .MapGroup("/api/v1/organizations")
+            .WithTags("Organizations");
+
+        group.MapPost("/", RegisterOrganizationAsync)
+            .WithName("RegisterOrganization")
+            .WithSummary("Registers a new Organization.");
+
+        group.MapGet("/{organizationId:guid}", GetOrganizationByIdAsync)
+            .WithName("GetOrganizationById")
+            .WithSummary("Retrieves a single Organization by its identifier.");
+
+        group.MapGet("/", SearchOrganizationsAsync)
+            .WithName("SearchOrganizations")
+            .WithSummary("Searches Organizations with optional text filtering and pagination.");
+
+        return endpoints;
+    }
+
+    private static async Task<IResult> RegisterOrganizationAsync(
+        RegisterOrganizationRequest request,
+        ISender sender,
+        HttpContext httpContext,
+        CancellationToken cancellationToken)
+    {
+        var result = await sender.Send(new RegisterOrganizationCommand(request.Name), cancellationToken);
+
+        return result.IsSuccess
+            ? Results.Created($"/api/v1/organizations/{result.Value}", new { id = result.Value })
+            : result.ToProblemResult(httpContext);
+    }
+
+    private static async Task<IResult> GetOrganizationByIdAsync(
+        Guid organizationId,
+        ISender sender,
+        HttpContext httpContext,
+        CancellationToken cancellationToken)
+    {
+        var result = await sender.Send(new GetOrganizationByIdQuery(organizationId), cancellationToken);
+
+        return result.IsSuccess
+            ? Results.Ok(result.Value)
+            : result.ToProblemResult(httpContext);
+    }
+
+    private static async Task<IResult> SearchOrganizationsAsync(
+        ISender sender,
+        HttpContext httpContext,
+        CancellationToken cancellationToken,
+        string? search = null,
+        int page = 1,
+        int pageSize = 25)
+    {
+        var result = await sender.Send(
+            new SearchOrganizationsQuery(search, page, pageSize),
+            cancellationToken);
+
+        return result.IsSuccess
+            ? Results.Ok(result.Value)
+            : result.ToProblemResult(httpContext);
+    }
+}
+
+
+================================================================================
+FILE: src\Modules\Organization\Organization.Presentation\Endpoints\ResultExtensions.cs
+SIZE: 2.28 KB
+================================================================================
+using MachineryManager.SharedKernel;
+using Microsoft.AspNetCore.Http;
+
+namespace MachineryManager.Organization.Presentation.Endpoints;
+
+/// <summary>
+/// Translates a failed <see cref="Result"/> into the error response
+/// shape defined in 07-api conventions, Section 8.7 (Error Response
+/// Structure), mapping the business <see cref="ErrorType"/> to the
+/// corresponding HTTP status and error-code prefix.
+/// </summary>
+/// <remarks>
+/// This mapping logic is duplicated per module until a second module
+/// needs it; extracting it into a shared BuildingBlocks project would
+/// be a structural change requiring approval it does not yet have
+/// (06-development, Forbidden Behaviors) — flagged in the completion
+/// report as a follow-up, not applied unilaterally here.
+/// </remarks>
+internal static class ResultExtensions
+{
+    /// <summary>
+    /// Builds the standard problem response for a failed <paramref name="result"/>.
+    /// </summary>
+    /// <param name="result">The failed result. Caller must have already checked <see cref="Result.IsFailure"/>.</param>
+    /// <param name="httpContext">The current HTTP context, used to correlate the error with request logs.</param>
+    /// <returns>An <see cref="IResult"/> carrying the mapped HTTP status and error body.</returns>
+    public static IResult ToProblemResult(this Result result, HttpContext httpContext)
+    {
+        var statusCode = result.Error.Type switch
+        {
+            ErrorType.Validation => StatusCodes.Status400BadRequest,
+            ErrorType.NotFound => StatusCodes.Status404NotFound,
+            ErrorType.Conflict => StatusCodes.Status409Conflict,
+            _ => StatusCodes.Status500InternalServerError,
+        };
+
+        var title = result.Error.Type switch
+        {
+            ErrorType.Validation => "Validation Error",
+            ErrorType.NotFound => "Resource Not Found",
+            ErrorType.Conflict => "Business Rule Violation",
+            _ => "Unexpected Error",
+        };
+
+        return Results.Json(
+            new
+            {
+                errorCode = result.Error.Code,
+                title,
+                message = result.Error.Message,
+                correlationId = httpContext.TraceIdentifier,
+                details = Array.Empty<string>(),
+            },
+            statusCode: statusCode);
+    }
+}
+
+
+================================================================================
+FILE: src\Modules\Organization\Organization.Presentation\Organization.Presentation.csproj
+SIZE: 0.26 KB
+================================================================================
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <ItemGroup>
+    <FrameworkReference Include="Microsoft.AspNetCore.App" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Organization.Application\Organization.Application.csproj" />
+  </ItemGroup>
+
+</Project>
+
+
+================================================================================
+# SECTION 3: SNAPSHOT SUMMARY
+================================================================================
+
+Generation Time     : 00:00:00.4326019
+Total Files Scanned : 72
+Files Included      : 72
+Files Skipped       : 0
+Total Source Size   : 0.08 MB
+Snapshot File Size  : 0.1 MB
+Output Path         : C:\Users\i\source\repos\MachineryManagerEnterprise\MME_Codebase_Snapshot.txt
+
+Excluded Directories: .git, .github, .vs, .vscode, .idea, .azure, .devcontainer, bin, obj, packages, publish, out, release, releases, debug, x64, x86, arm64, artifacts, .artifacts, node_modules, dist, build, bower_components, jspm_packages, docs-english, docs-farsi, docs, tools, test-results, coverage, .coverage, TestResults, lib, .angular, .next, .nuxt, .svelte-kit, .cache, .temp, tmp
+Excluded Extensions : .md, .markdown, .mdx
+Excluded File Names : MME_AI_Reference.md, MME_Codebase_Snapshot.txt, .gitignore, Generate-CodebaseSnapshot.ps1, package-lock.json, yarn.lock, pnpm-lock.yaml, project.lock.json, packages.config, Thumbs.db, Desktop.ini, .DS_Store
+
+Max File Size       : 500 KB
+
+================================================================================
+END OF SNAPSHOT
+================================================================================
