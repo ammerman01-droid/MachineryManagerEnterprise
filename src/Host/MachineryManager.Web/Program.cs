@@ -1,3 +1,4 @@
+using MachineryManager.Identity.Infrastructure;
 using MachineryManager.Organization.Application;
 using MachineryManager.Organization.Infrastructure;
 using MachineryManager.Organization.Presentation.Endpoints;
@@ -49,6 +50,9 @@ try
     // Organization module (Application + Infrastructure).
     builder.Services.AddOrganizationApplication();
     builder.Services.AddOrganizationInfrastructure(builder.Configuration);
+
+    // Identity platform module (ADR-0030).
+    builder.Services.AddIdentityInfrastructure(builder.Configuration);
 
     var app = builder.Build();
 

@@ -12,6 +12,7 @@
     <ProjectReference Include="..\..\Modules\Organization\Organization.Application\Organization.Application.csproj" />
     <ProjectReference Include="..\..\Modules\Organization\Organization.Infrastructure\Organization.Infrastructure.csproj" />
     <ProjectReference Include="..\..\Modules\Organization\Organization.Presentation\Organization.Presentation.csproj" />
+    <ProjectReference Include="..\..\Modules\Identity\Identity.Infrastructure\Identity.Infrastructure.csproj" />
   </ItemGroup>
 
   <ItemGroup>
