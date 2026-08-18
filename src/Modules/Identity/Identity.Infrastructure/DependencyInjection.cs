@@ -51,22 +51,40 @@ public static class DependencyInjection
         services
             .AddIdentityCore<ApplicationUser>(options =>
             {
-                // Provisional OWASP-aligned defaults — see remarks above.
-                options.Password.RequiredLength = 12;
+                // Password Policy — explicitly specified by the product
+                // owner (chat, 2026-08-18), not a library default.
+                options.Password.RequiredLength = PasswordPolicy.MinLength;
                 options.Password.RequireDigit = true;
                 options.Password.RequireLowercase = true;
                 options.Password.RequireUppercase = true;
                 options.Password.RequireNonAlphanumeric = true;
 
+                // Lockout policy: still provisional (OWASP-aligned
+                // default) — not yet explicitly confirmed by the
+                // product owner. Flagged as a remaining open item.
                 options.Lockout.MaxFailedAccessAttempts = 5;
                 options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(15);
                 options.Lockout.AllowedForNewUsers = true;
 
-                options.User.RequireUniqueEmail = true;
+                // No email collection (product owner, chat 2026-08-18):
+                // users are created by an Administrator only (05-application
+                // Section 5.3, Administration module), without an email
+                // address, so email uniqueness does not apply.
+                options.User.RequireUniqueEmail = false;
+
+                // English letters, digits, and standard ASCII special
+                // characters only (product owner, chat 2026-08-18) — this
+                // matches ASP.NET Core Identity's own default character
+                // set, restated explicitly so the rule is traceable in
+                // code rather than an implicit library default.
+                options.User.AllowedUserNameCharacters =
+                    "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-._@+";
             })
             .AddRoles<ApplicationRole>()
             .AddEntityFrameworkStores<IdentityDbContext>()
-            .AddDefaultTokenProviders();
+            .AddDefaultTokenProviders()
+            .AddUserValidator<Validation.UsernameLengthValidator>()
+            .AddPasswordValidator<Validation.AllowedCharactersPasswordValidator>();
 
         return services;
     }
