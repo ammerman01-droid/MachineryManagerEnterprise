@@ -13,6 +13,7 @@ namespace MachineryManager.Identity.Infrastructure;
 /// Registers the Identity platform module's Infrastructure layer
 /// services (ADR-0006 EF Core, ADR-0030 Identity &amp; Access Management).
 /// </summary>
+
 public static class DependencyInjection
 {
     /// <summary>
@@ -41,10 +42,11 @@ public static class DependencyInjection
                 sqlServerOptions => sqlServerOptions.MigrationsHistoryTable(
                     "__EFMigrationsHistory",
                     schema: "identity"));
-
+                    
             // Required by OpenIddict.EntityFrameworkCore so its stores
             // (Applications, Authorizations, Scopes, Tokens) are
             // recognized by this DbContext's model.
+
             options.UseOpenIddict<Guid>();
         });
 
@@ -84,7 +86,11 @@ public static class DependencyInjection
             .AddEntityFrameworkStores<IdentityDbContext>()
             .AddDefaultTokenProviders()
             .AddUserValidator<Validation.UsernameLengthValidator>()
-            .AddPasswordValidator<Validation.AllowedCharactersPasswordValidator>();
+            .AddPasswordValidator<Validation.AllowedCharactersPasswordValidator>()
+            // Added now: AddIdentityCore alone does NOT register
+            // SignInManager (unlike the full AddIdentity()). Required
+            // for the interactive Login page (cookie-based sign-in).
+            .AddSignInManager();
 
         return services;
     }
@@ -109,6 +115,18 @@ public static class DependencyInjection
         this IServiceCollection services,
         IHostEnvironment environment)
     {
+        // Cookie authentication for the interactive Login page.
+        // Fixes an omission from the previous step: without this, there
+        // is no authentication scheme available for SignInManager to
+        // issue a sign-in cookie against.
+        services
+            .AddAuthentication(options =>
+            {
+                options.DefaultScheme = IdentityConstants.ApplicationScheme;
+                options.DefaultSignInScheme = IdentityConstants.ApplicationScheme;
+            })
+            .AddIdentityCookies();
+
         services
             .AddOpenIddict()
             .AddCore(options => options
@@ -144,9 +162,6 @@ public static class DependencyInjection
                 }
                 else
                 {
-                    // Open item: production certificate source is not
-                    // documented in ADR-0026. Failing fast rather than
-                    // silently running with an insecure/invented default.
                     throw new InvalidOperationException(
                         "Production OpenIddict signing/encryption certificates are not configured. " +
                         "This requires an explicit decision (documented in ADR-0026) on the certificate source " +
@@ -162,8 +177,6 @@ public static class DependencyInjection
             })
             .AddValidation(options =>
             {
-                // Local server validation: this same monolith issues and
-                // validates its own tokens (single OpenIddict server).
                 options.UseLocalServer();
                 options.UseAspNetCore();
             });

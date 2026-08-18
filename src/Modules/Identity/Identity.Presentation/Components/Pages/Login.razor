@@ -1,0 +1,76 @@
+@page "/identity/login"
+@using System.ComponentModel.DataAnnotations
+@using MachineryManager.Identity.Domain
+@using Microsoft.AspNetCore.Identity
+@inject SignInManager<ApplicationUser> SignInManager
+@inject NavigationManager NavigationManager
+
+<PageTitle>ورود به سامانه</PageTitle>
+
+<h1>ورود به سامانه</h1>
+
+@if (errorMessage is not null)
+{
+    <p style="color:red">@errorMessage</p>
+}
+
+<EditForm Model="Input" method="post" OnValidSubmit="LoginUserAsync" FormName="login">
+    <DataAnnotationsValidator />
+
+    <div>
+        <label for="username">نام کاربری</label>
+        <InputText id="username" @bind-Value="Input.UserName" autocomplete="username" />
+        <ValidationMessage For="() => Input.UserName" />
+    </div>
+
+    <div>
+        <label for="password">رمز عبور</label>
+        <InputText id="password" type="password" @bind-Value="Input.Password" autocomplete="current-password" />
+        <ValidationMessage For="() => Input.Password" />
+    </div>
+
+    <button type="submit">ورود</button>
+</EditForm>
+
+@code {
+    private string? errorMessage;
+
+    [SupplyParameterFromForm]
+    private LoginInputModel Input { get; set; } = null!;
+
+    [SupplyParameterFromQuery]
+    private string? ReturnUrl { get; set; }
+
+    protected override void OnInitialized()
+    {
+        Input ??= new LoginInputModel();
+    }
+
+    private async Task LoginUserAsync()
+    {
+        var result = await SignInManager.PasswordSignInAsync(
+            Input.UserName,
+            Input.Password,
+            isPersistent: false,
+            lockoutOnFailure: true);
+
+        if (result.Succeeded)
+        {
+            NavigationManager.NavigateTo(ReturnUrl ?? "/", forceLoad: true);
+            return;
+        }
+
+        errorMessage = result.IsLockedOut
+            ? "حساب کاربری شما به‌دلیل تلاش‌های ناموفق متعدد، موقتاً قفل شده است."
+            : "نام کاربری یا رمز عبور نادرست است.";
+    }
+
+    private sealed class LoginInputModel
+    {
+        [Required(ErrorMessage = "نام کاربری الزامی است.")]
+        public string UserName { get; set; } = string.Empty;
+
+        [Required(ErrorMessage = "رمز عبور الزامی است.")]
+        public string Password { get; set; } = string.Empty;
+    }
+}
