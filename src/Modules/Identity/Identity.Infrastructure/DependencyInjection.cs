@@ -6,6 +6,8 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using OpenIddict.Abstractions;
+using MachineryManager.Identity.Infrastructure.Options;
+using Microsoft.Extensions.Options;
 
 namespace MachineryManager.Identity.Infrastructure;
 
@@ -91,6 +93,11 @@ public static class DependencyInjection
             // SignInManager (unlike the full AddIdentity()). Required
             // for the interactive Login page (cookie-based sign-in).
             .AddSignInManager();
+
+        services
+            .AddOptions<OpenIddictClientOptions>()
+            .BindConfiguration(OpenIddictClientOptions.SectionName)
+            .ValidateOnStart();
 
         return services;
     }

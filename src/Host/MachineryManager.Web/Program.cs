@@ -1,4 +1,5 @@
 using MachineryManager.Identity.Infrastructure;
+using MachineryManager.Identity.Infrastructure.Persistence;
 using MachineryManager.Identity.Presentation.Endpoints;
 using MachineryManager.Organization.Application;
 using MachineryManager.Organization.Infrastructure;
@@ -72,6 +73,11 @@ try
         app.MapScalarApiReference();
     }
 
+    using (var scope = app.Services.CreateScope())
+{
+    await IdentityDataSeeder.SeedAsync(scope.ServiceProvider);
+}
+
     app.UseSerilogRequestLogging();
 
     app.UseStatusCodePagesWithReExecute("/not-found", createScopeForStatusCodePages: true);
@@ -84,7 +90,8 @@ try
 
     app.MapStaticAssets();
     app.MapRazorComponents<App>()
-        .AddInteractiveServerRenderMode();
+        .AddInteractiveServerRenderMode()
+        .AddAdditionalAssemblies(typeof(MachineryManager.Identity.Presentation.Components.Pages.Login).Assembly);
 
     // Identity platform module: OpenIddict protocol endpoints (ADR-0030).
     app.MapIdentityConnectEndpoints();

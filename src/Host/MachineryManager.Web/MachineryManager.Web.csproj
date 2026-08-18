@@ -2,6 +2,7 @@
 
   <PropertyGroup>
     <BlazorDisableThrowNavigationException>true</BlazorDisableThrowNavigationException>
+    <UserSecretsId>MachineryManager.Web-Development</UserSecretsId>
   </PropertyGroup>
 
   <ItemGroup>
