@@ -73,6 +73,7 @@
     <PackageVersion Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="10.0.0" />
     <PackageVersion Include="Microsoft.Extensions.Identity.Stores" Version="10.0.0" /> <!-- TE-0020 (Identity domain model: IdentityUser<TKey>/IdentityRole<TKey>, framework-independent) -->
     <PackageVersion Include="OpenIddict.AspNetCore" Version="7.6.0" />
+    <PackageVersion Include="OpenIddict.Server.AspNetCore" Version="7.6.0" />
     <PackageVersion Include="OpenIddict.EntityFrameworkCore" Version="7.6.0" />
     <PackageVersion Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="10.0.0" /> <!-- Used by Business Modules / APIs to validate tokens issued by the Identity module -->
     <PackageVersion Include="Microsoft.AspNetCore.Authentication.OpenIdConnect" Version="10.0.0" /> <!-- Used only for the optional external identity providers listed in TE-0020 (Microsoft Entra ID, Google Identity, GitHub Identity) -->

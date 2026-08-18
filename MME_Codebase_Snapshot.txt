@@ -1,7 +1,7 @@
 ﻿
 ================================================================================
   MACHINERYMANAGERENTERPRISE - CODEBASE SNAPSHOT
-  Generated: 2026-08-17 15:44:59
+  Generated: 2026-08-18 10:24:12
   Source: C:\Users\i\source\repos\MachineryManagerEnterprise
   Purpose: Complete source code reference for AI-assisted development
   Excludes: .md, .gitignore, this script, build artifacts, binaries, IDE,
@@ -71,17 +71,30 @@ MachineryManagerEnterprise
 |   |   |   |   |-- ApplicationRole.cs
 |   |   |   |   |-- ApplicationUser.cs
 |   |   |   |   |-- Identity.Domain.csproj
-|   |   |   |   +-- StandardRoles.cs
+|   |   |   |   |-- PasswordPolicy.cs
+|   |   |   |   |-- StandardRoles.cs
+|   |   |   |   +-- UsernamePolicy.cs
 |   |   |   |-- Identity.Infrastructure
 |   |   |   |   |-- Persistence
 |   |   |   |   |   |-- Migrations
 |   |   |   |   |   |   |-- 20260817105949_InitialIdentitySchema.cs
 |   |   |   |   |   |   |-- 20260817105949_InitialIdentitySchema.Designer.cs
+|   |   |   |   |   |   |-- 20260818041151_AddOpenIddictStores.cs
+|   |   |   |   |   |   |-- 20260818041151_AddOpenIddictStores.Designer.cs
 |   |   |   |   |   |   +-- IdentityDbContextModelSnapshot.cs
 |   |   |   |   |   +-- IdentityDbContext.cs
+|   |   |   |   |-- Validation
+|   |   |   |   |   |-- AllowedCharactersPasswordValidator.cs
+|   |   |   |   |   +-- UsernameLengthValidator.cs
 |   |   |   |   |-- DependencyInjection.cs
 |   |   |   |   +-- Identity.Infrastructure.csproj
 |   |   |   +-- Identity.Presentation
+|   |   |       |-- Components
+|   |   |       |   |-- Pages
+|   |   |       |   |   +-- Login.razor
+|   |   |       |   +-- _Imports.razor
+|   |   |       |-- Endpoints
+|   |   |       |   +-- ConnectEndpoints.cs
 |   |   |       +-- Identity.Presentation.csproj
 |   |   +-- Organization
 |   |       |-- Organization.Application
@@ -177,7 +190,7 @@ SIZE: 0.57 KB
 
 ================================================================================
 FILE: Directory.Packages.props
-SIZE: 7.91 KB
+SIZE: 8.19 KB
 ================================================================================
 <Project>
   <PropertyGroup>
@@ -193,12 +206,12 @@ SIZE: 7.91 KB
     <PackageVersion Include="Microsoft.AspNetCore.OpenApi" Version="10.0.0" />
     <PackageVersion Include="Scalar.AspNetCore" Version="2.1.5" /> <!-- TE-0021 (API Documentation / ADR-0035) -->
     <PackageVersion Include="NSwag.MSBuild" Version="14.2.0" /> <!-- TE-0021 / ADR-0035 (client SDK generation) -->
-    <PackageVersion Include="Microsoft.Extensions.Hosting" Version="10.0.0" />
-    <PackageVersion Include="Microsoft.Extensions.Configuration.Binder" Version="10.0.0" />
-    <PackageVersion Include="Microsoft.Extensions.Caching.Hybrid" Version="10.0.0" /> <!-- TE-0015 (Caching Architecture / ADR-0031) -->
-    <PackageVersion Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="10.0.0" />
-    <PackageVersion Include="Microsoft.Extensions.Logging.Abstractions" Version="10.0.0" />
-    <PackageVersion Include="Microsoft.Extensions.Options" Version="10.0.0" /> <!-- TE-0018 (Configuration and Secrets Management / ADR-0034) -->
+    <PackageVersion Include="Microsoft.Extensions.Hosting" Version="10.0.10" /> <!-- Bumped from 10.0.0: aligned with EF Core 10.0.10 family (NU1109) -->
+    <PackageVersion Include="Microsoft.Extensions.Configuration.Binder" Version="10.0.10" />
+    <PackageVersion Include="Microsoft.Extensions.Caching.Hybrid" Version="10.0.10" /> <!-- TE-0015 (Caching Architecture / ADR-0031) -->
+    <PackageVersion Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="10.0.10" />
+    <PackageVersion Include="Microsoft.Extensions.Logging.Abstractions" Version="10.0.10" />
+    <PackageVersion Include="Microsoft.Extensions.Options" Version="10.0.10" /> <!-- TE-0018 (Configuration and Secrets Management / ADR-0034) -->
     <PackageVersion Include="Microsoft.FeatureManagement" Version="4.0.0" /> <!-- TE-0018 / ADR-0034 -->
     <PackageVersion Include="VaultSharp" Version="1.17.5.1" /> <!-- TE-0018 / ADR-0034 (HashiCorp Vault client) -->
 
@@ -207,14 +220,14 @@ SIZE: 7.91 KB
     <PackageVersion Include="Microsoft.AspNetCore.Components.WebView.Maui" Version="10.0.0" />
 
     <!-- Data Access, ORM & Primary Relational DB [TE-0004 (EF Core 10 / ADR-0006), TE-0024 (Data Access Architecture / ADR-0019 Hybrid Persistence Strategy), TE-0025 (Migrations / ADR-0037)] -->
-    <PackageVersion Include="Microsoft.EntityFrameworkCore" Version="10.0.0" />
-    <PackageVersion Include="Microsoft.EntityFrameworkCore.SqlServer" Version="10.0.0" />
-    <PackageVersion Include="Microsoft.EntityFrameworkCore.Tools" Version="10.0.0" />
-    <PackageVersion Include="Microsoft.EntityFrameworkCore.Design" Version="10.0.0" />
+    <PackageVersion Include="Microsoft.EntityFrameworkCore" Version="10.0.10" /> <!-- Bumped from 10.0.0: required by OpenIddict.EntityFrameworkCore 7.6.0 -> EntityFrameworkCore.Relational >= 10.0.10 (NU1109) -->
+    <PackageVersion Include="Microsoft.EntityFrameworkCore.SqlServer" Version="10.0.10" />
+    <PackageVersion Include="Microsoft.EntityFrameworkCore.Tools" Version="10.0.10" />
+    <PackageVersion Include="Microsoft.EntityFrameworkCore.Design" Version="10.0.10" />
     <PackageVersion Include="EFCore.NamingConventions" Version="10.0.0" />
 
     <!-- Embedded Local Workspace Databases [TE-0011 (Embedded Workspace DB / ADR-0014 SQLite & LiteDB)] -->
-    <PackageVersion Include="Microsoft.EntityFrameworkCore.Sqlite" Version="10.0.0" />
+    <PackageVersion Include="Microsoft.EntityFrameworkCore.Sqlite" Version="10.0.10" />
     <PackageVersion Include="LiteDB" Version="5.0.21" />
 
     <!-- Validation & Object Mapping [TE-0005 & TE-0022 (FluentValidation / ADR-0007, ADR-0036), TE-0006 & TE-0023 (Mapster / ADR-0008)] -->
@@ -254,6 +267,7 @@ SIZE: 7.91 KB
     <PackageVersion Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="10.0.0" />
     <PackageVersion Include="Microsoft.Extensions.Identity.Stores" Version="10.0.0" /> <!-- TE-0020 (Identity domain model: IdentityUser<TKey>/IdentityRole<TKey>, framework-independent) -->
     <PackageVersion Include="OpenIddict.AspNetCore" Version="7.6.0" />
+    <PackageVersion Include="OpenIddict.Server.AspNetCore" Version="7.6.0" />
     <PackageVersion Include="OpenIddict.EntityFrameworkCore" Version="7.6.0" />
     <PackageVersion Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="10.0.0" /> <!-- Used by Business Modules / APIs to validate tokens issued by the Identity module -->
     <PackageVersion Include="Microsoft.AspNetCore.Authentication.OpenIdConnect" Version="10.0.0" /> <!-- Used only for the optional external identity providers listed in TE-0020 (Microsoft Entra ID, Google Identity, GitHub Identity) -->
@@ -1234,9 +1248,11 @@ else
 
 ================================================================================
 FILE: src\Host\MachineryManager.Web\Components\Routes.razor
-SIZE: 0.29 KB
+SIZE: 0.42 KB
 ================================================================================
-<Router AppAssembly="typeof(Program).Assembly" NotFoundPage="typeof(Pages.NotFound)">
+<Router AppAssembly="typeof(Program).Assembly"
+        AdditionalAssemblies="new[] { typeof(MachineryManager.Identity.Presentation.Components.Pages.Login).Assembly }"
+        NotFoundPage="typeof(Pages.NotFound)">
     <Found Context="routeData">
         <RouteView RouteData="routeData" DefaultLayout="typeof(Layout.MainLayout)" />
         <FocusOnNavigate RouteData="routeData" Selector="h1" />
@@ -1246,7 +1262,7 @@ SIZE: 0.29 KB
 
 ================================================================================
 FILE: src\Host\MachineryManager.Web\MachineryManager.Web.csproj
-SIZE: 1.89 KB
+SIZE: 2 KB
 ================================================================================
 <Project Sdk="Microsoft.NET.Sdk.Web">
 
@@ -1263,6 +1279,7 @@ SIZE: 1.89 KB
     <ProjectReference Include="..\..\Modules\Organization\Organization.Infrastructure\Organization.Infrastructure.csproj" />
     <ProjectReference Include="..\..\Modules\Organization\Organization.Presentation\Organization.Presentation.csproj" />
     <ProjectReference Include="..\..\Modules\Identity\Identity.Infrastructure\Identity.Infrastructure.csproj" />
+    <ProjectReference Include="..\..\Modules\Identity\Identity.Presentation\Identity.Presentation.csproj" />
   </ItemGroup>
 
   <ItemGroup>
@@ -1284,9 +1301,10 @@ SIZE: 1.89 KB
 
 ================================================================================
 FILE: src\Host\MachineryManager.Web\Program.cs
-SIZE: 3.12 KB
+SIZE: 3.42 KB
 ================================================================================
 using MachineryManager.Identity.Infrastructure;
+using MachineryManager.Identity.Presentation.Endpoints;
 using MachineryManager.Organization.Application;
 using MachineryManager.Organization.Infrastructure;
 using MachineryManager.Organization.Presentation.Endpoints;
@@ -1341,6 +1359,7 @@ try
 
     // Identity platform module (ADR-0030).
     builder.Services.AddIdentityInfrastructure(builder.Configuration);
+    builder.Services.AddIdentityOpenIddictServer(builder.Environment);
 
     var app = builder.Build();
 
@@ -1363,11 +1382,17 @@ try
     app.UseStatusCodePagesWithReExecute("/not-found", createScopeForStatusCodePages: true);
     app.UseHttpsRedirection();
 
+    app.UseAuthentication();
+    app.UseAuthorization();
+
     app.UseAntiforgery();
 
     app.MapStaticAssets();
     app.MapRazorComponents<App>()
         .AddInteractiveServerRenderMode();
+
+    // Identity platform module: OpenIddict protocol endpoints (ADR-0030).
+    app.MapIdentityConnectEndpoints();
 
     // Organization module REST endpoints (07-api conventions, Section 8).
     app.MapOrganizationEndpoints();
@@ -1486,6 +1511,29 @@ SIZE: 0.15 KB
 </Project>
 
 ================================================================================
+FILE: src\Modules\Identity\Identity.Domain\PasswordPolicy.cs
+SIZE: 0.68 KB
+================================================================================
+using System.Text.RegularExpressions;
+
+namespace MachineryManager.Identity.Domain;
+
+/// <summary>
+/// The password policy as explicitly specified by the product owner
+/// (chat, 2026-08-18) — not an invented or library-default rule.
+/// </summary>
+public static class PasswordPolicy
+{
+    /// <summary>Minimum password length.</summary>
+    public const int MinLength = 8;
+
+    /// <summary>Matches only English letters, digits, and standard ASCII special/punctuation characters (no other alphabets or Unicode).</summary>
+    public static readonly Regex AllowedCharacters = new(
+        @"^[A-Za-z0-9!""#$%&'()*+,\-./:;<=>?@\[\]^_`{|}~]*$",
+        RegexOptions.Compiled);
+}
+
+================================================================================
 FILE: src\Modules\Identity\Identity.Domain\StandardRoles.cs
 SIZE: 2.48 KB
 ================================================================================
@@ -1555,8 +1603,24 @@ public static class StandardRoles
 }
 
 ================================================================================
+FILE: src\Modules\Identity\Identity.Domain\UsernamePolicy.cs
+SIZE: 0.34 KB
+================================================================================
+namespace MachineryManager.Identity.Domain;
+
+/// <summary>
+/// The username policy as explicitly specified by the product owner
+/// (chat, 2026-08-18) — not an invented or library-default rule.
+/// </summary>
+public static class UsernamePolicy
+{
+    /// <summary>Maximum username length.</summary>
+    public const int MaxLength = 20;
+}
+
+================================================================================
 FILE: src\Modules\Identity\Identity.Infrastructure\DependencyInjection.cs
-SIZE: 3.03 KB
+SIZE: 8.49 KB
 ================================================================================
 using MachineryManager.Identity.Domain;
 using MachineryManager.Identity.Infrastructure.Persistence;
@@ -1564,6 +1628,8 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
+using OpenIddict.Abstractions;
 
 namespace MachineryManager.Identity.Infrastructure;
 
@@ -1571,6 +1637,7 @@ namespace MachineryManager.Identity.Infrastructure;
 /// Registers the Identity platform module's Infrastructure layer
 /// services (ADR-0006 EF Core, ADR-0030 Identity &amp; Access Management).
 /// </summary>
+
 public static class DependencyInjection
 {
     /// <summary>
@@ -1599,32 +1666,146 @@ public static class DependencyInjection
                 sqlServerOptions => sqlServerOptions.MigrationsHistoryTable(
                     "__EFMigrationsHistory",
                     schema: "identity"));
-
+                    
             // Required by OpenIddict.EntityFrameworkCore so its stores
             // (Applications, Authorizations, Scopes, Tokens) are
             // recognized by this DbContext's model.
+
             options.UseOpenIddict<Guid>();
         });
 
         services
             .AddIdentityCore<ApplicationUser>(options =>
             {
-                // Provisional OWASP-aligned defaults — see remarks above.
-                options.Password.RequiredLength = 12;
+                // Password Policy — explicitly specified by the product
+                // owner (chat, 2026-08-18), not a library default.
+                options.Password.RequiredLength = PasswordPolicy.MinLength;
                 options.Password.RequireDigit = true;
                 options.Password.RequireLowercase = true;
                 options.Password.RequireUppercase = true;
                 options.Password.RequireNonAlphanumeric = true;
 
+                // Lockout policy: still provisional (OWASP-aligned
+                // default) — not yet explicitly confirmed by the
+                // product owner. Flagged as a remaining open item.
                 options.Lockout.MaxFailedAccessAttempts = 5;
                 options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(15);
                 options.Lockout.AllowedForNewUsers = true;
 
-                options.User.RequireUniqueEmail = true;
+                // No email collection (product owner, chat 2026-08-18):
+                // users are created by an Administrator only (05-application
+                // Section 5.3, Administration module), without an email
+                // address, so email uniqueness does not apply.
+                options.User.RequireUniqueEmail = false;
+
+                // English letters, digits, and standard ASCII special
+                // characters only (product owner, chat 2026-08-18) — this
+                // matches ASP.NET Core Identity's own default character
+                // set, restated explicitly so the rule is traceable in
+                // code rather than an implicit library default.
+                options.User.AllowedUserNameCharacters =
+                    "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-._@+";
             })
             .AddRoles<ApplicationRole>()
             .AddEntityFrameworkStores<IdentityDbContext>()
-            .AddDefaultTokenProviders();
+            .AddDefaultTokenProviders()
+            .AddUserValidator<Validation.UsernameLengthValidator>()
+            .AddPasswordValidator<Validation.AllowedCharactersPasswordValidator>()
+            // Added now: AddIdentityCore alone does NOT register
+            // SignInManager (unlike the full AddIdentity()). Required
+            // for the interactive Login page (cookie-based sign-in).
+            .AddSignInManager();
+
+        return services;
+    }
+
+    /// <summary>
+    /// Registers the OpenIddict Authorization Server + Token Validation
+    /// (ADR-0030), configured for two flows per the current requirement:
+    /// Authorization Code + PKCE (interactive users — Blazor Server,
+    /// MAUI) and Client Credentials (Service-to-Service integrations).
+    /// </summary>
+    /// <remarks>
+    /// Production signing/encryption certificates are NOT configured
+    /// here — no certificate source (file, Key Vault, etc.) is
+    /// documented anywhere in ADR-0026. Rather than inventing one, this
+    /// method fails fast outside Development until that decision is
+    /// made and documented.
+    /// </remarks>
+    /// <param name="services">The service collection to configure.</param>
+    /// <param name="environment">The hosting environment, used to select Development-only certificates.</param>
+    /// <returns>The same <see cref="IServiceCollection"/> for chaining.</returns>
+    public static IServiceCollection AddIdentityOpenIddictServer(
+        this IServiceCollection services,
+        IHostEnvironment environment)
+    {
+        // Cookie authentication for the interactive Login page.
+        // Fixes an omission from the previous step: without this, there
+        // is no authentication scheme available for SignInManager to
+        // issue a sign-in cookie against.
+        services
+            .AddAuthentication(options =>
+            {
+                options.DefaultScheme = IdentityConstants.ApplicationScheme;
+                options.DefaultSignInScheme = IdentityConstants.ApplicationScheme;
+            })
+            .AddIdentityCookies();
+
+        services
+            .AddOpenIddict()
+            .AddCore(options => options
+                .UseEntityFrameworkCore()
+                .UseDbContext<IdentityDbContext>()
+                .ReplaceDefaultEntities<Guid>())
+            .AddServer(options =>
+            {
+                options
+                    .SetAuthorizationEndpointUris("/connect/authorize")
+                    .SetTokenEndpointUris("/connect/token")
+                    .SetUserInfoEndpointUris("/connect/userinfo")
+                    .SetEndSessionEndpointUris("/connect/logout");
+
+                options
+                    .AllowAuthorizationCodeFlow()
+                    .RequireProofKeyForCodeExchange();
+
+                options.AllowClientCredentialsFlow();
+                options.AllowRefreshTokenFlow();
+
+                options.RegisterScopes(
+                    OpenIddictConstants.Scopes.OpenId,
+                    OpenIddictConstants.Scopes.Profile,
+                    OpenIddictConstants.Scopes.Email,
+                    OpenIddictConstants.Scopes.Roles);
+
+                if (environment.IsDevelopment())
+                {
+                    options
+                        .AddDevelopmentEncryptionCertificate()
+                        .AddDevelopmentSigningCertificate();
+                }
+                else
+                {
+                    throw new InvalidOperationException(
+                        "Production OpenIddict signing/encryption certificates are not configured. " +
+                        "This requires an explicit decision (documented in ADR-0026) on the certificate source " +
+                        "(e.g., Azure Key Vault, mounted X.509 file) before this environment can start.");
+                }
+
+                options
+                    .UseAspNetCore()
+                    .EnableAuthorizationEndpointPassthrough()
+                    .EnableTokenEndpointPassthrough()
+                    .EnableUserInfoEndpointPassthrough()
+                    .EnableEndSessionEndpointPassthrough();
+            })
+            .AddValidation(options =>
+            {
+                options.UseLocalServer();
+                options.UseAspNetCore();
+            });
+
+        services.AddAuthorization();
 
         return services;
     }
@@ -1632,7 +1813,7 @@ public static class DependencyInjection
 
 ================================================================================
 FILE: src\Modules\Identity\Identity.Infrastructure\Identity.Infrastructure.csproj
-SIZE: 0.9 KB
+SIZE: 0.96 KB
 ================================================================================
 <Project Sdk="Microsoft.NET.Sdk">
 
@@ -1652,6 +1833,7 @@ SIZE: 0.9 KB
     <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design" />
     <PackageReference Include="OpenIddict.EntityFrameworkCore" />
+    <PackageReference Include="OpenIddict.AspNetCore" />
   </ItemGroup>
 
 </Project>
@@ -2248,8 +2430,200 @@ namespace Identity.Infrastructure.Persistence.Migrations
 
 
 ================================================================================
-FILE: src\Modules\Identity\Identity.Infrastructure\Persistence\Migrations\IdentityDbContextModelSnapshot.cs
-SIZE: 10.47 KB
+FILE: src\Modules\Identity\Identity.Infrastructure\Persistence\Migrations\20260818041151_AddOpenIddictStores.cs
+SIZE: 9.75 KB
+================================================================================
+using System;
+using Microsoft.EntityFrameworkCore.Migrations;
+
+#nullable disable
+
+namespace Identity.Infrastructure.Persistence.Migrations
+{
+    /// <inheritdoc />
+    public partial class AddOpenIddictStores : Migration
+    {
+        /// <inheritdoc />
+        protected override void Up(MigrationBuilder migrationBuilder)
+        {
+            migrationBuilder.CreateTable(
+                name: "OpenIddictApplications",
+                schema: "identity",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    ApplicationType = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: true),
+                    ClientId = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: true),
+                    ClientSecret = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    ClientType = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: true),
+                    ConcurrencyToken = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: true),
+                    ConsentType = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: true),
+                    DisplayName = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    DisplayNames = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    JsonWebKeySet = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    Permissions = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    PostLogoutRedirectUris = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    Properties = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    RedirectUris = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    Requirements = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    Settings = table.Column<string>(type: "nvarchar(max)", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_OpenIddictApplications", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "OpenIddictScopes",
+                schema: "identity",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    ConcurrencyToken = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: true),
+                    Description = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    Descriptions = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    DisplayName = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    DisplayNames = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    Name = table.Column<string>(type: "nvarchar(200)", maxLength: 200, nullable: true),
+                    Properties = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    Resources = table.Column<string>(type: "nvarchar(max)", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_OpenIddictScopes", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "OpenIddictAuthorizations",
+                schema: "identity",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    ApplicationId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
+                    ConcurrencyToken = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: true),
+                    CreationDate = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    Properties = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    Scopes = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    Status = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: true),
+                    Subject = table.Column<string>(type: "nvarchar(400)", maxLength: 400, nullable: true),
+                    Type = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_OpenIddictAuthorizations", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_OpenIddictAuthorizations_OpenIddictApplications_ApplicationId",
+                        column: x => x.ApplicationId,
+                        principalSchema: "identity",
+                        principalTable: "OpenIddictApplications",
+                        principalColumn: "Id");
+                });
+
+            migrationBuilder.CreateTable(
+                name: "OpenIddictTokens",
+                schema: "identity",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    ApplicationId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
+                    AuthorizationId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
+                    ConcurrencyToken = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: true),
+                    CreationDate = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    ExpirationDate = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    Payload = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    Properties = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    RedemptionDate = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    ReferenceId = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: true),
+                    Status = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: true),
+                    Subject = table.Column<string>(type: "nvarchar(400)", maxLength: 400, nullable: true),
+                    Type = table.Column<string>(type: "nvarchar(150)", maxLength: 150, nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_OpenIddictTokens", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_OpenIddictTokens_OpenIddictApplications_ApplicationId",
+                        column: x => x.ApplicationId,
+                        principalSchema: "identity",
+                        principalTable: "OpenIddictApplications",
+                        principalColumn: "Id");
+                    table.ForeignKey(
+                        name: "FK_OpenIddictTokens_OpenIddictAuthorizations_AuthorizationId",
+                        column: x => x.AuthorizationId,
+                        principalSchema: "identity",
+                        principalTable: "OpenIddictAuthorizations",
+                        principalColumn: "Id");
+                });
+
+            migrationBuilder.CreateIndex(
+                name: "IX_OpenIddictApplications_ClientId",
+                schema: "identity",
+                table: "OpenIddictApplications",
+                column: "ClientId",
+                unique: true,
+                filter: "[ClientId] IS NOT NULL");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_OpenIddictAuthorizations_ApplicationId_Status_Subject_Type",
+                schema: "identity",
+                table: "OpenIddictAuthorizations",
+                columns: new[] { "ApplicationId", "Status", "Subject", "Type" });
+
+            migrationBuilder.CreateIndex(
+                name: "IX_OpenIddictScopes_Name",
+                schema: "identity",
+                table: "OpenIddictScopes",
+                column: "Name",
+                unique: true,
+                filter: "[Name] IS NOT NULL");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_OpenIddictTokens_ApplicationId_Status_Subject_Type",
+                schema: "identity",
+                table: "OpenIddictTokens",
+                columns: new[] { "ApplicationId", "Status", "Subject", "Type" });
+
+            migrationBuilder.CreateIndex(
+                name: "IX_OpenIddictTokens_AuthorizationId",
+                schema: "identity",
+                table: "OpenIddictTokens",
+                column: "AuthorizationId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_OpenIddictTokens_ReferenceId",
+                schema: "identity",
+                table: "OpenIddictTokens",
+                column: "ReferenceId",
+                unique: true,
+                filter: "[ReferenceId] IS NOT NULL");
+        }
+
+        /// <inheritdoc />
+        protected override void Down(MigrationBuilder migrationBuilder)
+        {
+            migrationBuilder.DropTable(
+                name: "OpenIddictScopes",
+                schema: "identity");
+
+            migrationBuilder.DropTable(
+                name: "OpenIddictTokens",
+                schema: "identity");
+
+            migrationBuilder.DropTable(
+                name: "OpenIddictAuthorizations",
+                schema: "identity");
+
+            migrationBuilder.DropTable(
+                name: "OpenIddictApplications",
+                schema: "identity");
+        }
+    }
+}
+
+
+================================================================================
+FILE: src\Modules\Identity\Identity.Infrastructure\Persistence\Migrations\20260818041151_AddOpenIddictStores.Designer.cs
+SIZE: 20.29 KB
 ================================================================================
 // <auto-generated />
 using System;
@@ -2257,6 +2631,7 @@ using MachineryManager.Identity.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -2264,14 +2639,16 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Identity.Infrastructure.Persistence.Migrations
 {
     [DbContext(typeof(IdentityDbContext))]
-    partial class IdentityDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260818041151_AddOpenIddictStores")]
+    partial class AddOpenIddictStores
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
                 .HasDefaultSchema("identity")
-                .HasAnnotation("ProductVersion", "10.0.0")
+                .HasAnnotation("ProductVersion", "10.0.10")
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
@@ -2473,6 +2850,217 @@ namespace Identity.Infrastructure.Persistence.Migrations
                     b.ToTable("AspNetUserTokens", "identity");
                 });
 
+            modelBuilder.Entity("OpenIddict.EntityFrameworkCore.Models.OpenIddictEntityFrameworkCoreApplication<System.Guid>", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("ApplicationType")
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<string>("ClientId")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<string>("ClientSecret")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("ClientType")
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<string>("ConcurrencyToken")
+                        .IsConcurrencyToken()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<string>("ConsentType")
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<string>("DisplayName")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("DisplayNames")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("JsonWebKeySet")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Permissions")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("PostLogoutRedirectUris")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Properties")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("RedirectUris")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Requirements")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Settings")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ClientId")
+                        .IsUnique()
+                        .HasFilter("[ClientId] IS NOT NULL");
+
+                    b.ToTable("OpenIddictApplications", "identity");
+                });
+
+            modelBuilder.Entity("OpenIddict.EntityFrameworkCore.Models.OpenIddictEntityFrameworkCoreAuthorization<System.Guid>", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid?>("ApplicationId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("ConcurrencyToken")
+                        .IsConcurrencyToken()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<DateTime?>("CreationDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Properties")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Scopes")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Status")
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<string>("Subject")
+                        .HasMaxLength(400)
+                        .HasColumnType("nvarchar(400)");
+
+                    b.Property<string>("Type")
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ApplicationId", "Status", "Subject", "Type");
+
+                    b.ToTable("OpenIddictAuthorizations", "identity");
+                });
+
+            modelBuilder.Entity("OpenIddict.EntityFrameworkCore.Models.OpenIddictEntityFrameworkCoreScope<System.Guid>", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("ConcurrencyToken")
+                        .IsConcurrencyToken()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<string>("Description")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Descriptions")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("DisplayName")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("DisplayNames")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Name")
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<string>("Properties")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Resources")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Name")
+                        .IsUnique()
+                        .HasFilter("[Name] IS NOT NULL");
+
+                    b.ToTable("OpenIddictScopes", "identity");
+                });
+
+            modelBuilder.Entity("OpenIddict.EntityFrameworkCore.Models.OpenIddictEntityFrameworkCoreToken<System.Guid>", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid?>("ApplicationId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid?>("AuthorizationId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("ConcurrencyToken")
+                        .IsConcurrencyToken()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<DateTime?>("CreationDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime?>("ExpirationDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Payload")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Properties")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime?>("RedemptionDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("ReferenceId")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<string>("Status")
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<string>("Subject")
+                        .HasMaxLength(400)
+                        .HasColumnType("nvarchar(400)");
+
+                    b.Property<string>("Type")
+                        .HasMaxLength(150)
+                        .HasColumnType("nvarchar(150)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("AuthorizationId");
+
+                    b.HasIndex("ReferenceId")
+                        .IsUnique()
+                        .HasFilter("[ReferenceId] IS NOT NULL");
+
+                    b.HasIndex("ApplicationId", "Status", "Subject", "Type");
+
+                    b.ToTable("OpenIddictTokens", "identity");
+                });
+
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<System.Guid>", b =>
                 {
                     b.HasOne("MachineryManager.Identity.Domain.ApplicationRole", null)
@@ -2523,6 +3111,42 @@ namespace Identity.Infrastructure.Persistence.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });
+
+            modelBuilder.Entity("OpenIddict.EntityFrameworkCore.Models.OpenIddictEntityFrameworkCoreAuthorization<System.Guid>", b =>
+                {
+                    b.HasOne("OpenIddict.EntityFrameworkCore.Models.OpenIddictEntityFrameworkCoreApplication<System.Guid>", "Application")
+                        .WithMany("Authorizations")
+                        .HasForeignKey("ApplicationId");
+
+                    b.Navigation("Application");
+                });
+
+            modelBuilder.Entity("OpenIddict.EntityFrameworkCore.Models.OpenIddictEntityFrameworkCoreToken<System.Guid>", b =>
+                {
+                    b.HasOne("OpenIddict.EntityFrameworkCore.Models.OpenIddictEntityFrameworkCoreApplication<System.Guid>", "Application")
+                        .WithMany("Tokens")
+                        .HasForeignKey("ApplicationId");
+
+                    b.HasOne("OpenIddict.EntityFrameworkCore.Models.OpenIddictEntityFrameworkCoreAuthorization<System.Guid>", "Authorization")
+                        .WithMany("Tokens")
+                        .HasForeignKey("AuthorizationId");
+
+                    b.Navigation("Application");
+
+                    b.Navigation("Authorization");
+                });
+
+            modelBuilder.Entity("OpenIddict.EntityFrameworkCore.Models.OpenIddictEntityFrameworkCoreApplication<System.Guid>", b =>
+                {
+                    b.Navigation("Authorizations");
+
+                    b.Navigation("Tokens");
+                });
+
+            modelBuilder.Entity("OpenIddict.EntityFrameworkCore.Models.OpenIddictEntityFrameworkCoreAuthorization<System.Guid>", b =>
+                {
+                    b.Navigation("Tokens");
+                });
 #pragma warning restore 612, 618
         }
     }
@@ -2530,10 +3154,947 @@ namespace Identity.Infrastructure.Persistence.Migrations
 
 
 ================================================================================
-FILE: src\Modules\Identity\Identity.Presentation\Identity.Presentation.csproj
-SIZE: 0.05 KB
+FILE: src\Modules\Identity\Identity.Infrastructure\Persistence\Migrations\IdentityDbContextModelSnapshot.cs
+SIZE: 20.19 KB
 ================================================================================
-<Project Sdk="Microsoft.NET.Sdk">
+// <auto-generated />
+using System;
+using MachineryManager.Identity.Infrastructure.Persistence;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
+
+#nullable disable
+
+namespace Identity.Infrastructure.Persistence.Migrations
+{
+    [DbContext(typeof(IdentityDbContext))]
+    partial class IdentityDbContextModelSnapshot : ModelSnapshot
+    {
+        protected override void BuildModel(ModelBuilder modelBuilder)
+        {
+#pragma warning disable 612, 618
+            modelBuilder
+                .HasDefaultSchema("identity")
+                .HasAnnotation("ProductVersion", "10.0.10")
+                .HasAnnotation("Relational:MaxIdentifierLength", 128);
+
+            SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
+
+            modelBuilder.Entity("MachineryManager.Identity.Domain.ApplicationRole", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("ConcurrencyStamp")
+                        .IsConcurrencyToken()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Name")
+                        .HasMaxLength(256)
+                        .HasColumnType("nvarchar(256)");
+
+                    b.Property<string>("NormalizedName")
+                        .HasMaxLength(256)
+                        .HasColumnType("nvarchar(256)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("NormalizedName")
+                        .IsUnique()
+                        .HasDatabaseName("RoleNameIndex")
+                        .HasFilter("[NormalizedName] IS NOT NULL");
+
+                    b.ToTable("AspNetRoles", "identity");
+                });
+
+            modelBuilder.Entity("MachineryManager.Identity.Domain.ApplicationUser", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<int>("AccessFailedCount")
+                        .HasColumnType("int");
+
+                    b.Property<string>("ConcurrencyStamp")
+                        .IsConcurrencyToken()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Email")
+                        .HasMaxLength(256)
+                        .HasColumnType("nvarchar(256)");
+
+                    b.Property<bool>("EmailConfirmed")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("LockoutEnabled")
+                        .HasColumnType("bit");
+
+                    b.Property<DateTimeOffset?>("LockoutEnd")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<string>("NormalizedEmail")
+                        .HasMaxLength(256)
+                        .HasColumnType("nvarchar(256)");
+
+                    b.Property<string>("NormalizedUserName")
+                        .HasMaxLength(256)
+                        .HasColumnType("nvarchar(256)");
+
+                    b.Property<string>("PasswordHash")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("PhoneNumber")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("PhoneNumberConfirmed")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("SecurityStamp")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("TwoFactorEnabled")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("UserName")
+                        .HasMaxLength(256)
+                        .HasColumnType("nvarchar(256)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("NormalizedEmail")
+                        .HasDatabaseName("EmailIndex");
+
+                    b.HasIndex("NormalizedUserName")
+                        .IsUnique()
+                        .HasDatabaseName("UserNameIndex")
+                        .HasFilter("[NormalizedUserName] IS NOT NULL");
+
+                    b.ToTable("AspNetUsers", "identity");
+                });
+
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<System.Guid>", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("ClaimType")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("ClaimValue")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<Guid>("RoleId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("RoleId");
+
+                    b.ToTable("AspNetRoleClaims", "identity");
+                });
+
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserClaim<System.Guid>", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("ClaimType")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("ClaimValue")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("AspNetUserClaims", "identity");
+                });
+
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserLogin<System.Guid>", b =>
+                {
+                    b.Property<string>("LoginProvider")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("ProviderKey")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("ProviderDisplayName")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("LoginProvider", "ProviderKey");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("AspNetUserLogins", "identity");
+                });
+
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserRole<System.Guid>", b =>
+                {
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("RoleId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("UserId", "RoleId");
+
+                    b.HasIndex("RoleId");
+
+                    b.ToTable("AspNetUserRoles", "identity");
+                });
+
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserToken<System.Guid>", b =>
+                {
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("LoginProvider")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("Name")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("Value")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("UserId", "LoginProvider", "Name");
+
+                    b.ToTable("AspNetUserTokens", "identity");
+                });
+
+            modelBuilder.Entity("OpenIddict.EntityFrameworkCore.Models.OpenIddictEntityFrameworkCoreApplication<System.Guid>", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("ApplicationType")
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<string>("ClientId")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<string>("ClientSecret")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("ClientType")
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<string>("ConcurrencyToken")
+                        .IsConcurrencyToken()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<string>("ConsentType")
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<string>("DisplayName")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("DisplayNames")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("JsonWebKeySet")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Permissions")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("PostLogoutRedirectUris")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Properties")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("RedirectUris")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Requirements")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Settings")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ClientId")
+                        .IsUnique()
+                        .HasFilter("[ClientId] IS NOT NULL");
+
+                    b.ToTable("OpenIddictApplications", "identity");
+                });
+
+            modelBuilder.Entity("OpenIddict.EntityFrameworkCore.Models.OpenIddictEntityFrameworkCoreAuthorization<System.Guid>", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid?>("ApplicationId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("ConcurrencyToken")
+                        .IsConcurrencyToken()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<DateTime?>("CreationDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Properties")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Scopes")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Status")
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<string>("Subject")
+                        .HasMaxLength(400)
+                        .HasColumnType("nvarchar(400)");
+
+                    b.Property<string>("Type")
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ApplicationId", "Status", "Subject", "Type");
+
+                    b.ToTable("OpenIddictAuthorizations", "identity");
+                });
+
+            modelBuilder.Entity("OpenIddict.EntityFrameworkCore.Models.OpenIddictEntityFrameworkCoreScope<System.Guid>", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("ConcurrencyToken")
+                        .IsConcurrencyToken()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<string>("Description")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Descriptions")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("DisplayName")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("DisplayNames")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Name")
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<string>("Properties")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Resources")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Name")
+                        .IsUnique()
+                        .HasFilter("[Name] IS NOT NULL");
+
+                    b.ToTable("OpenIddictScopes", "identity");
+                });
+
+            modelBuilder.Entity("OpenIddict.EntityFrameworkCore.Models.OpenIddictEntityFrameworkCoreToken<System.Guid>", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid?>("ApplicationId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid?>("AuthorizationId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("ConcurrencyToken")
+                        .IsConcurrencyToken()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<DateTime?>("CreationDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime?>("ExpirationDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Payload")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Properties")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime?>("RedemptionDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("ReferenceId")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<string>("Status")
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<string>("Subject")
+                        .HasMaxLength(400)
+                        .HasColumnType("nvarchar(400)");
+
+                    b.Property<string>("Type")
+                        .HasMaxLength(150)
+                        .HasColumnType("nvarchar(150)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("AuthorizationId");
+
+                    b.HasIndex("ReferenceId")
+                        .IsUnique()
+                        .HasFilter("[ReferenceId] IS NOT NULL");
+
+                    b.HasIndex("ApplicationId", "Status", "Subject", "Type");
+
+                    b.ToTable("OpenIddictTokens", "identity");
+                });
+
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<System.Guid>", b =>
+                {
+                    b.HasOne("MachineryManager.Identity.Domain.ApplicationRole", null)
+                        .WithMany()
+                        .HasForeignKey("RoleId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserClaim<System.Guid>", b =>
+                {
+                    b.HasOne("MachineryManager.Identity.Domain.ApplicationUser", null)
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserLogin<System.Guid>", b =>
+                {
+                    b.HasOne("MachineryManager.Identity.Domain.ApplicationUser", null)
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserRole<System.Guid>", b =>
+                {
+                    b.HasOne("MachineryManager.Identity.Domain.ApplicationRole", null)
+                        .WithMany()
+                        .HasForeignKey("RoleId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("MachineryManager.Identity.Domain.ApplicationUser", null)
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserToken<System.Guid>", b =>
+                {
+                    b.HasOne("MachineryManager.Identity.Domain.ApplicationUser", null)
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("OpenIddict.EntityFrameworkCore.Models.OpenIddictEntityFrameworkCoreAuthorization<System.Guid>", b =>
+                {
+                    b.HasOne("OpenIddict.EntityFrameworkCore.Models.OpenIddictEntityFrameworkCoreApplication<System.Guid>", "Application")
+                        .WithMany("Authorizations")
+                        .HasForeignKey("ApplicationId");
+
+                    b.Navigation("Application");
+                });
+
+            modelBuilder.Entity("OpenIddict.EntityFrameworkCore.Models.OpenIddictEntityFrameworkCoreToken<System.Guid>", b =>
+                {
+                    b.HasOne("OpenIddict.EntityFrameworkCore.Models.OpenIddictEntityFrameworkCoreApplication<System.Guid>", "Application")
+                        .WithMany("Tokens")
+                        .HasForeignKey("ApplicationId");
+
+                    b.HasOne("OpenIddict.EntityFrameworkCore.Models.OpenIddictEntityFrameworkCoreAuthorization<System.Guid>", "Authorization")
+                        .WithMany("Tokens")
+                        .HasForeignKey("AuthorizationId");
+
+                    b.Navigation("Application");
+
+                    b.Navigation("Authorization");
+                });
+
+            modelBuilder.Entity("OpenIddict.EntityFrameworkCore.Models.OpenIddictEntityFrameworkCoreApplication<System.Guid>", b =>
+                {
+                    b.Navigation("Authorizations");
+
+                    b.Navigation("Tokens");
+                });
+
+            modelBuilder.Entity("OpenIddict.EntityFrameworkCore.Models.OpenIddictEntityFrameworkCoreAuthorization<System.Guid>", b =>
+                {
+                    b.Navigation("Tokens");
+                });
+#pragma warning restore 612, 618
+        }
+    }
+}
+
+
+================================================================================
+FILE: src\Modules\Identity\Identity.Infrastructure\Validation\AllowedCharactersPasswordValidator.cs
+SIZE: 1.16 KB
+================================================================================
+using MachineryManager.Identity.Domain;
+using Microsoft.AspNetCore.Identity;
+
+namespace MachineryManager.Identity.Infrastructure.Validation;
+
+/// <summary>
+/// Enforces the password character-set restriction specified by the
+/// product owner (<see cref="PasswordPolicy.AllowedCharacters"/>):
+/// English letters, digits, and standard ASCII special characters
+/// only. ASP.NET Core Identity has no built-in charset restriction for
+/// passwords.
+/// </summary>
+public sealed class AllowedCharactersPasswordValidator : IPasswordValidator<ApplicationUser>
+{
+    /// <inheritdoc />
+    public Task<IdentityResult> ValidateAsync(UserManager<ApplicationUser> manager, ApplicationUser user, string? password)
+    {
+        if (password is not null && !PasswordPolicy.AllowedCharacters.IsMatch(password))
+        {
+            return Task.FromResult(IdentityResult.Failed(new IdentityError
+            {
+                Code = "PasswordInvalidCharacters",
+                Description = "Password may only contain English letters, digits, and standard special characters.",
+            }));
+        }
+
+        return Task.FromResult(IdentityResult.Success);
+    }
+}
+
+================================================================================
+FILE: src\Modules\Identity\Identity.Infrastructure\Validation\UsernameLengthValidator.cs
+SIZE: 1.14 KB
+================================================================================
+using MachineryManager.Identity.Domain;
+using Microsoft.AspNetCore.Identity;
+
+namespace MachineryManager.Identity.Infrastructure.Validation;
+
+/// <summary>
+/// Enforces the maximum username length specified by the product
+/// owner (<see cref="UsernamePolicy.MaxLength"/>). ASP.NET Core
+/// Identity has no built-in maximum-length option for usernames — the
+/// allowed-characters check is already covered natively via
+/// <c>IdentityOptions.User.AllowedUserNameCharacters</c>.
+/// </summary>
+public sealed class UsernameLengthValidator : IUserValidator<ApplicationUser>
+{
+    /// <inheritdoc />
+    public Task<IdentityResult> ValidateAsync(UserManager<ApplicationUser> manager, ApplicationUser user)
+    {
+        if (!string.IsNullOrEmpty(user.UserName) && user.UserName.Length > UsernamePolicy.MaxLength)
+        {
+            return Task.FromResult(IdentityResult.Failed(new IdentityError
+            {
+                Code = "UserNameTooLong",
+                Description = $"Username must not exceed {UsernamePolicy.MaxLength} characters.",
+            }));
+        }
+
+        return Task.FromResult(IdentityResult.Success);
+    }
+}
+
+================================================================================
+FILE: src\Modules\Identity\Identity.Presentation\Components\_Imports.razor
+SIZE: 0.18 KB
+================================================================================
+@using System.Net.Http
+@using System.Net.Http.Json
+@using Microsoft.AspNetCore.Components.Forms
+@using Microsoft.AspNetCore.Components.Routing
+@using Microsoft.AspNetCore.Components.Web
+
+================================================================================
+FILE: src\Modules\Identity\Identity.Presentation\Components\Pages\Login.razor
+SIZE: 2.36 KB
+================================================================================
+@page "/identity/login"
+@using System.ComponentModel.DataAnnotations
+@using MachineryManager.Identity.Domain
+@using Microsoft.AspNetCore.Identity
+@inject SignInManager<ApplicationUser> SignInManager
+@inject NavigationManager NavigationManager
+
+<PageTitle>ورود به سامانه</PageTitle>
+
+<h1>ورود به سامانه</h1>
+
+@if (errorMessage is not null)
+{
+    <p style="color:red">@errorMessage</p>
+}
+
+<EditForm Model="Input" method="post" OnValidSubmit="LoginUserAsync" FormName="login">
+    <DataAnnotationsValidator />
+
+    <div>
+        <label for="username">نام کاربری</label>
+        <InputText id="username" @bind-Value="Input.UserName" autocomplete="username" />
+        <ValidationMessage For="() => Input.UserName" />
+    </div>
+
+    <div>
+        <label for="password">رمز عبور</label>
+        <InputText id="password" type="password" @bind-Value="Input.Password" autocomplete="current-password" />
+        <ValidationMessage For="() => Input.Password" />
+    </div>
+
+    <button type="submit">ورود</button>
+</EditForm>
+
+@code {
+    private string? errorMessage;
+
+    [SupplyParameterFromForm]
+    private LoginInputModel Input { get; set; } = null!;
+
+    [SupplyParameterFromQuery]
+    private string? ReturnUrl { get; set; }
+
+    protected override void OnInitialized()
+    {
+        Input ??= new LoginInputModel();
+    }
+
+    private async Task LoginUserAsync()
+    {
+        var result = await SignInManager.PasswordSignInAsync(
+            Input.UserName,
+            Input.Password,
+            isPersistent: false,
+            lockoutOnFailure: true);
+
+        if (result.Succeeded)
+        {
+            NavigationManager.NavigateTo(ReturnUrl ?? "/", forceLoad: true);
+            return;
+        }
+
+        errorMessage = result.IsLockedOut
+            ? "حساب کاربری شما به‌دلیل تلاش‌های ناموفق متعدد، موقتاً قفل شده است."
+            : "نام کاربری یا رمز عبور نادرست است.";
+    }
+
+    private sealed class LoginInputModel
+    {
+        [Required(ErrorMessage = "نام کاربری الزامی است.")]
+        public string UserName { get; set; } = string.Empty;
+
+        [Required(ErrorMessage = "رمز عبور الزامی است.")]
+        public string Password { get; set; } = string.Empty;
+    }
+}
+
+================================================================================
+FILE: src\Modules\Identity\Identity.Presentation\Endpoints\ConnectEndpoints.cs
+SIZE: 9.15 KB
+================================================================================
+using System.Security.Claims;
+using MachineryManager.Identity.Domain;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Routing;
+using OpenIddict.Abstractions;
+using OpenIddict.Server.AspNetCore;
+
+using static OpenIddict.Abstractions.OpenIddictConstants;
+
+namespace MachineryManager.Identity.Presentation.Endpoints;
+
+/// <summary>
+/// Maps the OpenIddict protocol endpoints (Authorization Code + PKCE
+/// for interactive users, Client Credentials for Service-to-Service),
+/// per the decisions made in chat (2026-08-18).
+/// </summary>
+public static class ConnectEndpoints
+{
+    /// <summary>Registers the Identity module's OpenIddict protocol endpoints.</summary>
+    /// <param name="endpoints">The endpoint route builder.</param>
+    /// <returns>The same <see cref="IEndpointRouteBuilder"/> for chaining.</returns>
+    public static IEndpointRouteBuilder MapIdentityConnectEndpoints(this IEndpointRouteBuilder endpoints)
+    {
+        endpoints.MapMethods("/connect/authorize", ["GET", "POST"], AuthorizeAsync);
+        endpoints.MapPost("/connect/token", ExchangeAsync);
+        endpoints.MapMethods("/connect/logout", ["GET", "POST"], LogoutAsync);
+        endpoints.MapMethods("/connect/userinfo", ["GET", "POST"], UserInfoAsync);
+
+        return endpoints;
+    }
+
+    private static async Task<IResult> AuthorizeAsync(
+        HttpContext httpContext,
+        UserManager<ApplicationUser> userManager,
+        SignInManager<ApplicationUser> signInManager)
+    {
+        var request = httpContext.GetOpenIddictServerRequest()
+            ?? throw new InvalidOperationException("The OpenID Connect request cannot be retrieved.");
+
+        var authenticateResult = await httpContext.AuthenticateAsync(IdentityConstants.ApplicationScheme);
+
+        if (!authenticateResult.Succeeded || authenticateResult.Principal is null)
+        {
+            var returnUrl = Uri.EscapeDataString(
+                httpContext.Request.PathBase + httpContext.Request.Path + httpContext.Request.QueryString);
+
+            return Results.Redirect($"/identity/login?ReturnUrl={returnUrl}");
+        }
+
+        var user = await userManager.GetUserAsync(authenticateResult.Principal)
+            ?? throw new InvalidOperationException("The user details cannot be retrieved.");
+
+        if (!await signInManager.CanSignInAsync(user))
+        {
+            return Results.Forbid(
+                authenticationSchemes: [OpenIddictServerAspNetCoreDefaults.AuthenticationScheme],
+                properties: new AuthenticationProperties(new Dictionary<string, string?>
+                {
+                    [OpenIddictServerAspNetCoreConstants.Properties.Error] = Errors.AccessDenied,
+                    [OpenIddictServerAspNetCoreConstants.Properties.ErrorDescription] = "The user is no longer allowed to sign in.",
+                }));
+        }
+
+        var principal = await signInManager.CreateUserPrincipalAsync(user);
+
+        principal.SetScopes(request.GetScopes());
+
+        foreach (var claim in principal.Claims)
+        {
+            claim.SetDestinations(GetDestinations(claim, principal));
+        }
+
+        return Results.SignIn(principal, authenticationScheme: OpenIddictServerAspNetCoreDefaults.AuthenticationScheme);
+    }
+
+    private static async Task<IResult> ExchangeAsync(
+        HttpContext httpContext,
+        UserManager<ApplicationUser> userManager,
+        SignInManager<ApplicationUser> signInManager)
+    {
+        var request = httpContext.GetOpenIddictServerRequest()
+            ?? throw new InvalidOperationException("The OpenID Connect request cannot be retrieved.");
+
+        if (request.IsAuthorizationCodeGrantType() || request.IsRefreshTokenGrantType())
+        {
+            var authenticateResult = await httpContext.AuthenticateAsync(OpenIddictServerAspNetCoreDefaults.AuthenticationScheme);
+
+            var user = authenticateResult.Principal is null
+                ? null
+                : await userManager.GetUserAsync(authenticateResult.Principal);
+
+            if (user is null || !await signInManager.CanSignInAsync(user))
+            {
+                return Results.Forbid(
+                    authenticationSchemes: [OpenIddictServerAspNetCoreDefaults.AuthenticationScheme],
+                    properties: new AuthenticationProperties(new Dictionary<string, string?>
+                    {
+                        [OpenIddictServerAspNetCoreConstants.Properties.Error] = Errors.InvalidGrant,
+                        [OpenIddictServerAspNetCoreConstants.Properties.ErrorDescription] = "The token is no longer valid.",
+                    }));
+            }
+
+            var principal = await signInManager.CreateUserPrincipalAsync(user);
+            principal.SetScopes(authenticateResult.Principal!.GetScopes());
+
+            foreach (var claim in principal.Claims)
+            {
+                claim.SetDestinations(GetDestinations(claim, principal));
+            }
+
+            return Results.SignIn(principal, authenticationScheme: OpenIddictServerAspNetCoreDefaults.AuthenticationScheme);
+        }
+
+        if (request.IsClientCredentialsGrantType())
+        {
+            // The principal represents the calling application itself,
+            // not a human user — per the "Service-to-Service" decision
+            // (chat, 2026-08-18).
+            var identity = new ClaimsIdentity(
+                authenticationType: OpenIddictServerAspNetCoreDefaults.AuthenticationScheme,
+                nameType: Claims.Name,
+                roleType: Claims.Role);
+
+            identity.SetClaim(Claims.Subject, request.ClientId ?? throw new InvalidOperationException("The client identifier cannot be retrieved."));
+            identity.SetClaim(Claims.Name, request.ClientId);
+
+            var principal = new ClaimsPrincipal(identity);
+            principal.SetScopes(request.GetScopes());
+
+            foreach (var claim in principal.Claims)
+            {
+                claim.SetDestinations(Destinations.AccessToken);
+            }
+
+            return Results.SignIn(principal, authenticationScheme: OpenIddictServerAspNetCoreDefaults.AuthenticationScheme);
+        }
+
+        return Results.BadRequest(new { error = Errors.UnsupportedGrantType });
+    }
+
+    private static async Task<IResult> LogoutAsync(SignInManager<ApplicationUser> signInManager)
+    {
+        await signInManager.SignOutAsync();
+
+        return Results.SignOut(
+            authenticationSchemes: [OpenIddictServerAspNetCoreDefaults.AuthenticationScheme],
+            properties: new AuthenticationProperties { RedirectUri = "/" });
+    }
+
+    private static async Task<IResult> UserInfoAsync(
+        HttpContext httpContext,
+        UserManager<ApplicationUser> userManager)
+    {
+        var authenticateResult = await httpContext.AuthenticateAsync(OpenIddictServerAspNetCoreDefaults.AuthenticationScheme);
+
+        var user = authenticateResult.Principal is null
+            ? null
+            : await userManager.GetUserAsync(authenticateResult.Principal);
+
+        if (user is null)
+        {
+            return Results.Challenge(authenticationSchemes: [OpenIddictServerAspNetCoreDefaults.AuthenticationScheme]);
+        }
+
+        var claims = new Dictionary<string, object>(StringComparer.Ordinal)
+        {
+            [Claims.Subject] = user.Id.ToString(),
+        };
+
+        if (authenticateResult.Principal!.HasScope(Scopes.Profile))
+        {
+            claims[Claims.PreferredUsername] = user.UserName ?? string.Empty;
+        }
+
+        return Results.Ok(claims);
+    }
+
+    /// <summary>
+    /// Determines which token (access token, identity token, or both) a
+    /// given claim should be embedded in, based on the granted scopes.
+    /// Standard OpenIddict pattern — no undocumented business rule.
+    /// </summary>
+    private static IEnumerable<string> GetDestinations(Claim claim, ClaimsPrincipal principal)
+    {
+        switch (claim.Type)
+        {
+            case Claims.Name:
+            case Claims.PreferredUsername:
+                yield return Destinations.AccessToken;
+                if (principal.HasScope(Scopes.Profile))
+                {
+                    yield return Destinations.IdentityToken;
+                }
+
+                yield break;
+
+            case Claims.Email:
+                yield return Destinations.AccessToken;
+                if (principal.HasScope(Scopes.Email))
+                {
+                    yield return Destinations.IdentityToken;
+                }
+
+                yield break;
+
+            case Claims.Role:
+                yield return Destinations.AccessToken;
+                if (principal.HasScope(Scopes.Roles))
+                {
+                    yield return Destinations.IdentityToken;
+                }
+
+                yield break;
+
+            // Never expose the security stamp in issued tokens.
+            case "AspNet.Identity.SecurityStamp":
+                yield break;
+
+            default:
+                yield return Destinations.AccessToken;
+                yield break;
+        }
+    }
+}
+
+================================================================================
+FILE: src\Modules\Identity\Identity.Presentation\Identity.Presentation.csproj
+SIZE: 0.52 KB
+================================================================================
+<Project Sdk="Microsoft.NET.Sdk.Razor">
+
+  <PropertyGroup>
+    <RootNamespace>MachineryManager.Identity.Presentation</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <FrameworkReference Include="Microsoft.AspNetCore.App" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Identity.Domain\Identity.Domain.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="OpenIddict.AspNetCore" />
+    <PackageReference Include="OpenIddict.Server.AspNetCore" />
+  </ItemGroup>
 
 </Project>
 
@@ -3699,12 +5260,12 @@ SIZE: 0.26 KB
 # SECTION 3: SNAPSHOT SUMMARY
 ================================================================================
 
-Generation Time     : 00:00:01.4042180
-Total Files Scanned : 80
-Files Included      : 80
+Generation Time     : 00:00:02.8457248
+Total Files Scanned : 89
+Files Included      : 89
 Files Skipped       : 0
-Total Source Size   : 0.12 MB
-Snapshot File Size  : 0.14 MB
+Total Source Size   : 0.18 MB
+Snapshot File Size  : 0.21 MB
 Output Path         : C:\Users\i\source\repos\MachineryManagerEnterprise\MME_Codebase_Snapshot.txt
 
 Excluded Directories: .git, .github, .vs, .vscode, .idea, .azure, .devcontainer, bin, obj, packages, publish, out, release, releases, debug, x64, x86, arm64, artifacts, .artifacts, node_modules, dist, build, bower_components, jspm_packages, docs-english, docs-farsi, docs, tools, test-results, coverage, .coverage, TestResults, lib, .angular, .next, .nuxt, .svelte-kit, .cache, .temp, tmp

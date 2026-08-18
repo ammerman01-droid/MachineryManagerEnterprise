@@ -1,4 +1,5 @@
 using MachineryManager.Identity.Infrastructure;
+using MachineryManager.Identity.Presentation.Endpoints;
 using MachineryManager.Organization.Application;
 using MachineryManager.Organization.Infrastructure;
 using MachineryManager.Organization.Presentation.Endpoints;
@@ -84,6 +85,9 @@ try
     app.MapStaticAssets();
     app.MapRazorComponents<App>()
         .AddInteractiveServerRenderMode();
+
+    // Identity platform module: OpenIddict protocol endpoints (ADR-0030).
+    app.MapIdentityConnectEndpoints();
 
     // Organization module REST endpoints (07-api conventions, Section 8).
     app.MapOrganizationEndpoints();
