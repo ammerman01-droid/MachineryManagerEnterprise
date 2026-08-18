@@ -53,6 +53,7 @@ try
 
     // Identity platform module (ADR-0030).
     builder.Services.AddIdentityInfrastructure(builder.Configuration);
+    builder.Services.AddIdentityOpenIddictServer(builder.Environment);
 
     var app = builder.Build();
 
@@ -74,6 +75,9 @@ try
 
     app.UseStatusCodePagesWithReExecute("/not-found", createScopeForStatusCodePages: true);
     app.UseHttpsRedirection();
+
+    app.UseAuthentication();
+    app.UseAuthorization();
 
     app.UseAntiforgery();
 

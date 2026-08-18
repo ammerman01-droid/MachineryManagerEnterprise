@@ -1,7 +1,7 @@
 ﻿
 ================================================================================
   MACHINERYMANAGERENTERPRISE - CODEBASE SNAPSHOT
-  Generated: 2026-08-17 13:27:09
+  Generated: 2026-08-17 15:44:59
   Source: C:\Users\i\source\repos\MachineryManagerEnterprise
   Purpose: Complete source code reference for AI-assisted development
   Excludes: .md, .gitignore, this script, build artifacts, binaries, IDE,
@@ -68,8 +68,18 @@ MachineryManagerEnterprise
 |   |   |   |-- Identity.Application
 |   |   |   |   +-- Identity.Application.csproj
 |   |   |   |-- Identity.Domain
-|   |   |   |   +-- Identity.Domain.csproj
+|   |   |   |   |-- ApplicationRole.cs
+|   |   |   |   |-- ApplicationUser.cs
+|   |   |   |   |-- Identity.Domain.csproj
+|   |   |   |   +-- StandardRoles.cs
 |   |   |   |-- Identity.Infrastructure
+|   |   |   |   |-- Persistence
+|   |   |   |   |   |-- Migrations
+|   |   |   |   |   |   |-- 20260817105949_InitialIdentitySchema.cs
+|   |   |   |   |   |   |-- 20260817105949_InitialIdentitySchema.Designer.cs
+|   |   |   |   |   |   +-- IdentityDbContextModelSnapshot.cs
+|   |   |   |   |   +-- IdentityDbContext.cs
+|   |   |   |   |-- DependencyInjection.cs
 |   |   |   |   +-- Identity.Infrastructure.csproj
 |   |   |   +-- Identity.Presentation
 |   |   |       +-- Identity.Presentation.csproj
@@ -167,7 +177,7 @@ SIZE: 0.57 KB
 
 ================================================================================
 FILE: Directory.Packages.props
-SIZE: 7.17 KB
+SIZE: 7.91 KB
 ================================================================================
 <Project>
   <PropertyGroup>
@@ -242,6 +252,7 @@ SIZE: 7.17 KB
 
     <!-- Identity & Access Management [TE-0020 (ASP.NET Core Identity & OpenIddict / ADR-0030)] -->
     <PackageVersion Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="10.0.0" />
+    <PackageVersion Include="Microsoft.Extensions.Identity.Stores" Version="10.0.0" /> <!-- TE-0020 (Identity domain model: IdentityUser<TKey>/IdentityRole<TKey>, framework-independent) -->
     <PackageVersion Include="OpenIddict.AspNetCore" Version="7.6.0" />
     <PackageVersion Include="OpenIddict.EntityFrameworkCore" Version="7.6.0" />
     <PackageVersion Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="10.0.0" /> <!-- Used by Business Modules / APIs to validate tokens issued by the Identity module -->
@@ -260,6 +271,10 @@ SIZE: 7.17 KB
     <PackageVersion Include="Testcontainers.MsSql" Version="4.2.0" />
     <PackageVersion Include="Testcontainers.RabbitMq" Version="4.2.0" />
     <PackageVersion Include="NBomber" Version="5.7.0" /> <!-- TE-0033 (Enterprise Performance Testing / ADR-0027) -->
+
+    <!-- Security Overrides: Transitive Vulnerability Pins -->
+    <PackageVersion Include="System.Security.Cryptography.Xml" Version="10.0.10" /> <!-- Overrides vulnerable 9.0.0 pulled by EFCore.SqlServer/SqlClient — GHSA-23rf-6693-g89p, GHSA-37gx-xxp4-5rgx, GHSA-6588-8gv4-xfgh, GHSA-8q5v-6pqq-x66h, GHSA-cvvh-rhrc-wg4q, GHSA-g8r8-53c2-pm3f, GHSA-mmjf-rqrv-855v, GHSA-w3x6-4m5h-cxqf -->
+    <PackageVersion Include="Microsoft.OpenApi" Version="2.7.5" /> <!-- Overrides vulnerable 2.0.0 pulled by Microsoft.AspNetCore.OpenApi — GHSA-v5pm-xwqc-g5wc -->
   </ItemGroup>
 </Project>
 
@@ -434,7 +449,7 @@ public interface IUnitOfWork
 
 ================================================================================
 FILE: src\BuildingBlocks\MachineryManager.SharedKernel.Abstractions\MachineryManager.SharedKernel.Abstractions.csproj
-SIZE: 0.17 KB
+SIZE: 0.3 KB
 ================================================================================
 <Project Sdk="Microsoft.NET.Sdk">
 
@@ -442,8 +457,11 @@ SIZE: 0.17 KB
     <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" />
   </ItemGroup>
 
-</Project>
+  <ItemGroup>
+    <ProjectReference Include="..\MachineryManager.SharedKernel\MachineryManager.SharedKernel.csproj" />
+  </ItemGroup>
 
+</Project>
 
 ================================================================================
 FILE: src\BuildingBlocks\MachineryManager.SharedKernel.Abstractions\SystemDateTimeProvider.cs
@@ -1228,7 +1246,7 @@ SIZE: 0.29 KB
 
 ================================================================================
 FILE: src\Host\MachineryManager.Web\MachineryManager.Web.csproj
-SIZE: 1.78 KB
+SIZE: 1.89 KB
 ================================================================================
 <Project Sdk="Microsoft.NET.Sdk.Web">
 
@@ -1244,6 +1262,7 @@ SIZE: 1.78 KB
     <ProjectReference Include="..\..\Modules\Organization\Organization.Application\Organization.Application.csproj" />
     <ProjectReference Include="..\..\Modules\Organization\Organization.Infrastructure\Organization.Infrastructure.csproj" />
     <ProjectReference Include="..\..\Modules\Organization\Organization.Presentation\Organization.Presentation.csproj" />
+    <ProjectReference Include="..\..\Modules\Identity\Identity.Infrastructure\Identity.Infrastructure.csproj" />
   </ItemGroup>
 
   <ItemGroup>
@@ -1265,8 +1284,9 @@ SIZE: 1.78 KB
 
 ================================================================================
 FILE: src\Host\MachineryManager.Web\Program.cs
-SIZE: 2.95 KB
+SIZE: 3.12 KB
 ================================================================================
+using MachineryManager.Identity.Infrastructure;
 using MachineryManager.Organization.Application;
 using MachineryManager.Organization.Infrastructure;
 using MachineryManager.Organization.Presentation.Endpoints;
@@ -1318,6 +1338,9 @@ try
     // Organization module (Application + Infrastructure).
     builder.Services.AddOrganizationApplication();
     builder.Services.AddOrganizationInfrastructure(builder.Configuration);
+
+    // Identity platform module (ADR-0030).
+    builder.Services.AddIdentityInfrastructure(builder.Configuration);
 
     var app = builder.Build();
 
@@ -1398,20 +1421,1113 @@ SIZE: 0.05 KB
 </Project>
 
 ================================================================================
+FILE: src\Modules\Identity\Identity.Domain\ApplicationRole.cs
+SIZE: 0.72 KB
+================================================================================
+using Microsoft.AspNetCore.Identity;
+
+namespace MachineryManager.Identity.Domain;
+
+/// <summary>
+/// A platform Role, per the Authorization Model (05-application,
+/// Section 5.8): User → Role → Permission → Business Operation.
+/// </summary>
+public sealed class ApplicationRole : IdentityRole<Guid>
+{
+    /// <summary>Initializes a new instance of the <see cref="ApplicationRole"/> class.</summary>
+    public ApplicationRole()
+    {
+    }
+
+    /// <summary>Initializes a new instance of the <see cref="ApplicationRole"/> class with the given name.</summary>
+    /// <param name="roleName">The role's display name.</param>
+    public ApplicationRole(string roleName)
+        : base(roleName)
+    {
+    }
+}
+
+================================================================================
+FILE: src\Modules\Identity\Identity.Domain\ApplicationUser.cs
+SIZE: 0.82 KB
+================================================================================
+using Microsoft.AspNetCore.Identity;
+
+namespace MachineryManager.Identity.Domain;
+
+/// <summary>
+/// The platform's authenticated principal. Per ADR-0030, Identity is a
+/// Platform Module (not a DDD Bounded Context), so this type extends
+/// ASP.NET Core Identity's <see cref="IdentityUser{TKey}"/> directly
+/// rather than <c>AggregateRoot&lt;TId&gt;</c> as business modules
+/// (e.g. Organization) do.
+/// </summary>
+/// <remarks>
+/// Per ADR-0030, Identity NEVER owns Organization data: this type
+/// intentionally carries no Organization reference. Associating a
+/// User with an Organization is a business operation owned by the
+/// Organization module (AssociateUserWithOrganization command,
+/// 05-application Section 5.3), not by Identity.
+/// </remarks>
+public sealed class ApplicationUser : IdentityUser<Guid>
+{
+}
+
+================================================================================
 FILE: src\Modules\Identity\Identity.Domain\Identity.Domain.csproj
-SIZE: 0.05 KB
+SIZE: 0.15 KB
 ================================================================================
 <Project Sdk="Microsoft.NET.Sdk">
 
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Extensions.Identity.Stores" />
+  </ItemGroup>
+
 </Project>
+
+================================================================================
+FILE: src\Modules\Identity\Identity.Domain\StandardRoles.cs
+SIZE: 2.48 KB
+================================================================================
+namespace MachineryManager.Identity.Domain;
+
+/// <summary>
+/// The closed catalog of Standard Roles defined in 05-application,
+/// Section 5.8 (Authorization Model).
+/// </summary>
+/// <remarks>
+/// This list is closed to what is explicitly documented. Adding a new
+/// role first requires updating the approved documentation (Section
+/// 5.8), per the AI Engineering Contract's Business Rules governance
+/// (Section 1.3: "Never invent business rules") — it is not introduced
+/// here unilaterally.
+/// </remarks>
+public static class StandardRoles
+{
+    /// <summary>Platform-level administrator, scoped across all Organizations.</summary>
+    public const string SystemAdministrator = "System Administrator";
+
+    /// <summary>Administrator scoped to a single Organization (tenant).</summary>
+    public const string OrganizationAdministrator = "Organization Administrator";
+
+    /// <summary>Manages the asset fleet.</summary>
+    public const string FleetManager = "Fleet Manager";
+
+    /// <summary>Manages maintenance planning and operations.</summary>
+    public const string MaintenanceManager = "Maintenance Manager";
+
+    /// <summary>Performs maintenance activities.</summary>
+    public const string MaintenanceTechnician = "Maintenance Technician";
+
+    /// <summary>Supervises workshop operations.</summary>
+    public const string WorkshopSupervisor = "Workshop Supervisor";
+
+    /// <summary>Operates machinery assets.</summary>
+    public const string Operator = "Operator";
+
+    /// <summary>Manages financial records and expenses.</summary>
+    public const string FinancialOfficer = "Financial Officer";
+
+    /// <summary>Manages procurement activities.</summary>
+    public const string ProcurementOfficer = "Procurement Officer";
+
+    /// <summary>Manages document lifecycle and compliance.</summary>
+    public const string DocumentController = "Document Controller";
+
+    /// <summary>Read-only access for audit purposes.</summary>
+    public const string ReadOnlyAuditor = "Read-Only Auditor";
+
+    /// <summary>All standard role names, used for seeding and validation.</summary>
+    public static IReadOnlyList<string> All { get; } =
+    [
+        SystemAdministrator,
+        OrganizationAdministrator,
+        FleetManager,
+        MaintenanceManager,
+        MaintenanceTechnician,
+        WorkshopSupervisor,
+        Operator,
+        FinancialOfficer,
+        ProcurementOfficer,
+        DocumentController,
+        ReadOnlyAuditor,
+    ];
+}
+
+================================================================================
+FILE: src\Modules\Identity\Identity.Infrastructure\DependencyInjection.cs
+SIZE: 3.03 KB
+================================================================================
+using MachineryManager.Identity.Domain;
+using MachineryManager.Identity.Infrastructure.Persistence;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
+
+namespace MachineryManager.Identity.Infrastructure;
+
+/// <summary>
+/// Registers the Identity platform module's Infrastructure layer
+/// services (ADR-0006 EF Core, ADR-0030 Identity &amp; Access Management).
+/// </summary>
+public static class DependencyInjection
+{
+    /// <summary>
+    /// Registers the <see cref="Persistence.IdentityDbContext"/> and
+    /// ASP.NET Core Identity (local user/role store, ADR-0030).
+    /// </summary>
+    /// <remarks>
+    /// The password and lockout policy values set here are NOT sourced
+    /// from approved documentation — no numeric password policy exists
+    /// anywhere in 02-architecture (ADR-0026) or 03-domain. These are
+    /// provisional, OWASP-aligned defaults, flagged explicitly here as
+    /// an open item pending approval, not a silently assumed business
+    /// rule.
+    /// </remarks>
+    /// <param name="services">The service collection to configure.</param>
+    /// <param name="configuration">The application configuration, used to resolve the connection string.</param>
+    /// <returns>The same <see cref="IServiceCollection"/> for chaining.</returns>
+    public static IServiceCollection AddIdentityInfrastructure(
+        this IServiceCollection services,
+        IConfiguration configuration)
+    {
+        services.AddDbContext<IdentityDbContext>(options =>
+        {
+            options.UseSqlServer(
+                configuration.GetConnectionString("MachineryManagerDatabase"),
+                sqlServerOptions => sqlServerOptions.MigrationsHistoryTable(
+                    "__EFMigrationsHistory",
+                    schema: "identity"));
+
+            // Required by OpenIddict.EntityFrameworkCore so its stores
+            // (Applications, Authorizations, Scopes, Tokens) are
+            // recognized by this DbContext's model.
+            options.UseOpenIddict<Guid>();
+        });
+
+        services
+            .AddIdentityCore<ApplicationUser>(options =>
+            {
+                // Provisional OWASP-aligned defaults — see remarks above.
+                options.Password.RequiredLength = 12;
+                options.Password.RequireDigit = true;
+                options.Password.RequireLowercase = true;
+                options.Password.RequireUppercase = true;
+                options.Password.RequireNonAlphanumeric = true;
+
+                options.Lockout.MaxFailedAccessAttempts = 5;
+                options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(15);
+                options.Lockout.AllowedForNewUsers = true;
+
+                options.User.RequireUniqueEmail = true;
+            })
+            .AddRoles<ApplicationRole>()
+            .AddEntityFrameworkStores<IdentityDbContext>()
+            .AddDefaultTokenProviders();
+
+        return services;
+    }
+}
 
 ================================================================================
 FILE: src\Modules\Identity\Identity.Infrastructure\Identity.Infrastructure.csproj
-SIZE: 0.05 KB
+SIZE: 0.9 KB
 ================================================================================
 <Project Sdk="Microsoft.NET.Sdk">
 
+  <ItemGroup>
+    <FrameworkReference Include="Microsoft.AspNetCore.App" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Identity.Domain\Identity.Domain.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- Persistence & Identity Store [TE-0004 (EF Core 10 / ADR-0006), TE-0020 (ASP.NET Core Identity / ADR-0030), TE-0025 (Migrations / ADR-0037)] -->
+    <!-- Microsoft.Extensions.Configuration.Binder intentionally omitted: -->
+    <!-- already provided via FrameworkReference to Microsoft.AspNetCore.App (NU1510 pruning). -->
+    <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" />
+    <PackageReference Include="OpenIddict.EntityFrameworkCore" />
+  </ItemGroup>
+
 </Project>
+
+================================================================================
+FILE: src\Modules\Identity\Identity.Infrastructure\Persistence\IdentityDbContext.cs
+SIZE: 1.65 KB
+================================================================================
+using MachineryManager.Identity.Domain;
+using Microsoft.EntityFrameworkCore;
+
+namespace MachineryManager.Identity.Infrastructure.Persistence;
+
+/// <summary>
+/// EF Core persistence context for the Identity platform module
+/// (ADR-0006, ADR-0030). Owns the "identity" schema exclusively; per
+/// the Modular Monolith Rules (06-development, Section 6.1) no other
+/// module may reference these tables directly.
+/// </summary>
+/// <remarks>
+/// The base type is fully qualified (rather than imported via
+/// <c>using</c>) to avoid visual ambiguity between this type's name
+/// and its generic base class, which share the same simple name.
+/// Also hosts the OpenIddict EF Core stores (Applications,
+/// Authorizations, Scopes, Tokens) in the same schema, since both
+/// concerns belong to the same Identity platform module (ADR-0030).
+/// </remarks>
+public sealed class IdentityDbContext
+    : Microsoft.AspNetCore.Identity.EntityFrameworkCore.IdentityDbContext<ApplicationUser, ApplicationRole, Guid>
+{
+    /// <summary>Initializes a new instance of the <see cref="IdentityDbContext"/> class.</summary>
+    /// <param name="options">The EF Core options for this context.</param>
+    public IdentityDbContext(DbContextOptions<IdentityDbContext> options)
+        : base(options)
+    {
+    }
+
+    /// <inheritdoc />
+    protected override void OnModelCreating(ModelBuilder modelBuilder)
+    {
+        modelBuilder.HasDefaultSchema("identity");
+
+        base.OnModelCreating(modelBuilder);
+
+        // OpenIddict entities keyed by Guid, consistent with
+        // ApplicationUser/ApplicationRole (ADR-0030).
+        modelBuilder.UseOpenIddict<Guid>();
+    }
+}
+
+================================================================================
+FILE: src\Modules\Identity\Identity.Infrastructure\Persistence\Migrations\20260817105949_InitialIdentitySchema.cs
+SIZE: 11.34 KB
+================================================================================
+using System;
+using Microsoft.EntityFrameworkCore.Migrations;
+
+#nullable disable
+
+namespace Identity.Infrastructure.Persistence.Migrations
+{
+    /// <inheritdoc />
+    public partial class InitialIdentitySchema : Migration
+    {
+        /// <inheritdoc />
+        protected override void Up(MigrationBuilder migrationBuilder)
+        {
+            migrationBuilder.EnsureSchema(
+                name: "identity");
+
+            migrationBuilder.CreateTable(
+                name: "AspNetRoles",
+                schema: "identity",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    Name = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
+                    NormalizedName = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
+                    ConcurrencyStamp = table.Column<string>(type: "nvarchar(max)", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_AspNetRoles", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "AspNetUsers",
+                schema: "identity",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    UserName = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
+                    NormalizedUserName = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
+                    Email = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
+                    NormalizedEmail = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
+                    EmailConfirmed = table.Column<bool>(type: "bit", nullable: false),
+                    PasswordHash = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    SecurityStamp = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    ConcurrencyStamp = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    PhoneNumber = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    PhoneNumberConfirmed = table.Column<bool>(type: "bit", nullable: false),
+                    TwoFactorEnabled = table.Column<bool>(type: "bit", nullable: false),
+                    LockoutEnd = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: true),
+                    LockoutEnabled = table.Column<bool>(type: "bit", nullable: false),
+                    AccessFailedCount = table.Column<int>(type: "int", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_AspNetUsers", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "AspNetRoleClaims",
+                schema: "identity",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    RoleId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    ClaimType = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    ClaimValue = table.Column<string>(type: "nvarchar(max)", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_AspNetRoleClaims", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_AspNetRoleClaims_AspNetRoles_RoleId",
+                        column: x => x.RoleId,
+                        principalSchema: "identity",
+                        principalTable: "AspNetRoles",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "AspNetUserClaims",
+                schema: "identity",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    UserId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    ClaimType = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    ClaimValue = table.Column<string>(type: "nvarchar(max)", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_AspNetUserClaims", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_AspNetUserClaims_AspNetUsers_UserId",
+                        column: x => x.UserId,
+                        principalSchema: "identity",
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "AspNetUserLogins",
+                schema: "identity",
+                columns: table => new
+                {
+                    LoginProvider = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    ProviderKey = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    ProviderDisplayName = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    UserId = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_AspNetUserLogins", x => new { x.LoginProvider, x.ProviderKey });
+                    table.ForeignKey(
+                        name: "FK_AspNetUserLogins_AspNetUsers_UserId",
+                        column: x => x.UserId,
+                        principalSchema: "identity",
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "AspNetUserRoles",
+                schema: "identity",
+                columns: table => new
+                {
+                    UserId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    RoleId = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_AspNetUserRoles", x => new { x.UserId, x.RoleId });
+                    table.ForeignKey(
+                        name: "FK_AspNetUserRoles_AspNetRoles_RoleId",
+                        column: x => x.RoleId,
+                        principalSchema: "identity",
+                        principalTable: "AspNetRoles",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_AspNetUserRoles_AspNetUsers_UserId",
+                        column: x => x.UserId,
+                        principalSchema: "identity",
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "AspNetUserTokens",
+                schema: "identity",
+                columns: table => new
+                {
+                    UserId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    LoginProvider = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    Name = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    Value = table.Column<string>(type: "nvarchar(max)", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_AspNetUserTokens", x => new { x.UserId, x.LoginProvider, x.Name });
+                    table.ForeignKey(
+                        name: "FK_AspNetUserTokens_AspNetUsers_UserId",
+                        column: x => x.UserId,
+                        principalSchema: "identity",
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateIndex(
+                name: "IX_AspNetRoleClaims_RoleId",
+                schema: "identity",
+                table: "AspNetRoleClaims",
+                column: "RoleId");
+
+            migrationBuilder.CreateIndex(
+                name: "RoleNameIndex",
+                schema: "identity",
+                table: "AspNetRoles",
+                column: "NormalizedName",
+                unique: true,
+                filter: "[NormalizedName] IS NOT NULL");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_AspNetUserClaims_UserId",
+                schema: "identity",
+                table: "AspNetUserClaims",
+                column: "UserId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_AspNetUserLogins_UserId",
+                schema: "identity",
+                table: "AspNetUserLogins",
+                column: "UserId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_AspNetUserRoles_RoleId",
+                schema: "identity",
+                table: "AspNetUserRoles",
+                column: "RoleId");
+
+            migrationBuilder.CreateIndex(
+                name: "EmailIndex",
+                schema: "identity",
+                table: "AspNetUsers",
+                column: "NormalizedEmail");
+
+            migrationBuilder.CreateIndex(
+                name: "UserNameIndex",
+                schema: "identity",
+                table: "AspNetUsers",
+                column: "NormalizedUserName",
+                unique: true,
+                filter: "[NormalizedUserName] IS NOT NULL");
+        }
+
+        /// <inheritdoc />
+        protected override void Down(MigrationBuilder migrationBuilder)
+        {
+            migrationBuilder.DropTable(
+                name: "AspNetRoleClaims",
+                schema: "identity");
+
+            migrationBuilder.DropTable(
+                name: "AspNetUserClaims",
+                schema: "identity");
+
+            migrationBuilder.DropTable(
+                name: "AspNetUserLogins",
+                schema: "identity");
+
+            migrationBuilder.DropTable(
+                name: "AspNetUserRoles",
+                schema: "identity");
+
+            migrationBuilder.DropTable(
+                name: "AspNetUserTokens",
+                schema: "identity");
+
+            migrationBuilder.DropTable(
+                name: "AspNetRoles",
+                schema: "identity");
+
+            migrationBuilder.DropTable(
+                name: "AspNetUsers",
+                schema: "identity");
+        }
+    }
+}
+
+
+================================================================================
+FILE: src\Modules\Identity\Identity.Infrastructure\Persistence\Migrations\20260817105949_InitialIdentitySchema.Designer.cs
+SIZE: 10.58 KB
+================================================================================
+// <auto-generated />
+using System;
+using MachineryManager.Identity.Infrastructure.Persistence;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
+using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
+
+#nullable disable
+
+namespace Identity.Infrastructure.Persistence.Migrations
+{
+    [DbContext(typeof(IdentityDbContext))]
+    [Migration("20260817105949_InitialIdentitySchema")]
+    partial class InitialIdentitySchema
+    {
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
+        {
+#pragma warning disable 612, 618
+            modelBuilder
+                .HasDefaultSchema("identity")
+                .HasAnnotation("ProductVersion", "10.0.0")
+                .HasAnnotation("Relational:MaxIdentifierLength", 128);
+
+            SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
+
+            modelBuilder.Entity("MachineryManager.Identity.Domain.ApplicationRole", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("ConcurrencyStamp")
+                        .IsConcurrencyToken()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Name")
+                        .HasMaxLength(256)
+                        .HasColumnType("nvarchar(256)");
+
+                    b.Property<string>("NormalizedName")
+                        .HasMaxLength(256)
+                        .HasColumnType("nvarchar(256)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("NormalizedName")
+                        .IsUnique()
+                        .HasDatabaseName("RoleNameIndex")
+                        .HasFilter("[NormalizedName] IS NOT NULL");
+
+                    b.ToTable("AspNetRoles", "identity");
+                });
+
+            modelBuilder.Entity("MachineryManager.Identity.Domain.ApplicationUser", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<int>("AccessFailedCount")
+                        .HasColumnType("int");
+
+                    b.Property<string>("ConcurrencyStamp")
+                        .IsConcurrencyToken()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Email")
+                        .HasMaxLength(256)
+                        .HasColumnType("nvarchar(256)");
+
+                    b.Property<bool>("EmailConfirmed")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("LockoutEnabled")
+                        .HasColumnType("bit");
+
+                    b.Property<DateTimeOffset?>("LockoutEnd")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<string>("NormalizedEmail")
+                        .HasMaxLength(256)
+                        .HasColumnType("nvarchar(256)");
+
+                    b.Property<string>("NormalizedUserName")
+                        .HasMaxLength(256)
+                        .HasColumnType("nvarchar(256)");
+
+                    b.Property<string>("PasswordHash")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("PhoneNumber")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("PhoneNumberConfirmed")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("SecurityStamp")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("TwoFactorEnabled")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("UserName")
+                        .HasMaxLength(256)
+                        .HasColumnType("nvarchar(256)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("NormalizedEmail")
+                        .HasDatabaseName("EmailIndex");
+
+                    b.HasIndex("NormalizedUserName")
+                        .IsUnique()
+                        .HasDatabaseName("UserNameIndex")
+                        .HasFilter("[NormalizedUserName] IS NOT NULL");
+
+                    b.ToTable("AspNetUsers", "identity");
+                });
+
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<System.Guid>", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("ClaimType")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("ClaimValue")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<Guid>("RoleId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("RoleId");
+
+                    b.ToTable("AspNetRoleClaims", "identity");
+                });
+
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserClaim<System.Guid>", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("ClaimType")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("ClaimValue")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("AspNetUserClaims", "identity");
+                });
+
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserLogin<System.Guid>", b =>
+                {
+                    b.Property<string>("LoginProvider")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("ProviderKey")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("ProviderDisplayName")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("LoginProvider", "ProviderKey");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("AspNetUserLogins", "identity");
+                });
+
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserRole<System.Guid>", b =>
+                {
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("RoleId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("UserId", "RoleId");
+
+                    b.HasIndex("RoleId");
+
+                    b.ToTable("AspNetUserRoles", "identity");
+                });
+
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserToken<System.Guid>", b =>
+                {
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("LoginProvider")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("Name")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("Value")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("UserId", "LoginProvider", "Name");
+
+                    b.ToTable("AspNetUserTokens", "identity");
+                });
+
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<System.Guid>", b =>
+                {
+                    b.HasOne("MachineryManager.Identity.Domain.ApplicationRole", null)
+                        .WithMany()
+                        .HasForeignKey("RoleId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserClaim<System.Guid>", b =>
+                {
+                    b.HasOne("MachineryManager.Identity.Domain.ApplicationUser", null)
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserLogin<System.Guid>", b =>
+                {
+                    b.HasOne("MachineryManager.Identity.Domain.ApplicationUser", null)
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserRole<System.Guid>", b =>
+                {
+                    b.HasOne("MachineryManager.Identity.Domain.ApplicationRole", null)
+                        .WithMany()
+                        .HasForeignKey("RoleId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("MachineryManager.Identity.Domain.ApplicationUser", null)
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserToken<System.Guid>", b =>
+                {
+                    b.HasOne("MachineryManager.Identity.Domain.ApplicationUser", null)
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+#pragma warning restore 612, 618
+        }
+    }
+}
+
+
+================================================================================
+FILE: src\Modules\Identity\Identity.Infrastructure\Persistence\Migrations\IdentityDbContextModelSnapshot.cs
+SIZE: 10.47 KB
+================================================================================
+// <auto-generated />
+using System;
+using MachineryManager.Identity.Infrastructure.Persistence;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
+
+#nullable disable
+
+namespace Identity.Infrastructure.Persistence.Migrations
+{
+    [DbContext(typeof(IdentityDbContext))]
+    partial class IdentityDbContextModelSnapshot : ModelSnapshot
+    {
+        protected override void BuildModel(ModelBuilder modelBuilder)
+        {
+#pragma warning disable 612, 618
+            modelBuilder
+                .HasDefaultSchema("identity")
+                .HasAnnotation("ProductVersion", "10.0.0")
+                .HasAnnotation("Relational:MaxIdentifierLength", 128);
+
+            SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
+
+            modelBuilder.Entity("MachineryManager.Identity.Domain.ApplicationRole", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("ConcurrencyStamp")
+                        .IsConcurrencyToken()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Name")
+                        .HasMaxLength(256)
+                        .HasColumnType("nvarchar(256)");
+
+                    b.Property<string>("NormalizedName")
+                        .HasMaxLength(256)
+                        .HasColumnType("nvarchar(256)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("NormalizedName")
+                        .IsUnique()
+                        .HasDatabaseName("RoleNameIndex")
+                        .HasFilter("[NormalizedName] IS NOT NULL");
+
+                    b.ToTable("AspNetRoles", "identity");
+                });
+
+            modelBuilder.Entity("MachineryManager.Identity.Domain.ApplicationUser", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<int>("AccessFailedCount")
+                        .HasColumnType("int");
+
+                    b.Property<string>("ConcurrencyStamp")
+                        .IsConcurrencyToken()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Email")
+                        .HasMaxLength(256)
+                        .HasColumnType("nvarchar(256)");
+
+                    b.Property<bool>("EmailConfirmed")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("LockoutEnabled")
+                        .HasColumnType("bit");
+
+                    b.Property<DateTimeOffset?>("LockoutEnd")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<string>("NormalizedEmail")
+                        .HasMaxLength(256)
+                        .HasColumnType("nvarchar(256)");
+
+                    b.Property<string>("NormalizedUserName")
+                        .HasMaxLength(256)
+                        .HasColumnType("nvarchar(256)");
+
+                    b.Property<string>("PasswordHash")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("PhoneNumber")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("PhoneNumberConfirmed")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("SecurityStamp")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("TwoFactorEnabled")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("UserName")
+                        .HasMaxLength(256)
+                        .HasColumnType("nvarchar(256)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("NormalizedEmail")
+                        .HasDatabaseName("EmailIndex");
+
+                    b.HasIndex("NormalizedUserName")
+                        .IsUnique()
+                        .HasDatabaseName("UserNameIndex")
+                        .HasFilter("[NormalizedUserName] IS NOT NULL");
+
+                    b.ToTable("AspNetUsers", "identity");
+                });
+
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<System.Guid>", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("ClaimType")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("ClaimValue")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<Guid>("RoleId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("RoleId");
+
+                    b.ToTable("AspNetRoleClaims", "identity");
+                });
+
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserClaim<System.Guid>", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("ClaimType")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("ClaimValue")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("AspNetUserClaims", "identity");
+                });
+
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserLogin<System.Guid>", b =>
+                {
+                    b.Property<string>("LoginProvider")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("ProviderKey")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("ProviderDisplayName")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("LoginProvider", "ProviderKey");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("AspNetUserLogins", "identity");
+                });
+
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserRole<System.Guid>", b =>
+                {
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("RoleId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("UserId", "RoleId");
+
+                    b.HasIndex("RoleId");
+
+                    b.ToTable("AspNetUserRoles", "identity");
+                });
+
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserToken<System.Guid>", b =>
+                {
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("LoginProvider")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("Name")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("Value")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("UserId", "LoginProvider", "Name");
+
+                    b.ToTable("AspNetUserTokens", "identity");
+                });
+
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<System.Guid>", b =>
+                {
+                    b.HasOne("MachineryManager.Identity.Domain.ApplicationRole", null)
+                        .WithMany()
+                        .HasForeignKey("RoleId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserClaim<System.Guid>", b =>
+                {
+                    b.HasOne("MachineryManager.Identity.Domain.ApplicationUser", null)
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserLogin<System.Guid>", b =>
+                {
+                    b.HasOne("MachineryManager.Identity.Domain.ApplicationUser", null)
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserRole<System.Guid>", b =>
+                {
+                    b.HasOne("MachineryManager.Identity.Domain.ApplicationRole", null)
+                        .WithMany()
+                        .HasForeignKey("RoleId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("MachineryManager.Identity.Domain.ApplicationUser", null)
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserToken<System.Guid>", b =>
+                {
+                    b.HasOne("MachineryManager.Identity.Domain.ApplicationUser", null)
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+#pragma warning restore 612, 618
+        }
+    }
+}
+
 
 ================================================================================
 FILE: src\Modules\Identity\Identity.Presentation\Identity.Presentation.csproj
@@ -2244,7 +3360,7 @@ public sealed class OrganizationConfiguration : IEntityTypeConfiguration<global:
 
 ================================================================================
 FILE: src\Modules\Organization\Organization.Infrastructure\Persistence\OrganizationDbContext.cs
-SIZE: 2.79 KB
+SIZE: 2.8 KB
 ================================================================================
 using MachineryManager.SharedKernel.Abstractions;
 using Microsoft.EntityFrameworkCore;
@@ -2295,7 +3411,7 @@ public sealed class OrganizationDbContext : DbContext, IUnitOfWork
     /// </remarks>
     /// <param name="cancellationToken">Token to cancel the asynchronous operation.</param>
     /// <returns>The number of state entries written to the database.</returns>
-    public async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
+    public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
     {
         var aggregatesWithEvents = ChangeTracker
             .Entries<global::Organization.Domain.Organization>()
@@ -2583,12 +3699,12 @@ SIZE: 0.26 KB
 # SECTION 3: SNAPSHOT SUMMARY
 ================================================================================
 
-Generation Time     : 00:00:00.4326019
-Total Files Scanned : 72
-Files Included      : 72
+Generation Time     : 00:00:01.4042180
+Total Files Scanned : 80
+Files Included      : 80
 Files Skipped       : 0
-Total Source Size   : 0.08 MB
-Snapshot File Size  : 0.1 MB
+Total Source Size   : 0.12 MB
+Snapshot File Size  : 0.14 MB
 Output Path         : C:\Users\i\source\repos\MachineryManagerEnterprise\MME_Codebase_Snapshot.txt
 
 Excluded Directories: .git, .github, .vs, .vscode, .idea, .azure, .devcontainer, bin, obj, packages, publish, out, release, releases, debug, x64, x86, arm64, artifacts, .artifacts, node_modules, dist, build, bower_components, jspm_packages, docs-english, docs-farsi, docs, tools, test-results, coverage, .coverage, TestResults, lib, .angular, .next, .nuxt, .svelte-kit, .cache, .temp, tmp

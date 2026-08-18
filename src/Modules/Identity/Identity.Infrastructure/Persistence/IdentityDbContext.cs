@@ -13,6 +13,9 @@ namespace MachineryManager.Identity.Infrastructure.Persistence;
 /// The base type is fully qualified (rather than imported via
 /// <c>using</c>) to avoid visual ambiguity between this type's name
 /// and its generic base class, which share the same simple name.
+/// Also hosts the OpenIddict EF Core stores (Applications,
+/// Authorizations, Scopes, Tokens) in the same schema, since both
+/// concerns belong to the same Identity platform module (ADR-0030).
 /// </remarks>
 public sealed class IdentityDbContext
     : Microsoft.AspNetCore.Identity.EntityFrameworkCore.IdentityDbContext<ApplicationUser, ApplicationRole, Guid>
@@ -30,5 +33,9 @@ public sealed class IdentityDbContext
         modelBuilder.HasDefaultSchema("identity");
 
         base.OnModelCreating(modelBuilder);
+
+        // OpenIddict entities keyed by Guid, consistent with
+        // ApplicationUser/ApplicationRole (ADR-0030).
+        modelBuilder.UseOpenIddict<Guid>();
     }
 }
