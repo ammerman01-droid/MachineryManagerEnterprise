@@ -67,6 +67,12 @@ public static class ConnectEndpoints
 
         var principal = await signInManager.CreateUserPrincipalAsync(user);
 
+        // Required by OpenIddict: SignInManager's principal uses ASP.NET
+        // Core Identity's own claim types (e.g. ClaimTypes.NameIdentifier),
+        // not OpenIddict's "sub" (Claims.Subject). Without this, OpenIddict
+        // rejects the sign-in with "mandatory subject claim was missing".
+        principal.SetClaim(Claims.Subject, await userManager.GetUserIdAsync(user));
+
         principal.SetScopes(request.GetScopes());
 
         foreach (var claim in principal.Claims)
@@ -105,6 +111,8 @@ public static class ConnectEndpoints
             }
 
             var principal = await signInManager.CreateUserPrincipalAsync(user);
+
+            principal.SetClaim(Claims.Subject, await userManager.GetUserIdAsync(user));
             principal.SetScopes(authenticateResult.Principal!.GetScopes());
 
             foreach (var claim in principal.Claims)

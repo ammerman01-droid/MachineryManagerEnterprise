@@ -1,6 +1,6 @@
 using MachineryManager.Identity.Infrastructure;
-using MachineryManager.Identity.Infrastructure.Persistence;
 using MachineryManager.Identity.Presentation.Endpoints;
+using MachineryManager.Identity.Infrastructure.Persistence;
 using MachineryManager.Organization.Application;
 using MachineryManager.Organization.Infrastructure;
 using MachineryManager.Organization.Presentation.Endpoints;
@@ -56,6 +56,7 @@ try
     // Identity platform module (ADR-0030).
     builder.Services.AddIdentityInfrastructure(builder.Configuration);
     builder.Services.AddIdentityOpenIddictServer(builder.Environment);
+    builder.Services.AddIdentityOpenIddictClient(builder.Configuration, builder.Environment);
 
     var app = builder.Build();
 
@@ -95,6 +96,7 @@ try
 
     // Identity platform module: OpenIddict protocol endpoints (ADR-0030).
     app.MapIdentityConnectEndpoints();
+    app.MapIdentitySigninCallbackEndpoints();
 
     // Organization module REST endpoints (07-api conventions, Section 8).
     app.MapOrganizationEndpoints();

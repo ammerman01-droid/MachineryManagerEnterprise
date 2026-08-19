@@ -6,8 +6,10 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using OpenIddict.Abstractions;
-using MachineryManager.Identity.Infrastructure.Options;
-using Microsoft.Extensions.Options;
+using OpenIddict.Client;
+using OpenIddict.Client.AspNetCore;
+
+using static OpenIddict.Abstractions.OpenIddictConstants;
 
 namespace MachineryManager.Identity.Infrastructure;
 
@@ -95,8 +97,8 @@ public static class DependencyInjection
             .AddSignInManager();
 
         services
-            .AddOptions<OpenIddictClientOptions>()
-            .BindConfiguration(OpenIddictClientOptions.SectionName)
+            .AddOptions<Options.OpenIddictClientOptions>()
+            .BindConfiguration(Options.OpenIddictClientOptions.SectionName)
             .ValidateOnStart();
 
         return services;
@@ -189,6 +191,75 @@ public static class DependencyInjection
             });
 
         services.AddAuthorization();
+
+        return services;
+    }
+
+        /// <summary>
+    /// Registers this application as an OpenIddict Client of its own
+    /// Authorization Server (self-referencing monolith pattern), so
+    /// Blazor Server can complete the Authorization Code + PKCE flow
+    /// and obtain an access token to call protected APIs later.
+    /// </summary>
+    /// <remarks>
+    /// The user's local session (ApplicationScheme cookie) is already
+    /// established at password sign-in (/identity/login) — this client
+    /// does not "log the user in" a second time; it obtains and stores
+    /// the access/refresh tokens on that same session.
+    /// </remarks>
+    public static IServiceCollection AddIdentityOpenIddictClient(
+        this IServiceCollection services,
+        IConfiguration configuration,
+        IHostEnvironment environment)
+    {
+        var webClient = configuration
+            .GetSection($"{Options.OpenIddictClientOptions.SectionName}:Web")
+            .Get<Options.ClientOptions>()
+            ?? throw new InvalidOperationException($"{Options.OpenIddictClientOptions.SectionName}:Web is not configured.");
+
+        if (string.IsNullOrWhiteSpace(webClient.ClientSecret))
+        {
+            throw new InvalidOperationException(
+                "OpenIddict:Clients:Web:ClientSecret is not configured (required for the OpenIddict Client too).");
+        }
+
+        var issuer = configuration["OpenIddict:Issuer"]
+            ?? throw new InvalidOperationException("OpenIddict:Issuer is not configured.");
+
+        services
+            .AddOpenIddict()
+            .AddClient(options =>
+            {
+                options.AllowAuthorizationCodeFlow();
+
+                if (environment.IsDevelopment())
+                {
+                    options
+                        .AddDevelopmentEncryptionCertificate()
+                        .AddDevelopmentSigningCertificate();
+                }
+                else
+                {
+                    throw new InvalidOperationException(
+                        "Production OpenIddict Client certificates are not configured (same open item as the Server — ADR-0026).");
+                }
+
+                options
+                    .UseAspNetCore()
+                    .EnableStatusCodePagesIntegration()
+                    .EnableRedirectionEndpointPassthrough();
+
+                options.UseSystemNetHttp();
+
+                options.AddRegistration(new OpenIddictClientRegistration
+                {
+                    Issuer = new Uri(issuer, UriKind.Absolute),
+                    ClientId = webClient.ClientId,
+                    ClientSecret = webClient.ClientSecret,
+                    RedirectUri = new Uri("/signin-oidc", UriKind.Relative),
+                    Scopes = { Scopes.OpenId, Scopes.Profile, Scopes.Email, Scopes.Roles },
+                });
+            });
 
         return services;
     }
