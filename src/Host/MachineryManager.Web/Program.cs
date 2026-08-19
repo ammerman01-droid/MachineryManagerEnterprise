@@ -74,9 +74,9 @@ try
     }
 
     using (var scope = app.Services.CreateScope())
-{
-    await IdentityDataSeeder.SeedAsync(scope.ServiceProvider);
-}
+    {
+        await IdentityDataSeeder.SeedAsync(scope.ServiceProvider, app.Environment);
+    }
 
     app.UseSerilogRequestLogging();
 
