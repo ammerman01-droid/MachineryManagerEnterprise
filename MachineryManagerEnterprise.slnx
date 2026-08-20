@@ -23,4 +23,7 @@
     <Project Path="src/Modules/Organization/Organization.Infrastructure/Organization.Infrastructure.csproj" />
     <Project Path="src/Modules/Organization/Organization.Presentation/Organization.Presentation.csproj" />
   </Folder>
+  <Folder Name="/src/Modules/Administration/">
+    <Project Path="src/Modules/Administration/Administration.Domain/Administration.Domain.csproj" />
+  </Folder>
 </Solution>

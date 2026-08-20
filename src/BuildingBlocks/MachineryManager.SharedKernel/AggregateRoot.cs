@@ -7,7 +7,7 @@ namespace MachineryManager.SharedKernel;
 /// describe the business facts resulting from its own operations.
 /// </summary>
 /// <typeparam name="TId">The strongly-typed identifier type.</typeparam>
-public abstract class AggregateRoot<TId> : Entity<TId>
+public abstract class AggregateRoot<TId> : Entity<TId>, IHasDomainEvents
     where TId : notnull
 {
     private readonly List<IDomainEvent> _domainEvents = [];

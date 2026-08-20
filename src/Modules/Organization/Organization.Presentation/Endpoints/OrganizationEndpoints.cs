@@ -1,9 +1,9 @@
+using MachineryManager.Organization.Application.Features.Organizations.Commands.AssignOrganizationToHolding;
 using MachineryManager.Organization.Application.Features.Organizations.Commands.RegisterOrganization;
 using MachineryManager.Organization.Application.Features.Organizations.Queries.GetOrganizationById;
 using MachineryManager.Organization.Application.Features.Organizations.Queries.SearchOrganizations;
 using MachineryManager.Organization.Presentation.Contracts;
 using MediatR;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Routing;
@@ -46,6 +46,10 @@ public static class OrganizationEndpoints
         group.MapGet("/", SearchOrganizationsAsync)
             .WithName("SearchOrganizations")
             .WithSummary("Searches Organizations with optional text filtering and pagination.");
+
+        group.MapPost("/{organizationId:guid}/assign-to-holding", AssignOrganizationToHoldingAsync)
+            .WithName("AssignOrganizationToHolding")
+            .WithSummary("Assigns an Organization to a Holding.");
 
         return endpoints;
     }
@@ -90,6 +94,22 @@ public static class OrganizationEndpoints
 
         return result.IsSuccess
             ? Results.Ok(result.Value)
+            : result.ToProblemResult(httpContext);
+    }
+
+    private static async Task<IResult> AssignOrganizationToHoldingAsync(
+        Guid organizationId,
+        AssignOrganizationToHoldingRequest request,
+        ISender sender,
+        HttpContext httpContext,
+        CancellationToken cancellationToken)
+    {
+        var result = await sender.Send(
+            new AssignOrganizationToHoldingCommand(organizationId, request.HoldingId),
+            cancellationToken);
+
+        return result.IsSuccess
+            ? Results.NoContent()
             : result.ToProblemResult(httpContext);
     }
 }

@@ -49,6 +49,10 @@ try
     // Cross-cutting SharedKernel infrastructure (IDateTimeProvider).
     builder.Services.AddSharedKernelInfrastructure();
 
+    // ICurrentUserService implementation (resolves open item).
+builder.Services.AddHttpContextAccessor();
+builder.Services.AddScoped<MachineryManager.SharedKernel.Abstractions.ICurrentUserService, MachineryManager.SharedKernel.Infrastructure.CurrentUserService>();
+
     // Organization module (Application + Infrastructure).
     builder.Services.AddOrganizationApplication();
     builder.Services.AddOrganizationInfrastructure(builder.Configuration);
@@ -100,6 +104,10 @@ try
 
     // Organization module REST endpoints (07-api conventions, Section 8).
     app.MapOrganizationEndpoints();
+
+    // Holding and Project module REST endpoints.
+    app.MapHoldingEndpoints();
+    app.MapProjectEndpoints();
 
     app.Run();
 }

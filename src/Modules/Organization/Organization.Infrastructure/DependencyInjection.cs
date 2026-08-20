@@ -35,6 +35,8 @@ public static class DependencyInjection
             .UseSqlServer(configuration.GetConnectionString("MachineryManagerDatabase")));
 
         services.AddScoped<IOrganizationRepository, OrganizationRepository>();
+        services.AddScoped<IHoldingRepository, HoldingRepository>();
+        services.AddScoped<IProjectRepository, ProjectRepository>();
         services.AddScoped<IUnitOfWork>(serviceProvider =>
             serviceProvider.GetRequiredService<OrganizationDbContext>());
 

@@ -1,3 +1,4 @@
+using MachineryManager.SharedKernel;
 using MachineryManager.SharedKernel.Abstractions;
 using Microsoft.EntityFrameworkCore;
 
@@ -12,11 +13,20 @@ namespace MachineryManager.Organization.Infrastructure.Persistence;
 /// </summary>
 public sealed class OrganizationDbContext : DbContext, IUnitOfWork
 {
+    private readonly IDomainEventDispatcher? _domainEventDispatcher;
+
     /// <summary>Initializes a new instance of the <see cref="OrganizationDbContext"/> class.</summary>
     /// <param name="options">The EF Core options for this context.</param>
-    public OrganizationDbContext(DbContextOptions<OrganizationDbContext> options)
+    /// <param name="domainEventDispatcher">
+    /// Optional dispatcher for publishing domain events after successful
+    /// commit. Absent during design-time migrations or test isolation.
+    /// </param>
+    public OrganizationDbContext(
+        DbContextOptions<OrganizationDbContext> options,
+        IDomainEventDispatcher? domainEventDispatcher = null)
         : base(options)
     {
+        _domainEventDispatcher = domainEventDispatcher;
     }
 
     /// <summary>Gets the set of Organization aggregates.</summary>
@@ -43,51 +53,31 @@ public sealed class OrganizationDbContext : DbContext, IUnitOfWork
     /// <summary>
     /// Persists all pending changes for this module as a single atomic
     /// unit (ADR-0006). Domain Events raised by tracked aggregates are
-    /// cleared after a successful commit.
+    /// dispatched after a successful commit and then cleared.
     /// </summary>
-    /// <remarks>
-    /// Dispatching the collected events to subscribers is NOT wired yet:
-    /// no event dispatch mechanism has been approved for Infrastructure
-    /// (ADR-0011 restricts MediatR to the Application layer only), and
-    /// no Domain Event subscribers exist for this module yet either.
-    /// This is an explicit open item — see the completion report — not
-    /// a silent omission of Section 4.7's Event Publishing Rules.
-    /// </remarks>
     /// <param name="cancellationToken">Token to cancel the asynchronous operation.</param>
     /// <returns>The number of state entries written to the database.</returns>
     public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
     {
-        var organizationsWithEvents = ChangeTracker
-            .Entries<global::Organization.Domain.Organization>()
-            .Select(entry => entry.Entity)
-            .Where(aggregate => aggregate.DomainEvents.Count > 0)
+        var aggregatesWithEvents = ChangeTracker
+            .Entries()
+            .Where(e => e.Entity is IHasDomainEvents)
+            .Select(e => (IHasDomainEvents)e.Entity)
+            .Where(e => e.DomainEvents.Count > 0)
             .ToList();
 
-        var holdingsWithEvents = ChangeTracker
-            .Entries<global::Organization.Domain.Holding>()
-            .Select(entry => entry.Entity)
-            .Where(aggregate => aggregate.DomainEvents.Count > 0)
-            .ToList();
-
-        var projectsWithEvents = ChangeTracker
-            .Entries<global::Organization.Domain.Project>()
-            .Select(entry => entry.Entity)
-            .Where(aggregate => aggregate.DomainEvents.Count > 0)
+        var domainEvents = aggregatesWithEvents
+            .SelectMany(a => a.DomainEvents)
             .ToList();
 
         var affectedRows = await base.SaveChangesAsync(cancellationToken);
 
-        foreach (var aggregate in organizationsWithEvents)
+        if (_domainEventDispatcher is not null && domainEvents.Count > 0)
         {
-            aggregate.ClearDomainEvents();
+            await _domainEventDispatcher.DispatchAsync(domainEvents, cancellationToken);
         }
 
-        foreach (var aggregate in holdingsWithEvents)
-        {
-            aggregate.ClearDomainEvents();
-        }
-
-        foreach (var aggregate in projectsWithEvents)
+        foreach (var aggregate in aggregatesWithEvents)
         {
             aggregate.ClearDomainEvents();
         }

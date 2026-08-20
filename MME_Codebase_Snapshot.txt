@@ -1,7 +1,7 @@
 ﻿
 ================================================================================
   MACHINERYMANAGERENTERPRISE - CODEBASE SNAPSHOT
-  Generated: 2026-08-18 15:13:37
+  Generated: 2026-08-20 19:11:30
   Source: C:\Users\i\source\repos\MachineryManagerEnterprise
   Purpose: Complete source code reference for AI-assisted development
   Excludes: .md, .gitignore, this script, build artifacts, binaries, IDE,
@@ -35,6 +35,7 @@ MachineryManagerEnterprise
 |   |   |-- MachineryManager.SharedKernel.Contracts
 |   |   |   +-- MachineryManager.SharedKernel.Contracts.csproj
 |   |   |-- MachineryManager.SharedKernel.Infrastructure
+|   |   |   |-- CurrentUserService.cs
 |   |   |   +-- MachineryManager.SharedKernel.Infrastructure.csproj
 |   |   +-- MachineryManager.UI
 |   |       |-- wwwroot
@@ -93,58 +94,123 @@ MachineryManagerEnterprise
 |   |   |   |   +-- Identity.Infrastructure.csproj
 |   |   |   +-- Identity.Presentation
 |   |   |       |-- Components
+|   |   |       |   |-- Layout
+|   |   |       |   |   +-- AuthLayout.razor
 |   |   |       |   |-- Pages
 |   |   |       |   |   +-- Login.razor
 |   |   |       |   +-- _Imports.razor
 |   |   |       |-- Endpoints
-|   |   |       |   +-- ConnectEndpoints.cs
+|   |   |       |   |-- ConnectEndpoints.cs
+|   |   |       |   +-- SigninCallbackEndpoints.cs
 |   |   |       +-- Identity.Presentation.csproj
 |   |   +-- Organization
 |   |       |-- Organization.Application
 |   |       |   |-- Abstractions
-|   |       |   |   +-- IOrganizationRepository.cs
+|   |       |   |   |-- IHoldingRepository.cs
+|   |       |   |   |-- IOrganizationRepository.cs
+|   |       |   |   +-- IProjectRepository.cs
 |   |       |   |-- Behaviors
 |   |       |   |   +-- ValidationBehavior.cs
 |   |       |   |-- Features
-|   |       |   |   +-- Organizations
+|   |       |   |   |-- Holdings
+|   |       |   |   |   |-- Commands
+|   |       |   |   |   |   +-- RegisterHolding
+|   |       |   |   |   |       |-- RegisterHoldingCommand.cs
+|   |       |   |   |   |       |-- RegisterHoldingCommandHandler.cs
+|   |       |   |   |   |       +-- RegisterHoldingCommandValidator.cs
+|   |       |   |   |   |-- Dtos
+|   |       |   |   |   |   +-- HoldingDto.cs
+|   |       |   |   |   +-- Queries
+|   |       |   |   |       |-- GetHoldingById
+|   |       |   |   |       |   |-- GetHoldingByIdQuery.cs
+|   |       |   |   |       |   |-- GetHoldingByIdQueryHandler.cs
+|   |       |   |   |       |   +-- GetHoldingByIdQueryValidator.cs
+|   |       |   |   |       +-- SearchHoldings
+|   |       |   |   |           |-- SearchHoldingsQuery.cs
+|   |       |   |   |           |-- SearchHoldingsQueryHandler.cs
+|   |       |   |   |           +-- SearchHoldingsQueryValidator.cs
+|   |       |   |   |-- Organizations
+|   |       |   |   |   |-- Commands
+|   |       |   |   |   |   |-- AssignOrganizationToHolding
+|   |       |   |   |   |   |   |-- AssignOrganizationToHoldingCommand.cs
+|   |       |   |   |   |   |   |-- AssignOrganizationToHoldingCommandHandler.cs
+|   |       |   |   |   |   |   +-- AssignOrganizationToHoldingCommandValidator.cs
+|   |       |   |   |   |   +-- RegisterOrganization
+|   |       |   |   |   |       |-- RegisterOrganizationCommand.cs
+|   |       |   |   |   |       |-- RegisterOrganizationCommandHandler.cs
+|   |       |   |   |   |       +-- RegisterOrganizationCommandValidator.cs
+|   |       |   |   |   |-- Dtos
+|   |       |   |   |   |   +-- OrganizationDto.cs
+|   |       |   |   |   +-- Queries
+|   |       |   |   |       |-- GetOrganizationById
+|   |       |   |   |       |   |-- GetOrganizationByIdQuery.cs
+|   |       |   |   |       |   |-- GetOrganizationByIdQueryHandler.cs
+|   |       |   |   |       |   +-- GetOrganizationByIdQueryValidator.cs
+|   |       |   |   |       +-- SearchOrganizations
+|   |       |   |   |           |-- SearchOrganizationsQuery.cs
+|   |       |   |   |           |-- SearchOrganizationsQueryHandler.cs
+|   |       |   |   |           +-- SearchOrganizationsQueryValidator.cs
+|   |       |   |   +-- Projects
 |   |       |   |       |-- Commands
-|   |       |   |       |   +-- RegisterOrganization
-|   |       |   |       |       |-- RegisterOrganizationCommand.cs
-|   |       |   |       |       |-- RegisterOrganizationCommandHandler.cs
-|   |       |   |       |       +-- RegisterOrganizationCommandValidator.cs
+|   |       |   |       |   +-- RegisterProject
+|   |       |   |       |       |-- RegisterProjectCommand.cs
+|   |       |   |       |       |-- RegisterProjectCommandHandler.cs
+|   |       |   |       |       +-- RegisterProjectCommandValidator.cs
 |   |       |   |       |-- Dtos
-|   |       |   |       |   +-- OrganizationDto.cs
+|   |       |   |       |   +-- ProjectDto.cs
 |   |       |   |       +-- Queries
-|   |       |   |           |-- GetOrganizationById
-|   |       |   |           |   |-- GetOrganizationByIdQuery.cs
-|   |       |   |           |   |-- GetOrganizationByIdQueryHandler.cs
-|   |       |   |           |   +-- GetOrganizationByIdQueryValidator.cs
-|   |       |   |           +-- SearchOrganizations
-|   |       |   |               |-- SearchOrganizationsQuery.cs
-|   |       |   |               |-- SearchOrganizationsQueryHandler.cs
-|   |       |   |               +-- SearchOrganizationsQueryValidator.cs
+|   |       |   |           |-- GetProjectById
+|   |       |   |           |   |-- GetProjectByIdQuery.cs
+|   |       |   |           |   |-- GetProjectByIdQueryHandler.cs
+|   |       |   |           |   +-- GetProjectByIdQueryValidator.cs
+|   |       |   |           +-- SearchProjects
+|   |       |   |               |-- SearchProjectsQuery.cs
+|   |       |   |               |-- SearchProjectsQueryHandler.cs
+|   |       |   |               +-- SearchProjectsQueryValidator.cs
 |   |       |   |-- DependencyInjection.cs
 |   |       |   +-- Organization.Application.csproj
 |   |       |-- Organization.Domain
 |   |       |   |-- Events
-|   |       |   |   +-- OrganizationRegistered.cs
+|   |       |   |   |-- HoldingRegistered.cs
+|   |       |   |   |-- OrganizationAssignedToHolding.cs
+|   |       |   |   |-- OrganizationRegistered.cs
+|   |       |   |   +-- ProjectRegistered.cs
+|   |       |   |-- Holding.cs
+|   |       |   |-- HoldingErrors.cs
+|   |       |   |-- HoldingId.cs
 |   |       |   |-- Organization.cs
 |   |       |   |-- Organization.Domain.csproj
 |   |       |   |-- OrganizationErrors.cs
-|   |       |   +-- OrganizationId.cs
+|   |       |   |-- OrganizationId.cs
+|   |       |   |-- Project.cs
+|   |       |   |-- ProjectErrors.cs
+|   |       |   +-- ProjectId.cs
 |   |       |-- Organization.Infrastructure
 |   |       |   |-- Persistence
 |   |       |   |   |-- Configurations
-|   |       |   |   |   +-- OrganizationConfiguration.cs
+|   |       |   |   |   |-- HoldingConfiguration.cs
+|   |       |   |   |   |-- OrganizationConfiguration.cs
+|   |       |   |   |   +-- ProjectConfiguration.cs
+|   |       |   |   |-- Migrations
+|   |       |   |   |   |-- 20260820125650_AddHoldingAndProject.cs
+|   |       |   |   |   |-- 20260820125650_AddHoldingAndProject.Designer.cs
+|   |       |   |   |   +-- OrganizationDbContextModelSnapshot.cs
+|   |       |   |   |-- HoldingRepository.cs
 |   |       |   |   |-- OrganizationDbContext.cs
-|   |       |   |   +-- OrganizationRepository.cs
+|   |       |   |   |-- OrganizationRepository.cs
+|   |       |   |   +-- ProjectRepository.cs
 |   |       |   |-- DependencyInjection.cs
 |   |       |   +-- Organization.Infrastructure.csproj
 |   |       +-- Organization.Presentation
 |   |           |-- Contracts
-|   |           |   +-- RegisterOrganizationRequest.cs
+|   |           |   |-- AssignOrganizationToHoldingRequest.cs
+|   |           |   |-- RegisterHoldingRequest.cs
+|   |           |   |-- RegisterOrganizationRequest.cs
+|   |           |   +-- RegisterProjectRequest.cs
 |   |           |-- Endpoints
+|   |           |   |-- HoldingEndpoints.cs
 |   |           |   |-- OrganizationEndpoints.cs
+|   |           |   |-- ProjectEndpoints.cs
 |   |           |   +-- ResultExtensions.cs
 |   |           +-- Organization.Presentation.csproj
 |   +-- Shared
@@ -193,7 +259,7 @@ SIZE: 0.57 KB
 
 ================================================================================
 FILE: Directory.Packages.props
-SIZE: 8.19 KB
+SIZE: 8.5 KB
 ================================================================================
 <Project>
   <PropertyGroup>
@@ -274,6 +340,10 @@ SIZE: 8.19 KB
     <PackageVersion Include="OpenIddict.EntityFrameworkCore" Version="7.6.0" />
     <PackageVersion Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="10.0.0" /> <!-- Used by Business Modules / APIs to validate tokens issued by the Identity module -->
     <PackageVersion Include="Microsoft.AspNetCore.Authentication.OpenIdConnect" Version="10.0.0" /> <!-- Used only for the optional external identity providers listed in TE-0020 (Microsoft Entra ID, Google Identity, GitHub Identity) -->
+    <PackageVersion Include="OpenIddict.Client" Version="7.6.0" />
+    <PackageVersion Include="OpenIddict.Client.AspNetCore" Version="7.6.0" />
+    <PackageVersion Include="OpenIddict.Client.SystemNetHttp" Version="7.6.0" />
+    <PackageVersion Include="OpenIddict.Validation.AspNetCore" Version="7.6.0" />
 
     <!-- Enterprise Reporting Engine [TE-0035 (QuestPDF / ADR-0029; FastReport and RDLC are explicitly excluded)] -->
     <PackageVersion Include="QuestPDF" Version="2025.1.2" />
@@ -510,10 +580,68 @@ SIZE: 0.05 KB
 </Project>
 
 ================================================================================
+FILE: src\BuildingBlocks\MachineryManager.SharedKernel.Infrastructure\CurrentUserService.cs
+SIZE: 1.63 KB
+================================================================================
+using System.Security.Claims;
+using MachineryManager.SharedKernel.Abstractions;
+using Microsoft.AspNetCore.Http;
+
+namespace MachineryManager.SharedKernel.Infrastructure;
+
+/// <summary>
+/// Provides the current user context from the ASP.NET Core HttpContext,
+/// implementing the <see cref="ICurrentUserService"/> abstraction.
+/// </summary>
+public sealed class CurrentUserService : ICurrentUserService
+{
+    private readonly IHttpContextAccessor _httpContextAccessor;
+
+    public CurrentUserService(IHttpContextAccessor httpContextAccessor)
+    {
+        _httpContextAccessor = httpContextAccessor;
+    }
+
+    public Guid? UserId
+    {
+        get
+        {
+            var userIdClaim = _httpContextAccessor.HttpContext?.User?.FindFirstValue(ClaimTypes.NameIdentifier)
+                ?? _httpContextAccessor.HttpContext?.User?.FindFirstValue("sub");
+            return Guid.TryParse(userIdClaim, out var userId) ? userId : null;
+        }
+    }
+
+    public Guid? OrganizationId
+    {
+        get
+        {
+            // The Organization claim is not yet issued by the Identity module
+            // (ADR-0030: Identity NEVER owns Organization data). Tenant
+            // resolution will be added when the Administration module
+            // implements scoped assignment. Returns null until then.
+            var orgClaim = _httpContextAccessor.HttpContext?.User?.FindFirstValue("organization_id");
+            return Guid.TryParse(orgClaim, out var orgId) ? orgId : null;
+        }
+    }
+
+    /// <inheritdoc />
+    public bool IsAuthenticated => _httpContextAccessor.HttpContext?.User?.Identity?.IsAuthenticated ?? false;
+}
+
+================================================================================
 FILE: src\BuildingBlocks\MachineryManager.SharedKernel.Infrastructure\MachineryManager.SharedKernel.Infrastructure.csproj
-SIZE: 0.05 KB
+SIZE: 0.3 KB
 ================================================================================
 <Project Sdk="Microsoft.NET.Sdk">
+
+  <ItemGroup>
+    <FrameworkReference Include="Microsoft.AspNetCore.App" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\MachineryManager.SharedKernel.Abstractions\MachineryManager.SharedKernel.Abstractions.csproj" />
+  </ItemGroup>
 
 </Project>
 
@@ -896,10 +1024,12 @@ SIZE: 0.23 KB
 
 ================================================================================
 FILE: src\Host\MachineryManager.Web\appsettings.Development.json
-SIZE: 0.12 KB
+SIZE: 0.18 KB
 ================================================================================
 {
-  "Logging": {
+  "OpenIddict": {
+  "Issuer": "https://localhost:7138/"
+},"Logging": {
     "LogLevel": {
       "Default": "Information",
       "Microsoft.AspNetCore": "Warning"
@@ -909,7 +1039,7 @@ SIZE: 0.12 KB
 
 ================================================================================
 FILE: src\Host\MachineryManager.Web\appsettings.json
-SIZE: 1.11 KB
+SIZE: 1.1 KB
 ================================================================================
 {
   "ConnectionStrings": {
@@ -933,30 +1063,28 @@ SIZE: 1.11 KB
     }
   },
   "OpenIddict": {
-  "Clients": {
-    "Web": {
-      "ClientId": "machinerymanager-web",
-      "ClientSecret": "",
-      "RedirectUris": [
-        "https://localhost:7138/signin-oidc"
-      ],
-      "PostLogoutRedirectUris": [
-        "https://localhost:7138/"
-      ]
-    },
-    "Maui": {
-      "ClientId": "machinerymanager-maui",
-      "RedirectUris": [],
-      "PostLogoutRedirectUris": []
-    },
-    "Service": {
-      "ClientId": "machinerymanager-service",
-      "ClientSecret": "",
-      "RedirectUris": [],
-      "PostLogoutRedirectUris": []
+    "Clients": {
+      "Web": {
+        "ClientId": "machinerymanager-web",
+        "RedirectUris": [
+          "https://localhost:7138/signin-oidc"
+        ],
+        "PostLogoutRedirectUris": [
+          "https://localhost:7138/"
+        ]
+      },
+      "Maui": {
+        "ClientId": "machinerymanager-maui",
+        "RedirectUris": [],
+        "PostLogoutRedirectUris": []
+      },
+      "Service": {
+        "ClientId": "machinerymanager-service",
+        "RedirectUris": [],
+        "PostLogoutRedirectUris": []
+      }
     }
-  }
-},
+  },
   "AllowedHosts": "*"
 }
 
@@ -1330,11 +1458,11 @@ SIZE: 2.06 KB
 
 ================================================================================
 FILE: src\Host\MachineryManager.Web\Program.cs
-SIZE: 3.6 KB
+SIZE: 4.25 KB
 ================================================================================
 using MachineryManager.Identity.Infrastructure;
-using MachineryManager.Identity.Infrastructure.Persistence;
 using MachineryManager.Identity.Presentation.Endpoints;
+using MachineryManager.Identity.Infrastructure.Persistence;
 using MachineryManager.Organization.Application;
 using MachineryManager.Organization.Infrastructure;
 using MachineryManager.Organization.Presentation.Endpoints;
@@ -1383,6 +1511,10 @@ try
     // Cross-cutting SharedKernel infrastructure (IDateTimeProvider).
     builder.Services.AddSharedKernelInfrastructure();
 
+    // ICurrentUserService implementation (resolves open item).
+builder.Services.AddHttpContextAccessor();
+builder.Services.AddScoped<MachineryManager.SharedKernel.Abstractions.ICurrentUserService, MachineryManager.SharedKernel.Infrastructure.CurrentUserService>();
+
     // Organization module (Application + Infrastructure).
     builder.Services.AddOrganizationApplication();
     builder.Services.AddOrganizationInfrastructure(builder.Configuration);
@@ -1390,6 +1522,7 @@ try
     // Identity platform module (ADR-0030).
     builder.Services.AddIdentityInfrastructure(builder.Configuration);
     builder.Services.AddIdentityOpenIddictServer(builder.Environment);
+    builder.Services.AddIdentityOpenIddictClient(builder.Configuration, builder.Environment);
 
     var app = builder.Build();
 
@@ -1408,9 +1541,9 @@ try
     }
 
     using (var scope = app.Services.CreateScope())
-{
-    await IdentityDataSeeder.SeedAsync(scope.ServiceProvider);
-}
+    {
+        await IdentityDataSeeder.SeedAsync(scope.ServiceProvider, app.Environment);
+    }
 
     app.UseSerilogRequestLogging();
 
@@ -1424,13 +1557,19 @@ try
 
     app.MapStaticAssets();
     app.MapRazorComponents<App>()
-        .AddInteractiveServerRenderMode();
+        .AddInteractiveServerRenderMode()
+        .AddAdditionalAssemblies(typeof(MachineryManager.Identity.Presentation.Components.Pages.Login).Assembly);
 
     // Identity platform module: OpenIddict protocol endpoints (ADR-0030).
     app.MapIdentityConnectEndpoints();
+    app.MapIdentitySigninCallbackEndpoints();
 
     // Organization module REST endpoints (07-api conventions, Section 8).
     app.MapOrganizationEndpoints();
+
+    // Holding and Project module REST endpoints.
+    app.MapHoldingEndpoints();
+    app.MapProjectEndpoints();
 
     app.Run();
 }
@@ -1655,7 +1794,7 @@ public static class UsernamePolicy
 
 ================================================================================
 FILE: src\Modules\Identity\Identity.Infrastructure\DependencyInjection.cs
-SIZE: 8.94 KB
+SIZE: 11.65 KB
 ================================================================================
 using MachineryManager.Identity.Domain;
 using MachineryManager.Identity.Infrastructure.Persistence;
@@ -1665,8 +1804,10 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using OpenIddict.Abstractions;
-using MachineryManager.Identity.Infrastructure.Options;
-using Microsoft.Extensions.Options;
+using OpenIddict.Client;
+using OpenIddict.Client.AspNetCore;
+
+using static OpenIddict.Abstractions.OpenIddictConstants;
 
 namespace MachineryManager.Identity.Infrastructure;
 
@@ -1753,14 +1894,9 @@ public static class DependencyInjection
             // for the interactive Login page (cookie-based sign-in).
             .AddSignInManager();
 
-            services
+        services
             .AddOptions<Options.OpenIddictClientOptions>()
             .BindConfiguration(Options.OpenIddictClientOptions.SectionName)
-            .ValidateOnStart();
-
-            services
-            .AddOptions<OpenIddictClientOptions>()
-            .BindConfiguration(OpenIddictClientOptions.SectionName)
             .ValidateOnStart();
 
         return services;
@@ -1856,11 +1992,80 @@ public static class DependencyInjection
 
         return services;
     }
+
+        /// <summary>
+    /// Registers this application as an OpenIddict Client of its own
+    /// Authorization Server (self-referencing monolith pattern), so
+    /// Blazor Server can complete the Authorization Code + PKCE flow
+    /// and obtain an access token to call protected APIs later.
+    /// </summary>
+    /// <remarks>
+    /// The user's local session (ApplicationScheme cookie) is already
+    /// established at password sign-in (/identity/login) — this client
+    /// does not "log the user in" a second time; it obtains and stores
+    /// the access/refresh tokens on that same session.
+    /// </remarks>
+    public static IServiceCollection AddIdentityOpenIddictClient(
+        this IServiceCollection services,
+        IConfiguration configuration,
+        IHostEnvironment environment)
+    {
+        var webClient = configuration
+            .GetSection($"{Options.OpenIddictClientOptions.SectionName}:Web")
+            .Get<Options.ClientOptions>()
+            ?? throw new InvalidOperationException($"{Options.OpenIddictClientOptions.SectionName}:Web is not configured.");
+
+        if (string.IsNullOrWhiteSpace(webClient.ClientSecret))
+        {
+            throw new InvalidOperationException(
+                "OpenIddict:Clients:Web:ClientSecret is not configured (required for the OpenIddict Client too).");
+        }
+
+        var issuer = configuration["OpenIddict:Issuer"]
+            ?? throw new InvalidOperationException("OpenIddict:Issuer is not configured.");
+
+        services
+            .AddOpenIddict()
+            .AddClient(options =>
+            {
+                options.AllowAuthorizationCodeFlow();
+
+                if (environment.IsDevelopment())
+                {
+                    options
+                        .AddDevelopmentEncryptionCertificate()
+                        .AddDevelopmentSigningCertificate();
+                }
+                else
+                {
+                    throw new InvalidOperationException(
+                        "Production OpenIddict Client certificates are not configured (same open item as the Server — ADR-0026).");
+                }
+
+                options
+                    .UseAspNetCore()
+                    .EnableStatusCodePagesIntegration()
+                    .EnableRedirectionEndpointPassthrough();
+
+                options.UseSystemNetHttp();
+
+                options.AddRegistration(new OpenIddictClientRegistration
+                {
+                    Issuer = new Uri(issuer, UriKind.Absolute),
+                    ClientId = webClient.ClientId,
+                    ClientSecret = webClient.ClientSecret,
+                    RedirectUri = new Uri("/signin-oidc", UriKind.Relative),
+                    Scopes = { Scopes.OpenId, Scopes.Profile, Scopes.Email, Scopes.Roles },
+                });
+            });
+
+        return services;
+    }
 }
 
 ================================================================================
 FILE: src\Modules\Identity\Identity.Infrastructure\Identity.Infrastructure.csproj
-SIZE: 0.96 KB
+SIZE: 1.14 KB
 ================================================================================
 <Project Sdk="Microsoft.NET.Sdk">
 
@@ -1881,6 +2086,9 @@ SIZE: 0.96 KB
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design" />
     <PackageReference Include="OpenIddict.EntityFrameworkCore" />
     <PackageReference Include="OpenIddict.AspNetCore" />
+    <PackageReference Include="OpenIddict.Client" />
+    <PackageReference Include="OpenIddict.Client.AspNetCore" />
+    <PackageReference Include="OpenIddict.Client.SystemNetHttp" />
   </ItemGroup>
 
 </Project>
@@ -1945,164 +2153,255 @@ public sealed class ClientOptions
 
 ================================================================================
 FILE: src\Modules\Identity\Identity.Infrastructure\Persistence\IdentityDataSeeder.cs
-SIZE: 6.02 KB
+SIZE: 10.24 KB
 ================================================================================
-using Microsoft.Extensions.DependencyInjection;
-using OpenIddict.Abstractions;
+using MachineryManager.Identity.Domain;
 using MachineryManager.Identity.Infrastructure.Options;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using OpenIddict.Abstractions;
+
+using static OpenIddict.Abstractions.OpenIddictConstants;
 
 namespace MachineryManager.Identity.Infrastructure.Persistence;
 
 /// <summary>
-/// Seeds the Identity module's infrastructure data.
+/// Seeds the Identity module's infrastructure data: OpenIddict
+/// Application (client) registrations, Standard Roles, and — in
+/// Development only — a test user for end-to-end validation.
 /// </summary>
 public static class IdentityDataSeeder
 {
-/// <summary>
-/// Seeds OpenIddict applications and other Identity infrastructure data.
-/// </summary>
-/// <param name="serviceProvider">The application's service provider.</param>
-/// <returns>A task representing the asynchronous seeding operation.</returns>
-public static async Task SeedAsync(IServiceProvider serviceProvider)
-{
-    ArgumentNullException.ThrowIfNull(serviceProvider);
+    /// <summary>Development-only test credentials (chat, 2026-08-18) — never seeded outside Development.</summary>
+    private const string TestUserName = "sysadmin";
+    private const string TestUserPassword = "P@ssw0rd123";
 
-    var applicationManager =
-        serviceProvider.GetRequiredService<IOpenIddictApplicationManager>();
+    /// <summary>Seeds OpenIddict applications, Standard Roles, and (Development only) a test user.</summary>
+    /// <param name="serviceProvider">The application's service provider.</param>
+    /// <param name="environment">The hosting environment.</param>
+    /// <returns>A task representing the asynchronous seeding operation.</returns>
+    public static async Task SeedAsync(IServiceProvider serviceProvider, IHostEnvironment environment)
+    {
+        ArgumentNullException.ThrowIfNull(serviceProvider);
+        ArgumentNullException.ThrowIfNull(environment);
 
-    var clientOptions =
-        serviceProvider
+        var applicationManager = serviceProvider.GetRequiredService<IOpenIddictApplicationManager>();
+        var roleManager = serviceProvider.GetRequiredService<RoleManager<ApplicationRole>>();
+        var userManager = serviceProvider.GetRequiredService<UserManager<ApplicationUser>>();
+        var logger = serviceProvider.GetRequiredService<ILoggerFactory>().CreateLogger("IdentityDataSeeder");
+
+        var clientOptions = serviceProvider
             .GetRequiredService<IOptions<OpenIddictClientOptions>>()
             .Value;
 
-    await SeedApplicationsAsync(applicationManager, clientOptions);
-}
+        await SeedWebClientAsync(applicationManager, clientOptions.Web);
+        await SeedMauiClientAsync(applicationManager, clientOptions.Maui);
+        await SeedServiceClientAsync(applicationManager, clientOptions.Service);
 
-/// <summary>
-/// Seeds the OpenIddict applications configured for the Identity module.
-/// </summary>
-/// <param name="applicationManager">
-/// The OpenIddict application manager used to create and query applications.
-/// </param>
-/// <param name="clientOptions">
-/// The configured OpenIddict client options.
-/// </param>
-/// <returns>A task representing the asynchronous seeding operation.</returns>
-private static async Task SeedApplicationsAsync(
-    IOpenIddictApplicationManager applicationManager,
-    OpenIddictClientOptions clientOptions)
-{
-    await SeedWebClientAsync(applicationManager);
-    await SeedMauiClientAsync(applicationManager);
-    await SeedServiceClientAsync(applicationManager);
-}
+        await SeedRolesAsync(roleManager);
 
-/// <summary>
-/// Seeds the confidential Web application.
-/// </summary>
-/// <param name="applicationManager">
-/// The OpenIddict application manager used to create and query applications.
-/// </param>
-/// <returns>A task representing the asynchronous seeding operation.</returns>
-private static async Task SeedWebClientAsync(
-    IOpenIddictApplicationManager applicationManager)
-{
-    const string clientId = "machinerymanager-web";
-
-    if (await applicationManager.FindByClientIdAsync(clientId) is not null)
-    {
-        return;
+        if (environment.IsDevelopment())
+        {
+            await SeedDevelopmentTestUserAsync(userManager, logger);
+        }
     }
 
-    var descriptor = new OpenIddictApplicationDescriptor
+    /// <summary>Seeds the closed catalog of Standard Roles (05-application, Section 5.8) if not already present.</summary>
+    private static async Task SeedRolesAsync(RoleManager<ApplicationRole> roleManager)
     {
-        ClientId = clientId,
-        ClientType = OpenIddictConstants.ClientTypes.Confidential,
-        ConsentType = OpenIddictConstants.ConsentTypes.Explicit,
-        DisplayName = "MachineryManager Web",
-    };
-
-    descriptor.RedirectUris.Add(new Uri("https://localhost:7138/signin-oidc"));
-    descriptor.PostLogoutRedirectUris.Add(new Uri("https://localhost:7138/"));
-
-    descriptor.Permissions.Add(OpenIddictConstants.Permissions.Endpoints.Authorization);
-    descriptor.Permissions.Add(OpenIddictConstants.Permissions.Endpoints.Token);
-    descriptor.Permissions.Add(OpenIddictConstants.Permissions.Endpoints.EndSession);
-    descriptor.Permissions.Add(OpenIddictConstants.Permissions.GrantTypes.AuthorizationCode);
-    descriptor.Permissions.Add(OpenIddictConstants.Permissions.GrantTypes.RefreshToken);
-    descriptor.Permissions.Add(OpenIddictConstants.Permissions.ResponseTypes.Code);
-    descriptor.Requirements.Add(OpenIddictConstants.Requirements.Features.ProofKeyForCodeExchange);
-
-    await applicationManager.CreateAsync(descriptor);
-}
-
-/// <summary>
-/// Seeds the public MAUI application.
-/// </summary>
-/// <param name="applicationManager">
-/// The OpenIddict application manager used to create and query applications.
-/// </param>
-/// <returns>A task representing the asynchronous seeding operation.</returns>
-private static async Task SeedMauiClientAsync(
-    IOpenIddictApplicationManager applicationManager)
-{
-    const string clientId = "machinerymanager-maui";
-
-    if (await applicationManager.FindByClientIdAsync(clientId) is not null)
-    {
-        return;
+        foreach (var roleName in StandardRoles.All)
+        {
+            if (!await roleManager.RoleExistsAsync(roleName))
+            {
+                await roleManager.CreateAsync(new ApplicationRole(roleName));
+            }
+        }
     }
 
-    var descriptor = new OpenIddictApplicationDescriptor
+    /// <summary>
+    /// Seeds a single Development-only test user, assigned the
+    /// System Administrator role, for end-to-end login validation.
+    /// </summary>
+    /// <remarks>
+    /// This user and its password are explicit, hardcoded test
+    /// credentials (chat, 2026-08-18) — never created outside
+    /// Development (see <see cref="SeedAsync"/>'s environment check).
+    /// </remarks>
+    private static async Task SeedDevelopmentTestUserAsync(
+        UserManager<ApplicationUser> userManager,
+        ILogger logger)
     {
-        ClientId = clientId,
-        ClientType = OpenIddictConstants.ClientTypes.Public,
-        ConsentType = OpenIddictConstants.ConsentTypes.Explicit,
-        DisplayName = "MachineryManager MAUI",
-    };
+        if (await userManager.FindByNameAsync(TestUserName) is not null)
+        {
+            return;
+        }
 
-    descriptor.Permissions.Add(OpenIddictConstants.Permissions.Endpoints.Authorization);
-    descriptor.Permissions.Add(OpenIddictConstants.Permissions.Endpoints.Token);
-    descriptor.Permissions.Add(OpenIddictConstants.Permissions.Endpoints.EndSession);
-    descriptor.Permissions.Add(OpenIddictConstants.Permissions.GrantTypes.AuthorizationCode);
-    descriptor.Permissions.Add(OpenIddictConstants.Permissions.GrantTypes.RefreshToken);
-    descriptor.Permissions.Add(OpenIddictConstants.Permissions.ResponseTypes.Code);
-    descriptor.Requirements.Add(OpenIddictConstants.Requirements.Features.ProofKeyForCodeExchange);
+        var user = new ApplicationUser
+        {
+            UserName = TestUserName,
+        };
 
-    await applicationManager.CreateAsync(descriptor);
-}
+        var result = await userManager.CreateAsync(user, TestUserPassword);
 
-/// <summary>
-/// Seeds the confidential service-to-service application.
-/// </summary>
-/// <param name="applicationManager">
-/// The OpenIddict application manager used to create and query applications.
-/// </param>
-/// <returns>A task representing the asynchronous seeding operation.</returns>
-private static async Task SeedServiceClientAsync(
-    IOpenIddictApplicationManager applicationManager)
-{
-    const string clientId = "machinerymanager-service";
+        if (!result.Succeeded)
+        {
+            var errors = string.Join("; ", result.Errors.Select(e => e.Description));
+            throw new InvalidOperationException($"Failed to seed the Development test user: {errors}");
+        }
 
-    if (await applicationManager.FindByClientIdAsync(clientId) is not null)
-    {
-        return;
+        await userManager.AddToRoleAsync(user, StandardRoles.SystemAdministrator);
+
+        logger.LogWarning(
+            "Development test user seeded — username: {UserName}, password: {Password}. " +
+            "This user only exists because the environment is Development.",
+            TestUserName,
+            TestUserPassword);
     }
 
-    var descriptor = new OpenIddictApplicationDescriptor
+    private static async Task SeedWebClientAsync(
+        IOpenIddictApplicationManager applicationManager,
+        ClientOptions client)
     {
-        ClientId = clientId,
-        ClientType = OpenIddictConstants.ClientTypes.Confidential,
-        ConsentType = OpenIddictConstants.ConsentTypes.Explicit,
-        DisplayName = "MachineryManager Service",
-    };
+        if (string.IsNullOrWhiteSpace(client.ClientId))
+        {
+            throw new InvalidOperationException("OpenIddict:Clients:Web:ClientId is not configured.");
+        }
 
-    descriptor.Permissions.Add(OpenIddictConstants.Permissions.Endpoints.Token);
-    descriptor.Permissions.Add(OpenIddictConstants.Permissions.GrantTypes.ClientCredentials);
+        if (await applicationManager.FindByClientIdAsync(client.ClientId) is not null)
+        {
+            return;
+        }
 
-    await applicationManager.CreateAsync(descriptor);
-}
+        if (string.IsNullOrWhiteSpace(client.ClientSecret))
+        {
+            throw new InvalidOperationException(
+                "OpenIddict:Clients:Web:ClientSecret is not configured. Set it via " +
+                "'dotnet user-secrets' (Development) or your secret store (Production) " +
+                "— it must never be committed to appsettings.json.");
+        }
+
+        var descriptor = new OpenIddictApplicationDescriptor
+        {
+            ClientId = client.ClientId,
+            ClientSecret = client.ClientSecret,
+            ClientType = ClientTypes.Confidential,
+            ConsentType = ConsentTypes.Explicit,
+            DisplayName = "MachineryManager Web",
+        };
+
+        foreach (var redirectUri in client.RedirectUris)
+        {
+            descriptor.RedirectUris.Add(new Uri(redirectUri));
+        }
+
+        foreach (var postLogoutRedirectUri in client.PostLogoutRedirectUris)
+        {
+            descriptor.PostLogoutRedirectUris.Add(new Uri(postLogoutRedirectUri));
+        }
+
+        descriptor.Permissions.Add(Permissions.Endpoints.Authorization);
+        descriptor.Permissions.Add(Permissions.Endpoints.Token);
+        descriptor.Permissions.Add(Permissions.Endpoints.EndSession);
+        descriptor.Permissions.Add(Permissions.GrantTypes.AuthorizationCode);
+        descriptor.Permissions.Add(Permissions.GrantTypes.RefreshToken);
+        descriptor.Permissions.Add(Permissions.ResponseTypes.Code);
+        descriptor.Permissions.Add(Permissions.Prefixes.Scope + Scopes.OpenId);
+        descriptor.Permissions.Add(Permissions.Prefixes.Scope + Scopes.Profile);
+        descriptor.Permissions.Add(Permissions.Prefixes.Scope + Scopes.Email);
+        descriptor.Permissions.Add(Permissions.Prefixes.Scope + Scopes.Roles);
+        descriptor.Requirements.Add(Requirements.Features.ProofKeyForCodeExchange);
+
+        await applicationManager.CreateAsync(descriptor);
+    }
+
+    /// <summary>Seeds the public MAUI application (Authorization Code + PKCE, no client secret).</summary>
+    private static async Task SeedMauiClientAsync(
+        IOpenIddictApplicationManager applicationManager,
+        ClientOptions client)
+    {
+        if (string.IsNullOrWhiteSpace(client.ClientId))
+        {
+            throw new InvalidOperationException("OpenIddict:Clients:Maui:ClientId is not configured.");
+        }
+
+        if (await applicationManager.FindByClientIdAsync(client.ClientId) is not null)
+        {
+            return;
+        }
+
+        var descriptor = new OpenIddictApplicationDescriptor
+        {
+            ClientId = client.ClientId,
+            ClientType = ClientTypes.Public,
+            ConsentType = ConsentTypes.Explicit,
+            DisplayName = "MachineryManager MAUI",
+        };
+
+        foreach (var redirectUri in client.RedirectUris)
+        {
+            descriptor.RedirectUris.Add(new Uri(redirectUri));
+        }
+
+        foreach (var postLogoutRedirectUri in client.PostLogoutRedirectUris)
+        {
+            descriptor.PostLogoutRedirectUris.Add(new Uri(postLogoutRedirectUri));
+        }
+
+        descriptor.Permissions.Add(Permissions.Endpoints.Authorization);
+        descriptor.Permissions.Add(Permissions.Endpoints.Token);
+        descriptor.Permissions.Add(Permissions.Endpoints.EndSession);
+        descriptor.Permissions.Add(Permissions.GrantTypes.AuthorizationCode);
+        descriptor.Permissions.Add(Permissions.GrantTypes.RefreshToken);
+        descriptor.Permissions.Add(Permissions.ResponseTypes.Code);
+        descriptor.Permissions.Add(Permissions.Prefixes.Scope + Scopes.OpenId);
+        descriptor.Permissions.Add(Permissions.Prefixes.Scope + Scopes.Profile);
+        descriptor.Permissions.Add(Permissions.Prefixes.Scope + Scopes.Email);
+        descriptor.Permissions.Add(Permissions.Prefixes.Scope + Scopes.Roles);
+        descriptor.Requirements.Add(Requirements.Features.ProofKeyForCodeExchange);
+
+        await applicationManager.CreateAsync(descriptor);
+    }
+
+    /// <summary>Seeds the confidential Service-to-Service application (Client Credentials).</summary>
+    private static async Task SeedServiceClientAsync(
+        IOpenIddictApplicationManager applicationManager,
+        ClientOptions client)
+    {
+        if (string.IsNullOrWhiteSpace(client.ClientId))
+        {
+            throw new InvalidOperationException("OpenIddict:Clients:Service:ClientId is not configured.");
+        }
+
+        if (await applicationManager.FindByClientIdAsync(client.ClientId) is not null)
+        {
+            return;
+        }
+
+        if (string.IsNullOrWhiteSpace(client.ClientSecret))
+        {
+            throw new InvalidOperationException(
+                "OpenIddict:Clients:Service:ClientSecret is not configured. Set it via " +
+                "'dotnet user-secrets' (Development) or your secret store (Production) " +
+                "— it must never be committed to appsettings.json.");
+        }
+
+        var descriptor = new OpenIddictApplicationDescriptor
+        {
+            ClientId = client.ClientId,
+            ClientSecret = client.ClientSecret,
+            ClientType = ClientTypes.Confidential,
+            ConsentType = ConsentTypes.Explicit,
+            DisplayName = "MachineryManager Service",
+        };
+
+        descriptor.Permissions.Add(Permissions.Endpoints.Token);
+        descriptor.Permissions.Add(Permissions.GrantTypes.ClientCredentials);
+
+        await applicationManager.CreateAsync(descriptor);
+    }
 }
 
 ================================================================================
@@ -4028,10 +4327,23 @@ SIZE: 0.18 KB
 @using Microsoft.AspNetCore.Components.Web
 
 ================================================================================
+FILE: src\Modules\Identity\Identity.Presentation\Components\Layout\AuthLayout.razor
+SIZE: 0.3 KB
+================================================================================
+@inherits LayoutComponentBase
+
+<div style="min-height:100vh; display:flex; align-items:center; justify-content:center; background:#f5f5f5;">
+    <div style="width:100%; max-width:400px; padding:2rem; background:#fff; border-radius:8px; box-shadow:0 1px 4px rgba(0,0,0,.1);">
+        @Body
+    </div>
+</div>
+
+================================================================================
 FILE: src\Modules\Identity\Identity.Presentation\Components\Pages\Login.razor
-SIZE: 2.36 KB
+SIZE: 2.73 KB
 ================================================================================
 @page "/identity/login"
+@layout MachineryManager.Identity.Presentation.Components.Layout.AuthLayout
 @using System.ComponentModel.DataAnnotations
 @using MachineryManager.Identity.Domain
 @using Microsoft.AspNetCore.Identity
@@ -4089,7 +4401,11 @@ SIZE: 2.36 KB
 
         if (result.Succeeded)
         {
-            NavigationManager.NavigateTo(ReturnUrl ?? "/", forceLoad: true);
+            // Route through /identity/connect so OpenIddict.Client also
+            // acquires and stores an access/refresh token on this same
+            // session — not just a plain local cookie login.
+            var target = $"/identity/connect?returnUrl={Uri.EscapeDataString(ReturnUrl ?? "/")}";
+            NavigationManager.NavigateTo(target, forceLoad: true);
             return;
         }
 
@@ -4110,7 +4426,7 @@ SIZE: 2.36 KB
 
 ================================================================================
 FILE: src\Modules\Identity\Identity.Presentation\Endpoints\ConnectEndpoints.cs
-SIZE: 9.17 KB
+SIZE: 9.65 KB
 ================================================================================
 using System.Security.Claims;
 using MachineryManager.Identity.Domain;
@@ -4181,6 +4497,12 @@ public static class ConnectEndpoints
 
         var principal = await signInManager.CreateUserPrincipalAsync(user);
 
+        // Required by OpenIddict: SignInManager's principal uses ASP.NET
+        // Core Identity's own claim types (e.g. ClaimTypes.NameIdentifier),
+        // not OpenIddict's "sub" (Claims.Subject). Without this, OpenIddict
+        // rejects the sign-in with "mandatory subject claim was missing".
+        principal.SetClaim(Claims.Subject, await userManager.GetUserIdAsync(user));
+
         principal.SetScopes(request.GetScopes());
 
         foreach (var claim in principal.Claims)
@@ -4219,6 +4541,8 @@ public static class ConnectEndpoints
             }
 
             var principal = await signInManager.CreateUserPrincipalAsync(user);
+
+            principal.SetClaim(Claims.Subject, await userManager.GetUserIdAsync(user));
             principal.SetScopes(authenticateResult.Principal!.GetScopes());
 
             foreach (var claim in principal.Claims)
@@ -4342,6 +4666,71 @@ public static class ConnectEndpoints
 }
 
 ================================================================================
+FILE: src\Modules\Identity\Identity.Presentation\Endpoints\SigninCallbackEndpoints.cs
+SIZE: 2.49 KB
+================================================================================
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Routing;
+using OpenIddict.Client.AspNetCore;
+
+namespace MachineryManager.Identity.Presentation.Endpoints;
+
+/// <summary>
+/// Handles the redirection back from this application's own OpenIddict
+/// Authorization Server after a successful Authorization Code + PKCE
+/// exchange (initiated by <see cref="ConnectEndpoints"/>'s /connect/authorize
+/// passthrough — this endpoint completes the client side).
+/// </summary>
+public static class SigninCallbackEndpoints
+{
+    /// <summary>Registers the OpenIddict Client's redirection endpoint handler.</summary>
+    /// <param name="endpoints">The endpoint route builder.</param>
+    /// <returns>The same <see cref="IEndpointRouteBuilder"/> for chaining.</returns>
+    public static IEndpointRouteBuilder MapIdentitySigninCallbackEndpoints(this IEndpointRouteBuilder endpoints)
+    {
+        Func<HttpContext, Task<IResult>> callbackHandler = HandleCallbackAsync;
+        endpoints.MapGet("/signin-oidc", callbackHandler);
+
+        // Starts the flow: triggers OpenIddict.Client to generate a real
+        // PKCE code_verifier/code_challenge, store the correlation state,
+        // and redirect to /connect/authorize.
+        endpoints.MapGet("/identity/connect", (string? returnUrl) =>
+        {
+            var properties = new AuthenticationProperties
+            {
+                RedirectUri = string.IsNullOrEmpty(returnUrl) ? "/" : returnUrl,
+            };
+
+            return Results.Challenge(properties, [OpenIddictClientAspNetCoreDefaults.AuthenticationScheme]);
+        });
+
+        return endpoints;
+    }
+
+    private static async Task<IResult> HandleCallbackAsync(HttpContext httpContext)
+    {
+        var result = await httpContext.AuthenticateAsync(OpenIddictClientAspNetCoreDefaults.AuthenticationScheme);
+
+        if (!result.Succeeded || result.Principal is null)
+        {
+            return Results.Problem(
+                title: "External sign-in failed.",
+                detail: result.Failure?.Message,
+                statusCode: StatusCodes.Status400BadRequest);
+        }
+
+        await httpContext.SignInAsync(IdentityConstants.ApplicationScheme, result.Principal, result.Properties);
+
+        var returnUrl = result.Properties?.RedirectUri;
+
+        return Results.Redirect(string.IsNullOrEmpty(returnUrl) ? "/" : returnUrl);
+    }
+}
+
+================================================================================
 FILE: src\Modules\Identity\Identity.Presentation\Identity.Presentation.csproj
 SIZE: 0.52 KB
 ================================================================================
@@ -4365,6 +4754,26 @@ SIZE: 0.52 KB
   </ItemGroup>
 
 </Project>
+
+================================================================================
+FILE: src\Modules\Organization\Organization.Application\Abstractions\IHoldingRepository.cs
+SIZE: 0.58 KB
+================================================================================
+using MachineryManager.SharedKernel.Abstractions;
+using Organization.Domain;
+
+namespace MachineryManager.Organization.Application.Abstractions;
+
+/// <summary>Repository contract for the <see cref="Holding"/> aggregate.</summary>
+public interface IHoldingRepository : IRepository<Holding, HoldingId>
+{
+    /// <summary>Performs a paginated search over holdings.</summary>
+    Task<Features.Holdings.Queries.SearchHoldings.SearchHoldingsResponse> SearchAsync(
+        string? searchTerm,
+        int page,
+        int pageSize,
+        CancellationToken cancellationToken = default);
+}
 
 ================================================================================
 FILE: src\Modules\Organization\Organization.Application\Abstractions\IOrganizationRepository.cs
@@ -4392,6 +4801,26 @@ public interface IOrganizationRepository
     /// <param name="cancellationToken">Token to cancel the asynchronous operation.</param>
     /// <returns>A response containing the matching items and pagination metadata.</returns>
     Task<Features.Organizations.Queries.SearchOrganizations.SearchOrganizationsResponse> SearchAsync(
+        string? searchTerm,
+        int page,
+        int pageSize,
+        CancellationToken cancellationToken = default);
+}
+
+================================================================================
+FILE: src\Modules\Organization\Organization.Application\Abstractions\IProjectRepository.cs
+SIZE: 0.58 KB
+================================================================================
+using MachineryManager.SharedKernel.Abstractions;
+using Organization.Domain;
+
+namespace MachineryManager.Organization.Application.Abstractions;
+
+/// <summary>Repository contract for the <see cref="Project"/> aggregate.</summary>
+public interface IProjectRepository : IRepository<Project, ProjectId>
+{
+    /// <summary>Performs a paginated search over projects.</summary>
+    Task<Features.Projects.Queries.SearchProjects.SearchProjectsResponse> SearchAsync(
         string? searchTerm,
         int page,
         int pageSize,
@@ -4536,6 +4965,331 @@ public static class DependencyInjection
             typeof(Behaviors.ValidationBehavior<,>));
 
         return services;
+    }
+}
+
+================================================================================
+FILE: src\Modules\Organization\Organization.Application\Features\Holdings\Commands\RegisterHolding\RegisterHoldingCommand.cs
+SIZE: 0.29 KB
+================================================================================
+using MachineryManager.SharedKernel;
+using MediatR;
+
+namespace MachineryManager.Organization.Application.Features.Holdings.Commands.RegisterHolding;
+
+/// <summary>Command to register a new Holding.</summary>
+public sealed record RegisterHoldingCommand(string Name)
+    : IRequest<Result<Guid>>;
+
+================================================================================
+FILE: src\Modules\Organization\Organization.Application\Features\Holdings\Commands\RegisterHolding\RegisterHoldingCommandHandler.cs
+SIZE: 1.36 KB
+================================================================================
+using MachineryManager.Organization.Application.Abstractions;
+using MachineryManager.SharedKernel;
+using MachineryManager.SharedKernel.Abstractions;
+using MediatR;
+
+namespace MachineryManager.Organization.Application.Features.Holdings.Commands.RegisterHolding;
+
+public sealed class RegisterHoldingCommandHandler
+    : IRequestHandler<RegisterHoldingCommand, Result<Guid>>
+{
+    private readonly IHoldingRepository _holdingRepository;
+    private readonly IUnitOfWork _unitOfWork;
+    private readonly IDateTimeProvider _dateTimeProvider;
+
+    public RegisterHoldingCommandHandler(
+        IHoldingRepository holdingRepository,
+        IUnitOfWork unitOfWork,
+        IDateTimeProvider dateTimeProvider)
+    {
+        _holdingRepository = holdingRepository;
+        _unitOfWork = unitOfWork;
+        _dateTimeProvider = dateTimeProvider;
+    }
+
+    public async Task<Result<Guid>> Handle(
+        RegisterHoldingCommand request,
+        CancellationToken cancellationToken)
+    {
+        var result = global::Organization.Domain.Holding.Register(request.Name, _dateTimeProvider);
+
+        if (result.IsFailure)
+        {
+            return Result.Failure<Guid>(result.Error);
+        }
+
+        _holdingRepository.Add(result.Value);
+        await _unitOfWork.SaveChangesAsync(cancellationToken);
+
+        return Result.Success(result.Value.Id.Value);
+    }
+}
+
+================================================================================
+FILE: src\Modules\Organization\Organization.Application\Features\Holdings\Commands\RegisterHolding\RegisterHoldingCommandValidator.cs
+SIZE: 0.58 KB
+================================================================================
+using FluentValidation;
+
+namespace MachineryManager.Organization.Application.Features.Holdings.Commands.RegisterHolding;
+
+public sealed class RegisterHoldingCommandValidator : AbstractValidator<RegisterHoldingCommand>
+{
+    public RegisterHoldingCommandValidator()
+    {
+        int maxLength = global::Organization.Domain.Holding.MaxNameLength;
+
+        RuleFor(x => x.Name)
+            .NotEmpty()
+            .WithMessage("Holding name is required.")
+            .MaximumLength(maxLength)
+            .WithMessage($"Holding name shall not exceed {maxLength} characters.");
+    }
+}
+
+================================================================================
+FILE: src\Modules\Organization\Organization.Application\Features\Holdings\Dtos\HoldingDto.cs
+SIZE: 0.18 KB
+================================================================================
+namespace MachineryManager.Organization.Application.Features.Holdings.Dtos;
+
+/// <summary>Read-only view of a Holding.</summary>
+public sealed record HoldingDto(Guid Id, string Name);
+
+================================================================================
+FILE: src\Modules\Organization\Organization.Application\Features\Holdings\Queries\GetHoldingById\GetHoldingByIdQuery.cs
+SIZE: 0.31 KB
+================================================================================
+using MachineryManager.Organization.Application.Features.Holdings.Dtos;
+using MachineryManager.SharedKernel;
+using MediatR;
+
+namespace MachineryManager.Organization.Application.Features.Holdings.Queries.GetHoldingById;
+
+public sealed record GetHoldingByIdQuery(Guid HoldingId)
+    : IRequest<Result<HoldingDto>>;
+
+================================================================================
+FILE: src\Modules\Organization\Organization.Application\Features\Holdings\Queries\GetHoldingById\GetHoldingByIdQueryHandler.cs
+SIZE: 1.27 KB
+================================================================================
+using MachineryManager.Organization.Application.Abstractions;
+using MachineryManager.Organization.Application.Features.Holdings.Dtos;
+using MachineryManager.SharedKernel;
+using MediatR;
+using Organization.Domain;
+
+namespace MachineryManager.Organization.Application.Features.Holdings.Queries.GetHoldingById;
+
+public sealed class GetHoldingByIdQueryHandler
+    : IRequestHandler<GetHoldingByIdQuery, Result<HoldingDto>>
+{
+    private readonly IHoldingRepository _holdingRepository;
+
+    public GetHoldingByIdQueryHandler(IHoldingRepository holdingRepository)
+    {
+        _holdingRepository = holdingRepository;
+    }
+
+    public async Task<Result<HoldingDto>> Handle(
+        GetHoldingByIdQuery request,
+        CancellationToken cancellationToken)
+    {
+        var holdingId = HoldingId.From(request.HoldingId);
+        var holding = await _holdingRepository.GetByIdAsync(holdingId, cancellationToken);
+
+        if (holding is null)
+        {
+            return Result.Failure<HoldingDto>(
+                Error.NotFound(
+                    "Holding.NotFound",
+                    $"Holding with id {request.HoldingId} was not found."));
+        }
+
+        var dto = new HoldingDto(holding.Id.Value, holding.Name);
+        return Result.Success(dto);
+    }
+}
+
+================================================================================
+FILE: src\Modules\Organization\Organization.Application\Features\Holdings\Queries\GetHoldingById\GetHoldingByIdQueryValidator.cs
+SIZE: 0.32 KB
+================================================================================
+using FluentValidation;
+
+namespace MachineryManager.Organization.Application.Features.Holdings.Queries.GetHoldingById;
+
+public sealed class GetHoldingByIdQueryValidator : AbstractValidator<GetHoldingByIdQuery>
+{
+    public GetHoldingByIdQueryValidator()
+    {
+        RuleFor(x => x.HoldingId).NotEmpty();
+    }
+}
+
+================================================================================
+FILE: src\Modules\Organization\Organization.Application\Features\Holdings\Queries\SearchHoldings\SearchHoldingsQuery.cs
+SIZE: 0.59 KB
+================================================================================
+using MachineryManager.Organization.Application.Features.Holdings.Dtos;
+using MachineryManager.SharedKernel;
+using MediatR;
+
+namespace MachineryManager.Organization.Application.Features.Holdings.Queries.SearchHoldings;
+
+public sealed record SearchHoldingsQuery(
+    string? SearchTerm = null,
+    int Page = 1,
+    int PageSize = 25)
+    : IRequest<Result<SearchHoldingsResponse>>;
+
+public sealed record SearchHoldingsResponse(
+    IReadOnlyList<HoldingDto> Items,
+    int Page,
+    int PageSize,
+    int TotalItems,
+    int TotalPages,
+    bool HasNextPage,
+    bool HasPreviousPage);
+
+================================================================================
+FILE: src\Modules\Organization\Organization.Application\Features\Holdings\Queries\SearchHoldings\SearchHoldingsQueryHandler.cs
+SIZE: 0.92 KB
+================================================================================
+using MachineryManager.Organization.Application.Abstractions;
+using MachineryManager.SharedKernel;
+using MediatR;
+
+namespace MachineryManager.Organization.Application.Features.Holdings.Queries.SearchHoldings;
+
+public sealed class SearchHoldingsQueryHandler
+    : IRequestHandler<SearchHoldingsQuery, Result<SearchHoldingsResponse>>
+{
+    private readonly IHoldingRepository _holdingRepository;
+
+    public SearchHoldingsQueryHandler(IHoldingRepository holdingRepository)
+    {
+        _holdingRepository = holdingRepository;
+    }
+
+    public async Task<Result<SearchHoldingsResponse>> Handle(
+        SearchHoldingsQuery request,
+        CancellationToken cancellationToken)
+    {
+        var response = await _holdingRepository.SearchAsync(
+            request.SearchTerm,
+            request.Page,
+            request.PageSize,
+            cancellationToken);
+
+        return Result.Success(response);
+    }
+}
+
+================================================================================
+FILE: src\Modules\Organization\Organization.Application\Features\Holdings\Queries\SearchHoldings\SearchHoldingsQueryValidator.cs
+SIZE: 0.38 KB
+================================================================================
+using FluentValidation;
+
+namespace MachineryManager.Organization.Application.Features.Holdings.Queries.SearchHoldings;
+
+public sealed class SearchHoldingsQueryValidator : AbstractValidator<SearchHoldingsQuery>
+{
+    public SearchHoldingsQueryValidator()
+    {
+        RuleFor(x => x.Page).GreaterThanOrEqualTo(1);
+        RuleFor(x => x.PageSize).InclusiveBetween(1, 200);
+    }
+}
+
+================================================================================
+FILE: src\Modules\Organization\Organization.Application\Features\Organizations\Commands\AssignOrganizationToHolding\AssignOrganizationToHoldingCommand.cs
+SIZE: 0.28 KB
+================================================================================
+using MachineryManager.SharedKernel;
+using MediatR;
+
+namespace MachineryManager.Organization.Application.Features.Organizations.Commands.AssignOrganizationToHolding;
+
+public sealed record AssignOrganizationToHoldingCommand(Guid OrganizationId, Guid HoldingId)
+    : IRequest<Result>;
+
+================================================================================
+FILE: src\Modules\Organization\Organization.Application\Features\Organizations\Commands\AssignOrganizationToHolding\AssignOrganizationToHoldingCommandHandler.cs
+SIZE: 1.91 KB
+================================================================================
+using MachineryManager.Organization.Application.Abstractions;
+using MachineryManager.SharedKernel;
+using MachineryManager.SharedKernel.Abstractions;
+using MediatR;
+using Organization.Domain;
+
+namespace MachineryManager.Organization.Application.Features.Organizations.Commands.AssignOrganizationToHolding;
+
+public sealed class AssignOrganizationToHoldingCommandHandler
+    : IRequestHandler<AssignOrganizationToHoldingCommand, Result>
+{
+    private readonly IOrganizationRepository _organizationRepository;
+    private readonly IUnitOfWork _unitOfWork;
+    private readonly IDateTimeProvider _dateTimeProvider;
+
+    public AssignOrganizationToHoldingCommandHandler(
+        IOrganizationRepository organizationRepository,
+        IUnitOfWork unitOfWork,
+        IDateTimeProvider dateTimeProvider)
+    {
+        _organizationRepository = organizationRepository;
+        _unitOfWork = unitOfWork;
+        _dateTimeProvider = dateTimeProvider;
+    }
+
+    public async Task<Result> Handle(
+        AssignOrganizationToHoldingCommand request,
+        CancellationToken cancellationToken)
+    {
+        var organizationId = OrganizationId.From(request.OrganizationId);
+        var organization = await _organizationRepository.GetByIdAsync(organizationId, cancellationToken);
+
+        if (organization is null)
+        {
+            return Result.Failure(
+                Error.NotFound(
+                    "Organization.NotFound",
+                    $"Organization with id {request.OrganizationId} was not found."));
+        }
+
+        var holdingId = HoldingId.From(request.HoldingId);
+        var result = organization.AssignToHolding(holdingId, _dateTimeProvider);
+
+        if (result.IsFailure)
+        {
+            return result;
+        }
+
+        _organizationRepository.Update(organization);
+        await _unitOfWork.SaveChangesAsync(cancellationToken);
+
+        return Result.Success();
+    }
+}
+
+================================================================================
+FILE: src\Modules\Organization\Organization.Application\Features\Organizations\Commands\AssignOrganizationToHolding\AssignOrganizationToHoldingCommandValidator.cs
+SIZE: 0.43 KB
+================================================================================
+using FluentValidation;
+
+namespace MachineryManager.Organization.Application.Features.Organizations.Commands.AssignOrganizationToHolding;
+
+public sealed class AssignOrganizationToHoldingCommandValidator : AbstractValidator<AssignOrganizationToHoldingCommand>
+{
+    public AssignOrganizationToHoldingCommandValidator()
+    {
+        RuleFor(x => x.OrganizationId).NotEmpty();
+        RuleFor(x => x.HoldingId).NotEmpty();
     }
 }
 
@@ -4884,6 +5638,253 @@ public sealed class SearchOrganizationsQueryValidator
 }
 
 ================================================================================
+FILE: src\Modules\Organization\Organization.Application\Features\Projects\Commands\RegisterProject\RegisterProjectCommand.cs
+SIZE: 0.34 KB
+================================================================================
+using MachineryManager.SharedKernel;
+using MediatR;
+
+namespace MachineryManager.Organization.Application.Features.Projects.Commands.RegisterProject;
+
+/// <summary>Command to register a new Project under an Organization.</summary>
+public sealed record RegisterProjectCommand(Guid OrganizationId, string Name)
+    : IRequest<Result<Guid>>;
+
+================================================================================
+FILE: src\Modules\Organization\Organization.Application\Features\Projects\Commands\RegisterProject\RegisterProjectCommandHandler.cs
+SIZE: 1.45 KB
+================================================================================
+using MachineryManager.Organization.Application.Abstractions;
+using MachineryManager.SharedKernel;
+using MachineryManager.SharedKernel.Abstractions;
+using MediatR;
+using Organization.Domain;
+
+namespace MachineryManager.Organization.Application.Features.Projects.Commands.RegisterProject;
+
+public sealed class RegisterProjectCommandHandler
+    : IRequestHandler<RegisterProjectCommand, Result<Guid>>
+{
+    private readonly IProjectRepository _projectRepository;
+    private readonly IUnitOfWork _unitOfWork;
+    private readonly IDateTimeProvider _dateTimeProvider;
+
+    public RegisterProjectCommandHandler(
+        IProjectRepository projectRepository,
+        IUnitOfWork unitOfWork,
+        IDateTimeProvider dateTimeProvider)
+    {
+        _projectRepository = projectRepository;
+        _unitOfWork = unitOfWork;
+        _dateTimeProvider = dateTimeProvider;
+    }
+
+    public async Task<Result<Guid>> Handle(
+        RegisterProjectCommand request,
+        CancellationToken cancellationToken)
+    {
+        var organizationId = OrganizationId.From(request.OrganizationId);
+        var result = Project.Register(organizationId, request.Name, _dateTimeProvider);
+
+        if (result.IsFailure)
+        {
+            return Result.Failure<Guid>(result.Error);
+        }
+
+        _projectRepository.Add(result.Value);
+        await _unitOfWork.SaveChangesAsync(cancellationToken);
+
+        return Result.Success(result.Value.Id.Value);
+    }
+}
+
+================================================================================
+FILE: src\Modules\Organization\Organization.Application\Features\Projects\Commands\RegisterProject\RegisterProjectCommandValidator.cs
+SIZE: 0.64 KB
+================================================================================
+using FluentValidation;
+
+namespace MachineryManager.Organization.Application.Features.Projects.Commands.RegisterProject;
+
+public sealed class RegisterProjectCommandValidator : AbstractValidator<RegisterProjectCommand>
+{
+    public RegisterProjectCommandValidator()
+    {
+        int maxLength = global::Organization.Domain.Project.MaxNameLength;
+
+        RuleFor(x => x.OrganizationId).NotEmpty();
+        RuleFor(x => x.Name)
+            .NotEmpty()
+            .WithMessage("Project name is required.")
+            .MaximumLength(maxLength)
+            .WithMessage($"Project name shall not exceed {maxLength} characters.");
+    }
+}
+
+================================================================================
+FILE: src\Modules\Organization\Organization.Application\Features\Projects\Dtos\ProjectDto.cs
+SIZE: 0.22 KB
+================================================================================
+namespace MachineryManager.Organization.Application.Features.Projects.Dtos;
+
+/// <summary>Read-only view of a Project.</summary>
+public sealed record ProjectDto(
+    Guid Id,
+    string Name,
+    Guid OrganizationId);
+
+================================================================================
+FILE: src\Modules\Organization\Organization.Application\Features\Projects\Queries\GetProjectById\GetProjectByIdQuery.cs
+SIZE: 0.31 KB
+================================================================================
+using MachineryManager.Organization.Application.Features.Projects.Dtos;
+using MachineryManager.SharedKernel;
+using MediatR;
+
+namespace MachineryManager.Organization.Application.Features.Projects.Queries.GetProjectById;
+
+public sealed record GetProjectByIdQuery(Guid ProjectId)
+    : IRequest<Result<ProjectDto>>;
+
+================================================================================
+FILE: src\Modules\Organization\Organization.Application\Features\Projects\Queries\GetProjectById\GetProjectByIdQueryHandler.cs
+SIZE: 1.34 KB
+================================================================================
+using MachineryManager.Organization.Application.Abstractions;
+using MachineryManager.Organization.Application.Features.Projects.Dtos;
+using MachineryManager.SharedKernel;
+using MediatR;
+using Organization.Domain;
+
+namespace MachineryManager.Organization.Application.Features.Projects.Queries.GetProjectById;
+
+public sealed class GetProjectByIdQueryHandler
+    : IRequestHandler<GetProjectByIdQuery, Result<ProjectDto>>
+{
+    private readonly IProjectRepository _projectRepository;
+
+    public GetProjectByIdQueryHandler(IProjectRepository projectRepository)
+    {
+        _projectRepository = projectRepository;
+    }
+
+    public async Task<Result<ProjectDto>> Handle(
+        GetProjectByIdQuery request,
+        CancellationToken cancellationToken)
+    {
+        var projectId = ProjectId.From(request.ProjectId);
+        var project = await _projectRepository.GetByIdAsync(projectId, cancellationToken);
+
+        if (project is null)
+        {
+            return Result.Failure<ProjectDto>(
+                Error.NotFound(
+                    "Project.NotFound",
+                    $"Project with id {request.ProjectId} was not found."));
+        }
+
+        var dto = new ProjectDto(
+            project.Id.Value,
+            project.Name,
+            project.OrganizationId.Value);
+
+        return Result.Success(dto);
+    }
+}
+
+================================================================================
+FILE: src\Modules\Organization\Organization.Application\Features\Projects\Queries\GetProjectById\GetProjectByIdQueryValidator.cs
+SIZE: 0.32 KB
+================================================================================
+using FluentValidation;
+
+namespace MachineryManager.Organization.Application.Features.Projects.Queries.GetProjectById;
+
+public sealed class GetProjectByIdQueryValidator : AbstractValidator<GetProjectByIdQuery>
+{
+    public GetProjectByIdQueryValidator()
+    {
+        RuleFor(x => x.ProjectId).NotEmpty();
+    }
+}
+
+================================================================================
+FILE: src\Modules\Organization\Organization.Application\Features\Projects\Queries\SearchProjects\SearchProjectsQuery.cs
+SIZE: 0.59 KB
+================================================================================
+using MachineryManager.Organization.Application.Features.Projects.Dtos;
+using MachineryManager.SharedKernel;
+using MediatR;
+
+namespace MachineryManager.Organization.Application.Features.Projects.Queries.SearchProjects;
+
+public sealed record SearchProjectsQuery(
+    string? SearchTerm = null,
+    int Page = 1,
+    int PageSize = 25)
+    : IRequest<Result<SearchProjectsResponse>>;
+
+public sealed record SearchProjectsResponse(
+    IReadOnlyList<ProjectDto> Items,
+    int Page,
+    int PageSize,
+    int TotalItems,
+    int TotalPages,
+    bool HasNextPage,
+    bool HasPreviousPage);
+
+================================================================================
+FILE: src\Modules\Organization\Organization.Application\Features\Projects\Queries\SearchProjects\SearchProjectsQueryHandler.cs
+SIZE: 0.92 KB
+================================================================================
+using MachineryManager.Organization.Application.Abstractions;
+using MachineryManager.SharedKernel;
+using MediatR;
+
+namespace MachineryManager.Organization.Application.Features.Projects.Queries.SearchProjects;
+
+public sealed class SearchProjectsQueryHandler
+    : IRequestHandler<SearchProjectsQuery, Result<SearchProjectsResponse>>
+{
+    private readonly IProjectRepository _projectRepository;
+
+    public SearchProjectsQueryHandler(IProjectRepository projectRepository)
+    {
+        _projectRepository = projectRepository;
+    }
+
+    public async Task<Result<SearchProjectsResponse>> Handle(
+        SearchProjectsQuery request,
+        CancellationToken cancellationToken)
+    {
+        var response = await _projectRepository.SearchAsync(
+            request.SearchTerm,
+            request.Page,
+            request.PageSize,
+            cancellationToken);
+
+        return Result.Success(response);
+    }
+}
+
+================================================================================
+FILE: src\Modules\Organization\Organization.Application\Features\Projects\Queries\SearchProjects\SearchProjectsQueryValidator.cs
+SIZE: 0.38 KB
+================================================================================
+using FluentValidation;
+
+namespace MachineryManager.Organization.Application.Features.Projects.Queries.SearchProjects;
+
+public sealed class SearchProjectsQueryValidator : AbstractValidator<SearchProjectsQuery>
+{
+    public SearchProjectsQueryValidator()
+    {
+        RuleFor(x => x.Page).GreaterThanOrEqualTo(1);
+        RuleFor(x => x.PageSize).InclusiveBetween(1, 200);
+    }
+}
+
+================================================================================
 FILE: src\Modules\Organization\Organization.Application\Organization.Application.csproj
 SIZE: 0.49 KB
 ================================================================================
@@ -4904,6 +5905,64 @@ SIZE: 0.49 KB
   </ItemGroup>
 
 </Project>
+
+================================================================================
+FILE: src\Modules\Organization\Organization.Domain\Events\HoldingRegistered.cs
+SIZE: 0.83 KB
+================================================================================
+using MachineryManager.SharedKernel;
+
+namespace Organization.Domain.Events;
+
+/// <summary>Raised when a new Holding is registered.</summary>
+public sealed class HoldingRegistered : IDomainEvent
+{
+    /// <summary>Gets the identifier of the registered holding.</summary>
+    public HoldingId HoldingId { get; }
+
+    /// <summary>Gets the name of the registered holding.</summary>
+    public string Name { get; }
+
+    /// <summary>Gets the UTC timestamp when the event occurred.</summary>
+    public DateTimeOffset OccurredOn { get; }
+
+    /// <summary>Initializes a new instance of the <see cref="HoldingRegistered"/> class.</summary>
+    public HoldingRegistered(HoldingId holdingId, string name, DateTimeOffset occurredOn)
+    {
+        HoldingId = holdingId;
+        Name = name;
+        OccurredOn = occurredOn;
+    }
+}
+
+================================================================================
+FILE: src\Modules\Organization\Organization.Domain\Events\OrganizationAssignedToHolding.cs
+SIZE: 0.93 KB
+================================================================================
+using MachineryManager.SharedKernel;
+
+namespace Organization.Domain.Events;
+
+/// <summary>Raised when an Organization is assigned to a Holding.</summary>
+public sealed class OrganizationAssignedToHolding : IDomainEvent
+{
+    /// <summary>Gets the identifier of the assigned organization.</summary>
+    public OrganizationId OrganizationId { get; }
+
+    /// <summary>Gets the identifier of the holding.</summary>
+    public HoldingId HoldingId { get; }
+
+    /// <summary>Gets the UTC timestamp when the event occurred.</summary>
+    public DateTimeOffset OccurredOn { get; }
+
+    /// <summary>Initializes a new instance of the <see cref="OrganizationAssignedToHolding"/> class.</summary>
+    public OrganizationAssignedToHolding(OrganizationId organizationId, HoldingId holdingId, DateTimeOffset occurredOn)
+    {
+        OrganizationId = organizationId;
+        HoldingId = holdingId;
+        OccurredOn = occurredOn;
+    }
+}
 
 ================================================================================
 FILE: src\Modules\Organization\Organization.Domain\Events\OrganizationRegistered.cs
@@ -4942,8 +6001,167 @@ public sealed class OrganizationRegistered : IDomainEvent
 }
 
 ================================================================================
+FILE: src\Modules\Organization\Organization.Domain\Events\ProjectRegistered.cs
+SIZE: 1.04 KB
+================================================================================
+using MachineryManager.SharedKernel;
+
+namespace Organization.Domain.Events;
+
+/// <summary>Raised when a new Project is registered under an Organization.</summary>
+public sealed class ProjectRegistered : IDomainEvent
+{
+    /// <summary>Gets the identifier of the registered project.</summary>
+    public ProjectId ProjectId { get; }
+
+    /// <summary>Gets the identifier of the owning Organization.</summary>
+    public OrganizationId OrganizationId { get; }
+
+    /// <summary>Gets the name of the registered project.</summary>
+    public string Name { get; }
+
+    /// <summary>Gets the UTC timestamp when the event occurred.</summary>
+    public DateTimeOffset OccurredOn { get; }
+
+    /// <summary>Initializes a new instance of the <see cref="ProjectRegistered"/> class.</summary>
+    public ProjectRegistered(ProjectId projectId, OrganizationId organizationId, string name, DateTimeOffset occurredOn)
+    {
+        ProjectId = projectId;
+        OrganizationId = organizationId;
+        Name = name;
+        OccurredOn = occurredOn;
+    }
+}
+
+================================================================================
+FILE: src\Modules\Organization\Organization.Domain\Holding.cs
+SIZE: 2.33 KB
+================================================================================
+using MachineryManager.SharedKernel;
+using MachineryManager.SharedKernel.Abstractions;
+using Organization.Domain.Events;
+
+namespace Organization.Domain;
+
+/// <summary>
+/// Holding: the top-level tenant grouping — a collection of one or
+/// more Organizations under common administrative oversight (chat,
+/// 2026-08-19). This resolves BR-017's previously open
+/// "sub-organizations" question as a parent tier ABOVE Organization —
+/// not a redefinition of Organization itself, which remains the
+/// authorization scope boundary per BR-017.
+/// </summary>
+/// <remarks>
+/// A Holding is optional: an Organization may exist without belonging
+/// to any Holding (e.g. a standalone single-company tenant). This
+/// aggregate is intentionally minimal — no lifecycle beyond
+/// registration is added here until further specified.
+/// </remarks>
+public sealed class Holding : AggregateRoot<HoldingId>
+{
+    /// <summary>The maximum allowed length for a holding name.</summary>
+    public const int MaxNameLength = 200;
+
+    /// <summary>Gets the name of the holding.</summary>
+    public string Name { get; private set; }
+
+    // Reserved for EF Core materialization only.
+    private Holding()
+    {
+        Name = string.Empty;
+    }
+
+    private Holding(HoldingId id, string name)
+        : base(id)
+    {
+        Name = name;
+    }
+
+    /// <summary>Registers a new Holding. This is the only way a Holding comes into existence.</summary>
+    /// <param name="name">The holding's name.</param>
+    /// <param name="dateTimeProvider">Provides the current UTC time for the raised domain event.</param>
+    /// <returns>A <see cref="Result{Holding}"/> containing the new holding, or a validation error.</returns>
+    public static Result<Holding> Register(string name, IDateTimeProvider dateTimeProvider)
+    {
+        if (string.IsNullOrWhiteSpace(name))
+        {
+            return Result.Failure<Holding>(HoldingErrors.NameRequired());
+        }
+
+        if (name.Length > MaxNameLength)
+        {
+            return Result.Failure<Holding>(HoldingErrors.NameTooLong(MaxNameLength));
+        }
+
+        var holding = new Holding(HoldingId.New(), name.Trim());
+
+        holding.RaiseDomainEvent(
+            new HoldingRegistered(holding.Id, holding.Name, dateTimeProvider.UtcNow));
+
+        return holding;
+    }
+}
+
+================================================================================
+FILE: src\Modules\Organization\Organization.Domain\HoldingErrors.cs
+SIZE: 0.67 KB
+================================================================================
+using MachineryManager.SharedKernel;
+
+namespace Organization.Domain;
+
+/// <summary>Business Errors for the Holding aggregate.</summary>
+public static class HoldingErrors
+{
+    /// <summary>Creates an error indicating that the holding name is required.</summary>
+    public static Error NameRequired() => Error.Validation(
+        "Holding.NameRequired",
+        "Holding name is required.");
+
+    /// <summary>Creates an error indicating that the holding name exceeds the maximum length.</summary>
+    public static Error NameTooLong(int maxLength) => Error.Validation(
+        "Holding.NameTooLong",
+        $"Holding name shall not exceed {maxLength} characters.");
+}
+
+================================================================================
+FILE: src\Modules\Organization\Organization.Domain\HoldingId.cs
+SIZE: 0.86 KB
+================================================================================
+using MachineryManager.SharedKernel;
+
+namespace Organization.Domain;
+
+/// <summary>Strongly-typed identifier for a Holding (top-level tenant grouping).</summary>
+public sealed class HoldingId : ValueObject
+{
+    /// <summary>Gets the underlying GUID value.</summary>
+    public Guid Value { get; }
+
+    private HoldingId(Guid value)
+    {
+        Value = value;
+    }
+
+    /// <summary>Creates a new, unique HoldingId.</summary>
+    public static HoldingId New() => new(Guid.NewGuid());
+
+    /// <summary>Wraps an existing identifier value (e.g. read from persistence).</summary>
+    public static HoldingId From(Guid value) => new(value);
+
+    /// <inheritdoc />
+    protected override IEnumerable<object?> GetEqualityComponents()
+    {
+        yield return Value;
+    }
+
+    /// <inheritdoc />
+    public override string ToString() => Value.ToString();
+}
+
+================================================================================
 FILE: src\Modules\Organization\Organization.Domain\Organization.cs
-SIZE: 1.93 KB
+SIZE: 2.75 KB
 ================================================================================
 using MachineryManager.SharedKernel;
 using MachineryManager.SharedKernel.Abstractions;
@@ -4953,13 +6171,8 @@ namespace Organization.Domain;
 
 /// <summary>
 /// Organization (GL-ORG-001): the tenant boundary and business owner
-/// of Assets, per BR-017 (Business Specification — Organization
-/// Management).
-///
-/// This Aggregate is intentionally minimal. BR-017 explicitly leaves
-/// sub-organizations, ownership transfer, and any lifecycle beyond
-/// registration as open questions (Section 9) — behavior for those
-/// shall not be added here until Domain Discovery resolves them.
+/// of Assets (via Project), per BR-017 (Business Specification —
+/// Organization Management).
 /// </summary>
 public sealed class Organization : AggregateRoot<OrganizationId>
 {
@@ -4968,6 +6181,13 @@ public sealed class Organization : AggregateRoot<OrganizationId>
 
     /// <summary>Gets the name of the organization.</summary>
     public string Name { get; private set; }
+
+    /// <summary>
+    /// Gets the identifier of the Holding this Organization belongs
+    /// to, if any (chat, 2026-08-19). An Organization may exist
+    /// without a Holding (standalone tenant).
+    /// </summary>
+    public HoldingId? HoldingId { get; private set; }
 
     // Reserved for EF Core materialization only.
     private Organization()
@@ -5004,6 +6224,27 @@ public sealed class Organization : AggregateRoot<OrganizationId>
 
         return organization;
     }
+
+    /// <summary>
+    /// Assigns this Organization to a Holding (chat, 2026-08-19). An
+    /// Organization belongs to at most one Holding at a time.
+    /// </summary>
+    /// <param name="holdingId">The identifier of the Holding.</param>
+    /// <param name="dateTimeProvider">Provides the current UTC time for the raised domain event.</param>
+    /// <returns>A <see cref="Result"/> indicating success or a validation error.</returns>
+    public Result AssignToHolding(HoldingId holdingId, IDateTimeProvider dateTimeProvider)
+    {
+        if (holdingId is null)
+        {
+            return Result.Failure(OrganizationErrors.HoldingRequired());
+        }
+
+        HoldingId = holdingId;
+
+        RaiseDomainEvent(new OrganizationAssignedToHolding(Id, holdingId, dateTimeProvider.UtcNow));
+
+        return Result.Success();
+    }
 }
 
 ================================================================================
@@ -5021,7 +6262,7 @@ SIZE: 0.35 KB
 
 ================================================================================
 FILE: src\Modules\Organization\Organization.Domain\OrganizationErrors.cs
-SIZE: 0.99 KB
+SIZE: 1.23 KB
 ================================================================================
 using MachineryManager.SharedKernel;
 
@@ -5042,6 +6283,11 @@ public static class OrganizationErrors
     public static Error NameTooLong(int maxLength) => Error.Validation(
         "Organization.NameTooLong",
         $"Organization name shall not exceed {maxLength} characters.");
+
+    /// <summary>Creates an error indicating that a Holding identifier is required.</summary>
+    public static Error HoldingRequired() => Error.Validation(
+        "Organization.HoldingRequired",
+        "A valid Holding identifier is required.");
 }
 
 ================================================================================
@@ -5083,8 +6329,154 @@ public sealed class OrganizationId : ValueObject
 }
 
 ================================================================================
+FILE: src\Modules\Organization\Organization.Domain\Project.cs
+SIZE: 3.15 KB
+================================================================================
+using MachineryManager.SharedKernel;
+using MachineryManager.SharedKernel.Abstractions;
+using Organization.Domain.Events;
+
+namespace Organization.Domain;
+
+/// <summary>
+/// Project: the bottom tier of the tenant hierarchy (chat,
+/// 2026-08-19) — the scope that owns Assets, personnel, warehouses,
+/// and workshops within a single Organization. A Project always
+/// belongs to exactly one Organization.
+/// </summary>
+/// <remarks>
+/// Per explicit clarification (chat, 2026-08-19): Project does NOT
+/// own Assets, Personnel, or Warehouse inventory — Organization does,
+/// unchanged from BR-017. Project represents only the CURRENT
+/// operational assignment of those resources, which may change over
+/// time (e.g. an Asset moves between Projects). Historical
+/// Usage/Maintenance records remain permanently scoped to whichever
+/// Project was current when each record was created (append-only,
+/// per BR-016's Historical Entities principle) — that scoping logic
+/// belongs to the Usage/Maintenance Bounded Contexts, not yet
+/// implemented, and is not built here.
+/// </remarks>
+public sealed class Project : AggregateRoot<ProjectId>
+{
+    /// <summary>The maximum allowed length for a project name.</summary>
+    public const int MaxNameLength = 200;
+
+    /// <summary>Gets the identifier of the Organization that owns this Project.</summary>
+    public OrganizationId OrganizationId { get; private set; }
+
+    /// <summary>Gets the name of the project.</summary>
+    public string Name { get; private set; }
+
+    // Reserved for EF Core materialization only.
+    private Project()
+    {
+        OrganizationId = null!;
+        Name = string.Empty;
+    }
+
+    private Project(ProjectId id, OrganizationId organizationId, string name)
+        : base(id)
+    {
+        OrganizationId = organizationId;
+        Name = name;
+    }
+
+    /// <summary>Registers a new Project under the given Organization. This is the only way a Project comes into existence.</summary>
+    /// <param name="organizationId">The identifier of the owning Organization.</param>
+    /// <param name="name">The project's name.</param>
+    /// <param name="dateTimeProvider">Provides the current UTC time for the raised domain event.</param>
+    /// <returns>A <see cref="Result{Project}"/> containing the new project, or a validation error.</returns>
+    public static Result<Project> Register(OrganizationId organizationId, string name, IDateTimeProvider dateTimeProvider)
+    {
+        if (organizationId is null)
+        {
+            return Result.Failure<Project>(ProjectErrors.OrganizationRequired());
+        }
+
+        if (string.IsNullOrWhiteSpace(name))
+        {
+            return Result.Failure<Project>(ProjectErrors.NameRequired());
+        }
+
+        if (name.Length > MaxNameLength)
+        {
+            return Result.Failure<Project>(ProjectErrors.NameTooLong(MaxNameLength));
+        }
+
+        var project = new Project(ProjectId.New(), organizationId, name.Trim());
+
+        project.RaiseDomainEvent(
+            new ProjectRegistered(project.Id, project.OrganizationId, project.Name, dateTimeProvider.UtcNow));
+
+        return project;
+    }
+}
+
+================================================================================
+FILE: src\Modules\Organization\Organization.Domain\ProjectErrors.cs
+SIZE: 0.93 KB
+================================================================================
+using MachineryManager.SharedKernel;
+
+namespace Organization.Domain;
+
+/// <summary>Business Errors for the Project aggregate.</summary>
+public static class ProjectErrors
+{
+    /// <summary>Creates an error indicating that a Project must have an owning Organization.</summary>
+    public static Error OrganizationRequired() => Error.Validation(
+        "Project.OrganizationRequired",
+        "A Project must belong to an Organization.");
+
+    /// <summary>Creates an error indicating that the project name is required.</summary>
+    public static Error NameRequired() => Error.Validation(
+        "Project.NameRequired",
+        "Project name is required.");
+
+    /// <summary>Creates an error indicating that the project name exceeds the maximum length.</summary>
+    public static Error NameTooLong(int maxLength) => Error.Validation(
+        "Project.NameTooLong",
+        $"Project name shall not exceed {maxLength} characters.");
+}
+
+================================================================================
+FILE: src\Modules\Organization\Organization.Domain\ProjectId.cs
+SIZE: 0.84 KB
+================================================================================
+using MachineryManager.SharedKernel;
+
+namespace Organization.Domain;
+
+/// <summary>Strongly-typed identifier for a Project.</summary>
+public sealed class ProjectId : ValueObject
+{
+    /// <summary>Gets the underlying GUID value.</summary>
+    public Guid Value { get; }
+
+    private ProjectId(Guid value)
+    {
+        Value = value;
+    }
+
+    /// <summary>Creates a new, unique ProjectId.</summary>
+    public static ProjectId New() => new(Guid.NewGuid());
+
+    /// <summary>Wraps an existing identifier value (e.g. read from persistence).</summary>
+    public static ProjectId From(Guid value) => new(value);
+
+    /// <inheritdoc />
+    protected override IEnumerable<object?> GetEqualityComponents()
+    {
+        yield return Value;
+    }
+
+    /// <inheritdoc />
+    public override string ToString() => Value.ToString();
+}
+
+================================================================================
 FILE: src\Modules\Organization\Organization.Infrastructure\DependencyInjection.cs
-SIZE: 1.85 KB
+SIZE: 1.99 KB
 ================================================================================
 using MachineryManager.Organization.Application.Abstractions;
 using MachineryManager.Organization.Infrastructure.Persistence;
@@ -5123,13 +6515,14 @@ public static class DependencyInjection
             .UseSqlServer(configuration.GetConnectionString("MachineryManagerDatabase")));
 
         services.AddScoped<IOrganizationRepository, OrganizationRepository>();
+        services.AddScoped<IHoldingRepository, HoldingRepository>();
+        services.AddScoped<IProjectRepository, ProjectRepository>();
         services.AddScoped<IUnitOfWork>(serviceProvider =>
             serviceProvider.GetRequiredService<OrganizationDbContext>());
 
         return services;
     }
 }
-
 
 ================================================================================
 FILE: src\Modules\Organization\Organization.Infrastructure\Organization.Infrastructure.csproj
@@ -5151,8 +6544,42 @@ SIZE: 0.56 KB
 </Project>
 
 ================================================================================
+FILE: src\Modules\Organization\Organization.Infrastructure\Persistence\Configurations\HoldingConfiguration.cs
+SIZE: 1.06 KB
+================================================================================
+using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata.Builders;
+using Organization.Domain;
+
+namespace MachineryManager.Organization.Infrastructure.Persistence.Configurations;
+
+/// <summary>EF Core mapping for the <see cref="Holding"/> aggregate.</summary>
+public sealed class HoldingConfiguration : IEntityTypeConfiguration<Holding>
+{
+    /// <summary>Configures the entity mapping.</summary>
+    /// <param name="builder">The entity type builder.</param>
+    public void Configure(EntityTypeBuilder<Holding> builder)
+    {
+        builder.ToTable("Holding");
+
+        builder.HasKey(holding => holding.Id);
+
+        builder.Property(holding => holding.Id)
+            .HasConversion(id => id.Value, value => HoldingId.From(value))
+            .ValueGeneratedNever();
+
+        builder.Property(holding => holding.Name)
+            .HasMaxLength(Holding.MaxNameLength)
+            .IsRequired();
+
+        // Domain Events are transient behavior, never persisted state.
+        builder.Ignore(holding => holding.DomainEvents);
+    }
+}
+
+================================================================================
 FILE: src\Modules\Organization\Organization.Infrastructure\Persistence\Configurations\OrganizationConfiguration.cs
-SIZE: 1.23 KB
+SIZE: 1.58 KB
 ================================================================================
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
@@ -5181,6 +6608,14 @@ public sealed class OrganizationConfiguration : IEntityTypeConfiguration<global:
             .HasMaxLength(global::Organization.Domain.Organization.MaxNameLength)
             .IsRequired();
 
+        // Optional parent Holding (BR-017, chat 2026-08-19).
+        builder.Property(organization => organization.HoldingId)
+            .HasConversion(
+                id => id == null ? (Guid?)null : id.Value,
+                value => value == null ? null : HoldingId.From(value.Value));
+
+        builder.HasIndex(organization => organization.HoldingId);
+
         // Domain Events are transient behavior, never persisted state.
         builder.Ignore(organization => organization.DomainEvents);
     }
@@ -5188,8 +6623,392 @@ public sealed class OrganizationConfiguration : IEntityTypeConfiguration<global:
 
 
 ================================================================================
+FILE: src\Modules\Organization\Organization.Infrastructure\Persistence\Configurations\ProjectConfiguration.cs
+SIZE: 1.6 KB
+================================================================================
+using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata.Builders;
+using Organization.Domain;
+
+namespace MachineryManager.Organization.Infrastructure.Persistence.Configurations;
+
+/// <summary>
+/// EF Core mapping for the <see cref="Project"/> aggregate. Per DDD
+/// aggregate boundary discipline, this only stores the owning
+/// <see cref="Project.OrganizationId"/> as a value (indexed for
+/// query performance) — no cross-aggregate navigation/FK constraint
+/// is configured, consistent with "one transaction = one aggregate
+/// only" (Section 4.5).
+/// </summary>
+public sealed class ProjectConfiguration : IEntityTypeConfiguration<Project>
+{
+    /// <summary>Configures the entity mapping.</summary>
+    /// <param name="builder">The entity type builder.</param>
+    public void Configure(EntityTypeBuilder<Project> builder)
+    {
+        builder.ToTable("Project");
+
+        builder.HasKey(project => project.Id);
+
+        builder.Property(project => project.Id)
+            .HasConversion(id => id.Value, value => ProjectId.From(value))
+            .ValueGeneratedNever();
+
+        builder.Property(project => project.OrganizationId)
+            .HasConversion(id => id.Value, value => OrganizationId.From(value))
+            .IsRequired();
+
+        builder.HasIndex(project => project.OrganizationId);
+
+        builder.Property(project => project.Name)
+            .HasMaxLength(Project.MaxNameLength)
+            .IsRequired();
+
+        // Domain Events are transient behavior, never persisted state.
+        builder.Ignore(project => project.DomainEvents);
+    }
+}
+
+================================================================================
+FILE: src\Modules\Organization\Organization.Infrastructure\Persistence\HoldingRepository.cs
+SIZE: 1.96 KB
+================================================================================
+using MachineryManager.Organization.Application.Abstractions;
+using MachineryManager.Organization.Application.Features.Holdings.Dtos;
+using MachineryManager.Organization.Application.Features.Holdings.Queries.SearchHoldings;
+using Microsoft.EntityFrameworkCore;
+using Organization.Domain;
+
+namespace MachineryManager.Organization.Infrastructure.Persistence;
+
+public sealed class HoldingRepository : IHoldingRepository
+{
+    private readonly OrganizationDbContext _dbContext;
+
+    public HoldingRepository(OrganizationDbContext dbContext)
+    {
+        _dbContext = dbContext;
+    }
+
+    public Task<Holding?> GetByIdAsync(HoldingId id, CancellationToken cancellationToken = default) =>
+        _dbContext.Holdings.FirstOrDefaultAsync(h => h.Id == id, cancellationToken);
+
+    public void Add(Holding aggregate) => _dbContext.Holdings.Add(aggregate);
+
+    public void Update(Holding aggregate) => _dbContext.Holdings.Update(aggregate);
+
+    public async Task<SearchHoldingsResponse> SearchAsync(
+        string? searchTerm,
+        int page,
+        int pageSize,
+        CancellationToken cancellationToken = default)
+    {
+        var query = _dbContext.Holdings.AsNoTracking().AsQueryable();
+
+        if (!string.IsNullOrWhiteSpace(searchTerm))
+        {
+            query = query.Where(h => h.Name.Contains(searchTerm));
+        }
+
+        var totalItems = await query.CountAsync(cancellationToken);
+
+        var items = await query
+            .OrderBy(h => h.Name)
+            .Skip((page - 1) * pageSize)
+            .Take(pageSize)
+            .Select(h => new HoldingDto(h.Id.Value, h.Name))
+            .ToListAsync(cancellationToken);
+
+        var totalPages = totalItems == 0 ? 0 : (int)Math.Ceiling(totalItems / (double)pageSize);
+
+        return new SearchHoldingsResponse(
+            items,
+            page,
+            pageSize,
+            totalItems,
+            totalPages,
+            page < totalPages,
+            page > 1);
+    }
+}
+
+================================================================================
+FILE: src\Modules\Organization\Organization.Infrastructure\Persistence\Migrations\20260820125650_AddHoldingAndProject.cs
+SIZE: 3.12 KB
+================================================================================
+using System;
+using Microsoft.EntityFrameworkCore.Migrations;
+
+#nullable disable
+
+namespace Organization.Infrastructure.Persistence.Migrations
+{
+    /// <inheritdoc />
+    public partial class AddHoldingAndProject : Migration
+    {
+        /// <inheritdoc />
+        protected override void Up(MigrationBuilder migrationBuilder)
+        {
+            migrationBuilder.EnsureSchema(
+                name: "organization");
+
+            migrationBuilder.CreateTable(
+                name: "Holding",
+                schema: "organization",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    Name = table.Column<string>(type: "nvarchar(200)", maxLength: 200, nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Holding", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Organization",
+                schema: "organization",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    Name = table.Column<string>(type: "nvarchar(200)", maxLength: 200, nullable: false),
+                    HoldingId = table.Column<Guid>(type: "uniqueidentifier", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Organization", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Project",
+                schema: "organization",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    OrganizationId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    Name = table.Column<string>(type: "nvarchar(200)", maxLength: 200, nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Project", x => x.Id);
+                });
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Organization_HoldingId",
+                schema: "organization",
+                table: "Organization",
+                column: "HoldingId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Project_OrganizationId",
+                schema: "organization",
+                table: "Project",
+                column: "OrganizationId");
+        }
+
+        /// <inheritdoc />
+        protected override void Down(MigrationBuilder migrationBuilder)
+        {
+            migrationBuilder.DropTable(
+                name: "Holding",
+                schema: "organization");
+
+            migrationBuilder.DropTable(
+                name: "Organization",
+                schema: "organization");
+
+            migrationBuilder.DropTable(
+                name: "Project",
+                schema: "organization");
+        }
+    }
+}
+
+
+================================================================================
+FILE: src\Modules\Organization\Organization.Infrastructure\Persistence\Migrations\20260820125650_AddHoldingAndProject.Designer.cs
+SIZE: 2.89 KB
+================================================================================
+// <auto-generated />
+using System;
+using MachineryManager.Organization.Infrastructure.Persistence;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
+using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
+
+#nullable disable
+
+namespace Organization.Infrastructure.Persistence.Migrations
+{
+    [DbContext(typeof(OrganizationDbContext))]
+    [Migration("20260820125650_AddHoldingAndProject")]
+    partial class AddHoldingAndProject
+    {
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
+        {
+#pragma warning disable 612, 618
+            modelBuilder
+                .HasDefaultSchema("organization")
+                .HasAnnotation("ProductVersion", "10.0.10")
+                .HasAnnotation("Relational:MaxIdentifierLength", 128);
+
+            SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
+
+            modelBuilder.Entity("Organization.Domain.Holding", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Holding", "organization");
+                });
+
+            modelBuilder.Entity("Organization.Domain.Organization", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid?>("HoldingId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("HoldingId");
+
+                    b.ToTable("Organization", "organization");
+                });
+
+            modelBuilder.Entity("Organization.Domain.Project", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<Guid>("OrganizationId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("OrganizationId");
+
+                    b.ToTable("Project", "organization");
+                });
+#pragma warning restore 612, 618
+        }
+    }
+}
+
+
+================================================================================
+FILE: src\Modules\Organization\Organization.Infrastructure\Persistence\Migrations\OrganizationDbContextModelSnapshot.cs
+SIZE: 2.78 KB
+================================================================================
+// <auto-generated />
+using System;
+using MachineryManager.Organization.Infrastructure.Persistence;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
+
+#nullable disable
+
+namespace Organization.Infrastructure.Persistence.Migrations
+{
+    [DbContext(typeof(OrganizationDbContext))]
+    partial class OrganizationDbContextModelSnapshot : ModelSnapshot
+    {
+        protected override void BuildModel(ModelBuilder modelBuilder)
+        {
+#pragma warning disable 612, 618
+            modelBuilder
+                .HasDefaultSchema("organization")
+                .HasAnnotation("ProductVersion", "10.0.10")
+                .HasAnnotation("Relational:MaxIdentifierLength", 128);
+
+            SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
+
+            modelBuilder.Entity("Organization.Domain.Holding", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Holding", "organization");
+                });
+
+            modelBuilder.Entity("Organization.Domain.Organization", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid?>("HoldingId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("HoldingId");
+
+                    b.ToTable("Organization", "organization");
+                });
+
+            modelBuilder.Entity("Organization.Domain.Project", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<Guid>("OrganizationId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("OrganizationId");
+
+                    b.ToTable("Project", "organization");
+                });
+#pragma warning restore 612, 618
+        }
+    }
+}
+
+
+================================================================================
 FILE: src\Modules\Organization\Organization.Infrastructure\Persistence\OrganizationDbContext.cs
-SIZE: 2.8 KB
+SIZE: 3.91 KB
 ================================================================================
 using MachineryManager.SharedKernel.Abstractions;
 using Microsoft.EntityFrameworkCore;
@@ -5215,6 +7034,14 @@ public sealed class OrganizationDbContext : DbContext, IUnitOfWork
     /// <summary>Gets the set of Organization aggregates.</summary>
     public DbSet<global::Organization.Domain.Organization> Organizations =>
         Set<global::Organization.Domain.Organization>();
+
+    /// <summary>Gets the set of Holding aggregates (BR-017, chat 2026-08-19).</summary>
+    public DbSet<global::Organization.Domain.Holding> Holdings =>
+        Set<global::Organization.Domain.Holding>();
+
+    /// <summary>Gets the set of Project aggregates (BR-017, chat 2026-08-19).</summary>
+    public DbSet<global::Organization.Domain.Project> Projects =>
+        Set<global::Organization.Domain.Project>();
 
     /// <inheritdoc />
     protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -5242,15 +7069,37 @@ public sealed class OrganizationDbContext : DbContext, IUnitOfWork
     /// <returns>The number of state entries written to the database.</returns>
     public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
     {
-        var aggregatesWithEvents = ChangeTracker
+        var organizationsWithEvents = ChangeTracker
             .Entries<global::Organization.Domain.Organization>()
+            .Select(entry => entry.Entity)
+            .Where(aggregate => aggregate.DomainEvents.Count > 0)
+            .ToList();
+
+        var holdingsWithEvents = ChangeTracker
+            .Entries<global::Organization.Domain.Holding>()
+            .Select(entry => entry.Entity)
+            .Where(aggregate => aggregate.DomainEvents.Count > 0)
+            .ToList();
+
+        var projectsWithEvents = ChangeTracker
+            .Entries<global::Organization.Domain.Project>()
             .Select(entry => entry.Entity)
             .Where(aggregate => aggregate.DomainEvents.Count > 0)
             .ToList();
 
         var affectedRows = await base.SaveChangesAsync(cancellationToken);
 
-        foreach (var aggregate in aggregatesWithEvents)
+        foreach (var aggregate in organizationsWithEvents)
+        {
+            aggregate.ClearDomainEvents();
+        }
+
+        foreach (var aggregate in holdingsWithEvents)
+        {
+            aggregate.ClearDomainEvents();
+        }
+
+        foreach (var aggregate in projectsWithEvents)
         {
             aggregate.ClearDomainEvents();
         }
@@ -5258,7 +7107,6 @@ public sealed class OrganizationDbContext : DbContext, IUnitOfWork
         return affectedRows;
     }
 }
-
 
 ================================================================================
 FILE: src\Modules\Organization\Organization.Infrastructure\Persistence\OrganizationRepository.cs
@@ -5343,6 +7191,85 @@ public sealed class OrganizationRepository : IOrganizationRepository
 
 
 ================================================================================
+FILE: src\Modules\Organization\Organization.Infrastructure\Persistence\ProjectRepository.cs
+SIZE: 1.99 KB
+================================================================================
+using MachineryManager.Organization.Application.Abstractions;
+using MachineryManager.Organization.Application.Features.Projects.Dtos;
+using MachineryManager.Organization.Application.Features.Projects.Queries.SearchProjects;
+using Microsoft.EntityFrameworkCore;
+using Organization.Domain;
+
+namespace MachineryManager.Organization.Infrastructure.Persistence;
+
+public sealed class ProjectRepository : IProjectRepository
+{
+    private readonly OrganizationDbContext _dbContext;
+
+    public ProjectRepository(OrganizationDbContext dbContext)
+    {
+        _dbContext = dbContext;
+    }
+
+    public Task<Project?> GetByIdAsync(ProjectId id, CancellationToken cancellationToken = default) =>
+        _dbContext.Projects.FirstOrDefaultAsync(p => p.Id == id, cancellationToken);
+
+    public void Add(Project aggregate) => _dbContext.Projects.Add(aggregate);
+
+    public void Update(Project aggregate) => _dbContext.Projects.Update(aggregate);
+
+    public async Task<SearchProjectsResponse> SearchAsync(
+        string? searchTerm,
+        int page,
+        int pageSize,
+        CancellationToken cancellationToken = default)
+    {
+        var query = _dbContext.Projects.AsNoTracking().AsQueryable();
+
+        if (!string.IsNullOrWhiteSpace(searchTerm))
+        {
+            query = query.Where(p => p.Name.Contains(searchTerm));
+        }
+
+        var totalItems = await query.CountAsync(cancellationToken);
+
+        var items = await query
+            .OrderBy(p => p.Name)
+            .Skip((page - 1) * pageSize)
+            .Take(pageSize)
+            .Select(p => new ProjectDto(p.Id.Value, p.Name, p.OrganizationId.Value))
+            .ToListAsync(cancellationToken);
+
+        var totalPages = totalItems == 0 ? 0 : (int)Math.Ceiling(totalItems / (double)pageSize);
+
+        return new SearchProjectsResponse(
+            items,
+            page,
+            pageSize,
+            totalItems,
+            totalPages,
+            page < totalPages,
+            page > 1);
+    }
+}
+
+================================================================================
+FILE: src\Modules\Organization\Organization.Presentation\Contracts\AssignOrganizationToHoldingRequest.cs
+SIZE: 0.14 KB
+================================================================================
+namespace MachineryManager.Organization.Presentation.Contracts;
+
+public sealed record AssignOrganizationToHoldingRequest(Guid HoldingId);
+
+================================================================================
+FILE: src\Modules\Organization\Organization.Presentation\Contracts\RegisterHoldingRequest.cs
+SIZE: 0.12 KB
+================================================================================
+namespace MachineryManager.Organization.Presentation.Contracts;
+
+public sealed record RegisterHoldingRequest(string Name);
+
+================================================================================
 FILE: src\Modules\Organization\Organization.Presentation\Contracts\RegisterOrganizationRequest.cs
 SIZE: 0.3 KB
 ================================================================================
@@ -5356,9 +7283,104 @@ public sealed record RegisterOrganizationRequest(string Name);
 
 
 ================================================================================
-FILE: src\Modules\Organization\Organization.Presentation\Endpoints\OrganizationEndpoints.cs
-SIZE: 3.22 KB
+FILE: src\Modules\Organization\Organization.Presentation\Contracts\RegisterProjectRequest.cs
+SIZE: 0.14 KB
 ================================================================================
+namespace MachineryManager.Organization.Presentation.Contracts;
+
+public sealed record RegisterProjectRequest(Guid OrganizationId, string Name);
+
+================================================================================
+FILE: src\Modules\Organization\Organization.Presentation\Endpoints\HoldingEndpoints.cs
+SIZE: 2.98 KB
+================================================================================
+using MachineryManager.Organization.Application.Features.Holdings.Commands.RegisterHolding;
+using MachineryManager.Organization.Application.Features.Holdings.Queries.GetHoldingById;
+using MachineryManager.Organization.Application.Features.Holdings.Queries.SearchHoldings;
+using MachineryManager.Organization.Presentation.Contracts;
+using MediatR;
+using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Routing;
+using OpenIddict.Validation.AspNetCore;
+
+namespace MachineryManager.Organization.Presentation.Endpoints;
+
+public static class HoldingEndpoints
+{
+    public static IEndpointRouteBuilder MapHoldingEndpoints(this IEndpointRouteBuilder endpoints)
+    {
+        var group = endpoints
+            .MapGroup("/api/v1/holdings")
+            .WithTags("Holdings")
+            .RequireAuthorization(policy => policy
+                .AddAuthenticationSchemes(OpenIddictValidationAspNetCoreDefaults.AuthenticationScheme)
+                .RequireAuthenticatedUser());
+
+        group.MapPost("/", RegisterHoldingAsync)
+            .WithName("RegisterHolding")
+            .WithSummary("Registers a new Holding.");
+
+        group.MapGet("/{holdingId:guid}", GetHoldingByIdAsync)
+            .WithName("GetHoldingById")
+            .WithSummary("Retrieves a single Holding by its identifier.");
+
+        group.MapGet("/", SearchHoldingsAsync)
+            .WithName("SearchHoldings")
+            .WithSummary("Searches Holdings with optional text filtering and pagination.");
+
+        return endpoints;
+    }
+
+    private static async Task<IResult> RegisterHoldingAsync(
+        RegisterHoldingRequest request,
+        ISender sender,
+        HttpContext httpContext,
+        CancellationToken cancellationToken)
+    {
+        var result = await sender.Send(new RegisterHoldingCommand(request.Name), cancellationToken);
+
+        return result.IsSuccess
+            ? Results.Created($"/api/v1/holdings/{result.Value}", new { id = result.Value })
+            : result.ToProblemResult(httpContext);
+    }
+
+    private static async Task<IResult> GetHoldingByIdAsync(
+        Guid holdingId,
+        ISender sender,
+        HttpContext httpContext,
+        CancellationToken cancellationToken)
+    {
+        var result = await sender.Send(new GetHoldingByIdQuery(holdingId), cancellationToken);
+
+        return result.IsSuccess
+            ? Results.Ok(result.Value)
+            : result.ToProblemResult(httpContext);
+    }
+
+    private static async Task<IResult> SearchHoldingsAsync(
+        ISender sender,
+        HttpContext httpContext,
+        CancellationToken cancellationToken,
+        string? search = null,
+        int page = 1,
+        int pageSize = 25)
+    {
+        var result = await sender.Send(
+            new SearchHoldingsQuery(search, page, pageSize),
+            cancellationToken);
+
+        return result.IsSuccess
+            ? Results.Ok(result.Value)
+            : result.ToProblemResult(httpContext);
+    }
+}
+
+================================================================================
+FILE: src\Modules\Organization\Organization.Presentation\Endpoints\OrganizationEndpoints.cs
+SIZE: 4.71 KB
+================================================================================
+using MachineryManager.Organization.Application.Features.Organizations.Commands.AssignOrganizationToHolding;
 using MachineryManager.Organization.Application.Features.Organizations.Commands.RegisterOrganization;
 using MachineryManager.Organization.Application.Features.Organizations.Queries.GetOrganizationById;
 using MachineryManager.Organization.Application.Features.Organizations.Queries.SearchOrganizations;
@@ -5367,6 +7389,7 @@ using MediatR;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Routing;
+using OpenIddict.Validation.AspNetCore;
 
 namespace MachineryManager.Organization.Presentation.Endpoints;
 
@@ -5383,7 +7406,16 @@ public static class OrganizationEndpoints
     {
         var group = endpoints
             .MapGroup("/api/v1/organizations")
-            .WithTags("Organizations");
+            .WithTags("Organizations")
+            // ADR-0030: every Organization endpoint requires a valid
+            // Bearer access token issued by this app's own OpenIddict
+            // server. Role/permission-scoped restrictions per action
+            // are NOT yet applied here — that requires the
+            // Administration module's Role→Permission mapping, which
+            // does not exist yet (open item, not a silent gap).
+            .RequireAuthorization(policy => policy
+                .AddAuthenticationSchemes(OpenIddictValidationAspNetCoreDefaults.AuthenticationScheme)
+                .RequireAuthenticatedUser());
 
         group.MapPost("/", RegisterOrganizationAsync)
             .WithName("RegisterOrganization")
@@ -5396,6 +7428,10 @@ public static class OrganizationEndpoints
         group.MapGet("/", SearchOrganizationsAsync)
             .WithName("SearchOrganizations")
             .WithSummary("Searches Organizations with optional text filtering and pagination.");
+
+        group.MapPost("/{organizationId:guid}/assign-to-holding", AssignOrganizationToHoldingAsync)
+            .WithName("AssignOrganizationToHolding")
+            .WithSummary("Assigns an Organization to a Holding.");
 
         return endpoints;
     }
@@ -5442,8 +7478,111 @@ public static class OrganizationEndpoints
             ? Results.Ok(result.Value)
             : result.ToProblemResult(httpContext);
     }
+
+    private static async Task<IResult> AssignOrganizationToHoldingAsync(
+        Guid organizationId,
+        AssignOrganizationToHoldingRequest request,
+        ISender sender,
+        HttpContext httpContext,
+        CancellationToken cancellationToken)
+    {
+        var result = await sender.Send(
+            new AssignOrganizationToHoldingCommand(organizationId, request.HoldingId),
+            cancellationToken);
+
+        return result.IsSuccess
+            ? Results.NoContent()
+            : result.ToProblemResult(httpContext);
+    }
 }
 
+================================================================================
+FILE: src\Modules\Organization\Organization.Presentation\Endpoints\ProjectEndpoints.cs
+SIZE: 3.05 KB
+================================================================================
+using MachineryManager.Organization.Application.Features.Projects.Commands.RegisterProject;
+using MachineryManager.Organization.Application.Features.Projects.Queries.GetProjectById;
+using MachineryManager.Organization.Application.Features.Projects.Queries.SearchProjects;
+using MachineryManager.Organization.Presentation.Contracts;
+using MediatR;
+using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Routing;
+using OpenIddict.Validation.AspNetCore;
+
+namespace MachineryManager.Organization.Presentation.Endpoints;
+
+public static class ProjectEndpoints
+{
+    public static IEndpointRouteBuilder MapProjectEndpoints(this IEndpointRouteBuilder endpoints)
+    {
+        var group = endpoints
+            .MapGroup("/api/v1/projects")
+            .WithTags("Projects")
+            .RequireAuthorization(policy => policy
+                .AddAuthenticationSchemes(OpenIddictValidationAspNetCoreDefaults.AuthenticationScheme)
+                .RequireAuthenticatedUser());
+
+        group.MapPost("/", RegisterProjectAsync)
+            .WithName("RegisterProject")
+            .WithSummary("Registers a new Project under an Organization.");
+
+        group.MapGet("/{projectId:guid}", GetProjectByIdAsync)
+            .WithName("GetProjectById")
+            .WithSummary("Retrieves a single Project by its identifier.");
+
+        group.MapGet("/", SearchProjectsAsync)
+            .WithName("SearchProjects")
+            .WithSummary("Searches Projects with optional text filtering and pagination.");
+
+        return endpoints;
+    }
+
+    private static async Task<IResult> RegisterProjectAsync(
+        RegisterProjectRequest request,
+        ISender sender,
+        HttpContext httpContext,
+        CancellationToken cancellationToken)
+    {
+        var result = await sender.Send(
+            new RegisterProjectCommand(request.OrganizationId, request.Name),
+            cancellationToken);
+
+        return result.IsSuccess
+            ? Results.Created($"/api/v1/projects/{result.Value}", new { id = result.Value })
+            : result.ToProblemResult(httpContext);
+    }
+
+    private static async Task<IResult> GetProjectByIdAsync(
+        Guid projectId,
+        ISender sender,
+        HttpContext httpContext,
+        CancellationToken cancellationToken)
+    {
+        var result = await sender.Send(new GetProjectByIdQuery(projectId), cancellationToken);
+
+        return result.IsSuccess
+            ? Results.Ok(result.Value)
+            : result.ToProblemResult(httpContext);
+    }
+
+    private static async Task<IResult> SearchProjectsAsync(
+        ISender sender,
+        HttpContext httpContext,
+        CancellationToken cancellationToken,
+        string? search = null,
+        int page = 1,
+        int pageSize = 25)
+    {
+        var result = await sender.Send(
+            new SearchProjectsQuery(search, page, pageSize),
+            cancellationToken);
+
+        return result.IsSuccess
+            ? Results.Ok(result.Value)
+            : result.ToProblemResult(httpContext);
+    }
+}
 
 ================================================================================
 FILE: src\Modules\Organization\Organization.Presentation\Endpoints\ResultExtensions.cs
@@ -5509,7 +7648,7 @@ internal static class ResultExtensions
 
 ================================================================================
 FILE: src\Modules\Organization\Organization.Presentation\Organization.Presentation.csproj
-SIZE: 0.26 KB
+SIZE: 0.35 KB
 ================================================================================
 <Project Sdk="Microsoft.NET.Sdk">
 
@@ -5521,6 +7660,10 @@ SIZE: 0.26 KB
     <ProjectReference Include="..\Organization.Application\Organization.Application.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <PackageReference Include="OpenIddict.Validation.AspNetCore" />
+  </ItemGroup>
+
 </Project>
 
 
@@ -5528,12 +7671,12 @@ SIZE: 0.26 KB
 # SECTION 3: SNAPSHOT SUMMARY
 ================================================================================
 
-Generation Time     : 00:00:01.4380982
-Total Files Scanned : 91
-Files Included      : 91
+Generation Time     : 00:00:02.2075159
+Total Files Scanned : 140
+Files Included      : 140
 Files Skipped       : 0
-Total Source Size   : 0.19 MB
-Snapshot File Size  : 0.22 MB
+Total Source Size   : 0.25 MB
+Snapshot File Size  : 0.3 MB
 Output Path         : C:\Users\i\source\repos\MachineryManagerEnterprise\MME_Codebase_Snapshot.txt
 
 Excluded Directories: .git, .github, .vs, .vscode, .idea, .azure, .devcontainer, bin, obj, packages, publish, out, release, releases, debug, x64, x86, arm64, artifacts, .artifacts, node_modules, dist, build, bower_components, jspm_packages, docs-english, docs-farsi, docs, tools, test-results, coverage, .coverage, TestResults, lib, .angular, .next, .nuxt, .svelte-kit, .cache, .temp, tmp

@@ -1,3 +1,11 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
+  <ItemGroup>
+    <FrameworkReference Include="Microsoft.AspNetCore.App" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\MachineryManager.SharedKernel.Abstractions\MachineryManager.SharedKernel.Abstractions.csproj" />
+  </ItemGroup>
+
 </Project>
