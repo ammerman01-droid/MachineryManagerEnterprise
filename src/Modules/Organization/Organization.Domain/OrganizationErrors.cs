@@ -17,4 +17,9 @@ public static class OrganizationErrors
     public static Error NameTooLong(int maxLength) => Error.Validation(
         "Organization.NameTooLong",
         $"Organization name shall not exceed {maxLength} characters.");
+
+    /// <summary>Creates an error indicating that a Holding identifier is required.</summary>
+    public static Error HoldingRequired() => Error.Validation(
+        "Organization.HoldingRequired",
+        "A valid Holding identifier is required.");
 }

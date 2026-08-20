@@ -6,13 +6,8 @@ namespace Organization.Domain;
 
 /// <summary>
 /// Organization (GL-ORG-001): the tenant boundary and business owner
-/// of Assets, per BR-017 (Business Specification — Organization
-/// Management).
-///
-/// This Aggregate is intentionally minimal. BR-017 explicitly leaves
-/// sub-organizations, ownership transfer, and any lifecycle beyond
-/// registration as open questions (Section 9) — behavior for those
-/// shall not be added here until Domain Discovery resolves them.
+/// of Assets (via Project), per BR-017 (Business Specification —
+/// Organization Management).
 /// </summary>
 public sealed class Organization : AggregateRoot<OrganizationId>
 {
@@ -21,6 +16,13 @@ public sealed class Organization : AggregateRoot<OrganizationId>
 
     /// <summary>Gets the name of the organization.</summary>
     public string Name { get; private set; }
+
+    /// <summary>
+    /// Gets the identifier of the Holding this Organization belongs
+    /// to, if any (chat, 2026-08-19). An Organization may exist
+    /// without a Holding (standalone tenant).
+    /// </summary>
+    public HoldingId? HoldingId { get; private set; }
 
     // Reserved for EF Core materialization only.
     private Organization()
@@ -56,5 +58,26 @@ public sealed class Organization : AggregateRoot<OrganizationId>
             new OrganizationRegistered(organization.Id, organization.Name, dateTimeProvider.UtcNow));
 
         return organization;
+    }
+
+    /// <summary>
+    /// Assigns this Organization to a Holding (chat, 2026-08-19). An
+    /// Organization belongs to at most one Holding at a time.
+    /// </summary>
+    /// <param name="holdingId">The identifier of the Holding.</param>
+    /// <param name="dateTimeProvider">Provides the current UTC time for the raised domain event.</param>
+    /// <returns>A <see cref="Result"/> indicating success or a validation error.</returns>
+    public Result AssignToHolding(HoldingId holdingId, IDateTimeProvider dateTimeProvider)
+    {
+        if (holdingId is null)
+        {
+            return Result.Failure(OrganizationErrors.HoldingRequired());
+        }
+
+        HoldingId = holdingId;
+
+        RaiseDomainEvent(new OrganizationAssignedToHolding(Id, holdingId, dateTimeProvider.UtcNow));
+
+        return Result.Success();
     }
 }
