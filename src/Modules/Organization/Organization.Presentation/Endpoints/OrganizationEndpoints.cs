@@ -3,9 +3,11 @@ using MachineryManager.Organization.Application.Features.Organizations.Queries.G
 using MachineryManager.Organization.Application.Features.Organizations.Queries.SearchOrganizations;
 using MachineryManager.Organization.Presentation.Contracts;
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Routing;
+using OpenIddict.Validation.AspNetCore;
 
 namespace MachineryManager.Organization.Presentation.Endpoints;
 
@@ -22,7 +24,16 @@ public static class OrganizationEndpoints
     {
         var group = endpoints
             .MapGroup("/api/v1/organizations")
-            .WithTags("Organizations");
+            .WithTags("Organizations")
+            // ADR-0030: every Organization endpoint requires a valid
+            // Bearer access token issued by this app's own OpenIddict
+            // server. Role/permission-scoped restrictions per action
+            // are NOT yet applied here — that requires the
+            // Administration module's Role→Permission mapping, which
+            // does not exist yet (open item, not a silent gap).
+            .RequireAuthorization(policy => policy
+                .AddAuthenticationSchemes(OpenIddictValidationAspNetCoreDefaults.AuthenticationScheme)
+                .RequireAuthenticatedUser());
 
         group.MapPost("/", RegisterOrganizationAsync)
             .WithName("RegisterOrganization")

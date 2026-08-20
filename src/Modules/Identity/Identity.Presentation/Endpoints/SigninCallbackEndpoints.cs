@@ -20,8 +20,21 @@ public static class SigninCallbackEndpoints
     /// <returns>The same <see cref="IEndpointRouteBuilder"/> for chaining.</returns>
     public static IEndpointRouteBuilder MapIdentitySigninCallbackEndpoints(this IEndpointRouteBuilder endpoints)
     {
-        Func<HttpContext, Task<IResult>> handler = HandleCallbackAsync;
-        endpoints.MapGet("/signin-oidc", handler);
+        Func<HttpContext, Task<IResult>> callbackHandler = HandleCallbackAsync;
+        endpoints.MapGet("/signin-oidc", callbackHandler);
+
+        // Starts the flow: triggers OpenIddict.Client to generate a real
+        // PKCE code_verifier/code_challenge, store the correlation state,
+        // and redirect to /connect/authorize.
+        endpoints.MapGet("/identity/connect", (string? returnUrl) =>
+        {
+            var properties = new AuthenticationProperties
+            {
+                RedirectUri = string.IsNullOrEmpty(returnUrl) ? "/" : returnUrl,
+            };
+
+            return Results.Challenge(properties, [OpenIddictClientAspNetCoreDefaults.AuthenticationScheme]);
+        });
 
         return endpoints;
     }

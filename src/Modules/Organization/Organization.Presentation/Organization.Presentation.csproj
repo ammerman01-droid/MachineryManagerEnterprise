@@ -8,4 +8,8 @@
     <ProjectReference Include="..\Organization.Application\Organization.Application.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <PackageReference Include="OpenIddict.Validation.AspNetCore" />
+  </ItemGroup>
+
 </Project>

@@ -57,7 +57,11 @@
 
         if (result.Succeeded)
         {
-            NavigationManager.NavigateTo(ReturnUrl ?? "/", forceLoad: true);
+            // Route through /identity/connect so OpenIddict.Client also
+            // acquires and stores an access/refresh token on this same
+            // session — not just a plain local cookie login.
+            var target = $"/identity/connect?returnUrl={Uri.EscapeDataString(ReturnUrl ?? "/")}";
+            NavigationManager.NavigateTo(target, forceLoad: true);
             return;
         }
 

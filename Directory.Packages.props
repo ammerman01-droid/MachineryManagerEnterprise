@@ -80,6 +80,7 @@
     <PackageVersion Include="OpenIddict.Client" Version="7.6.0" />
     <PackageVersion Include="OpenIddict.Client.AspNetCore" Version="7.6.0" />
     <PackageVersion Include="OpenIddict.Client.SystemNetHttp" Version="7.6.0" />
+    <PackageVersion Include="OpenIddict.Validation.AspNetCore" Version="7.6.0" />
 
     <!-- Enterprise Reporting Engine [TE-0035 (QuestPDF / ADR-0029; FastReport and RDLC are explicitly excluded)] -->
     <PackageVersion Include="QuestPDF" Version="2025.1.2" />
