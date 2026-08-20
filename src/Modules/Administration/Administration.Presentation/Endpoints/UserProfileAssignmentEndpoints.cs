@@ -7,6 +7,8 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Routing;
 using OpenIddict.Validation.AspNetCore;
 
+using static OpenIddict.Abstractions.OpenIddictConstants;
+
 namespace MachineryManager.Administration.Presentation.Endpoints;
 
 /// <summary>Maps the UserProfileAssignment module's REST endpoints.</summary>
@@ -26,7 +28,12 @@ public static class UserProfileAssignmentEndpoints
 
         group.MapPost("/", AssignUserToProfileAsync)
             .WithName("AssignUserToProfile")
-            .WithSummary("Assigns a User to a Profile at a specific authorization scope.");
+            .WithSummary("Assigns a User to a Profile at a specific authorization scope.")
+            // Bootstrap-phase restriction (chat, 2026-08-20) — see the
+            // same note on ProfileEndpoints.CreateProfile.
+            .RequireAuthorization(policy => policy
+                .AddAuthenticationSchemes(OpenIddictValidationAspNetCoreDefaults.AuthenticationScheme)
+                .RequireClaim(Claims.Role, "System Administrator"));
 
         return endpoints;
     }

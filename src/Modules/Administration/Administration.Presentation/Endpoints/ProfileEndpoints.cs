@@ -7,6 +7,8 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Routing;
 using OpenIddict.Validation.AspNetCore;
 
+using static OpenIddict.Abstractions.OpenIddictConstants;
+
 namespace MachineryManager.Administration.Presentation.Endpoints;
 
 /// <summary>Maps the Profile module's REST endpoints.</summary>
@@ -26,7 +28,16 @@ public static class ProfileEndpoints
 
         group.MapPost("/", CreateProfileAsync)
             .WithName("CreateProfile")
-            .WithSummary("Creates a new permission Profile.");
+            .WithSummary("Creates a new permission Profile.")
+            // Bootstrap-phase restriction (chat, 2026-08-20): only a
+            // Platform SuperUser (System Administrator) may create
+            // Profiles. Full scope-aware SuperUser resolution (Holding/
+            // Organization/Project) is a documented follow-up — this is
+            // NOT the final permission model, just closing the
+            // immediate privilege-escalation gap.
+            .RequireAuthorization(policy => policy
+                .AddAuthenticationSchemes(OpenIddictValidationAspNetCoreDefaults.AuthenticationScheme)
+                .RequireClaim(Claims.Role, "System Administrator"));
 
         group.MapGet("/{profileId:guid}", GetProfileByIdAsync)
             .WithName("GetProfileById")

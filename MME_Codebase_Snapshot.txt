@@ -1,7 +1,7 @@
 ﻿
 ================================================================================
   MACHINERYMANAGERENTERPRISE - CODEBASE SNAPSHOT
-  Generated: 2026-08-20 19:11:30
+  Generated: 2026-08-21 01:28:36
   Source: C:\Users\i\source\repos\MachineryManagerEnterprise
   Purpose: Complete source code reference for AI-assisted development
   Excludes: .md, .gitignore, this script, build artifacts, binaries, IDE,
@@ -21,6 +21,7 @@ MachineryManagerEnterprise
 |   |   |   |-- Error.cs
 |   |   |   |-- ErrorType.cs
 |   |   |   |-- IDomainEvent.cs
+|   |   |   |-- IHasDomainEvents.cs
 |   |   |   |-- MachineryManager.SharedKernel.csproj
 |   |   |   |-- Result.cs
 |   |   |   +-- ValueObject.cs
@@ -28,6 +29,7 @@ MachineryManagerEnterprise
 |   |   |   |-- DependencyInjection.cs
 |   |   |   |-- ICurrentUserService.cs
 |   |   |   |-- IDateTimeProvider.cs
+|   |   |   |-- IDomainEventDispatcher.cs
 |   |   |   |-- IRepository.cs
 |   |   |   |-- IUnitOfWork.cs
 |   |   |   |-- MachineryManager.SharedKernel.Abstractions.csproj
@@ -65,6 +67,69 @@ MachineryManagerEnterprise
 |   |       |-- MachineryManager.Web.csproj
 |   |       +-- Program.cs
 |   |-- Modules
+|   |   |-- Administration
+|   |   |   |-- Administration.Application
+|   |   |   |   |-- Abstractions
+|   |   |   |   |   |-- IAdministrationUnitOfWork.cs
+|   |   |   |   |   |-- IProfileRepository.cs
+|   |   |   |   |   +-- IUserProfileAssignmentRepository.cs
+|   |   |   |   |-- Behaviors
+|   |   |   |   |   +-- ValidationBehavior.cs
+|   |   |   |   |-- Features
+|   |   |   |   |   |-- Profiles
+|   |   |   |   |   |   |-- Commands
+|   |   |   |   |   |   |   +-- CreateProfile
+|   |   |   |   |   |   |       |-- CreateProfileCommand.cs
+|   |   |   |   |   |   |       |-- CreateProfileCommandHandler.cs
+|   |   |   |   |   |   |       +-- CreateProfileCommandValidator.cs
+|   |   |   |   |   |   |-- Dtos
+|   |   |   |   |   |   |   +-- ProfileDto.cs
+|   |   |   |   |   |   +-- Queries
+|   |   |   |   |   |       +-- GetProfileById
+|   |   |   |   |   |           |-- GetProfileByIdQuery.cs
+|   |   |   |   |   |           |-- GetProfileByIdQueryHandler.cs
+|   |   |   |   |   |           +-- GetProfileByIdQueryValidator.cs
+|   |   |   |   |   +-- UserProfileAssignments
+|   |   |   |   |       +-- Commands
+|   |   |   |   |           +-- AssignUserToProfile
+|   |   |   |   |               |-- AssignUserToProfileCommand.cs
+|   |   |   |   |               |-- AssignUserToProfileCommandHandler.cs
+|   |   |   |   |               +-- AssignUserToProfileCommandValidator.cs
+|   |   |   |   |-- Administration.Application.csproj
+|   |   |   |   |-- DependencyInjection.cs
+|   |   |   |   |-- DomainEventNotification.cs
+|   |   |   |   +-- MediatRDomainEventDispatcher.cs
+|   |   |   |-- Administration.Domain
+|   |   |   |   |-- Events
+|   |   |   |   |   |-- ProfileCreated.cs
+|   |   |   |   |   +-- UserAssignedToProfile.cs
+|   |   |   |   |-- Administration.Domain.csproj
+|   |   |   |   |-- AuthorizationScope.cs
+|   |   |   |   |-- AuthorizationScopeLevel.cs
+|   |   |   |   |-- Profile.cs
+|   |   |   |   |-- ProfileErrors.cs
+|   |   |   |   |-- ProfileId.cs
+|   |   |   |   |-- UserProfileAssignment.cs
+|   |   |   |   +-- UserProfileAssignmentId.cs
+|   |   |   |-- Administration.Infrastructure
+|   |   |   |   |-- Persistence
+|   |   |   |   |   |-- Configurations
+|   |   |   |   |   |   |-- ProfileConfiguration.cs
+|   |   |   |   |   |   +-- UserProfileAssignmentConfiguration.cs
+|   |   |   |   |   |-- AdministrationDbContext.cs
+|   |   |   |   |   |-- ProfileRepository.cs
+|   |   |   |   |   +-- UserProfileAssignmentRepository.cs
+|   |   |   |   |-- Administration.Infrastructure.csproj
+|   |   |   |   +-- DependencyInjection.cs
+|   |   |   +-- Administration.Presentation
+|   |   |       |-- Contracts
+|   |   |       |   |-- AssignUserToProfileRequest.cs
+|   |   |       |   +-- CreateProfileRequest.cs
+|   |   |       |-- Endpoints
+|   |   |       |   |-- ProfileEndpoints.cs
+|   |   |       |   |-- ResultExtensions.cs
+|   |   |       |   +-- UserProfileAssignmentEndpoints.cs
+|   |   |       +-- Administration.Presentation.csproj
 |   |   |-- Identity
 |   |   |   |-- Identity.Application
 |   |   |   |   +-- Identity.Application.csproj
@@ -168,6 +233,8 @@ MachineryManagerEnterprise
 |   |       |   |               |-- SearchProjectsQueryHandler.cs
 |   |       |   |               +-- SearchProjectsQueryValidator.cs
 |   |       |   |-- DependencyInjection.cs
+|   |       |   |-- DomainEventNotification.cs
+|   |       |   |-- MediatRDomainEventDispatcher.cs
 |   |       |   +-- Organization.Application.csproj
 |   |       |-- Organization.Domain
 |   |       |   |-- Events
@@ -377,7 +444,7 @@ SIZE: 0.05 KB
 
 ================================================================================
 FILE: MachineryManagerEnterprise.slnx
-SIZE: 1.74 KB
+SIZE: 2.23 KB
 ================================================================================
 <Solution>
   <Folder Name="/src/" />
@@ -403,6 +470,12 @@ SIZE: 1.74 KB
     <Project Path="src/Modules/Organization/Organization.Application/Organization.Application.csproj" />
     <Project Path="src/Modules/Organization/Organization.Infrastructure/Organization.Infrastructure.csproj" />
     <Project Path="src/Modules/Organization/Organization.Presentation/Organization.Presentation.csproj" />
+  </Folder>
+  <Folder Name="/src/Modules/Administration/">
+    <Project Path="src/Modules/Administration/Administration.Domain/Administration.Domain.csproj" />
+    <Project Path="src/Modules/Administration/Administration.Application/Administration.Application.csproj" />
+    <Project Path="src/Modules/Administration/Administration.Infrastructure/Administration.Infrastructure.csproj" />
+    <Project Path="src/Modules/Administration/Administration.Presentation/Administration.Presentation.csproj" />
   </Folder>
 </Solution>
 
@@ -485,6 +558,27 @@ public interface IDateTimeProvider
 {
     /// <summary>The current UTC time.</summary>
     DateTimeOffset UtcNow { get; }
+}
+
+================================================================================
+FILE: src\BuildingBlocks\MachineryManager.SharedKernel.Abstractions\IDomainEventDispatcher.cs
+SIZE: 0.69 KB
+================================================================================
+namespace MachineryManager.SharedKernel.Abstractions;
+
+/// <summary>
+/// Dispatches domain events to their subscribers. Implemented in the
+/// Application layer (ADR-0011) and consumed by Infrastructure to
+/// publish events after successful persistence.
+/// </summary>
+public interface IDomainEventDispatcher
+{
+    /// <summary>
+    /// Dispatches the given domain events to all registered handlers.
+    /// </summary>
+    /// <param name="events">The domain events to dispatch.</param>
+    /// <param name="cancellationToken">Token to cancel the asynchronous operation.</param>
+    Task DispatchAsync(IReadOnlyCollection<IDomainEvent> events, CancellationToken cancellationToken = default);
 }
 
 ================================================================================
@@ -581,7 +675,7 @@ SIZE: 0.05 KB
 
 ================================================================================
 FILE: src\BuildingBlocks\MachineryManager.SharedKernel.Infrastructure\CurrentUserService.cs
-SIZE: 1.63 KB
+SIZE: 1.88 KB
 ================================================================================
 using System.Security.Claims;
 using MachineryManager.SharedKernel.Abstractions;
@@ -597,11 +691,16 @@ public sealed class CurrentUserService : ICurrentUserService
 {
     private readonly IHttpContextAccessor _httpContextAccessor;
 
+    /// <summary>
+    /// Initializes a new instance of the <see cref="CurrentUserService"/> class.
+    /// </summary>
+    /// <param name="httpContextAccessor">The HTTP context accessor.</param>
     public CurrentUserService(IHttpContextAccessor httpContextAccessor)
     {
         _httpContextAccessor = httpContextAccessor;
     }
 
+    /// <inheritdoc />
     public Guid? UserId
     {
         get
@@ -612,6 +711,7 @@ public sealed class CurrentUserService : ICurrentUserService
         }
     }
 
+    /// <inheritdoc />
     public Guid? OrganizationId
     {
         get
@@ -647,7 +747,7 @@ SIZE: 0.3 KB
 
 ================================================================================
 FILE: src\BuildingBlocks\MachineryManager.SharedKernel\AggregateRoot.cs
-SIZE: 1.7 KB
+SIZE: 1.72 KB
 ================================================================================
 namespace MachineryManager.SharedKernel;
 
@@ -658,7 +758,7 @@ namespace MachineryManager.SharedKernel;
 /// describe the business facts resulting from its own operations.
 /// </summary>
 /// <typeparam name="TId">The strongly-typed identifier type.</typeparam>
-public abstract class AggregateRoot<TId> : Entity<TId>
+public abstract class AggregateRoot<TId> : Entity<TId>, IHasDomainEvents
     where TId : notnull
 {
     private readonly List<IDomainEvent> _domainEvents = [];
@@ -855,6 +955,26 @@ public interface IDomainEvent
     /// UTC timestamp at which the underlying business fact occurred.
     /// </summary>
     DateTimeOffset OccurredOn { get; }
+}
+
+================================================================================
+FILE: src\BuildingBlocks\MachineryManager.SharedKernel\IHasDomainEvents.cs
+SIZE: 0.57 KB
+================================================================================
+namespace MachineryManager.SharedKernel;
+
+/// <summary>
+/// Implemented by aggregates that raise domain events, allowing
+/// infrastructure to collect and dispatch them generically without
+/// depending on specific aggregate types.
+/// </summary>
+public interface IHasDomainEvents
+{
+    /// <summary>The domain events raised by this aggregate that have not yet been dispatched.</summary>
+    IReadOnlyCollection<IDomainEvent> DomainEvents { get; }
+
+    /// <summary>Clears all domain events after they have been dispatched.</summary>
+    void ClearDomainEvents();
 }
 
 ================================================================================
@@ -1418,7 +1538,7 @@ SIZE: 0.42 KB
 
 ================================================================================
 FILE: src\Host\MachineryManager.Web\MachineryManager.Web.csproj
-SIZE: 2.06 KB
+SIZE: 2.2 KB
 ================================================================================
 <Project Sdk="Microsoft.NET.Sdk.Web">
 
@@ -1437,17 +1557,15 @@ SIZE: 2.06 KB
     <ProjectReference Include="..\..\Modules\Organization\Organization.Presentation\Organization.Presentation.csproj" />
     <ProjectReference Include="..\..\Modules\Identity\Identity.Infrastructure\Identity.Infrastructure.csproj" />
     <ProjectReference Include="..\..\Modules\Identity\Identity.Presentation\Identity.Presentation.csproj" />
+    <ProjectReference Include="..\..\Modules\Administration\Administration.Application\Administration.Application.csproj" />
+    <ProjectReference Include="..\..\Modules\Administration\Administration.Infrastructure\Administration.Infrastructure.csproj" />
+    <ProjectReference Include="..\..\Modules\Administration\Administration.Presentation\Administration.Presentation.csproj" />
   </ItemGroup>
 
   <ItemGroup>
-    <!-- UI [TE-0003 (MudBlazor / ADR-0005)] -->
     <PackageReference Include="MudBlazor" />
-
-    <!-- API Documentation [TE-0021 (Scalar & NSwag / ADR-0035)] -->
     <PackageReference Include="Microsoft.AspNetCore.OpenApi" />
     <PackageReference Include="Scalar.AspNetCore" />
-
-    <!-- Logging & Observability [TE-0007 (Serilog / ADR-0009), TE-0008 & TE-0017 (OpenTelemetry / ADR-0010, ADR-0033)] -->
     <PackageReference Include="Serilog.AspNetCore" />
     <PackageReference Include="Serilog.Sinks.Console" />
     <PackageReference Include="OpenTelemetry.Extensions.Hosting" />
@@ -1458,11 +1576,14 @@ SIZE: 2.06 KB
 
 ================================================================================
 FILE: src\Host\MachineryManager.Web\Program.cs
-SIZE: 4.25 KB
+SIZE: 3.76 KB
 ================================================================================
 using MachineryManager.Identity.Infrastructure;
 using MachineryManager.Identity.Presentation.Endpoints;
 using MachineryManager.Identity.Infrastructure.Persistence;
+using MachineryManager.Administration.Application;
+using MachineryManager.Administration.Infrastructure;
+using MachineryManager.Administration.Presentation.Endpoints;
 using MachineryManager.Organization.Application;
 using MachineryManager.Organization.Infrastructure;
 using MachineryManager.Organization.Presentation.Endpoints;
@@ -1475,9 +1596,6 @@ using OpenTelemetry.Trace;
 using Scalar.AspNetCore;
 using Serilog;
 
-// Two-stage initialization (per ADR-0009 / ADR-0033): a bootstrap
-// logger captures any failure that happens before the host itself has
-// finished configuring the real logging pipeline.
 Log.Logger = new LoggerConfiguration()
     .WriteTo.Console()
     .CreateBootstrapLogger();
@@ -1498,44 +1616,38 @@ try
         .WithMetrics(metrics => metrics
             .AddAspNetCoreInstrumentation());
 
-    // Add services to the container.
     builder.Services.AddRazorComponents()
         .AddInteractiveServerComponents();
 
-    // UI [TE-0003 (MudBlazor / ADR-0005)]
     builder.Services.AddMudServices();
-
-    // API Documentation [TE-0021 (Scalar & NSwag / ADR-0035)]
     builder.Services.AddOpenApi();
-
-    // Cross-cutting SharedKernel infrastructure (IDateTimeProvider).
     builder.Services.AddSharedKernelInfrastructure();
 
-    // ICurrentUserService implementation (resolves open item).
-builder.Services.AddHttpContextAccessor();
-builder.Services.AddScoped<MachineryManager.SharedKernel.Abstractions.ICurrentUserService, MachineryManager.SharedKernel.Infrastructure.CurrentUserService>();
+    builder.Services.AddHttpContextAccessor();
+    builder.Services.AddScoped<MachineryManager.SharedKernel.Abstractions.ICurrentUserService, MachineryManager.SharedKernel.Infrastructure.CurrentUserService>();
 
-    // Organization module (Application + Infrastructure).
+    // Organization module
     builder.Services.AddOrganizationApplication();
     builder.Services.AddOrganizationInfrastructure(builder.Configuration);
 
-    // Identity platform module (ADR-0030).
+    // Administration module
+    builder.Services.AddAdministrationApplication();
+    builder.Services.AddAdministrationInfrastructure(builder.Configuration);
+
+    // Identity platform module
     builder.Services.AddIdentityInfrastructure(builder.Configuration);
     builder.Services.AddIdentityOpenIddictServer(builder.Environment);
     builder.Services.AddIdentityOpenIddictClient(builder.Configuration, builder.Environment);
 
     var app = builder.Build();
 
-    // Configure the HTTP request pipeline.
     if (!app.Environment.IsDevelopment())
     {
         app.UseExceptionHandler("/Error", createScopeForErrors: true);
-        // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
         app.UseHsts();
     }
     else
     {
-        // API Documentation [TE-0021 (Scalar / ADR-0035)] - interactive docs in Development only.
         app.MapOpenApi();
         app.MapScalarApiReference();
     }
@@ -1546,13 +1658,10 @@ builder.Services.AddScoped<MachineryManager.SharedKernel.Abstractions.ICurrentUs
     }
 
     app.UseSerilogRequestLogging();
-
     app.UseStatusCodePagesWithReExecute("/not-found", createScopeForStatusCodePages: true);
     app.UseHttpsRedirection();
-
     app.UseAuthentication();
     app.UseAuthorization();
-
     app.UseAntiforgery();
 
     app.MapStaticAssets();
@@ -1560,16 +1669,18 @@ builder.Services.AddScoped<MachineryManager.SharedKernel.Abstractions.ICurrentUs
         .AddInteractiveServerRenderMode()
         .AddAdditionalAssemblies(typeof(MachineryManager.Identity.Presentation.Components.Pages.Login).Assembly);
 
-    // Identity platform module: OpenIddict protocol endpoints (ADR-0030).
+    // Identity endpoints
     app.MapIdentityConnectEndpoints();
     app.MapIdentitySigninCallbackEndpoints();
 
-    // Organization module REST endpoints (07-api conventions, Section 8).
+    // Organization endpoints
     app.MapOrganizationEndpoints();
-
-    // Holding and Project module REST endpoints.
     app.MapHoldingEndpoints();
     app.MapProjectEndpoints();
+
+    // Administration endpoints
+    app.MapProfileEndpoints();
+    app.MapUserProfileAssignmentEndpoints();
 
     app.Run();
 }
@@ -1610,6 +1721,1737 @@ SIZE: 0.67 KB
     }
   }
 
+
+================================================================================
+FILE: src\Modules\Administration\Administration.Application\Abstractions\IAdministrationUnitOfWork.cs
+SIZE: 0.39 KB
+================================================================================
+using MachineryManager.SharedKernel.Abstractions;
+
+namespace MachineryManager.Administration.Application.Abstractions;
+
+/// <summary>
+/// Unit of work for the Administration module. Distinct from the
+/// Organization module's UoW so that each module commits its own
+/// aggregates (ADR-0001, Modular Monolith Rules).
+/// </summary>
+public interface IAdministrationUnitOfWork : IUnitOfWork
+{
+}
+
+================================================================================
+FILE: src\Modules\Administration\Administration.Application\Abstractions\IProfileRepository.cs
+SIZE: 0.37 KB
+================================================================================
+using MachineryManager.SharedKernel.Abstractions;
+
+namespace MachineryManager.Administration.Application.Abstractions;
+
+/// <summary>Repository contract for the <see cref="global::Administration.Domain.Profile"/> aggregate.</summary>
+public interface IProfileRepository : IRepository<global::Administration.Domain.Profile, global::Administration.Domain.ProfileId>
+{
+}
+
+================================================================================
+FILE: src\Modules\Administration\Administration.Application\Abstractions\IUserProfileAssignmentRepository.cs
+SIZE: 0.42 KB
+================================================================================
+using MachineryManager.SharedKernel.Abstractions;
+
+namespace MachineryManager.Administration.Application.Abstractions;
+
+/// <summary>Repository contract for the <see cref="global::Administration.Domain.UserProfileAssignment"/> aggregate.</summary>
+public interface IUserProfileAssignmentRepository : IRepository<global::Administration.Domain.UserProfileAssignment, global::Administration.Domain.UserProfileAssignmentId>
+{
+}
+
+================================================================================
+FILE: src\Modules\Administration\Administration.Application\Administration.Application.csproj
+SIZE: 0.49 KB
+================================================================================
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <RootNamespace>MachineryManager.Administration.Application</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Administration.Domain\Administration.Domain.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="MediatR" />
+    <PackageReference Include="FluentValidation" />
+    <PackageReference Include="FluentValidation.DependencyInjectionExtensions" />
+  </ItemGroup>
+
+</Project>
+
+================================================================================
+FILE: src\Modules\Administration\Administration.Application\Behaviors\ValidationBehavior.cs
+SIZE: 3.24 KB
+================================================================================
+using FluentValidation;
+using MachineryManager.SharedKernel;
+using MediatR;
+
+namespace MachineryManager.Administration.Application.Behaviors;
+
+/// <summary>
+/// MediatR pipeline behavior that executes FluentValidation validators
+/// before the request handler. Per ADR-0036, validation runs automatically
+/// and handlers shall NOT perform ad hoc input validation.
+/// </summary>
+/// <typeparam name="TRequest">The request type.</typeparam>
+/// <typeparam name="TResponse">The response type (expected to be Result or Result&lt;T&gt;).</typeparam>
+public sealed class ValidationBehavior<TRequest, TResponse>
+    : IPipelineBehavior<TRequest, TResponse>
+    where TRequest : notnull
+{
+    private readonly IEnumerable<IValidator<TRequest>> _validators;
+
+    /// <summary>
+    /// Initializes a new instance of the <see cref="ValidationBehavior{TRequest, TResponse}"/> class.
+    /// </summary>
+    /// <param name="validators">All registered validators for <typeparamref name="TRequest"/>.</param>
+    public ValidationBehavior(IEnumerable<IValidator<TRequest>> validators)
+    {
+        _validators = validators;
+    }
+
+    /// <summary>
+    /// Validates the request before delegating to the handler.
+    /// </summary>
+    /// <param name="request">The incoming request.</param>
+    /// <param name="next">The delegate to execute the handler.</param>
+    /// <param name="cancellationToken">Token to cancel the asynchronous operation.</param>
+    /// <returns>The handler response, or a validation failure result.</returns>
+    public async Task<TResponse> Handle(
+        TRequest request,
+        RequestHandlerDelegate<TResponse> next,
+        CancellationToken cancellationToken)
+    {
+        if (!_validators.Any())
+        {
+            return await next();
+        }
+
+        var context = new ValidationContext<TRequest>(request);
+        var validationResults = await Task.WhenAll(
+            _validators.Select(v => v.ValidateAsync(context, cancellationToken)));
+
+        var failures = validationResults
+            .SelectMany(r => r.Errors)
+            .Where(f => f != null)
+            .ToList();
+
+        if (failures.Count == 0)
+        {
+            return await next();
+        }
+
+        var error = Error.Validation(
+            "Validation.General",
+            string.Join("; ", failures.Select(f => f.ErrorMessage)));
+
+        var responseType = typeof(TResponse);
+
+        if (responseType == typeof(Result))
+        {
+            return (TResponse)(object)Result.Failure(error);
+        }
+
+        if (responseType.IsGenericType &&
+            responseType.GetGenericTypeDefinition() == typeof(Result<>))
+        {
+            var valueType = responseType.GetGenericArguments()[0];
+            var method = typeof(Result)
+                .GetMethod(nameof(Result.Failure), 1, new[] { typeof(Error) })
+                ?.MakeGenericMethod(valueType);
+
+            if (method != null)
+            {
+                var result = method.Invoke(null, new object[] { error });
+                return (TResponse)result!;
+            }
+        }
+
+        throw new InvalidOperationException(
+            $"Validation failed but response type {responseType.Name} does not support Result pattern.");
+    }
+}
+
+================================================================================
+FILE: src\Modules\Administration\Administration.Application\DependencyInjection.cs
+SIZE: 1.33 KB
+================================================================================
+using FluentValidation;
+using MachineryManager.Administration.Application.Abstractions;
+using MachineryManager.SharedKernel.Abstractions;
+using MediatR;
+using Microsoft.Extensions.DependencyInjection;
+
+namespace MachineryManager.Administration.Application;
+
+/// <summary>
+/// Provides extension methods for registering Administration Application layer services.
+/// </summary>
+public static class DependencyInjection
+{
+    /// <summary>
+    /// Registers MediatR, FluentValidation, pipeline behaviors, and domain event dispatcher.
+    /// </summary>
+    /// <param name="services">The service collection to configure.</param>
+    /// <returns>The same <see cref="IServiceCollection"/> for chaining.</returns>
+    public static IServiceCollection AddAdministrationApplication(
+        this IServiceCollection services)
+    {
+        var assembly = typeof(DependencyInjection).Assembly;
+
+        services.AddMediatR(configuration =>
+        {
+            configuration.RegisterServicesFromAssembly(assembly);
+        });
+
+        services.AddValidatorsFromAssembly(assembly);
+
+        services.AddTransient(
+            typeof(IPipelineBehavior<,>),
+            typeof(Behaviors.ValidationBehavior<,>));
+
+        services.AddScoped<IDomainEventDispatcher, MediatRDomainEventDispatcher>();
+
+        return services;
+    }
+}
+
+================================================================================
+FILE: src\Modules\Administration\Administration.Application\DomainEventNotification.cs
+SIZE: 0.77 KB
+================================================================================
+using MediatR;
+using MachineryManager.SharedKernel;
+
+namespace MachineryManager.Administration.Application;
+
+/// <summary>
+/// Wraps a domain event as a MediatR <see cref="INotification"/>.
+/// </summary>
+/// <typeparam name="TDomainEvent">The type of the domain event being wrapped.</typeparam>
+public sealed class DomainEventNotification<TDomainEvent> : INotification
+    where TDomainEvent : IDomainEvent
+{
+    /// <summary>Gets the underlying domain event.</summary>
+    public TDomainEvent DomainEvent { get; }
+
+    /// <summary>Initializes a new instance of the wrapper.</summary>
+    /// <param name="domainEvent">The domain event to wrap.</param>
+    public DomainEventNotification(TDomainEvent domainEvent)
+    {
+        DomainEvent = domainEvent;
+    }
+}
+
+================================================================================
+FILE: src\Modules\Administration\Administration.Application\Features\Profiles\Commands\CreateProfile\CreateProfileCommand.cs
+SIZE: 0.5 KB
+================================================================================
+using MachineryManager.SharedKernel;
+using MediatR;
+
+namespace MachineryManager.Administration.Application.Features.Profiles.Commands.CreateProfile;
+
+/// <summary>
+/// Command to create a new Profile (named permission bundle).
+/// </summary>
+/// <param name="Name">The display name of the profile.</param>
+/// <param name="Permissions">The initial set of permissions.</param>
+public sealed record CreateProfileCommand(
+    string Name,
+    IReadOnlyList<string> Permissions)
+    : IRequest<Result<Guid>>;
+
+================================================================================
+FILE: src\Modules\Administration\Administration.Application\Features\Profiles\Commands\CreateProfile\CreateProfileCommandHandler.cs
+SIZE: 2.3 KB
+================================================================================
+using MachineryManager.Administration.Application.Abstractions;
+using MachineryManager.SharedKernel;
+using MachineryManager.SharedKernel.Abstractions;
+using MediatR;
+
+namespace MachineryManager.Administration.Application.Features.Profiles.Commands.CreateProfile;
+
+/// <summary>
+/// Handles <see cref="CreateProfileCommand"/> by orchestrating domain
+/// creation, persisting the aggregate, and committing the unit of work.
+/// </summary>
+public sealed class CreateProfileCommandHandler
+    : IRequestHandler<CreateProfileCommand, Result<Guid>>
+{
+    private readonly IProfileRepository _profileRepository;
+    private readonly IAdministrationUnitOfWork _unitOfWork;
+    private readonly IDateTimeProvider _dateTimeProvider;
+
+    /// <summary>
+    /// Initializes a new instance of the <see cref="CreateProfileCommandHandler"/> class.
+    /// </summary>
+    /// <param name="profileRepository">The profile repository.</param>
+    /// <param name="unitOfWork">The unit of work for atomic persistence.</param>
+    /// <param name="dateTimeProvider">Provider for deterministic UTC timestamps.</param>
+    public CreateProfileCommandHandler(
+        IProfileRepository profileRepository,
+        IAdministrationUnitOfWork unitOfWork,
+        IDateTimeProvider dateTimeProvider)
+    {
+        _profileRepository = profileRepository;
+        _unitOfWork = unitOfWork;
+        _dateTimeProvider = dateTimeProvider;
+    }
+
+    /// <summary>
+    /// Executes the creation use case.
+    /// </summary>
+    /// <param name="request">The creation command.</param>
+    /// <param name="cancellationToken">Token to cancel the asynchronous operation.</param>
+    /// <returns>A result containing the new profile's GUID on success.</returns>
+    public async Task<Result<Guid>> Handle(
+        CreateProfileCommand request,
+        CancellationToken cancellationToken)
+    {
+        var result = global::Administration.Domain.Profile.Create(
+            request.Name,
+            request.Permissions,
+            _dateTimeProvider);
+
+        if (result.IsFailure)
+        {
+            return Result.Failure<Guid>(result.Error);
+        }
+
+        _profileRepository.Add(result.Value);
+        await _unitOfWork.SaveChangesAsync(cancellationToken);
+
+        return Result.Success(result.Value.Id.Value);
+    }
+}
+
+================================================================================
+FILE: src\Modules\Administration\Administration.Application\Features\Profiles\Commands\CreateProfile\CreateProfileCommandValidator.cs
+SIZE: 0.9 KB
+================================================================================
+using FluentValidation;
+
+namespace MachineryManager.Administration.Application.Features.Profiles.Commands.CreateProfile;
+
+/// <summary>
+/// Validates <see cref="CreateProfileCommand"/> per ADR-0036.
+/// </summary>
+public sealed class CreateProfileCommandValidator : AbstractValidator<CreateProfileCommand>
+{
+    /// <summary>
+    /// Initializes validation rules for the create profile command.
+    /// </summary>
+    public CreateProfileCommandValidator()
+    {
+        int maxLength = global::Administration.Domain.Profile.MaxNameLength;
+
+        RuleFor(x => x.Name)
+            .NotEmpty()
+            .WithMessage("Profile name is required.")
+            .MaximumLength(maxLength)
+            .WithMessage($"Profile name shall not exceed {maxLength} characters.");
+
+        RuleForEach(x => x.Permissions)
+            .NotEmpty()
+            .WithMessage("Permission cannot be empty.");
+    }
+}
+
+================================================================================
+FILE: src\Modules\Administration\Administration.Application\Features\Profiles\Dtos\ProfileDto.cs
+SIZE: 0.65 KB
+================================================================================
+namespace MachineryManager.Administration.Application.Features.Profiles.Dtos;
+
+/// <summary>Read-only view of a Profile.</summary>
+/// <param name="Id">The unique identifier of the profile.</param>
+/// <param name="Name">The display name of the profile.</param>
+/// <param name="Permissions">The permissions bundled in this profile.</param>
+/// <param name="IsActive">Whether the profile is currently active.</param>
+/// <param name="CreatedAt">The UTC timestamp when the profile was created.</param>
+public sealed record ProfileDto(
+    Guid Id,
+    string Name,
+    IReadOnlyList<string> Permissions,
+    bool IsActive,
+    DateTimeOffset CreatedAt);
+
+================================================================================
+FILE: src\Modules\Administration\Administration.Application\Features\Profiles\Queries\GetProfileById\GetProfileByIdQuery.cs
+SIZE: 0.48 KB
+================================================================================
+using MachineryManager.Administration.Application.Features.Profiles.Dtos;
+using MachineryManager.SharedKernel;
+using MediatR;
+
+namespace MachineryManager.Administration.Application.Features.Profiles.Queries.GetProfileById;
+
+/// <summary>
+/// Query to retrieve a single profile by its unique identifier.
+/// </summary>
+/// <param name="ProfileId">The GUID of the profile to retrieve.</param>
+public sealed record GetProfileByIdQuery(Guid ProfileId)
+    : IRequest<Result<ProfileDto>>;
+
+================================================================================
+FILE: src\Modules\Administration\Administration.Application\Features\Profiles\Queries\GetProfileById\GetProfileByIdQueryHandler.cs
+SIZE: 2.12 KB
+================================================================================
+using MachineryManager.Administration.Application.Abstractions;
+using MachineryManager.Administration.Application.Features.Profiles.Dtos;
+using MachineryManager.SharedKernel;
+using MediatR;
+
+namespace MachineryManager.Administration.Application.Features.Profiles.Queries.GetProfileById;
+
+/// <summary>
+/// Handles <see cref="GetProfileByIdQuery"/> by loading the aggregate
+/// and projecting it into a read-only DTO.
+/// </summary>
+public sealed class GetProfileByIdQueryHandler
+    : IRequestHandler<GetProfileByIdQuery, Result<ProfileDto>>
+{
+    private readonly IProfileRepository _profileRepository;
+
+    /// <summary>
+    /// Initializes a new instance of the <see cref="GetProfileByIdQueryHandler"/> class.
+    /// </summary>
+    /// <param name="profileRepository">The profile repository.</param>
+    public GetProfileByIdQueryHandler(IProfileRepository profileRepository)
+    {
+        _profileRepository = profileRepository;
+    }
+
+    /// <summary>
+    /// Executes the query and returns the profile DTO if found.
+    /// </summary>
+    /// <param name="request">The query containing the profile identifier.</param>
+    /// <param name="cancellationToken">Token to cancel the asynchronous operation.</param>
+    /// <returns>A result containing the <see cref="ProfileDto"/> or a not-found error.</returns>
+    public async Task<Result<ProfileDto>> Handle(
+        GetProfileByIdQuery request,
+        CancellationToken cancellationToken)
+    {
+        var profileId = global::Administration.Domain.ProfileId.From(request.ProfileId);
+        var profile = await _profileRepository.GetByIdAsync(profileId, cancellationToken);
+
+        if (profile is null)
+        {
+            return Result.Failure<ProfileDto>(
+                Error.NotFound(
+                    "Profile.NotFound",
+                    $"Profile with id {request.ProfileId} was not found."));
+        }
+
+        var dto = new ProfileDto(
+            profile.Id.Value,
+            profile.Name,
+            profile.Permissions.ToList(),
+            profile.IsActive,
+            profile.CreatedAt);
+
+        return Result.Success(dto);
+    }
+}
+
+================================================================================
+FILE: src\Modules\Administration\Administration.Application\Features\Profiles\Queries\GetProfileById\GetProfileByIdQueryValidator.cs
+SIZE: 0.51 KB
+================================================================================
+using FluentValidation;
+
+namespace MachineryManager.Administration.Application.Features.Profiles.Queries.GetProfileById;
+
+/// <summary>
+/// Validates <see cref="GetProfileByIdQuery"/> per ADR-0036.
+/// </summary>
+public sealed class GetProfileByIdQueryValidator : AbstractValidator<GetProfileByIdQuery>
+{
+    /// <summary>
+    /// Initializes validation rules for the get-by-id query.
+    /// </summary>
+    public GetProfileByIdQueryValidator()
+    {
+        RuleFor(x => x.ProfileId).NotEmpty();
+    }
+}
+
+================================================================================
+FILE: src\Modules\Administration\Administration.Application\Features\UserProfileAssignments\Commands\AssignUserToProfile\AssignUserToProfileCommand.cs
+SIZE: 0.62 KB
+================================================================================
+using Administration.Domain;
+using MachineryManager.SharedKernel;
+using MediatR;
+
+namespace MachineryManager.Administration.Application.Features.UserProfileAssignments.Commands.AssignUserToProfile;
+
+/// <summary>
+/// Command to assign a User to a Profile at a specific authorization scope.
+/// </summary>
+/// <param name="UserId">The GUID of the user.</param>
+/// <param name="ProfileId">The GUID of the profile.</param>
+/// <param name="Scope">The authorization scope.</param>
+public sealed record AssignUserToProfileCommand(
+    Guid UserId,
+    Guid ProfileId,
+    AuthorizationScope Scope)
+    : IRequest<Result<Guid>>;
+
+================================================================================
+FILE: src\Modules\Administration\Administration.Application\Features\UserProfileAssignments\Commands\AssignUserToProfile\AssignUserToProfileCommandHandler.cs
+SIZE: 3.3 KB
+================================================================================
+using Administration.Domain;
+using MachineryManager.Administration.Application.Abstractions;
+using MachineryManager.SharedKernel;
+using MachineryManager.SharedKernel.Abstractions;
+using MediatR;
+
+namespace MachineryManager.Administration.Application.Features.UserProfileAssignments.Commands.AssignUserToProfile;
+
+/// <summary>
+/// Handles <see cref="AssignUserToProfileCommand"/> by creating the
+/// assignment aggregate, persisting it, and committing the unit of work.
+/// </summary>
+public sealed class AssignUserToProfileCommandHandler
+    : IRequestHandler<AssignUserToProfileCommand, Result<Guid>>
+{
+    private readonly IProfileRepository _profileRepository;
+    private readonly IUserProfileAssignmentRepository _assignmentRepository;
+    private readonly IAdministrationUnitOfWork _unitOfWork;
+    private readonly IDateTimeProvider _dateTimeProvider;
+
+    /// <summary>
+    /// Initializes a new instance of the <see cref="AssignUserToProfileCommandHandler"/> class.
+    /// </summary>
+    /// <param name="profileRepository">The profile repository.</param>
+    /// <param name="assignmentRepository">The user-profile assignment repository.</param>
+    /// <param name="unitOfWork">The unit of work for atomic persistence.</param>
+    /// <param name="dateTimeProvider">Provider for deterministic UTC timestamps.</param>
+    public AssignUserToProfileCommandHandler(
+        IProfileRepository profileRepository,
+        IUserProfileAssignmentRepository assignmentRepository,
+        IAdministrationUnitOfWork unitOfWork,
+        IDateTimeProvider dateTimeProvider)
+    {
+        _profileRepository = profileRepository;
+        _assignmentRepository = assignmentRepository;
+        _unitOfWork = unitOfWork;
+        _dateTimeProvider = dateTimeProvider;
+    }
+
+    /// <summary>
+    /// Executes the assignment use case.
+    /// </summary>
+    /// <param name="request">The assignment command.</param>
+    /// <param name="cancellationToken">Token to cancel the asynchronous operation.</param>
+    /// <returns>A result containing the new assignment's GUID on success.</returns>
+    public async Task<Result<Guid>> Handle(
+        AssignUserToProfileCommand request,
+        CancellationToken cancellationToken)
+    {
+        var profileId = ProfileId.From(request.ProfileId);
+        var profile = await _profileRepository.GetByIdAsync(profileId, cancellationToken);
+
+        if (profile is null)
+        {
+            return Result.Failure<Guid>(
+                Error.NotFound(
+                    "Profile.NotFound",
+                    $"Profile with id {request.ProfileId} was not found."));
+        }
+
+        if (!profile.IsActive)
+        {
+            return Result.Failure<Guid>(
+                Error.Conflict(
+                    "Profile.Inactive",
+                    "Cannot assign an inactive profile to a user."));
+        }
+
+        var result = UserProfileAssignment.Create(
+            request.UserId,
+            profileId,
+            request.Scope,
+            _dateTimeProvider);
+
+        if (result.IsFailure)
+        {
+            return Result.Failure<Guid>(result.Error);
+        }
+
+        _assignmentRepository.Add(result.Value);
+        await _unitOfWork.SaveChangesAsync(cancellationToken);
+
+        return Result.Success(result.Value.Id.Value);
+    }
+}
+
+================================================================================
+FILE: src\Modules\Administration\Administration.Application\Features\UserProfileAssignments\Commands\AssignUserToProfile\AssignUserToProfileCommandValidator.cs
+SIZE: 0.65 KB
+================================================================================
+using FluentValidation;
+
+namespace MachineryManager.Administration.Application.Features.UserProfileAssignments.Commands.AssignUserToProfile;
+
+/// <summary>
+/// Validates <see cref="AssignUserToProfileCommand"/> per ADR-0036.
+/// </summary>
+public sealed class AssignUserToProfileCommandValidator : AbstractValidator<AssignUserToProfileCommand>
+{
+    /// <summary>
+    /// Initializes validation rules for the assign-user-to-profile command.
+    /// </summary>
+    public AssignUserToProfileCommandValidator()
+    {
+        RuleFor(x => x.UserId).NotEmpty();
+        RuleFor(x => x.ProfileId).NotEmpty();
+        RuleFor(x => x.Scope).NotNull();
+    }
+}
+
+================================================================================
+FILE: src\Modules\Administration\Administration.Application\MediatRDomainEventDispatcher.cs
+SIZE: 1.6 KB
+================================================================================
+using System.Reflection;
+using MediatR;
+using MachineryManager.SharedKernel;
+using MachineryManager.SharedKernel.Abstractions;
+
+namespace MachineryManager.Administration.Application;
+
+/// <summary>
+/// Dispatches domain events through MediatR (ADR-0011).
+/// </summary>
+public sealed class MediatRDomainEventDispatcher : IDomainEventDispatcher
+{
+    private readonly IMediator _mediator;
+
+    /// <summary>Initializes a new instance of the dispatcher.</summary>
+    /// <param name="mediator">The MediatR mediator.</param>
+    public MediatRDomainEventDispatcher(IMediator mediator)
+    {
+        _mediator = mediator;
+    }
+
+    /// <inheritdoc />
+    public async Task DispatchAsync(IReadOnlyCollection<IDomainEvent> events, CancellationToken cancellationToken = default)
+    {
+        foreach (var domainEvent in events)
+        {
+            var notificationType = typeof(DomainEventNotification<>).MakeGenericType(domainEvent.GetType());
+            var notification = Activator.CreateInstance(notificationType, domainEvent)!;
+
+            var method = typeof(MediatRDomainEventDispatcher)
+                .GetMethod(nameof(PublishTyped), BindingFlags.NonPublic | BindingFlags.Instance)!
+                .MakeGenericMethod(notificationType);
+
+            await (Task)method.Invoke(this, new[] { notification, cancellationToken })!;
+        }
+    }
+
+    private async Task PublishTyped<TNotification>(TNotification notification, CancellationToken cancellationToken)
+        where TNotification : INotification
+    {
+        await _mediator.Publish(notification, cancellationToken);
+    }
+}
+
+================================================================================
+FILE: src\Modules\Administration\Administration.Domain\Administration.Domain.csproj
+SIZE: 0.35 KB
+================================================================================
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\BuildingBlocks\MachineryManager.SharedKernel\MachineryManager.SharedKernel.csproj" />
+    <ProjectReference Include="..\..\..\BuildingBlocks\MachineryManager.SharedKernel.Abstractions\MachineryManager.SharedKernel.Abstractions.csproj" />
+  </ItemGroup>
+
+</Project>
+
+================================================================================
+FILE: src\Modules\Administration\Administration.Domain\AuthorizationScope.cs
+SIZE: 2.16 KB
+================================================================================
+using MachineryManager.SharedKernel;
+
+namespace Administration.Domain;
+
+/// <summary>
+/// Represents the tenant scope at which a Profile is assigned to a User (Section 5.8).
+/// </summary>
+public sealed class AuthorizationScope : ValueObject
+{
+    /// <summary>Gets the level of the scope.</summary>
+    public AuthorizationScopeLevel Level { get; private set; }
+
+    /// <summary>Gets the Holding identifier when applicable.</summary>
+    public Guid? HoldingId { get; private set; }
+
+    /// <summary>Gets the Organization identifier when applicable.</summary>
+    public Guid? OrganizationId { get; private set; }
+
+    /// <summary>Gets the Project identifier when applicable.</summary>
+    public Guid? ProjectId { get; private set; }
+
+    // Reserved for EF Core materialization only.
+    private AuthorizationScope()
+    {
+    }
+
+    private AuthorizationScope(
+        AuthorizationScopeLevel level,
+        Guid? holdingId,
+        Guid? organizationId,
+        Guid? projectId)
+    {
+        Level = level;
+        HoldingId = holdingId;
+        OrganizationId = organizationId;
+        ProjectId = projectId;
+    }
+
+    /// <summary>Creates a platform-level scope.</summary>
+    public static AuthorizationScope Platform() =>
+        new(AuthorizationScopeLevel.Platform, null, null, null);
+
+    /// <summary>Creates a holding-level scope.</summary>
+    public static AuthorizationScope ForHolding(Guid holdingId) =>
+        new(AuthorizationScopeLevel.Holding, holdingId, null, null);
+
+    /// <summary>Creates an organization-level scope.</summary>
+    public static AuthorizationScope ForOrganization(Guid organizationId) =>
+        new(AuthorizationScopeLevel.Organization, null, organizationId, null);
+
+    /// <summary>Creates a project-level scope.</summary>
+    public static AuthorizationScope ForProject(Guid projectId) =>
+        new(AuthorizationScopeLevel.Project, null, null, projectId);
+
+    /// <inheritdoc />
+    protected override IEnumerable<object?> GetEqualityComponents()
+    {
+        yield return Level;
+        yield return HoldingId;
+        yield return OrganizationId;
+        yield return ProjectId;
+    }
+}
+
+================================================================================
+FILE: src\Modules\Administration\Administration.Domain\AuthorizationScopeLevel.cs
+SIZE: 0.56 KB
+================================================================================
+namespace Administration.Domain;
+
+/// <summary>
+/// Defines the hierarchy levels at which a scoped permission or
+/// profile assignment may be granted (Section 5.8, Authorization Model).
+/// </summary>
+public enum AuthorizationScopeLevel
+{
+    /// <summary>Unrestricted platform-level access.</summary>
+    Platform,
+
+    /// <summary>Scoped to all Organizations within a Holding.</summary>
+    Holding,
+
+    /// <summary>Scoped to a single Organization.</summary>
+    Organization,
+
+    /// <summary>Scoped to a single Project.</summary>
+    Project,
+}
+
+================================================================================
+FILE: src\Modules\Administration\Administration.Domain\Events\ProfileCreated.cs
+SIZE: 1.06 KB
+================================================================================
+using MachineryManager.SharedKernel;
+
+namespace Administration.Domain.Events;
+
+/// <summary>Raised when a new Profile is created.</summary>
+public sealed class ProfileCreated : IDomainEvent
+{
+    /// <summary>Gets the identifier of the created profile.</summary>
+    public ProfileId ProfileId { get; }
+
+    /// <summary>Gets the name of the created profile.</summary>
+    public string Name { get; }
+
+    /// <summary>Gets the UTC timestamp when the event occurred.</summary>
+    public DateTimeOffset OccurredOn { get; }
+
+    /// <summary>
+    /// Initializes a new instance of the <see cref="ProfileCreated"/> class.
+    /// </summary>
+    /// <param name="profileId">The identifier of the created profile.</param>
+    /// <param name="name">The name of the created profile.</param>
+    /// <param name="occurredOn">The UTC timestamp when the event occurred.</param>
+    public ProfileCreated(ProfileId profileId, string name, DateTimeOffset occurredOn)
+    {
+        ProfileId = profileId;
+        Name = name;
+        OccurredOn = occurredOn;
+    }
+}
+
+================================================================================
+FILE: src\Modules\Administration\Administration.Domain\Events\UserAssignedToProfile.cs
+SIZE: 1.62 KB
+================================================================================
+using MachineryManager.SharedKernel;
+
+namespace Administration.Domain.Events;
+
+/// <summary>Raised when a User is assigned to a Profile at a specific scope.</summary>
+public sealed class UserAssignedToProfile : IDomainEvent
+{
+    /// <summary>Gets the identifier of the assignment.</summary>
+    public UserProfileAssignmentId AssignmentId { get; }
+
+    /// <summary>Gets the identifier of the user.</summary>
+    public Guid UserId { get; }
+
+    /// <summary>Gets the identifier of the profile.</summary>
+    public ProfileId ProfileId { get; }
+
+    /// <summary>Gets the scope of the assignment.</summary>
+    public AuthorizationScope Scope { get; }
+
+    /// <summary>Gets the UTC timestamp when the event occurred.</summary>
+    public DateTimeOffset OccurredOn { get; }
+
+    /// <summary>
+    /// Initializes a new instance of the <see cref="UserAssignedToProfile"/> class.
+    /// </summary>
+    /// <param name="assignmentId">The identifier of the assignment.</param>
+    /// <param name="userId">The identifier of the user.</param>
+    /// <param name="profileId">The identifier of the profile.</param>
+    /// <param name="scope">The authorization scope.</param>
+    /// <param name="occurredOn">The UTC timestamp when the event occurred.</param>
+    public UserAssignedToProfile(
+        UserProfileAssignmentId assignmentId,
+        Guid userId,
+        ProfileId profileId,
+        AuthorizationScope scope,
+        DateTimeOffset occurredOn)
+    {
+        AssignmentId = assignmentId;
+        UserId = userId;
+        ProfileId = profileId;
+        Scope = scope;
+        OccurredOn = occurredOn;
+    }
+}
+
+================================================================================
+FILE: src\Modules\Administration\Administration.Domain\Profile.cs
+SIZE: 4.27 KB
+================================================================================
+using Administration.Domain.Events;
+using MachineryManager.SharedKernel;
+using MachineryManager.SharedKernel.Abstractions;
+
+namespace Administration.Domain;
+
+/// <summary>
+/// Profile: a named, reusable bundle of Permissions (Section 5.8).
+/// A Profile does NOT carry a scope — scope is assigned separately
+/// per User via <see cref="UserProfileAssignment"/>.
+/// </summary>
+public sealed class Profile : AggregateRoot<ProfileId>
+{
+    /// <summary>The maximum allowed length for a profile name.</summary>
+    public const int MaxNameLength = 200;
+
+    /// <summary>Gets the name of the profile.</summary>
+    public string Name { get; private set; }
+
+    private readonly List<string> _permissions = [];
+
+    /// <summary>Gets the permissions contained in this profile.</summary>
+    public IReadOnlyCollection<string> Permissions => _permissions.AsReadOnly();
+
+    /// <summary>Gets whether this profile is currently active.</summary>
+    public bool IsActive { get; private set; }
+
+    /// <summary>Gets the UTC timestamp when the profile was created.</summary>
+    public DateTimeOffset CreatedAt { get; private set; }
+
+    // Reserved for EF Core materialization only.
+    private Profile()
+    {
+        Name = string.Empty;
+    }
+
+    private Profile(ProfileId id, string name, DateTimeOffset createdAt)
+        : base(id)
+    {
+        Name = name;
+        IsActive = true;
+        CreatedAt = createdAt;
+    }
+
+    /// <summary>
+    /// Creates a new Profile. This is the only way a Profile comes into existence.
+    /// </summary>
+    /// <param name="name">The profile's display name.</param>
+    /// <param name="permissions">The initial set of permissions.</param>
+    /// <param name="dateTimeProvider">Provider for deterministic UTC timestamps.</param>
+    /// <returns>A <see cref="Result{Profile}"/> containing the new profile, or a validation error.</returns>
+    public static Result<Profile> Create(
+        string name,
+        IEnumerable<string> permissions,
+        IDateTimeProvider dateTimeProvider)
+    {
+        if (string.IsNullOrWhiteSpace(name))
+        {
+            return Result.Failure<Profile>(ProfileErrors.NameRequired());
+        }
+
+        if (name.Length > MaxNameLength)
+        {
+            return Result.Failure<Profile>(ProfileErrors.NameTooLong(MaxNameLength));
+        }
+
+        var profile = new Profile(ProfileId.New(), name.Trim(), dateTimeProvider.UtcNow);
+
+        foreach (var permission in permissions.Distinct(StringComparer.Ordinal))
+        {
+            if (!string.IsNullOrWhiteSpace(permission))
+            {
+                profile._permissions.Add(permission);
+            }
+        }
+
+        profile.RaiseDomainEvent(
+            new ProfileCreated(profile.Id, profile.Name, profile.CreatedAt));
+
+        return profile;
+    }
+
+    /// <summary>
+    /// Adds a permission to this profile.
+    /// </summary>
+    /// <param name="permission">The permission to add.</param>
+    /// <returns>A result indicating success or a business error.</returns>
+    public Result AddPermission(string permission)
+    {
+        if (string.IsNullOrWhiteSpace(permission))
+        {
+            return Result.Failure(ProfileErrors.PermissionRequired());
+        }
+
+        if (_permissions.Contains(permission, StringComparer.Ordinal))
+        {
+            return Result.Failure(ProfileErrors.PermissionAlreadyExists(permission));
+        }
+
+        _permissions.Add(permission);
+        return Result.Success();
+    }
+
+    /// <summary>
+    /// Removes a permission from this profile.
+    /// </summary>
+    /// <param name="permission">The permission to remove.</param>
+    /// <returns>A result indicating success or a business error.</returns>
+    public Result RemovePermission(string permission)
+    {
+        if (!_permissions.Remove(permission))
+        {
+            return Result.Failure(ProfileErrors.PermissionNotFound(permission));
+        }
+
+        return Result.Success();
+    }
+
+    /// <summary>Deactivates this profile, preventing new assignments.</summary>
+    public void Deactivate()
+    {
+        IsActive = false;
+    }
+
+    /// <summary>Reactivates this profile, allowing new assignments.</summary>
+    public void Activate()
+    {
+        IsActive = true;
+    }
+}
+
+================================================================================
+FILE: src\Modules\Administration\Administration.Domain\ProfileErrors.cs
+SIZE: 2.25 KB
+================================================================================
+using MachineryManager.SharedKernel;
+
+namespace Administration.Domain;
+
+/// <summary>Business Errors for the Administration module's Profile aggregate.</summary>
+public static class ProfileErrors
+{
+    /// <summary>Creates an error indicating that the profile name is required.</summary>
+    public static Error NameRequired() => Error.Validation(
+        "Profile.NameRequired",
+        "Profile name is required.");
+
+    /// <summary>Creates an error indicating that the profile name exceeds the maximum length.</summary>
+    public static Error NameTooLong(int maxLength) => Error.Validation(
+        "Profile.NameTooLong",
+        $"Profile name shall not exceed {maxLength} characters.");
+
+    /// <summary>Creates an error indicating that a permission string is required.</summary>
+    public static Error PermissionRequired() => Error.Validation(
+        "Profile.PermissionRequired",
+        "Permission is required.");
+
+    /// <summary>Creates an error indicating that the permission already exists on the profile.</summary>
+    public static Error PermissionAlreadyExists(string permission) => Error.Validation(
+        "Profile.PermissionAlreadyExists",
+        $"Permission '{permission}' already exists on this profile.");
+
+    /// <summary>Creates an error indicating that the permission was not found on the profile.</summary>
+    public static Error PermissionNotFound(string permission) => Error.Validation(
+        "Profile.PermissionNotFound",
+        $"Permission '{permission}' was not found on this profile.");
+
+    /// <summary>Creates an error indicating that a user identifier is required.</summary>
+    public static Error UserIdRequired() => Error.Validation(
+        "Profile.UserIdRequired",
+        "A valid User identifier is required.");
+
+    /// <summary>Creates an error indicating that a profile identifier is required.</summary>
+    public static Error ProfileIdRequired() => Error.Validation(
+        "Profile.ProfileIdRequired",
+        "A valid Profile identifier is required.");
+
+    /// <summary>Creates an error indicating that an authorization scope is required.</summary>
+    public static Error ScopeRequired() => Error.Validation(
+        "Profile.ScopeRequired",
+        "An authorization scope is required.");
+}
+
+================================================================================
+FILE: src\Modules\Administration\Administration.Domain\ProfileId.cs
+SIZE: 0.81 KB
+================================================================================
+using MachineryManager.SharedKernel;
+
+namespace Administration.Domain;
+
+/// <summary>Strongly-typed identifier for a Profile.</summary>
+public sealed class ProfileId : ValueObject
+{
+    /// <summary>Gets the underlying GUID value.</summary>
+    public Guid Value { get; }
+
+    private ProfileId(Guid value)
+    {
+        Value = value;
+    }
+
+    /// <summary>Creates a new, unique ProfileId.</summary>
+    public static ProfileId New() => new(Guid.NewGuid());
+
+    /// <summary>Wraps an existing identifier value.</summary>
+    public static ProfileId From(Guid value) => new(value);
+
+    /// <inheritdoc />
+    protected override IEnumerable<object?> GetEqualityComponents()
+    {
+        yield return Value;
+    }
+
+    /// <inheritdoc />
+    public override string ToString() => Value.ToString();
+}
+
+================================================================================
+FILE: src\Modules\Administration\Administration.Domain\UserProfileAssignment.cs
+SIZE: 3.15 KB
+================================================================================
+using Administration.Domain.Events;
+using MachineryManager.SharedKernel;
+using MachineryManager.SharedKernel.Abstractions;
+
+namespace Administration.Domain;
+
+/// <summary>
+/// Represents the assignment of a <see cref="Profile"/> to a User at a
+/// specific <see cref="AuthorizationScope"/> (Section 5.8). This is a
+/// first-class aggregate because its lifecycle is independent from both
+/// the User (Identity module) and the Profile.
+/// </summary>
+public sealed class UserProfileAssignment : AggregateRoot<UserProfileAssignmentId>
+{
+    /// <summary>Gets the identifier of the User being assigned.</summary>
+    public Guid UserId { get; private set; }
+
+    /// <summary>Gets the identifier of the Profile being assigned.</summary>
+    public ProfileId ProfileId { get; private set; }
+
+    /// <summary>Gets the scope at which the assignment applies.</summary>
+    public AuthorizationScope Scope { get; private set; }
+
+    /// <summary>Gets the UTC timestamp when the assignment was created.</summary>
+    public DateTimeOffset AssignedAt { get; private set; }
+
+    // Reserved for EF Core materialization only.
+    private UserProfileAssignment()
+    {
+        ProfileId = null!;
+        Scope = null!;
+    }
+
+    private UserProfileAssignment(
+        UserProfileAssignmentId id,
+        Guid userId,
+        ProfileId profileId,
+        AuthorizationScope scope,
+        DateTimeOffset assignedAt)
+        : base(id)
+    {
+        UserId = userId;
+        ProfileId = profileId;
+        Scope = scope;
+        AssignedAt = assignedAt;
+    }
+
+    /// <summary>
+    /// Creates a new UserProfileAssignment. This is the only way an assignment comes into existence.
+    /// </summary>
+    /// <param name="userId">The identifier of the user.</param>
+    /// <param name="profileId">The identifier of the profile.</param>
+    /// <param name="scope">The authorization scope.</param>
+    /// <param name="dateTimeProvider">Provider for deterministic UTC timestamps.</param>
+    /// <returns>A result containing the new assignment, or a validation error.</returns>
+    public static Result<UserProfileAssignment> Create(
+        Guid userId,
+        ProfileId profileId,
+        AuthorizationScope scope,
+        IDateTimeProvider dateTimeProvider)
+    {
+        if (userId == Guid.Empty)
+        {
+            return Result.Failure<UserProfileAssignment>(ProfileErrors.UserIdRequired());
+        }
+
+        if (profileId is null)
+        {
+            return Result.Failure<UserProfileAssignment>(ProfileErrors.ProfileIdRequired());
+        }
+
+        if (scope is null)
+        {
+            return Result.Failure<UserProfileAssignment>(ProfileErrors.ScopeRequired());
+        }
+
+        var assignment = new UserProfileAssignment(
+            UserProfileAssignmentId.New(),
+            userId,
+            profileId,
+            scope,
+            dateTimeProvider.UtcNow);
+
+        assignment.RaiseDomainEvent(
+            new UserAssignedToProfile(
+                assignment.Id,
+                userId,
+                profileId,
+                scope,
+                assignment.AssignedAt));
+
+        return assignment;
+    }
+}
+
+================================================================================
+FILE: src\Modules\Administration\Administration.Domain\UserProfileAssignmentId.cs
+SIZE: 0.89 KB
+================================================================================
+using MachineryManager.SharedKernel;
+
+namespace Administration.Domain;
+
+/// <summary>Strongly-typed identifier for a UserProfileAssignment.</summary>
+public sealed class UserProfileAssignmentId : ValueObject
+{
+    /// <summary>Gets the underlying GUID value.</summary>
+    public Guid Value { get; }
+
+    private UserProfileAssignmentId(Guid value)
+    {
+        Value = value;
+    }
+
+    /// <summary>Creates a new, unique UserProfileAssignmentId.</summary>
+    public static UserProfileAssignmentId New() => new(Guid.NewGuid());
+
+    /// <summary>Wraps an existing identifier value.</summary>
+    public static UserProfileAssignmentId From(Guid value) => new(value);
+
+    /// <inheritdoc />
+    protected override IEnumerable<object?> GetEqualityComponents()
+    {
+        yield return Value;
+    }
+
+    /// <inheritdoc />
+    public override string ToString() => Value.ToString();
+}
+
+================================================================================
+FILE: src\Modules\Administration\Administration.Infrastructure\Administration.Infrastructure.csproj
+SIZE: 0.43 KB
+================================================================================
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <ItemGroup>
+    <ProjectReference Include="..\Administration.Application\Administration.Application.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.Binder" />
+  </ItemGroup>
+
+</Project>
+
+================================================================================
+FILE: src\Modules\Administration\Administration.Infrastructure\DependencyInjection.cs
+SIZE: 1.58 KB
+================================================================================
+using MachineryManager.Administration.Application.Abstractions;
+using MachineryManager.Administration.Infrastructure.Persistence;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
+
+namespace MachineryManager.Administration.Infrastructure;
+
+/// <summary>
+/// Registers the Administration module's Infrastructure layer services
+/// (ADR-0006 EF Core, ADR-0019 Hybrid Persistence Strategy).
+/// </summary>
+public static class DependencyInjection
+{
+    /// <summary>
+    /// Registers the Administration module's <see cref="AdministrationDbContext"/>,
+    /// repositories, and unit of work.
+    /// </summary>
+    /// <param name="services">The service collection to configure.</param>
+    /// <param name="configuration">The application configuration.</param>
+    /// <returns>The same <see cref="IServiceCollection"/> for chaining.</returns>
+    public static IServiceCollection AddAdministrationInfrastructure(
+        this IServiceCollection services,
+        IConfiguration configuration)
+    {
+        services.AddDbContext<AdministrationDbContext>(options => options
+            .UseSqlServer(configuration.GetConnectionString("MachineryManagerDatabase")));
+
+        services.AddScoped<IProfileRepository, ProfileRepository>();
+        services.AddScoped<IUserProfileAssignmentRepository, UserProfileAssignmentRepository>();
+        services.AddScoped<IAdministrationUnitOfWork>(serviceProvider =>
+            serviceProvider.GetRequiredService<AdministrationDbContext>());
+
+        return services;
+    }
+}
+
+================================================================================
+FILE: src\Modules\Administration\Administration.Infrastructure\Persistence\AdministrationDbContext.cs
+SIZE: 2.77 KB
+================================================================================
+using MachineryManager.Administration.Application.Abstractions;
+using MachineryManager.SharedKernel;
+using MachineryManager.SharedKernel.Abstractions;
+using Microsoft.EntityFrameworkCore;
+
+namespace MachineryManager.Administration.Infrastructure.Persistence;
+
+/// <summary>
+/// EF Core persistence context for the Administration module (ADR-0006).
+/// Owns the "administration" schema exclusively.
+/// </summary>
+public sealed class AdministrationDbContext : DbContext, IAdministrationUnitOfWork
+{
+    private readonly IDomainEventDispatcher? _domainEventDispatcher;
+
+    /// <summary>Initializes a new instance of the <see cref="AdministrationDbContext"/> class.</summary>
+    /// <param name="options">The EF Core options for this context.</param>
+    /// <param name="domainEventDispatcher">Optional dispatcher for publishing domain events after commit.</param>
+    public AdministrationDbContext(
+        DbContextOptions<AdministrationDbContext> options,
+        IDomainEventDispatcher? domainEventDispatcher = null)
+        : base(options)
+    {
+        _domainEventDispatcher = domainEventDispatcher;
+    }
+
+    /// <summary>Gets the set of Profile aggregates.</summary>
+    public DbSet<global::Administration.Domain.Profile> Profiles =>
+        Set<global::Administration.Domain.Profile>();
+
+    /// <summary>Gets the set of UserProfileAssignment aggregates.</summary>
+    public DbSet<global::Administration.Domain.UserProfileAssignment> UserProfileAssignments =>
+        Set<global::Administration.Domain.UserProfileAssignment>();
+
+    /// <inheritdoc />
+    protected override void OnModelCreating(ModelBuilder modelBuilder)
+    {
+        modelBuilder.HasDefaultSchema("administration");
+        modelBuilder.ApplyConfigurationsFromAssembly(typeof(AdministrationDbContext).Assembly);
+
+        base.OnModelCreating(modelBuilder);
+    }
+
+    /// <inheritdoc />
+    public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
+    {
+        var aggregatesWithEvents = ChangeTracker
+            .Entries()
+            .Where(e => e.Entity is IHasDomainEvents)
+            .Select(e => (IHasDomainEvents)e.Entity)
+            .Where(e => e.DomainEvents.Count > 0)
+            .ToList();
+
+        var domainEvents = aggregatesWithEvents
+            .SelectMany(a => a.DomainEvents)
+            .ToList();
+
+        var affectedRows = await base.SaveChangesAsync(cancellationToken);
+
+        if (_domainEventDispatcher is not null && domainEvents.Count > 0)
+        {
+            await _domainEventDispatcher.DispatchAsync(domainEvents, cancellationToken);
+        }
+
+        foreach (var aggregate in aggregatesWithEvents)
+        {
+            aggregate.ClearDomainEvents();
+        }
+
+        return affectedRows;
+    }
+}
+
+================================================================================
+FILE: src\Modules\Administration\Administration.Infrastructure\Persistence\Configurations\ProfileConfiguration.cs
+SIZE: 1.38 KB
+================================================================================
+using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata.Builders;
+
+namespace MachineryManager.Administration.Infrastructure.Persistence.Configurations;
+
+/// <summary>EF Core mapping for the <see cref="global::Administration.Domain.Profile"/> aggregate.</summary>
+public sealed class ProfileConfiguration : IEntityTypeConfiguration<global::Administration.Domain.Profile>
+{
+    /// <summary>Configures the entity mapping.</summary>
+    /// <param name="builder">The entity type builder.</param>
+    public void Configure(EntityTypeBuilder<global::Administration.Domain.Profile> builder)
+    {
+        builder.ToTable("Profile");
+
+        builder.HasKey(profile => profile.Id);
+
+        builder.Property(profile => profile.Id)
+            .HasConversion(id => id.Value, value => global::Administration.Domain.ProfileId.From(value))
+            .ValueGeneratedNever();
+
+        builder.Property(profile => profile.Name)
+            .HasMaxLength(global::Administration.Domain.Profile.MaxNameLength)
+            .IsRequired();
+
+        builder.Property(profile => profile.IsActive)
+            .IsRequired();
+
+        builder.Property(profile => profile.CreatedAt)
+            .IsRequired();
+
+        builder.Property(profile => profile.Permissions)
+            .HasField("_permissions");
+
+        builder.Ignore(profile => profile.DomainEvents);
+    }
+}
+
+================================================================================
+FILE: src\Modules\Administration\Administration.Infrastructure\Persistence\Configurations\UserProfileAssignmentConfiguration.cs
+SIZE: 1.94 KB
+================================================================================
+using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata.Builders;
+
+namespace MachineryManager.Administration.Infrastructure.Persistence.Configurations;
+
+/// <summary>EF Core mapping for the <see cref="global::Administration.Domain.UserProfileAssignment"/> aggregate.</summary>
+public sealed class UserProfileAssignmentConfiguration : IEntityTypeConfiguration<global::Administration.Domain.UserProfileAssignment>
+{
+    /// <summary>Configures the entity mapping.</summary>
+    /// <param name="builder">The entity type builder.</param>
+    public void Configure(EntityTypeBuilder<global::Administration.Domain.UserProfileAssignment> builder)
+    {
+        builder.ToTable("UserProfileAssignment");
+
+        builder.HasKey(assignment => assignment.Id);
+
+        builder.Property(assignment => assignment.Id)
+            .HasConversion(id => id.Value, value => global::Administration.Domain.UserProfileAssignmentId.From(value))
+            .ValueGeneratedNever();
+
+        builder.Property(assignment => assignment.UserId)
+            .IsRequired();
+
+        builder.Property(assignment => assignment.ProfileId)
+            .HasConversion(id => id.Value, value => global::Administration.Domain.ProfileId.From(value))
+            .IsRequired();
+
+        builder.Property(assignment => assignment.AssignedAt)
+            .IsRequired();
+
+        builder.ComplexProperty(assignment => assignment.Scope, scope =>
+        {
+            scope.Property(s => s.Level)
+                .HasColumnName("ScopeLevel")
+                .IsRequired();
+
+            scope.Property(s => s.HoldingId)
+                .HasColumnName("ScopeHoldingId");
+
+            scope.Property(s => s.OrganizationId)
+                .HasColumnName("ScopeOrganizationId");
+
+            scope.Property(s => s.ProjectId)
+                .HasColumnName("ScopeProjectId");
+        });
+
+        builder.Ignore(assignment => assignment.DomainEvents);
+    }
+}
+
+================================================================================
+FILE: src\Modules\Administration\Administration.Infrastructure\Persistence\ProfileRepository.cs
+SIZE: 1.21 KB
+================================================================================
+using MachineryManager.Administration.Application.Abstractions;
+using Microsoft.EntityFrameworkCore;
+using Administration.Domain;
+
+namespace MachineryManager.Administration.Infrastructure.Persistence;
+
+/// <summary>EF Core implementation of <see cref="IProfileRepository"/>.</summary>
+public sealed class ProfileRepository : IProfileRepository
+{
+    private readonly AdministrationDbContext _dbContext;
+
+    /// <summary>Initializes a new instance of the <see cref="ProfileRepository"/> class.</summary>
+    /// <param name="dbContext">The Administration module's persistence context.</param>
+    public ProfileRepository(AdministrationDbContext dbContext)
+    {
+        _dbContext = dbContext;
+    }
+
+    /// <inheritdoc />
+    public Task<global::Administration.Domain.Profile?> GetByIdAsync(ProfileId id, CancellationToken cancellationToken = default) =>
+        _dbContext.Profiles.FirstOrDefaultAsync(p => p.Id == id, cancellationToken);
+
+    /// <inheritdoc />
+    public void Add(global::Administration.Domain.Profile aggregate) => _dbContext.Profiles.Add(aggregate);
+
+    /// <inheritdoc />
+    public void Update(global::Administration.Domain.Profile aggregate) => _dbContext.Profiles.Update(aggregate);
+}
+
+================================================================================
+FILE: src\Modules\Administration\Administration.Infrastructure\Persistence\UserProfileAssignmentRepository.cs
+SIZE: 1.29 KB
+================================================================================
+using MachineryManager.Administration.Application.Abstractions;
+using Microsoft.EntityFrameworkCore;
+using Administration.Domain;
+
+namespace MachineryManager.Administration.Infrastructure.Persistence;
+
+/// <summary>EF Core implementation of <see cref="IUserProfileAssignmentRepository"/>.</summary>
+public sealed class UserProfileAssignmentRepository : IUserProfileAssignmentRepository
+{
+    private readonly AdministrationDbContext _dbContext;
+
+    /// <summary>Initializes a new instance of the <see cref="UserProfileAssignmentRepository"/> class.</summary>
+    /// <param name="dbContext">The Administration module's persistence context.</param>
+    public UserProfileAssignmentRepository(AdministrationDbContext dbContext)
+    {
+        _dbContext = dbContext;
+    }
+
+    /// <inheritdoc />
+    public Task<UserProfileAssignment?> GetByIdAsync(UserProfileAssignmentId id, CancellationToken cancellationToken = default) =>
+        _dbContext.UserProfileAssignments.FirstOrDefaultAsync(a => a.Id == id, cancellationToken);
+
+    /// <inheritdoc />
+    public void Add(UserProfileAssignment aggregate) => _dbContext.UserProfileAssignments.Add(aggregate);
+
+    /// <inheritdoc />
+    public void Update(UserProfileAssignment aggregate) => _dbContext.UserProfileAssignments.Update(aggregate);
+}
+
+================================================================================
+FILE: src\Modules\Administration\Administration.Presentation\Administration.Presentation.csproj
+SIZE: 0.49 KB
+================================================================================
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <RootNamespace>MachineryManager.Administration.Presentation</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <FrameworkReference Include="Microsoft.AspNetCore.App" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Administration.Application\Administration.Application.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="OpenIddict.Validation.AspNetCore" />
+  </ItemGroup>
+
+</Project>
+
+================================================================================
+FILE: src\Modules\Administration\Administration.Presentation\Contracts\AssignUserToProfileRequest.cs
+SIZE: 0.87 KB
+================================================================================
+using Administration.Domain;
+
+namespace MachineryManager.Administration.Presentation.Contracts;
+
+/// <summary>
+/// Request body for assigning a User to a Profile at a specific scope.
+/// </summary>
+/// <param name="UserId">The GUID of the user.</param>
+/// <param name="ProfileId">The GUID of the profile.</param>
+/// <param name="ScopeLevel">The authorization scope level.</param>
+/// <param name="ScopeHoldingId">The holding identifier for Holding-level scope.</param>
+/// <param name="ScopeOrganizationId">The organization identifier for Organization-level scope.</param>
+/// <param name="ScopeProjectId">The project identifier for Project-level scope.</param>
+public sealed record AssignUserToProfileRequest(
+    Guid UserId,
+    Guid ProfileId,
+    AuthorizationScopeLevel ScopeLevel,
+    Guid? ScopeHoldingId,
+    Guid? ScopeOrganizationId,
+    Guid? ScopeProjectId);
+
+================================================================================
+FILE: src\Modules\Administration\Administration.Presentation\Contracts\CreateProfileRequest.cs
+SIZE: 0.36 KB
+================================================================================
+namespace MachineryManager.Administration.Presentation.Contracts;
+
+/// <summary>
+/// Request body for creating a new Profile.
+/// </summary>
+/// <param name="Name">The display name of the profile.</param>
+/// <param name="Permissions">The initial set of permissions.</param>
+public sealed record CreateProfileRequest(string Name, IReadOnlyList<string> Permissions);
+
+================================================================================
+FILE: src\Modules\Administration\Administration.Presentation\Endpoints\ProfileEndpoints.cs
+SIZE: 2.53 KB
+================================================================================
+using MachineryManager.Administration.Application.Features.Profiles.Commands.CreateProfile;
+using MachineryManager.Administration.Application.Features.Profiles.Queries.GetProfileById;
+using MachineryManager.Administration.Presentation.Contracts;
+using MediatR;
+using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Routing;
+using OpenIddict.Validation.AspNetCore;
+
+namespace MachineryManager.Administration.Presentation.Endpoints;
+
+/// <summary>Maps the Profile module's REST endpoints.</summary>
+public static class ProfileEndpoints
+{
+    /// <summary>Registers the Profile module's endpoints.</summary>
+    /// <param name="endpoints">The endpoint route builder.</param>
+    /// <returns>The same <see cref="IEndpointRouteBuilder"/> for chaining.</returns>
+    public static IEndpointRouteBuilder MapProfileEndpoints(this IEndpointRouteBuilder endpoints)
+    {
+        var group = endpoints
+            .MapGroup("/api/v1/profiles")
+            .WithTags("Profiles")
+            .RequireAuthorization(policy => policy
+                .AddAuthenticationSchemes(OpenIddictValidationAspNetCoreDefaults.AuthenticationScheme)
+                .RequireAuthenticatedUser());
+
+        group.MapPost("/", CreateProfileAsync)
+            .WithName("CreateProfile")
+            .WithSummary("Creates a new permission Profile.");
+
+        group.MapGet("/{profileId:guid}", GetProfileByIdAsync)
+            .WithName("GetProfileById")
+            .WithSummary("Retrieves a single Profile by its identifier.");
+
+        return endpoints;
+    }
+
+    private static async Task<IResult> CreateProfileAsync(
+        CreateProfileRequest request,
+        ISender sender,
+        HttpContext httpContext,
+        CancellationToken cancellationToken)
+    {
+        var result = await sender.Send(
+            new CreateProfileCommand(request.Name, request.Permissions),
+            cancellationToken);
+
+        return result.IsSuccess
+            ? Results.Created($"/api/v1/profiles/{result.Value}", new { id = result.Value })
+            : result.ToProblemResult(httpContext);
+    }
+
+    private static async Task<IResult> GetProfileByIdAsync(
+        Guid profileId,
+        ISender sender,
+        HttpContext httpContext,
+        CancellationToken cancellationToken)
+    {
+        var result = await sender.Send(new GetProfileByIdQuery(profileId), cancellationToken);
+
+        return result.IsSuccess
+            ? Results.Ok(result.Value)
+            : result.ToProblemResult(httpContext);
+    }
+}
+
+================================================================================
+FILE: src\Modules\Administration\Administration.Presentation\Endpoints\ResultExtensions.cs
+SIZE: 1.43 KB
+================================================================================
+using MachineryManager.SharedKernel;
+using Microsoft.AspNetCore.Http;
+
+namespace MachineryManager.Administration.Presentation.Endpoints;
+
+/// <summary>
+/// Translates a failed <see cref="Result"/> into the standard error response shape.
+/// </summary>
+internal static class ResultExtensions
+{
+    /// <summary>Builds the standard problem response for a failed result.</summary>
+    public static IResult ToProblemResult(this Result result, HttpContext httpContext)
+    {
+        var statusCode = result.Error.Type switch
+        {
+            ErrorType.Validation => StatusCodes.Status400BadRequest,
+            ErrorType.NotFound => StatusCodes.Status404NotFound,
+            ErrorType.Conflict => StatusCodes.Status409Conflict,
+            _ => StatusCodes.Status500InternalServerError,
+        };
+
+        var title = result.Error.Type switch
+        {
+            ErrorType.Validation => "Validation Error",
+            ErrorType.NotFound => "Resource Not Found",
+            ErrorType.Conflict => "Business Rule Violation",
+            _ => "Unexpected Error",
+        };
+
+        return Results.Json(
+            new
+            {
+                errorCode = result.Error.Code,
+                title,
+                message = result.Error.Message,
+                correlationId = httpContext.TraceIdentifier,
+                details = Array.Empty<string>(),
+            },
+            statusCode: statusCode);
+    }
+}
+
+================================================================================
+FILE: src\Modules\Administration\Administration.Presentation\Endpoints\UserProfileAssignmentEndpoints.cs
+SIZE: 2.6 KB
+================================================================================
+using Administration.Domain;
+using MachineryManager.Administration.Application.Features.UserProfileAssignments.Commands.AssignUserToProfile;
+using MachineryManager.Administration.Presentation.Contracts;
+using MediatR;
+using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Routing;
+using OpenIddict.Validation.AspNetCore;
+
+namespace MachineryManager.Administration.Presentation.Endpoints;
+
+/// <summary>Maps the UserProfileAssignment module's REST endpoints.</summary>
+public static class UserProfileAssignmentEndpoints
+{
+    /// <summary>Registers the assignment endpoints.</summary>
+    /// <param name="endpoints">The endpoint route builder.</param>
+    /// <returns>The same <see cref="IEndpointRouteBuilder"/> for chaining.</returns>
+    public static IEndpointRouteBuilder MapUserProfileAssignmentEndpoints(this IEndpointRouteBuilder endpoints)
+    {
+        var group = endpoints
+            .MapGroup("/api/v1/user-profile-assignments")
+            .WithTags("User Profile Assignments")
+            .RequireAuthorization(policy => policy
+                .AddAuthenticationSchemes(OpenIddictValidationAspNetCoreDefaults.AuthenticationScheme)
+                .RequireAuthenticatedUser());
+
+        group.MapPost("/", AssignUserToProfileAsync)
+            .WithName("AssignUserToProfile")
+            .WithSummary("Assigns a User to a Profile at a specific authorization scope.");
+
+        return endpoints;
+    }
+
+    private static async Task<IResult> AssignUserToProfileAsync(
+        AssignUserToProfileRequest request,
+        ISender sender,
+        HttpContext httpContext,
+        CancellationToken cancellationToken)
+    {
+        var scope = request.ScopeLevel switch
+        {
+            AuthorizationScopeLevel.Platform => AuthorizationScope.Platform(),
+            AuthorizationScopeLevel.Holding => AuthorizationScope.ForHolding(request.ScopeHoldingId!.Value),
+            AuthorizationScopeLevel.Organization => AuthorizationScope.ForOrganization(request.ScopeOrganizationId!.Value),
+            AuthorizationScopeLevel.Project => AuthorizationScope.ForProject(request.ScopeProjectId!.Value),
+            _ => throw new ArgumentOutOfRangeException(nameof(request.ScopeLevel))
+        };
+
+        var result = await sender.Send(
+            new AssignUserToProfileCommand(request.UserId, request.ProfileId, scope),
+            cancellationToken);
+
+        return result.IsSuccess
+            ? Results.Created($"/api/v1/user-profile-assignments/{result.Value}", new { id = result.Value })
+            : result.ToProblemResult(httpContext);
+    }
+}
 
 ================================================================================
 FILE: src\Modules\Identity\Identity.Application\Identity.Application.csproj
@@ -4928,9 +6770,10 @@ public sealed class ValidationBehavior<TRequest, TResponse>
 
 ================================================================================
 FILE: src\Modules\Organization\Organization.Application\DependencyInjection.cs
-SIZE: 1.24 KB
+SIZE: 1.36 KB
 ================================================================================
 using FluentValidation;
+using MachineryManager.SharedKernel.Abstractions;
 using MediatR;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -4943,8 +6786,8 @@ namespace MachineryManager.Organization.Application;
 public static class DependencyInjection
 {
     /// <summary>
-    /// Registers MediatR handlers, FluentValidation validators, and pipeline
-    /// behaviors (Validation per ADR-0036) from the Organization.Application assembly.
+    /// Registers MediatR handlers, FluentValidation validators, pipeline
+    /// behaviors (Validation per ADR-0036), and the domain event dispatcher.
     /// </summary>
     /// <param name="services">The service collection to configure.</param>
     /// <returns>The same <see cref="IServiceCollection"/> for chaining.</returns>
@@ -4964,7 +6807,40 @@ public static class DependencyInjection
             typeof(IPipelineBehavior<,>),
             typeof(Behaviors.ValidationBehavior<,>));
 
+        services.AddScoped<IDomainEventDispatcher, MediatRDomainEventDispatcher>();
+
         return services;
+    }
+}
+
+================================================================================
+FILE: src\Modules\Organization\Organization.Application\DomainEventNotification.cs
+SIZE: 0.99 KB
+================================================================================
+using MediatR;
+using MachineryManager.SharedKernel;
+
+namespace MachineryManager.Organization.Application;
+
+/// <summary>
+/// Wraps a domain event as a MediatR <see cref="INotification"/> so
+/// that Application-layer handlers can subscribe to specific domain
+/// event types via <c>INotificationHandler&lt;DomainEventNotification&lt;T&gt;&gt;</c>.
+/// </summary>
+/// <typeparam name="TDomainEvent">The type of the domain event being wrapped.</typeparam>
+public sealed class DomainEventNotification<TDomainEvent> : INotification
+    where TDomainEvent : IDomainEvent
+{
+    /// <summary>Gets the underlying domain event.</summary>
+    public TDomainEvent DomainEvent { get; }
+
+    /// <summary>
+    /// Initializes a new instance of the <see cref="DomainEventNotification{TDomainEvent}"/> class.
+    /// </summary>
+    /// <param name="domainEvent">The domain event to wrap.</param>
+    public DomainEventNotification(TDomainEvent domainEvent)
+    {
+        DomainEvent = domainEvent;
     }
 }
 
@@ -4983,7 +6859,7 @@ public sealed record RegisterHoldingCommand(string Name)
 
 ================================================================================
 FILE: src\Modules\Organization\Organization.Application\Features\Holdings\Commands\RegisterHolding\RegisterHoldingCommandHandler.cs
-SIZE: 1.36 KB
+SIZE: 2.23 KB
 ================================================================================
 using MachineryManager.Organization.Application.Abstractions;
 using MachineryManager.SharedKernel;
@@ -4992,6 +6868,10 @@ using MediatR;
 
 namespace MachineryManager.Organization.Application.Features.Holdings.Commands.RegisterHolding;
 
+/// <summary>
+/// Handles <see cref="RegisterHoldingCommand"/> by orchestrating domain
+/// registration, persisting the aggregate, and committing the unit of work.
+/// </summary>
 public sealed class RegisterHoldingCommandHandler
     : IRequestHandler<RegisterHoldingCommand, Result<Guid>>
 {
@@ -4999,6 +6879,12 @@ public sealed class RegisterHoldingCommandHandler
     private readonly IUnitOfWork _unitOfWork;
     private readonly IDateTimeProvider _dateTimeProvider;
 
+    /// <summary>
+    /// Initializes a new instance of the <see cref="RegisterHoldingCommandHandler"/> class.
+    /// </summary>
+    /// <param name="holdingRepository">The holding repository.</param>
+    /// <param name="unitOfWork">The unit of work for atomic persistence.</param>
+    /// <param name="dateTimeProvider">Provider for deterministic UTC timestamps.</param>
     public RegisterHoldingCommandHandler(
         IHoldingRepository holdingRepository,
         IUnitOfWork unitOfWork,
@@ -5009,6 +6895,12 @@ public sealed class RegisterHoldingCommandHandler
         _dateTimeProvider = dateTimeProvider;
     }
 
+    /// <summary>
+    /// Executes the registration use case.
+    /// </summary>
+    /// <param name="request">The registration command.</param>
+    /// <param name="cancellationToken">Token to cancel the asynchronous operation.</param>
+    /// <returns>A result containing the new holding's GUID on success.</returns>
     public async Task<Result<Guid>> Handle(
         RegisterHoldingCommand request,
         CancellationToken cancellationToken)
@@ -5029,14 +6921,20 @@ public sealed class RegisterHoldingCommandHandler
 
 ================================================================================
 FILE: src\Modules\Organization\Organization.Application\Features\Holdings\Commands\RegisterHolding\RegisterHoldingCommandValidator.cs
-SIZE: 0.58 KB
+SIZE: 0.79 KB
 ================================================================================
 using FluentValidation;
 
 namespace MachineryManager.Organization.Application.Features.Holdings.Commands.RegisterHolding;
 
+/// <summary>
+/// Validates <see cref="RegisterHoldingCommand"/> per ADR-0036.
+/// </summary>
 public sealed class RegisterHoldingCommandValidator : AbstractValidator<RegisterHoldingCommand>
 {
+    /// <summary>
+    /// Initializes validation rules for the register holding command.
+    /// </summary>
     public RegisterHoldingCommandValidator()
     {
         int maxLength = global::Organization.Domain.Holding.MaxNameLength;
@@ -5060,7 +6958,7 @@ public sealed record HoldingDto(Guid Id, string Name);
 
 ================================================================================
 FILE: src\Modules\Organization\Organization.Application\Features\Holdings\Queries\GetHoldingById\GetHoldingByIdQuery.cs
-SIZE: 0.31 KB
+SIZE: 0.48 KB
 ================================================================================
 using MachineryManager.Organization.Application.Features.Holdings.Dtos;
 using MachineryManager.SharedKernel;
@@ -5068,12 +6966,16 @@ using MediatR;
 
 namespace MachineryManager.Organization.Application.Features.Holdings.Queries.GetHoldingById;
 
+/// <summary>
+/// Query to retrieve a single holding by its unique identifier.
+/// </summary>
+/// <param name="HoldingId">The GUID of the holding to retrieve.</param>
 public sealed record GetHoldingByIdQuery(Guid HoldingId)
     : IRequest<Result<HoldingDto>>;
 
 ================================================================================
 FILE: src\Modules\Organization\Organization.Application\Features\Holdings\Queries\GetHoldingById\GetHoldingByIdQueryHandler.cs
-SIZE: 1.27 KB
+SIZE: 1.98 KB
 ================================================================================
 using MachineryManager.Organization.Application.Abstractions;
 using MachineryManager.Organization.Application.Features.Holdings.Dtos;
@@ -5083,16 +6985,30 @@ using Organization.Domain;
 
 namespace MachineryManager.Organization.Application.Features.Holdings.Queries.GetHoldingById;
 
+/// <summary>
+/// Handles <see cref="GetHoldingByIdQuery"/> by loading the aggregate
+/// and projecting it into a read-only DTO.
+/// </summary>
 public sealed class GetHoldingByIdQueryHandler
     : IRequestHandler<GetHoldingByIdQuery, Result<HoldingDto>>
 {
     private readonly IHoldingRepository _holdingRepository;
 
+    /// <summary>
+    /// Initializes a new instance of the <see cref="GetHoldingByIdQueryHandler"/> class.
+    /// </summary>
+    /// <param name="holdingRepository">The holding repository.</param>
     public GetHoldingByIdQueryHandler(IHoldingRepository holdingRepository)
     {
         _holdingRepository = holdingRepository;
     }
 
+    /// <summary>
+    /// Executes the query and returns the holding DTO if found.
+    /// </summary>
+    /// <param name="request">The query containing the holding identifier.</param>
+    /// <param name="cancellationToken">Token to cancel the asynchronous operation.</param>
+    /// <returns>A result containing the <see cref="HoldingDto"/> or a not-found error.</returns>
     public async Task<Result<HoldingDto>> Handle(
         GetHoldingByIdQuery request,
         CancellationToken cancellationToken)
@@ -5115,14 +7031,20 @@ public sealed class GetHoldingByIdQueryHandler
 
 ================================================================================
 FILE: src\Modules\Organization\Organization.Application\Features\Holdings\Queries\GetHoldingById\GetHoldingByIdQueryValidator.cs
-SIZE: 0.32 KB
+SIZE: 0.51 KB
 ================================================================================
 using FluentValidation;
 
 namespace MachineryManager.Organization.Application.Features.Holdings.Queries.GetHoldingById;
 
+/// <summary>
+/// Validates <see cref="GetHoldingByIdQuery"/> per ADR-0036.
+/// </summary>
 public sealed class GetHoldingByIdQueryValidator : AbstractValidator<GetHoldingByIdQuery>
 {
+    /// <summary>
+    /// Initializes validation rules for the get-by-id query.
+    /// </summary>
     public GetHoldingByIdQueryValidator()
     {
         RuleFor(x => x.HoldingId).NotEmpty();
@@ -5131,7 +7053,7 @@ public sealed class GetHoldingByIdQueryValidator : AbstractValidator<GetHoldingB
 
 ================================================================================
 FILE: src\Modules\Organization\Organization.Application\Features\Holdings\Queries\SearchHoldings\SearchHoldingsQuery.cs
-SIZE: 0.59 KB
+SIZE: 1.47 KB
 ================================================================================
 using MachineryManager.Organization.Application.Features.Holdings.Dtos;
 using MachineryManager.SharedKernel;
@@ -5139,12 +7061,28 @@ using MediatR;
 
 namespace MachineryManager.Organization.Application.Features.Holdings.Queries.SearchHoldings;
 
+/// <summary>
+/// Query to perform a paginated search over holdings.
+/// </summary>
+/// <param name="SearchTerm">Optional text to filter by holding name.</param>
+/// <param name="Page">The one-based page number (default 1).</param>
+/// <param name="PageSize">The number of items per page (default 25, max 200).</param>
 public sealed record SearchHoldingsQuery(
     string? SearchTerm = null,
     int Page = 1,
     int PageSize = 25)
     : IRequest<Result<SearchHoldingsResponse>>;
 
+/// <summary>
+/// Paginated response for holding search queries.
+/// </summary>
+/// <param name="Items">The holdings matching the search criteria.</param>
+/// <param name="Page">The current page number.</param>
+/// <param name="PageSize">The number of items per page.</param>
+/// <param name="TotalItems">The total count of matching items across all pages.</param>
+/// <param name="TotalPages">The total number of pages.</param>
+/// <param name="HasNextPage">Whether a next page exists.</param>
+/// <param name="HasPreviousPage">Whether a previous page exists.</param>
 public sealed record SearchHoldingsResponse(
     IReadOnlyList<HoldingDto> Items,
     int Page,
@@ -5156,7 +7094,7 @@ public sealed record SearchHoldingsResponse(
 
 ================================================================================
 FILE: src\Modules\Organization\Organization.Application\Features\Holdings\Queries\SearchHoldings\SearchHoldingsQueryHandler.cs
-SIZE: 0.92 KB
+SIZE: 1.59 KB
 ================================================================================
 using MachineryManager.Organization.Application.Abstractions;
 using MachineryManager.SharedKernel;
@@ -5164,16 +7102,30 @@ using MediatR;
 
 namespace MachineryManager.Organization.Application.Features.Holdings.Queries.SearchHoldings;
 
+/// <summary>
+/// Handles <see cref="SearchHoldingsQuery"/> by delegating to the repository
+/// search projection.
+/// </summary>
 public sealed class SearchHoldingsQueryHandler
     : IRequestHandler<SearchHoldingsQuery, Result<SearchHoldingsResponse>>
 {
     private readonly IHoldingRepository _holdingRepository;
 
+    /// <summary>
+    /// Initializes a new instance of the <see cref="SearchHoldingsQueryHandler"/> class.
+    /// </summary>
+    /// <param name="holdingRepository">The holding repository.</param>
     public SearchHoldingsQueryHandler(IHoldingRepository holdingRepository)
     {
         _holdingRepository = holdingRepository;
     }
 
+    /// <summary>
+    /// Executes the search query and returns the paginated result.
+    /// </summary>
+    /// <param name="request">The search query parameters.</param>
+    /// <param name="cancellationToken">Token to cancel the asynchronous operation.</param>
+    /// <returns>A result containing the paginated search response.</returns>
     public async Task<Result<SearchHoldingsResponse>> Handle(
         SearchHoldingsQuery request,
         CancellationToken cancellationToken)
@@ -5190,14 +7142,20 @@ public sealed class SearchHoldingsQueryHandler
 
 ================================================================================
 FILE: src\Modules\Organization\Organization.Application\Features\Holdings\Queries\SearchHoldings\SearchHoldingsQueryValidator.cs
-SIZE: 0.38 KB
+SIZE: 0.6 KB
 ================================================================================
 using FluentValidation;
 
 namespace MachineryManager.Organization.Application.Features.Holdings.Queries.SearchHoldings;
 
+/// <summary>
+/// Validates <see cref="SearchHoldingsQuery"/> per ADR-0036 and API conventions.
+/// </summary>
 public sealed class SearchHoldingsQueryValidator : AbstractValidator<SearchHoldingsQuery>
 {
+    /// <summary>
+    /// Initializes validation rules for the search holdings query.
+    /// </summary>
     public SearchHoldingsQueryValidator()
     {
         RuleFor(x => x.Page).GreaterThanOrEqualTo(1);
@@ -5207,19 +7165,24 @@ public sealed class SearchHoldingsQueryValidator : AbstractValidator<SearchHoldi
 
 ================================================================================
 FILE: src\Modules\Organization\Organization.Application\Features\Organizations\Commands\AssignOrganizationToHolding\AssignOrganizationToHoldingCommand.cs
-SIZE: 0.28 KB
+SIZE: 0.52 KB
 ================================================================================
 using MachineryManager.SharedKernel;
 using MediatR;
 
 namespace MachineryManager.Organization.Application.Features.Organizations.Commands.AssignOrganizationToHolding;
 
+/// <summary>
+/// Command to assign an existing Organization to a Holding.
+/// </summary>
+/// <param name="OrganizationId">The GUID of the organization to assign.</param>
+/// <param name="HoldingId">The GUID of the target holding.</param>
 public sealed record AssignOrganizationToHoldingCommand(Guid OrganizationId, Guid HoldingId)
     : IRequest<Result>;
 
 ================================================================================
 FILE: src\Modules\Organization\Organization.Application\Features\Organizations\Commands\AssignOrganizationToHolding\AssignOrganizationToHoldingCommandHandler.cs
-SIZE: 1.91 KB
+SIZE: 2.82 KB
 ================================================================================
 using MachineryManager.Organization.Application.Abstractions;
 using MachineryManager.SharedKernel;
@@ -5229,6 +7192,11 @@ using Organization.Domain;
 
 namespace MachineryManager.Organization.Application.Features.Organizations.Commands.AssignOrganizationToHolding;
 
+/// <summary>
+/// Handles <see cref="AssignOrganizationToHoldingCommand"/> by loading the
+/// organization aggregate, invoking the domain assignment behavior, and
+/// committing the unit of work.
+/// </summary>
 public sealed class AssignOrganizationToHoldingCommandHandler
     : IRequestHandler<AssignOrganizationToHoldingCommand, Result>
 {
@@ -5236,6 +7204,12 @@ public sealed class AssignOrganizationToHoldingCommandHandler
     private readonly IUnitOfWork _unitOfWork;
     private readonly IDateTimeProvider _dateTimeProvider;
 
+    /// <summary>
+    /// Initializes a new instance of the <see cref="AssignOrganizationToHoldingCommandHandler"/> class.
+    /// </summary>
+    /// <param name="organizationRepository">The organization repository.</param>
+    /// <param name="unitOfWork">The unit of work for atomic persistence.</param>
+    /// <param name="dateTimeProvider">Provider for deterministic UTC timestamps.</param>
     public AssignOrganizationToHoldingCommandHandler(
         IOrganizationRepository organizationRepository,
         IUnitOfWork unitOfWork,
@@ -5246,6 +7220,12 @@ public sealed class AssignOrganizationToHoldingCommandHandler
         _dateTimeProvider = dateTimeProvider;
     }
 
+    /// <summary>
+    /// Executes the assignment use case.
+    /// </summary>
+    /// <param name="request">The assignment command.</param>
+    /// <param name="cancellationToken">Token to cancel the asynchronous operation.</param>
+    /// <returns>A result indicating success or a business error.</returns>
     public async Task<Result> Handle(
         AssignOrganizationToHoldingCommand request,
         CancellationToken cancellationToken)
@@ -5278,14 +7258,20 @@ public sealed class AssignOrganizationToHoldingCommandHandler
 
 ================================================================================
 FILE: src\Modules\Organization\Organization.Application\Features\Organizations\Commands\AssignOrganizationToHolding\AssignOrganizationToHoldingCommandValidator.cs
-SIZE: 0.43 KB
+SIZE: 0.64 KB
 ================================================================================
 using FluentValidation;
 
 namespace MachineryManager.Organization.Application.Features.Organizations.Commands.AssignOrganizationToHolding;
 
+/// <summary>
+/// Validates <see cref="AssignOrganizationToHoldingCommand"/> per ADR-0036.
+/// </summary>
 public sealed class AssignOrganizationToHoldingCommandValidator : AbstractValidator<AssignOrganizationToHoldingCommand>
 {
+    /// <summary>
+    /// Initializes validation rules for the assign-to-holding command.
+    /// </summary>
     public AssignOrganizationToHoldingCommandValidator()
     {
         RuleFor(x => x.OrganizationId).NotEmpty();
@@ -5652,7 +7638,7 @@ public sealed record RegisterProjectCommand(Guid OrganizationId, string Name)
 
 ================================================================================
 FILE: src\Modules\Organization\Organization.Application\Features\Projects\Commands\RegisterProject\RegisterProjectCommandHandler.cs
-SIZE: 1.45 KB
+SIZE: 2.32 KB
 ================================================================================
 using MachineryManager.Organization.Application.Abstractions;
 using MachineryManager.SharedKernel;
@@ -5662,6 +7648,10 @@ using Organization.Domain;
 
 namespace MachineryManager.Organization.Application.Features.Projects.Commands.RegisterProject;
 
+/// <summary>
+/// Handles <see cref="RegisterProjectCommand"/> by orchestrating domain
+/// registration, persisting the aggregate, and committing the unit of work.
+/// </summary>
 public sealed class RegisterProjectCommandHandler
     : IRequestHandler<RegisterProjectCommand, Result<Guid>>
 {
@@ -5669,6 +7659,12 @@ public sealed class RegisterProjectCommandHandler
     private readonly IUnitOfWork _unitOfWork;
     private readonly IDateTimeProvider _dateTimeProvider;
 
+    /// <summary>
+    /// Initializes a new instance of the <see cref="RegisterProjectCommandHandler"/> class.
+    /// </summary>
+    /// <param name="projectRepository">The project repository.</param>
+    /// <param name="unitOfWork">The unit of work for atomic persistence.</param>
+    /// <param name="dateTimeProvider">Provider for deterministic UTC timestamps.</param>
     public RegisterProjectCommandHandler(
         IProjectRepository projectRepository,
         IUnitOfWork unitOfWork,
@@ -5679,6 +7675,12 @@ public sealed class RegisterProjectCommandHandler
         _dateTimeProvider = dateTimeProvider;
     }
 
+    /// <summary>
+    /// Executes the registration use case.
+    /// </summary>
+    /// <param name="request">The registration command.</param>
+    /// <param name="cancellationToken">Token to cancel the asynchronous operation.</param>
+    /// <returns>A result containing the new project's GUID on success.</returns>
     public async Task<Result<Guid>> Handle(
         RegisterProjectCommand request,
         CancellationToken cancellationToken)
@@ -5700,14 +7702,20 @@ public sealed class RegisterProjectCommandHandler
 
 ================================================================================
 FILE: src\Modules\Organization\Organization.Application\Features\Projects\Commands\RegisterProject\RegisterProjectCommandValidator.cs
-SIZE: 0.64 KB
+SIZE: 0.84 KB
 ================================================================================
 using FluentValidation;
 
 namespace MachineryManager.Organization.Application.Features.Projects.Commands.RegisterProject;
 
+/// <summary>
+/// Validates <see cref="RegisterProjectCommand"/> per ADR-0036.
+/// </summary>
 public sealed class RegisterProjectCommandValidator : AbstractValidator<RegisterProjectCommand>
 {
+    /// <summary>
+    /// Initializes validation rules for the register project command.
+    /// </summary>
     public RegisterProjectCommandValidator()
     {
         int maxLength = global::Organization.Domain.Project.MaxNameLength;
@@ -5735,7 +7743,7 @@ public sealed record ProjectDto(
 
 ================================================================================
 FILE: src\Modules\Organization\Organization.Application\Features\Projects\Queries\GetProjectById\GetProjectByIdQuery.cs
-SIZE: 0.31 KB
+SIZE: 0.48 KB
 ================================================================================
 using MachineryManager.Organization.Application.Features.Projects.Dtos;
 using MachineryManager.SharedKernel;
@@ -5743,12 +7751,16 @@ using MediatR;
 
 namespace MachineryManager.Organization.Application.Features.Projects.Queries.GetProjectById;
 
+/// <summary>
+/// Query to retrieve a single project by its unique identifier.
+/// </summary>
+/// <param name="ProjectId">The GUID of the project to retrieve.</param>
 public sealed record GetProjectByIdQuery(Guid ProjectId)
     : IRequest<Result<ProjectDto>>;
 
 ================================================================================
 FILE: src\Modules\Organization\Organization.Application\Features\Projects\Queries\GetProjectById\GetProjectByIdQueryHandler.cs
-SIZE: 1.34 KB
+SIZE: 2.05 KB
 ================================================================================
 using MachineryManager.Organization.Application.Abstractions;
 using MachineryManager.Organization.Application.Features.Projects.Dtos;
@@ -5758,16 +7770,30 @@ using Organization.Domain;
 
 namespace MachineryManager.Organization.Application.Features.Projects.Queries.GetProjectById;
 
+/// <summary>
+/// Handles <see cref="GetProjectByIdQuery"/> by loading the aggregate
+/// and projecting it into a read-only DTO.
+/// </summary>
 public sealed class GetProjectByIdQueryHandler
     : IRequestHandler<GetProjectByIdQuery, Result<ProjectDto>>
 {
     private readonly IProjectRepository _projectRepository;
 
+    /// <summary>
+    /// Initializes a new instance of the <see cref="GetProjectByIdQueryHandler"/> class.
+    /// </summary>
+    /// <param name="projectRepository">The project repository.</param>
     public GetProjectByIdQueryHandler(IProjectRepository projectRepository)
     {
         _projectRepository = projectRepository;
     }
 
+    /// <summary>
+    /// Executes the query and returns the project DTO if found.
+    /// </summary>
+    /// <param name="request">The query containing the project identifier.</param>
+    /// <param name="cancellationToken">Token to cancel the asynchronous operation.</param>
+    /// <returns>A result containing the <see cref="ProjectDto"/> or a not-found error.</returns>
     public async Task<Result<ProjectDto>> Handle(
         GetProjectByIdQuery request,
         CancellationToken cancellationToken)
@@ -5794,14 +7820,20 @@ public sealed class GetProjectByIdQueryHandler
 
 ================================================================================
 FILE: src\Modules\Organization\Organization.Application\Features\Projects\Queries\GetProjectById\GetProjectByIdQueryValidator.cs
-SIZE: 0.32 KB
+SIZE: 0.51 KB
 ================================================================================
 using FluentValidation;
 
 namespace MachineryManager.Organization.Application.Features.Projects.Queries.GetProjectById;
 
+/// <summary>
+/// Validates <see cref="GetProjectByIdQuery"/> per ADR-0036.
+/// </summary>
 public sealed class GetProjectByIdQueryValidator : AbstractValidator<GetProjectByIdQuery>
 {
+    /// <summary>
+    /// Initializes validation rules for the get-by-id query.
+    /// </summary>
     public GetProjectByIdQueryValidator()
     {
         RuleFor(x => x.ProjectId).NotEmpty();
@@ -5810,7 +7842,7 @@ public sealed class GetProjectByIdQueryValidator : AbstractValidator<GetProjectB
 
 ================================================================================
 FILE: src\Modules\Organization\Organization.Application\Features\Projects\Queries\SearchProjects\SearchProjectsQuery.cs
-SIZE: 0.59 KB
+SIZE: 1.47 KB
 ================================================================================
 using MachineryManager.Organization.Application.Features.Projects.Dtos;
 using MachineryManager.SharedKernel;
@@ -5818,12 +7850,28 @@ using MediatR;
 
 namespace MachineryManager.Organization.Application.Features.Projects.Queries.SearchProjects;
 
+/// <summary>
+/// Query to perform a paginated search over projects.
+/// </summary>
+/// <param name="SearchTerm">Optional text to filter by project name.</param>
+/// <param name="Page">The one-based page number (default 1).</param>
+/// <param name="PageSize">The number of items per page (default 25, max 200).</param>
 public sealed record SearchProjectsQuery(
     string? SearchTerm = null,
     int Page = 1,
     int PageSize = 25)
     : IRequest<Result<SearchProjectsResponse>>;
 
+/// <summary>
+/// Paginated response for project search queries.
+/// </summary>
+/// <param name="Items">The projects matching the search criteria.</param>
+/// <param name="Page">The current page number.</param>
+/// <param name="PageSize">The number of items per page.</param>
+/// <param name="TotalItems">The total count of matching items across all pages.</param>
+/// <param name="TotalPages">The total number of pages.</param>
+/// <param name="HasNextPage">Whether a next page exists.</param>
+/// <param name="HasPreviousPage">Whether a previous page exists.</param>
 public sealed record SearchProjectsResponse(
     IReadOnlyList<ProjectDto> Items,
     int Page,
@@ -5835,7 +7883,7 @@ public sealed record SearchProjectsResponse(
 
 ================================================================================
 FILE: src\Modules\Organization\Organization.Application\Features\Projects\Queries\SearchProjects\SearchProjectsQueryHandler.cs
-SIZE: 0.92 KB
+SIZE: 1.59 KB
 ================================================================================
 using MachineryManager.Organization.Application.Abstractions;
 using MachineryManager.SharedKernel;
@@ -5843,16 +7891,30 @@ using MediatR;
 
 namespace MachineryManager.Organization.Application.Features.Projects.Queries.SearchProjects;
 
+/// <summary>
+/// Handles <see cref="SearchProjectsQuery"/> by delegating to the repository
+/// search projection.
+/// </summary>
 public sealed class SearchProjectsQueryHandler
     : IRequestHandler<SearchProjectsQuery, Result<SearchProjectsResponse>>
 {
     private readonly IProjectRepository _projectRepository;
 
+    /// <summary>
+    /// Initializes a new instance of the <see cref="SearchProjectsQueryHandler"/> class.
+    /// </summary>
+    /// <param name="projectRepository">The project repository.</param>
     public SearchProjectsQueryHandler(IProjectRepository projectRepository)
     {
         _projectRepository = projectRepository;
     }
 
+    /// <summary>
+    /// Executes the search query and returns the paginated result.
+    /// </summary>
+    /// <param name="request">The search query parameters.</param>
+    /// <param name="cancellationToken">Token to cancel the asynchronous operation.</param>
+    /// <returns>A result containing the paginated search response.</returns>
     public async Task<Result<SearchProjectsResponse>> Handle(
         SearchProjectsQuery request,
         CancellationToken cancellationToken)
@@ -5869,18 +7931,80 @@ public sealed class SearchProjectsQueryHandler
 
 ================================================================================
 FILE: src\Modules\Organization\Organization.Application\Features\Projects\Queries\SearchProjects\SearchProjectsQueryValidator.cs
-SIZE: 0.38 KB
+SIZE: 0.6 KB
 ================================================================================
 using FluentValidation;
 
 namespace MachineryManager.Organization.Application.Features.Projects.Queries.SearchProjects;
 
+/// <summary>
+/// Validates <see cref="SearchProjectsQuery"/> per ADR-0036 and API conventions.
+/// </summary>
 public sealed class SearchProjectsQueryValidator : AbstractValidator<SearchProjectsQuery>
 {
+    /// <summary>
+    /// Initializes validation rules for the search projects query.
+    /// </summary>
     public SearchProjectsQueryValidator()
     {
         RuleFor(x => x.Page).GreaterThanOrEqualTo(1);
         RuleFor(x => x.PageSize).InclusiveBetween(1, 200);
+    }
+}
+
+================================================================================
+FILE: src\Modules\Organization\Organization.Application\MediatRDomainEventDispatcher.cs
+SIZE: 1.94 KB
+================================================================================
+using System.Reflection;
+using MediatR;
+using MachineryManager.SharedKernel;
+using MachineryManager.SharedKernel.Abstractions;
+
+namespace MachineryManager.Organization.Application;
+
+/// <summary>
+/// Dispatches domain events through MediatR as <see cref="INotification"/>
+/// wrappers, bridging the SharedKernel abstraction to the Application-layer
+/// messaging infrastructure (ADR-0011).
+/// </summary>
+public sealed class MediatRDomainEventDispatcher : IDomainEventDispatcher
+{
+    private readonly IMediator _mediator;
+
+    /// <summary>
+    /// Initializes a new instance of the <see cref="MediatRDomainEventDispatcher"/> class.
+    /// </summary>
+    /// <param name="mediator">The MediatR mediator.</param>
+    public MediatRDomainEventDispatcher(IMediator mediator)
+    {
+        _mediator = mediator;
+    }
+
+    /// <inheritdoc />
+    public async Task DispatchAsync(IReadOnlyCollection<IDomainEvent> events, CancellationToken cancellationToken = default)
+    {
+        foreach (var domainEvent in events)
+        {
+            var notificationType = typeof(DomainEventNotification<>).MakeGenericType(domainEvent.GetType());
+            var notification = Activator.CreateInstance(notificationType, domainEvent)!;
+
+            var method = typeof(MediatRDomainEventDispatcher)
+                .GetMethod(nameof(PublishTyped), BindingFlags.NonPublic | BindingFlags.Instance)!
+                .MakeGenericMethod(notificationType);
+
+            await (Task)method.Invoke(this, new[] { notification, cancellationToken })!;
+        }
+    }
+
+    /// <summary>
+    /// Strongly-typed helper that satisfies MediatR's generic constraint
+    /// on <see cref="INotification"/>.
+    /// </summary>
+    private async Task PublishTyped<TNotification>(TNotification notification, CancellationToken cancellationToken)
+        where TNotification : INotification
+    {
+        await _mediator.Publish(notification, cancellationToken);
     }
 }
 
@@ -6671,7 +8795,7 @@ public sealed class ProjectConfiguration : IEntityTypeConfiguration<Project>
 
 ================================================================================
 FILE: src\Modules\Organization\Organization.Infrastructure\Persistence\HoldingRepository.cs
-SIZE: 1.96 KB
+SIZE: 2.36 KB
 ================================================================================
 using MachineryManager.Organization.Application.Abstractions;
 using MachineryManager.Organization.Application.Features.Holdings.Dtos;
@@ -6681,22 +8805,33 @@ using Organization.Domain;
 
 namespace MachineryManager.Organization.Infrastructure.Persistence;
 
+/// <summary>
+/// EF Core implementation of <see cref="IHoldingRepository"/>.
+/// </summary>
 public sealed class HoldingRepository : IHoldingRepository
 {
     private readonly OrganizationDbContext _dbContext;
 
+    /// <summary>
+    /// Initializes a new instance of the <see cref="HoldingRepository"/> class.
+    /// </summary>
+    /// <param name="dbContext">The Organization module's persistence context.</param>
     public HoldingRepository(OrganizationDbContext dbContext)
     {
         _dbContext = dbContext;
     }
 
+    /// <inheritdoc />
     public Task<Holding?> GetByIdAsync(HoldingId id, CancellationToken cancellationToken = default) =>
         _dbContext.Holdings.FirstOrDefaultAsync(h => h.Id == id, cancellationToken);
 
+    /// <inheritdoc />
     public void Add(Holding aggregate) => _dbContext.Holdings.Add(aggregate);
 
+    /// <inheritdoc />
     public void Update(Holding aggregate) => _dbContext.Holdings.Update(aggregate);
 
+    /// <inheritdoc />
     public async Task<SearchHoldingsResponse> SearchAsync(
         string? searchTerm,
         int page,
@@ -7008,8 +9143,9 @@ namespace Organization.Infrastructure.Persistence.Migrations
 
 ================================================================================
 FILE: src\Modules\Organization\Organization.Infrastructure\Persistence\OrganizationDbContext.cs
-SIZE: 3.91 KB
+SIZE: 3.49 KB
 ================================================================================
+using MachineryManager.SharedKernel;
 using MachineryManager.SharedKernel.Abstractions;
 using Microsoft.EntityFrameworkCore;
 
@@ -7024,11 +9160,20 @@ namespace MachineryManager.Organization.Infrastructure.Persistence;
 /// </summary>
 public sealed class OrganizationDbContext : DbContext, IUnitOfWork
 {
+    private readonly IDomainEventDispatcher? _domainEventDispatcher;
+
     /// <summary>Initializes a new instance of the <see cref="OrganizationDbContext"/> class.</summary>
     /// <param name="options">The EF Core options for this context.</param>
-    public OrganizationDbContext(DbContextOptions<OrganizationDbContext> options)
+    /// <param name="domainEventDispatcher">
+    /// Optional dispatcher for publishing domain events after successful
+    /// commit. Absent during design-time migrations or test isolation.
+    /// </param>
+    public OrganizationDbContext(
+        DbContextOptions<OrganizationDbContext> options,
+        IDomainEventDispatcher? domainEventDispatcher = null)
         : base(options)
     {
+        _domainEventDispatcher = domainEventDispatcher;
     }
 
     /// <summary>Gets the set of Organization aggregates.</summary>
@@ -7055,51 +9200,31 @@ public sealed class OrganizationDbContext : DbContext, IUnitOfWork
     /// <summary>
     /// Persists all pending changes for this module as a single atomic
     /// unit (ADR-0006). Domain Events raised by tracked aggregates are
-    /// cleared after a successful commit.
+    /// dispatched after a successful commit and then cleared.
     /// </summary>
-    /// <remarks>
-    /// Dispatching the collected events to subscribers is NOT wired yet:
-    /// no event dispatch mechanism has been approved for Infrastructure
-    /// (ADR-0011 restricts MediatR to the Application layer only), and
-    /// no Domain Event subscribers exist for this module yet either.
-    /// This is an explicit open item — see the completion report — not
-    /// a silent omission of Section 4.7's Event Publishing Rules.
-    /// </remarks>
     /// <param name="cancellationToken">Token to cancel the asynchronous operation.</param>
     /// <returns>The number of state entries written to the database.</returns>
     public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
     {
-        var organizationsWithEvents = ChangeTracker
-            .Entries<global::Organization.Domain.Organization>()
-            .Select(entry => entry.Entity)
-            .Where(aggregate => aggregate.DomainEvents.Count > 0)
+        var aggregatesWithEvents = ChangeTracker
+            .Entries()
+            .Where(e => e.Entity is IHasDomainEvents)
+            .Select(e => (IHasDomainEvents)e.Entity)
+            .Where(e => e.DomainEvents.Count > 0)
             .ToList();
 
-        var holdingsWithEvents = ChangeTracker
-            .Entries<global::Organization.Domain.Holding>()
-            .Select(entry => entry.Entity)
-            .Where(aggregate => aggregate.DomainEvents.Count > 0)
-            .ToList();
-
-        var projectsWithEvents = ChangeTracker
-            .Entries<global::Organization.Domain.Project>()
-            .Select(entry => entry.Entity)
-            .Where(aggregate => aggregate.DomainEvents.Count > 0)
+        var domainEvents = aggregatesWithEvents
+            .SelectMany(a => a.DomainEvents)
             .ToList();
 
         var affectedRows = await base.SaveChangesAsync(cancellationToken);
 
-        foreach (var aggregate in organizationsWithEvents)
+        if (_domainEventDispatcher is not null && domainEvents.Count > 0)
         {
-            aggregate.ClearDomainEvents();
+            await _domainEventDispatcher.DispatchAsync(domainEvents, cancellationToken);
         }
 
-        foreach (var aggregate in holdingsWithEvents)
-        {
-            aggregate.ClearDomainEvents();
-        }
-
-        foreach (var aggregate in projectsWithEvents)
+        foreach (var aggregate in aggregatesWithEvents)
         {
             aggregate.ClearDomainEvents();
         }
@@ -7192,7 +9317,7 @@ public sealed class OrganizationRepository : IOrganizationRepository
 
 ================================================================================
 FILE: src\Modules\Organization\Organization.Infrastructure\Persistence\ProjectRepository.cs
-SIZE: 1.99 KB
+SIZE: 2.38 KB
 ================================================================================
 using MachineryManager.Organization.Application.Abstractions;
 using MachineryManager.Organization.Application.Features.Projects.Dtos;
@@ -7202,22 +9327,33 @@ using Organization.Domain;
 
 namespace MachineryManager.Organization.Infrastructure.Persistence;
 
+/// <summary>
+/// EF Core implementation of <see cref="IProjectRepository"/>.
+/// </summary>
 public sealed class ProjectRepository : IProjectRepository
 {
     private readonly OrganizationDbContext _dbContext;
 
+    /// <summary>
+    /// Initializes a new instance of the <see cref="ProjectRepository"/> class.
+    /// </summary>
+    /// <param name="dbContext">The Organization module's persistence context.</param>
     public ProjectRepository(OrganizationDbContext dbContext)
     {
         _dbContext = dbContext;
     }
 
+    /// <inheritdoc />
     public Task<Project?> GetByIdAsync(ProjectId id, CancellationToken cancellationToken = default) =>
         _dbContext.Projects.FirstOrDefaultAsync(p => p.Id == id, cancellationToken);
 
+    /// <inheritdoc />
     public void Add(Project aggregate) => _dbContext.Projects.Add(aggregate);
 
+    /// <inheritdoc />
     public void Update(Project aggregate) => _dbContext.Projects.Update(aggregate);
 
+    /// <inheritdoc />
     public async Task<SearchProjectsResponse> SearchAsync(
         string? searchTerm,
         int page,
@@ -7255,18 +9391,26 @@ public sealed class ProjectRepository : IProjectRepository
 
 ================================================================================
 FILE: src\Modules\Organization\Organization.Presentation\Contracts\AssignOrganizationToHoldingRequest.cs
-SIZE: 0.14 KB
+SIZE: 0.29 KB
 ================================================================================
 namespace MachineryManager.Organization.Presentation.Contracts;
 
+/// <summary>
+/// Request body for assigning an Organization to a Holding.
+/// </summary>
+/// <param name="HoldingId">The GUID of the target holding.</param>
 public sealed record AssignOrganizationToHoldingRequest(Guid HoldingId);
 
 ================================================================================
 FILE: src\Modules\Organization\Organization.Presentation\Contracts\RegisterHoldingRequest.cs
-SIZE: 0.12 KB
+SIZE: 0.27 KB
 ================================================================================
 namespace MachineryManager.Organization.Presentation.Contracts;
 
+/// <summary>
+/// Request body for registering a new Holding.
+/// </summary>
+/// <param name="Name">The display name of the holding to create.</param>
 public sealed record RegisterHoldingRequest(string Name);
 
 ================================================================================
@@ -7281,18 +9425,22 @@ namespace MachineryManager.Organization.Presentation.Contracts;
 /// <param name="Name">The display name of the organization to create.</param>
 public sealed record RegisterOrganizationRequest(string Name);
 
-
 ================================================================================
 FILE: src\Modules\Organization\Organization.Presentation\Contracts\RegisterProjectRequest.cs
-SIZE: 0.14 KB
+SIZE: 0.39 KB
 ================================================================================
 namespace MachineryManager.Organization.Presentation.Contracts;
 
+/// <summary>
+/// Request body for registering a new Project under an Organization.
+/// </summary>
+/// <param name="OrganizationId">The GUID of the owning organization.</param>
+/// <param name="Name">The display name of the project to create.</param>
 public sealed record RegisterProjectRequest(Guid OrganizationId, string Name);
 
 ================================================================================
 FILE: src\Modules\Organization\Organization.Presentation\Endpoints\HoldingEndpoints.cs
-SIZE: 2.98 KB
+SIZE: 3.35 KB
 ================================================================================
 using MachineryManager.Organization.Application.Features.Holdings.Commands.RegisterHolding;
 using MachineryManager.Organization.Application.Features.Holdings.Queries.GetHoldingById;
@@ -7306,8 +9454,16 @@ using OpenIddict.Validation.AspNetCore;
 
 namespace MachineryManager.Organization.Presentation.Endpoints;
 
+/// <summary>
+/// Maps the Holding module's REST endpoints per 07-api conventions.
+/// </summary>
 public static class HoldingEndpoints
 {
+    /// <summary>
+    /// Registers the Holding module's endpoints on the application's route builder.
+    /// </summary>
+    /// <param name="endpoints">The endpoint route builder.</param>
+    /// <returns>The same <see cref="IEndpointRouteBuilder"/> for chaining.</returns>
     public static IEndpointRouteBuilder MapHoldingEndpoints(this IEndpointRouteBuilder endpoints)
     {
         var group = endpoints
@@ -7498,7 +9654,7 @@ public static class OrganizationEndpoints
 
 ================================================================================
 FILE: src\Modules\Organization\Organization.Presentation\Endpoints\ProjectEndpoints.cs
-SIZE: 3.05 KB
+SIZE: 3.42 KB
 ================================================================================
 using MachineryManager.Organization.Application.Features.Projects.Commands.RegisterProject;
 using MachineryManager.Organization.Application.Features.Projects.Queries.GetProjectById;
@@ -7512,8 +9668,16 @@ using OpenIddict.Validation.AspNetCore;
 
 namespace MachineryManager.Organization.Presentation.Endpoints;
 
+/// <summary>
+/// Maps the Project module's REST endpoints per 07-api conventions.
+/// </summary>
 public static class ProjectEndpoints
 {
+    /// <summary>
+    /// Registers the Project module's endpoints on the application's route builder.
+    /// </summary>
+    /// <param name="endpoints">The endpoint route builder.</param>
+    /// <returns>The same <see cref="IEndpointRouteBuilder"/> for chaining.</returns>
     public static IEndpointRouteBuilder MapProjectEndpoints(this IEndpointRouteBuilder endpoints)
     {
         var group = endpoints
@@ -7671,12 +9835,12 @@ SIZE: 0.35 KB
 # SECTION 3: SNAPSHOT SUMMARY
 ================================================================================
 
-Generation Time     : 00:00:02.2075159
-Total Files Scanned : 140
-Files Included      : 140
+Generation Time     : 00:00:01.0255226
+Total Files Scanned : 185
+Files Included      : 185
 Files Skipped       : 0
-Total Source Size   : 0.25 MB
-Snapshot File Size  : 0.3 MB
+Total Source Size   : 0.32 MB
+Snapshot File Size  : 0.39 MB
 Output Path         : C:\Users\i\source\repos\MachineryManagerEnterprise\MME_Codebase_Snapshot.txt
 
 Excluded Directories: .git, .github, .vs, .vscode, .idea, .azure, .devcontainer, bin, obj, packages, publish, out, release, releases, debug, x64, x86, arm64, artifacts, .artifacts, node_modules, dist, build, bower_components, jspm_packages, docs-english, docs-farsi, docs, tools, test-results, coverage, .coverage, TestResults, lib, .angular, .next, .nuxt, .svelte-kit, .cache, .temp, tmp
