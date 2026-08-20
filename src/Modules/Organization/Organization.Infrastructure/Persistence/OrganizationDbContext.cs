@@ -23,6 +23,14 @@ public sealed class OrganizationDbContext : DbContext, IUnitOfWork
     public DbSet<global::Organization.Domain.Organization> Organizations =>
         Set<global::Organization.Domain.Organization>();
 
+    /// <summary>Gets the set of Holding aggregates (BR-017, chat 2026-08-19).</summary>
+    public DbSet<global::Organization.Domain.Holding> Holdings =>
+        Set<global::Organization.Domain.Holding>();
+
+    /// <summary>Gets the set of Project aggregates (BR-017, chat 2026-08-19).</summary>
+    public DbSet<global::Organization.Domain.Project> Projects =>
+        Set<global::Organization.Domain.Project>();
+
     /// <inheritdoc />
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -49,15 +57,37 @@ public sealed class OrganizationDbContext : DbContext, IUnitOfWork
     /// <returns>The number of state entries written to the database.</returns>
     public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
     {
-        var aggregatesWithEvents = ChangeTracker
+        var organizationsWithEvents = ChangeTracker
             .Entries<global::Organization.Domain.Organization>()
+            .Select(entry => entry.Entity)
+            .Where(aggregate => aggregate.DomainEvents.Count > 0)
+            .ToList();
+
+        var holdingsWithEvents = ChangeTracker
+            .Entries<global::Organization.Domain.Holding>()
+            .Select(entry => entry.Entity)
+            .Where(aggregate => aggregate.DomainEvents.Count > 0)
+            .ToList();
+
+        var projectsWithEvents = ChangeTracker
+            .Entries<global::Organization.Domain.Project>()
             .Select(entry => entry.Entity)
             .Where(aggregate => aggregate.DomainEvents.Count > 0)
             .ToList();
 
         var affectedRows = await base.SaveChangesAsync(cancellationToken);
 
-        foreach (var aggregate in aggregatesWithEvents)
+        foreach (var aggregate in organizationsWithEvents)
+        {
+            aggregate.ClearDomainEvents();
+        }
+
+        foreach (var aggregate in holdingsWithEvents)
+        {
+            aggregate.ClearDomainEvents();
+        }
+
+        foreach (var aggregate in projectsWithEvents)
         {
             aggregate.ClearDomainEvents();
         }

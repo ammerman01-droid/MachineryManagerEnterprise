@@ -10,7 +10,7 @@
 ## 1.1 Project Identity
 - **Name:** MachineryManagerEnterprise
 - **Type:** Enterprise Asset Lifecycle Management (EALM) / EAM
-- **Status:** Phase 2 — Project Bootstrap
+- **Status:** Phase 3 — Core Platform Modules. Identity & Access Management (ASP.NET Core Identity + OpenIddict Authorization Server/Client, Authorization Code+PKCE and Client Credentials flows, end-to-end verified) is functionally complete. Organization module's initial vertical slice (Organization aggregate, CQRS, EF Core) is complete; the Holding/Project tenant hierarchy (BR-017) has been added at the Domain layer, with Infrastructure (EF configuration, migrations) and the Administration module (Profiles, scoped Role/Permission assignment per Section 5.8) still pending.
 - **Branch:** feature/project-bootstrap
 - **License:** Private — All Rights Reserved
 
@@ -317,7 +317,7 @@ Multi-company, Fleet, IoT, Telematics, Predictive Maintenance, AI Diagnostics, G
 
 | Context | Owns | Does NOT Own |
 |---------|------|-------------|
-| **Organization** | Organization Identity, Structure, Asset Ownership | Asset lifecycle, Financial calc, Auth |
+| **Organization** | Holding, Organization Identity/Structure, Project, Asset Ownership, current Project assignment of Assets/Personnel/Warehouse Inventory (BR-017) | Asset lifecycle, Financial calc, Auth, Usage/Maintenance history (only references the Project that was current when recorded) |
 | **Asset** | Asset, Asset Model, Status, Lifecycle, Classification, Hierarchy | Engine internals, Meter readings, Maint history, Financial calc |
 | **Component** | Engine, Transmission, Attachments, Batteries, Hydraulic Components | Asset lifecycle |
 | **Usage** | Meter Device, Meter Reading, Operational Usage, Non-operational Usage | Assets |
@@ -704,6 +704,8 @@ Forbidden: Historical→Active/Modified (immutable); Draft does not participate 
 | Item / Stuff | Part / Asset | Non-descriptive |
 | UserCompany | Organization | Confuses Identity with Organization; Company = manufacturer brand |
 | DeviceData | MeterReading / Telemetry | Technical jargon |
+| Company (as tenant grouping) | Holding | Company = manufacturer brand ONLY (reserved, see above); the tenant grouping above Organization is Holding (BR-017) |
+| Enterprise (in new code) | Organization | BR-016's "Enterprise" is a legacy synonym for Organization (see BR-016 terminology reconciliation); new code/UI should say Organization, not Enterprise |
 
 ### Translation Rules
 - **Source Code:** ALL C# classes, interfaces, enums, properties, DB columns, API JSON fields, commit messages = ENGLISH using exact Ubiquitous Language identifiers
@@ -972,12 +974,28 @@ User → Role → Permission → Business Operation
 - One User may have multiple Roles
 - One Role may contain multiple Permissions
 
+### Scope Hierarchy & SuperUser Model (RESOLVED, chat 2026-08-19)
+Four authorization levels exist, corresponding to the tenant hierarchy (BR-017) plus the platform itself:
+
+```
+Platform → Holding → Organization → Project
+```
+
+- **SuperUser per level:** each level has at least one SuperUser (there MAY be more than one). A SuperUser has unrestricted access to everything within their level's scope (Platform SuperUser = System Administrator, unrestricted across the entire platform; Holding SuperUser = unrestricted across every Organization/Project under that Holding; and so on down to Project).
+- **Partial-scope Administrators:** below the SuperUser of a level, there MAY also be Administrators with RESTRICTED access within that same level — e.g. a Holding-level Administrator who can only see a subset of the Holding's Organizations, or who lacks certain feature permissions (Financial, say) that the Holding SuperUser has. Being "an Administrator at a level" does NOT imply full access to everything at that level or below it.
+- **Who grants access:** a User's specific permissions and specific scope (which Organizations/Projects, which features) at a given level are configured by the SuperUser of that same level, or by a SuperUser of any level ABOVE it. A User can never grant a scope or permission they do not themselves hold.
+- **Project-level Users vs. Admin-tier Users (RESOLVED, chat 2026-08-19):** an ordinary Project-level User has exactly one CURRENT Project assignment at a time (see BR-017). A User who needs simultaneous (concurrent) access to more than one Project is, by definition, no longer a plain Project-level User — they are an Administrator (at Organization or Holding level, with a Project subset or full Project access configured as above), not a User with multiple simultaneous "current Project" values.
+- **Bootstrap requirement:** the platform shall always have at least one Platform-level SuperUser (System Administrator) available — this is the Development-only seeded test user today (`sysadmin`); a proper Production bootstrap procedure is a Production-readiness open item (see ADR-0026 open item on certificates — bootstrap strategy should be documented alongside it).
+
 ### Standard Roles
-- System Administrator (platform-level, across Organizations)
-- Organization Administrator (scoped to single Organization/tenant)
+- System Administrator = Platform SuperUser (unrestricted, across all Holdings/Organizations)
+- Holding Administrator: SuperUser or partial-scope Administrator at Holding level (RESOLVED, chat 2026-08-19)
+- Organization Administrator: SuperUser or partial-scope Administrator at Organization level (scoped to a single Organization/tenant; MAY be restricted to a subset of that Organization's Projects)
+- Project Administrator: SuperUser or partial-scope Administrator at Project level (RESOLVED, chat 2026-08-19)
 - Fleet Manager, Maintenance Manager, Maintenance Technician
 - Workshop Supervisor, Operator, Financial Officer
 - Procurement Officer, Document Controller, Read-Only Auditor
+- (Fleet Manager through Read-Only Auditor are ordinary Project-level operational roles, each with exactly one current Project per the model above, unless explicitly elevated to an Administrator role)
 
 ### Permission Naming Convention
 `[Domain].[Action]`
@@ -989,7 +1007,10 @@ Examples:
 - Financial.View, Financial.RecordExpense, Financial.CalculateDepreciation
 - Document.Upload, Document.Replace, Document.Archive
 - Forecast.Generate, Forecast.View, Forecast.Compare
-- User.Create, User.Disable, Role.Assign, Permission.Assign, Organization.Manage
+- User.Create, User.Disable, Role.Assign, Permission.Assign, Organization.Manage, Holding.Manage, Project.Manage
+
+### Profiles (RESOLVED, chat 2026-08-19)
+A **Profile** is a named, reusable bundle of Permissions (e.g. "Maintenance Technician — Project X") that a SuperUser (or higher-level SuperUser) can define once and assign to multiple Users, rather than assigning individual Permissions one by one. A Profile bundles Permissions only — it does NOT itself carry a scope (which Organizations/Projects); scope is assigned separately per User, so the same Profile can be reused for different Users across different scopes.
 
 ### Authorization Flow
 ```
@@ -2137,6 +2158,7 @@ Released → Supported → Maintenance → Deprecated → End of Support → Arc
 ## 10.15 BR-016 — Distributed Workspace Synchronization
 - **Purpose:** Enable business operations to continue without connectivity while preserving enterprise consistency
 - **Workspace Hierarchy:** Enterprise → Project → User (synchronization only between adjacent levels)
+- **Terminology reconciliation (RESOLVED, chat 2026-08-19):** "Enterprise" in this hierarchy is the same entity as **Organization** (BR-017), not Holding. Holding does NOT participate in Workspace Synchronization — Holding is a purely administrative grouping above Organization (see BR-017) and has no sync authority, Working Set, or offline concerns of its own. The synchronization hierarchy remains exactly two hops: Organization ("Enterprise") → Project → User.
 - **Key Rules:**
   - Business execution continues regardless of synchronization availability
   - Synchronization occurs ONLY after successful business validation
@@ -2160,17 +2182,38 @@ Released → Supported → Maintenance → Deprecated → End of Support → Arc
   - Every sync session generates audit record
   - 10 synchronization scenarios defined (Online, Offline, Package Delivery, Consolidation, Distribution, Long Offline, Simultaneous, Device Replacement, Project Closure, Enterprise Recovery)
 
-## 10.16 BR-017 — Organization Management
-- **Purpose:** Define Organization as the business owner of Assets and authorization scope boundary
-- **Key Rules:**
-  - Organization = business entity (company/operating unit) that owns Assets
-  - Every Asset has exactly one owning Organization
-  - Organization is the multi-tenant boundary (distinct from Company = manufacturer brand)
-  - Organization-scoped permissions evaluated within single resolved Organization
-  - Asset shall not exist without owning Organization
-  - Authorization checks shall not evaluate across Organization boundaries
-  - Changes to Asset ownership preserved as history
-  - Open questions (not yet decided): sub-organizations, Asset transfer between Organizations, Organization lifecycle states
+## 10.16 BR-017 — Organization Management (Tenant Hierarchy: Holding → Organization → Project)
+- **Purpose:** Define the tenant hierarchy, and the ownership vs. operational-assignment split within it, as the authorization scope boundary
+- **Tenant Hierarchy (RESOLVED, chat 2026-08-19 — replaces the former "sub-organizations" open question):**
+  - **Holding:** optional top-level tenant grouping — a collection of one or more Organizations under common administrative oversight. An Organization MAY exist without belonging to any Holding (standalone tenant).
+  - **Organization:** business entity (company/operating unit). Distinct from Company = manufacturer brand. Remains THE authorization scope boundary and THE sole owner of Assets, Personnel, and Warehouse Inventory — this did not change.
+  - **Project:** the operational tier beneath Organization. A Project belongs to exactly one Organization. Projects are where Assets, Personnel, and Warehouse Inventory are currently operationally active — but Projects do NOT own them (ownership stays at Organization level; see "Ownership vs. Current Assignment" below).
+- **Ownership vs. Current Assignment (RESOLVED, chat 2026-08-19):**
+  - Every Asset has exactly one owning Organization (unchanged).
+  - Assets, Personnel, and Warehouse Inventory each have (a) a permanent owning Organization, and (b) a CURRENT Project assignment that may change over time.
+  - Reassignment between Projects (of the same Organization) is a normal operational event, not an ownership transfer.
+  - Historical Usage/Maintenance/Activity records remain permanently scoped to whichever Project was current at the time each record was created. This scoping is immutable and is never retroactively updated when the resource is later reassigned to a different Project — consistent with the Historical Entities principle (append-only; see Section 4.2).
+  - The owning Organization has standing access to all historical records across all of its Projects, past and present.
+  - **Warehouse facility vs. Inventory (RESOLVED, chat 2026-08-19):** a Warehouse (the physical facility) is fixed to a single Project — it does not itself move between Projects. Inventory items stored within a Warehouse are owned by the Organization and MAY be moved between Warehouses, whether within the same Project or across different Projects of the same Organization.
+- **Authorization Scope Rules:**
+  - Organization-scoped permissions evaluated within a single resolved Organization.
+  - Project-scoped permissions evaluated within a single resolved Project (RESOLVED, chat 2026-08-19).
+  - Holding-scoped permissions span all Organizations under that Holding (RESOLVED, chat 2026-08-19).
+  - Asset shall not exist without owning Organization.
+  - Authorization checks shall not evaluate across Organization boundaries — the sole exception is a Holding Administrator, who is authorized across all Organizations within their Holding (RESOLVED, chat 2026-08-19).
+  - **Access revocation on reassignment (RESOLVED, chat 2026-08-19):** when a User's current Project assignment changes, access to the PREVIOUS Project's data is revoked immediately and does not persist. A User promoted to Organization Administrator gains scope across all Projects of that Organization; a User promoted to Holding Administrator gains scope across all Organizations (and their Projects) of that Holding.
+  - Scope resolution (which Organizations/Projects a User currently has access to) is evaluated dynamically against current assignment state at request time — NOT cached or baked into a long-lived token, so that revocation and reassignment take effect immediately (RESOLVED, chat 2026-08-19).
+- **Cross-Organization Asset Transfer (RESOLVED, chat 2026-08-19):**
+  - An Asset MAY be transferred from one Organization to a different Organization (e.g. a sale). This is distinct from — and independent of — a Project reassignment within the same Organization.
+  - All historical records (Usage, Maintenance, ownership history, etc.) created BEFORE the transfer date remain permanently visible to BOTH the source (origin) Organization and the destination Organization.
+  - Records created AFTER the transfer date belong exclusively to the destination Organization; the source Organization loses access to these new records.
+  - **Re-acquisition case:** an Asset MAY later be transferred back to an Organization that previously owned it (e.g. Org A sells to Org B, then later reacquires it from Org B). The transfer mechanism shall be idempotent with respect to previously archived history: re-linking an Asset to a former owning Organization shall NOT duplicate, rewrite, or conflict with that Organization's pre-existing historical records for that Asset — the prior history is already present and is simply reconnected, not recreated.
+  - Each transfer event itself is recorded as an immutable history entry (which Organization → which Organization, when), consistent with the existing "Asset ownership history" rule.
+- **Organization Suspension (RESOLVED, chat 2026-08-19):**
+  - When an Organization is suspended, all of its historical records remain intact and are NOT deleted.
+  - If a suspended Organization's Assets are subsequently transferred (sold) to another Organization — whether within the same Holding or not — the Cross-Organization Asset Transfer rule above applies identically: history splits at the transfer date, both Organizations retain access to pre-transfer history, and re-acquisition remains idempotent.
+- **Open questions (not yet decided):**
+  - Full Organization lifecycle states beyond Suspension (e.g. permanent closure/dissolution) and what happens to any Assets that are never transferred out of a closed Organization.
 
 ---
 

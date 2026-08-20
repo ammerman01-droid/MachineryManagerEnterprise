@@ -25,6 +25,14 @@ public sealed class OrganizationConfiguration : IEntityTypeConfiguration<global:
             .HasMaxLength(global::Organization.Domain.Organization.MaxNameLength)
             .IsRequired();
 
+        // Optional parent Holding (BR-017, chat 2026-08-19).
+        builder.Property(organization => organization.HoldingId)
+            .HasConversion(
+                id => id == null ? (Guid?)null : id.Value,
+                value => value == null ? null : HoldingId.From(value.Value));
+
+        builder.HasIndex(organization => organization.HoldingId);
+
         // Domain Events are transient behavior, never persisted state.
         builder.Ignore(organization => organization.DomainEvents);
     }
