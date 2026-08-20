@@ -25,5 +25,8 @@
   </Folder>
   <Folder Name="/src/Modules/Administration/">
     <Project Path="src/Modules/Administration/Administration.Domain/Administration.Domain.csproj" />
+    <Project Path="src/Modules/Administration/Administration.Application/Administration.Application.csproj" />
+    <Project Path="src/Modules/Administration/Administration.Infrastructure/Administration.Infrastructure.csproj" />
+    <Project Path="src/Modules/Administration/Administration.Presentation/Administration.Presentation.csproj" />
   </Folder>
 </Solution>
