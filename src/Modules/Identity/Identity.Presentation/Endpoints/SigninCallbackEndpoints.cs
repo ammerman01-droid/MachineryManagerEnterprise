@@ -51,9 +51,38 @@ public static class SigninCallbackEndpoints
                 statusCode: StatusCodes.Status400BadRequest);
         }
 
-        await httpContext.SignInAsync(IdentityConstants.ApplicationScheme, result.Principal, result.Properties);
+        var properties = result.Properties ?? new AuthenticationProperties();
 
-        var returnUrl = result.Properties?.RedirectUri;
+        // OpenIddict.Client stores the issued tokens under its own
+        // property keys, NOT under the plain "access_token"/"refresh_token"
+        // names that HttpContext.GetTokenAsync expects by convention.
+        // Re-store them explicitly so later GetTokenAsync calls (e.g.
+        // /identity/dev/token) can find them.
+        var tokens = new List<AuthenticationToken>();
+
+        var accessToken = properties.GetTokenValue(OpenIddictClientAspNetCoreConstants.Tokens.BackchannelAccessToken);
+        if (!string.IsNullOrEmpty(accessToken))
+        {
+            tokens.Add(new AuthenticationToken { Name = "access_token", Value = accessToken });
+        }
+
+        var refreshToken = properties.GetTokenValue(OpenIddictClientAspNetCoreConstants.Tokens.RefreshToken);
+        if (!string.IsNullOrEmpty(refreshToken))
+        {
+            tokens.Add(new AuthenticationToken { Name = "refresh_token", Value = refreshToken });
+        }
+
+        var identityToken = properties.GetTokenValue(OpenIddictClientAspNetCoreConstants.Tokens.BackchannelIdentityToken);
+        if (!string.IsNullOrEmpty(identityToken))
+        {
+            tokens.Add(new AuthenticationToken { Name = "id_token", Value = identityToken });
+        }
+
+        properties.StoreTokens(tokens);
+
+        await httpContext.SignInAsync(IdentityConstants.ApplicationScheme, result.Principal, properties);
+
+        var returnUrl = properties.RedirectUri;
 
         return Results.Redirect(string.IsNullOrEmpty(returnUrl) ? "/" : returnUrl);
     }

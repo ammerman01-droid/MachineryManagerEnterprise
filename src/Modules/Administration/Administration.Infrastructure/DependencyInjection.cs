@@ -24,7 +24,11 @@ public static class DependencyInjection
         IConfiguration configuration)
     {
         services.AddDbContext<AdministrationDbContext>(options => options
-            .UseSqlServer(configuration.GetConnectionString("MachineryManagerDatabase")));
+            .UseSqlServer(
+                configuration.GetConnectionString("MachineryManagerDatabase"),
+                sqlServerOptions => sqlServerOptions.MigrationsHistoryTable(
+                    "__EFMigrationsHistory",
+                    schema: "administration")));
 
         services.AddScoped<IProfileRepository, ProfileRepository>();
         services.AddScoped<IUserProfileAssignmentRepository, UserProfileAssignmentRepository>();

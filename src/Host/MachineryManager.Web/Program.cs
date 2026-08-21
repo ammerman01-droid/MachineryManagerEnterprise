@@ -92,6 +92,7 @@ try
     // Identity endpoints
     app.MapIdentityConnectEndpoints();
     app.MapIdentitySigninCallbackEndpoints();
+    app.MapIdentityDevTokenEndpoints(app.Environment);
 
     // Organization endpoints
     app.MapOrganizationEndpoints();
