@@ -25,4 +25,10 @@ public sealed class UserProfileAssignmentRepository : IUserProfileAssignmentRepo
 
     /// <inheritdoc />
     public void Update(UserProfileAssignment aggregate) => _dbContext.UserProfileAssignments.Update(aggregate);
+
+    /// <inheritdoc />
+    public async Task<IReadOnlyList<UserProfileAssignment>> GetByUserIdAsync(Guid userId, CancellationToken cancellationToken = default) =>
+        await _dbContext.UserProfileAssignments
+            .Where(a => a.UserId == userId)
+            .ToListAsync(cancellationToken);
 }

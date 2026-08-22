@@ -94,6 +94,7 @@ try
     app.MapIdentityConnectEndpoints();
     app.MapIdentitySigninCallbackEndpoints();
     app.MapIdentityDevTokenEndpoints(app.Environment);
+    app.MapIdentityUserEndpoints();
 
     // Organization endpoints
     app.MapOrganizationEndpoints();

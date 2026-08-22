@@ -1,9 +1,11 @@
 using Administration.Domain;
 using MachineryManager.Administration.Application.Features.UserProfileAssignments.Commands.AssignUserToProfile;
+using MachineryManager.Administration.Application.Features.UserProfileAssignments.Queries.GetUserProfileAssignmentsByUserId;
 using MachineryManager.Administration.Presentation.Contracts;
 using MediatR;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
 using OpenIddict.Validation.AspNetCore;
 
@@ -35,6 +37,10 @@ public static class UserProfileAssignmentEndpoints
                 .AddAuthenticationSchemes(OpenIddictValidationAspNetCoreDefaults.AuthenticationScheme)
                 .RequireClaim(Claims.Role, "System Administrator"));
 
+        group.MapGet("/", GetAssignmentsByUserIdAsync)
+            .WithName("GetUserProfileAssignments")
+            .WithSummary("Retrieves profile assignments for a user.");
+
         return endpoints;
     }
 
@@ -59,6 +65,21 @@ public static class UserProfileAssignmentEndpoints
 
         return result.IsSuccess
             ? Results.Created($"/api/v1/user-profile-assignments/{result.Value}", new { id = result.Value })
+            : result.ToProblemResult(httpContext);
+    }
+
+    private static async Task<IResult> GetAssignmentsByUserIdAsync(
+        [FromQuery] Guid userId,
+        ISender sender,
+        HttpContext httpContext,
+        CancellationToken cancellationToken)
+    {
+        var result = await sender.Send(
+            new GetUserProfileAssignmentsByUserIdQuery(userId),
+            cancellationToken);
+
+        return result.IsSuccess
+            ? Results.Ok(result.Value)
             : result.ToProblemResult(httpContext);
     }
 }

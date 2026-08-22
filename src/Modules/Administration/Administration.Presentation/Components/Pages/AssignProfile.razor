@@ -1,0 +1,160 @@
+@page "/admin/users/{UserId:guid}/assign-profile"
+@rendermode InteractiveServer
+@inject IHttpClientFactory HttpClientFactory
+@inject NavigationManager Navigation
+
+<PageTitle>تخصیص پروفایل</PageTitle>
+
+<MudText Typo="Typo.h4" Class="mb-4">تخصیص پروفایل به کاربر</MudText>
+
+@if (isLoading)
+{
+    <MudProgressLinear Indeterminate="true" Class="my-4" />
+}
+else if (errorMessage is not null)
+{
+    <MudAlert Severity="Severity.Error" Class="my-4">@errorMessage</MudAlert>
+}
+else
+{
+    <MudPaper Class="pa-4" Style="max-width:600px;">
+        <MudForm @ref="form" @bind-IsValid="@isValid">
+            <MudSelect T="Guid" @bind-Value="selectedProfileId" Label="پروفایل" Required="true" RequiredError="انتخاب پروفایل الزامی است.">
+                @foreach (var profile in profiles)
+                {
+                    <MudSelectItem T="Guid" Value="@profile.Id">@profile.Name</MudSelectItem>
+                }
+            </MudSelect>
+            
+            <MudSelect T="string" @bind-Value="selectedScopeLevel" Label="سطح دسترسی" Required="true" Class="mt-4">
+                <MudSelectItem T="string" Value="@("Platform")">Platform</MudSelectItem>
+                <MudSelectItem T="string" Value="@("Organization")">Organization</MudSelectItem>
+                <MudSelectItem T="string" Value="@("Project")">Project</MudSelectItem>
+            </MudSelect>
+            
+            <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="SubmitAsync" Disabled="@(!isValid || isSubmitting)" Class="mt-4">
+                @if (isSubmitting)
+                {
+                    <MudProgressCircular Size="Size.Small" Indeterminate="true" />
+                }
+                else
+                {
+                    <span>تخصیص</span>
+                }
+            </MudButton>
+            
+            <MudButton Variant="Variant.Outlined" OnClick="@(() => Navigation.NavigateTo("/admin/users"))" Class="mt-4 mr-2">
+                بازگشت
+            </MudButton>
+        </MudForm>
+    </MudPaper>
+}
+
+@code {
+    [Parameter]
+    public Guid UserId { get; set; }
+
+    private MudForm? form;
+    private bool isValid;
+    private bool isSubmitting;
+    private bool isLoading = true;
+    private string? errorMessage;
+    
+    private List<ProfileItem> profiles = new();
+    private Guid selectedProfileId;
+    private string selectedScopeLevel = "Platform";
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadProfilesAsync();
+    }
+
+    private async Task LoadProfilesAsync()
+    {
+        try
+        {
+            var client = HttpClientFactory.CreateClient("InternalApi");
+            var response = await client.GetAsync("/api/v1/profiles?pageSize=200");
+            var content = await response.Content.ReadAsStringAsync();
+
+            if (response.IsSuccessStatusCode)
+            {
+                var result = System.Text.Json.JsonSerializer.Deserialize<SearchProfilesResponse>(content, new System.Text.Json.JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+                profiles = result?.Items?.ToList() ?? new List<ProfileItem>();
+                if (profiles.Any())
+                {
+                    selectedProfileId = profiles.First().Id;
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"خطا در بارگذاری پروفایل‌ها: {ex.Message}";
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+
+    private async Task SubmitAsync()
+    {
+        if (form is null || !isValid) return;
+        
+        isSubmitting = true;
+        errorMessage = null;
+        
+        try
+        {
+            var scopeLevelValue = selectedScopeLevel switch
+            {
+                "Platform" => 0,
+                "Holding" => 1,
+                "Organization" => 2,
+                "Project" => 3,
+                _ => 0
+            };
+
+            var request = new
+            {
+                UserId,
+                ProfileId = selectedProfileId,
+                ScopeLevel = scopeLevelValue,
+                ScopeHoldingId = (Guid?)null,
+                ScopeOrganizationId = (Guid?)null,
+                ScopeProjectId = (Guid?)null
+            };
+
+            var client = HttpClientFactory.CreateClient("InternalApi");
+            var response = await client.PostAsJsonAsync("/api/v1/user-profile-assignments", request);
+            var content = await response.Content.ReadAsStringAsync();
+
+            if (!response.IsSuccessStatusCode)
+            {
+                errorMessage = $"خطا در تخصیص پروفایل: {content}";
+                return;
+            }
+
+            Navigation.NavigateTo("/admin/users");
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"خطا: {ex.Message}";
+        }
+        finally
+        {
+            isSubmitting = false;
+        }
+    }
+
+    private sealed class ProfileItem
+    {
+        public Guid Id { get; set; }
+        public string Name { get; set; } = string.Empty;
+    }
+
+    private sealed class SearchProfilesResponse
+    {
+        public List<ProfileItem> Items { get; set; } = new();
+    }
+}

@@ -1,5 +1,6 @@
 using MachineryManager.Administration.Application.Features.Profiles.Commands.CreateProfile;
 using MachineryManager.Administration.Application.Features.Profiles.Queries.GetProfileById;
+using MachineryManager.Administration.Application.Features.Profiles.Queries.SearchProfiles;
 using MachineryManager.Administration.Presentation.Contracts;
 using MediatR;
 using Microsoft.AspNetCore.Builder;
@@ -43,6 +44,10 @@ public static class ProfileEndpoints
             .WithName("GetProfileById")
             .WithSummary("Retrieves a single Profile by its identifier.");
 
+        group.MapGet("/", SearchProfilesAsync)
+            .WithName("SearchProfiles")
+            .WithSummary("Searches Profiles with optional text filtering and pagination.");
+
         return endpoints;
     }
 
@@ -68,6 +73,23 @@ public static class ProfileEndpoints
         CancellationToken cancellationToken)
     {
         var result = await sender.Send(new GetProfileByIdQuery(profileId), cancellationToken);
+
+        return result.IsSuccess
+            ? Results.Ok(result.Value)
+            : result.ToProblemResult(httpContext);
+    }
+
+    private static async Task<IResult> SearchProfilesAsync(
+        ISender sender,
+        HttpContext httpContext,
+        CancellationToken cancellationToken,
+        string? search = null,
+        int page = 1,
+        int pageSize = 25)
+    {
+        var result = await sender.Send(
+            new SearchProfilesQuery(search, page, pageSize),
+            cancellationToken);
 
         return result.IsSuccess
             ? Results.Ok(result.Value)
