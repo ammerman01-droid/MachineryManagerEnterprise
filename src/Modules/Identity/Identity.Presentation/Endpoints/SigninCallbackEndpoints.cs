@@ -78,6 +78,15 @@ public static class SigninCallbackEndpoints
             tokens.Add(new AuthenticationToken { Name = "id_token", Value = identityToken });
         }
 
+        // We never populated "expires_at" explicitly — GetTokenAsync
+        // looks up this exact token name by convention. properties.ExpiresUtc
+        // is set by OpenIddict.Client itself when the token response
+        // includes "expires_in" (chat, 2026-08-22).
+        if (properties.ExpiresUtc is { } expiresUtc)
+        {
+            tokens.Add(new AuthenticationToken { Name = "expires_at", Value = expiresUtc.ToString("o") });
+        }
+
         properties.StoreTokens(tokens);
 
         await httpContext.SignInAsync(IdentityConstants.ApplicationScheme, result.Principal, properties);

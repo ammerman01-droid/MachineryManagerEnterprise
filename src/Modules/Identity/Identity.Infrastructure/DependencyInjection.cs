@@ -257,7 +257,9 @@ public static class DependencyInjection
                     ClientId = webClient.ClientId,
                     ClientSecret = webClient.ClientSecret,
                     RedirectUri = new Uri("/signin-oidc", UriKind.Relative),
-                    Scopes = { Scopes.OpenId, Scopes.Profile, Scopes.Email, Scopes.Roles },
+                    // Scopes.OfflineAccess added (chat, 2026-08-22):
+                    // without it, OpenIddict never issues a refresh_token.
+                    Scopes = { Scopes.OpenId, Scopes.Profile, Scopes.Email, Scopes.Roles, Scopes.OfflineAccess },
                 });
             });
 
