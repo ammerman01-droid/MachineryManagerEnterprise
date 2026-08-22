@@ -1,7 +1,7 @@
 ﻿
 ================================================================================
   MACHINERYMANAGERENTERPRISE - CODEBASE SNAPSHOT
-  Generated: 2026-08-21 12:10:17
+  Generated: 2026-08-22 09:24:25
   Source: C:\Users\i\source\repos\MachineryManagerEnterprise
   Purpose: Complete source code reference for AI-assisted development
   Excludes: .md, .gitignore, this script, build artifacts, binaries, IDE,
@@ -145,6 +145,8 @@ MachineryManagerEnterprise
 |   |   |   |   |-- StandardRoles.cs
 |   |   |   |   +-- UsernamePolicy.cs
 |   |   |   |-- Identity.Infrastructure
+|   |   |   |   |-- Http
+|   |   |   |   |   +-- BearerTokenHandler.cs
 |   |   |   |   |-- Options
 |   |   |   |   |   +-- OpenIddictClientOptions.cs
 |   |   |   |   |-- Persistence
@@ -166,7 +168,8 @@ MachineryManagerEnterprise
 |   |   |       |   |-- Layout
 |   |   |       |   |   +-- AuthLayout.razor
 |   |   |       |   |-- Pages
-|   |   |       |   |   +-- Login.razor
+|   |   |       |   |   |-- Login.razor
+|   |   |       |   |   +-- OrganizationsTest.razor
 |   |   |       |   +-- _Imports.razor
 |   |   |       |-- Endpoints
 |   |   |       |   |-- ConnectEndpoints.cs
@@ -288,6 +291,7 @@ MachineryManagerEnterprise
 |   +-- Shared
 |-- tests
 |-- .editorconfig
+|-- claims.json
 |-- Directory.Build.props
 |-- Directory.Packages.props
 |-- global.json
@@ -304,6 +308,12 @@ FILE: .editorconfig
 SIZE: 0 KB
 ================================================================================
 [EMPTY FILE]
+
+================================================================================
+FILE: claims.json
+SIZE: 1.2 KB
+================================================================================
+{"authenticated":true,"claims":[{"type":"iss","value":"https://localhost:7138/"},{"type":"exp","value":"1787377332"},{"type":"iat","value":"1787373732"},{"type":"scope","value":"openid profile email roles"},{"type":"jti","value":"6de9de0c-f3eb-4b9a-95a7-9f966c4518a9"},{"type":"http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier","value":"8a2fde2b-dbf7-4083-a779-08defde11de0"},{"type":"http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name","value":"sysadmin"},{"type":"http://schemas.microsoft.com/ws/2008/06/identity/claims/role","value":"System Administrator"},{"type":"sub","value":"8a2fde2b-dbf7-4083-a779-08defde11de0"},{"type":"oi_prst","value":"machinerymanager-web"},{"type":"oi_au_id","value":"ed3be6ee-cb70-4a8a-2432-08df0007bafb"},{"type":"client_id","value":"machinerymanager-web"},{"type":"oi_tkn_id","value":"eb90160d-0696-4ea1-5887-08df0007a98a"},{"type":"oi_tkn_typ","value":"urn:ietf:params:oauth:token-type:access_token"},{"type":"oi_crt_dt","value":"Sat, 22 Aug 2026 04:42:12 GMT"},{"type":"oi_exp_dt","value":"Sat, 22 Aug 2026 05:42:12 GMT"},{"type":"oi_scp","value":"openid"},{"type":"oi_scp","value":"profile"},{"type":"oi_scp","value":"email"},{"type":"oi_scp","value":"roles"}]}
 
 ================================================================================
 FILE: Directory.Build.props
@@ -1581,7 +1591,7 @@ SIZE: 2.2 KB
 
 ================================================================================
 FILE: src\Host\MachineryManager.Web\Program.cs
-SIZE: 3.82 KB
+SIZE: 3.89 KB
 ================================================================================
 using MachineryManager.Identity.Infrastructure;
 using MachineryManager.Identity.Presentation.Endpoints;
@@ -1643,6 +1653,7 @@ try
     builder.Services.AddIdentityInfrastructure(builder.Configuration);
     builder.Services.AddIdentityOpenIddictServer(builder.Environment);
     builder.Services.AddIdentityOpenIddictClient(builder.Configuration, builder.Environment);
+    builder.Services.AddIdentityInternalApiClient(builder.Configuration);
 
     var app = builder.Build();
 
@@ -3938,7 +3949,7 @@ public static class UsernamePolicy
 
 ================================================================================
 FILE: src\Modules\Identity\Identity.Infrastructure\DependencyInjection.cs
-SIZE: 11.65 KB
+SIZE: 12.97 KB
 ================================================================================
 using MachineryManager.Identity.Domain;
 using MachineryManager.Identity.Infrastructure.Persistence;
@@ -4199,11 +4210,89 @@ public static class DependencyInjection
                     ClientId = webClient.ClientId,
                     ClientSecret = webClient.ClientSecret,
                     RedirectUri = new Uri("/signin-oidc", UriKind.Relative),
-                    Scopes = { Scopes.OpenId, Scopes.Profile, Scopes.Email, Scopes.Roles },
+                    // Scopes.OfflineAccess added (chat, 2026-08-22):
+                    // without it, OpenIddict never issues a refresh_token.
+                    Scopes = { Scopes.OpenId, Scopes.Profile, Scopes.Email, Scopes.Roles, Scopes.OfflineAccess },
                 });
             });
 
         return services;
+    }
+
+        /// <summary>
+    /// Registers a named HttpClient ("InternalApi") that automatically
+    /// attaches the current user's Bearer access token to every
+    /// request, for Blazor Server pages calling this monolith's own
+    /// protected API endpoints (chat, 2026-08-22).
+    /// </summary>
+    /// <param name="services">The service collection to configure.</param>
+    /// <param name="configuration">The application configuration, used to resolve the base address.</param>
+    /// <returns>The same <see cref="IServiceCollection"/> for chaining.</returns>
+    public static IServiceCollection AddIdentityInternalApiClient(
+        this IServiceCollection services,
+        IConfiguration configuration)
+    {
+        services.AddTransient<Http.BearerTokenHandler>();
+
+        var baseAddress = configuration["OpenIddict:Issuer"]
+            ?? throw new InvalidOperationException("OpenIddict:Issuer is not configured.");
+
+        services
+            .AddHttpClient("InternalApi", client => client.BaseAddress = new Uri(baseAddress, UriKind.Absolute))
+            .AddHttpMessageHandler<Http.BearerTokenHandler>();
+
+        return services;
+    }
+}
+
+================================================================================
+FILE: src\Modules\Identity\Identity.Infrastructure\Http\BearerTokenHandler.cs
+SIZE: 1.63 KB
+================================================================================
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Identity;
+using System.Net.Http.Headers;
+
+namespace MachineryManager.Identity.Infrastructure.Http;
+
+/// <summary>
+/// Attaches the current user's stored OpenIddict access token (obtained
+/// via the Authorization Code + PKCE flow at /identity/connect) as a
+/// Bearer Authorization header on outgoing internal API calls
+/// (chat, 2026-08-22).
+/// </summary>
+public sealed class BearerTokenHandler : DelegatingHandler
+{
+    private readonly IHttpContextAccessor _httpContextAccessor;
+
+    /// <summary>Initializes a new instance of the <see cref="BearerTokenHandler"/> class.</summary>
+    /// <param name="httpContextAccessor">Provides access to the current request's HttpContext.</param>
+    public BearerTokenHandler(IHttpContextAccessor httpContextAccessor)
+    {
+        _httpContextAccessor = httpContextAccessor;
+    }
+
+    /// <inheritdoc />
+    protected override async Task<HttpResponseMessage> SendAsync(
+        HttpRequestMessage request,
+        CancellationToken cancellationToken)
+    {
+        var httpContext = _httpContextAccessor.HttpContext;
+
+        if (httpContext is not null)
+        {
+            var accessToken = await httpContext.GetTokenAsync(
+                IdentityConstants.ApplicationScheme,
+                "access_token");
+
+            if (!string.IsNullOrEmpty(accessToken))
+            {
+                request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
+            }
+        }
+
+        return await base.SendAsync(request, cancellationToken);
     }
 }
 
@@ -6569,11 +6658,70 @@ SIZE: 2.73 KB
 }
 
 ================================================================================
+FILE: src\Modules\Identity\Identity.Presentation\Components\Pages\OrganizationsTest.razor
+SIZE: 1.47 KB
+================================================================================
+@page "/identity/dev/organizations-test"
+@rendermode InteractiveServer
+@using System.Text.Json
+@inject IHttpClientFactory HttpClientFactory
+
+<PageTitle>تست فراخوانی API</PageTitle>
+
+<h1>تست فراخوانی Organization API با توکن ذخیره‌شده</h1>
+
+<button @onclick="LoadOrganizationsAsync">دریافت لیست Organization ها</button>
+
+@if (errorMessage is not null)
+{
+    <p style="color:red">خطا: @errorMessage</p>
+}
+
+@if (organizationsJson is not null)
+{
+    <pre>@organizationsJson</pre>
+}
+
+@code {
+    private string? organizationsJson;
+    private string? errorMessage;
+
+    private async Task LoadOrganizationsAsync()
+    {
+        errorMessage = null;
+        organizationsJson = null;
+
+        try
+        {
+            var client = HttpClientFactory.CreateClient("InternalApi");
+            var response = await client.GetAsync("/api/v1/organizations");
+
+            var content = await response.Content.ReadAsStringAsync();
+
+            if (!response.IsSuccessStatusCode)
+            {
+                errorMessage = $"HTTP {(int)response.StatusCode}: {content}";
+                return;
+            }
+
+            organizationsJson = JsonSerializer.Serialize(
+                JsonSerializer.Deserialize<JsonElement>(content),
+                new JsonSerializerOptions { WriteIndented = true });
+        }
+        catch (Exception ex)
+        {
+            errorMessage = ex.Message;
+        }
+    }
+}
+
+================================================================================
 FILE: src\Modules\Identity\Identity.Presentation\Endpoints\ConnectEndpoints.cs
-SIZE: 9.65 KB
+SIZE: 10.79 KB
 ================================================================================
 using System.Security.Claims;
 using MachineryManager.Identity.Domain;
+using ClaimTypesLong = System.Security.Claims.ClaimTypes;
 using Microsoft.AspNetCore;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Builder;
@@ -6647,6 +6795,12 @@ public static class ConnectEndpoints
         // rejects the sign-in with "mandatory subject claim was missing".
         principal.SetClaim(Claims.Subject, await userManager.GetUserIdAsync(user));
 
+        // Normalize role claims from ASP.NET Core Identity's long claim
+        // type to OpenIddict's short OIDC-style "role" claim, so that
+        // downstream RequireClaim(Claims.Role, ...) policies can find
+        // them (chat, 2026-08-22 — diagnosed via /identity/dev/claims).
+        NormalizeRoleClaims(principal);
+
         principal.SetScopes(request.GetScopes());
 
         foreach (var claim in principal.Claims)
@@ -6687,6 +6841,7 @@ public static class ConnectEndpoints
             var principal = await signInManager.CreateUserPrincipalAsync(user);
 
             principal.SetClaim(Claims.Subject, await userManager.GetUserIdAsync(user));
+            NormalizeRoleClaims(principal);
             principal.SetScopes(authenticateResult.Principal!.GetScopes());
 
             foreach (var claim in principal.Claims)
@@ -6807,11 +6962,30 @@ public static class ConnectEndpoints
                 yield break;
         }
     }
+
+        /// <summary>
+    /// Adds a short OIDC-style "role" claim (<see cref="Claims.Role"/>)
+    /// for every ASP.NET Core Identity role claim already present on
+    /// the principal, then removes the long-form originals so only the
+    /// normalized claim remains.
+    /// </summary>
+    private static void NormalizeRoleClaims(ClaimsPrincipal principal)
+    {
+        var identity = (ClaimsIdentity)principal.Identity!;
+
+        var longFormRoleClaims = identity.FindAll(ClaimTypesLong.Role).ToList();
+
+        foreach (var roleClaim in longFormRoleClaims)
+        {
+            identity.AddClaim(new Claim(Claims.Role, roleClaim.Value));
+            identity.RemoveClaim(roleClaim);
+        }
+    }
 }
 
 ================================================================================
 FILE: src\Modules\Identity\Identity.Presentation\Endpoints\DevTokenEndpoints.cs
-SIZE: 3.38 KB
+SIZE: 4.34 KB
 ================================================================================
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Builder;
@@ -6854,6 +7028,30 @@ public static class DevTokenEndpoints
             .RequireAuthorization(policy => policy
                 .AddAuthenticationSchemes(IdentityConstants.ApplicationScheme)
                 .RequireAuthenticatedUser());
+
+        // Diagnostic: shows exactly which claims the OpenIddict
+        // Validation handler produces for the current Bearer token,
+        // to debug authorization policy failures (chat, 2026-08-21).
+        endpoints.MapGet("/identity/dev/claims", async (HttpContext httpContext) =>
+        {
+            var result = await httpContext.AuthenticateAsync(
+                OpenIddict.Validation.AspNetCore.OpenIddictValidationAspNetCoreDefaults.AuthenticationScheme);
+
+            if (!result.Succeeded || result.Principal is null)
+            {
+                return Results.Ok(new
+                {
+                    authenticated = false,
+                    failure = result.Failure?.Message,
+                });
+            }
+
+            return Results.Ok(new
+            {
+                authenticated = true,
+                claims = result.Principal.Claims.Select(c => new { c.Type, c.Value }),
+            });
+        }).AllowAnonymous();
 
         // Returns ONLY the raw access token as plain text — no JSON
         // punctuation to accidentally over-select when copying for
@@ -6898,7 +7096,7 @@ public static class DevTokenEndpoints
 
 ================================================================================
 FILE: src\Modules\Identity\Identity.Presentation\Endpoints\SigninCallbackEndpoints.cs
-SIZE: 3.83 KB
+SIZE: 4.28 KB
 ================================================================================
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Builder;
@@ -6978,6 +7176,15 @@ public static class SigninCallbackEndpoints
         if (!string.IsNullOrEmpty(identityToken))
         {
             tokens.Add(new AuthenticationToken { Name = "id_token", Value = identityToken });
+        }
+
+        // We never populated "expires_at" explicitly — GetTokenAsync
+        // looks up this exact token name by convention. properties.ExpiresUtc
+        // is set by OpenIddict.Client itself when the token response
+        // includes "expires_in" (chat, 2026-08-22).
+        if (properties.ExpiresUtc is { } expiresUtc)
+        {
+            tokens.Add(new AuthenticationToken { Name = "expires_at", Value = expiresUtc.ToString("o") });
         }
 
         properties.StoreTokens(tokens);
@@ -10253,12 +10460,12 @@ SIZE: 0.35 KB
 # SECTION 3: SNAPSHOT SUMMARY
 ================================================================================
 
-Generation Time     : 00:00:02.0794809
-Total Files Scanned : 189
-Files Included      : 189
+Generation Time     : 00:00:02.4603369
+Total Files Scanned : 192
+Files Included      : 192
 Files Skipped       : 0
-Total Source Size   : 0.34 MB
-Snapshot File Size  : 0.4 MB
+Total Source Size   : 0.35 MB
+Snapshot File Size  : 0.41 MB
 Output Path         : C:\Users\i\source\repos\MachineryManagerEnterprise\MME_Codebase_Snapshot.txt
 
 Excluded Directories: .git, .github, .vs, .vscode, .idea, .azure, .devcontainer, bin, obj, packages, publish, out, release, releases, debug, x64, x86, arm64, artifacts, .artifacts, node_modules, dist, build, bower_components, jspm_packages, docs-english, docs-farsi, docs, tools, test-results, coverage, .coverage, TestResults, lib, .angular, .next, .nuxt, .svelte-kit, .cache, .temp, tmp

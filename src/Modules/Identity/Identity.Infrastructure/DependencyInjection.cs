@@ -265,4 +265,29 @@ public static class DependencyInjection
 
         return services;
     }
+
+        /// <summary>
+    /// Registers a named HttpClient ("InternalApi") that automatically
+    /// attaches the current user's Bearer access token to every
+    /// request, for Blazor Server pages calling this monolith's own
+    /// protected API endpoints (chat, 2026-08-22).
+    /// </summary>
+    /// <param name="services">The service collection to configure.</param>
+    /// <param name="configuration">The application configuration, used to resolve the base address.</param>
+    /// <returns>The same <see cref="IServiceCollection"/> for chaining.</returns>
+    public static IServiceCollection AddIdentityInternalApiClient(
+        this IServiceCollection services,
+        IConfiguration configuration)
+    {
+        services.AddTransient<Http.BearerTokenHandler>();
+
+        var baseAddress = configuration["OpenIddict:Issuer"]
+            ?? throw new InvalidOperationException("OpenIddict:Issuer is not configured.");
+
+        services
+            .AddHttpClient("InternalApi", client => client.BaseAddress = new Uri(baseAddress, UriKind.Absolute))
+            .AddHttpMessageHandler<Http.BearerTokenHandler>();
+
+        return services;
+    }
 }

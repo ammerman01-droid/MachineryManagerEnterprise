@@ -58,6 +58,7 @@ try
     builder.Services.AddIdentityInfrastructure(builder.Configuration);
     builder.Services.AddIdentityOpenIddictServer(builder.Environment);
     builder.Services.AddIdentityOpenIddictClient(builder.Configuration, builder.Environment);
+    builder.Services.AddIdentityInternalApiClient(builder.Configuration);
 
     var app = builder.Build();
 
