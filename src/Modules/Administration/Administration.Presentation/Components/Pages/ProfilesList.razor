@@ -27,6 +27,7 @@ else
             <MudTh>دسترسی‌ها</MudTh>
             <MudTh>وضعیت</MudTh>
             <MudTh>تاریخ ایجاد</MudTh>
+            <MudTh>عملیات</MudTh>
         </HeaderContent>
         <RowTemplate>
             <MudTd DataLabel="نام">@context.Name</MudTd>
@@ -37,6 +38,23 @@ else
                 </MudChip>
             </MudTd>
             <MudTd DataLabel="تاریخ">@context.CreatedAt.ToLocalTime().ToString("yyyy/MM/dd HH:mm")</MudTd>
+            <MudTd>
+                <MudButton Variant="Variant.Text" Color="Color.Primary" OnClick="@(() => Navigation.NavigateTo($"/admin/profiles/{context.Id}/edit"))">
+                    ویرایش
+                </MudButton>
+                @if (context.IsActive)
+                {
+                    <MudButton Variant="Variant.Text" Color="Color.Warning" OnClick="@(() => DeactivateAsync(context.Id))">
+                        غیرفعال‌سازی
+                    </MudButton>
+                }
+                else
+                {
+                    <MudButton Variant="Variant.Text" Color="Color.Success" OnClick="@(() => ActivateAsync(context.Id))">
+                        فعال‌سازی
+                    </MudButton>
+                }
+            </MudTd>
         </RowTemplate>
     </MudTable>
 }
@@ -75,6 +93,50 @@ else
         finally
         {
             isLoading = false;
+        }
+    }
+
+    private async Task DeactivateAsync(Guid id)
+    {
+        errorMessage = null;
+        try
+        {
+            var client = HttpClientFactory.CreateClient("InternalApi");
+            var response = await client.PostAsync($"/api/v1/profiles/{id}/deactivate", null);
+            if (response.IsSuccessStatusCode)
+            {
+                await LoadProfilesAsync();
+            }
+            else
+            {
+                errorMessage = $"خطا در غیرفعال‌سازی: {await response.Content.ReadAsStringAsync()}";
+            }
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"خطا: {ex.Message}";
+        }
+    }
+
+    private async Task ActivateAsync(Guid id)
+    {
+        errorMessage = null;
+        try
+        {
+            var client = HttpClientFactory.CreateClient("InternalApi");
+            var response = await client.PostAsync($"/api/v1/profiles/{id}/activate", null);
+            if (response.IsSuccessStatusCode)
+            {
+                await LoadProfilesAsync();
+            }
+            else
+            {
+                errorMessage = $"خطا در فعال‌سازی: {await response.Content.ReadAsStringAsync()}";
+            }
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"خطا: {ex.Message}";
         }
     }
 

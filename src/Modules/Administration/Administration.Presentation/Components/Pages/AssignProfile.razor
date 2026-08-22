@@ -3,6 +3,10 @@
 @inject IHttpClientFactory HttpClientFactory
 @inject NavigationManager Navigation
 
+@using MachineryManager.Administration.Application.Features.Profiles.Dtos
+@using MachineryManager.Administration.Application.Features.Profiles.Queries.SearchProfiles
+@using global::Administration.Domain
+
 <PageTitle>تخصیص پروفایل</PageTitle>
 
 <MudText Typo="Typo.h4" Class="mb-4">تخصیص پروفایل به کاربر</MudText>
@@ -25,13 +29,27 @@ else
                     <MudSelectItem T="Guid" Value="@profile.Id">@profile.Name</MudSelectItem>
                 }
             </MudSelect>
-            
+
             <MudSelect T="string" @bind-Value="selectedScopeLevel" Label="سطح دسترسی" Required="true" Class="mt-4">
                 <MudSelectItem T="string" Value="@("Platform")">Platform</MudSelectItem>
+                <MudSelectItem T="string" Value="@("Holding")">Holding</MudSelectItem>
                 <MudSelectItem T="string" Value="@("Organization")">Organization</MudSelectItem>
                 <MudSelectItem T="string" Value="@("Project")">Project</MudSelectItem>
             </MudSelect>
-            
+
+            @if (selectedScopeLevel == "Holding")
+            {
+                <MudTextField @bind-Value="scopeHoldingId" Label="شناسه Holding" Required="true" Class="mt-4" />
+            }
+            else if (selectedScopeLevel == "Organization")
+            {
+                <MudTextField @bind-Value="scopeOrganizationId" Label="شناسه Organization" Required="true" Class="mt-4" />
+            }
+            else if (selectedScopeLevel == "Project")
+            {
+                <MudTextField @bind-Value="scopeProjectId" Label="شناسه Project" Required="true" Class="mt-4" />
+            }
+
             <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="SubmitAsync" Disabled="@(!isValid || isSubmitting)" Class="mt-4">
                 @if (isSubmitting)
                 {
@@ -39,10 +57,10 @@ else
                 }
                 else
                 {
-                    <span>تخصیص</span>
+                    <span>ذخیره</span>
                 }
             </MudButton>
-            
+
             <MudButton Variant="Variant.Outlined" OnClick="@(() => Navigation.NavigateTo("/admin/users"))" Class="mt-4 mr-2">
                 بازگشت
             </MudButton>
@@ -51,6 +69,9 @@ else
 }
 
 @code {
+    /// <summary>
+    /// The unique identifier of the user receiving the profile assignment.
+    /// </summary>
     [Parameter]
     public Guid UserId { get; set; }
 
@@ -59,37 +80,56 @@ else
     private bool isSubmitting;
     private bool isLoading = true;
     private string? errorMessage;
-    
+
     private List<ProfileItem> profiles = new();
     private Guid selectedProfileId;
     private string selectedScopeLevel = "Platform";
+    private string? scopeHoldingId;
+    private string? scopeOrganizationId;
+    private string? scopeProjectId;
 
+    /// <summary>
+    /// Initializes the component and loads the available profiles.
+    /// </summary>
     protected override async Task OnInitializedAsync()
     {
         await LoadProfilesAsync();
     }
 
+    /// <summary>
+    /// Loads the list of active profiles from the API.
+    /// </summary>
     private async Task LoadProfilesAsync()
     {
+        errorMessage = null;
+
         try
         {
             var client = HttpClientFactory.CreateClient("InternalApi");
             var response = await client.GetAsync("/api/v1/profiles?pageSize=200");
             var content = await response.Content.ReadAsStringAsync();
 
-            if (response.IsSuccessStatusCode)
+            if (!response.IsSuccessStatusCode)
             {
-                var result = System.Text.Json.JsonSerializer.Deserialize<SearchProfilesResponse>(content, new System.Text.Json.JsonSerializerOptions { PropertyNameCaseInsensitive = true });
-                profiles = result?.Items?.ToList() ?? new List<ProfileItem>();
-                if (profiles.Any())
-                {
-                    selectedProfileId = profiles.First().Id;
-                }
+                errorMessage = $"خطا در دریافت پروفایل‌ها: {content}";
+                isLoading = false;
+                return;
             }
+
+            var result = System.Text.Json.JsonSerializer.Deserialize<SearchProfilesResponse>(content, new System.Text.Json.JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+
+            if (result is null)
+            {
+                errorMessage = "پاسخ نامعتبر از سرور.";
+                isLoading = false;
+                return;
+            }
+
+            profiles = result.Items.Select(p => new ProfileItem { Id = p.Id, Name = p.Name }).ToList();
         }
         catch (Exception ex)
         {
-            errorMessage = $"خطا در بارگذاری پروفایل‌ها: {ex.Message}";
+            errorMessage = $"خطا: {ex.Message}";
         }
         finally
         {
@@ -97,45 +137,59 @@ else
         }
     }
 
+        /// <summary>
+    /// Submits the profile assignment to the API.
+    /// </summary>
     private async Task SubmitAsync()
     {
-        if (form is null || !isValid) return;
-        
+        if (form is null || !isValid)
+        {
+            return;
+        }
+
         isSubmitting = true;
         errorMessage = null;
-        
+
         try
         {
-            var scopeLevelValue = selectedScopeLevel switch
+            var scopeLevel = selectedScopeLevel switch
             {
-                "Platform" => 0,
-                "Holding" => 1,
-                "Organization" => 2,
-                "Project" => 3,
-                _ => 0
+                "Platform" => AuthorizationScopeLevel.Platform,
+                "Holding" => AuthorizationScopeLevel.Holding,
+                "Organization" => AuthorizationScopeLevel.Organization,
+                "Project" => AuthorizationScopeLevel.Project,
+                _ => throw new InvalidOperationException(
+                    $"Unsupported authorization scope level: {selectedScopeLevel}.")
             };
 
-            var request = new
-            {
-                UserId,
-                ProfileId = selectedProfileId,
-                ScopeLevel = scopeLevelValue,
-                ScopeHoldingId = (Guid?)null,
-                ScopeOrganizationId = (Guid?)null,
-                ScopeProjectId = (Guid?)null
-            };
+            Guid? holdingId = ParseScopeId(scopeHoldingId, "Holding");
+            Guid? organizationId = ParseScopeId(scopeOrganizationId, "Organization");
+            Guid? projectId = ParseScopeId(scopeProjectId, "Project");
+
+            var request =
+                new MachineryManager.Administration.Presentation.Contracts
+                    .AssignUserToProfileRequest(
+                        UserId,
+                        selectedProfileId,
+                        scopeLevel,
+                        holdingId,
+                        organizationId,
+                        projectId);
 
             var client = HttpClientFactory.CreateClient("InternalApi");
-            var response = await client.PostAsJsonAsync("/api/v1/user-profile-assignments", request);
-            var content = await response.Content.ReadAsStringAsync();
 
-            if (!response.IsSuccessStatusCode)
+            var response = await client.PostAsJsonAsync(
+                "/api/v1/user-profile-assignments/",
+                request);
+
+            if (response.IsSuccessStatusCode)
             {
-                errorMessage = $"خطا در تخصیص پروفایل: {content}";
+                Navigation.NavigateTo("/admin/users");
                 return;
             }
 
-            Navigation.NavigateTo("/admin/users");
+            errorMessage =
+                $"خطا در تخصیص پروفایل: {await response.Content.ReadAsStringAsync()}";
         }
         catch (Exception ex)
         {
@@ -147,14 +201,41 @@ else
         }
     }
 
-    private sealed class ProfileItem
+    /// <summary>
+    /// Parses an optional authorization scope identifier.
+    /// </summary>
+    /// <param name="value">The text representation of the identifier.</param>
+    /// <param name="scopeName">The name of the authorization scope.</param>
+    /// <returns>The parsed identifier, or <see langword="null"/> when not applicable.</returns>
+    private Guid? ParseScopeId(string? value, string scopeName)
     {
-        public Guid Id { get; set; }
-        public string Name { get; set; } = string.Empty;
+        if (selectedScopeLevel != scopeName)
+        {
+            return null;
+        }
+
+        if (Guid.TryParse(value, out var id))
+        {
+            return id;
+        }
+
+        throw new InvalidOperationException(
+            $"شناسه {scopeName} معتبر نیست.");
     }
 
-    private sealed class SearchProfilesResponse
+    /// <summary>
+    /// Represents a profile available for assignment in the user interface.
+    /// </summary>
+    private sealed class ProfileItem
     {
-        public List<ProfileItem> Items { get; set; } = new();
+        /// <summary>
+        /// Gets or sets the unique identifier of the profile.
+        /// </summary>
+        public Guid Id { get; set; }
+
+        /// <summary>
+        /// Gets or sets the display name of the profile.
+        /// </summary>
+        public string Name { get; set; } = string.Empty;
     }
 }

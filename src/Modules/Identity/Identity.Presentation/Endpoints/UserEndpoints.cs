@@ -44,6 +44,13 @@ public static class UserEndpoints
             .WithName("GetUserRoles")
             .WithSummary("Retrieves roles assigned to a user.");
 
+        group.MapPost("/{userId:guid}/deactivate", DeactivateUserAsync)
+            .WithName("DeactivateUser")
+            .WithSummary("Locks out a user account.")
+            .RequireAuthorization(policy => policy
+                .AddAuthenticationSchemes(OpenIddictValidationAspNetCoreDefaults.AuthenticationScheme)
+                .RequireClaim(Claims.Role, "System Administrator"));
+
         return endpoints;
     }
 
@@ -131,5 +138,25 @@ public static class UserEndpoints
 
         var roles = await userManager.GetRolesAsync(user);
         return Results.Ok(roles);
+    }
+
+    private static async Task<IResult> DeactivateUserAsync(
+        Guid userId,
+        UserManager<ApplicationUser> userManager)
+    {
+        var user = await userManager.FindByIdAsync(userId.ToString());
+        if (user is null)
+        {
+            return Results.NotFound(new { error = "User.NotFound", message = $"User with id {userId} was not found." });
+        }
+
+        var result = await userManager.SetLockoutEndDateAsync(user, DateTimeOffset.UtcNow.AddYears(100));
+        if (!result.Succeeded)
+        {
+            var errors = string.Join("; ", result.Errors.Select(e => e.Description));
+            return Results.BadRequest(new { error = "User.DeactivateFailed", message = errors });
+        }
+
+        return Results.NoContent();
     }
 }

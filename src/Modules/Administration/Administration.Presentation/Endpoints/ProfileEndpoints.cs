@@ -1,4 +1,7 @@
+using MachineryManager.Administration.Application.Features.Profiles.Commands.ActivateProfile;
 using MachineryManager.Administration.Application.Features.Profiles.Commands.CreateProfile;
+using MachineryManager.Administration.Application.Features.Profiles.Commands.DeactivateProfile;
+using MachineryManager.Administration.Application.Features.Profiles.Commands.UpdateProfile;
 using MachineryManager.Administration.Application.Features.Profiles.Queries.GetProfileById;
 using MachineryManager.Administration.Application.Features.Profiles.Queries.SearchProfiles;
 using MachineryManager.Administration.Presentation.Contracts;
@@ -40,6 +43,27 @@ public static class ProfileEndpoints
                 .AddAuthenticationSchemes(OpenIddictValidationAspNetCoreDefaults.AuthenticationScheme)
                 .RequireClaim(Claims.Role, "System Administrator"));
 
+        group.MapPut("/{profileId:guid}", UpdateProfileAsync)
+            .WithName("UpdateProfile")
+            .WithSummary("Updates a Profile's name and permissions.")
+            .RequireAuthorization(policy => policy
+                .AddAuthenticationSchemes(OpenIddictValidationAspNetCoreDefaults.AuthenticationScheme)
+                .RequireClaim(Claims.Role, "System Administrator"));
+
+        group.MapPost("/{profileId:guid}/deactivate", DeactivateProfileAsync)
+            .WithName("DeactivateProfile")
+            .WithSummary("Deactivates a Profile.")
+            .RequireAuthorization(policy => policy
+                .AddAuthenticationSchemes(OpenIddictValidationAspNetCoreDefaults.AuthenticationScheme)
+                .RequireClaim(Claims.Role, "System Administrator"));
+
+        group.MapPost("/{profileId:guid}/activate", ActivateProfileAsync)
+            .WithName("ActivateProfile")
+            .WithSummary("Activates a Profile.")
+            .RequireAuthorization(policy => policy
+                .AddAuthenticationSchemes(OpenIddictValidationAspNetCoreDefaults.AuthenticationScheme)
+                .RequireClaim(Claims.Role, "System Administrator"));
+
         group.MapGet("/{profileId:guid}", GetProfileByIdAsync)
             .WithName("GetProfileById")
             .WithSummary("Retrieves a single Profile by its identifier.");
@@ -63,6 +87,52 @@ public static class ProfileEndpoints
 
         return result.IsSuccess
             ? Results.Created($"/api/v1/profiles/{result.Value}", new { id = result.Value })
+            : result.ToProblemResult(httpContext);
+    }
+
+    private static async Task<IResult> UpdateProfileAsync(
+        Guid profileId,
+        UpdateProfileRequest request,
+        ISender sender,
+        HttpContext httpContext,
+        CancellationToken cancellationToken)
+    {
+        var result = await sender.Send(
+            new UpdateProfileCommand(profileId, request.Name, request.Permissions),
+            cancellationToken);
+
+        return result.IsSuccess
+            ? Results.NoContent()
+            : result.ToProblemResult(httpContext);
+    }
+
+    private static async Task<IResult> DeactivateProfileAsync(
+        Guid profileId,
+        ISender sender,
+        HttpContext httpContext,
+        CancellationToken cancellationToken)
+    {
+        var result = await sender.Send(
+            new DeactivateProfileCommand(profileId),
+            cancellationToken);
+
+        return result.IsSuccess
+            ? Results.NoContent()
+            : result.ToProblemResult(httpContext);
+    }
+
+    private static async Task<IResult> ActivateProfileAsync(
+        Guid profileId,
+        ISender sender,
+        HttpContext httpContext,
+        CancellationToken cancellationToken)
+    {
+        var result = await sender.Send(
+            new ActivateProfileCommand(profileId),
+            cancellationToken);
+
+        return result.IsSuccess
+            ? Results.NoContent()
             : result.ToProblemResult(httpContext);
     }
 

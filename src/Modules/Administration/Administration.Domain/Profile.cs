@@ -127,4 +127,33 @@ public sealed class Profile : AggregateRoot<ProfileId>
     {
         IsActive = true;
     }
+
+    /// <summary>
+/// Updates the profile's name and replaces the entire permission set.
+/// </summary>
+public Result UpdateInformation(string name, IEnumerable<string> permissions)
+{
+    if (string.IsNullOrWhiteSpace(name))
+    {
+        return Result.Failure(ProfileErrors.NameRequired());
+    }
+
+    if (name.Length > MaxNameLength)
+    {
+        return Result.Failure(ProfileErrors.NameTooLong(MaxNameLength));
+    }
+
+    Name = name.Trim();
+    _permissions.Clear();
+
+    foreach (var permission in permissions.Distinct(StringComparer.Ordinal))
+    {
+        if (!string.IsNullOrWhiteSpace(permission))
+        {
+            _permissions.Add(permission);
+        }
+    }
+
+    return Result.Success();
+}
 }

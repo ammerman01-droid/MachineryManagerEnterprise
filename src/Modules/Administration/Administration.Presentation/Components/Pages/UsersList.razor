@@ -32,6 +32,9 @@ else
                 <MudButton Variant="Variant.Text" Color="Color.Primary" OnClick="@(() => Navigation.NavigateTo($"/admin/users/{context.Id}/assign-profile"))">
                     تخصیص پروفایل
                 </MudButton>
+                <MudButton Variant="Variant.Text" Color="Color.Warning" OnClick="@(() => DeactivateUserAsync(context.Id))">
+                    غیرفعال‌سازی
+                </MudButton>
             </MudTd>
         </RowTemplate>
     </MudTable>
@@ -71,6 +74,24 @@ else
         finally
         {
             isLoading = false;
+        }
+    }
+
+    private async Task DeactivateUserAsync(Guid id)
+    {
+        errorMessage = null;
+        try
+        {
+            var client = HttpClientFactory.CreateClient("InternalApi");
+            var response = await client.PostAsync($"/api/v1/users/{id}/deactivate", null);
+            if (!response.IsSuccessStatusCode)
+            {
+                errorMessage = $"خطا در غیرفعال‌سازی کاربر: {await response.Content.ReadAsStringAsync()}";
+            }
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"خطا: {ex.Message}";
         }
     }
 
