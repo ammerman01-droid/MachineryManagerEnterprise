@@ -1,7 +1,7 @@
 ﻿
 ================================================================================
   MACHINERYMANAGERENTERPRISE - CODEBASE SNAPSHOT
-  Generated: 2026-08-21 01:28:36
+  Generated: 2026-08-21 12:10:17
   Source: C:\Users\i\source\repos\MachineryManagerEnterprise
   Purpose: Complete source code reference for AI-assisted development
   Excludes: .md, .gitignore, this script, build artifacts, binaries, IDE,
@@ -116,6 +116,10 @@ MachineryManagerEnterprise
 |   |   |   |   |   |-- Configurations
 |   |   |   |   |   |   |-- ProfileConfiguration.cs
 |   |   |   |   |   |   +-- UserProfileAssignmentConfiguration.cs
+|   |   |   |   |   |-- Migrations
+|   |   |   |   |   |   |-- 20260820222811_InitialAdministrationSchema.cs
+|   |   |   |   |   |   |-- 20260820222811_InitialAdministrationSchema.Designer.cs
+|   |   |   |   |   |   +-- AdministrationDbContextModelSnapshot.cs
 |   |   |   |   |   |-- AdministrationDbContext.cs
 |   |   |   |   |   |-- ProfileRepository.cs
 |   |   |   |   |   +-- UserProfileAssignmentRepository.cs
@@ -166,6 +170,7 @@ MachineryManagerEnterprise
 |   |   |       |   +-- _Imports.razor
 |   |   |       |-- Endpoints
 |   |   |       |   |-- ConnectEndpoints.cs
+|   |   |       |   |-- DevTokenEndpoints.cs
 |   |   |       |   +-- SigninCallbackEndpoints.cs
 |   |   |       +-- Identity.Presentation.csproj
 |   |   +-- Organization
@@ -1576,7 +1581,7 @@ SIZE: 2.2 KB
 
 ================================================================================
 FILE: src\Host\MachineryManager.Web\Program.cs
-SIZE: 3.76 KB
+SIZE: 3.82 KB
 ================================================================================
 using MachineryManager.Identity.Infrastructure;
 using MachineryManager.Identity.Presentation.Endpoints;
@@ -1672,6 +1677,7 @@ try
     // Identity endpoints
     app.MapIdentityConnectEndpoints();
     app.MapIdentitySigninCallbackEndpoints();
+    app.MapIdentityDevTokenEndpoints(app.Environment);
 
     // Organization endpoints
     app.MapOrganizationEndpoints();
@@ -2936,7 +2942,7 @@ SIZE: 0.43 KB
 
 ================================================================================
 FILE: src\Modules\Administration\Administration.Infrastructure\DependencyInjection.cs
-SIZE: 1.58 KB
+SIZE: 1.77 KB
 ================================================================================
 using MachineryManager.Administration.Application.Abstractions;
 using MachineryManager.Administration.Infrastructure.Persistence;
@@ -2964,7 +2970,11 @@ public static class DependencyInjection
         IConfiguration configuration)
     {
         services.AddDbContext<AdministrationDbContext>(options => options
-            .UseSqlServer(configuration.GetConnectionString("MachineryManagerDatabase")));
+            .UseSqlServer(
+                configuration.GetConnectionString("MachineryManagerDatabase"),
+                sqlServerOptions => sqlServerOptions.MigrationsHistoryTable(
+                    "__EFMigrationsHistory",
+                    schema: "administration")));
 
         services.AddScoped<IProfileRepository, ProfileRepository>();
         services.AddScoped<IUserProfileAssignmentRepository, UserProfileAssignmentRepository>();
@@ -3148,6 +3158,280 @@ public sealed class UserProfileAssignmentConfiguration : IEntityTypeConfiguratio
 }
 
 ================================================================================
+FILE: src\Modules\Administration\Administration.Infrastructure\Persistence\Migrations\20260820222811_InitialAdministrationSchema.cs
+SIZE: 2.75 KB
+================================================================================
+using System;
+using Microsoft.EntityFrameworkCore.Migrations;
+
+#nullable disable
+
+namespace Administration.Infrastructure.Persistence.Migrations
+{
+    /// <inheritdoc />
+    public partial class InitialAdministrationSchema : Migration
+    {
+        /// <inheritdoc />
+        protected override void Up(MigrationBuilder migrationBuilder)
+        {
+            migrationBuilder.EnsureSchema(
+                name: "administration");
+
+            migrationBuilder.CreateTable(
+                name: "Profile",
+                schema: "administration",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    Name = table.Column<string>(type: "nvarchar(200)", maxLength: 200, nullable: false),
+                    Permissions = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    IsActive = table.Column<bool>(type: "bit", nullable: false),
+                    CreatedAt = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Profile", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "UserProfileAssignment",
+                schema: "administration",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    UserId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    ProfileId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    AssignedAt = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false),
+                    ScopeHoldingId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
+                    ScopeLevel = table.Column<int>(type: "int", nullable: false),
+                    ScopeOrganizationId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
+                    ScopeProjectId = table.Column<Guid>(type: "uniqueidentifier", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_UserProfileAssignment", x => x.Id);
+                });
+        }
+
+        /// <inheritdoc />
+        protected override void Down(MigrationBuilder migrationBuilder)
+        {
+            migrationBuilder.DropTable(
+                name: "Profile",
+                schema: "administration");
+
+            migrationBuilder.DropTable(
+                name: "UserProfileAssignment",
+                schema: "administration");
+        }
+    }
+}
+
+
+================================================================================
+FILE: src\Modules\Administration\Administration.Infrastructure\Persistence\Migrations\20260820222811_InitialAdministrationSchema.Designer.cs
+SIZE: 3.7 KB
+================================================================================
+// <auto-generated />
+using System;
+using System.Collections.Generic;
+using MachineryManager.Administration.Infrastructure.Persistence;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
+using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
+
+#nullable disable
+
+namespace Administration.Infrastructure.Persistence.Migrations
+{
+    [DbContext(typeof(AdministrationDbContext))]
+    [Migration("20260820222811_InitialAdministrationSchema")]
+    partial class InitialAdministrationSchema
+    {
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
+        {
+#pragma warning disable 612, 618
+            modelBuilder
+                .HasDefaultSchema("administration")
+                .HasAnnotation("ProductVersion", "10.0.10")
+                .HasAnnotation("Relational:MaxIdentifierLength", 128);
+
+            SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
+
+            modelBuilder.Entity("Administration.Domain.Profile", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.PrimitiveCollection<string>("Permissions")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Profile", "administration");
+                });
+
+            modelBuilder.Entity("Administration.Domain.UserProfileAssignment", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTimeOffset>("AssignedAt")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<Guid>("ProfileId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.ComplexProperty(typeof(Dictionary<string, object>), "Scope", "Administration.Domain.UserProfileAssignment.Scope#AuthorizationScope", b1 =>
+                        {
+                            b1.IsRequired();
+
+                            b1.Property<Guid?>("HoldingId")
+                                .HasColumnType("uniqueidentifier")
+                                .HasColumnName("ScopeHoldingId");
+
+                            b1.Property<int>("Level")
+                                .HasColumnType("int")
+                                .HasColumnName("ScopeLevel");
+
+                            b1.Property<Guid?>("OrganizationId")
+                                .HasColumnType("uniqueidentifier")
+                                .HasColumnName("ScopeOrganizationId");
+
+                            b1.Property<Guid?>("ProjectId")
+                                .HasColumnType("uniqueidentifier")
+                                .HasColumnName("ScopeProjectId");
+                        });
+
+                    b.HasKey("Id");
+
+                    b.ToTable("UserProfileAssignment", "administration");
+                });
+#pragma warning restore 612, 618
+        }
+    }
+}
+
+
+================================================================================
+FILE: src\Modules\Administration\Administration.Infrastructure\Persistence\Migrations\AdministrationDbContextModelSnapshot.cs
+SIZE: 3.58 KB
+================================================================================
+// <auto-generated />
+using System;
+using System.Collections.Generic;
+using MachineryManager.Administration.Infrastructure.Persistence;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
+
+#nullable disable
+
+namespace Administration.Infrastructure.Persistence.Migrations
+{
+    [DbContext(typeof(AdministrationDbContext))]
+    partial class AdministrationDbContextModelSnapshot : ModelSnapshot
+    {
+        protected override void BuildModel(ModelBuilder modelBuilder)
+        {
+#pragma warning disable 612, 618
+            modelBuilder
+                .HasDefaultSchema("administration")
+                .HasAnnotation("ProductVersion", "10.0.10")
+                .HasAnnotation("Relational:MaxIdentifierLength", 128);
+
+            SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
+
+            modelBuilder.Entity("Administration.Domain.Profile", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.PrimitiveCollection<string>("Permissions")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Profile", "administration");
+                });
+
+            modelBuilder.Entity("Administration.Domain.UserProfileAssignment", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTimeOffset>("AssignedAt")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<Guid>("ProfileId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.ComplexProperty(typeof(Dictionary<string, object>), "Scope", "Administration.Domain.UserProfileAssignment.Scope#AuthorizationScope", b1 =>
+                        {
+                            b1.IsRequired();
+
+                            b1.Property<Guid?>("HoldingId")
+                                .HasColumnType("uniqueidentifier")
+                                .HasColumnName("ScopeHoldingId");
+
+                            b1.Property<int>("Level")
+                                .HasColumnType("int")
+                                .HasColumnName("ScopeLevel");
+
+                            b1.Property<Guid?>("OrganizationId")
+                                .HasColumnType("uniqueidentifier")
+                                .HasColumnName("ScopeOrganizationId");
+
+                            b1.Property<Guid?>("ProjectId")
+                                .HasColumnType("uniqueidentifier")
+                                .HasColumnName("ScopeProjectId");
+                        });
+
+                    b.HasKey("Id");
+
+                    b.ToTable("UserProfileAssignment", "administration");
+                });
+#pragma warning restore 612, 618
+        }
+    }
+}
+
+
+================================================================================
 FILE: src\Modules\Administration\Administration.Infrastructure\Persistence\ProfileRepository.cs
 SIZE: 1.21 KB
 ================================================================================
@@ -3277,7 +3561,7 @@ public sealed record CreateProfileRequest(string Name, IReadOnlyList<string> Per
 
 ================================================================================
 FILE: src\Modules\Administration\Administration.Presentation\Endpoints\ProfileEndpoints.cs
-SIZE: 2.53 KB
+SIZE: 3.21 KB
 ================================================================================
 using MachineryManager.Administration.Application.Features.Profiles.Commands.CreateProfile;
 using MachineryManager.Administration.Application.Features.Profiles.Queries.GetProfileById;
@@ -3287,6 +3571,8 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Routing;
 using OpenIddict.Validation.AspNetCore;
+
+using static OpenIddict.Abstractions.OpenIddictConstants;
 
 namespace MachineryManager.Administration.Presentation.Endpoints;
 
@@ -3307,7 +3593,16 @@ public static class ProfileEndpoints
 
         group.MapPost("/", CreateProfileAsync)
             .WithName("CreateProfile")
-            .WithSummary("Creates a new permission Profile.");
+            .WithSummary("Creates a new permission Profile.")
+            // Bootstrap-phase restriction (chat, 2026-08-20): only a
+            // Platform SuperUser (System Administrator) may create
+            // Profiles. Full scope-aware SuperUser resolution (Holding/
+            // Organization/Project) is a documented follow-up — this is
+            // NOT the final permission model, just closing the
+            // immediate privilege-escalation gap.
+            .RequireAuthorization(policy => policy
+                .AddAuthenticationSchemes(OpenIddictValidationAspNetCoreDefaults.AuthenticationScheme)
+                .RequireClaim(Claims.Role, "System Administrator"));
 
         group.MapGet("/{profileId:guid}", GetProfileByIdAsync)
             .WithName("GetProfileById")
@@ -3393,7 +3688,7 @@ internal static class ResultExtensions
 
 ================================================================================
 FILE: src\Modules\Administration\Administration.Presentation\Endpoints\UserProfileAssignmentEndpoints.cs
-SIZE: 2.6 KB
+SIZE: 3.01 KB
 ================================================================================
 using Administration.Domain;
 using MachineryManager.Administration.Application.Features.UserProfileAssignments.Commands.AssignUserToProfile;
@@ -3403,6 +3698,8 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Routing;
 using OpenIddict.Validation.AspNetCore;
+
+using static OpenIddict.Abstractions.OpenIddictConstants;
 
 namespace MachineryManager.Administration.Presentation.Endpoints;
 
@@ -3423,7 +3720,12 @@ public static class UserProfileAssignmentEndpoints
 
         group.MapPost("/", AssignUserToProfileAsync)
             .WithName("AssignUserToProfile")
-            .WithSummary("Assigns a User to a Profile at a specific authorization scope.");
+            .WithSummary("Assigns a User to a Profile at a specific authorization scope.")
+            // Bootstrap-phase restriction (chat, 2026-08-20) — see the
+            // same note on ProfileEndpoints.CreateProfile.
+            .RequireAuthorization(policy => policy
+                .AddAuthenticationSchemes(OpenIddictValidationAspNetCoreDefaults.AuthenticationScheme)
+                .RequireClaim(Claims.Role, "System Administrator"));
 
         return endpoints;
     }
@@ -6508,8 +6810,95 @@ public static class ConnectEndpoints
 }
 
 ================================================================================
+FILE: src\Modules\Identity\Identity.Presentation\Endpoints\DevTokenEndpoints.cs
+SIZE: 3.38 KB
+================================================================================
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Routing;
+using Microsoft.Extensions.Hosting;
+
+namespace MachineryManager.Identity.Presentation.Endpoints;
+
+/// <summary>
+/// Development-only diagnostic endpoint that returns the current
+/// user's stored OpenIddict tokens as JSON, for manual API testing
+/// with tools like Postman/curl (chat, 2026-08-20).
+/// </summary>
+/// <remarks>
+/// Registered ONLY when the hosting environment is Development
+/// (checked once at startup, not per-request) — the route does not
+/// exist at all outside Development, not merely hidden behind a
+/// runtime check.
+/// </remarks>
+public static class DevTokenEndpoints
+{
+    /// <summary>Registers the Development-only token inspection endpoint, if the environment is Development.</summary>
+    /// <param name="endpoints">The endpoint route builder.</param>
+    /// <param name="environment">The hosting environment.</param>
+    /// <returns>The same <see cref="IEndpointRouteBuilder"/> for chaining.</returns>
+    public static IEndpointRouteBuilder MapIdentityDevTokenEndpoints(
+        this IEndpointRouteBuilder endpoints,
+        IHostEnvironment environment)
+    {
+        if (!environment.IsDevelopment())
+        {
+            return endpoints;
+        }
+
+        Func<HttpContext, Task<IResult>> handler = HandleAsync;
+
+        endpoints.MapGet("/identity/dev/token", handler)
+            .RequireAuthorization(policy => policy
+                .AddAuthenticationSchemes(IdentityConstants.ApplicationScheme)
+                .RequireAuthenticatedUser());
+
+        // Returns ONLY the raw access token as plain text — no JSON
+        // punctuation to accidentally over-select when copying for
+        // Postman/curl (chat, 2026-08-21).
+        endpoints.MapGet("/identity/dev/token/raw", async (HttpContext httpContext) =>
+        {
+            var accessToken = await httpContext.GetTokenAsync(IdentityConstants.ApplicationScheme, "access_token");
+
+            return accessToken is null
+                ? Results.NotFound("No access token stored on the current session. Sign in via /identity/connect first.")
+                : Results.Text(accessToken, "text/plain");
+        }).RequireAuthorization(policy => policy
+            .AddAuthenticationSchemes(IdentityConstants.ApplicationScheme)
+            .RequireAuthenticatedUser());
+
+        return endpoints;
+    }
+
+    private static async Task<IResult> HandleAsync(HttpContext httpContext)
+    {
+        var accessToken = await httpContext.GetTokenAsync(IdentityConstants.ApplicationScheme, "access_token");
+        var refreshToken = await httpContext.GetTokenAsync(IdentityConstants.ApplicationScheme, "refresh_token");
+        var expiresAt = await httpContext.GetTokenAsync(IdentityConstants.ApplicationScheme, "expires_at");
+
+        if (accessToken is null)
+        {
+            return Results.NotFound(new
+            {
+                message = "No access token stored on the current session. Sign in via /identity/connect first.",
+            });
+        }
+
+        return Results.Ok(new
+        {
+            access_token = accessToken,
+            refresh_token = refreshToken,
+            expires_at = expiresAt,
+            user_name = httpContext.User.Identity?.Name,
+        });
+    }
+}
+
+================================================================================
 FILE: src\Modules\Identity\Identity.Presentation\Endpoints\SigninCallbackEndpoints.cs
-SIZE: 2.49 KB
+SIZE: 3.83 KB
 ================================================================================
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Builder;
@@ -6564,9 +6953,38 @@ public static class SigninCallbackEndpoints
                 statusCode: StatusCodes.Status400BadRequest);
         }
 
-        await httpContext.SignInAsync(IdentityConstants.ApplicationScheme, result.Principal, result.Properties);
+        var properties = result.Properties ?? new AuthenticationProperties();
 
-        var returnUrl = result.Properties?.RedirectUri;
+        // OpenIddict.Client stores the issued tokens under its own
+        // property keys, NOT under the plain "access_token"/"refresh_token"
+        // names that HttpContext.GetTokenAsync expects by convention.
+        // Re-store them explicitly so later GetTokenAsync calls (e.g.
+        // /identity/dev/token) can find them.
+        var tokens = new List<AuthenticationToken>();
+
+        var accessToken = properties.GetTokenValue(OpenIddictClientAspNetCoreConstants.Tokens.BackchannelAccessToken);
+        if (!string.IsNullOrEmpty(accessToken))
+        {
+            tokens.Add(new AuthenticationToken { Name = "access_token", Value = accessToken });
+        }
+
+        var refreshToken = properties.GetTokenValue(OpenIddictClientAspNetCoreConstants.Tokens.RefreshToken);
+        if (!string.IsNullOrEmpty(refreshToken))
+        {
+            tokens.Add(new AuthenticationToken { Name = "refresh_token", Value = refreshToken });
+        }
+
+        var identityToken = properties.GetTokenValue(OpenIddictClientAspNetCoreConstants.Tokens.BackchannelIdentityToken);
+        if (!string.IsNullOrEmpty(identityToken))
+        {
+            tokens.Add(new AuthenticationToken { Name = "id_token", Value = identityToken });
+        }
+
+        properties.StoreTokens(tokens);
+
+        await httpContext.SignInAsync(IdentityConstants.ApplicationScheme, result.Principal, properties);
+
+        var returnUrl = properties.RedirectUri;
 
         return Results.Redirect(string.IsNullOrEmpty(returnUrl) ? "/" : returnUrl);
     }
@@ -9835,12 +10253,12 @@ SIZE: 0.35 KB
 # SECTION 3: SNAPSHOT SUMMARY
 ================================================================================
 
-Generation Time     : 00:00:01.0255226
-Total Files Scanned : 185
-Files Included      : 185
+Generation Time     : 00:00:02.0794809
+Total Files Scanned : 189
+Files Included      : 189
 Files Skipped       : 0
-Total Source Size   : 0.32 MB
-Snapshot File Size  : 0.39 MB
+Total Source Size   : 0.34 MB
+Snapshot File Size  : 0.4 MB
 Output Path         : C:\Users\i\source\repos\MachineryManagerEnterprise\MME_Codebase_Snapshot.txt
 
 Excluded Directories: .git, .github, .vs, .vscode, .idea, .azure, .devcontainer, bin, obj, packages, publish, out, release, releases, debug, x64, x86, arm64, artifacts, .artifacts, node_modules, dist, build, bower_components, jspm_packages, docs-english, docs-farsi, docs, tools, test-results, coverage, .coverage, TestResults, lib, .angular, .next, .nuxt, .svelte-kit, .cache, .temp, tmp

@@ -40,6 +40,44 @@ public static class DevTokenEndpoints
                 .AddAuthenticationSchemes(IdentityConstants.ApplicationScheme)
                 .RequireAuthenticatedUser());
 
+        // Diagnostic: shows exactly which claims the OpenIddict
+        // Validation handler produces for the current Bearer token,
+        // to debug authorization policy failures (chat, 2026-08-21).
+        endpoints.MapGet("/identity/dev/claims", async (HttpContext httpContext) =>
+        {
+            var result = await httpContext.AuthenticateAsync(
+                OpenIddict.Validation.AspNetCore.OpenIddictValidationAspNetCoreDefaults.AuthenticationScheme);
+
+            if (!result.Succeeded || result.Principal is null)
+            {
+                return Results.Ok(new
+                {
+                    authenticated = false,
+                    failure = result.Failure?.Message,
+                });
+            }
+
+            return Results.Ok(new
+            {
+                authenticated = true,
+                claims = result.Principal.Claims.Select(c => new { c.Type, c.Value }),
+            });
+        }).AllowAnonymous();
+
+        // Returns ONLY the raw access token as plain text — no JSON
+        // punctuation to accidentally over-select when copying for
+        // Postman/curl (chat, 2026-08-21).
+        endpoints.MapGet("/identity/dev/token/raw", async (HttpContext httpContext) =>
+        {
+            var accessToken = await httpContext.GetTokenAsync(IdentityConstants.ApplicationScheme, "access_token");
+
+            return accessToken is null
+                ? Results.NotFound("No access token stored on the current session. Sign in via /identity/connect first.")
+                : Results.Text(accessToken, "text/plain");
+        }).RequireAuthorization(policy => policy
+            .AddAuthenticationSchemes(IdentityConstants.ApplicationScheme)
+            .RequireAuthenticatedUser());
+
         return endpoints;
     }
 

@@ -1,5 +1,6 @@
 using System.Security.Claims;
 using MachineryManager.Identity.Domain;
+using ClaimTypesLong = System.Security.Claims.ClaimTypes;
 using Microsoft.AspNetCore;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Builder;
@@ -73,6 +74,12 @@ public static class ConnectEndpoints
         // rejects the sign-in with "mandatory subject claim was missing".
         principal.SetClaim(Claims.Subject, await userManager.GetUserIdAsync(user));
 
+        // Normalize role claims from ASP.NET Core Identity's long claim
+        // type to OpenIddict's short OIDC-style "role" claim, so that
+        // downstream RequireClaim(Claims.Role, ...) policies can find
+        // them (chat, 2026-08-22 — diagnosed via /identity/dev/claims).
+        NormalizeRoleClaims(principal);
+
         principal.SetScopes(request.GetScopes());
 
         foreach (var claim in principal.Claims)
@@ -113,6 +120,7 @@ public static class ConnectEndpoints
             var principal = await signInManager.CreateUserPrincipalAsync(user);
 
             principal.SetClaim(Claims.Subject, await userManager.GetUserIdAsync(user));
+            NormalizeRoleClaims(principal);
             principal.SetScopes(authenticateResult.Principal!.GetScopes());
 
             foreach (var claim in principal.Claims)
@@ -231,6 +239,25 @@ public static class ConnectEndpoints
             default:
                 yield return Destinations.AccessToken;
                 yield break;
+        }
+    }
+
+        /// <summary>
+    /// Adds a short OIDC-style "role" claim (<see cref="Claims.Role"/>)
+    /// for every ASP.NET Core Identity role claim already present on
+    /// the principal, then removes the long-form originals so only the
+    /// normalized claim remains.
+    /// </summary>
+    private static void NormalizeRoleClaims(ClaimsPrincipal principal)
+    {
+        var identity = (ClaimsIdentity)principal.Identity!;
+
+        var longFormRoleClaims = identity.FindAll(ClaimTypesLong.Role).ToList();
+
+        foreach (var roleClaim in longFormRoleClaims)
+        {
+            identity.AddClaim(new Claim(Claims.Role, roleClaim.Value));
+            identity.RemoveClaim(roleClaim);
         }
     }
 }
