@@ -279,6 +279,7 @@ public static class DependencyInjection
         this IServiceCollection services,
         IConfiguration configuration)
     {
+        services.AddScoped<MachineryManager.Identity.Domain.ICurrentAccessTokenAccessor, Http.CurrentAccessTokenAccessor>();
         services.AddTransient<Http.BearerTokenHandler>();
 
         var baseAddress = configuration["OpenIddict:Issuer"]

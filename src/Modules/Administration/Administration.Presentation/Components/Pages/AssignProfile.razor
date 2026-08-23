@@ -9,64 +9,70 @@
 
 <PageTitle>تخصیص پروفایل</PageTitle>
 
-<MudText Typo="Typo.h4" Class="mb-4">تخصیص پروفایل به کاربر</MudText>
+<AdminOnly>
+    <MudText Typo="Typo.h4" Class="mb-4">تخصیص پروفایل به کاربر</MudText>
 
-@if (isLoading)
-{
-    <MudProgressLinear Indeterminate="true" Class="my-4" />
-}
-else if (errorMessage is not null)
-{
-    <MudAlert Severity="Severity.Error" Class="my-4">@errorMessage</MudAlert>
-}
-else
-{
-    <MudPaper Class="pa-4" Style="max-width:600px;">
-        <MudForm @ref="form" @bind-IsValid="@isValid">
-            <MudSelect T="Guid" @bind-Value="selectedProfileId" Label="پروفایل" Required="true" RequiredError="انتخاب پروفایل الزامی است.">
-                @foreach (var profile in profiles)
+    @if (isLoading)
+    {
+        <MudProgressLinear Indeterminate="true" Class="my-4" />
+    }
+    else if (errorMessage is not null)
+    {
+        <MudAlert Severity="Severity.Error" Class="my-4">@errorMessage</MudAlert>
+    }
+    else
+    {
+        <MudPaper Class="pa-4" Style="max-width:600px;">
+            <MudForm @ref="form" @bind-IsValid="@isValid">
+                <MudSelect T="Guid" @bind-Value="selectedProfileId" Label="پروفایل" Required="true"
+                           RequiredError="انتخاب پروفایل الزامی است.">
+                    @foreach (var profile in profiles)
+                    {
+                        <MudSelectItem T="Guid" Value="@profile.Id">@profile.Name</MudSelectItem>
+                    }
+                </MudSelect>
+
+                <MudSelect T="string" @bind-Value="selectedScopeLevel" Label="سطح دسترسی" Required="true" Class="mt-4">
+                    <MudSelectItem T="string" Value="@("Platform")">Platform</MudSelectItem>
+                    <MudSelectItem T="string" Value="@("Holding")">Holding</MudSelectItem>
+                    <MudSelectItem T="string" Value="@("Organization")">Organization</MudSelectItem>
+                    <MudSelectItem T="string" Value="@("Project")">Project</MudSelectItem>
+                </MudSelect>
+
+                @if (selectedScopeLevel == "Holding")
                 {
-                    <MudSelectItem T="Guid" Value="@profile.Id">@profile.Name</MudSelectItem>
+                    <MudTextField @bind-Value="scopeHoldingId" Label="شناسه Holding" Required="true" Class="mt-4" />
                 }
-            </MudSelect>
-
-            <MudSelect T="string" @bind-Value="selectedScopeLevel" Label="سطح دسترسی" Required="true" Class="mt-4">
-                <MudSelectItem T="string" Value="@("Platform")">Platform</MudSelectItem>
-                <MudSelectItem T="string" Value="@("Holding")">Holding</MudSelectItem>
-                <MudSelectItem T="string" Value="@("Organization")">Organization</MudSelectItem>
-                <MudSelectItem T="string" Value="@("Project")">Project</MudSelectItem>
-            </MudSelect>
-
-            @if (selectedScopeLevel == "Holding")
-            {
-                <MudTextField @bind-Value="scopeHoldingId" Label="شناسه Holding" Required="true" Class="mt-4" />
-            }
-            else if (selectedScopeLevel == "Organization")
-            {
-                <MudTextField @bind-Value="scopeOrganizationId" Label="شناسه Organization" Required="true" Class="mt-4" />
-            }
-            else if (selectedScopeLevel == "Project")
-            {
-                <MudTextField @bind-Value="scopeProjectId" Label="شناسه Project" Required="true" Class="mt-4" />
-            }
-
-            <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="SubmitAsync" Disabled="@(!isValid || isSubmitting)" Class="mt-4">
-                @if (isSubmitting)
+                else if (selectedScopeLevel == "Organization")
                 {
-                    <MudProgressCircular Size="Size.Small" Indeterminate="true" />
+                    <MudTextField @bind-Value="scopeOrganizationId" Label="شناسه Organization" Required="true" Class="mt-4" />
                 }
-                else
+                else if (selectedScopeLevel == "Project")
                 {
-                    <span>ذخیره</span>
+                    <MudTextField @bind-Value="scopeProjectId" Label="شناسه Project" Required="true" Class="mt-4" />
                 }
-            </MudButton>
 
-            <MudButton Variant="Variant.Outlined" OnClick="@(() => Navigation.NavigateTo("/admin/users"))" Class="mt-4 mr-2">
-                بازگشت
-            </MudButton>
-        </MudForm>
-    </MudPaper>
-}
+                <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="SubmitAsync"
+                           Disabled="@(!isValid || isSubmitting)" Class="mt-4">
+                    @if (isSubmitting)
+                    {
+                        <MudProgressCircular Size="Size.Small" Indeterminate="true" />
+                    }
+                    else
+                    {
+                        <span>ذخیره</span>
+                    }
+                </MudButton>
+
+                <MudButton Variant="Variant.Outlined" OnClick="@(() => Navigation.NavigateTo("/admin/users"))"
+                           Class="mt-4 mr-2">
+                    بازگشت
+                </MudButton>
+            </MudForm>
+        </MudPaper>
+    }
+
+</AdminOnly>
 
 @code {
     /// <summary>
@@ -116,7 +122,9 @@ else
                 return;
             }
 
-            var result = System.Text.Json.JsonSerializer.Deserialize<SearchProfilesResponse>(content, new System.Text.Json.JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+            var result = System.Text.Json.JsonSerializer.Deserialize<SearchProfilesResponse>(content, new
+System.Text.Json.JsonSerializerOptions
+            { PropertyNameCaseInsensitive = true });
 
             if (result is null)
             {
@@ -137,7 +145,7 @@ else
         }
     }
 
-        /// <summary>
+    /// <summary>
     /// Submits the profile assignment to the API.
     /// </summary>
     private async Task SubmitAsync()

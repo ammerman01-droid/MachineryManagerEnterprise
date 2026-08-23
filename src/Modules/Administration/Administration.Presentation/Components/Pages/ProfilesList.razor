@@ -5,59 +5,66 @@
 
 <PageTitle>مدیریت پروفایل‌ها</PageTitle>
 
-<MudText Typo="Typo.h4" Class="mb-4">پروفایل‌های دسترسی</MudText>
+<AdminOnly>
 
-<MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="@(() => Navigation.NavigateTo("/admin/profiles/create"))" Class="mb-4">
-    ایجاد پروفایل جدید
-</MudButton>
+    <MudText Typo="Typo.h4" Class="mb-4">پروفایل‌های دسترسی</MudText>
 
-@if (isLoading)
-{
-    <MudProgressLinear Indeterminate="true" Class="my-4" />
-}
-else if (errorMessage is not null)
-{
-    <MudAlert Severity="Severity.Error" Class="my-4">@errorMessage</MudAlert>
-}
-else
-{
-    <MudTable Items="@profiles" Hover="true" Breakpoint="Breakpoint.Sm">
-        <HeaderContent>
-            <MudTh>نام پروفایل</MudTh>
-            <MudTh>دسترسی‌ها</MudTh>
-            <MudTh>وضعیت</MudTh>
-            <MudTh>تاریخ ایجاد</MudTh>
-            <MudTh>عملیات</MudTh>
-        </HeaderContent>
-        <RowTemplate>
-            <MudTd DataLabel="نام">@context.Name</MudTd>
-            <MudTd DataLabel="دسترسی‌ها">@string.Join(", ", context.Permissions.Take(3))@(context.Permissions.Count > 3 ? "..." : "")</MudTd>
-            <MudTd DataLabel="وضعیت">
-                <MudChip T="string" Color="@(context.IsActive ? Color.Success : Color.Default)" Size="Size.Small">
-                    @(context.IsActive ? "فعال" : "غیرفعال")
-                </MudChip>
-            </MudTd>
-            <MudTd DataLabel="تاریخ">@context.CreatedAt.ToLocalTime().ToString("yyyy/MM/dd HH:mm")</MudTd>
-            <MudTd>
-                <MudButton Variant="Variant.Text" Color="Color.Primary" OnClick="@(() => Navigation.NavigateTo($"/admin/profiles/{context.Id}/edit"))">
-                    ویرایش
-                </MudButton>
-                @if (context.IsActive)
-                {
-                    <MudButton Variant="Variant.Text" Color="Color.Warning" OnClick="@(() => DeactivateAsync(context.Id))">
-                        غیرفعال‌سازی
-                    </MudButton>
-                }
-                else
-                {
-                    <MudButton Variant="Variant.Text" Color="Color.Success" OnClick="@(() => ActivateAsync(context.Id))">
-                        فعال‌سازی
-                    </MudButton>
-                }
-            </MudTd>
-        </RowTemplate>
-    </MudTable>
-}
+    <MudButton Variant="Variant.Filled" Color="Color.Primary"
+               OnClick="@(() => Navigation.NavigateTo("/admin/profiles/create"))" Class="mb-4">
+        ایجاد پروفایل جدید
+    </MudButton>
+
+    @if (isLoading)
+    {
+        <MudProgressLinear Indeterminate="true" Class="my-4" />
+    }
+    else if (errorMessage is not null)
+    {
+        <MudAlert Severity="Severity.Error" Class="my-4">@errorMessage</MudAlert>
+    }
+    else
+    {
+        <MudTable Items="@profiles" Hover="true" Breakpoint="Breakpoint.Sm">
+            <HeaderContent>
+                <MudTh>نام پروفایل</MudTh>
+                <MudTh>دسترسی‌ها</MudTh>
+                <MudTh>وضعیت</MudTh>
+                <MudTh>تاریخ ایجاد</MudTh>
+                <MudTh>عملیات</MudTh>
+            </HeaderContent>
+            <RowTemplate>
+                <MudTd DataLabel="نام">@context.Name</MudTd>
+                <MudTd DataLabel="دسترسی‌ها">@string.Join(", ", context.Permissions.Take(3))@(context.Permissions.Count > 3
+                                    ? "..." : "")</MudTd>
+                    <MudTd DataLabel="وضعیت">
+                        <MudChip T="string" Color="@(context.IsActive ? Color.Success : Color.Default)" Size="Size.Small">
+                            @(context.IsActive ? "فعال" : "غیرفعال")
+                        </MudChip>
+                    </MudTd>
+                    <MudTd DataLabel="تاریخ">@context.CreatedAt.ToLocalTime().ToString("yyyy/MM/dd HH:mm")</MudTd>
+                    <MudTd>
+                        <MudButton Variant="Variant.Text" Color="Color.Primary"
+                                   OnClick="@(() => Navigation.NavigateTo($"/admin/profiles/{context.Id}/edit"))">
+                            ویرایش
+                        </MudButton>
+                        @if (context.IsActive)
+                        {
+                            <MudButton Variant="Variant.Text" Color="Color.Warning" OnClick="@(() => DeactivateAsync(context.Id))">
+                                غیرفعال‌سازی
+                            </MudButton>
+                        }
+                        else
+                        {
+                            <MudButton Variant="Variant.Text" Color="Color.Success" OnClick="@(() => ActivateAsync(context.Id))">
+                                فعال‌سازی
+                            </MudButton>
+                        }
+                    </MudTd>
+                </RowTemplate>
+            </MudTable>
+        }
+
+    </AdminOnly>
 
 @code {
     private List<ProfileItem> profiles = new();
@@ -83,7 +90,9 @@ else
                 return;
             }
 
-            var result = System.Text.Json.JsonSerializer.Deserialize<SearchProfilesResponse>(content, new System.Text.Json.JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+            var result = System.Text.Json.JsonSerializer.Deserialize<SearchProfilesResponse>(content, new
+System.Text.Json.JsonSerializerOptions
+            { PropertyNameCaseInsensitive = true });
             profiles = result?.Items?.ToList() ?? new List<ProfileItem>();
         }
         catch (Exception ex)

@@ -2,6 +2,7 @@
 @rendermode InteractiveServer
 @using System.Text.Json
 @inject IHttpClientFactory HttpClientFactory
+@inject global::MachineryManager.Identity.Domain.ICurrentAccessTokenAccessor TokenAccessor
 
 <PageTitle>تست فراخوانی API</PageTitle>
 
@@ -23,6 +24,13 @@
     private string? organizationsJson;
     private string? errorMessage;
 
+        protected override async Task OnInitializedAsync()
+    {
+        // Warms the token cache while a real HttpContext is still
+        // available (chat, 2026-08-22) — see CurrentAccessTokenAccessor.
+        await TokenAccessor.GetAccessTokenAsync();
+    }
+    
     private async Task LoadOrganizationsAsync()
     {
         errorMessage = null;

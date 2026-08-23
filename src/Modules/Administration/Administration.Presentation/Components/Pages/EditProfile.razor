@@ -5,42 +5,49 @@
 
 <PageTitle>ویرایش پروفایل</PageTitle>
 
-<MudText Typo="Typo.h4" Class="mb-4">ویرایش پروفایل</MudText>
+<AdminOnly>
 
-@if (isLoading)
-{
-    <MudProgressLinear Indeterminate="true" Class="my-4" />
-}
-else if (errorMessage is not null)
-{
-    <MudAlert Severity="Severity.Error" Class="my-4">@errorMessage</MudAlert>
-}
-else
-{
-    <MudPaper Class="pa-4" Style="max-width:600px;">
-        <MudForm @ref="form" @bind-IsValid="@isValid">
-            <MudTextField @bind-Value="model.Name" Label="نام پروفایل" Required="true" RequiredError="نام پروفایل الزامی است." />
-            
-            <MudTextField @bind-Value="permissionInput" Label="دسترسی‌ها (با کاما جدا کنید)" 
-                          HelperText="مثال: Asset.Create, Asset.View, Maintenance.Plan" Class="mt-4" />
-            
-            <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="SubmitAsync" Disabled="@(!isValid || isSubmitting)" Class="mt-4">
-                @if (isSubmitting)
-                {
-                    <MudProgressCircular Size="Size.Small" Indeterminate="true" />
-                }
-                else
-                {
-                    <span>ذخیره</span>
-                }
-            </MudButton>
-            
-            <MudButton Variant="Variant.Outlined" OnClick="@(() => Navigation.NavigateTo("/admin/profiles"))" Class="mt-4 mr-2">
-                بازگشت
-            </MudButton>
-        </MudForm>
-    </MudPaper>
-}
+    <MudText Typo="Typo.h4" Class="mb-4">ویرایش پروفایل</MudText>
+
+    @if (isLoading)
+    {
+        <MudProgressLinear Indeterminate="true" Class="my-4" />
+    }
+    else if (errorMessage is not null)
+    {
+        <MudAlert Severity="Severity.Error" Class="my-4">@errorMessage</MudAlert>
+    }
+    else
+    {
+        <MudPaper Class="pa-4" Style="max-width:600px;">
+            <MudForm @ref="form" @bind-IsValid="@isValid">
+                <MudTextField @bind-Value="model.Name" Label="نام پروفایل" Required="true"
+                              RequiredError="نام پروفایل الزامی است." />
+
+                <MudTextField @bind-Value="permissionInput" Label="دسترسی‌ها (با کاما جدا کنید)"
+                              HelperText="مثال: Asset.Create, Asset.View, Maintenance.Plan" Class="mt-4" />
+
+                <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="SubmitAsync"
+                           Disabled="@(!isValid || isSubmitting)" Class="mt-4">
+                    @if (isSubmitting)
+                    {
+                        <MudProgressCircular Size="Size.Small" Indeterminate="true" />
+                    }
+                    else
+                    {
+                        <span>ذخیره</span>
+                    }
+                </MudButton>
+
+                <MudButton Variant="Variant.Outlined" OnClick="@(() => Navigation.NavigateTo("/admin/profiles"))"
+                           Class="mt-4 mr-2">
+                    بازگشت
+                </MudButton>
+            </MudForm>
+        </MudPaper>
+    }
+
+</AdminOnly>
 
 @code {
     /// <summary>
@@ -54,7 +61,7 @@ else
     private bool isSubmitting;
     private bool isLoading = true;
     private string? errorMessage;
-    
+
     private EditProfileModel model = new();
     private string permissionInput = string.Empty;
 
@@ -78,8 +85,10 @@ else
                 return;
             }
 
-            var result = System.Text.Json.JsonSerializer.Deserialize<ProfileItem>(content, new System.Text.Json.JsonSerializerOptions { PropertyNameCaseInsensitive = true });
-            
+            var result = System.Text.Json.JsonSerializer.Deserialize<ProfileItem>(content, new
+System.Text.Json.JsonSerializerOptions
+            { PropertyNameCaseInsensitive = true });
+
             if (result is null)
             {
                 errorMessage = "پاسخ نامعتبر از سرور.";
@@ -106,10 +115,10 @@ else
     private async Task SubmitAsync()
     {
         if (form is null || !isValid) return;
-        
+
         isSubmitting = true;
         errorMessage = null;
-        
+
         try
         {
             var permissions = permissionInput.Split(',', StringSplitOptions.RemoveEmptyEntries)

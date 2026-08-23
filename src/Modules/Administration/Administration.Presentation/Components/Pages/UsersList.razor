@@ -5,40 +5,42 @@
 
 <PageTitle>مدیریت کاربران</PageTitle>
 
-<MudText Typo="Typo.h4" Class="mb-4">کاربران سامانه</MudText>
+<AdminOnly>
+    <MudText Typo="Typo.h4" Class="mb-4">کاربران سامانه</MudText>
 
-<MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="@(() => Navigation.NavigateTo("/admin/users/create"))" Class="mb-4">
-    ایجاد کاربر جدید
-</MudButton>
+    <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="@(() => Navigation.NavigateTo("/admin/users/create"))" Class="mb-4">
+        ایجاد کاربر جدید
+    </MudButton>
 
-@if (isLoading)
-{
-    <MudProgressLinear Indeterminate="true" Class="my-4" />
-}
-else if (errorMessage is not null)
-{
-    <MudAlert Severity="Severity.Error" Class="my-4">@errorMessage</MudAlert>
-}
-else
-{
-    <MudTable Items="@users" Hover="true" Breakpoint="Breakpoint.Sm">
-        <HeaderContent>
-            <MudTh>نام کاربری</MudTh>
-            <MudTh>عملیات</MudTh>
-        </HeaderContent>
-        <RowTemplate>
-            <MudTd DataLabel="نام کاربری">@context.UserName</MudTd>
-            <MudTd>
-                <MudButton Variant="Variant.Text" Color="Color.Primary" OnClick="@(() => Navigation.NavigateTo($"/admin/users/{context.Id}/assign-profile"))">
-                    تخصیص پروفایل
-                </MudButton>
-                <MudButton Variant="Variant.Text" Color="Color.Warning" OnClick="@(() => DeactivateUserAsync(context.Id))">
-                    غیرفعال‌سازی
-                </MudButton>
-            </MudTd>
-        </RowTemplate>
-    </MudTable>
-}
+    @if (isLoading)
+    {
+        <MudProgressLinear Indeterminate="true" Class="my-4" />
+    }
+    else if (errorMessage is not null)
+    {
+        <MudAlert Severity="Severity.Error" Class="my-4">@errorMessage</MudAlert>
+    }
+    else
+    {
+        <MudTable Items="@users" Hover="true" Breakpoint="Breakpoint.Sm">
+            <HeaderContent>
+                <MudTh>نام کاربری</MudTh>
+                <MudTh>عملیات</MudTh>
+            </HeaderContent>
+            <RowTemplate>
+                <MudTd DataLabel="نام کاربری">@context.UserName</MudTd>
+                <MudTd>
+                    <MudButton Variant="Variant.Text" Color="Color.Primary" OnClick="@(() => Navigation.NavigateTo($"/admin/users/{context.Id}/assign-profile"))">
+                        تخصیص پروفایل
+                    </MudButton>
+                    <MudButton Variant="Variant.Text" Color="Color.Warning" OnClick="@(() => DeactivateUserAsync(context.Id))">
+                        غیرفعال‌سازی
+                    </MudButton>
+                </MudTd>
+            </RowTemplate>
+        </MudTable>
+    }
+</AdminOnly>
 
 @code {
     private List<UserItem> users = new();

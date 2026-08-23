@@ -5,53 +5,60 @@
 
 <PageTitle>ایجاد پروفایل</PageTitle>
 
-<MudText Typo="Typo.h4" Class="mb-4">ایجاد پروفایل جدید</MudText>
+<AdminOnly>
 
-<MudPaper Class="pa-4" Style="max-width:600px;">
-    <MudForm @ref="form" @bind-IsValid="@isValid">
-        <MudTextField @bind-Value="model.Name" Label="نام پروفایل" Required="true" RequiredError="نام پروفایل الزامی است." />
-        
-        <MudTextField @bind-Value="permissionInput" Label="دسترسی‌ها (با کاما جدا کنید)" 
-                      HelperText="مثال: Asset.Create, Asset.View, Maintenance.Plan" Class="mt-4" />
-        
-        <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="SubmitAsync" Disabled="@(!isValid || isSubmitting)" Class="mt-4">
-            @if (isSubmitting)
-            {
-                <MudProgressCircular Size="Size.Small" Indeterminate="true" />
-            }
-            else
-            {
-                <span>ذخیره</span>
-            }
-        </MudButton>
-        
-        <MudButton Variant="Variant.Outlined" OnClick="@(() => Navigation.NavigateTo("/admin/profiles"))" Class="mt-4 mr-2">
-            بازگشت
-        </MudButton>
-    </MudForm>
-</MudPaper>
+    <MudText Typo="Typo.h4" Class="mb-4">ایجاد پروفایل جدید</MudText>
 
-@if (errorMessage is not null)
-{
-    <MudAlert Severity="Severity.Error" Class="mt-4">@errorMessage</MudAlert>
-}
+    <MudPaper Class="pa-4" Style="max-width:600px;">
+        <MudForm @ref="form" @bind-IsValid="@isValid">
+            <MudTextField @bind-Value="model.Name" Label="نام پروفایل" Required="true"
+                          RequiredError="نام پروفایل الزامی است." />
+
+            <MudTextField @bind-Value="permissionInput" Label="دسترسی‌ها (با کاما جدا کنید)"
+                          HelperText="مثال: Asset.Create, Asset.View, Maintenance.Plan" Class="mt-4" />
+
+            <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="SubmitAsync"
+                       Disabled="@(!isValid || isSubmitting)" Class="mt-4">
+                @if (isSubmitting)
+                {
+                    <MudProgressCircular Size="Size.Small" Indeterminate="true" />
+                }
+                else
+                {
+                    <span>ذخیره</span>
+                }
+            </MudButton>
+
+            <MudButton Variant="Variant.Outlined" OnClick="@(() => Navigation.NavigateTo("/admin/profiles"))"
+                       Class="mt-4 mr-2">
+                بازگشت
+            </MudButton>
+        </MudForm>
+    </MudPaper>
+
+    @if (errorMessage is not null)
+    {
+        <MudAlert Severity="Severity.Error" Class="mt-4">@errorMessage</MudAlert>
+    }
+
+</AdminOnly>
 
 @code {
     private MudForm? form;
     private bool isValid;
     private bool isSubmitting;
     private string? errorMessage;
-    
+
     private CreateProfileModel model = new();
     private string permissionInput = string.Empty;
 
     private async Task SubmitAsync()
     {
         if (form is null || !isValid) return;
-        
+
         isSubmitting = true;
         errorMessage = null;
-        
+
         try
         {
             var permissions = permissionInput.Split(',', StringSplitOptions.RemoveEmptyEntries)
