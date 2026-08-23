@@ -3,6 +3,7 @@ using MachineryManager.Organization.Application.Features.Holdings.Dtos;
 using MachineryManager.Organization.Application.Features.Holdings.Queries.SearchHoldings;
 using Microsoft.EntityFrameworkCore;
 using Organization.Domain;
+using MachineryManager.SharedKernel.Abstractions;
 
 namespace MachineryManager.Organization.Infrastructure.Persistence;
 
@@ -32,11 +33,12 @@ public sealed class HoldingRepository : IHoldingRepository
     /// <inheritdoc />
     public void Update(Holding aggregate) => _dbContext.Holdings.Update(aggregate);
 
-    /// <inheritdoc />
+      /// <inheritdoc />
     public async Task<SearchHoldingsResponse> SearchAsync(
         string? searchTerm,
         int page,
         int pageSize,
+        AuthorizedScopeSet authorizedScope,
         CancellationToken cancellationToken = default)
     {
         var query = _dbContext.Holdings.AsNoTracking().AsQueryable();
@@ -44,6 +46,18 @@ public sealed class HoldingRepository : IHoldingRepository
         if (!string.IsNullOrWhiteSpace(searchTerm))
         {
             query = query.Where(h => h.Name.Contains(searchTerm));
+        }
+
+        if (!authorizedScope.IsUnrestricted)
+        {
+            // Holding is the top of the tenant hierarchy (besides
+            // Platform, which is Unrestricted) — a user sees a Holding
+            // only if granted directly at Holding level (chat, 2026-08-23).
+            var holdingIdSet = authorizedScope.HoldingIds
+                .Select(HoldingId.From)
+                .ToHashSet();
+
+            query = query.Where(h => holdingIdSet.Contains(h.Id));
         }
 
         var totalItems = await query.CountAsync(cancellationToken);
