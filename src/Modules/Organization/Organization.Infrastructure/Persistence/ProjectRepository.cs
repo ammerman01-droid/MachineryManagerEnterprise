@@ -3,6 +3,7 @@ using MachineryManager.Organization.Application.Features.Projects.Dtos;
 using MachineryManager.Organization.Application.Features.Projects.Queries.SearchProjects;
 using Microsoft.EntityFrameworkCore;
 using Organization.Domain;
+using MachineryManager.SharedKernel.Abstractions;
 
 namespace MachineryManager.Organization.Infrastructure.Persistence;
 
@@ -37,22 +38,50 @@ public sealed class ProjectRepository : IProjectRepository
         string? searchTerm,
         int page,
         int pageSize,
+        AuthorizedScopeSet authorizedScope,
         CancellationToken cancellationToken = default)
     {
-        var query = _dbContext.Projects.AsNoTracking().AsQueryable();
+        // Read-only projection Join with Organization, purely to resolve
+        // each Project's parent Holding for scope filtering — Project
+        // itself stores no HoldingId (deliberate aggregate-boundary
+        // decision, see ProjectConfiguration remarks). This is a query
+        // concern, not a permanent cross-aggregate navigation.
+        var query =
+            from project in _dbContext.Projects.AsNoTracking()
+            join organization in _dbContext.Organizations.AsNoTracking()
+                on project.OrganizationId equals organization.Id
+            select new { Project = project, Organization = organization };
 
         if (!string.IsNullOrWhiteSpace(searchTerm))
         {
-            query = query.Where(p => p.Name.Contains(searchTerm));
+            query = query.Where(x => x.Project.Name.Contains(searchTerm));
+        }
+
+        if (!authorizedScope.IsUnrestricted)
+        {
+            var projectIdSet = authorizedScope.ProjectIds
+                .Select(ProjectId.From)
+                .ToHashSet();
+            var organizationIdSet = authorizedScope.OrganizationIds
+                .Select(OrganizationId.From)
+                .ToHashSet();
+            var holdingIdSet = authorizedScope.HoldingIds
+                .Select(HoldingId.From)
+                .ToHashSet();
+
+            query = query.Where(x =>
+                projectIdSet.Contains(x.Project.Id)
+                || organizationIdSet.Contains(x.Project.OrganizationId)
+                || (x.Organization.HoldingId != null && holdingIdSet.Contains(x.Organization.HoldingId)));
         }
 
         var totalItems = await query.CountAsync(cancellationToken);
 
         var items = await query
-            .OrderBy(p => p.Name)
+            .OrderBy(x => x.Project.Name)
             .Skip((page - 1) * pageSize)
             .Take(pageSize)
-            .Select(p => new ProjectDto(p.Id.Value, p.Name, p.OrganizationId.Value))
+            .Select(x => new ProjectDto(x.Project.Id.Value, x.Project.Name, x.Project.OrganizationId.Value))
             .ToListAsync(cancellationToken);
 
         var totalPages = totalItems == 0 ? 0 : (int)Math.Ceiling(totalItems / (double)pageSize);

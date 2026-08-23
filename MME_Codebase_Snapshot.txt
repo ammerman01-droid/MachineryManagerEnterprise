@@ -1,7 +1,7 @@
 ﻿
 ================================================================================
   MACHINERYMANAGERENTERPRISE - CODEBASE SNAPSHOT
-  Generated: 2026-08-23 08:29:57
+  Generated: 2026-08-23 10:24:47
   Source: C:\Users\i\source\repos\MachineryManagerEnterprise
   Purpose: Complete source code reference for AI-assisted development
   Excludes: .md, .gitignore, this script, build artifacts, binaries, IDE,
@@ -26,6 +26,7 @@ MachineryManagerEnterprise
 |   |   |   |-- Result.cs
 |   |   |   +-- ValueObject.cs
 |   |   |-- MachineryManager.SharedKernel.Abstractions
+|   |   |   |-- AuthorizedScopeSet.cs
 |   |   |   |-- DependencyInjection.cs
 |   |   |   |-- ICurrentUserService.cs
 |   |   |   |-- IDateTimeProvider.cs
@@ -535,6 +536,39 @@ SIZE: 2.23 KB
 </Solution>
 
 ================================================================================
+FILE: src\BuildingBlocks\MachineryManager.SharedKernel.Abstractions\AuthorizedScopeSet.cs
+SIZE: 1.44 KB
+================================================================================
+namespace MachineryManager.SharedKernel.Abstractions;
+
+/// <summary>
+/// The full set of scopes a User holds a given Permission over, used to
+/// filter list/search results (as opposed to <see cref="IPermissionEvaluator.HasPermissionAsync"/>,
+/// which answers a yes/no question about one specific resource).
+/// </summary>
+/// <param name="IsUnrestricted">
+/// True when the user holds this Permission at Platform level — sees
+/// everything, no filtering needed.
+/// </param>
+/// <param name="HoldingIds">Holdings the user has this Permission over (grants visibility of everything beneath them too).</param>
+/// <param name="OrganizationIds">Organizations the user has this Permission over directly.</param>
+/// <param name="ProjectIds">Projects the user has this Permission over directly.</param>
+public sealed record AuthorizedScopeSet(
+    bool IsUnrestricted,
+    IReadOnlyCollection<Guid> HoldingIds,
+    IReadOnlyCollection<Guid> OrganizationIds,
+    IReadOnlyCollection<Guid> ProjectIds)
+{
+    /// <summary>A scope set representing full, unfiltered access (Platform-level).</summary>
+    public static AuthorizedScopeSet Unrestricted { get; } =
+        new(true, Array.Empty<Guid>(), Array.Empty<Guid>(), Array.Empty<Guid>());
+
+    /// <summary>A scope set representing no access at all.</summary>
+    public static AuthorizedScopeSet None { get; } =
+        new(false, Array.Empty<Guid>(), Array.Empty<Guid>(), Array.Empty<Guid>());
+}
+
+================================================================================
 FILE: src\BuildingBlocks\MachineryManager.SharedKernel.Abstractions\DependencyInjection.cs
 SIZE: 1.26 KB
 ================================================================================
@@ -638,7 +672,7 @@ public interface IDomainEventDispatcher
 
 ================================================================================
 FILE: src\BuildingBlocks\MachineryManager.SharedKernel.Abstractions\IPermissionEvaluator.cs
-SIZE: 1.15 KB
+SIZE: 1.88 KB
 ================================================================================
 namespace MachineryManager.SharedKernel.Abstractions;
 
@@ -661,6 +695,21 @@ public interface IPermissionEvaluator
         Guid userId,
         string permission,
         ResourceScope resourceScope,
+        CancellationToken cancellationToken = default);
+
+
+    /// <summary>
+    /// Resolves the full set of scopes the user holds the given permission
+    /// over, for filtering list/search results (05-application, Section 5.8,
+    /// Phase 3 — Scope-based Filtering).
+    /// </summary>
+    /// <param name="userId">The user's identifier.</param>
+    /// <param name="permission">The permission string (e.g. "Organization.View").</param>
+    /// <param name="cancellationToken">Token to cancel the asynchronous operation.</param>
+    /// <returns>The set of scopes the user is authorized within for this permission.</returns>
+    Task<AuthorizedScopeSet> GetAuthorizedScopesAsync(
+        Guid userId,
+        string permission,
         CancellationToken cancellationToken = default);
 }
 
@@ -3604,7 +3653,7 @@ public static class DependencyInjection
 
 ================================================================================
 FILE: src\Modules\Administration\Administration.Infrastructure\PermissionEvaluator.cs
-SIZE: 3.18 KB
+SIZE: 5.53 KB
 ================================================================================
 using MachineryManager.SharedKernel.Abstractions;
 using Microsoft.EntityFrameworkCore;
@@ -3671,6 +3720,66 @@ public sealed class PermissionEvaluator : IPermissionEvaluator
         return false;
     }
 
+
+    /// <inheritdoc />
+    public async Task<AuthorizedScopeSet> GetAuthorizedScopesAsync(
+        Guid userId,
+        string permission,
+        CancellationToken cancellationToken = default)
+    {
+        var assignments = await _dbContext.Set<global::Administration.Domain.UserProfileAssignment>()
+            .Where(a => a.UserId == userId)
+            .Join(
+                _dbContext.Set<global::Administration.Domain.Profile>(),
+                assignment => assignment.ProfileId,
+                profile => profile.Id,
+                (assignment, profile) => new { assignment.Scope, profile.Permissions, profile.IsActive })
+            .Where(x => x.IsActive)
+            .ToListAsync(cancellationToken);
+
+        var holdingIds = new HashSet<Guid>();
+        var organizationIds = new HashSet<Guid>();
+        var projectIds = new HashSet<Guid>();
+
+        foreach (var assignment in assignments)
+        {
+            var hasPermission = assignment.Permissions.Contains(WildcardPermission)
+                || assignment.Permissions.Contains(permission);
+
+            if (!hasPermission)
+            {
+                continue;
+            }
+
+            switch (assignment.Scope.Level)
+            {
+                case global::Administration.Domain.AuthorizationScopeLevel.Platform:
+                    return AuthorizedScopeSet.Unrestricted;
+
+                case global::Administration.Domain.AuthorizationScopeLevel.Holding
+                    when assignment.Scope.HoldingId is { } holdingId:
+                    holdingIds.Add(holdingId);
+                    break;
+
+                case global::Administration.Domain.AuthorizationScopeLevel.Organization
+                    when assignment.Scope.OrganizationId is { } organizationId:
+                    organizationIds.Add(organizationId);
+                    break;
+
+                case global::Administration.Domain.AuthorizationScopeLevel.Project
+                    when assignment.Scope.ProjectId is { } projectId:
+                    projectIds.Add(projectId);
+                    break;
+            }
+        }
+
+        if (holdingIds.Count == 0 && organizationIds.Count == 0 && projectIds.Count == 0)
+        {
+            return AuthorizedScopeSet.None;
+        }
+
+        return new AuthorizedScopeSet(false, holdingIds, organizationIds, projectIds);
+    }
     private static bool Covers(global::Administration.Domain.AuthorizationScope assignmentScope, ResourceScope resource)
     {
         return assignmentScope.Level switch
@@ -9321,7 +9430,7 @@ SIZE: 0.52 KB
 
 ================================================================================
 FILE: src\Modules\Organization\Organization.Application\Abstractions\IHoldingRepository.cs
-SIZE: 0.58 KB
+SIZE: 0.73 KB
 ================================================================================
 using MachineryManager.SharedKernel.Abstractions;
 using Organization.Domain;
@@ -9331,17 +9440,21 @@ namespace MachineryManager.Organization.Application.Abstractions;
 /// <summary>Repository contract for the <see cref="Holding"/> aggregate.</summary>
 public interface IHoldingRepository : IRepository<Holding, HoldingId>
 {
-    /// <summary>Performs a paginated search over holdings.</summary>
+    /// <summary>
+    /// Performs a paginated search over holdings, restricted to the given
+    /// authorized scope (Phase 3 — Scope-based Filtering).
+    /// </summary>
     Task<Features.Holdings.Queries.SearchHoldings.SearchHoldingsResponse> SearchAsync(
         string? searchTerm,
         int page,
         int pageSize,
+        AuthorizedScopeSet authorizedScope,
         CancellationToken cancellationToken = default);
 }
 
 ================================================================================
 FILE: src\Modules\Organization\Organization.Application\Abstractions\IOrganizationRepository.cs
-SIZE: 1.25 KB
+SIZE: 1.48 KB
 ================================================================================
 using MachineryManager.SharedKernel;
 using MachineryManager.SharedKernel.Abstractions;
@@ -9357,23 +9470,26 @@ public interface IOrganizationRepository
     : IRepository<global::Organization.Domain.Organization, OrganizationId>
 {
     /// <summary>
-    /// Performs a paginated search over organizations with an optional text filter.
+    /// Performs a paginated search over organizations with an optional text filter,
+    /// restricted to the given authorized scope (Phase 3 — Scope-based Filtering).
     /// </summary>
     /// <param name="searchTerm">Optional text to filter by organization name.</param>
     /// <param name="page">The one-based page number.</param>
     /// <param name="pageSize">The number of items per page.</param>
+    /// <param name="authorizedScope">The scopes the requesting user is authorized to see.</param>
     /// <param name="cancellationToken">Token to cancel the asynchronous operation.</param>
     /// <returns>A response containing the matching items and pagination metadata.</returns>
     Task<Features.Organizations.Queries.SearchOrganizations.SearchOrganizationsResponse> SearchAsync(
         string? searchTerm,
         int page,
         int pageSize,
+        AuthorizedScopeSet authorizedScope,
         CancellationToken cancellationToken = default);
 }
 
 ================================================================================
 FILE: src\Modules\Organization\Organization.Application\Abstractions\IProjectRepository.cs
-SIZE: 0.58 KB
+SIZE: 0.73 KB
 ================================================================================
 using MachineryManager.SharedKernel.Abstractions;
 using Organization.Domain;
@@ -9383,11 +9499,15 @@ namespace MachineryManager.Organization.Application.Abstractions;
 /// <summary>Repository contract for the <see cref="Project"/> aggregate.</summary>
 public interface IProjectRepository : IRepository<Project, ProjectId>
 {
-    /// <summary>Performs a paginated search over projects.</summary>
+    /// <summary>
+    /// Performs a paginated search over projects, restricted to the given
+    /// authorized scope (Phase 3 — Scope-based Filtering).
+    /// </summary>
     Task<Features.Projects.Queries.SearchProjects.SearchProjectsResponse> SearchAsync(
         string? searchTerm,
         int page,
         int pageSize,
+        AuthorizedScopeSet authorizedScope,
         CancellationToken cancellationToken = default);
 }
 
@@ -9581,12 +9701,13 @@ public sealed record RegisterHoldingCommand(string Name)
 
 ================================================================================
 FILE: src\Modules\Organization\Organization.Application\Features\Holdings\Commands\RegisterHolding\RegisterHoldingCommandHandler.cs
-SIZE: 2.23 KB
+SIZE: 3.52 KB
 ================================================================================
 using MachineryManager.Organization.Application.Abstractions;
 using MachineryManager.SharedKernel;
 using MachineryManager.SharedKernel.Abstractions;
 using MediatR;
+using Organization.Domain;
 
 namespace MachineryManager.Organization.Application.Features.Holdings.Commands.RegisterHolding;
 
@@ -9597,9 +9718,13 @@ namespace MachineryManager.Organization.Application.Features.Holdings.Commands.R
 public sealed class RegisterHoldingCommandHandler
     : IRequestHandler<RegisterHoldingCommand, Result<Guid>>
 {
+    private const string RequiredPermission = "Holding.Manage";
+
     private readonly IHoldingRepository _holdingRepository;
     private readonly IUnitOfWork _unitOfWork;
     private readonly IDateTimeProvider _dateTimeProvider;
+    private readonly ICurrentUserService _currentUserService;
+    private readonly IPermissionEvaluator _permissionEvaluator;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="RegisterHoldingCommandHandler"/> class.
@@ -9607,14 +9732,20 @@ public sealed class RegisterHoldingCommandHandler
     /// <param name="holdingRepository">The holding repository.</param>
     /// <param name="unitOfWork">The unit of work for atomic persistence.</param>
     /// <param name="dateTimeProvider">Provider for deterministic UTC timestamps.</param>
+    /// <param name="currentUserService">Provides the authenticated user context.</param>
+    /// <param name="permissionEvaluator">Evaluates the current user's permissions at request time.</param>
     public RegisterHoldingCommandHandler(
         IHoldingRepository holdingRepository,
         IUnitOfWork unitOfWork,
-        IDateTimeProvider dateTimeProvider)
+        IDateTimeProvider dateTimeProvider,
+        ICurrentUserService currentUserService,
+        IPermissionEvaluator permissionEvaluator)
     {
         _holdingRepository = holdingRepository;
         _unitOfWork = unitOfWork;
         _dateTimeProvider = dateTimeProvider;
+        _currentUserService = currentUserService;
+        _permissionEvaluator = permissionEvaluator;
     }
 
     /// <summary>
@@ -9627,6 +9758,25 @@ public sealed class RegisterHoldingCommandHandler
         RegisterHoldingCommand request,
         CancellationToken cancellationToken)
     {
+        if (_currentUserService.UserId is not { } userId)
+        {
+            return Result.Failure<Guid>(HoldingErrors.NotAuthorized());
+        }
+
+        // Registering a new Holding is a platform-level action (it has
+        // no HoldingId of its own yet) — checked against
+        // ResourceScope.PlatformWide, mirroring RegisterOrganization.
+        var isAuthorized = await _permissionEvaluator.HasPermissionAsync(
+            userId,
+            RequiredPermission,
+            ResourceScope.PlatformWide,
+            cancellationToken);
+
+        if (!isAuthorized)
+        {
+            return Result.Failure<Guid>(HoldingErrors.NotAuthorized());
+        }
+
         var result = global::Organization.Domain.Holding.Register(request.Name, _dateTimeProvider);
 
         if (result.IsFailure)
@@ -9816,34 +9966,48 @@ public sealed record SearchHoldingsResponse(
 
 ================================================================================
 FILE: src\Modules\Organization\Organization.Application\Features\Holdings\Queries\SearchHoldings\SearchHoldingsQueryHandler.cs
-SIZE: 1.59 KB
+SIZE: 2.76 KB
 ================================================================================
 using MachineryManager.Organization.Application.Abstractions;
 using MachineryManager.SharedKernel;
+using MachineryManager.SharedKernel.Abstractions;
 using MediatR;
+using Organization.Domain;
 
 namespace MachineryManager.Organization.Application.Features.Holdings.Queries.SearchHoldings;
 
 /// <summary>
-/// Handles <see cref="SearchHoldingsQuery"/> by delegating to the repository
-/// search projection.
+/// Handles <see cref="SearchHoldingsQuery"/> by resolving the current
+/// user's authorized scope and delegating to the repository search
+/// projection, restricted to that scope (Phase 3 — Scope-based Filtering).
 /// </summary>
 public sealed class SearchHoldingsQueryHandler
     : IRequestHandler<SearchHoldingsQuery, Result<SearchHoldingsResponse>>
 {
+    private const string RequiredPermission = "Holding.View";
+
     private readonly IHoldingRepository _holdingRepository;
+    private readonly ICurrentUserService _currentUserService;
+    private readonly IPermissionEvaluator _permissionEvaluator;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="SearchHoldingsQueryHandler"/> class.
     /// </summary>
     /// <param name="holdingRepository">The holding repository.</param>
-    public SearchHoldingsQueryHandler(IHoldingRepository holdingRepository)
+    /// <param name="currentUserService">Provides the authenticated user context.</param>
+    /// <param name="permissionEvaluator">Evaluates the current user's authorized scopes at request time.</param>
+    public SearchHoldingsQueryHandler(
+        IHoldingRepository holdingRepository,
+        ICurrentUserService currentUserService,
+        IPermissionEvaluator permissionEvaluator)
     {
         _holdingRepository = holdingRepository;
+        _currentUserService = currentUserService;
+        _permissionEvaluator = permissionEvaluator;
     }
 
     /// <summary>
-    /// Executes the search query and returns the paginated result.
+    /// Executes the search query, restricted to the current user's authorized scope.
     /// </summary>
     /// <param name="request">The search query parameters.</param>
     /// <param name="cancellationToken">Token to cancel the asynchronous operation.</param>
@@ -9852,10 +10016,21 @@ public sealed class SearchHoldingsQueryHandler
         SearchHoldingsQuery request,
         CancellationToken cancellationToken)
     {
+        if (_currentUserService.UserId is not { } userId)
+        {
+            return Result.Failure<SearchHoldingsResponse>(HoldingErrors.NotAuthorized());
+        }
+
+        var authorizedScope = await _permissionEvaluator.GetAuthorizedScopesAsync(
+            userId,
+            RequiredPermission,
+            cancellationToken);
+
         var response = await _holdingRepository.SearchAsync(
             request.SearchTerm,
             request.Page,
             request.PageSize,
+            authorizedScope,
             cancellationToken);
 
         return Result.Success(response);
@@ -9904,7 +10079,7 @@ public sealed record AssignOrganizationToHoldingCommand(Guid OrganizationId, Gui
 
 ================================================================================
 FILE: src\Modules\Organization\Organization.Application\Features\Organizations\Commands\AssignOrganizationToHolding\AssignOrganizationToHoldingCommandHandler.cs
-SIZE: 2.82 KB
+SIZE: 4.27 KB
 ================================================================================
 using MachineryManager.Organization.Application.Abstractions;
 using MachineryManager.SharedKernel;
@@ -9922,9 +10097,13 @@ namespace MachineryManager.Organization.Application.Features.Organizations.Comma
 public sealed class AssignOrganizationToHoldingCommandHandler
     : IRequestHandler<AssignOrganizationToHoldingCommand, Result>
 {
+    private const string RequiredPermission = "Organization.Manage";
+
     private readonly IOrganizationRepository _organizationRepository;
     private readonly IUnitOfWork _unitOfWork;
     private readonly IDateTimeProvider _dateTimeProvider;
+    private readonly ICurrentUserService _currentUserService;
+    private readonly IPermissionEvaluator _permissionEvaluator;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="AssignOrganizationToHoldingCommandHandler"/> class.
@@ -9932,14 +10111,20 @@ public sealed class AssignOrganizationToHoldingCommandHandler
     /// <param name="organizationRepository">The organization repository.</param>
     /// <param name="unitOfWork">The unit of work for atomic persistence.</param>
     /// <param name="dateTimeProvider">Provider for deterministic UTC timestamps.</param>
+    /// <param name="currentUserService">Provides the authenticated user context.</param>
+    /// <param name="permissionEvaluator">Evaluates the current user's permissions at request time.</param>
     public AssignOrganizationToHoldingCommandHandler(
         IOrganizationRepository organizationRepository,
         IUnitOfWork unitOfWork,
-        IDateTimeProvider dateTimeProvider)
+        IDateTimeProvider dateTimeProvider,
+        ICurrentUserService currentUserService,
+        IPermissionEvaluator permissionEvaluator)
     {
         _organizationRepository = organizationRepository;
         _unitOfWork = unitOfWork;
         _dateTimeProvider = dateTimeProvider;
+        _currentUserService = currentUserService;
+        _permissionEvaluator = permissionEvaluator;
     }
 
     /// <summary>
@@ -9961,6 +10146,31 @@ public sealed class AssignOrganizationToHoldingCommandHandler
                 Error.NotFound(
                     "Organization.NotFound",
                     $"Organization with id {request.OrganizationId} was not found."));
+        }
+
+        if (_currentUserService.UserId is not { } userId)
+        {
+            return Result.Failure(OrganizationErrors.NotAuthorized());
+        }
+
+        // Full scope chain resolved from the already-loaded Organization
+        // (its CURRENT Holding, before this reassignment) — per
+        // ResourceScope's contract that the calling module resolves the
+        // chain from its own local data.
+        var resourceScope = new ResourceScope(
+            organization.HoldingId?.Value,
+            organization.Id.Value,
+            null);
+
+        var isAuthorized = await _permissionEvaluator.HasPermissionAsync(
+            userId,
+            RequiredPermission,
+            resourceScope,
+            cancellationToken);
+
+        if (!isAuthorized)
+        {
+            return Result.Failure(OrganizationErrors.NotAuthorized());
         }
 
         var holdingId = HoldingId.From(request.HoldingId);
@@ -10003,10 +10213,11 @@ public sealed class AssignOrganizationToHoldingCommandValidator : AbstractValida
 
 ================================================================================
 FILE: src\Modules\Organization\Organization.Application\Features\Organizations\Commands\RegisterOrganization\RegisterOrganizationCommand.cs
-SIZE: 0.42 KB
+SIZE: 0.46 KB
 ================================================================================
 using MachineryManager.SharedKernel;
 using MediatR;
+using Organization.Domain;
 
 namespace MachineryManager.Organization.Application.Features.Organizations.Commands.RegisterOrganization;
 
@@ -10015,16 +10226,17 @@ namespace MachineryManager.Organization.Application.Features.Organizations.Comma
 /// </summary>
 /// <param name="Name">The display name of the organization to create.</param>
 public sealed record RegisterOrganizationCommand(string Name)
-    : IRequest<Result<Guid>>;
+    : IRequest<Result<OrganizationId>>;
 
 ================================================================================
 FILE: src\Modules\Organization\Organization.Application\Features\Organizations\Commands\RegisterOrganization\RegisterOrganizationCommandHandler.cs
-SIZE: 2.62 KB
+SIZE: 2.82 KB
 ================================================================================
 using MachineryManager.SharedKernel;
 using MachineryManager.SharedKernel.Abstractions;
 using MediatR;
 using Organization.Domain;
+using MachineryManager.Organization.Application.Abstractions;
 
 namespace MachineryManager.Organization.Application.Features.Organizations.Commands.RegisterOrganization;
 
@@ -10056,13 +10268,19 @@ public sealed class RegisterOrganizationCommandHandler
     }
 
     /// <inheritdoc />
+        /// <inheritdoc />
     public async Task<Result<OrganizationId>> Handle(RegisterOrganizationCommand request, CancellationToken cancellationToken)
     {
+        if (_currentUserService.UserId is not { } userId)
+        {
+            return Result.Failure<OrganizationId>(OrganizationErrors.NotAuthorized());
+        }
+
         // Registering a new Organization is a platform/Holding-level
         // action (it has no OrganizationId of its own yet) — checked
         // against ResourceScope.PlatformWide (chat, 2026-08-22).
         var isAuthorized = await _permissionEvaluator.HasPermissionAsync(
-            _currentUserService.UserId,
+            userId,
             RequiredPermission,
             ResourceScope.PlatformWide,
             cancellationToken);
@@ -10081,7 +10299,7 @@ public sealed class RegisterOrganizationCommandHandler
 
         var organization = organizationResult.Value;
 
-        await _repository.AddAsync(organization, cancellationToken);
+        _repository.Add(organization);
         await _unitOfWork.SaveChangesAsync(cancellationToken);
 
         return organization.Id;
@@ -10278,35 +10496,48 @@ public sealed record SearchOrganizationsResponse(
 
 ================================================================================
 FILE: src\Modules\Organization\Organization.Application\Features\Organizations\Queries\SearchOrganizations\SearchOrganizationsQueryHandler.cs
-SIZE: 1.69 KB
+SIZE: 2.87 KB
 ================================================================================
 using MachineryManager.Organization.Application.Abstractions;
 using MachineryManager.SharedKernel;
+using MachineryManager.SharedKernel.Abstractions;
 using MediatR;
+using Organization.Domain;
 
 namespace MachineryManager.Organization.Application.Features.Organizations.Queries.SearchOrganizations;
 
 /// <summary>
-/// Handles <see cref="SearchOrganizationsQuery"/> by delegating to the repository
-/// search projection.
+/// Handles <see cref="SearchOrganizationsQuery"/> by resolving the current
+/// user's authorized scope and delegating to the repository search
+/// projection, restricted to that scope (Phase 3 — Scope-based Filtering).
 /// </summary>
 public sealed class SearchOrganizationsQueryHandler
     : IRequestHandler<SearchOrganizationsQuery, Result<SearchOrganizationsResponse>>
 {
+    private const string RequiredPermission = "Organization.View";
+
     private readonly IOrganizationRepository _organizationRepository;
+    private readonly ICurrentUserService _currentUserService;
+    private readonly IPermissionEvaluator _permissionEvaluator;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="SearchOrganizationsQueryHandler"/> class.
     /// </summary>
     /// <param name="organizationRepository">The organization repository.</param>
+    /// <param name="currentUserService">Provides the authenticated user context.</param>
+    /// <param name="permissionEvaluator">Evaluates the current user's authorized scopes at request time.</param>
     public SearchOrganizationsQueryHandler(
-        IOrganizationRepository organizationRepository)
+        IOrganizationRepository organizationRepository,
+        ICurrentUserService currentUserService,
+        IPermissionEvaluator permissionEvaluator)
     {
         _organizationRepository = organizationRepository;
+        _currentUserService = currentUserService;
+        _permissionEvaluator = permissionEvaluator;
     }
 
     /// <summary>
-    /// Executes the search query and returns the paginated result.
+    /// Executes the search query, restricted to the current user's authorized scope.
     /// </summary>
     /// <param name="request">The search query parameters.</param>
     /// <param name="cancellationToken">Token to cancel the asynchronous operation.</param>
@@ -10315,10 +10546,21 @@ public sealed class SearchOrganizationsQueryHandler
         SearchOrganizationsQuery request,
         CancellationToken cancellationToken)
     {
+        if (_currentUserService.UserId is not { } userId)
+        {
+            return Result.Failure<SearchOrganizationsResponse>(OrganizationErrors.NotAuthorized());
+        }
+
+        var authorizedScope = await _permissionEvaluator.GetAuthorizedScopesAsync(
+            userId,
+            RequiredPermission,
+            cancellationToken);
+
         var response = await _organizationRepository.SearchAsync(
             request.SearchTerm,
             request.Page,
             request.PageSize,
+            authorizedScope,
             cancellationToken);
 
         return Result.Success(response);
@@ -10367,7 +10609,7 @@ public sealed record RegisterProjectCommand(Guid OrganizationId, string Name)
 
 ================================================================================
 FILE: src\Modules\Organization\Organization.Application\Features\Projects\Commands\RegisterProject\RegisterProjectCommandHandler.cs
-SIZE: 2.32 KB
+SIZE: 4.43 KB
 ================================================================================
 using MachineryManager.Organization.Application.Abstractions;
 using MachineryManager.SharedKernel;
@@ -10384,24 +10626,38 @@ namespace MachineryManager.Organization.Application.Features.Projects.Commands.R
 public sealed class RegisterProjectCommandHandler
     : IRequestHandler<RegisterProjectCommand, Result<Guid>>
 {
+    private const string RequiredPermission = "Project.Manage";
+
     private readonly IProjectRepository _projectRepository;
+    private readonly IOrganizationRepository _organizationRepository;
     private readonly IUnitOfWork _unitOfWork;
     private readonly IDateTimeProvider _dateTimeProvider;
+    private readonly ICurrentUserService _currentUserService;
+    private readonly IPermissionEvaluator _permissionEvaluator;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="RegisterProjectCommandHandler"/> class.
     /// </summary>
     /// <param name="projectRepository">The project repository.</param>
+    /// <param name="organizationRepository">The organization repository, used to verify the owning Organization exists and to resolve its scope chain.</param>
     /// <param name="unitOfWork">The unit of work for atomic persistence.</param>
     /// <param name="dateTimeProvider">Provider for deterministic UTC timestamps.</param>
+    /// <param name="currentUserService">Provides the authenticated user context.</param>
+    /// <param name="permissionEvaluator">Evaluates the current user's permissions at request time.</param>
     public RegisterProjectCommandHandler(
         IProjectRepository projectRepository,
+        IOrganizationRepository organizationRepository,
         IUnitOfWork unitOfWork,
-        IDateTimeProvider dateTimeProvider)
+        IDateTimeProvider dateTimeProvider,
+        ICurrentUserService currentUserService,
+        IPermissionEvaluator permissionEvaluator)
     {
         _projectRepository = projectRepository;
+        _organizationRepository = organizationRepository;
         _unitOfWork = unitOfWork;
         _dateTimeProvider = dateTimeProvider;
+        _currentUserService = currentUserService;
+        _permissionEvaluator = permissionEvaluator;
     }
 
     /// <summary>
@@ -10415,6 +10671,40 @@ public sealed class RegisterProjectCommandHandler
         CancellationToken cancellationToken)
     {
         var organizationId = OrganizationId.From(request.OrganizationId);
+        var organization = await _organizationRepository.GetByIdAsync(organizationId, cancellationToken);
+
+        if (organization is null)
+        {
+            return Result.Failure<Guid>(
+                Error.NotFound(
+                    "Organization.NotFound",
+                    $"Organization with id {request.OrganizationId} was not found."));
+        }
+
+        if (_currentUserService.UserId is not { } userId)
+        {
+            return Result.Failure<Guid>(ProjectErrors.NotAuthorized());
+        }
+
+        // Full scope chain resolved from the owning Organization, so a
+        // Holding Administrator's scoped assignment correctly covers
+        // Projects created under any Organization of that Holding.
+        var resourceScope = new ResourceScope(
+            organization.HoldingId?.Value,
+            organization.Id.Value,
+            null);
+
+        var isAuthorized = await _permissionEvaluator.HasPermissionAsync(
+            userId,
+            RequiredPermission,
+            resourceScope,
+            cancellationToken);
+
+        if (!isAuthorized)
+        {
+            return Result.Failure<Guid>(ProjectErrors.NotAuthorized());
+        }
+
         var result = Project.Register(organizationId, request.Name, _dateTimeProvider);
 
         if (result.IsFailure)
@@ -10957,7 +11247,7 @@ public sealed class Holding : AggregateRoot<HoldingId>
 
 ================================================================================
 FILE: src\Modules\Organization\Organization.Domain\HoldingErrors.cs
-SIZE: 0.67 KB
+SIZE: 0.93 KB
 ================================================================================
 using MachineryManager.SharedKernel;
 
@@ -10975,6 +11265,11 @@ public static class HoldingErrors
     public static Error NameTooLong(int maxLength) => Error.Validation(
         "Holding.NameTooLong",
         $"Holding name shall not exceed {maxLength} characters.");
+
+    /// <summary>Creates an error indicating the current user lacks permission for this action.</summary>
+    public static Error NotAuthorized() => Error.Failure(
+        "Holding.NotAuthorized",
+        "You do not have permission to perform this action.");
 }
 
 ================================================================================
@@ -11272,7 +11567,7 @@ public sealed class Project : AggregateRoot<ProjectId>
 
 ================================================================================
 FILE: src\Modules\Organization\Organization.Domain\ProjectErrors.cs
-SIZE: 0.93 KB
+SIZE: 1.19 KB
 ================================================================================
 using MachineryManager.SharedKernel;
 
@@ -11295,6 +11590,11 @@ public static class ProjectErrors
     public static Error NameTooLong(int maxLength) => Error.Validation(
         "Project.NameTooLong",
         $"Project name shall not exceed {maxLength} characters.");
+
+    /// <summary>Creates an error indicating the current user lacks permission for this action.</summary>
+    public static Error NotAuthorized() => Error.Failure(
+        "Project.NotAuthorized",
+        "You do not have permission to perform this action.");
 }
 
 ================================================================================
@@ -11529,13 +11829,14 @@ public sealed class ProjectConfiguration : IEntityTypeConfiguration<Project>
 
 ================================================================================
 FILE: src\Modules\Organization\Organization.Infrastructure\Persistence\HoldingRepository.cs
-SIZE: 2.36 KB
+SIZE: 2.93 KB
 ================================================================================
 using MachineryManager.Organization.Application.Abstractions;
 using MachineryManager.Organization.Application.Features.Holdings.Dtos;
 using MachineryManager.Organization.Application.Features.Holdings.Queries.SearchHoldings;
 using Microsoft.EntityFrameworkCore;
 using Organization.Domain;
+using MachineryManager.SharedKernel.Abstractions;
 
 namespace MachineryManager.Organization.Infrastructure.Persistence;
 
@@ -11565,11 +11866,12 @@ public sealed class HoldingRepository : IHoldingRepository
     /// <inheritdoc />
     public void Update(Holding aggregate) => _dbContext.Holdings.Update(aggregate);
 
-    /// <inheritdoc />
+      /// <inheritdoc />
     public async Task<SearchHoldingsResponse> SearchAsync(
         string? searchTerm,
         int page,
         int pageSize,
+        AuthorizedScopeSet authorizedScope,
         CancellationToken cancellationToken = default)
     {
         var query = _dbContext.Holdings.AsNoTracking().AsQueryable();
@@ -11577,6 +11879,18 @@ public sealed class HoldingRepository : IHoldingRepository
         if (!string.IsNullOrWhiteSpace(searchTerm))
         {
             query = query.Where(h => h.Name.Contains(searchTerm));
+        }
+
+        if (!authorizedScope.IsUnrestricted)
+        {
+            // Holding is the top of the tenant hierarchy (besides
+            // Platform, which is Unrestricted) — a user sees a Holding
+            // only if granted directly at Holding level (chat, 2026-08-23).
+            var holdingIdSet = authorizedScope.HoldingIds
+                .Select(HoldingId.From)
+                .ToHashSet();
+
+            query = query.Where(h => holdingIdSet.Contains(h.Id));
         }
 
         var totalItems = await query.CountAsync(cancellationToken);
@@ -11969,13 +12283,14 @@ public sealed class OrganizationDbContext : DbContext, IUnitOfWork
 
 ================================================================================
 FILE: src\Modules\Organization\Organization.Infrastructure\Persistence\OrganizationRepository.cs
-SIZE: 2.77 KB
+SIZE: 3.76 KB
 ================================================================================
 using MachineryManager.Organization.Application.Abstractions;
 using MachineryManager.Organization.Application.Features.Organizations.Dtos;
 using MachineryManager.Organization.Application.Features.Organizations.Queries.SearchOrganizations;
 using Microsoft.EntityFrameworkCore;
 using Organization.Domain;
+using MachineryManager.SharedKernel.Abstractions;
 
 namespace MachineryManager.Organization.Infrastructure.Persistence;
 
@@ -12011,10 +12326,12 @@ public sealed class OrganizationRepository : IOrganizationRepository
         _dbContext.Organizations.Update(aggregate);
 
     /// <inheritdoc />
+
     public async Task<SearchOrganizationsResponse> SearchAsync(
         string? searchTerm,
         int page,
         int pageSize,
+        AuthorizedScopeSet authorizedScope,
         CancellationToken cancellationToken = default)
     {
         var query = _dbContext.Organizations.AsNoTracking().AsQueryable();
@@ -12022,6 +12339,25 @@ public sealed class OrganizationRepository : IOrganizationRepository
         if (!string.IsNullOrWhiteSpace(searchTerm))
         {
             query = query.Where(organization => organization.Name.Contains(searchTerm));
+        }
+
+        if (!authorizedScope.IsUnrestricted)
+        {
+            // A user sees an Organization if they were granted access to
+            // it directly, or to the Holding it belongs to (top-down
+            // visibility only — chat, 2026-08-23). Comparing via the
+            // strongly-typed Ids, same as elsewhere in this repository,
+            // so EF Core applies the same value converters as the column.
+            var organizationIdSet = authorizedScope.OrganizationIds
+                .Select(OrganizationId.From)
+                .ToHashSet();
+            var holdingIdSet = authorizedScope.HoldingIds
+                .Select(HoldingId.From)
+                .ToHashSet();
+
+            query = query.Where(organization =>
+                organizationIdSet.Contains(organization.Id)
+                || (organization.HoldingId != null && holdingIdSet.Contains(organization.HoldingId)));
         }
 
         var totalItems = await query.CountAsync(cancellationToken);
@@ -12051,13 +12387,14 @@ public sealed class OrganizationRepository : IOrganizationRepository
 
 ================================================================================
 FILE: src\Modules\Organization\Organization.Infrastructure\Persistence\ProjectRepository.cs
-SIZE: 2.38 KB
+SIZE: 3.82 KB
 ================================================================================
 using MachineryManager.Organization.Application.Abstractions;
 using MachineryManager.Organization.Application.Features.Projects.Dtos;
 using MachineryManager.Organization.Application.Features.Projects.Queries.SearchProjects;
 using Microsoft.EntityFrameworkCore;
 using Organization.Domain;
+using MachineryManager.SharedKernel.Abstractions;
 
 namespace MachineryManager.Organization.Infrastructure.Persistence;
 
@@ -12092,22 +12429,50 @@ public sealed class ProjectRepository : IProjectRepository
         string? searchTerm,
         int page,
         int pageSize,
+        AuthorizedScopeSet authorizedScope,
         CancellationToken cancellationToken = default)
     {
-        var query = _dbContext.Projects.AsNoTracking().AsQueryable();
+        // Read-only projection Join with Organization, purely to resolve
+        // each Project's parent Holding for scope filtering — Project
+        // itself stores no HoldingId (deliberate aggregate-boundary
+        // decision, see ProjectConfiguration remarks). This is a query
+        // concern, not a permanent cross-aggregate navigation.
+        var query =
+            from project in _dbContext.Projects.AsNoTracking()
+            join organization in _dbContext.Organizations.AsNoTracking()
+                on project.OrganizationId equals organization.Id
+            select new { Project = project, Organization = organization };
 
         if (!string.IsNullOrWhiteSpace(searchTerm))
         {
-            query = query.Where(p => p.Name.Contains(searchTerm));
+            query = query.Where(x => x.Project.Name.Contains(searchTerm));
+        }
+
+        if (!authorizedScope.IsUnrestricted)
+        {
+            var projectIdSet = authorizedScope.ProjectIds
+                .Select(ProjectId.From)
+                .ToHashSet();
+            var organizationIdSet = authorizedScope.OrganizationIds
+                .Select(OrganizationId.From)
+                .ToHashSet();
+            var holdingIdSet = authorizedScope.HoldingIds
+                .Select(HoldingId.From)
+                .ToHashSet();
+
+            query = query.Where(x =>
+                projectIdSet.Contains(x.Project.Id)
+                || organizationIdSet.Contains(x.Project.OrganizationId)
+                || (x.Organization.HoldingId != null && holdingIdSet.Contains(x.Organization.HoldingId)));
         }
 
         var totalItems = await query.CountAsync(cancellationToken);
 
         var items = await query
-            .OrderBy(p => p.Name)
+            .OrderBy(x => x.Project.Name)
             .Skip((page - 1) * pageSize)
             .Take(pageSize)
-            .Select(p => new ProjectDto(p.Id.Value, p.Name, p.OrganizationId.Value))
+            .Select(x => new ProjectDto(x.Project.Id.Value, x.Project.Name, x.Project.OrganizationId.Value))
             .ToListAsync(cancellationToken);
 
         var totalPages = totalItems == 0 ? 0 : (int)Math.Ceiling(totalItems / (double)pageSize);
@@ -12569,12 +12934,12 @@ SIZE: 0.35 KB
 # SECTION 3: SNAPSHOT SUMMARY
 ================================================================================
 
-Generation Time     : 00:00:02.4366788
-Total Files Scanned : 222
-Files Included      : 222
+Generation Time     : 00:00:01.2292780
+Total Files Scanned : 223
+Files Included      : 223
 Files Skipped       : 0
-Total Source Size   : 0.42 MB
-Snapshot File Size  : 0.49 MB
+Total Source Size   : 0.43 MB
+Snapshot File Size  : 0.51 MB
 Output Path         : C:\Users\i\source\repos\MachineryManagerEnterprise\MME_Codebase_Snapshot.txt
 
 Excluded Directories: .git, .github, .vs, .vscode, .idea, .azure, .devcontainer, bin, obj, packages, publish, out, release, releases, debug, x64, x86, arm64, artifacts, .artifacts, node_modules, dist, build, bower_components, jspm_packages, docs-english, docs-farsi, docs, tools, test-results, coverage, .coverage, TestResults, lib, .angular, .next, .nuxt, .svelte-kit, .cache, .temp, tmp
