@@ -70,6 +70,65 @@
                 </MudButton>
             </MudForm>
         </MudPaper>
+
+        <MudText Typo="Typo.h5" Class="mt-8 mb-4">تخصیص‌های فعلی این کاربر</MudText>
+
+        @if (assignmentsErrorMessage is not null)
+        {
+            <MudAlert Severity="Severity.Error" Class="my-4">@assignmentsErrorMessage</MudAlert>
+        }
+
+        @if (isLoadingAssignments)
+        {
+            <MudProgressLinear Indeterminate="true" Class="my-4" />
+        }
+        else if (assignments.Count == 0)
+        {
+            <MudText Typo="Typo.body2" Class="mud-text-secondary">هیچ تخصیصی برای این کاربر ثبت نشده است.</MudText>
+        }
+        else
+        {
+            <MudTable Items="@assignments" Hover="true" Breakpoint="Breakpoint.Sm">
+                <HeaderContent>
+                    <MudTh>پروفایل</MudTh>
+                    <MudTh>سطح دسترسی</MudTh>
+                    <MudTh>وضعیت</MudTh>
+                    <MudTh>تاریخ تخصیص</MudTh>
+                    <MudTh>تاریخ لغو</MudTh>
+                    <MudTh>عملیات</MudTh>
+                </HeaderContent>
+                <RowTemplate>
+                    <MudTd DataLabel="پروفایل">@ResolveProfileName(context.ProfileId)</MudTd>
+                    <MudTd DataLabel="سطح دسترسی">@context.ScopeLevel</MudTd>
+                    <MudTd DataLabel="وضعیت">
+                        <MudChip T="string" Color="@(context.IsRevoked ? Color.Default : Color.Success)" Size="Size.Small">
+                            @(context.IsRevoked ? "لغو شده" : "فعال")
+                        </MudChip>
+                    </MudTd>
+                    <MudTd DataLabel="تاریخ تخصیص">@context.AssignedAt.ToLocalTime().ToString("yyyy/MM/dd HH:mm")</MudTd>
+                    <MudTd DataLabel="تاریخ لغو">
+                        @(context.RevokedAt is { } revokedAt ? revokedAt.ToLocalTime().ToString("yyyy/MM/dd HH:mm") : "—")
+                    </MudTd>
+                    <MudTd>
+                        @if (!context.IsRevoked)
+                        {
+                            <MudButton Variant="Variant.Text" Color="Color.Error"
+                                       Disabled="@(revokingAssignmentId == context.Id)"
+                                       OnClick="@(() => RevokeAsync(context.Id))">
+                                @if (revokingAssignmentId == context.Id)
+                                {
+                                    <MudProgressCircular Size="Size.Small" Indeterminate="true" />
+                                }
+                                else
+                                {
+                                    <span>لغو دسترسی</span>
+                                }
+                            </MudButton>
+                        }
+                    </MudTd>
+                </RowTemplate>
+            </MudTable>
+        }
     }
 
 </AdminOnly>
@@ -94,12 +153,19 @@
     private string? scopeOrganizationId;
     private string? scopeProjectId;
 
+    private List<AssignmentItem> assignments = new();
+    private bool isLoadingAssignments = true;
+    private string? assignmentsErrorMessage;
+    private Guid? revokingAssignmentId;
+
     /// <summary>
-    /// Initializes the component and loads the available profiles.
+    /// Initializes the component and loads the available profiles and
+    /// the user's current assignments.
     /// </summary>
     protected override async Task OnInitializedAsync()
     {
         await LoadProfilesAsync();
+        await LoadAssignmentsAsync();
     }
 
     /// <summary>
@@ -142,6 +208,43 @@ System.Text.Json.JsonSerializerOptions
         finally
         {
             isLoading = false;
+        }
+    }
+
+    /// <summary>
+    /// Loads the user's current profile assignments from the API
+    /// (Phase 3 — BR-017 Access revocation on reassignment).
+    /// </summary>
+    private async Task LoadAssignmentsAsync()
+    {
+        assignmentsErrorMessage = null;
+        isLoadingAssignments = true;
+
+        try
+        {
+            var client = HttpClientFactory.CreateClient("InternalApi");
+            var response = await client.GetAsync($"/api/v1/user-profile-assignments?userId={UserId}");
+            var content = await response.Content.ReadAsStringAsync();
+
+            if (!response.IsSuccessStatusCode)
+            {
+                assignmentsErrorMessage = $"خطا در دریافت تخصیص‌ها: {content}";
+                return;
+            }
+
+            var result = System.Text.Json.JsonSerializer.Deserialize<List<AssignmentItem>>(content, new
+System.Text.Json.JsonSerializerOptions
+            { PropertyNameCaseInsensitive = true });
+
+            assignments = result ?? new List<AssignmentItem>();
+        }
+        catch (Exception ex)
+        {
+            assignmentsErrorMessage = $"خطا: {ex.Message}";
+        }
+        finally
+        {
+            isLoadingAssignments = false;
         }
     }
 
@@ -192,7 +295,7 @@ System.Text.Json.JsonSerializerOptions
 
             if (response.IsSuccessStatusCode)
             {
-                Navigation.NavigateTo("/admin/users");
+                await LoadAssignmentsAsync();
                 return;
             }
 
@@ -208,6 +311,50 @@ System.Text.Json.JsonSerializerOptions
             isSubmitting = false;
         }
     }
+
+    /// <summary>
+    /// Revokes an existing assignment (BR-017, Access revocation on reassignment).
+    /// </summary>
+    /// <param name="assignmentId">The identifier of the assignment to revoke.</param>
+    private async Task RevokeAsync(Guid assignmentId)
+    {
+        assignmentsErrorMessage = null;
+        revokingAssignmentId = assignmentId;
+
+        try
+        {
+            var client = HttpClientFactory.CreateClient("InternalApi");
+            var response = await client.PostAsync(
+                $"/api/v1/user-profile-assignments/{assignmentId}/revoke", null);
+
+            if (response.IsSuccessStatusCode)
+            {
+                await LoadAssignmentsAsync();
+            }
+            else
+            {
+                assignmentsErrorMessage =
+                    $"خطا در لغو دسترسی: {await response.Content.ReadAsStringAsync()}";
+            }
+        }
+        catch (Exception ex)
+        {
+            assignmentsErrorMessage = $"خطا: {ex.Message}";
+        }
+        finally
+        {
+            revokingAssignmentId = null;
+        }
+    }
+
+    /// <summary>
+    /// Resolves a profile's display name from its identifier, using the
+    /// already-loaded profile list.
+    /// </summary>
+    /// <param name="profileId">The profile identifier to resolve.</param>
+    /// <returns>The profile's name, or the raw identifier if not found.</returns>
+    private string ResolveProfileName(Guid profileId) =>
+        profiles.FirstOrDefault(p => p.Id == profileId)?.Name ?? profileId.ToString();
 
     /// <summary>
     /// Parses an optional authorization scope identifier.
@@ -245,5 +392,22 @@ System.Text.Json.JsonSerializerOptions
         /// Gets or sets the display name of the profile.
         /// </summary>
         public string Name { get; set; } = string.Empty;
+    }
+
+    /// <summary>
+    /// Represents a single UserProfileAssignment row in the user interface.
+    /// </summary>
+    private sealed class AssignmentItem
+    {
+        public Guid Id { get; set; }
+        public Guid UserId { get; set; }
+        public Guid ProfileId { get; set; }
+        public string ScopeLevel { get; set; } = string.Empty;
+        public Guid? ScopeHoldingId { get; set; }
+        public Guid? ScopeOrganizationId { get; set; }
+        public Guid? ScopeProjectId { get; set; }
+        public DateTimeOffset AssignedAt { get; set; }
+        public bool IsRevoked { get; set; }
+        public DateTimeOffset? RevokedAt { get; set; }
     }
 }
