@@ -63,6 +63,66 @@ public sealed class PermissionEvaluator : IPermissionEvaluator
         return false;
     }
 
+
+    /// <inheritdoc />
+    public async Task<AuthorizedScopeSet> GetAuthorizedScopesAsync(
+        Guid userId,
+        string permission,
+        CancellationToken cancellationToken = default)
+    {
+        var assignments = await _dbContext.Set<global::Administration.Domain.UserProfileAssignment>()
+            .Where(a => a.UserId == userId)
+            .Join(
+                _dbContext.Set<global::Administration.Domain.Profile>(),
+                assignment => assignment.ProfileId,
+                profile => profile.Id,
+                (assignment, profile) => new { assignment.Scope, profile.Permissions, profile.IsActive })
+            .Where(x => x.IsActive)
+            .ToListAsync(cancellationToken);
+
+        var holdingIds = new HashSet<Guid>();
+        var organizationIds = new HashSet<Guid>();
+        var projectIds = new HashSet<Guid>();
+
+        foreach (var assignment in assignments)
+        {
+            var hasPermission = assignment.Permissions.Contains(WildcardPermission)
+                || assignment.Permissions.Contains(permission);
+
+            if (!hasPermission)
+            {
+                continue;
+            }
+
+            switch (assignment.Scope.Level)
+            {
+                case global::Administration.Domain.AuthorizationScopeLevel.Platform:
+                    return AuthorizedScopeSet.Unrestricted;
+
+                case global::Administration.Domain.AuthorizationScopeLevel.Holding
+                    when assignment.Scope.HoldingId is { } holdingId:
+                    holdingIds.Add(holdingId);
+                    break;
+
+                case global::Administration.Domain.AuthorizationScopeLevel.Organization
+                    when assignment.Scope.OrganizationId is { } organizationId:
+                    organizationIds.Add(organizationId);
+                    break;
+
+                case global::Administration.Domain.AuthorizationScopeLevel.Project
+                    when assignment.Scope.ProjectId is { } projectId:
+                    projectIds.Add(projectId);
+                    break;
+            }
+        }
+
+        if (holdingIds.Count == 0 && organizationIds.Count == 0 && projectIds.Count == 0)
+        {
+            return AuthorizedScopeSet.None;
+        }
+
+        return new AuthorizedScopeSet(false, holdingIds, organizationIds, projectIds);
+    }
     private static bool Covers(global::Administration.Domain.AuthorizationScope assignmentScope, ResourceScope resource)
     {
         return assignmentScope.Level switch

@@ -20,4 +20,19 @@ public interface IPermissionEvaluator
         string permission,
         ResourceScope resourceScope,
         CancellationToken cancellationToken = default);
+
+
+    /// <summary>
+    /// Resolves the full set of scopes the user holds the given permission
+    /// over, for filtering list/search results (05-application, Section 5.8,
+    /// Phase 3 — Scope-based Filtering).
+    /// </summary>
+    /// <param name="userId">The user's identifier.</param>
+    /// <param name="permission">The permission string (e.g. "Organization.View").</param>
+    /// <param name="cancellationToken">Token to cancel the asynchronous operation.</param>
+    /// <returns>The set of scopes the user is authorized within for this permission.</returns>
+    Task<AuthorizedScopeSet> GetAuthorizedScopesAsync(
+        Guid userId,
+        string permission,
+        CancellationToken cancellationToken = default);
 }

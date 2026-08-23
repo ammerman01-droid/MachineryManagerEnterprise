@@ -3,6 +3,7 @@ using MachineryManager.Organization.Application.Features.Organizations.Dtos;
 using MachineryManager.Organization.Application.Features.Organizations.Queries.SearchOrganizations;
 using Microsoft.EntityFrameworkCore;
 using Organization.Domain;
+using MachineryManager.SharedKernel.Abstractions;
 
 namespace MachineryManager.Organization.Infrastructure.Persistence;
 
@@ -38,10 +39,12 @@ public sealed class OrganizationRepository : IOrganizationRepository
         _dbContext.Organizations.Update(aggregate);
 
     /// <inheritdoc />
+
     public async Task<SearchOrganizationsResponse> SearchAsync(
         string? searchTerm,
         int page,
         int pageSize,
+        AuthorizedScopeSet authorizedScope,
         CancellationToken cancellationToken = default)
     {
         var query = _dbContext.Organizations.AsNoTracking().AsQueryable();
@@ -49,6 +52,25 @@ public sealed class OrganizationRepository : IOrganizationRepository
         if (!string.IsNullOrWhiteSpace(searchTerm))
         {
             query = query.Where(organization => organization.Name.Contains(searchTerm));
+        }
+
+        if (!authorizedScope.IsUnrestricted)
+        {
+            // A user sees an Organization if they were granted access to
+            // it directly, or to the Holding it belongs to (top-down
+            // visibility only — chat, 2026-08-23). Comparing via the
+            // strongly-typed Ids, same as elsewhere in this repository,
+            // so EF Core applies the same value converters as the column.
+            var organizationIdSet = authorizedScope.OrganizationIds
+                .Select(OrganizationId.From)
+                .ToHashSet();
+            var holdingIdSet = authorizedScope.HoldingIds
+                .Select(HoldingId.From)
+                .ToHashSet();
+
+            query = query.Where(organization =>
+                organizationIdSet.Contains(organization.Id)
+                || (organization.HoldingId != null && holdingIdSet.Contains(organization.HoldingId)));
         }
 
         var totalItems = await query.CountAsync(cancellationToken);
