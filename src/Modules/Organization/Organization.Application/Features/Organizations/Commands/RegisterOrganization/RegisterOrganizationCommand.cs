@@ -1,5 +1,6 @@
 using MachineryManager.SharedKernel;
 using MediatR;
+using Organization.Domain;
 
 namespace MachineryManager.Organization.Application.Features.Organizations.Commands.RegisterOrganization;
 
@@ -8,4 +9,4 @@ namespace MachineryManager.Organization.Application.Features.Organizations.Comma
 /// </summary>
 /// <param name="Name">The display name of the organization to create.</param>
 public sealed record RegisterOrganizationCommand(string Name)
-    : IRequest<Result<Guid>>;
+    : IRequest<Result<OrganizationId>>;

@@ -22,4 +22,9 @@ public static class OrganizationErrors
     public static Error HoldingRequired() => Error.Validation(
         "Organization.HoldingRequired",
         "A valid Holding identifier is required.");
+
+    /// <summary>Creates an error indicating the current user lacks permission for this action.</summary>
+    public static Error NotAuthorized() => Error.Failure(
+        "Organization.NotAuthorized",
+        "You do not have permission to perform this action.");
 }

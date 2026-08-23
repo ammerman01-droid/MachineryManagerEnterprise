@@ -34,6 +34,7 @@ public static class DependencyInjection
         services.AddScoped<IUserProfileAssignmentRepository, UserProfileAssignmentRepository>();
         services.AddScoped<IAdministrationUnitOfWork>(serviceProvider =>
             serviceProvider.GetRequiredService<AdministrationDbContext>());
+        services.AddScoped<MachineryManager.SharedKernel.Abstractions.IPermissionEvaluator, PermissionEvaluator>();
 
         return services;
     }

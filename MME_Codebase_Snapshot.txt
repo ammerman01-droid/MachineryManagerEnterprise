@@ -1,7 +1,7 @@
 ﻿
 ================================================================================
   MACHINERYMANAGERENTERPRISE - CODEBASE SNAPSHOT
-  Generated: 2026-08-22 14:45:35
+  Generated: 2026-08-23 08:29:57
   Source: C:\Users\i\source\repos\MachineryManagerEnterprise
   Purpose: Complete source code reference for AI-assisted development
   Excludes: .md, .gitignore, this script, build artifacts, binaries, IDE,
@@ -30,9 +30,12 @@ MachineryManagerEnterprise
 |   |   |   |-- ICurrentUserService.cs
 |   |   |   |-- IDateTimeProvider.cs
 |   |   |   |-- IDomainEventDispatcher.cs
+|   |   |   |-- IPermissionEvaluator.cs
 |   |   |   |-- IRepository.cs
 |   |   |   |-- IUnitOfWork.cs
 |   |   |   |-- MachineryManager.SharedKernel.Abstractions.csproj
+|   |   |   |-- ResourceScope.cs
+|   |   |   |-- ScopeLevel.cs
 |   |   |   +-- SystemDateTimeProvider.cs
 |   |   |-- MachineryManager.SharedKernel.Contracts
 |   |   |   +-- MachineryManager.SharedKernel.Contracts.csproj
@@ -142,7 +145,8 @@ MachineryManagerEnterprise
 |   |   |   |   |   |-- ProfileRepository.cs
 |   |   |   |   |   +-- UserProfileAssignmentRepository.cs
 |   |   |   |   |-- Administration.Infrastructure.csproj
-|   |   |   |   +-- DependencyInjection.cs
+|   |   |   |   |-- DependencyInjection.cs
+|   |   |   |   +-- PermissionEvaluator.cs
 |   |   |   +-- Administration.Presentation
 |   |   |       |-- Components
 |   |   |       |   |-- Pages
@@ -152,6 +156,8 @@ MachineryManagerEnterprise
 |   |   |       |   |   |-- EditProfile.razor
 |   |   |       |   |   |-- ProfilesList.razor
 |   |   |       |   |   +-- UsersList.razor
+|   |   |       |   |-- Shared
+|   |   |       |   |   +-- AdminOnly.razor
 |   |   |       |   +-- _Imports.razor
 |   |   |       |-- Contracts
 |   |   |       |   |-- AssignUserToProfileRequest.cs
@@ -168,13 +174,15 @@ MachineryManagerEnterprise
 |   |   |   |-- Identity.Domain
 |   |   |   |   |-- ApplicationRole.cs
 |   |   |   |   |-- ApplicationUser.cs
+|   |   |   |   |-- ICurrentAccessTokenAccessor.cs
 |   |   |   |   |-- Identity.Domain.csproj
 |   |   |   |   |-- PasswordPolicy.cs
 |   |   |   |   |-- StandardRoles.cs
 |   |   |   |   +-- UsernamePolicy.cs
 |   |   |   |-- Identity.Infrastructure
 |   |   |   |   |-- Http
-|   |   |   |   |   +-- BearerTokenHandler.cs
+|   |   |   |   |   |-- BearerTokenHandler.cs
+|   |   |   |   |   +-- CurrentAccessTokenAccessor.cs
 |   |   |   |   |-- Options
 |   |   |   |   |   +-- OpenIddictClientOptions.cs
 |   |   |   |   |-- Persistence
@@ -629,6 +637,34 @@ public interface IDomainEventDispatcher
 }
 
 ================================================================================
+FILE: src\BuildingBlocks\MachineryManager.SharedKernel.Abstractions\IPermissionEvaluator.cs
+SIZE: 1.15 KB
+================================================================================
+namespace MachineryManager.SharedKernel.Abstractions;
+
+/// <summary>
+/// Evaluates, at request time, whether a User has a given Permission
+/// over a specific resource — per the SuperUser / partial-scope
+/// Administrator model (05-application, Section 5.8). Deliberately
+/// NOT cached or claims-based, so revocation and reassignment take
+/// effect immediately (BR-017).
+/// </summary>
+public interface IPermissionEvaluator
+{
+    /// <summary>Determines whether the given user holds the given permission over the given resource scope.</summary>
+    /// <param name="userId">The user's identifier.</param>
+    /// <param name="permission">The permission string (e.g. "Organization.Manage").</param>
+    /// <param name="resourceScope">The full scope chain of the resource being accessed.</param>
+    /// <param name="cancellationToken">Token to cancel the asynchronous operation.</param>
+    /// <returns><c>true</c> if the user is authorized; otherwise <c>false</c>.</returns>
+    Task<bool> HasPermissionAsync(
+        Guid userId,
+        string permission,
+        ResourceScope resourceScope,
+        CancellationToken cancellationToken = default);
+}
+
+================================================================================
 FILE: src\BuildingBlocks\MachineryManager.SharedKernel.Abstractions\IRepository.cs
 SIZE: 1.02 KB
 ================================================================================
@@ -690,6 +726,55 @@ SIZE: 0.3 KB
   </ItemGroup>
 
 </Project>
+
+================================================================================
+FILE: src\BuildingBlocks\MachineryManager.SharedKernel.Abstractions\ResourceScope.cs
+SIZE: 1.1 KB
+================================================================================
+namespace MachineryManager.SharedKernel.Abstractions;
+
+/// <summary>
+/// Describes the full scope chain of a specific resource being
+/// accessed (e.g. a Project belongs to an Organization, which may
+/// belong to a Holding), so <see cref="IPermissionEvaluator"/> can
+/// check it against a user's assignments without needing to know
+/// about other modules' data. The CALLING module is responsible for
+/// resolving this full chain from its own local data before calling
+/// the evaluator (chat, 2026-08-22).
+/// </summary>
+/// <param name="HoldingId">The Holding this resource belongs to, if any.</param>
+/// <param name="OrganizationId">The Organization this resource belongs to, if any.</param>
+/// <param name="ProjectId">The Project this resource belongs to, if any.</param>
+public sealed record ResourceScope(Guid? HoldingId, Guid? OrganizationId, Guid? ProjectId)
+{
+    /// <summary>A scope representing the platform itself (used for platform-wide actions, e.g. registering a new standalone Organization).</summary>
+    public static ResourceScope PlatformWide { get; } = new(null, null, null);
+}
+
+================================================================================
+FILE: src\BuildingBlocks\MachineryManager.SharedKernel.Abstractions\ScopeLevel.cs
+SIZE: 0.63 KB
+================================================================================
+namespace MachineryManager.SharedKernel.Abstractions;
+
+/// <summary>
+/// The four authorization levels of the tenant hierarchy
+/// (05-application, Section 5.8): Platform → Holding → Organization → Project.
+/// </summary>
+public enum ScopeLevel
+{
+    /// <summary>Unrestricted access across the entire platform.</summary>
+    Platform = 0,
+
+    /// <summary>Scoped to a single Holding and everything beneath it.</summary>
+    Holding = 1,
+
+    /// <summary>Scoped to a single Organization and everything beneath it.</summary>
+    Organization = 2,
+
+    /// <summary>Scoped to a single Project.</summary>
+    Project = 3,
+}
 
 ================================================================================
 FILE: src\BuildingBlocks\MachineryManager.SharedKernel.Abstractions\SystemDateTimeProvider.cs
@@ -3473,7 +3558,7 @@ SIZE: 0.43 KB
 
 ================================================================================
 FILE: src\Modules\Administration\Administration.Infrastructure\DependencyInjection.cs
-SIZE: 1.77 KB
+SIZE: 1.88 KB
 ================================================================================
 using MachineryManager.Administration.Application.Abstractions;
 using MachineryManager.Administration.Infrastructure.Persistence;
@@ -3511,8 +3596,94 @@ public static class DependencyInjection
         services.AddScoped<IUserProfileAssignmentRepository, UserProfileAssignmentRepository>();
         services.AddScoped<IAdministrationUnitOfWork>(serviceProvider =>
             serviceProvider.GetRequiredService<AdministrationDbContext>());
+        services.AddScoped<MachineryManager.SharedKernel.Abstractions.IPermissionEvaluator, PermissionEvaluator>();
 
         return services;
+    }
+}
+
+================================================================================
+FILE: src\Modules\Administration\Administration.Infrastructure\PermissionEvaluator.cs
+SIZE: 3.18 KB
+================================================================================
+using MachineryManager.SharedKernel.Abstractions;
+using Microsoft.EntityFrameworkCore;
+
+namespace MachineryManager.Administration.Infrastructure;
+
+/// <summary>
+/// EF Core-backed implementation of <see cref="IPermissionEvaluator"/>.
+/// Queries the current state of <c>UserProfileAssignment</c> at
+/// request time — no caching (chat, 2026-08-22).
+/// </summary>
+/// <remarks>
+/// Convention: a Profile whose Permissions list contains "*" grants
+/// every permission within that assignment's scope (this is how a
+/// SuperUser assignment is represented — Section 5.8 does not define
+/// a separate boolean flag for it).
+/// </remarks>
+public sealed class PermissionEvaluator : IPermissionEvaluator
+{
+    private const string WildcardPermission = "*";
+
+    private readonly Persistence.AdministrationDbContext _dbContext;
+
+    /// <summary>Initializes a new instance of the <see cref="PermissionEvaluator"/> class.</summary>
+    /// <param name="dbContext">The Administration module's persistence context.</param>
+    public PermissionEvaluator(Persistence.AdministrationDbContext dbContext)
+    {
+        _dbContext = dbContext;
+    }
+
+    /// <inheritdoc />
+    public async Task<bool> HasPermissionAsync(
+        Guid userId,
+        string permission,
+        ResourceScope resourceScope,
+        CancellationToken cancellationToken = default)
+    {
+        var assignments = await _dbContext.Set<global::Administration.Domain.UserProfileAssignment>()
+            .Where(a => a.UserId == userId)
+            .Join(
+                _dbContext.Set<global::Administration.Domain.Profile>(),
+                assignment => assignment.ProfileId,
+                profile => profile.Id,
+                (assignment, profile) => new { assignment.Scope, profile.Permissions, profile.IsActive })
+            .Where(x => x.IsActive)
+            .ToListAsync(cancellationToken);
+
+        foreach (var assignment in assignments)
+        {
+            var hasPermission = assignment.Permissions.Contains(WildcardPermission)
+                || assignment.Permissions.Contains(permission);
+
+            if (!hasPermission)
+            {
+                continue;
+            }
+
+            if (Covers(assignment.Scope, resourceScope))
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private static bool Covers(global::Administration.Domain.AuthorizationScope assignmentScope, ResourceScope resource)
+    {
+        return assignmentScope.Level switch
+        {
+            global::Administration.Domain.AuthorizationScopeLevel.Platform => true,
+            global::Administration.Domain.AuthorizationScopeLevel.Holding =>
+                resource.HoldingId is not null && assignmentScope.HoldingId == resource.HoldingId,
+            global::Administration.Domain.AuthorizationScopeLevel.Organization =>
+                resource.OrganizationId is not null && assignmentScope.OrganizationId == resource.OrganizationId,
+            global::Administration.Domain.AuthorizationScopeLevel.Project =>
+                resource.ProjectId is not null && assignmentScope.ProjectId == resource.ProjectId,
+            _ => false,
+        };
     }
 }
 
@@ -4105,7 +4276,7 @@ SIZE: 0.63 KB
 
 ================================================================================
 FILE: src\Modules\Administration\Administration.Presentation\Components\_Imports.razor
-SIZE: 0.37 KB
+SIZE: 0.44 KB
 ================================================================================
 @using System.Net.Http
 @using System.Net.Http.Json
@@ -4117,10 +4288,11 @@ SIZE: 0.37 KB
 @using Microsoft.AspNetCore.Components.Web.Virtualization
 @using Microsoft.JSInterop
 @using MudBlazor
+@using MachineryManager.Administration.Presentation.Components.Shared
 
 ================================================================================
 FILE: src\Modules\Administration\Administration.Presentation\Components\Pages\AssignProfile.razor
-SIZE: 8.35 KB
+SIZE: 8.68 KB
 ================================================================================
 @page "/admin/users/{UserId:guid}/assign-profile"
 @rendermode InteractiveServer
@@ -4129,68 +4301,74 @@ SIZE: 8.35 KB
 
 @using MachineryManager.Administration.Application.Features.Profiles.Dtos
 @using MachineryManager.Administration.Application.Features.Profiles.Queries.SearchProfiles
-@using Administration.Domain
+@using global::Administration.Domain
 
 <PageTitle>تخصیص پروفایل</PageTitle>
 
-<MudText Typo="Typo.h4" Class="mb-4">تخصیص پروفایل به کاربر</MudText>
+<AdminOnly>
+    <MudText Typo="Typo.h4" Class="mb-4">تخصیص پروفایل به کاربر</MudText>
 
-@if (isLoading)
-{
-    <MudProgressLinear Indeterminate="true" Class="my-4" />
-}
-else if (errorMessage is not null)
-{
-    <MudAlert Severity="Severity.Error" Class="my-4">@errorMessage</MudAlert>
-}
-else
-{
-    <MudPaper Class="pa-4" Style="max-width:600px;">
-        <MudForm @ref="form" @bind-IsValid="@isValid">
-            <MudSelect T="Guid" @bind-Value="selectedProfileId" Label="پروفایل" Required="true" RequiredError="انتخاب پروفایل الزامی است.">
-                @foreach (var profile in profiles)
+    @if (isLoading)
+    {
+        <MudProgressLinear Indeterminate="true" Class="my-4" />
+    }
+    else if (errorMessage is not null)
+    {
+        <MudAlert Severity="Severity.Error" Class="my-4">@errorMessage</MudAlert>
+    }
+    else
+    {
+        <MudPaper Class="pa-4" Style="max-width:600px;">
+            <MudForm @ref="form" @bind-IsValid="@isValid">
+                <MudSelect T="Guid" @bind-Value="selectedProfileId" Label="پروفایل" Required="true"
+                           RequiredError="انتخاب پروفایل الزامی است.">
+                    @foreach (var profile in profiles)
+                    {
+                        <MudSelectItem T="Guid" Value="@profile.Id">@profile.Name</MudSelectItem>
+                    }
+                </MudSelect>
+
+                <MudSelect T="string" @bind-Value="selectedScopeLevel" Label="سطح دسترسی" Required="true" Class="mt-4">
+                    <MudSelectItem T="string" Value="@("Platform")">Platform</MudSelectItem>
+                    <MudSelectItem T="string" Value="@("Holding")">Holding</MudSelectItem>
+                    <MudSelectItem T="string" Value="@("Organization")">Organization</MudSelectItem>
+                    <MudSelectItem T="string" Value="@("Project")">Project</MudSelectItem>
+                </MudSelect>
+
+                @if (selectedScopeLevel == "Holding")
                 {
-                    <MudSelectItem T="Guid" Value="@profile.Id">@profile.Name</MudSelectItem>
+                    <MudTextField @bind-Value="scopeHoldingId" Label="شناسه Holding" Required="true" Class="mt-4" />
                 }
-            </MudSelect>
-
-            <MudSelect T="string" @bind-Value="selectedScopeLevel" Label="سطح دسترسی" Required="true" Class="mt-4">
-                <MudSelectItem T="string" Value="@("Platform")">Platform</MudSelectItem>
-                <MudSelectItem T="string" Value="@("Holding")">Holding</MudSelectItem>
-                <MudSelectItem T="string" Value="@("Organization")">Organization</MudSelectItem>
-                <MudSelectItem T="string" Value="@("Project")">Project</MudSelectItem>
-            </MudSelect>
-
-            @if (selectedScopeLevel == "Holding")
-            {
-                <MudTextField @bind-Value="scopeHoldingId" Label="شناسه Holding" Required="true" Class="mt-4" />
-            }
-            else if (selectedScopeLevel == "Organization")
-            {
-                <MudTextField @bind-Value="scopeOrganizationId" Label="شناسه Organization" Required="true" Class="mt-4" />
-            }
-            else if (selectedScopeLevel == "Project")
-            {
-                <MudTextField @bind-Value="scopeProjectId" Label="شناسه Project" Required="true" Class="mt-4" />
-            }
-
-            <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="SubmitAsync" Disabled="@(!isValid || isSubmitting)" Class="mt-4">
-                @if (isSubmitting)
+                else if (selectedScopeLevel == "Organization")
                 {
-                    <MudProgressCircular Size="Size.Small" Indeterminate="true" />
+                    <MudTextField @bind-Value="scopeOrganizationId" Label="شناسه Organization" Required="true" Class="mt-4" />
                 }
-                else
+                else if (selectedScopeLevel == "Project")
                 {
-                    <span>ذخیره</span>
+                    <MudTextField @bind-Value="scopeProjectId" Label="شناسه Project" Required="true" Class="mt-4" />
                 }
-            </MudButton>
 
-            <MudButton Variant="Variant.Outlined" OnClick="@(() => Navigation.NavigateTo("/admin/users"))" Class="mt-4 mr-2">
-                بازگشت
-            </MudButton>
-        </MudForm>
-    </MudPaper>
-}
+                <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="SubmitAsync"
+                           Disabled="@(!isValid || isSubmitting)" Class="mt-4">
+                    @if (isSubmitting)
+                    {
+                        <MudProgressCircular Size="Size.Small" Indeterminate="true" />
+                    }
+                    else
+                    {
+                        <span>ذخیره</span>
+                    }
+                </MudButton>
+
+                <MudButton Variant="Variant.Outlined" OnClick="@(() => Navigation.NavigateTo("/admin/users"))"
+                           Class="mt-4 mr-2">
+                    بازگشت
+                </MudButton>
+            </MudForm>
+        </MudPaper>
+    }
+
+</AdminOnly>
 
 @code {
     /// <summary>
@@ -4240,7 +4418,9 @@ else
                 return;
             }
 
-            var result = System.Text.Json.JsonSerializer.Deserialize<SearchProfilesResponse>(content, new System.Text.Json.JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+            var result = System.Text.Json.JsonSerializer.Deserialize<SearchProfilesResponse>(content, new
+System.Text.Json.JsonSerializerOptions
+            { PropertyNameCaseInsensitive = true });
 
             if (result is null)
             {
@@ -4261,7 +4441,7 @@ else
         }
     }
 
-        /// <summary>
+    /// <summary>
     /// Submits the profile assignment to the API.
     /// </summary>
     private async Task SubmitAsync()
@@ -4366,7 +4546,7 @@ else
 
 ================================================================================
 FILE: src\Modules\Administration\Administration.Presentation\Components\Pages\CreateProfile.razor
-SIZE: 2.97 KB
+SIZE: 3.13 KB
 ================================================================================
 @page "/admin/profiles/create"
 @rendermode InteractiveServer
@@ -4375,53 +4555,60 @@ SIZE: 2.97 KB
 
 <PageTitle>ایجاد پروفایل</PageTitle>
 
-<MudText Typo="Typo.h4" Class="mb-4">ایجاد پروفایل جدید</MudText>
+<AdminOnly>
 
-<MudPaper Class="pa-4" Style="max-width:600px;">
-    <MudForm @ref="form" @bind-IsValid="@isValid">
-        <MudTextField @bind-Value="model.Name" Label="نام پروفایل" Required="true" RequiredError="نام پروفایل الزامی است." />
-        
-        <MudTextField @bind-Value="permissionInput" Label="دسترسی‌ها (با کاما جدا کنید)" 
-                      HelperText="مثال: Asset.Create, Asset.View, Maintenance.Plan" Class="mt-4" />
-        
-        <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="SubmitAsync" Disabled="@(!isValid || isSubmitting)" Class="mt-4">
-            @if (isSubmitting)
-            {
-                <MudProgressCircular Size="Size.Small" Indeterminate="true" />
-            }
-            else
-            {
-                <span>ذخیره</span>
-            }
-        </MudButton>
-        
-        <MudButton Variant="Variant.Outlined" OnClick="@(() => Navigation.NavigateTo("/admin/profiles"))" Class="mt-4 mr-2">
-            بازگشت
-        </MudButton>
-    </MudForm>
-</MudPaper>
+    <MudText Typo="Typo.h4" Class="mb-4">ایجاد پروفایل جدید</MudText>
 
-@if (errorMessage is not null)
-{
-    <MudAlert Severity="Severity.Error" Class="mt-4">@errorMessage</MudAlert>
-}
+    <MudPaper Class="pa-4" Style="max-width:600px;">
+        <MudForm @ref="form" @bind-IsValid="@isValid">
+            <MudTextField @bind-Value="model.Name" Label="نام پروفایل" Required="true"
+                          RequiredError="نام پروفایل الزامی است." />
+
+            <MudTextField @bind-Value="permissionInput" Label="دسترسی‌ها (با کاما جدا کنید)"
+                          HelperText="مثال: Asset.Create, Asset.View, Maintenance.Plan" Class="mt-4" />
+
+            <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="SubmitAsync"
+                       Disabled="@(!isValid || isSubmitting)" Class="mt-4">
+                @if (isSubmitting)
+                {
+                    <MudProgressCircular Size="Size.Small" Indeterminate="true" />
+                }
+                else
+                {
+                    <span>ذخیره</span>
+                }
+            </MudButton>
+
+            <MudButton Variant="Variant.Outlined" OnClick="@(() => Navigation.NavigateTo("/admin/profiles"))"
+                       Class="mt-4 mr-2">
+                بازگشت
+            </MudButton>
+        </MudForm>
+    </MudPaper>
+
+    @if (errorMessage is not null)
+    {
+        <MudAlert Severity="Severity.Error" Class="mt-4">@errorMessage</MudAlert>
+    }
+
+</AdminOnly>
 
 @code {
     private MudForm? form;
     private bool isValid;
     private bool isSubmitting;
     private string? errorMessage;
-    
+
     private CreateProfileModel model = new();
     private string permissionInput = string.Empty;
 
     private async Task SubmitAsync()
     {
         if (form is null || !isValid) return;
-        
+
         isSubmitting = true;
         errorMessage = null;
-        
+
         try
         {
             var permissions = permissionInput.Split(',', StringSplitOptions.RemoveEmptyEntries)
@@ -4460,7 +4647,7 @@ SIZE: 2.97 KB
 
 ================================================================================
 FILE: src\Modules\Administration\Administration.Presentation\Components\Pages\CreateUser.razor
-SIZE: 2.79 KB
+SIZE: 2.92 KB
 ================================================================================
 @page "/admin/users/create"
 @rendermode InteractiveServer
@@ -4469,53 +4656,58 @@ SIZE: 2.79 KB
 
 <PageTitle>ایجاد کاربر</PageTitle>
 
-<MudText Typo="Typo.h4" Class="mb-4">ایجاد کاربر جدید</MudText>
+<AdminOnly>
+    <MudText Typo="Typo.h4" Class="mb-4">ایجاد کاربر جدید</MudText>
 
-<MudPaper Class="pa-4" Style="max-width:600px;">
-    <MudForm @ref="form" @bind-IsValid="@isValid">
-        <MudTextField @bind-Value="model.UserName" Label="نام کاربری" Required="true" 
-                      RequiredError="نام کاربری الزامی است." Counter="20" MaxLength="20" />
-        
-        <MudTextField @bind-Value="model.Password" Label="رمز عبور" Required="true" 
-                      RequiredError="رمز عبور الزامی است." InputType="InputType.Password" />
-        
-        <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="SubmitAsync" Disabled="@(!isValid || isSubmitting)" Class="mt-4">
-            @if (isSubmitting)
-            {
-                <MudProgressCircular Size="Size.Small" Indeterminate="true" />
-            }
-            else
-            {
-                <span>ذخیره</span>
-            }
-        </MudButton>
-        
-        <MudButton Variant="Variant.Outlined" OnClick="@(() => Navigation.NavigateTo("/admin/users"))" Class="mt-4 mr-2">
-            بازگشت
-        </MudButton>
-    </MudForm>
-</MudPaper>
+    <MudPaper Class="pa-4" Style="max-width:600px;">
+        <MudForm @ref="form" @bind-IsValid="@isValid">
+            <MudTextField @bind-Value="model.UserName" Label="نام کاربری" Required="true"
+                          RequiredError="نام کاربری الزامی است." Counter="20" MaxLength="20" />
 
-@if (errorMessage is not null)
-{
-    <MudAlert Severity="Severity.Error" Class="mt-4">@errorMessage</MudAlert>
-}
+            <MudTextField @bind-Value="model.Password" Label="رمز عبور" Required="true"
+                          RequiredError="رمز عبور الزامی است." InputType="InputType.Password" />
+
+            <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="SubmitAsync"
+                       Disabled="@(!isValid || isSubmitting)" Class="mt-4">
+                @if (isSubmitting)
+                {
+                    <MudProgressCircular Size="Size.Small" Indeterminate="true" />
+                }
+                else
+                {
+                    <span>ذخیره</span>
+                }
+            </MudButton>
+
+            <MudButton Variant="Variant.Outlined" OnClick="@(() => Navigation.NavigateTo("/admin/users"))"
+                       Class="mt-4 mr-2">
+                بازگشت
+            </MudButton>
+        </MudForm>
+    </MudPaper>
+
+    @if (errorMessage is not null)
+    {
+        <MudAlert Severity="Severity.Error" Class="mt-4">@errorMessage</MudAlert>
+    }
+
+</AdminOnly>
 
 @code {
     private MudForm? form;
     private bool isValid;
     private bool isSubmitting;
     private string? errorMessage;
-    
+
     private CreateUserModel model = new();
 
     private async Task SubmitAsync()
     {
         if (form is null || !isValid) return;
-        
+
         isSubmitting = true;
         errorMessage = null;
-        
+
         try
         {
             var request = new { model.UserName, model.Password, Roles = new[] { "Operator" } };
@@ -4550,7 +4742,7 @@ SIZE: 2.79 KB
 
 ================================================================================
 FILE: src\Modules\Administration\Administration.Presentation\Components\Pages\EditProfile.razor
-SIZE: 5.05 KB
+SIZE: 5.23 KB
 ================================================================================
 @page "/admin/profiles/{ProfileId:guid}/edit"
 @rendermode InteractiveServer
@@ -4559,42 +4751,49 @@ SIZE: 5.05 KB
 
 <PageTitle>ویرایش پروفایل</PageTitle>
 
-<MudText Typo="Typo.h4" Class="mb-4">ویرایش پروفایل</MudText>
+<AdminOnly>
 
-@if (isLoading)
-{
-    <MudProgressLinear Indeterminate="true" Class="my-4" />
-}
-else if (errorMessage is not null)
-{
-    <MudAlert Severity="Severity.Error" Class="my-4">@errorMessage</MudAlert>
-}
-else
-{
-    <MudPaper Class="pa-4" Style="max-width:600px;">
-        <MudForm @ref="form" @bind-IsValid="@isValid">
-            <MudTextField @bind-Value="model.Name" Label="نام پروفایل" Required="true" RequiredError="نام پروفایل الزامی است." />
-            
-            <MudTextField @bind-Value="permissionInput" Label="دسترسی‌ها (با کاما جدا کنید)" 
-                          HelperText="مثال: Asset.Create, Asset.View, Maintenance.Plan" Class="mt-4" />
-            
-            <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="SubmitAsync" Disabled="@(!isValid || isSubmitting)" Class="mt-4">
-                @if (isSubmitting)
-                {
-                    <MudProgressCircular Size="Size.Small" Indeterminate="true" />
-                }
-                else
-                {
-                    <span>ذخیره</span>
-                }
-            </MudButton>
-            
-            <MudButton Variant="Variant.Outlined" OnClick="@(() => Navigation.NavigateTo("/admin/profiles"))" Class="mt-4 mr-2">
-                بازگشت
-            </MudButton>
-        </MudForm>
-    </MudPaper>
-}
+    <MudText Typo="Typo.h4" Class="mb-4">ویرایش پروفایل</MudText>
+
+    @if (isLoading)
+    {
+        <MudProgressLinear Indeterminate="true" Class="my-4" />
+    }
+    else if (errorMessage is not null)
+    {
+        <MudAlert Severity="Severity.Error" Class="my-4">@errorMessage</MudAlert>
+    }
+    else
+    {
+        <MudPaper Class="pa-4" Style="max-width:600px;">
+            <MudForm @ref="form" @bind-IsValid="@isValid">
+                <MudTextField @bind-Value="model.Name" Label="نام پروفایل" Required="true"
+                              RequiredError="نام پروفایل الزامی است." />
+
+                <MudTextField @bind-Value="permissionInput" Label="دسترسی‌ها (با کاما جدا کنید)"
+                              HelperText="مثال: Asset.Create, Asset.View, Maintenance.Plan" Class="mt-4" />
+
+                <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="SubmitAsync"
+                           Disabled="@(!isValid || isSubmitting)" Class="mt-4">
+                    @if (isSubmitting)
+                    {
+                        <MudProgressCircular Size="Size.Small" Indeterminate="true" />
+                    }
+                    else
+                    {
+                        <span>ذخیره</span>
+                    }
+                </MudButton>
+
+                <MudButton Variant="Variant.Outlined" OnClick="@(() => Navigation.NavigateTo("/admin/profiles"))"
+                           Class="mt-4 mr-2">
+                    بازگشت
+                </MudButton>
+            </MudForm>
+        </MudPaper>
+    }
+
+</AdminOnly>
 
 @code {
     /// <summary>
@@ -4608,7 +4807,7 @@ else
     private bool isSubmitting;
     private bool isLoading = true;
     private string? errorMessage;
-    
+
     private EditProfileModel model = new();
     private string permissionInput = string.Empty;
 
@@ -4632,8 +4831,10 @@ else
                 return;
             }
 
-            var result = System.Text.Json.JsonSerializer.Deserialize<ProfileItem>(content, new System.Text.Json.JsonSerializerOptions { PropertyNameCaseInsensitive = true });
-            
+            var result = System.Text.Json.JsonSerializer.Deserialize<ProfileItem>(content, new
+System.Text.Json.JsonSerializerOptions
+            { PropertyNameCaseInsensitive = true });
+
             if (result is null)
             {
                 errorMessage = "پاسخ نامعتبر از سرور.";
@@ -4660,10 +4861,10 @@ else
     private async Task SubmitAsync()
     {
         if (form is null || !isValid) return;
-        
+
         isSubmitting = true;
         errorMessage = null;
-        
+
         try
         {
             var permissions = permissionInput.Split(',', StringSplitOptions.RemoveEmptyEntries)
@@ -4711,7 +4912,7 @@ else
 
 ================================================================================
 FILE: src\Modules\Administration\Administration.Presentation\Components\Pages\ProfilesList.razor
-SIZE: 5.43 KB
+SIZE: 5.86 KB
 ================================================================================
 @page "/admin/profiles"
 @rendermode InteractiveServer
@@ -4720,59 +4921,66 @@ SIZE: 5.43 KB
 
 <PageTitle>مدیریت پروفایل‌ها</PageTitle>
 
-<MudText Typo="Typo.h4" Class="mb-4">پروفایل‌های دسترسی</MudText>
+<AdminOnly>
 
-<MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="@(() => Navigation.NavigateTo("/admin/profiles/create"))" Class="mb-4">
-    ایجاد پروفایل جدید
-</MudButton>
+    <MudText Typo="Typo.h4" Class="mb-4">پروفایل‌های دسترسی</MudText>
 
-@if (isLoading)
-{
-    <MudProgressLinear Indeterminate="true" Class="my-4" />
-}
-else if (errorMessage is not null)
-{
-    <MudAlert Severity="Severity.Error" Class="my-4">@errorMessage</MudAlert>
-}
-else
-{
-    <MudTable Items="@profiles" Hover="true" Breakpoint="Breakpoint.Sm">
-        <HeaderContent>
-            <MudTh>نام پروفایل</MudTh>
-            <MudTh>دسترسی‌ها</MudTh>
-            <MudTh>وضعیت</MudTh>
-            <MudTh>تاریخ ایجاد</MudTh>
-            <MudTh>عملیات</MudTh>
-        </HeaderContent>
-        <RowTemplate>
-            <MudTd DataLabel="نام">@context.Name</MudTd>
-            <MudTd DataLabel="دسترسی‌ها">@string.Join(", ", context.Permissions.Take(3))@(context.Permissions.Count > 3 ? "..." : "")</MudTd>
-            <MudTd DataLabel="وضعیت">
-                <MudChip T="string" Color="@(context.IsActive ? Color.Success : Color.Default)" Size="Size.Small">
-                    @(context.IsActive ? "فعال" : "غیرفعال")
-                </MudChip>
-            </MudTd>
-            <MudTd DataLabel="تاریخ">@context.CreatedAt.ToLocalTime().ToString("yyyy/MM/dd HH:mm")</MudTd>
-            <MudTd>
-                <MudButton Variant="Variant.Text" Color="Color.Primary" OnClick="@(() => Navigation.NavigateTo($"/admin/profiles/{context.Id}/edit"))">
-                    ویرایش
-                </MudButton>
-                @if (context.IsActive)
-                {
-                    <MudButton Variant="Variant.Text" Color="Color.Warning" OnClick="@(() => DeactivateAsync(context.Id))">
-                        غیرفعال‌سازی
-                    </MudButton>
-                }
-                else
-                {
-                    <MudButton Variant="Variant.Text" Color="Color.Success" OnClick="@(() => ActivateAsync(context.Id))">
-                        فعال‌سازی
-                    </MudButton>
-                }
-            </MudTd>
-        </RowTemplate>
-    </MudTable>
-}
+    <MudButton Variant="Variant.Filled" Color="Color.Primary"
+               OnClick="@(() => Navigation.NavigateTo("/admin/profiles/create"))" Class="mb-4">
+        ایجاد پروفایل جدید
+    </MudButton>
+
+    @if (isLoading)
+    {
+        <MudProgressLinear Indeterminate="true" Class="my-4" />
+    }
+    else if (errorMessage is not null)
+    {
+        <MudAlert Severity="Severity.Error" Class="my-4">@errorMessage</MudAlert>
+    }
+    else
+    {
+        <MudTable Items="@profiles" Hover="true" Breakpoint="Breakpoint.Sm">
+            <HeaderContent>
+                <MudTh>نام پروفایل</MudTh>
+                <MudTh>دسترسی‌ها</MudTh>
+                <MudTh>وضعیت</MudTh>
+                <MudTh>تاریخ ایجاد</MudTh>
+                <MudTh>عملیات</MudTh>
+            </HeaderContent>
+            <RowTemplate>
+                <MudTd DataLabel="نام">@context.Name</MudTd>
+                <MudTd DataLabel="دسترسی‌ها">@string.Join(", ", context.Permissions.Take(3))@(context.Permissions.Count > 3
+                                    ? "..." : "")</MudTd>
+                    <MudTd DataLabel="وضعیت">
+                        <MudChip T="string" Color="@(context.IsActive ? Color.Success : Color.Default)" Size="Size.Small">
+                            @(context.IsActive ? "فعال" : "غیرفعال")
+                        </MudChip>
+                    </MudTd>
+                    <MudTd DataLabel="تاریخ">@context.CreatedAt.ToLocalTime().ToString("yyyy/MM/dd HH:mm")</MudTd>
+                    <MudTd>
+                        <MudButton Variant="Variant.Text" Color="Color.Primary"
+                                   OnClick="@(() => Navigation.NavigateTo($"/admin/profiles/{context.Id}/edit"))">
+                            ویرایش
+                        </MudButton>
+                        @if (context.IsActive)
+                        {
+                            <MudButton Variant="Variant.Text" Color="Color.Warning" OnClick="@(() => DeactivateAsync(context.Id))">
+                                غیرفعال‌سازی
+                            </MudButton>
+                        }
+                        else
+                        {
+                            <MudButton Variant="Variant.Text" Color="Color.Success" OnClick="@(() => ActivateAsync(context.Id))">
+                                فعال‌سازی
+                            </MudButton>
+                        }
+                    </MudTd>
+                </RowTemplate>
+            </MudTable>
+        }
+
+    </AdminOnly>
 
 @code {
     private List<ProfileItem> profiles = new();
@@ -4798,7 +5006,9 @@ else
                 return;
             }
 
-            var result = System.Text.Json.JsonSerializer.Deserialize<SearchProfilesResponse>(content, new System.Text.Json.JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+            var result = System.Text.Json.JsonSerializer.Deserialize<SearchProfilesResponse>(content, new
+System.Text.Json.JsonSerializerOptions
+            { PropertyNameCaseInsensitive = true });
             profiles = result?.Items?.ToList() ?? new List<ProfileItem>();
         }
         catch (Exception ex)
@@ -4872,7 +5082,7 @@ else
 
 ================================================================================
 FILE: src\Modules\Administration\Administration.Presentation\Components\Pages\UsersList.razor
-SIZE: 3.47 KB
+SIZE: 3.63 KB
 ================================================================================
 @page "/admin/users"
 @rendermode InteractiveServer
@@ -4881,40 +5091,42 @@ SIZE: 3.47 KB
 
 <PageTitle>مدیریت کاربران</PageTitle>
 
-<MudText Typo="Typo.h4" Class="mb-4">کاربران سامانه</MudText>
+<AdminOnly>
+    <MudText Typo="Typo.h4" Class="mb-4">کاربران سامانه</MudText>
 
-<MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="@(() => Navigation.NavigateTo("/admin/users/create"))" Class="mb-4">
-    ایجاد کاربر جدید
-</MudButton>
+    <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="@(() => Navigation.NavigateTo("/admin/users/create"))" Class="mb-4">
+        ایجاد کاربر جدید
+    </MudButton>
 
-@if (isLoading)
-{
-    <MudProgressLinear Indeterminate="true" Class="my-4" />
-}
-else if (errorMessage is not null)
-{
-    <MudAlert Severity="Severity.Error" Class="my-4">@errorMessage</MudAlert>
-}
-else
-{
-    <MudTable Items="@users" Hover="true" Breakpoint="Breakpoint.Sm">
-        <HeaderContent>
-            <MudTh>نام کاربری</MudTh>
-            <MudTh>عملیات</MudTh>
-        </HeaderContent>
-        <RowTemplate>
-            <MudTd DataLabel="نام کاربری">@context.UserName</MudTd>
-            <MudTd>
-                <MudButton Variant="Variant.Text" Color="Color.Primary" OnClick="@(() => Navigation.NavigateTo($"/admin/users/{context.Id}/assign-profile"))">
-                    تخصیص پروفایل
-                </MudButton>
-                <MudButton Variant="Variant.Text" Color="Color.Warning" OnClick="@(() => DeactivateUserAsync(context.Id))">
-                    غیرفعال‌سازی
-                </MudButton>
-            </MudTd>
-        </RowTemplate>
-    </MudTable>
-}
+    @if (isLoading)
+    {
+        <MudProgressLinear Indeterminate="true" Class="my-4" />
+    }
+    else if (errorMessage is not null)
+    {
+        <MudAlert Severity="Severity.Error" Class="my-4">@errorMessage</MudAlert>
+    }
+    else
+    {
+        <MudTable Items="@users" Hover="true" Breakpoint="Breakpoint.Sm">
+            <HeaderContent>
+                <MudTh>نام کاربری</MudTh>
+                <MudTh>عملیات</MudTh>
+            </HeaderContent>
+            <RowTemplate>
+                <MudTd DataLabel="نام کاربری">@context.UserName</MudTd>
+                <MudTd>
+                    <MudButton Variant="Variant.Text" Color="Color.Primary" OnClick="@(() => Navigation.NavigateTo($"/admin/users/{context.Id}/assign-profile"))">
+                        تخصیص پروفایل
+                    </MudButton>
+                    <MudButton Variant="Variant.Text" Color="Color.Warning" OnClick="@(() => DeactivateUserAsync(context.Id))">
+                        غیرفعال‌سازی
+                    </MudButton>
+                </MudTd>
+            </RowTemplate>
+        </MudTable>
+    }
+</AdminOnly>
 
 @code {
     private List<UserItem> users = new();
@@ -4980,6 +5192,53 @@ else
     private sealed class UsersResponse
     {
         public List<UserItem> Items { get; set; } = new();
+    }
+}
+
+================================================================================
+FILE: src\Modules\Administration\Administration.Presentation\Components\Shared\AdminOnly.razor
+SIZE: 1.31 KB
+================================================================================
+@using Microsoft.AspNetCore.Components.Authorization
+@inject AuthenticationStateProvider AuthStateProvider
+
+@if (isChecking)
+{
+    <MudProgressLinear Indeterminate="true" />
+}
+else if (isAuthorized)
+{
+    @ChildContent
+}
+else
+{
+    <MudAlert Severity="Severity.Error">
+        دسترسی غیرمجاز — این بخش فقط برای مدیر سیستم (System Administrator) در دسترس است.
+    </MudAlert>
+}
+
+@code {
+    [Parameter]
+    public RenderFragment? ChildContent { get; set; }
+
+    private bool isChecking = true;
+    private bool isAuthorized;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var authState = await AuthStateProvider.GetAuthenticationStateAsync();
+        var user = authState.User;
+
+        // Checks both claim type variants (chat, 2026-08-22) — the
+        // short OIDC "role" claim (normalized on OpenIddict-issued
+        // tokens) and the long ASP.NET Core Identity ClaimTypes.Role,
+        // since which one lands on the cookie can vary by login path.
+        isAuthorized = user.Identity?.IsAuthenticated == true
+            && user.Claims.Any(c =>
+                (c.Type == "role" || c.Type == System.Security.Claims.ClaimTypes.Role)
+                && c.Value == "System Administrator");
+
+        isChecking = false;
     }
 }
 
@@ -5405,6 +5664,31 @@ public sealed class ApplicationUser : IdentityUser<Guid>
 }
 
 ================================================================================
+FILE: src\Modules\Identity\Identity.Domain\ICurrentAccessTokenAccessor.cs
+SIZE: 0.89 KB
+================================================================================
+namespace MachineryManager.Identity.Domain;
+
+/// <summary>
+/// Reads and caches the current user's access token once (typically
+/// during a Razor component's OnInitializedAsync, while a real
+/// HttpContext is still reliably available), so later Blazor Server
+/// interactive event handlers — which no longer have a real
+/// HttpContext — can still access it (chat, 2026-08-22).
+/// </summary>
+/// <remarks>
+/// Defined here (Domain) rather than Infrastructure so Presentation
+/// can depend on the abstraction without referencing Infrastructure
+/// directly — the same pattern already used for SignInManager/UserManager.
+/// </remarks>
+public interface ICurrentAccessTokenAccessor
+{
+    /// <summary>Gets the current user's stored access token, if any.</summary>
+    /// <returns>The access token, or <c>null</c> if unavailable.</returns>
+    Task<string?> GetAccessTokenAsync();
+}
+
+================================================================================
 FILE: src\Modules\Identity\Identity.Domain\Identity.Domain.csproj
 SIZE: 0.15 KB
 ================================================================================
@@ -5526,7 +5810,7 @@ public static class UsernamePolicy
 
 ================================================================================
 FILE: src\Modules\Identity\Identity.Infrastructure\DependencyInjection.cs
-SIZE: 12.97 KB
+SIZE: 13.1 KB
 ================================================================================
 using MachineryManager.Identity.Domain;
 using MachineryManager.Identity.Infrastructure.Persistence;
@@ -5809,6 +6093,7 @@ public static class DependencyInjection
         this IServiceCollection services,
         IConfiguration configuration)
     {
+        services.AddScoped<MachineryManager.Identity.Domain.ICurrentAccessTokenAccessor, Http.CurrentAccessTokenAccessor>();
         services.AddTransient<Http.BearerTokenHandler>();
 
         var baseAddress = configuration["OpenIddict:Issuer"]
@@ -5824,30 +6109,28 @@ public static class DependencyInjection
 
 ================================================================================
 FILE: src\Modules\Identity\Identity.Infrastructure\Http\BearerTokenHandler.cs
-SIZE: 1.63 KB
+SIZE: 1.29 KB
 ================================================================================
-using Microsoft.AspNetCore.Authentication;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Identity;
 using System.Net.Http.Headers;
+using MachineryManager.Identity.Domain;
 
 namespace MachineryManager.Identity.Infrastructure.Http;
 
 /// <summary>
-/// Attaches the current user's stored OpenIddict access token (obtained
-/// via the Authorization Code + PKCE flow at /identity/connect) as a
-/// Bearer Authorization header on outgoing internal API calls
+/// Attaches the current user's cached access token (via
+/// <see cref="ICurrentAccessTokenAccessor"/>) as a Bearer
+/// Authorization header on outgoing internal API calls
 /// (chat, 2026-08-22).
 /// </summary>
 public sealed class BearerTokenHandler : DelegatingHandler
 {
-    private readonly IHttpContextAccessor _httpContextAccessor;
+    private readonly ICurrentAccessTokenAccessor _tokenAccessor;
 
     /// <summary>Initializes a new instance of the <see cref="BearerTokenHandler"/> class.</summary>
-    /// <param name="httpContextAccessor">Provides access to the current request's HttpContext.</param>
-    public BearerTokenHandler(IHttpContextAccessor httpContextAccessor)
+    /// <param name="tokenAccessor">Provides the current user's cached access token.</param>
+    public BearerTokenHandler(ICurrentAccessTokenAccessor tokenAccessor)
     {
-        _httpContextAccessor = httpContextAccessor;
+        _tokenAccessor = tokenAccessor;
     }
 
     /// <inheritdoc />
@@ -5855,21 +6138,64 @@ public sealed class BearerTokenHandler : DelegatingHandler
         HttpRequestMessage request,
         CancellationToken cancellationToken)
     {
+        var accessToken = await _tokenAccessor.GetAccessTokenAsync();
+
+        if (!string.IsNullOrEmpty(accessToken))
+        {
+            request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
+        }
+
+        return await base.SendAsync(request, cancellationToken);
+    }
+}
+
+================================================================================
+FILE: src\Modules\Identity\Identity.Infrastructure\Http\CurrentAccessTokenAccessor.cs
+SIZE: 1.54 KB
+================================================================================
+using MachineryManager.Identity.Domain;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Identity;
+
+namespace MachineryManager.Identity.Infrastructure.Http;
+
+/// <inheritdoc cref="ICurrentAccessTokenAccessor" />
+/// <remarks>
+/// Registered as Scoped: in Blazor Server, a scoped service's lifetime
+/// matches the user's circuit, so the cached token is naturally
+/// isolated per user/session and cleared when the circuit ends.
+/// </remarks>
+public sealed class CurrentAccessTokenAccessor : ICurrentAccessTokenAccessor
+{
+    private readonly IHttpContextAccessor _httpContextAccessor;
+    private string? _cachedToken;
+    private bool _hasCached;
+
+    /// <summary>Initializes a new instance of the <see cref="CurrentAccessTokenAccessor"/> class.</summary>
+    /// <param name="httpContextAccessor">Provides access to the current request's HttpContext, when available.</param>
+    public CurrentAccessTokenAccessor(IHttpContextAccessor httpContextAccessor)
+    {
+        _httpContextAccessor = httpContextAccessor;
+    }
+
+    /// <inheritdoc />
+    public async Task<string?> GetAccessTokenAsync()
+    {
+        if (_hasCached)
+        {
+            return _cachedToken;
+        }
+
         var httpContext = _httpContextAccessor.HttpContext;
 
         if (httpContext is not null)
         {
-            var accessToken = await httpContext.GetTokenAsync(
-                IdentityConstants.ApplicationScheme,
-                "access_token");
-
-            if (!string.IsNullOrEmpty(accessToken))
-            {
-                request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
-            }
+            _cachedToken = await httpContext.GetTokenAsync(IdentityConstants.ApplicationScheme, "access_token");
+            _hasCached = true;
         }
 
-        return await base.SendAsync(request, cancellationToken);
+        return _cachedToken;
     }
 }
 
@@ -8237,12 +8563,13 @@ SIZE: 2.73 KB
 
 ================================================================================
 FILE: src\Modules\Identity\Identity.Presentation\Components\Pages\OrganizationsTest.razor
-SIZE: 1.47 KB
+SIZE: 1.83 KB
 ================================================================================
 @page "/identity/dev/organizations-test"
 @rendermode InteractiveServer
 @using System.Text.Json
 @inject IHttpClientFactory HttpClientFactory
+@inject global::MachineryManager.Identity.Domain.ICurrentAccessTokenAccessor TokenAccessor
 
 <PageTitle>تست فراخوانی API</PageTitle>
 
@@ -8264,6 +8591,13 @@ SIZE: 1.47 KB
     private string? organizationsJson;
     private string? errorMessage;
 
+        protected override async Task OnInitializedAsync()
+    {
+        // Warms the token cache while a real HttpContext is still
+        // available (chat, 2026-08-22) — see CurrentAccessTokenAccessor.
+        await TokenAccessor.GetAccessTokenAsync();
+    }
+    
     private async Task LoadOrganizationsAsync()
     {
         errorMessage = null;
@@ -9685,65 +10019,72 @@ public sealed record RegisterOrganizationCommand(string Name)
 
 ================================================================================
 FILE: src\Modules\Organization\Organization.Application\Features\Organizations\Commands\RegisterOrganization\RegisterOrganizationCommandHandler.cs
-SIZE: 2.35 KB
+SIZE: 2.62 KB
 ================================================================================
-using MachineryManager.Organization.Application.Abstractions;
 using MachineryManager.SharedKernel;
 using MachineryManager.SharedKernel.Abstractions;
 using MediatR;
+using Organization.Domain;
 
 namespace MachineryManager.Organization.Application.Features.Organizations.Commands.RegisterOrganization;
 
-/// <summary>
-/// Handles <see cref="RegisterOrganizationCommand"/> by orchestrating domain
-/// registration, persisting the aggregate, and committing the unit of work.
-/// </summary>
+/// <summary>Handles <see cref="RegisterOrganizationCommand"/>.</summary>
 public sealed class RegisterOrganizationCommandHandler
-    : IRequestHandler<RegisterOrganizationCommand, Result<Guid>>
+    : IRequestHandler<RegisterOrganizationCommand, Result<OrganizationId>>
 {
-    private readonly IOrganizationRepository _organizationRepository;
+    private const string RequiredPermission = "Organization.Manage";
+
+    private readonly IOrganizationRepository _repository;
     private readonly IUnitOfWork _unitOfWork;
     private readonly IDateTimeProvider _dateTimeProvider;
+    private readonly ICurrentUserService _currentUserService;
+    private readonly IPermissionEvaluator _permissionEvaluator;
 
-    /// <summary>
-    /// Initializes a new instance of the <see cref="RegisterOrganizationCommandHandler"/> class.
-    /// </summary>
-    /// <param name="organizationRepository">The organization repository.</param>
-    /// <param name="unitOfWork">The unit of work for atomic persistence.</param>
-    /// <param name="dateTimeProvider">Provider for deterministic UTC timestamps.</param>
+    /// <summary>Initializes a new instance of the <see cref="RegisterOrganizationCommandHandler"/> class.</summary>
     public RegisterOrganizationCommandHandler(
-        IOrganizationRepository organizationRepository,
+        IOrganizationRepository repository,
         IUnitOfWork unitOfWork,
-        IDateTimeProvider dateTimeProvider)
+        IDateTimeProvider dateTimeProvider,
+        ICurrentUserService currentUserService,
+        IPermissionEvaluator permissionEvaluator)
     {
-        _organizationRepository = organizationRepository;
+        _repository = repository;
         _unitOfWork = unitOfWork;
         _dateTimeProvider = dateTimeProvider;
+        _currentUserService = currentUserService;
+        _permissionEvaluator = permissionEvaluator;
     }
 
-    /// <summary>
-    /// Executes the registration use case.
-    /// </summary>
-    /// <param name="request">The registration command.</param>
-    /// <param name="cancellationToken">Token to cancel the asynchronous operation.</param>
-    /// <returns>A result containing the new organization's GUID on success.</returns>
-    public async Task<Result<Guid>> Handle(
-        RegisterOrganizationCommand request,
-        CancellationToken cancellationToken)
+    /// <inheritdoc />
+    public async Task<Result<OrganizationId>> Handle(RegisterOrganizationCommand request, CancellationToken cancellationToken)
     {
-        var result = global::Organization.Domain.Organization.Register(
-            request.Name,
-            _dateTimeProvider);
+        // Registering a new Organization is a platform/Holding-level
+        // action (it has no OrganizationId of its own yet) — checked
+        // against ResourceScope.PlatformWide (chat, 2026-08-22).
+        var isAuthorized = await _permissionEvaluator.HasPermissionAsync(
+            _currentUserService.UserId,
+            RequiredPermission,
+            ResourceScope.PlatformWide,
+            cancellationToken);
 
-        if (result.IsFailure)
+        if (!isAuthorized)
         {
-            return Result.Failure<Guid>(result.Error);
+            return Result.Failure<OrganizationId>(OrganizationErrors.NotAuthorized());
         }
 
-        _organizationRepository.Add(result.Value);
+        var organizationResult = global::Organization.Domain.Organization.Register(request.Name, _dateTimeProvider);
+
+        if (organizationResult.IsFailure)
+        {
+            return Result.Failure<OrganizationId>(organizationResult.Error);
+        }
+
+        var organization = organizationResult.Value;
+
+        await _repository.AddAsync(organization, cancellationToken);
         await _unitOfWork.SaveChangesAsync(cancellationToken);
 
-        return Result.Success(result.Value.Id.Value);
+        return organization.Id;
     }
 }
 
@@ -10774,7 +11115,7 @@ SIZE: 0.35 KB
 
 ================================================================================
 FILE: src\Modules\Organization\Organization.Domain\OrganizationErrors.cs
-SIZE: 1.23 KB
+SIZE: 1.49 KB
 ================================================================================
 using MachineryManager.SharedKernel;
 
@@ -10800,6 +11141,11 @@ public static class OrganizationErrors
     public static Error HoldingRequired() => Error.Validation(
         "Organization.HoldingRequired",
         "A valid Holding identifier is required.");
+
+    /// <summary>Creates an error indicating the current user lacks permission for this action.</summary>
+    public static Error NotAuthorized() => Error.Failure(
+        "Organization.NotAuthorized",
+        "You do not have permission to perform this action.");
 }
 
 ================================================================================
@@ -12223,12 +12569,12 @@ SIZE: 0.35 KB
 # SECTION 3: SNAPSHOT SUMMARY
 ================================================================================
 
-Generation Time     : 00:00:01.9236186
-Total Files Scanned : 215
-Files Included      : 215
+Generation Time     : 00:00:02.4366788
+Total Files Scanned : 222
+Files Included      : 222
 Files Skipped       : 0
-Total Source Size   : 0.4 MB
-Snapshot File Size  : 0.48 MB
+Total Source Size   : 0.42 MB
+Snapshot File Size  : 0.49 MB
 Output Path         : C:\Users\i\source\repos\MachineryManagerEnterprise\MME_Codebase_Snapshot.txt
 
 Excluded Directories: .git, .github, .vs, .vscode, .idea, .azure, .devcontainer, bin, obj, packages, publish, out, release, releases, debug, x64, x86, arm64, artifacts, .artifacts, node_modules, dist, build, bower_components, jspm_packages, docs-english, docs-farsi, docs, tools, test-results, coverage, .coverage, TestResults, lib, .angular, .next, .nuxt, .svelte-kit, .cache, .temp, tmp

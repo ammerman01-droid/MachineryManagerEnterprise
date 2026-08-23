@@ -1,59 +1,73 @@
-using MachineryManager.Organization.Application.Abstractions;
 using MachineryManager.SharedKernel;
 using MachineryManager.SharedKernel.Abstractions;
 using MediatR;
+using Organization.Domain;
+using MachineryManager.Organization.Application.Abstractions;
 
 namespace MachineryManager.Organization.Application.Features.Organizations.Commands.RegisterOrganization;
 
-/// <summary>
-/// Handles <see cref="RegisterOrganizationCommand"/> by orchestrating domain
-/// registration, persisting the aggregate, and committing the unit of work.
-/// </summary>
+/// <summary>Handles <see cref="RegisterOrganizationCommand"/>.</summary>
 public sealed class RegisterOrganizationCommandHandler
-    : IRequestHandler<RegisterOrganizationCommand, Result<Guid>>
+    : IRequestHandler<RegisterOrganizationCommand, Result<OrganizationId>>
 {
-    private readonly IOrganizationRepository _organizationRepository;
+    private const string RequiredPermission = "Organization.Manage";
+
+    private readonly IOrganizationRepository _repository;
     private readonly IUnitOfWork _unitOfWork;
     private readonly IDateTimeProvider _dateTimeProvider;
+    private readonly ICurrentUserService _currentUserService;
+    private readonly IPermissionEvaluator _permissionEvaluator;
 
-    /// <summary>
-    /// Initializes a new instance of the <see cref="RegisterOrganizationCommandHandler"/> class.
-    /// </summary>
-    /// <param name="organizationRepository">The organization repository.</param>
-    /// <param name="unitOfWork">The unit of work for atomic persistence.</param>
-    /// <param name="dateTimeProvider">Provider for deterministic UTC timestamps.</param>
+    /// <summary>Initializes a new instance of the <see cref="RegisterOrganizationCommandHandler"/> class.</summary>
     public RegisterOrganizationCommandHandler(
-        IOrganizationRepository organizationRepository,
+        IOrganizationRepository repository,
         IUnitOfWork unitOfWork,
-        IDateTimeProvider dateTimeProvider)
+        IDateTimeProvider dateTimeProvider,
+        ICurrentUserService currentUserService,
+        IPermissionEvaluator permissionEvaluator)
     {
-        _organizationRepository = organizationRepository;
+        _repository = repository;
         _unitOfWork = unitOfWork;
         _dateTimeProvider = dateTimeProvider;
+        _currentUserService = currentUserService;
+        _permissionEvaluator = permissionEvaluator;
     }
 
-    /// <summary>
-    /// Executes the registration use case.
-    /// </summary>
-    /// <param name="request">The registration command.</param>
-    /// <param name="cancellationToken">Token to cancel the asynchronous operation.</param>
-    /// <returns>A result containing the new organization's GUID on success.</returns>
-    public async Task<Result<Guid>> Handle(
-        RegisterOrganizationCommand request,
-        CancellationToken cancellationToken)
+    /// <inheritdoc />
+        /// <inheritdoc />
+    public async Task<Result<OrganizationId>> Handle(RegisterOrganizationCommand request, CancellationToken cancellationToken)
     {
-        var result = global::Organization.Domain.Organization.Register(
-            request.Name,
-            _dateTimeProvider);
-
-        if (result.IsFailure)
+        if (_currentUserService.UserId is not { } userId)
         {
-            return Result.Failure<Guid>(result.Error);
+            return Result.Failure<OrganizationId>(OrganizationErrors.NotAuthorized());
         }
 
-        _organizationRepository.Add(result.Value);
+        // Registering a new Organization is a platform/Holding-level
+        // action (it has no OrganizationId of its own yet) — checked
+        // against ResourceScope.PlatformWide (chat, 2026-08-22).
+        var isAuthorized = await _permissionEvaluator.HasPermissionAsync(
+            userId,
+            RequiredPermission,
+            ResourceScope.PlatformWide,
+            cancellationToken);
+
+        if (!isAuthorized)
+        {
+            return Result.Failure<OrganizationId>(OrganizationErrors.NotAuthorized());
+        }
+
+        var organizationResult = global::Organization.Domain.Organization.Register(request.Name, _dateTimeProvider);
+
+        if (organizationResult.IsFailure)
+        {
+            return Result.Failure<OrganizationId>(organizationResult.Error);
+        }
+
+        var organization = organizationResult.Value;
+
+        _repository.Add(organization);
         await _unitOfWork.SaveChangesAsync(cancellationToken);
 
-        return Result.Success(result.Value.Id.Value);
+        return organization.Id;
     }
 }
