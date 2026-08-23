@@ -1,5 +1,6 @@
 using Administration.Domain;
 using MachineryManager.Administration.Application.Features.UserProfileAssignments.Commands.AssignUserToProfile;
+using MachineryManager.Administration.Application.Features.UserProfileAssignments.Commands.RevokeUserProfileAssignment;
 using MachineryManager.Administration.Application.Features.UserProfileAssignments.Queries.GetUserProfileAssignmentsByUserId;
 using MachineryManager.Administration.Presentation.Contracts;
 using MediatR;
@@ -41,6 +42,15 @@ public static class UserProfileAssignmentEndpoints
             .WithName("GetUserProfileAssignments")
             .WithSummary("Retrieves profile assignments for a user.");
 
+        group.MapPost("/{assignmentId:guid}/revoke", RevokeUserProfileAssignmentAsync)
+            .WithName("RevokeUserProfileAssignment")
+            .WithSummary("Revokes an existing User-Profile assignment (BR-017, Access revocation on reassignment).")
+            // Same bootstrap-phase restriction as Assign — revocation is
+            // an equally sensitive authorization-changing operation.
+            .RequireAuthorization(policy => policy
+                .AddAuthenticationSchemes(OpenIddictValidationAspNetCoreDefaults.AuthenticationScheme)
+                .RequireClaim(Claims.Role, "System Administrator"));
+
         return endpoints;
     }
 
@@ -80,6 +90,21 @@ public static class UserProfileAssignmentEndpoints
 
         return result.IsSuccess
             ? Results.Ok(result.Value)
+            : result.ToProblemResult(httpContext);
+    }
+
+    private static async Task<IResult> RevokeUserProfileAssignmentAsync(
+        Guid assignmentId,
+        ISender sender,
+        HttpContext httpContext,
+        CancellationToken cancellationToken)
+    {
+        var result = await sender.Send(
+            new RevokeUserProfileAssignmentCommand(assignmentId),
+            cancellationToken);
+
+        return result.IsSuccess
+            ? Results.NoContent()
             : result.ToProblemResult(httpContext);
     }
 }

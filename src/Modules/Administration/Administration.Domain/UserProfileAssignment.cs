@@ -24,6 +24,17 @@ public sealed class UserProfileAssignment : AggregateRoot<UserProfileAssignmentI
     /// <summary>Gets the UTC timestamp when the assignment was created.</summary>
     public DateTimeOffset AssignedAt { get; private set; }
 
+    /// <summary>
+    /// Gets whether this assignment has been revoked. A revoked assignment
+    /// is excluded from authorization checks (BR-017, Access revocation on
+    /// reassignment) but is never physically deleted — Audit Requirements
+    /// (Section 5.8) require immutable authorization records.
+    /// </summary>
+    public bool IsRevoked { get; private set; }
+
+    /// <summary>Gets the UTC timestamp when the assignment was revoked, or null if still active.</summary>
+    public DateTimeOffset? RevokedAt { get; private set; }
+
     // Reserved for EF Core materialization only.
     private UserProfileAssignment()
     {
@@ -43,6 +54,8 @@ public sealed class UserProfileAssignment : AggregateRoot<UserProfileAssignmentI
         ProfileId = profileId;
         Scope = scope;
         AssignedAt = assignedAt;
+        IsRevoked = false;
+        RevokedAt = null;
     }
 
     /// <summary>
@@ -90,5 +103,28 @@ public sealed class UserProfileAssignment : AggregateRoot<UserProfileAssignmentI
                 assignment.AssignedAt));
 
         return assignment;
+    }
+
+    /// <summary>
+    /// Revokes this assignment, immediately excluding it from authorization
+    /// checks (BR-017). The record itself is retained (soft revocation) to
+    /// satisfy the immutable-audit-trail requirement in Section 5.8.
+    /// </summary>
+    /// <param name="dateTimeProvider">Provider for deterministic UTC timestamps.</param>
+    /// <returns>A result indicating success, or a business error if already revoked.</returns>
+    public Result Revoke(IDateTimeProvider dateTimeProvider)
+    {
+        if (IsRevoked)
+        {
+            return Result.Failure(ProfileErrors.AssignmentAlreadyRevoked());
+        }
+
+        IsRevoked = true;
+        RevokedAt = dateTimeProvider.UtcNow;
+
+        RaiseDomainEvent(
+            new UserProfileAssignmentRevoked(Id, UserId, ProfileId, Scope, RevokedAt.Value));
+
+        return Result.Success();
     }
 }

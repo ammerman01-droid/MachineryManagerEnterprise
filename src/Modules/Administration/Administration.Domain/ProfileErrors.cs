@@ -44,4 +44,14 @@ public static class ProfileErrors
     public static Error ScopeRequired() => Error.Validation(
         "Profile.ScopeRequired",
         "An authorization scope is required.");
+
+    /// <summary>Creates an error indicating that the assignment was not found.</summary>
+    public static Error AssignmentNotFound(Guid assignmentId) => Error.NotFound(
+        "Profile.AssignmentNotFound",
+        $"UserProfileAssignment with id {assignmentId} was not found.");
+
+    /// <summary>Creates an error indicating that the assignment is already revoked.</summary>
+    public static Error AssignmentAlreadyRevoked() => Error.Conflict(
+        "Profile.AssignmentAlreadyRevoked",
+        "This assignment has already been revoked.");
 }

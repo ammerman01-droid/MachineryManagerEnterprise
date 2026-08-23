@@ -1026,6 +1026,14 @@ Request → Authentication → Resolve User → Resolve Organization → Resolve
 ### Audit Requirements
 Every authorization-sensitive operation records: User, Time, Operation, Resource, Result, Source. Audit records are immutable.
 
++ ### Assignment Revocation (Phase 3, chat 2026-08-23)
++ A UserProfileAssignment is REVOKED, never deleted. Revocation sets
++ IsRevoked=true and RevokedAt (soft revocation), preserving the
++ immutable audit trail. IPermissionEvaluator excludes revoked
++ assignments from both HasPermissionAsync and GetAuthorizedScopesAsync
++ immediately (no caching), satisfying BR-017's "Access revocation on
++ reassignment" rule (Section 10.16).
+
 ---
 
 

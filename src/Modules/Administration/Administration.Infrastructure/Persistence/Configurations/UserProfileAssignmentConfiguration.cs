@@ -28,6 +28,12 @@ public sealed class UserProfileAssignmentConfiguration : IEntityTypeConfiguratio
         builder.Property(assignment => assignment.AssignedAt)
             .IsRequired();
 
+        builder.Property(assignment => assignment.IsRevoked)
+    .IsRequired()
+    .HasDefaultValue(false);
+
+        builder.Property(assignment => assignment.RevokedAt);
+
         builder.ComplexProperty(assignment => assignment.Scope, scope =>
         {
             scope.Property(s => s.Level)
