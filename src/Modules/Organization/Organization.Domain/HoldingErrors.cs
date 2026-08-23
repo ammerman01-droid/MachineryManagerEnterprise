@@ -14,4 +14,9 @@ public static class HoldingErrors
     public static Error NameTooLong(int maxLength) => Error.Validation(
         "Holding.NameTooLong",
         $"Holding name shall not exceed {maxLength} characters.");
+
+    /// <summary>Creates an error indicating the current user lacks permission for this action.</summary>
+    public static Error NotAuthorized() => Error.Failure(
+        "Holding.NotAuthorized",
+        "You do not have permission to perform this action.");
 }

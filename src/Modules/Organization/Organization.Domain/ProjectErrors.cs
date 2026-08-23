@@ -19,4 +19,9 @@ public static class ProjectErrors
     public static Error NameTooLong(int maxLength) => Error.Validation(
         "Project.NameTooLong",
         $"Project name shall not exceed {maxLength} characters.");
+
+    /// <summary>Creates an error indicating the current user lacks permission for this action.</summary>
+    public static Error NotAuthorized() => Error.Failure(
+        "Project.NotAuthorized",
+        "You do not have permission to perform this action.");
 }

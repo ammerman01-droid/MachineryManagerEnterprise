@@ -2,6 +2,7 @@ using MachineryManager.Organization.Application.Abstractions;
 using MachineryManager.SharedKernel;
 using MachineryManager.SharedKernel.Abstractions;
 using MediatR;
+using Organization.Domain;
 
 namespace MachineryManager.Organization.Application.Features.Holdings.Commands.RegisterHolding;
 
@@ -12,9 +13,13 @@ namespace MachineryManager.Organization.Application.Features.Holdings.Commands.R
 public sealed class RegisterHoldingCommandHandler
     : IRequestHandler<RegisterHoldingCommand, Result<Guid>>
 {
+    private const string RequiredPermission = "Holding.Manage";
+
     private readonly IHoldingRepository _holdingRepository;
     private readonly IUnitOfWork _unitOfWork;
     private readonly IDateTimeProvider _dateTimeProvider;
+    private readonly ICurrentUserService _currentUserService;
+    private readonly IPermissionEvaluator _permissionEvaluator;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="RegisterHoldingCommandHandler"/> class.
@@ -22,14 +27,20 @@ public sealed class RegisterHoldingCommandHandler
     /// <param name="holdingRepository">The holding repository.</param>
     /// <param name="unitOfWork">The unit of work for atomic persistence.</param>
     /// <param name="dateTimeProvider">Provider for deterministic UTC timestamps.</param>
+    /// <param name="currentUserService">Provides the authenticated user context.</param>
+    /// <param name="permissionEvaluator">Evaluates the current user's permissions at request time.</param>
     public RegisterHoldingCommandHandler(
         IHoldingRepository holdingRepository,
         IUnitOfWork unitOfWork,
-        IDateTimeProvider dateTimeProvider)
+        IDateTimeProvider dateTimeProvider,
+        ICurrentUserService currentUserService,
+        IPermissionEvaluator permissionEvaluator)
     {
         _holdingRepository = holdingRepository;
         _unitOfWork = unitOfWork;
         _dateTimeProvider = dateTimeProvider;
+        _currentUserService = currentUserService;
+        _permissionEvaluator = permissionEvaluator;
     }
 
     /// <summary>
@@ -42,6 +53,25 @@ public sealed class RegisterHoldingCommandHandler
         RegisterHoldingCommand request,
         CancellationToken cancellationToken)
     {
+        if (_currentUserService.UserId is not { } userId)
+        {
+            return Result.Failure<Guid>(HoldingErrors.NotAuthorized());
+        }
+
+        // Registering a new Holding is a platform-level action (it has
+        // no HoldingId of its own yet) — checked against
+        // ResourceScope.PlatformWide, mirroring RegisterOrganization.
+        var isAuthorized = await _permissionEvaluator.HasPermissionAsync(
+            userId,
+            RequiredPermission,
+            ResourceScope.PlatformWide,
+            cancellationToken);
+
+        if (!isAuthorized)
+        {
+            return Result.Failure<Guid>(HoldingErrors.NotAuthorized());
+        }
+
         var result = global::Organization.Domain.Holding.Register(request.Name, _dateTimeProvider);
 
         if (result.IsFailure)
