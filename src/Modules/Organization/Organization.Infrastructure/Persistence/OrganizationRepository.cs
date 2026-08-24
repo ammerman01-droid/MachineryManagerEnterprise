@@ -39,7 +39,6 @@ public sealed class OrganizationRepository : IOrganizationRepository
         _dbContext.Organizations.Update(aggregate);
 
     /// <inheritdoc />
-
     public async Task<SearchOrganizationsResponse> SearchAsync(
         string? searchTerm,
         int page,
@@ -79,7 +78,10 @@ public sealed class OrganizationRepository : IOrganizationRepository
             .OrderBy(organization => organization.Name)
             .Skip((page - 1) * pageSize)
             .Take(pageSize)
-            .Select(organization => new OrganizationDto(organization.Id.Value, organization.Name))
+            .Select(organization => new OrganizationDto(
+                organization.Id.Value,
+                organization.Name,
+                organization.IsSuspended))
             .ToListAsync(cancellationToken);
 
         var totalPages = totalItems == 0

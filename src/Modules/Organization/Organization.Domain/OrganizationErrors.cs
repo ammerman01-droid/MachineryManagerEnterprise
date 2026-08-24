@@ -27,4 +27,14 @@ public static class OrganizationErrors
     public static Error NotAuthorized() => Error.Failure(
         "Organization.NotAuthorized",
         "You do not have permission to perform this action.");
+
+            /// <summary>Creates an error indicating the organization is already suspended.</summary>
+    public static Error AlreadySuspended() => Error.Conflict(
+        "Organization.AlreadySuspended",
+        "This organization is already suspended.");
+
+    /// <summary>Creates an error indicating the organization is not currently suspended.</summary>
+    public static Error NotSuspended() => Error.Conflict(
+        "Organization.NotSuspended",
+        "This organization is not currently suspended.");
 }

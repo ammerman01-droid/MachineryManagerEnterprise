@@ -1,5 +1,7 @@
 using MachineryManager.Organization.Application.Features.Organizations.Commands.AssignOrganizationToHolding;
+using MachineryManager.Organization.Application.Features.Organizations.Commands.ReactivateOrganization;
 using MachineryManager.Organization.Application.Features.Organizations.Commands.RegisterOrganization;
+using MachineryManager.Organization.Application.Features.Organizations.Commands.SuspendOrganization;
 using MachineryManager.Organization.Application.Features.Organizations.Queries.GetOrganizationById;
 using MachineryManager.Organization.Application.Features.Organizations.Queries.SearchOrganizations;
 using MachineryManager.Organization.Presentation.Contracts;
@@ -28,9 +30,8 @@ public static class OrganizationEndpoints
             // ADR-0030: every Organization endpoint requires a valid
             // Bearer access token issued by this app's own OpenIddict
             // server. Role/permission-scoped restrictions per action
-            // are NOT yet applied here — that requires the
-            // Administration module's Role→Permission mapping, which
-            // does not exist yet (open item, not a silent gap).
+            // are enforced inside each command handler via
+            // IPermissionEvaluator, not at the endpoint level.
             .RequireAuthorization(policy => policy
                 .AddAuthenticationSchemes(OpenIddictValidationAspNetCoreDefaults.AuthenticationScheme)
                 .RequireAuthenticatedUser());
@@ -50,6 +51,14 @@ public static class OrganizationEndpoints
         group.MapPost("/{organizationId:guid}/assign-to-holding", AssignOrganizationToHoldingAsync)
             .WithName("AssignOrganizationToHolding")
             .WithSummary("Assigns an Organization to a Holding.");
+
+        group.MapPost("/{organizationId:guid}/suspend", SuspendOrganizationAsync)
+            .WithName("SuspendOrganization")
+            .WithSummary("Suspends an Organization (BR-017, Section 10.16). Historical records remain intact.");
+
+        group.MapPost("/{organizationId:guid}/reactivate", ReactivateOrganizationAsync)
+            .WithName("ReactivateOrganization")
+            .WithSummary("Reactivates a previously suspended Organization.");
 
         return endpoints;
     }
@@ -107,6 +116,32 @@ public static class OrganizationEndpoints
         var result = await sender.Send(
             new AssignOrganizationToHoldingCommand(organizationId, request.HoldingId),
             cancellationToken);
+
+        return result.IsSuccess
+            ? Results.NoContent()
+            : result.ToProblemResult(httpContext);
+    }
+
+    private static async Task<IResult> SuspendOrganizationAsync(
+        Guid organizationId,
+        ISender sender,
+        HttpContext httpContext,
+        CancellationToken cancellationToken)
+    {
+        var result = await sender.Send(new SuspendOrganizationCommand(organizationId), cancellationToken);
+
+        return result.IsSuccess
+            ? Results.NoContent()
+            : result.ToProblemResult(httpContext);
+    }
+
+    private static async Task<IResult> ReactivateOrganizationAsync(
+        Guid organizationId,
+        ISender sender,
+        HttpContext httpContext,
+        CancellationToken cancellationToken)
+    {
+        var result = await sender.Send(new ReactivateOrganizationCommand(organizationId), cancellationToken);
 
         return result.IsSuccess
             ? Results.NoContent()

@@ -24,6 +24,19 @@ public sealed class Organization : AggregateRoot<OrganizationId>
     /// </summary>
     public HoldingId? HoldingId { get; private set; }
 
+    /// <summary>
+    /// Gets whether this Organization is currently suspended (BR-017,
+    /// Section 10.16, RESOLVED). Suspension never deletes or hides
+    /// historical records — it is purely a status flag consumed by
+    /// callers as needed. Full lifecycle states beyond Suspension
+    /// (e.g. permanent closure) remain an open question and are
+    /// intentionally NOT modeled here.
+    /// </summary>
+    public bool IsSuspended { get; private set; }
+
+    /// <summary>Gets the UTC timestamp when the organization was suspended, or null if not suspended.</summary>
+    public DateTimeOffset? SuspendedAt { get; private set; }
+
     // Reserved for EF Core materialization only.
     private Organization()
     {
@@ -34,6 +47,8 @@ public sealed class Organization : AggregateRoot<OrganizationId>
         : base(id)
     {
         Name = name;
+        IsSuspended = false;
+        SuspendedAt = null;
     }
 
     /// <summary>
@@ -77,6 +92,50 @@ public sealed class Organization : AggregateRoot<OrganizationId>
         HoldingId = holdingId;
 
         RaiseDomainEvent(new OrganizationAssignedToHolding(Id, holdingId, dateTimeProvider.UtcNow));
+
+        return Result.Success();
+    }
+
+    /// <summary>
+    /// Suspends this Organization (BR-017, Section 10.16, RESOLVED).
+    /// Historical records are never deleted or hidden by suspension —
+    /// this method only flips the status flag and raises the
+    /// corresponding domain event; any downstream effects (if ever
+    /// decided) belong to their own Bounded Contexts.
+    /// </summary>
+    /// <param name="dateTimeProvider">Provides the current UTC time for the raised domain event.</param>
+    /// <returns>A <see cref="Result"/> indicating success, or a conflict error if already suspended.</returns>
+    public Result Suspend(IDateTimeProvider dateTimeProvider)
+    {
+        if (IsSuspended)
+        {
+            return Result.Failure(OrganizationErrors.AlreadySuspended());
+        }
+
+        IsSuspended = true;
+        SuspendedAt = dateTimeProvider.UtcNow;
+
+        RaiseDomainEvent(new OrganizationSuspended(Id, SuspendedAt.Value));
+
+        return Result.Success();
+    }
+
+    /// <summary>
+    /// Reactivates a previously suspended Organization.
+    /// </summary>
+    /// <param name="dateTimeProvider">Provides the current UTC time for the raised domain event.</param>
+    /// <returns>A <see cref="Result"/> indicating success, or a conflict error if not currently suspended.</returns>
+    public Result Reactivate(IDateTimeProvider dateTimeProvider)
+    {
+        if (!IsSuspended)
+        {
+            return Result.Failure(OrganizationErrors.NotSuspended());
+        }
+
+        IsSuspended = false;
+        SuspendedAt = null;
+
+        RaiseDomainEvent(new OrganizationReactivated(Id, dateTimeProvider.UtcNow));
 
         return Result.Success();
     }

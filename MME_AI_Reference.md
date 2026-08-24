@@ -10,7 +10,7 @@
 ## 1.1 Project Identity
 - **Name:** MachineryManagerEnterprise
 - **Type:** Enterprise Asset Lifecycle Management (EALM) / EAM
-- **Status:** Phase 3 — Core Platform Modules. Identity & Access Management (ASP.NET Core Identity + OpenIddict Authorization Server/Client, Authorization Code+PKCE and Client Credentials flows, end-to-end verified) is functionally complete. Organization module's initial vertical slice (Organization aggregate, CQRS, EF Core) is complete; the Holding/Project tenant hierarchy (BR-017) has been added at the Domain layer, with Infrastructure (EF configuration, migrations) and the Administration module (Profiles, scoped Role/Permission assignment per Section 5.8) still pending.
+- **Status:** Phase 3 — Core Platform Modules. Identity & Access Management (ASP.NET Core Identity + OpenIddict Authorization Server/Client, Authorization Code+PKCE and Client Credentials flows, end-to-end verified) is functionally complete. Organization module's initial vertical slice (Organization aggregate, CQRS, EF Core) is complete; the Holding/Project tenant hierarchy (BR-017) is complete end-to-end (Domain, Infrastructure/EF, Presentation REST endpoints), including Organization Suspension (BR-017, Section 10.16). The Administration module (Profiles, scoped Role/Permission assignment, Assignment Revocation per BR-017) is also complete end-to-end. Remaining: Blazor Presentation UI for Holding/Organization/Project management (currently REST-only).
 - **Branch:** feature/project-bootstrap
 - **License:** Private — All Rights Reserved
 

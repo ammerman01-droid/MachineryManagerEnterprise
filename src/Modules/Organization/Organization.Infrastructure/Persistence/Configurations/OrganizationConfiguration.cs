@@ -33,6 +33,12 @@ public sealed class OrganizationConfiguration : IEntityTypeConfiguration<global:
 
         builder.HasIndex(organization => organization.HoldingId);
 
+        builder.Property(organization => organization.IsSuspended)
+    .IsRequired()
+    .HasDefaultValue(false);
+
+        builder.Property(organization => organization.SuspendedAt);
+
         // Domain Events are transient behavior, never persisted state.
         builder.Ignore(organization => organization.DomainEvents);
     }

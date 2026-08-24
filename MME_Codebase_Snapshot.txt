@@ -1,7 +1,7 @@
 ﻿
 ================================================================================
   MACHINERYMANAGERENTERPRISE - CODEBASE SNAPSHOT
-  Generated: 2026-08-23 10:24:47
+  Generated: 2026-08-23 11:29:08
   Source: C:\Users\i\source\repos\MachineryManagerEnterprise
   Purpose: Complete source code reference for AI-assisted development
   Excludes: .md, .gitignore, this script, build artifacts, binaries, IDE,
@@ -109,10 +109,14 @@ MachineryManagerEnterprise
 |   |   |   |   |   |           +-- SearchProfilesQueryValidator.cs
 |   |   |   |   |   +-- UserProfileAssignments
 |   |   |   |   |       |-- Commands
-|   |   |   |   |       |   +-- AssignUserToProfile
-|   |   |   |   |       |       |-- AssignUserToProfileCommand.cs
-|   |   |   |   |       |       |-- AssignUserToProfileCommandHandler.cs
-|   |   |   |   |       |       +-- AssignUserToProfileCommandValidator.cs
+|   |   |   |   |       |   |-- AssignUserToProfile
+|   |   |   |   |       |   |   |-- AssignUserToProfileCommand.cs
+|   |   |   |   |       |   |   |-- AssignUserToProfileCommandHandler.cs
+|   |   |   |   |       |   |   +-- AssignUserToProfileCommandValidator.cs
+|   |   |   |   |       |   +-- RevokeUserProfileAssignment
+|   |   |   |   |       |       |-- RevokeUserProfileAssignmentCommand.cs
+|   |   |   |   |       |       |-- RevokeUserProfileAssignmentCommandHandler.cs
+|   |   |   |   |       |       +-- RevokeUserProfileAssignmentCommandValidator.cs
 |   |   |   |   |       +-- Queries
 |   |   |   |   |           +-- GetUserProfileAssignmentsByUserId
 |   |   |   |   |               |-- GetUserProfileAssignmentsByUserIdQuery.cs
@@ -124,7 +128,8 @@ MachineryManagerEnterprise
 |   |   |   |-- Administration.Domain
 |   |   |   |   |-- Events
 |   |   |   |   |   |-- ProfileCreated.cs
-|   |   |   |   |   +-- UserAssignedToProfile.cs
+|   |   |   |   |   |-- UserAssignedToProfile.cs
+|   |   |   |   |   +-- UserProfileAssignmentRevoked.cs
 |   |   |   |   |-- Administration.Domain.csproj
 |   |   |   |   |-- AuthorizationScope.cs
 |   |   |   |   |-- AuthorizationScopeLevel.cs
@@ -141,6 +146,8 @@ MachineryManagerEnterprise
 |   |   |   |   |   |-- Migrations
 |   |   |   |   |   |   |-- 20260820222811_InitialAdministrationSchema.cs
 |   |   |   |   |   |   |-- 20260820222811_InitialAdministrationSchema.Designer.cs
+|   |   |   |   |   |   |-- 20260823073337_AddUserProfileAssignmentRevocation.cs
+|   |   |   |   |   |   |-- 20260823073337_AddUserProfileAssignmentRevocation.Designer.cs
 |   |   |   |   |   |   +-- AdministrationDbContextModelSnapshot.cs
 |   |   |   |   |   |-- AdministrationDbContext.cs
 |   |   |   |   |   |-- ProfileRepository.cs
@@ -2895,8 +2902,120 @@ public sealed class AssignUserToProfileCommandValidator : AbstractValidator<Assi
 }
 
 ================================================================================
+FILE: src\Modules\Administration\Administration.Application\Features\UserProfileAssignments\Commands\RevokeUserProfileAssignment\RevokeUserProfileAssignmentCommand.cs
+SIZE: 0.5 KB
+================================================================================
+using MachineryManager.SharedKernel;
+using MediatR;
+
+namespace MachineryManager.Administration.Application.Features.UserProfileAssignments.Commands.RevokeUserProfileAssignment;
+
+/// <summary>
+/// Command to revoke an existing UserProfileAssignment, immediately
+/// removing the User's access at that scope (BR-017).
+/// </summary>
+/// <param name="AssignmentId">The GUID of the assignment to revoke.</param>
+public sealed record RevokeUserProfileAssignmentCommand(Guid AssignmentId)
+    : IRequest<Result>;
+
+================================================================================
+FILE: src\Modules\Administration\Administration.Application\Features\UserProfileAssignments\Commands\RevokeUserProfileAssignment\RevokeUserProfileAssignmentCommandHandler.cs
+SIZE: 2.76 KB
+================================================================================
+using MachineryManager.Administration.Application.Abstractions;
+using MachineryManager.SharedKernel;
+using MachineryManager.SharedKernel.Abstractions;
+using MediatR;
+
+namespace MachineryManager.Administration.Application.Features.UserProfileAssignments.Commands.RevokeUserProfileAssignment;
+
+/// <summary>
+/// Handles <see cref="RevokeUserProfileAssignmentCommand"/> by loading the
+/// assignment aggregate, invoking domain revocation, and committing the
+/// unit of work (BR-017, Access revocation on reassignment).
+/// </summary>
+public sealed class RevokeUserProfileAssignmentCommandHandler
+    : IRequestHandler<RevokeUserProfileAssignmentCommand, Result>
+{
+    private readonly IUserProfileAssignmentRepository _assignmentRepository;
+    private readonly IAdministrationUnitOfWork _unitOfWork;
+    private readonly IDateTimeProvider _dateTimeProvider;
+
+    /// <summary>
+    /// Initializes a new instance of the <see cref="RevokeUserProfileAssignmentCommandHandler"/> class.
+    /// </summary>
+    /// <param name="assignmentRepository">The user-profile assignment repository.</param>
+    /// <param name="unitOfWork">The unit of work for atomic persistence.</param>
+    /// <param name="dateTimeProvider">Provider for deterministic UTC timestamps.</param>
+    public RevokeUserProfileAssignmentCommandHandler(
+        IUserProfileAssignmentRepository assignmentRepository,
+        IAdministrationUnitOfWork unitOfWork,
+        IDateTimeProvider dateTimeProvider)
+    {
+        _assignmentRepository = assignmentRepository;
+        _unitOfWork = unitOfWork;
+        _dateTimeProvider = dateTimeProvider;
+    }
+
+    /// <summary>
+    /// Executes the revocation use case.
+    /// </summary>
+    /// <param name="request">The revocation command.</param>
+    /// <param name="cancellationToken">Token to cancel the asynchronous operation.</param>
+    /// <returns>A result indicating success or a business error.</returns>
+    public async Task<Result> Handle(
+        RevokeUserProfileAssignmentCommand request,
+        CancellationToken cancellationToken)
+    {
+        var assignmentId = global::Administration.Domain.UserProfileAssignmentId.From(request.AssignmentId);
+        var assignment = await _assignmentRepository.GetByIdAsync(assignmentId, cancellationToken);
+
+        if (assignment is null)
+        {
+            return Result.Failure(
+                global::Administration.Domain.ProfileErrors.AssignmentNotFound(request.AssignmentId));
+        }
+
+        var result = assignment.Revoke(_dateTimeProvider);
+
+        if (result.IsFailure)
+        {
+            return result;
+        }
+
+        _assignmentRepository.Update(assignment);
+        await _unitOfWork.SaveChangesAsync(cancellationToken);
+
+        return Result.Success();
+    }
+}
+
+================================================================================
+FILE: src\Modules\Administration\Administration.Application\Features\UserProfileAssignments\Commands\RevokeUserProfileAssignment\RevokeUserProfileAssignmentCommandValidator.cs
+SIZE: 0.61 KB
+================================================================================
+using FluentValidation;
+
+namespace MachineryManager.Administration.Application.Features.UserProfileAssignments.Commands.RevokeUserProfileAssignment;
+
+/// <summary>
+/// Validates <see cref="RevokeUserProfileAssignmentCommand"/> per ADR-0036.
+/// </summary>
+public sealed class RevokeUserProfileAssignmentCommandValidator
+    : AbstractValidator<RevokeUserProfileAssignmentCommand>
+{
+    /// <summary>
+    /// Initializes validation rules for the revoke-assignment command.
+    /// </summary>
+    public RevokeUserProfileAssignmentCommandValidator()
+    {
+        RuleFor(x => x.AssignmentId).NotEmpty();
+    }
+}
+
+================================================================================
 FILE: src\Modules\Administration\Administration.Application\Features\UserProfileAssignments\Queries\GetUserProfileAssignmentsByUserId\GetUserProfileAssignmentsByUserIdQuery.cs
-SIZE: 0.7 KB
+SIZE: 0.75 KB
 ================================================================================
 using MachineryManager.SharedKernel;
 using MediatR;
@@ -2912,7 +3031,9 @@ public sealed record UserProfileAssignmentDto(
     Guid? ScopeHoldingId,
     Guid? ScopeOrganizationId,
     Guid? ScopeProjectId,
-    DateTimeOffset AssignedAt);
+    DateTimeOffset AssignedAt,
+    bool IsRevoked,
+    DateTimeOffset? RevokedAt);
 
 /// <summary>Query to retrieve assignments for a specific user.</summary>
 public sealed record GetUserProfileAssignmentsByUserIdQuery(Guid UserId)
@@ -2920,7 +3041,7 @@ public sealed record GetUserProfileAssignmentsByUserIdQuery(Guid UserId)
 
 ================================================================================
 FILE: src\Modules\Administration\Administration.Application\Features\UserProfileAssignments\Queries\GetUserProfileAssignmentsByUserId\GetUserProfileAssignmentsByUserIdQueryHandler.cs
-SIZE: 2.02 KB
+SIZE: 2.07 KB
 ================================================================================
 using MachineryManager.Administration.Application.Abstractions;
 using MachineryManager.SharedKernel;
@@ -2959,7 +3080,9 @@ public sealed class GetUserProfileAssignmentsByUserIdQueryHandler
             a.Scope.HoldingId,
             a.Scope.OrganizationId,
             a.Scope.ProjectId,
-            a.AssignedAt)).ToList();
+            a.AssignedAt,
+            a.IsRevoked,
+            a.RevokedAt)).ToList();
 
         return Result.Success<IReadOnlyList<UserProfileAssignmentDto>>(dtos);
     }
@@ -3203,6 +3326,55 @@ public sealed class UserAssignedToProfile : IDomainEvent
 }
 
 ================================================================================
+FILE: src\Modules\Administration\Administration.Domain\Events\UserProfileAssignmentRevoked.cs
+SIZE: 1.74 KB
+================================================================================
+using MachineryManager.SharedKernel;
+
+namespace Administration.Domain.Events;
+
+/// <summary>Raised when a UserProfileAssignment is revoked (BR-017, Access revocation).</summary>
+public sealed class UserProfileAssignmentRevoked : IDomainEvent
+{
+    /// <summary>Gets the identifier of the revoked assignment.</summary>
+    public UserProfileAssignmentId AssignmentId { get; }
+
+    /// <summary>Gets the identifier of the affected user.</summary>
+    public Guid UserId { get; }
+
+    /// <summary>Gets the identifier of the profile that was assigned.</summary>
+    public ProfileId ProfileId { get; }
+
+    /// <summary>Gets the scope the assignment applied to.</summary>
+    public AuthorizationScope Scope { get; }
+
+    /// <summary>Gets the UTC timestamp when the event occurred.</summary>
+    public DateTimeOffset OccurredOn { get; }
+
+    /// <summary>
+    /// Initializes a new instance of the <see cref="UserProfileAssignmentRevoked"/> class.
+    /// </summary>
+    /// <param name="assignmentId">The identifier of the revoked assignment.</param>
+    /// <param name="userId">The identifier of the affected user.</param>
+    /// <param name="profileId">The identifier of the profile that was assigned.</param>
+    /// <param name="scope">The scope the assignment applied to.</param>
+    /// <param name="occurredOn">The UTC timestamp when the event occurred.</param>
+    public UserProfileAssignmentRevoked(
+        UserProfileAssignmentId assignmentId,
+        Guid userId,
+        ProfileId profileId,
+        AuthorizationScope scope,
+        DateTimeOffset occurredOn)
+    {
+        AssignmentId = assignmentId;
+        UserId = userId;
+        ProfileId = profileId;
+        Scope = scope;
+        OccurredOn = occurredOn;
+    }
+}
+
+================================================================================
 FILE: src\Modules\Administration\Administration.Domain\Profile.cs
 SIZE: 4.99 KB
 ================================================================================
@@ -3368,7 +3540,7 @@ public Result UpdateInformation(string name, IEnumerable<string> permissions)
 
 ================================================================================
 FILE: src\Modules\Administration\Administration.Domain\ProfileErrors.cs
-SIZE: 2.25 KB
+SIZE: 2.8 KB
 ================================================================================
 using MachineryManager.SharedKernel;
 
@@ -3416,6 +3588,16 @@ public static class ProfileErrors
     public static Error ScopeRequired() => Error.Validation(
         "Profile.ScopeRequired",
         "An authorization scope is required.");
+
+    /// <summary>Creates an error indicating that the assignment was not found.</summary>
+    public static Error AssignmentNotFound(Guid assignmentId) => Error.NotFound(
+        "Profile.AssignmentNotFound",
+        $"UserProfileAssignment with id {assignmentId} was not found.");
+
+    /// <summary>Creates an error indicating that the assignment is already revoked.</summary>
+    public static Error AssignmentAlreadyRevoked() => Error.Conflict(
+        "Profile.AssignmentAlreadyRevoked",
+        "This assignment has already been revoked.");
 }
 
 ================================================================================
@@ -3455,7 +3637,7 @@ public sealed class ProfileId : ValueObject
 
 ================================================================================
 FILE: src\Modules\Administration\Administration.Domain\UserProfileAssignment.cs
-SIZE: 3.15 KB
+SIZE: 4.62 KB
 ================================================================================
 using Administration.Domain.Events;
 using MachineryManager.SharedKernel;
@@ -3483,6 +3665,17 @@ public sealed class UserProfileAssignment : AggregateRoot<UserProfileAssignmentI
     /// <summary>Gets the UTC timestamp when the assignment was created.</summary>
     public DateTimeOffset AssignedAt { get; private set; }
 
+    /// <summary>
+    /// Gets whether this assignment has been revoked. A revoked assignment
+    /// is excluded from authorization checks (BR-017, Access revocation on
+    /// reassignment) but is never physically deleted — Audit Requirements
+    /// (Section 5.8) require immutable authorization records.
+    /// </summary>
+    public bool IsRevoked { get; private set; }
+
+    /// <summary>Gets the UTC timestamp when the assignment was revoked, or null if still active.</summary>
+    public DateTimeOffset? RevokedAt { get; private set; }
+
     // Reserved for EF Core materialization only.
     private UserProfileAssignment()
     {
@@ -3502,6 +3695,8 @@ public sealed class UserProfileAssignment : AggregateRoot<UserProfileAssignmentI
         ProfileId = profileId;
         Scope = scope;
         AssignedAt = assignedAt;
+        IsRevoked = false;
+        RevokedAt = null;
     }
 
     /// <summary>
@@ -3549,6 +3744,29 @@ public sealed class UserProfileAssignment : AggregateRoot<UserProfileAssignmentI
                 assignment.AssignedAt));
 
         return assignment;
+    }
+
+    /// <summary>
+    /// Revokes this assignment, immediately excluding it from authorization
+    /// checks (BR-017). The record itself is retained (soft revocation) to
+    /// satisfy the immutable-audit-trail requirement in Section 5.8.
+    /// </summary>
+    /// <param name="dateTimeProvider">Provider for deterministic UTC timestamps.</param>
+    /// <returns>A result indicating success, or a business error if already revoked.</returns>
+    public Result Revoke(IDateTimeProvider dateTimeProvider)
+    {
+        if (IsRevoked)
+        {
+            return Result.Failure(ProfileErrors.AssignmentAlreadyRevoked());
+        }
+
+        IsRevoked = true;
+        RevokedAt = dateTimeProvider.UtcNow;
+
+        RaiseDomainEvent(
+            new UserProfileAssignmentRevoked(Id, UserId, ProfileId, Scope, RevokedAt.Value));
+
+        return Result.Success();
     }
 }
 
@@ -3653,7 +3871,7 @@ public static class DependencyInjection
 
 ================================================================================
 FILE: src\Modules\Administration\Administration.Infrastructure\PermissionEvaluator.cs
-SIZE: 5.53 KB
+SIZE: 5.56 KB
 ================================================================================
 using MachineryManager.SharedKernel.Abstractions;
 using Microsoft.EntityFrameworkCore;
@@ -3692,7 +3910,7 @@ public sealed class PermissionEvaluator : IPermissionEvaluator
         CancellationToken cancellationToken = default)
     {
         var assignments = await _dbContext.Set<global::Administration.Domain.UserProfileAssignment>()
-            .Where(a => a.UserId == userId)
+            .Where(a => a.UserId == userId && !a.IsRevoked)
             .Join(
                 _dbContext.Set<global::Administration.Domain.Profile>(),
                 assignment => assignment.ProfileId,
@@ -3728,7 +3946,7 @@ public sealed class PermissionEvaluator : IPermissionEvaluator
         CancellationToken cancellationToken = default)
     {
         var assignments = await _dbContext.Set<global::Administration.Domain.UserProfileAssignment>()
-            .Where(a => a.UserId == userId)
+            .Where(a => a.UserId == userId && !a.IsRevoked)
             .Join(
                 _dbContext.Set<global::Administration.Domain.Profile>(),
                 assignment => assignment.ProfileId,
@@ -3916,7 +4134,7 @@ public sealed class ProfileConfiguration : IEntityTypeConfiguration<global::Admi
 
 ================================================================================
 FILE: src\Modules\Administration\Administration.Infrastructure\Persistence\Configurations\UserProfileAssignmentConfiguration.cs
-SIZE: 1.94 KB
+SIZE: 2.11 KB
 ================================================================================
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
@@ -3947,6 +4165,12 @@ public sealed class UserProfileAssignmentConfiguration : IEntityTypeConfiguratio
 
         builder.Property(assignment => assignment.AssignedAt)
             .IsRequired();
+
+        builder.Property(assignment => assignment.IsRevoked)
+    .IsRequired()
+    .HasDefaultValue(false);
+
+        builder.Property(assignment => assignment.RevokedAt);
 
         builder.ComplexProperty(assignment => assignment.Scope, scope =>
         {
@@ -4143,8 +4367,169 @@ namespace Administration.Infrastructure.Persistence.Migrations
 
 
 ================================================================================
+FILE: src\Modules\Administration\Administration.Infrastructure\Persistence\Migrations\20260823073337_AddUserProfileAssignmentRevocation.cs
+SIZE: 1.37 KB
+================================================================================
+using System;
+using Microsoft.EntityFrameworkCore.Migrations;
+
+#nullable disable
+
+namespace Administration.Infrastructure.Persistence.Migrations
+{
+    /// <inheritdoc />
+    public partial class AddUserProfileAssignmentRevocation : Migration
+    {
+        /// <inheritdoc />
+        protected override void Up(MigrationBuilder migrationBuilder)
+        {
+            migrationBuilder.AddColumn<bool>(
+                name: "IsRevoked",
+                schema: "administration",
+                table: "UserProfileAssignment",
+                type: "bit",
+                nullable: false,
+                defaultValue: false);
+
+            migrationBuilder.AddColumn<DateTimeOffset>(
+                name: "RevokedAt",
+                schema: "administration",
+                table: "UserProfileAssignment",
+                type: "datetimeoffset",
+                nullable: true);
+        }
+
+        /// <inheritdoc />
+        protected override void Down(MigrationBuilder migrationBuilder)
+        {
+            migrationBuilder.DropColumn(
+                name: "IsRevoked",
+                schema: "administration",
+                table: "UserProfileAssignment");
+
+            migrationBuilder.DropColumn(
+                name: "RevokedAt",
+                schema: "administration",
+                table: "UserProfileAssignment");
+        }
+    }
+}
+
+
+================================================================================
+FILE: src\Modules\Administration\Administration.Infrastructure\Persistence\Migrations\20260823073337_AddUserProfileAssignmentRevocation.Designer.cs
+SIZE: 4.02 KB
+================================================================================
+// <auto-generated />
+using System;
+using System.Collections.Generic;
+using MachineryManager.Administration.Infrastructure.Persistence;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
+using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
+
+#nullable disable
+
+namespace Administration.Infrastructure.Persistence.Migrations
+{
+    [DbContext(typeof(AdministrationDbContext))]
+    [Migration("20260823073337_AddUserProfileAssignmentRevocation")]
+    partial class AddUserProfileAssignmentRevocation
+    {
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
+        {
+#pragma warning disable 612, 618
+            modelBuilder
+                .HasDefaultSchema("administration")
+                .HasAnnotation("ProductVersion", "10.0.10")
+                .HasAnnotation("Relational:MaxIdentifierLength", 128);
+
+            SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
+
+            modelBuilder.Entity("Administration.Domain.Profile", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.PrimitiveCollection<string>("Permissions")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Profile", "administration");
+                });
+
+            modelBuilder.Entity("Administration.Domain.UserProfileAssignment", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTimeOffset>("AssignedAt")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<bool>("IsRevoked")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(false);
+
+                    b.Property<Guid>("ProfileId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTimeOffset?>("RevokedAt")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.ComplexProperty(typeof(Dictionary<string, object>), "Scope", "Administration.Domain.UserProfileAssignment.Scope#AuthorizationScope", b1 =>
+                        {
+                            b1.IsRequired();
+
+                            b1.Property<Guid?>("HoldingId")
+                                .HasColumnType("uniqueidentifier")
+                                .HasColumnName("ScopeHoldingId");
+
+                            b1.Property<int>("Level")
+                                .HasColumnType("int")
+                                .HasColumnName("ScopeLevel");
+
+                            b1.Property<Guid?>("OrganizationId")
+                                .HasColumnType("uniqueidentifier")
+                                .HasColumnName("ScopeOrganizationId");
+
+                            b1.Property<Guid?>("ProjectId")
+                                .HasColumnType("uniqueidentifier")
+                                .HasColumnName("ScopeProjectId");
+                        });
+
+                    b.HasKey("Id");
+
+                    b.ToTable("UserProfileAssignment", "administration");
+                });
+#pragma warning restore 612, 618
+        }
+    }
+}
+
+
+================================================================================
 FILE: src\Modules\Administration\Administration.Infrastructure\Persistence\Migrations\AdministrationDbContextModelSnapshot.cs
-SIZE: 3.58 KB
+SIZE: 3.89 KB
 ================================================================================
 // <auto-generated />
 using System;
@@ -4205,8 +4590,16 @@ namespace Administration.Infrastructure.Persistence.Migrations
                     b.Property<DateTimeOffset>("AssignedAt")
                         .HasColumnType("datetimeoffset");
 
+                    b.Property<bool>("IsRevoked")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(false);
+
                     b.Property<Guid>("ProfileId")
                         .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTimeOffset?>("RevokedAt")
+                        .HasColumnType("datetimeoffset");
 
                     b.Property<Guid>("UserId")
                         .HasColumnType("uniqueidentifier");
@@ -4401,7 +4794,7 @@ SIZE: 0.44 KB
 
 ================================================================================
 FILE: src\Modules\Administration\Administration.Presentation\Components\Pages\AssignProfile.razor
-SIZE: 8.68 KB
+SIZE: 15.29 KB
 ================================================================================
 @page "/admin/users/{UserId:guid}/assign-profile"
 @rendermode InteractiveServer
@@ -4475,6 +4868,65 @@ SIZE: 8.68 KB
                 </MudButton>
             </MudForm>
         </MudPaper>
+
+        <MudText Typo="Typo.h5" Class="mt-8 mb-4">تخصیص‌های فعلی این کاربر</MudText>
+
+        @if (assignmentsErrorMessage is not null)
+        {
+            <MudAlert Severity="Severity.Error" Class="my-4">@assignmentsErrorMessage</MudAlert>
+        }
+
+        @if (isLoadingAssignments)
+        {
+            <MudProgressLinear Indeterminate="true" Class="my-4" />
+        }
+        else if (assignments.Count == 0)
+        {
+            <MudText Typo="Typo.body2" Class="mud-text-secondary">هیچ تخصیصی برای این کاربر ثبت نشده است.</MudText>
+        }
+        else
+        {
+            <MudTable Items="@assignments" Hover="true" Breakpoint="Breakpoint.Sm">
+                <HeaderContent>
+                    <MudTh>پروفایل</MudTh>
+                    <MudTh>سطح دسترسی</MudTh>
+                    <MudTh>وضعیت</MudTh>
+                    <MudTh>تاریخ تخصیص</MudTh>
+                    <MudTh>تاریخ لغو</MudTh>
+                    <MudTh>عملیات</MudTh>
+                </HeaderContent>
+                <RowTemplate>
+                    <MudTd DataLabel="پروفایل">@ResolveProfileName(context.ProfileId)</MudTd>
+                    <MudTd DataLabel="سطح دسترسی">@context.ScopeLevel</MudTd>
+                    <MudTd DataLabel="وضعیت">
+                        <MudChip T="string" Color="@(context.IsRevoked ? Color.Default : Color.Success)" Size="Size.Small">
+                            @(context.IsRevoked ? "لغو شده" : "فعال")
+                        </MudChip>
+                    </MudTd>
+                    <MudTd DataLabel="تاریخ تخصیص">@context.AssignedAt.ToLocalTime().ToString("yyyy/MM/dd HH:mm")</MudTd>
+                    <MudTd DataLabel="تاریخ لغو">
+                        @(context.RevokedAt is { } revokedAt ? revokedAt.ToLocalTime().ToString("yyyy/MM/dd HH:mm") : "—")
+                    </MudTd>
+                    <MudTd>
+                        @if (!context.IsRevoked)
+                        {
+                            <MudButton Variant="Variant.Text" Color="Color.Error"
+                                       Disabled="@(revokingAssignmentId == context.Id)"
+                                       OnClick="@(() => RevokeAsync(context.Id))">
+                                @if (revokingAssignmentId == context.Id)
+                                {
+                                    <MudProgressCircular Size="Size.Small" Indeterminate="true" />
+                                }
+                                else
+                                {
+                                    <span>لغو دسترسی</span>
+                                }
+                            </MudButton>
+                        }
+                    </MudTd>
+                </RowTemplate>
+            </MudTable>
+        }
     }
 
 </AdminOnly>
@@ -4499,12 +4951,19 @@ SIZE: 8.68 KB
     private string? scopeOrganizationId;
     private string? scopeProjectId;
 
+    private List<AssignmentItem> assignments = new();
+    private bool isLoadingAssignments = true;
+    private string? assignmentsErrorMessage;
+    private Guid? revokingAssignmentId;
+
     /// <summary>
-    /// Initializes the component and loads the available profiles.
+    /// Initializes the component and loads the available profiles and
+    /// the user's current assignments.
     /// </summary>
     protected override async Task OnInitializedAsync()
     {
         await LoadProfilesAsync();
+        await LoadAssignmentsAsync();
     }
 
     /// <summary>
@@ -4547,6 +5006,43 @@ System.Text.Json.JsonSerializerOptions
         finally
         {
             isLoading = false;
+        }
+    }
+
+    /// <summary>
+    /// Loads the user's current profile assignments from the API
+    /// (Phase 3 — BR-017 Access revocation on reassignment).
+    /// </summary>
+    private async Task LoadAssignmentsAsync()
+    {
+        assignmentsErrorMessage = null;
+        isLoadingAssignments = true;
+
+        try
+        {
+            var client = HttpClientFactory.CreateClient("InternalApi");
+            var response = await client.GetAsync($"/api/v1/user-profile-assignments?userId={UserId}");
+            var content = await response.Content.ReadAsStringAsync();
+
+            if (!response.IsSuccessStatusCode)
+            {
+                assignmentsErrorMessage = $"خطا در دریافت تخصیص‌ها: {content}";
+                return;
+            }
+
+            var result = System.Text.Json.JsonSerializer.Deserialize<List<AssignmentItem>>(content, new
+System.Text.Json.JsonSerializerOptions
+            { PropertyNameCaseInsensitive = true });
+
+            assignments = result ?? new List<AssignmentItem>();
+        }
+        catch (Exception ex)
+        {
+            assignmentsErrorMessage = $"خطا: {ex.Message}";
+        }
+        finally
+        {
+            isLoadingAssignments = false;
         }
     }
 
@@ -4597,7 +5093,7 @@ System.Text.Json.JsonSerializerOptions
 
             if (response.IsSuccessStatusCode)
             {
-                Navigation.NavigateTo("/admin/users");
+                await LoadAssignmentsAsync();
                 return;
             }
 
@@ -4613,6 +5109,50 @@ System.Text.Json.JsonSerializerOptions
             isSubmitting = false;
         }
     }
+
+    /// <summary>
+    /// Revokes an existing assignment (BR-017, Access revocation on reassignment).
+    /// </summary>
+    /// <param name="assignmentId">The identifier of the assignment to revoke.</param>
+    private async Task RevokeAsync(Guid assignmentId)
+    {
+        assignmentsErrorMessage = null;
+        revokingAssignmentId = assignmentId;
+
+        try
+        {
+            var client = HttpClientFactory.CreateClient("InternalApi");
+            var response = await client.PostAsync(
+                $"/api/v1/user-profile-assignments/{assignmentId}/revoke", null);
+
+            if (response.IsSuccessStatusCode)
+            {
+                await LoadAssignmentsAsync();
+            }
+            else
+            {
+                assignmentsErrorMessage =
+                    $"خطا در لغو دسترسی: {await response.Content.ReadAsStringAsync()}";
+            }
+        }
+        catch (Exception ex)
+        {
+            assignmentsErrorMessage = $"خطا: {ex.Message}";
+        }
+        finally
+        {
+            revokingAssignmentId = null;
+        }
+    }
+
+    /// <summary>
+    /// Resolves a profile's display name from its identifier, using the
+    /// already-loaded profile list.
+    /// </summary>
+    /// <param name="profileId">The profile identifier to resolve.</param>
+    /// <returns>The profile's name, or the raw identifier if not found.</returns>
+    private string ResolveProfileName(Guid profileId) =>
+        profiles.FirstOrDefault(p => p.Id == profileId)?.Name ?? profileId.ToString();
 
     /// <summary>
     /// Parses an optional authorization scope identifier.
@@ -4650,6 +5190,23 @@ System.Text.Json.JsonSerializerOptions
         /// Gets or sets the display name of the profile.
         /// </summary>
         public string Name { get; set; } = string.Empty;
+    }
+
+    /// <summary>
+    /// Represents a single UserProfileAssignment row in the user interface.
+    /// </summary>
+    private sealed class AssignmentItem
+    {
+        public Guid Id { get; set; }
+        public Guid UserId { get; set; }
+        public Guid ProfileId { get; set; }
+        public string ScopeLevel { get; set; } = string.Empty;
+        public Guid? ScopeHoldingId { get; set; }
+        public Guid? ScopeOrganizationId { get; set; }
+        public Guid? ScopeProjectId { get; set; }
+        public DateTimeOffset AssignedAt { get; set; }
+        public bool IsRevoked { get; set; }
+        public DateTimeOffset? RevokedAt { get; set; }
     }
 }
 
@@ -5623,10 +6180,11 @@ internal static class ResultExtensions
 
 ================================================================================
 FILE: src\Modules\Administration\Administration.Presentation\Endpoints\UserProfileAssignmentEndpoints.cs
-SIZE: 3.83 KB
+SIZE: 5.04 KB
 ================================================================================
 using Administration.Domain;
 using MachineryManager.Administration.Application.Features.UserProfileAssignments.Commands.AssignUserToProfile;
+using MachineryManager.Administration.Application.Features.UserProfileAssignments.Commands.RevokeUserProfileAssignment;
 using MachineryManager.Administration.Application.Features.UserProfileAssignments.Queries.GetUserProfileAssignmentsByUserId;
 using MachineryManager.Administration.Presentation.Contracts;
 using MediatR;
@@ -5668,6 +6226,15 @@ public static class UserProfileAssignmentEndpoints
             .WithName("GetUserProfileAssignments")
             .WithSummary("Retrieves profile assignments for a user.");
 
+        group.MapPost("/{assignmentId:guid}/revoke", RevokeUserProfileAssignmentAsync)
+            .WithName("RevokeUserProfileAssignment")
+            .WithSummary("Revokes an existing User-Profile assignment (BR-017, Access revocation on reassignment).")
+            // Same bootstrap-phase restriction as Assign — revocation is
+            // an equally sensitive authorization-changing operation.
+            .RequireAuthorization(policy => policy
+                .AddAuthenticationSchemes(OpenIddictValidationAspNetCoreDefaults.AuthenticationScheme)
+                .RequireClaim(Claims.Role, "System Administrator"));
+
         return endpoints;
     }
 
@@ -5707,6 +6274,21 @@ public static class UserProfileAssignmentEndpoints
 
         return result.IsSuccess
             ? Results.Ok(result.Value)
+            : result.ToProblemResult(httpContext);
+    }
+
+    private static async Task<IResult> RevokeUserProfileAssignmentAsync(
+        Guid assignmentId,
+        ISender sender,
+        HttpContext httpContext,
+        CancellationToken cancellationToken)
+    {
+        var result = await sender.Send(
+            new RevokeUserProfileAssignmentCommand(assignmentId),
+            cancellationToken);
+
+        return result.IsSuccess
+            ? Results.NoContent()
             : result.ToProblemResult(httpContext);
     }
 }
@@ -10902,34 +11484,48 @@ public sealed record SearchProjectsResponse(
 
 ================================================================================
 FILE: src\Modules\Organization\Organization.Application\Features\Projects\Queries\SearchProjects\SearchProjectsQueryHandler.cs
-SIZE: 1.59 KB
+SIZE: 2.76 KB
 ================================================================================
 using MachineryManager.Organization.Application.Abstractions;
 using MachineryManager.SharedKernel;
+using MachineryManager.SharedKernel.Abstractions;
 using MediatR;
+using Organization.Domain;
 
 namespace MachineryManager.Organization.Application.Features.Projects.Queries.SearchProjects;
 
 /// <summary>
-/// Handles <see cref="SearchProjectsQuery"/> by delegating to the repository
-/// search projection.
+/// Handles <see cref="SearchProjectsQuery"/> by resolving the current
+/// user's authorized scope and delegating to the repository search
+/// projection, restricted to that scope (Phase 3 — Scope-based Filtering).
 /// </summary>
 public sealed class SearchProjectsQueryHandler
     : IRequestHandler<SearchProjectsQuery, Result<SearchProjectsResponse>>
 {
+    private const string RequiredPermission = "Project.View";
+
     private readonly IProjectRepository _projectRepository;
+    private readonly ICurrentUserService _currentUserService;
+    private readonly IPermissionEvaluator _permissionEvaluator;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="SearchProjectsQueryHandler"/> class.
     /// </summary>
     /// <param name="projectRepository">The project repository.</param>
-    public SearchProjectsQueryHandler(IProjectRepository projectRepository)
+    /// <param name="currentUserService">Provides the authenticated user context.</param>
+    /// <param name="permissionEvaluator">Evaluates the current user's authorized scopes at request time.</param>
+    public SearchProjectsQueryHandler(
+        IProjectRepository projectRepository,
+        ICurrentUserService currentUserService,
+        IPermissionEvaluator permissionEvaluator)
     {
         _projectRepository = projectRepository;
+        _currentUserService = currentUserService;
+        _permissionEvaluator = permissionEvaluator;
     }
 
     /// <summary>
-    /// Executes the search query and returns the paginated result.
+    /// Executes the search query, restricted to the current user's authorized scope.
     /// </summary>
     /// <param name="request">The search query parameters.</param>
     /// <param name="cancellationToken">Token to cancel the asynchronous operation.</param>
@@ -10938,10 +11534,21 @@ public sealed class SearchProjectsQueryHandler
         SearchProjectsQuery request,
         CancellationToken cancellationToken)
     {
+        if (_currentUserService.UserId is not { } userId)
+        {
+            return Result.Failure<SearchProjectsResponse>(ProjectErrors.NotAuthorized());
+        }
+
+        var authorizedScope = await _permissionEvaluator.GetAuthorizedScopesAsync(
+            userId,
+            RequiredPermission,
+            cancellationToken);
+
         var response = await _projectRepository.SearchAsync(
             request.SearchTerm,
             request.Page,
             request.PageSize,
+            authorizedScope,
             cancellationToken);
 
         return Result.Success(response);
@@ -12934,12 +13541,12 @@ SIZE: 0.35 KB
 # SECTION 3: SNAPSHOT SUMMARY
 ================================================================================
 
-Generation Time     : 00:00:01.2292780
-Total Files Scanned : 223
-Files Included      : 223
+Generation Time     : 00:00:01.2373428
+Total Files Scanned : 229
+Files Included      : 229
 Files Skipped       : 0
-Total Source Size   : 0.43 MB
-Snapshot File Size  : 0.51 MB
+Total Source Size   : 0.45 MB
+Snapshot File Size  : 0.53 MB
 Output Path         : C:\Users\i\source\repos\MachineryManagerEnterprise\MME_Codebase_Snapshot.txt
 
 Excluded Directories: .git, .github, .vs, .vscode, .idea, .azure, .devcontainer, bin, obj, packages, publish, out, release, releases, debug, x64, x86, arm64, artifacts, .artifacts, node_modules, dist, build, bower_components, jspm_packages, docs-english, docs-farsi, docs, tools, test-results, coverage, .coverage, TestResults, lib, .angular, .next, .nuxt, .svelte-kit, .cache, .temp, tmp
