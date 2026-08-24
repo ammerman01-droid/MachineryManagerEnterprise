@@ -88,7 +88,10 @@ try
     app.MapStaticAssets();
     app.MapRazorComponents<App>()
         .AddInteractiveServerRenderMode()
-        .AddAdditionalAssemblies(typeof(MachineryManager.Identity.Presentation.Components.Pages.Login).Assembly);
+        .AddAdditionalAssemblies(
+            typeof(MachineryManager.Identity.Presentation.Components.Pages.Login).Assembly,
+            typeof(MachineryManager.Administration.Presentation.Components.Pages.ProfilesList).Assembly,
+            typeof(MachineryManager.Organization.Presentation.Components.Pages.OrganizationsList).Assembly);
 
     // Identity endpoints
     app.MapIdentityConnectEndpoints();

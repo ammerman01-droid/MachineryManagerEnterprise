@@ -1,0 +1,168 @@
+@page "/admin/projects"
+@rendermode InteractiveServer
+@inject IHttpClientFactory HttpClientFactory
+@inject NavigationManager Navigation
+
+<PageTitle>پروژه‌ها</PageTitle>
+
+<MudText Typo="Typo.h4" Class="mb-4">مدیریت پروژه‌ها</MudText>
+
+<MudButton Variant="Variant.Filled" Color="Color.Primary" Class="mb-4"
+           OnClick="@(() => Navigation.NavigateTo("/admin/projects/create"))">
+    پروژه جدید
+</MudButton>
+
+@if (errorMessage is not null)
+{
+    <MudAlert Severity="Severity.Error" Class="my-4">@errorMessage</MudAlert>
+}
+
+@if (isLoading)
+{
+    <MudProgressLinear Indeterminate="true" Class="my-4" />
+}
+else if (items.Count == 0)
+{
+    <MudText Typo="Typo.body2" Class="mud-text-secondary">هیچ پروژه‌ای ثبت نشده است.</MudText>
+}
+else
+{
+    <MudTable Items="@items" Hover="true" Breakpoint="Breakpoint.Sm">
+        <HeaderContent>
+            <MudTh>نام</MudTh>
+            <MudTh>سازمان</MudTh>
+        </HeaderContent>
+        <RowTemplate>
+            <MudTd DataLabel="نام">@context.Name</MudTd>
+            <MudTd DataLabel="سازمان">@ResolveOrganizationName(context.OrganizationId)</MudTd>
+        </RowTemplate>
+    </MudTable>
+
+    <div class="d-flex justify-space-between align-center mt-4">
+        <MudButton Disabled="@(!hasPreviousPage)" OnClick="@(() => LoadPageAsync(page - 1))">قبلی</MudButton>
+        <MudText Typo="Typo.body2">صفحه @(page) از @totalPages</MudText>
+        <MudButton Disabled="@(!hasNextPage)" OnClick="@(() => LoadPageAsync(page + 1))">بعدی</MudButton>
+    </div>
+}
+
+@code {
+    private sealed class ProjectItem
+    {
+        public Guid Id { get; set; }
+        public string Name { get; set; } = string.Empty;
+        public Guid OrganizationId { get; set; }
+    }
+
+    private sealed class OrganizationItem
+    {
+        public Guid Id { get; set; }
+        public string Name { get; set; } = string.Empty;
+    }
+
+    private sealed class SearchProjectsResponse
+    {
+        public List<ProjectItem> Items { get; set; } = new();
+        public int Page { get; set; }
+        public int PageSize { get; set; }
+        public int TotalItems { get; set; }
+        public int TotalPages { get; set; }
+        public bool HasNextPage { get; set; }
+        public bool HasPreviousPage { get; set; }
+    }
+
+    private sealed class SearchOrganizationsResponse
+    {
+        public List<OrganizationItem> Items { get; set; } = new();
+    }
+
+    private List<ProjectItem> items = new();
+    private List<OrganizationItem> organizations = new();
+    private bool isLoading = true;
+    private string? errorMessage;
+    private int page = 1;
+    private int totalPages;
+    private bool hasNextPage;
+    private bool hasPreviousPage;
+
+    /// <summary>Initializes the component, loading Organizations (for name resolution) and the first page of Projects.</summary>
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadOrganizationsAsync();
+        await LoadPageAsync(1);
+    }
+
+    /// <summary>Loads the full list of organizations, used only to resolve display names.</summary>
+    private async Task LoadOrganizationsAsync()
+    {
+        try
+        {
+            var client = HttpClientFactory.CreateClient("InternalApi");
+            var response = await client.GetAsync("/api/v1/organizations?pageSize=200");
+            var content = await response.Content.ReadAsStringAsync();
+
+            if (response.IsSuccessStatusCode)
+            {
+                var result = System.Text.Json.JsonSerializer.Deserialize<SearchOrganizationsResponse>(content, new
+System.Text.Json.JsonSerializerOptions
+                { PropertyNameCaseInsensitive = true });
+
+                organizations = result?.Items ?? new List<OrganizationItem>();
+            }
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"خطا در دریافت سازمان‌ها: {ex.Message}";
+        }
+    }
+
+    /// <summary>Loads a specific page of projects from the API.</summary>
+    /// <param name="targetPage">The one-based page number to load.</param>
+    private async Task LoadPageAsync(int targetPage)
+    {
+        isLoading = true;
+        errorMessage = null;
+
+        try
+        {
+            var client = HttpClientFactory.CreateClient("InternalApi");
+            var response = await client.GetAsync($"/api/v1/projects?page={targetPage}&pageSize=25");
+            var content = await response.Content.ReadAsStringAsync();
+
+            if (!response.IsSuccessStatusCode)
+            {
+                errorMessage = $"خطا در دریافت پروژه‌ها: {content}";
+                return;
+            }
+
+            var result = System.Text.Json.JsonSerializer.Deserialize<SearchProjectsResponse>(content, new
+System.Text.Json.JsonSerializerOptions
+            { PropertyNameCaseInsensitive = true });
+
+            if (result is null)
+            {
+                errorMessage = "پاسخ نامعتبر از سرور.";
+                return;
+            }
+
+            items = result.Items;
+            page = result.Page;
+            totalPages = result.TotalPages;
+            hasNextPage = result.HasNextPage;
+            hasPreviousPage = result.HasPreviousPage;
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"خطا: {ex.Message}";
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+
+    /// <summary>Resolves an organization's display name from its identifier, using the already-loaded list.</summary>
+    /// <param name="organizationId">The organization identifier to resolve.</param>
+    /// <returns>The organization's name, or the raw identifier if not found.</returns>
+    private string ResolveOrganizationName(Guid organizationId) =>
+        organizations.FirstOrDefault(o => o.Id == organizationId)?.Name ?? organizationId.ToString();
+}

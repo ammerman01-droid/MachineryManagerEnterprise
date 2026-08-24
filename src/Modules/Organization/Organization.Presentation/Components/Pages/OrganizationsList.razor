@@ -1,0 +1,294 @@
+@page "/admin/organizations"
+@rendermode InteractiveServer
+@inject IHttpClientFactory HttpClientFactory
+@inject NavigationManager Navigation
+
+<PageTitle>سازمان‌ها</PageTitle>
+
+<MudText Typo="Typo.h4" Class="mb-4">مدیریت سازمان‌ها</MudText>
+
+<MudButton Variant="Variant.Filled" Color="Color.Primary" Class="mb-4"
+           OnClick="@(() => Navigation.NavigateTo("/admin/organizations/create"))">
+    سازمان جدید
+</MudButton>
+
+@if (errorMessage is not null)
+{
+    <MudAlert Severity="Severity.Error" Class="my-4">@errorMessage</MudAlert>
+}
+
+@if (isLoading)
+{
+    <MudProgressLinear Indeterminate="true" Class="my-4" />
+}
+else if (items.Count == 0)
+{
+    <MudText Typo="Typo.body2" Class="mud-text-secondary">هیچ سازمانی ثبت نشده است.</MudText>
+}
+else
+{
+    <MudTable Items="@items" Hover="true" Breakpoint="Breakpoint.Sm">
+        <HeaderContent>
+            <MudTh>نام</MudTh>
+            <MudTh>وضعیت</MudTh>
+            <MudTh>تخصیص به Holding</MudTh>
+            <MudTh>عملیات</MudTh>
+        </HeaderContent>
+        <RowTemplate>
+            <MudTd DataLabel="نام">@context.Name</MudTd>
+            <MudTd DataLabel="وضعیت">
+                <MudChip T="string" Color="@(context.IsSuspended ? Color.Warning : Color.Success)" Size="Size.Small">
+                    @(context.IsSuspended ? "معلق" : "فعال")
+                </MudChip>
+            </MudTd>
+            <MudTd DataLabel="تخصیص به Holding">
+                <div class="d-flex align-center gap-2">
+                    <MudSelect T="Guid?" Value="@GetSelectedHolding(context.Id)"
+                               ValueChanged="@((Guid? v) => SetSelectedHolding(context.Id, v))"
+                               Dense="true" Margin="Margin.Dense" Style="min-width:160px;">
+                        @foreach (var holding in holdings)
+                        {
+                            <MudSelectItem T="Guid?" Value="@((Guid?)holding.Id)">@holding.Name</MudSelectItem>
+                        }
+                    </MudSelect>
+                    <MudButton Size="Size.Small" Variant="Variant.Outlined"
+                               Disabled="@(GetSelectedHolding(context.Id) is null || assigningOrganizationId == context.Id)"
+                               OnClick="@(() => AssignToHoldingAsync(context.Id))">
+                        @if (assigningOrganizationId == context.Id)
+                        {
+                            <MudProgressCircular Size="Size.Small" Indeterminate="true" />
+                        }
+                        else
+                        {
+                            <span>تخصیص</span>
+                        }
+                    </MudButton>
+                </div>
+            </MudTd>
+            <MudTd DataLabel="عملیات">
+                @if (context.IsSuspended)
+                {
+                    <MudButton Size="Size.Small" Variant="Variant.Text" Color="Color.Success"
+                               Disabled="@(togglingOrganizationId == context.Id)"
+                               OnClick="@(() => ReactivateAsync(context.Id))">
+                        فعال‌سازی مجدد
+                    </MudButton>
+                }
+                else
+                {
+                    <MudButton Size="Size.Small" Variant="Variant.Text" Color="Color.Warning"
+                               Disabled="@(togglingOrganizationId == context.Id)"
+                               OnClick="@(() => SuspendAsync(context.Id))">
+                        تعلیق
+                    </MudButton>
+                }
+            </MudTd>
+        </RowTemplate>
+    </MudTable>
+
+    <div class="d-flex justify-space-between align-center mt-4">
+        <MudButton Disabled="@(!hasPreviousPage)" OnClick="@(() => LoadPageAsync(page - 1))">قبلی</MudButton>
+        <MudText Typo="Typo.body2">صفحه @(page) از @totalPages</MudText>
+        <MudButton Disabled="@(!hasNextPage)" OnClick="@(() => LoadPageAsync(page + 1))">بعدی</MudButton>
+    </div>
+}
+
+@code {
+    private sealed class OrganizationItem
+    {
+        public Guid Id { get; set; }
+        public string Name { get; set; } = string.Empty;
+        public bool IsSuspended { get; set; }
+    }
+
+    private sealed class HoldingItem
+    {
+        public Guid Id { get; set; }
+        public string Name { get; set; } = string.Empty;
+    }
+
+    private sealed class SearchOrganizationsResponse
+    {
+        public List<OrganizationItem> Items { get; set; } = new();
+        public int Page { get; set; }
+        public int PageSize { get; set; }
+        public int TotalItems { get; set; }
+        public int TotalPages { get; set; }
+        public bool HasNextPage { get; set; }
+        public bool HasPreviousPage { get; set; }
+    }
+
+    private sealed class SearchHoldingsResponse
+    {
+        public List<HoldingItem> Items { get; set; } = new();
+    }
+
+    private List<OrganizationItem> items = new();
+    private List<HoldingItem> holdings = new();
+    private readonly Dictionary<Guid, Guid?> selectedHoldingByOrganization = new();
+    private bool isLoading = true;
+    private string? errorMessage;
+    private int page = 1;
+    private int totalPages;
+    private bool hasNextPage;
+    private bool hasPreviousPage;
+    private Guid? assigningOrganizationId;
+    private Guid? togglingOrganizationId;
+
+    /// <summary>Initializes the component, loading Holdings (for the assignment dropdown) and the first page of Organizations.</summary>
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadHoldingsAsync();
+        await LoadPageAsync(1);
+    }
+
+    /// <summary>Loads the full list of Holdings for the assignment dropdown.</summary>
+    private async Task LoadHoldingsAsync()
+    {
+        try
+        {
+            var client = HttpClientFactory.CreateClient("InternalApi");
+            var response = await client.GetAsync("/api/v1/holdings?pageSize=200");
+            var content = await response.Content.ReadAsStringAsync();
+
+            if (response.IsSuccessStatusCode)
+            {
+                var result = System.Text.Json.JsonSerializer.Deserialize<SearchHoldingsResponse>(content, new
+System.Text.Json.JsonSerializerOptions
+                { PropertyNameCaseInsensitive = true });
+
+                holdings = result?.Items ?? new List<HoldingItem>();
+            }
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"خطا در دریافت Holding ها: {ex.Message}";
+        }
+    }
+
+    /// <summary>Loads a specific page of organizations from the API.</summary>
+    /// <param name="targetPage">The one-based page number to load.</param>
+    private async Task LoadPageAsync(int targetPage)
+    {
+        isLoading = true;
+        errorMessage = null;
+
+        try
+        {
+            var client = HttpClientFactory.CreateClient("InternalApi");
+            var response = await client.GetAsync($"/api/v1/organizations?page={targetPage}&pageSize=25");
+            var content = await response.Content.ReadAsStringAsync();
+
+            if (!response.IsSuccessStatusCode)
+            {
+                errorMessage = $"خطا در دریافت سازمان‌ها: {content}";
+                return;
+            }
+
+            var result = System.Text.Json.JsonSerializer.Deserialize<SearchOrganizationsResponse>(content, new
+System.Text.Json.JsonSerializerOptions
+            { PropertyNameCaseInsensitive = true });
+
+            if (result is null)
+            {
+                errorMessage = "پاسخ نامعتبر از سرور.";
+                return;
+            }
+
+            items = result.Items;
+            page = result.Page;
+            totalPages = result.TotalPages;
+            hasNextPage = result.HasNextPage;
+            hasPreviousPage = result.HasPreviousPage;
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"خطا: {ex.Message}";
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+
+    private Guid? GetSelectedHolding(Guid organizationId) =>
+        selectedHoldingByOrganization.TryGetValue(organizationId, out var value) ? value : null;
+
+    private void SetSelectedHolding(Guid organizationId, Guid? holdingId) =>
+        selectedHoldingByOrganization[organizationId] = holdingId;
+
+    /// <summary>Assigns the organization to the currently selected Holding.</summary>
+    /// <param name="organizationId">The identifier of the organization.</param>
+    private async Task AssignToHoldingAsync(Guid organizationId)
+    {
+        var holdingId = GetSelectedHolding(organizationId);
+
+        if (holdingId is null)
+        {
+            return;
+        }
+
+        errorMessage = null;
+        assigningOrganizationId = organizationId;
+
+        try
+        {
+            var client = HttpClientFactory.CreateClient("InternalApi");
+            var response = await client.PostAsJsonAsync(
+                $"/api/v1/organizations/{organizationId}/assign-to-holding",
+                new { HoldingId = holdingId.Value });
+
+            if (!response.IsSuccessStatusCode)
+            {
+                errorMessage = $"خطا در تخصیص: {await response.Content.ReadAsStringAsync()}";
+            }
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"خطا: {ex.Message}";
+        }
+        finally
+        {
+            assigningOrganizationId = null;
+        }
+    }
+
+    /// <summary>Suspends an organization (BR-017, Section 10.16).</summary>
+    /// <param name="organizationId">The identifier of the organization.</param>
+    private async Task SuspendAsync(Guid organizationId) =>
+        await ToggleSuspensionAsync(organizationId, "suspend");
+
+    /// <summary>Reactivates a previously suspended organization.</summary>
+    /// <param name="organizationId">The identifier of the organization.</param>
+    private async Task ReactivateAsync(Guid organizationId) =>
+        await ToggleSuspensionAsync(organizationId, "reactivate");
+
+    private async Task ToggleSuspensionAsync(Guid organizationId, string action)
+    {
+        errorMessage = null;
+        togglingOrganizationId = organizationId;
+
+        try
+        {
+            var client = HttpClientFactory.CreateClient("InternalApi");
+            var response = await client.PostAsync($"/api/v1/organizations/{organizationId}/{action}", null);
+
+            if (response.IsSuccessStatusCode)
+            {
+                await LoadPageAsync(page);
+            }
+            else
+            {
+                errorMessage = $"خطا: {await response.Content.ReadAsStringAsync()}";
+            }
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"خطا: {ex.Message}";
+        }
+        finally
+        {
+            togglingOrganizationId = null;
+        }
+    }
+}

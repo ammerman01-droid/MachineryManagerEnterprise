@@ -1,0 +1,79 @@
+@page "/admin/holdings/create"
+@rendermode InteractiveServer
+@inject IHttpClientFactory HttpClientFactory
+@inject NavigationManager Navigation
+
+<PageTitle>Holding جدید</PageTitle>
+
+<MudText Typo="Typo.h4" Class="mb-4">ثبت Holding جدید</MudText>
+
+@if (errorMessage is not null)
+{
+    <MudAlert Severity="Severity.Error" Class="my-4">@errorMessage</MudAlert>
+}
+
+<MudPaper Class="pa-4" Style="max-width:500px;">
+    <MudForm @ref="form" @bind-IsValid="@isValid">
+        <MudTextField @bind-Value="name" Label="نام Holding" Required="true"
+                      RequiredError="نام الزامی است." MaxLength="200" />
+
+        <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="SubmitAsync"
+                   Disabled="@(!isValid || isSubmitting)" Class="mt-4">
+            @if (isSubmitting)
+            {
+                <MudProgressCircular Size="Size.Small" Indeterminate="true" />
+            }
+            else
+            {
+                <span>ذخیره</span>
+            }
+        </MudButton>
+
+        <MudButton Variant="Variant.Outlined" OnClick="@(() => Navigation.NavigateTo("/admin/holdings"))"
+                   Class="mt-4 mr-2">
+            بازگشت
+        </MudButton>
+    </MudForm>
+</MudPaper>
+
+@code {
+    private MudForm? form;
+    private bool isValid;
+    private bool isSubmitting;
+    private string name = string.Empty;
+    private string? errorMessage;
+
+    /// <summary>Submits the new holding to the API.</summary>
+    private async Task SubmitAsync()
+    {
+        if (form is null || !isValid)
+        {
+            return;
+        }
+
+        isSubmitting = true;
+        errorMessage = null;
+
+        try
+        {
+            var client = HttpClientFactory.CreateClient("InternalApi");
+            var response = await client.PostAsJsonAsync("/api/v1/holdings/", new { Name = name });
+
+            if (response.IsSuccessStatusCode)
+            {
+                Navigation.NavigateTo("/admin/holdings");
+                return;
+            }
+
+            errorMessage = $"خطا در ثبت Holding: {await response.Content.ReadAsStringAsync()}";
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"خطا: {ex.Message}";
+        }
+        finally
+        {
+            isSubmitting = false;
+        }
+    }
+}
