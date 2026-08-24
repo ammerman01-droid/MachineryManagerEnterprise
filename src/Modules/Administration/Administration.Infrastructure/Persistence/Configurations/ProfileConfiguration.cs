@@ -28,8 +28,9 @@ public sealed class ProfileConfiguration : IEntityTypeConfiguration<global::Admi
         builder.Property(profile => profile.CreatedAt)
             .IsRequired();
 
-        builder.Property(profile => profile.Permissions)
-            .HasField("_permissions");
+                builder.Property(profile => profile.Permissions)
+            .HasField("_permissions")
+            .UsePropertyAccessMode(PropertyAccessMode.Field);
 
         builder.Ignore(profile => profile.DomainEvents);
     }

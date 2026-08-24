@@ -29,7 +29,7 @@ public sealed class ProfileRepository : IProfileRepository
     /// <inheritdoc />
     public void Update(global::Administration.Domain.Profile aggregate) => _dbContext.Profiles.Update(aggregate);
 
-    /// <inheritdoc />
+        /// <inheritdoc />
     public async Task<SearchProfilesResponse> SearchAsync(
         string? searchTerm,
         int page,
@@ -45,17 +45,27 @@ public sealed class ProfileRepository : IProfileRepository
 
         var totalItems = await query.CountAsync(cancellationToken);
 
-        var items = await query
+        // Materialize the Profile entities first (pagination still runs
+        // in SQL via OrderBy/Skip/Take), then map to ProfileDto in
+        // memory. EF Core 10's query translator hits a NullReferenceException
+        // when a primitive-collection, field-backed property
+        // (Profile.Permissions) is projected directly into another
+        // type's constructor inside .Select() — this sidesteps that
+        // translation-layer issue entirely (chat, 2026-08-24).
+        var entities = await query
             .OrderBy(p => p.Name)
             .Skip((page - 1) * pageSize)
             .Take(pageSize)
+            .ToListAsync(cancellationToken);
+
+        var items = entities
             .Select(p => new ProfileDto(
                 p.Id.Value,
                 p.Name,
                 p.Permissions.ToList(),
                 p.IsActive,
                 p.CreatedAt))
-            .ToListAsync(cancellationToken);
+            .ToList();
 
         var totalPages = totalItems == 0 ? 0 : (int)Math.Ceiling(totalItems / (double)pageSize);
 

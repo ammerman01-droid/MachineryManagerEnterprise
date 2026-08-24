@@ -79,7 +79,9 @@ try
     }
 
     app.UseSerilogRequestLogging();
-    app.UseStatusCodePagesWithReExecute("/not-found", createScopeForStatusCodePages: true);
+        app.UseWhen(
+        context => !context.Request.Path.StartsWithSegments("/api"),
+        branch => branch.UseStatusCodePagesWithReExecute("/not-found", createScopeForStatusCodePages: true));
     app.UseHttpsRedirection();
     app.UseAuthentication();
     app.UseAuthorization();

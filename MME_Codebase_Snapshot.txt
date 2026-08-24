@@ -1,7 +1,7 @@
 ﻿
 ================================================================================
   MACHINERYMANAGERENTERPRISE - CODEBASE SNAPSHOT
-  Generated: 2026-08-24 10:33:16
+  Generated: 2026-08-24 13:07:11
   Source: C:\Users\i\source\repos\MachineryManagerEnterprise
   Purpose: Complete source code reference for AI-assisted development
   Excludes: .md, .gitignore, this script, build artifacts, binaries, IDE,
@@ -14042,14 +14042,14 @@ System.Text.Json.JsonSerializerOptions
 
 ================================================================================
 FILE: src\Modules\Organization\Organization.Presentation\Components\Pages\HoldingsList.razor
-SIZE: 3.99 KB
+SIZE: 3.98 KB
 ================================================================================
 @page "/admin/holdings"
 @rendermode InteractiveServer
 @inject IHttpClientFactory HttpClientFactory
 @inject NavigationManager Navigation
 
-<PageTitle>Holding ها</PageTitle>
+<PageTitle>Holdings </PageTitle>
 
 <MudText Typo="Typo.h4" Class="mb-4">مدیریت Holding</MudText>
 
@@ -14086,7 +14086,7 @@ else
 
     <div class="d-flex justify-space-between align-center mt-4">
         <MudButton Disabled="@(!hasPreviousPage)" OnClick="@(() => LoadPageAsync(page - 1))">قبلی</MudButton>
-        <MudText Typo="Typo.body2">صفحه @page از @totalPages</MudText>
+        <MudText Typo="Typo.body2">صفحه @(page) از @totalPages</MudText>
         <MudButton Disabled="@(!hasNextPage)" OnClick="@(() => LoadPageAsync(page + 1))">بعدی</MudButton>
     </div>
 }
@@ -14263,7 +14263,7 @@ else
 
     <div class="d-flex justify-space-between align-center mt-4">
         <MudButton Disabled="@(!hasPreviousPage)" OnClick="@(() => LoadPageAsync(page - 1))">قبلی</MudButton>
-        <MudText Typo="Typo.body2">صفحه @page از @totalPages</MudText>
+        <MudText Typo="Typo.body2">صفحه @(page) از @totalPages</MudText>
         <MudButton Disabled="@(!hasNextPage)" OnClick="@(() => LoadPageAsync(page + 1))">بعدی</MudButton>
     </div>
 }
@@ -14514,7 +14514,7 @@ else
 
     <div class="d-flex justify-space-between align-center mt-4">
         <MudButton Disabled="@(!hasPreviousPage)" OnClick="@(() => LoadPageAsync(page - 1))">قبلی</MudButton>
-        <MudText Typo="Typo.body2">صفحه @page از @totalPages</MudText>
+        <MudText Typo="Typo.body2">صفحه @(page) از @totalPages</MudText>
         <MudButton Disabled="@(!hasNextPage)" OnClick="@(() => LoadPageAsync(page + 1))">بعدی</MudButton>
     </div>
 }
@@ -15126,7 +15126,7 @@ SIZE: 0.51 KB
 # SECTION 3: SNAPSHOT SUMMARY
 ================================================================================
 
-Generation Time     : 00:00:01.3921056
+Generation Time     : 00:00:02.5348547
 Total Files Scanned : 246
 Files Included      : 246
 Files Skipped       : 0
