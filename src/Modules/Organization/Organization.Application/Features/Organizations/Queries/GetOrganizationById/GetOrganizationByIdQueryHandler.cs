@@ -50,7 +50,8 @@ public sealed class GetOrganizationByIdQueryHandler
         var dto = new OrganizationDto(
             organization.Id.Value,
             organization.Name,
-            organization.IsSuspended);
+            organization.IsSuspended,
+            organization.HoldingId == null ? (Guid?)null : organization.HoldingId.Value);
 
         return Result.Success(dto);
     }

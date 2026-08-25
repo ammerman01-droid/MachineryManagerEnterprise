@@ -85,7 +85,8 @@ public sealed class OrganizationRepository : IOrganizationRepository
             .Select(organization => new OrganizationDto(
                 organization.Id.Value,
                 organization.Name,
-                organization.IsSuspended))
+                organization.IsSuspended,
+                organization.HoldingId == null ? (Guid?)null : organization.HoldingId.Value))
             .ToListAsync(cancellationToken);
 
         var totalPages = totalItems == 0

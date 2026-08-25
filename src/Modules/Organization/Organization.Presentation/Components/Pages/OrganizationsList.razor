@@ -93,11 +93,12 @@ else
 }
 
 @code {
-    private sealed class OrganizationItem
+        private sealed class OrganizationItem
     {
         public Guid Id { get; set; }
         public string Name { get; set; } = string.Empty;
         public bool IsSuspended { get; set; }
+        public Guid? HoldingId { get; set; }
     }
 
     private sealed class HoldingItem
@@ -195,6 +196,11 @@ System.Text.Json.JsonSerializerOptions
             }
 
             items = result.Items;
+
+            foreach (var item in items)
+            {
+                selectedHoldingByOrganization[item.Id] = item.HoldingId;
+            }
             page = result.Page;
             totalPages = result.TotalPages;
             hasNextPage = result.HasNextPage;
@@ -237,7 +243,11 @@ System.Text.Json.JsonSerializerOptions
                 $"/api/v1/organizations/{organizationId}/assign-to-holding",
                 new { HoldingId = holdingId.Value });
 
-            if (!response.IsSuccessStatusCode)
+            if (response.IsSuccessStatusCode)
+            {
+                await LoadPageAsync(page);
+            }
+            else
             {
                 errorMessage = $"خطا در تخصیص: {await response.Content.ReadAsStringAsync()}";
             }
