@@ -50,11 +50,6 @@ public static class ProfileErrors
         "Profile.AssignmentNotFound",
         $"UserProfileAssignment with id {assignmentId} was not found.");
 
-    /// <summary>Creates an error indicating that the assignment is already revoked.</summary>
-    public static Error AssignmentAlreadyRevoked() => Error.Conflict(
-        "Profile.AssignmentAlreadyRevoked",
-        "This assignment has already been revoked.");
-
     /// <summary>
     /// Creates an error indicating that the profile was not found (used
     /// by DeleteProfile, distinct code from AssignmentNotFound above so
@@ -66,23 +61,19 @@ public static class ProfileErrors
         $"Profile with id {profileId} was not found.");
 
     /// <summary>
-    /// Creates an error indicating the user already has an active
-    /// (non-revoked) Profile assignment, so a new assignment cannot be
-    /// created until the existing one is revoked (chat, 2026-08-25:
-    /// each user may hold at most one active Profile at a time).
-    /// </summary>
-    public static Error UserAlreadyHasActiveAssignment(Guid existingProfileId) => Error.Conflict(
-        "Profile.UserAlreadyHasActiveAssignment",
-        $"This user already has an active profile (id {existingProfileId}). " +
-        "Revoke the existing assignment before assigning a new one.");
-
-    /// <summary>
     /// Creates an error indicating that a Profile cannot be deleted
-    /// because it still has one or more active (non-revoked)
-    /// UserProfileAssignment records (chat, 2026-08-25).
+    /// because it still has one or more active UserProfileAssignment
+    /// records (chat, 2026-08-25).
     /// </summary>
     public static Error ProfileHasActiveAssignments() => Error.Conflict(
         "Profile.HasActiveAssignments",
         "This profile has already been assigned to one or more users. " +
         "Remove it from every user's assignment list before deleting it.");
+
+    // Removed (chat, 2026-08-25 — revised): AssignmentAlreadyRevoked and
+    // UserAlreadyHasActiveAssignment no longer apply. A user may now
+    // hold multiple assignments with automatic single-active-slot
+    // handling instead of a hard conflict — see
+    // AssignUserToProfileCommandHandler and
+    // ActivateUserProfileAssignmentCommandHandler.
 }

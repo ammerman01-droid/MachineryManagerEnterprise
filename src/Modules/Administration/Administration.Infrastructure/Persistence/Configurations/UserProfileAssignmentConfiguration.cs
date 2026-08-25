@@ -41,11 +41,15 @@ public sealed class UserProfileAssignmentConfiguration : IEntityTypeConfiguratio
         builder.Property(assignment => assignment.AssignedAt)
             .IsRequired();
 
-        builder.Property(assignment => assignment.IsRevoked)
+        // Renamed from IsRevoked/RevokedAt (chat, 2026-08-25 — revised):
+        // this is now a reversible Active/Inactive toggle rather than a
+        // one-way revocation. Defaults to active on insert, matching
+        // UserProfileAssignment.Create.
+        builder.Property(assignment => assignment.IsActive)
             .IsRequired()
-            .HasDefaultValue(false);
+            .HasDefaultValue(true);
 
-        builder.Property(assignment => assignment.RevokedAt);
+        builder.Property(assignment => assignment.LastChangedAt);
 
         builder.ComplexProperty(assignment => assignment.Scope, scope =>
         {

@@ -6,9 +6,14 @@ namespace Administration.Domain;
 
 /// <summary>
 /// Represents the assignment of a <see cref="Profile"/> to a User at a
-/// specific <see cref="AuthorizationScope"/> (Section 5.8). This is a
-/// first-class aggregate because its lifecycle is independent from both
-/// the User (Identity module) and the Profile.
+/// specific <see cref="AuthorizationScope"/> (Section 5.8). A user may
+/// keep many assignments in their list over time, but at most one may be
+/// <see cref="IsActive"/> at any moment (chat, 2026-08-25 — revised).
+/// Unlike the project's default historical-integrity rules, this
+/// aggregate intentionally allows an assignment to toggle between active
+/// and inactive any number of times (explicit product decision, chat,
+/// 2026-08-25 — revised): "Active" and "Inactive" are reversible states
+/// of the same record, not a one-way audit trail.
 /// </summary>
 public sealed class UserProfileAssignment : AggregateRoot<UserProfileAssignmentId>
 {
@@ -25,15 +30,17 @@ public sealed class UserProfileAssignment : AggregateRoot<UserProfileAssignmentI
     public DateTimeOffset AssignedAt { get; private set; }
 
     /// <summary>
-    /// Gets whether this assignment has been revoked. A revoked assignment
-    /// is excluded from authorization checks (BR-017, Access revocation on
-    /// reassignment) but is never physically deleted — Audit Requirements
-    /// (Section 5.8) require immutable authorization records.
+    /// Gets whether this assignment is currently the user's active
+    /// Profile. Exactly one assignment per user may be active at a time;
+    /// this is enforced at the application layer (chat, 2026-08-25 —
+    /// revised) by the command handlers that assign or activate a
+    /// Profile, not by this aggregate alone (each handler orchestrates
+    /// across multiple aggregate instances for the same user).
     /// </summary>
-    public bool IsRevoked { get; private set; }
+    public bool IsActive { get; private set; }
 
-    /// <summary>Gets the UTC timestamp when the assignment was revoked, or null if still active.</summary>
-    public DateTimeOffset? RevokedAt { get; private set; }
+    /// <summary>Gets the UTC timestamp of the last activation or deactivation, or null if never toggled.</summary>
+    public DateTimeOffset? LastChangedAt { get; private set; }
 
     // Reserved for EF Core materialization only.
     private UserProfileAssignment()
@@ -54,12 +61,16 @@ public sealed class UserProfileAssignment : AggregateRoot<UserProfileAssignmentI
         ProfileId = profileId;
         Scope = scope;
         AssignedAt = assignedAt;
-        IsRevoked = false;
-        RevokedAt = null;
+        IsActive = true;
+        LastChangedAt = null;
     }
 
     /// <summary>
-    /// Creates a new UserProfileAssignment. This is the only way an assignment comes into existence.
+    /// Creates a new UserProfileAssignment. This is the only way an
+    /// assignment comes into existence, and it is always created active
+    /// — callers (see <c>AssignUserToProfileCommandHandler</c>) are
+    /// responsible for deactivating the user's previously active
+    /// assignment, if any, in the same operation.
     /// </summary>
     /// <param name="userId">The identifier of the user.</param>
     /// <param name="profileId">The identifier of the profile.</param>
@@ -106,25 +117,46 @@ public sealed class UserProfileAssignment : AggregateRoot<UserProfileAssignmentI
     }
 
     /// <summary>
-    /// Revokes this assignment, immediately excluding it from authorization
-    /// checks (BR-017). The record itself is retained (soft revocation) to
-    /// satisfy the immutable-audit-trail requirement in Section 5.8.
+    /// Deactivates this assignment. Idempotent: deactivating an already
+    /// inactive assignment is a harmless no-op (chat, 2026-08-25 —
+    /// revised), since the whole point of this model is that assignments
+    /// toggle freely.
     /// </summary>
     /// <param name="dateTimeProvider">Provider for deterministic UTC timestamps.</param>
-    /// <returns>A result indicating success, or a business error if already revoked.</returns>
-    public Result Revoke(IDateTimeProvider dateTimeProvider)
+    public void Deactivate(IDateTimeProvider dateTimeProvider)
     {
-        if (IsRevoked)
+        if (!IsActive)
         {
-            return Result.Failure(ProfileErrors.AssignmentAlreadyRevoked());
+            return;
         }
 
-        IsRevoked = true;
-        RevokedAt = dateTimeProvider.UtcNow;
+        IsActive = false;
+        LastChangedAt = dateTimeProvider.UtcNow;
 
         RaiseDomainEvent(
-            new UserProfileAssignmentRevoked(Id, UserId, ProfileId, Scope, RevokedAt.Value));
+            new UserProfileAssignmentDeactivated(Id, UserId, ProfileId, Scope, LastChangedAt.Value));
+    }
 
-        return Result.Success();
+    /// <summary>
+    /// Activates this assignment. Idempotent for the same reason as
+    /// <see cref="Deactivate"/>. Callers (see
+    /// <c>ActivateUserProfileAssignmentCommandHandler</c>) are
+    /// responsible for deactivating whichever other assignment is
+    /// currently active for the same user, in the same operation, so
+    /// the "at most one active Profile" invariant holds afterward.
+    /// </summary>
+    /// <param name="dateTimeProvider">Provider for deterministic UTC timestamps.</param>
+    public void Activate(IDateTimeProvider dateTimeProvider)
+    {
+        if (IsActive)
+        {
+            return;
+        }
+
+        IsActive = true;
+        LastChangedAt = dateTimeProvider.UtcNow;
+
+        RaiseDomainEvent(
+            new UserProfileAssignmentActivated(Id, UserId, ProfileId, Scope, LastChangedAt.Value));
     }
 }

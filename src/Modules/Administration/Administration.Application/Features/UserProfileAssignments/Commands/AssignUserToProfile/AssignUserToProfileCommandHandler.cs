@@ -7,8 +7,12 @@ using MediatR;
 namespace MachineryManager.Administration.Application.Features.UserProfileAssignments.Commands.AssignUserToProfile;
 
 /// <summary>
-/// Handles <see cref="AssignUserToProfileCommand"/> by creating the
-/// assignment aggregate, persisting it, and committing the unit of work.
+/// Handles <see cref="AssignUserToProfileCommand"/> by deactivating the
+/// user's currently active assignment (if any), then creating and
+/// persisting the new assignment as active (chat, 2026-08-25 — revised:
+/// a user may keep many assignments in their list, but only one is
+/// active at a time; assigning a new Profile automatically takes over
+/// the active slot instead of requiring a manual deactivation first).
 /// </summary>
 public sealed class AssignUserToProfileCommandHandler
     : IRequestHandler<AssignUserToProfileCommand, Result<Guid>>
@@ -66,19 +70,20 @@ public sealed class AssignUserToProfileCommandHandler
                     "Cannot assign an inactive profile to a user."));
         }
 
-        // A user may hold at most one active Profile at a time (chat,
-        // 2026-08-25). This single check also prevents the same Profile
-        // from being assigned twice to the same user, since a duplicate
-        // assignment is a specific case of "already has an active
-        // assignment".
-        var existingActiveAssignments = await _assignmentRepository.GetActiveByUserIdAsync(
+        // Automatically deactivate whichever assignment currently holds
+        // this user's active slot (chat, 2026-08-25 — revised). This
+        // replaces the previous hard 409 conflict: assigning a new
+        // Profile now always succeeds and simply takes over the active
+        // slot, while the previous assignment stays in the user's list
+        // (inactive) and can be reactivated later.
+        var currentlyActive = await _assignmentRepository.GetActiveByUserIdAsync(
             request.UserId,
             cancellationToken);
 
-        if (existingActiveAssignments.Count > 0)
+        foreach (var existing in currentlyActive)
         {
-            return Result.Failure<Guid>(
-                ProfileErrors.UserAlreadyHasActiveAssignment(existingActiveAssignments[0].ProfileId.Value));
+            existing.Deactivate(_dateTimeProvider);
+            _assignmentRepository.Update(existing);
         }
 
         var result = UserProfileAssignment.Create(

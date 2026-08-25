@@ -1,4 +1,5 @@
 @page "/admin/users/{UserId:guid}/assign-profile"
+@rendermode @(new InteractiveServerRenderMode(prerender: false))
 @inject IHttpClientFactory HttpClientFactory
 @inject NavigationManager Navigation
 
@@ -59,7 +60,7 @@
                     }
                     else
                     {
-                        <span>ذخیره</span>
+                        <span>تخصیص به‌عنوان پروفایل فعال</span>
                     }
                 </MudButton>
 
@@ -70,7 +71,7 @@
             </MudForm>
         </MudPaper>
 
-        <MudText Typo="Typo.h5" Class="mt-8 mb-4">تخصیص‌های فعلی این کاربر</MudText>
+        <MudText Typo="Typo.h5" Class="mt-8 mb-4">لیست پروفایل‌های این کاربر</MudText>
 
         @if (assignmentsErrorMessage is not null)
         {
@@ -83,7 +84,7 @@
         }
         else if (assignments.Count == 0)
         {
-            <MudText Typo="Typo.body2" Class="mud-text-secondary">هیچ تخصیصی برای این کاربر ثبت نشده است.</MudText>
+            <MudText Typo="Typo.body2" Class="mud-text-secondary">هیچ پروفایلی برای این کاربر ثبت نشده است.</MudText>
         }
         else
         {
@@ -93,37 +94,60 @@
                     <MudTh>سطح دسترسی</MudTh>
                     <MudTh>وضعیت</MudTh>
                     <MudTh>تاریخ تخصیص</MudTh>
-                    <MudTh>تاریخ لغو</MudTh>
                     <MudTh>عملیات</MudTh>
                 </HeaderContent>
                 <RowTemplate>
                     <MudTd DataLabel="پروفایل">@ResolveProfileName(context.ProfileId)</MudTd>
                     <MudTd DataLabel="سطح دسترسی">@context.ScopeLevel</MudTd>
                     <MudTd DataLabel="وضعیت">
-                        <MudChip T="string" Color="@(context.IsRevoked ? Color.Default : Color.Success)" Size="Size.Small">
-                            @(context.IsRevoked ? "لغو شده" : "فعال")
+                        <MudChip T="string" Color="@(context.IsActive ? Color.Success : Color.Default)" Size="Size.Small">
+                            @(context.IsActive ? "فعال" : "غیرفعال")
                         </MudChip>
                     </MudTd>
                     <MudTd DataLabel="تاریخ تخصیص">@context.AssignedAt.ToLocalTime().ToString("yyyy/MM/dd HH:mm")</MudTd>
-                    <MudTd DataLabel="تاریخ لغو">
-                        @(context.RevokedAt is { } revokedAt ? revokedAt.ToLocalTime().ToString("yyyy/MM/dd HH:mm") : "—")
-                    </MudTd>
                     <MudTd>
-                        @if (!context.IsRevoked)
+                        @if (context.IsActive)
                         {
-                            <MudButton Variant="Variant.Text" Color="Color.Error"
-                                       Disabled="@(revokingAssignmentId == context.Id)"
-                                       OnClick="@(() => RevokeAsync(context.Id))">
-                                @if (revokingAssignmentId == context.Id)
+                            <MudButton Variant="Variant.Text" Color="Color.Warning"
+                                       Disabled="@(busyAssignmentId == context.Id)"
+                                       OnClick="@(() => DeactivateAsync(context.Id))">
+                                @if (busyAssignmentId == context.Id)
                                 {
                                     <MudProgressCircular Size="Size.Small" Indeterminate="true" />
                                 }
                                 else
                                 {
-                                    <span>لغو دسترسی</span>
+                                    <span>غیرفعال‌سازی</span>
                                 }
                             </MudButton>
                         }
+                        else
+                        {
+                            <MudButton Variant="Variant.Text" Color="Color.Success"
+                                       Disabled="@(busyAssignmentId == context.Id)"
+                                       OnClick="@(() => ActivateAsync(context.Id))">
+                                @if (busyAssignmentId == context.Id)
+                                {
+                                    <MudProgressCircular Size="Size.Small" Indeterminate="true" />
+                                }
+                                else
+                                {
+                                    <span>فعال‌سازی</span>
+                                }
+                            </MudButton>
+                        }
+                        <MudButton Variant="Variant.Text" Color="Color.Error"
+                                   Disabled="@(busyAssignmentId == context.Id)"
+                                   OnClick="@(() => DeleteAsync(context.Id))">
+                            @if (busyAssignmentId == context.Id)
+                            {
+                                <MudProgressCircular Size="Size.Small" Indeterminate="true" />
+                            }
+                            else
+                            {
+                                <span>حذف از لیست</span>
+                            }
+                        </MudButton>
                     </MudTd>
                 </RowTemplate>
             </MudTable>
@@ -155,7 +179,7 @@
     private List<AssignmentItem> assignments = new();
     private bool isLoadingAssignments = true;
     private string? assignmentsErrorMessage;
-    private Guid? revokingAssignmentId;
+    private Guid? busyAssignmentId;
 
     /// <summary>
     /// Initializes the component and loads the available profiles and
@@ -211,8 +235,9 @@ System.Text.Json.JsonSerializerOptions
     }
 
     /// <summary>
-    /// Loads the user's current profile assignments from the API
-    /// (Phase 3 — BR-017 Access revocation on reassignment).
+    /// Loads every assignment (active and inactive) in the user's list
+    /// from the API (chat, 2026-08-25 — revised: shows the full list,
+    /// not just active ones, so inactive rows can be reactivated).
     /// </summary>
     private async Task LoadAssignmentsAsync()
     {
@@ -227,7 +252,7 @@ System.Text.Json.JsonSerializerOptions
 
             if (!response.IsSuccessStatusCode)
             {
-                assignmentsErrorMessage = $"خطا در دریافت تخصیص‌ها: {content}";
+                assignmentsErrorMessage = $"خطا در دریافت لیست پروفایل‌ها: {content}";
                 return;
             }
 
@@ -248,12 +273,10 @@ System.Text.Json.JsonSerializerOptions
     }
 
     /// <summary>
-    /// Submits the profile assignment to the API. The API rejects this
-    /// (409) if the user already has an active assignment — a user may
-    /// hold at most one active Profile at a time (chat, 2026-08-25);
-    /// use "لغو دسترسی" on the existing row below to free the slot
-    /// before assigning a different profile — and the rejection
-    /// message is surfaced here as-is.
+    /// Submits a new profile assignment to the API. The API
+    /// automatically deactivates the user's previously active
+    /// assignment, if any, and adds this one as active (chat,
+    /// 2026-08-25 — revised).
     /// </summary>
     private async Task SubmitAsync()
     {
@@ -317,23 +340,62 @@ System.Text.Json.JsonSerializerOptions
     }
 
     /// <summary>
-    /// Revokes an existing assignment (BR-017, Access revocation on
-    /// reassignment). This is the correct action to free up this
-    /// user's "one active profile" slot before assigning a different
-    /// profile — it never touches the Profile entity itself, only this
-    /// specific assignment record.
+    /// Deactivates an assignment. The record stays in the list and can
+    /// be reactivated later (chat, 2026-08-25 — revised).
     /// </summary>
-    /// <param name="assignmentId">The identifier of the assignment to revoke.</param>
-    private async Task RevokeAsync(Guid assignmentId)
+    /// <param name="assignmentId">The identifier of the assignment to deactivate.</param>
+    private async Task DeactivateAsync(Guid assignmentId)
+    {
+        await SendAssignmentActionAsync(
+            assignmentId,
+            client => client.PostAsync($"/api/v1/user-profile-assignments/{assignmentId}/deactivate", null),
+            "خطا در غیرفعال‌سازی");
+    }
+
+    /// <summary>
+    /// (Re)activates an assignment. The server automatically deactivates
+    /// whichever other assignment currently holds the user's active slot
+    /// (chat, 2026-08-25 — revised).
+    /// </summary>
+    /// <param name="assignmentId">The identifier of the assignment to activate.</param>
+    private async Task ActivateAsync(Guid assignmentId)
+    {
+        await SendAssignmentActionAsync(
+            assignmentId,
+            client => client.PostAsync($"/api/v1/user-profile-assignments/{assignmentId}/activate", null),
+            "خطا در فعال‌سازی");
+    }
+
+    /// <summary>
+    /// Permanently removes an assignment from the user's list — unlike
+    /// Deactivate, this cannot be undone (chat, 2026-08-25 — revised).
+    /// </summary>
+    /// <param name="assignmentId">The identifier of the assignment to delete.</param>
+    private async Task DeleteAsync(Guid assignmentId)
+    {
+        await SendAssignmentActionAsync(
+            assignmentId,
+            client => client.DeleteAsync($"/api/v1/user-profile-assignments/{assignmentId}"),
+            "خطا در حذف");
+    }
+
+    /// <summary>
+    /// Shared plumbing for the three per-row actions above: sets the
+    /// busy state, calls the API, reloads the list on success, and
+    /// surfaces the server's error message as-is on failure.
+    /// </summary>
+    private async Task SendAssignmentActionAsync(
+        Guid assignmentId,
+        Func<HttpClient, Task<HttpResponseMessage>> sendRequest,
+        string errorPrefix)
     {
         assignmentsErrorMessage = null;
-        revokingAssignmentId = assignmentId;
+        busyAssignmentId = assignmentId;
 
         try
         {
             var client = HttpClientFactory.CreateClient("InternalApi");
-            var response = await client.PostAsync(
-                $"/api/v1/user-profile-assignments/{assignmentId}/revoke", null);
+            var response = await sendRequest(client);
 
             if (response.IsSuccessStatusCode)
             {
@@ -342,7 +404,7 @@ System.Text.Json.JsonSerializerOptions
             else
             {
                 assignmentsErrorMessage =
-                    $"خطا در لغو دسترسی: {await response.Content.ReadAsStringAsync()}";
+                    $"{errorPrefix}: {await response.Content.ReadAsStringAsync()}";
             }
         }
         catch (Exception ex)
@@ -351,7 +413,7 @@ System.Text.Json.JsonSerializerOptions
         }
         finally
         {
-            revokingAssignmentId = null;
+            busyAssignmentId = null;
         }
     }
 
@@ -415,7 +477,7 @@ System.Text.Json.JsonSerializerOptions
         public Guid? ScopeOrganizationId { get; set; }
         public Guid? ScopeProjectId { get; set; }
         public DateTimeOffset AssignedAt { get; set; }
-        public bool IsRevoked { get; set; }
-        public DateTimeOffset? RevokedAt { get; set; }
+        public bool IsActive { get; set; }
+        public DateTimeOffset? LastChangedAt { get; set; }
     }
 }

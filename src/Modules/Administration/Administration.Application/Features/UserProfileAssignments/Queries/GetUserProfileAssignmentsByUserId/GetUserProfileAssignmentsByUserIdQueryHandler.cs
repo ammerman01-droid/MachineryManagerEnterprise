@@ -36,8 +36,8 @@ public sealed class GetUserProfileAssignmentsByUserIdQueryHandler
             a.Scope.OrganizationId,
             a.Scope.ProjectId,
             a.AssignedAt,
-            a.IsRevoked,
-            a.RevokedAt)).ToList();
+            a.IsActive,
+            a.LastChangedAt)).ToList();
 
         return Result.Success<IReadOnlyList<UserProfileAssignmentDto>>(dtos);
     }

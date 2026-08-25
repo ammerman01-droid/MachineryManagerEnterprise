@@ -1,6 +1,8 @@
 using Administration.Domain;
+using MachineryManager.Administration.Application.Features.UserProfileAssignments.Commands.ActivateUserProfileAssignment;
 using MachineryManager.Administration.Application.Features.UserProfileAssignments.Commands.AssignUserToProfile;
-using MachineryManager.Administration.Application.Features.UserProfileAssignments.Commands.RevokeUserProfileAssignment;
+using MachineryManager.Administration.Application.Features.UserProfileAssignments.Commands.DeactivateUserProfileAssignment;
+using MachineryManager.Administration.Application.Features.UserProfileAssignments.Commands.DeleteUserProfileAssignment;
 using MachineryManager.Administration.Application.Features.UserProfileAssignments.Queries.GetUserProfileAssignmentsByUserId;
 using MachineryManager.Administration.Presentation.Contracts;
 using MediatR;
@@ -31,7 +33,7 @@ public static class UserProfileAssignmentEndpoints
 
         group.MapPost("/", AssignUserToProfileAsync)
             .WithName("AssignUserToProfile")
-            .WithSummary("Assigns a User to a Profile at a specific authorization scope.")
+            .WithSummary("Assigns a User to a Profile at a specific authorization scope. Automatically deactivates the user's previously active assignment, if any.")
             // Bootstrap-phase restriction (chat, 2026-08-20) — see the
             // same note on ProfileEndpoints.CreateProfile.
             .RequireAuthorization(policy => policy
@@ -40,13 +42,25 @@ public static class UserProfileAssignmentEndpoints
 
         group.MapGet("/", GetAssignmentsByUserIdAsync)
             .WithName("GetUserProfileAssignments")
-            .WithSummary("Retrieves profile assignments for a user.");
+            .WithSummary("Retrieves every profile assignment for a user (active and inactive).");
 
-        group.MapPost("/{assignmentId:guid}/revoke", RevokeUserProfileAssignmentAsync)
-            .WithName("RevokeUserProfileAssignment")
-            .WithSummary("Revokes an existing User-Profile assignment (BR-017, Access revocation on reassignment).")
-            // Same bootstrap-phase restriction as Assign — revocation is
-            // an equally sensitive authorization-changing operation.
+        group.MapPost("/{assignmentId:guid}/deactivate", DeactivateUserProfileAssignmentAsync)
+            .WithName("DeactivateUserProfileAssignment")
+            .WithSummary("Deactivates a User-Profile assignment. The record stays in the user's list and can be reactivated later.")
+            .RequireAuthorization(policy => policy
+                .AddAuthenticationSchemes(OpenIddictValidationAspNetCoreDefaults.AuthenticationScheme)
+                .RequireClaim(Claims.Role, "System Administrator"));
+
+        group.MapPost("/{assignmentId:guid}/activate", ActivateUserProfileAssignmentAsync)
+            .WithName("ActivateUserProfileAssignment")
+            .WithSummary("(Re)activates a User-Profile assignment, automatically deactivating whichever other assignment currently holds the user's active slot.")
+            .RequireAuthorization(policy => policy
+                .AddAuthenticationSchemes(OpenIddictValidationAspNetCoreDefaults.AuthenticationScheme)
+                .RequireClaim(Claims.Role, "System Administrator"));
+
+        group.MapDelete("/{assignmentId:guid}", DeleteUserProfileAssignmentAsync)
+            .WithName("DeleteUserProfileAssignment")
+            .WithSummary("Permanently removes a User-Profile assignment from the user's list.")
             .RequireAuthorization(policy => policy
                 .AddAuthenticationSchemes(OpenIddictValidationAspNetCoreDefaults.AuthenticationScheme)
                 .RequireClaim(Claims.Role, "System Administrator"));
@@ -93,14 +107,44 @@ public static class UserProfileAssignmentEndpoints
             : result.ToProblemResult(httpContext);
     }
 
-    private static async Task<IResult> RevokeUserProfileAssignmentAsync(
+    private static async Task<IResult> DeactivateUserProfileAssignmentAsync(
         Guid assignmentId,
         ISender sender,
         HttpContext httpContext,
         CancellationToken cancellationToken)
     {
         var result = await sender.Send(
-            new RevokeUserProfileAssignmentCommand(assignmentId),
+            new DeactivateUserProfileAssignmentCommand(assignmentId),
+            cancellationToken);
+
+        return result.IsSuccess
+            ? Results.NoContent()
+            : result.ToProblemResult(httpContext);
+    }
+
+    private static async Task<IResult> ActivateUserProfileAssignmentAsync(
+        Guid assignmentId,
+        ISender sender,
+        HttpContext httpContext,
+        CancellationToken cancellationToken)
+    {
+        var result = await sender.Send(
+            new ActivateUserProfileAssignmentCommand(assignmentId),
+            cancellationToken);
+
+        return result.IsSuccess
+            ? Results.NoContent()
+            : result.ToProblemResult(httpContext);
+    }
+
+    private static async Task<IResult> DeleteUserProfileAssignmentAsync(
+        Guid assignmentId,
+        ISender sender,
+        HttpContext httpContext,
+        CancellationToken cancellationToken)
+    {
+        var result = await sender.Send(
+            new DeleteUserProfileAssignmentCommand(assignmentId),
             cancellationToken);
 
         return result.IsSuccess

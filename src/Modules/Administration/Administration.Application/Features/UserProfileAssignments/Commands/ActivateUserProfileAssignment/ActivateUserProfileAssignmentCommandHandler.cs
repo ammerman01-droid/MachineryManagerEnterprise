@@ -3,27 +3,28 @@ using MachineryManager.SharedKernel;
 using MachineryManager.SharedKernel.Abstractions;
 using MediatR;
 
-namespace MachineryManager.Administration.Application.Features.UserProfileAssignments.Commands.RevokeUserProfileAssignment;
+namespace MachineryManager.Administration.Application.Features.UserProfileAssignments.Commands.ActivateUserProfileAssignment;
 
 /// <summary>
-/// Handles <see cref="RevokeUserProfileAssignmentCommand"/> by loading the
-/// assignment aggregate, invoking domain revocation, and committing the
-/// unit of work (BR-017, Access revocation on reassignment).
+/// Handles <see cref="ActivateUserProfileAssignmentCommand"/> by
+/// deactivating the user's currently active assignment (if it differs
+/// from the target), activating the target assignment, and committing
+/// the unit of work (chat, 2026-08-25 — revised).
 /// </summary>
-public sealed class RevokeUserProfileAssignmentCommandHandler
-    : IRequestHandler<RevokeUserProfileAssignmentCommand, Result>
+public sealed class ActivateUserProfileAssignmentCommandHandler
+    : IRequestHandler<ActivateUserProfileAssignmentCommand, Result>
 {
     private readonly IUserProfileAssignmentRepository _assignmentRepository;
     private readonly IAdministrationUnitOfWork _unitOfWork;
     private readonly IDateTimeProvider _dateTimeProvider;
 
     /// <summary>
-    /// Initializes a new instance of the <see cref="RevokeUserProfileAssignmentCommandHandler"/> class.
+    /// Initializes a new instance of the <see cref="ActivateUserProfileAssignmentCommandHandler"/> class.
     /// </summary>
     /// <param name="assignmentRepository">The user-profile assignment repository.</param>
     /// <param name="unitOfWork">The unit of work for atomic persistence.</param>
     /// <param name="dateTimeProvider">Provider for deterministic UTC timestamps.</param>
-    public RevokeUserProfileAssignmentCommandHandler(
+    public ActivateUserProfileAssignmentCommandHandler(
         IUserProfileAssignmentRepository assignmentRepository,
         IAdministrationUnitOfWork unitOfWork,
         IDateTimeProvider dateTimeProvider)
@@ -34,13 +35,13 @@ public sealed class RevokeUserProfileAssignmentCommandHandler
     }
 
     /// <summary>
-    /// Executes the revocation use case.
+    /// Executes the activation use case.
     /// </summary>
-    /// <param name="request">The revocation command.</param>
+    /// <param name="request">The activation command.</param>
     /// <param name="cancellationToken">Token to cancel the asynchronous operation.</param>
     /// <returns>A result indicating success or a business error.</returns>
     public async Task<Result> Handle(
-        RevokeUserProfileAssignmentCommand request,
+        ActivateUserProfileAssignmentCommand request,
         CancellationToken cancellationToken)
     {
         var assignmentId = global::Administration.Domain.UserProfileAssignmentId.From(request.AssignmentId);
@@ -52,14 +53,24 @@ public sealed class RevokeUserProfileAssignmentCommandHandler
                 global::Administration.Domain.ProfileErrors.AssignmentNotFound(request.AssignmentId));
         }
 
-        var result = assignment.Revoke(_dateTimeProvider);
+        // Deactivate whichever OTHER assignment currently holds this
+        // user's active slot, so at most one stays active afterward.
+        var currentlyActive = await _assignmentRepository.GetActiveByUserIdAsync(
+            assignment.UserId,
+            cancellationToken);
 
-        if (result.IsFailure)
+        foreach (var existing in currentlyActive)
         {
-            return result;
+            if (existing.Id != assignment.Id)
+            {
+                existing.Deactivate(_dateTimeProvider);
+                _assignmentRepository.Update(existing);
+            }
         }
 
+        assignment.Activate(_dateTimeProvider);
         _assignmentRepository.Update(assignment);
+
         await _unitOfWork.SaveChangesAsync(cancellationToken);
 
         return Result.Success();

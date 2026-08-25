@@ -38,13 +38,13 @@ public sealed class UserProfileAssignmentRepository : IUserProfileAssignmentRepo
     /// <inheritdoc />
     public async Task<IReadOnlyList<UserProfileAssignment>> GetActiveByUserIdAsync(Guid userId, CancellationToken cancellationToken = default) =>
         await _dbContext.UserProfileAssignments
-            .Where(a => a.UserId == userId && !a.IsRevoked)
+            .Where(a => a.UserId == userId && a.IsActive)
             .ToListAsync(cancellationToken);
 
     /// <inheritdoc />
     public Task<bool> HasActiveAssignmentsForProfileAsync(ProfileId profileId, CancellationToken cancellationToken = default) =>
         _dbContext.UserProfileAssignments
-            .AnyAsync(a => a.ProfileId == profileId && !a.IsRevoked, cancellationToken);
+            .AnyAsync(a => a.ProfileId == profileId && a.IsActive, cancellationToken);
 
     /// <inheritdoc />
     public async Task RemoveAllForProfileAsync(ProfileId profileId, CancellationToken cancellationToken = default)

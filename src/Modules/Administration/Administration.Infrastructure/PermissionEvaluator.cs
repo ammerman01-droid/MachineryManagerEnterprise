@@ -35,7 +35,7 @@ public sealed class PermissionEvaluator : IPermissionEvaluator
         CancellationToken cancellationToken = default)
     {
         var assignments = await _dbContext.Set<global::Administration.Domain.UserProfileAssignment>()
-            .Where(a => a.UserId == userId && !a.IsRevoked)
+            .Where(a => a.UserId == userId && a.IsActive)
             .Join(
                 _dbContext.Set<global::Administration.Domain.Profile>(),
                 assignment => assignment.ProfileId,
@@ -71,7 +71,7 @@ public sealed class PermissionEvaluator : IPermissionEvaluator
         CancellationToken cancellationToken = default)
     {
         var assignments = await _dbContext.Set<global::Administration.Domain.UserProfileAssignment>()
-            .Where(a => a.UserId == userId && !a.IsRevoked)
+            .Where(a => a.UserId == userId && a.IsActive)
             .Join(
                 _dbContext.Set<global::Administration.Domain.Profile>(),
                 assignment => assignment.ProfileId,

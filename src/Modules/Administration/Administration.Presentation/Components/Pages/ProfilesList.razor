@@ -1,6 +1,7 @@
 @page "/admin/profiles"
 @inject IHttpClientFactory HttpClientFactory
 @inject NavigationManager Navigation
+@inject IDialogService DialogService
 
 <PageTitle>مدیریت پروفایل‌ها</PageTitle>
 
@@ -170,7 +171,6 @@ System.Text.Json.JsonSerializerOptions
     /// <param name="id">The identifier of the profile to delete.</param>
     private async Task DeleteAsync(Guid id)
     {
-        errorMessage = null;
         deletingProfileId = id;
 
         try
@@ -184,17 +184,66 @@ System.Text.Json.JsonSerializerOptions
             }
             else
             {
-                errorMessage = $"خطا در حذف پروفایل: {await response.Content.ReadAsStringAsync()}";
+                var rawContent = await response.Content.ReadAsStringAsync();
+                var friendlyMessage = TranslateDeleteError(rawContent);
+
+                await DialogService.ShowMessageBox(
+                    "امکان حذف وجود ندارد",
+                    friendlyMessage,
+                    yesText: "متوجه شدم");
             }
         }
         catch (Exception ex)
         {
-            errorMessage = $"خطا: {ex.Message}";
+            await DialogService.ShowMessageBox(
+                "خطا",
+                $"در ارتباط با سرور مشکلی پیش آمد: {ex.Message}",
+                yesText: "متوجه شدم");
         }
         finally
         {
             deletingProfileId = null;
         }
+    }
+
+    /// <summary>
+    /// Translates the API's ProblemDetails JSON into a friendly Persian
+    /// message for the delete-profile dialog (chat, 2026-08-25).
+    /// </summary>
+    private static string TranslateDeleteError(string rawJson)
+    {
+        try
+        {
+            var problem = System.Text.Json.JsonSerializer.Deserialize<ApiErrorResponse>(
+                rawJson,
+                new System.Text.Json.JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+
+            return problem?.ErrorCode switch
+            {
+                "Profile.HasActiveAssignments" =>
+                    "این پروفایل هنوز به یک یا چند کاربر تخصیص داده شده است. " +
+                    "ابتدا آن را از لیست دسترسی‌های همه‌ی کاربران بردارید، سپس دوباره تلاش کنید.",
+                "Profile.NotFound" =>
+                    "این پروفایل پیدا نشد — احتمالاً قبلاً حذف شده است.",
+                _ => problem?.Message ?? "خطای نامشخصی هنگام حذف پروفایل رخ داد.",
+            };
+        }
+        catch
+        {
+            return "خطای نامشخصی هنگام حذف پروفایل رخ داد.";
+        }
+    }
+
+    /// <summary>
+    /// Matches this API's actual custom error response shape
+    /// (chat, 2026-08-25 — corrected after seeing the real JSON):
+    /// { errorCode, title, message, correlationId, details }.
+    /// </summary>
+    private sealed class ApiErrorResponse
+    {
+        public string? ErrorCode { get; set; }
+        public string? Title { get; set; }
+        public string? Message { get; set; }
     }
 
     private sealed class ProfileItem

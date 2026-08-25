@@ -13,8 +13,8 @@ public sealed record UserProfileAssignmentDto(
     Guid? ScopeOrganizationId,
     Guid? ScopeProjectId,
     DateTimeOffset AssignedAt,
-    bool IsRevoked,
-    DateTimeOffset? RevokedAt);
+    bool IsActive,
+    DateTimeOffset? LastChangedAt);
 
 /// <summary>Query to retrieve assignments for a specific user.</summary>
 public sealed record GetUserProfileAssignmentsByUserIdQuery(Guid UserId)
