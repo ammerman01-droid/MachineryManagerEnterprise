@@ -10,6 +10,7 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Routing;
 using OpenIddict.Validation.AspNetCore;
+using MachineryManager.Organization.Application.Features.Organizations.Commands.RenameOrganization;
 
 namespace MachineryManager.Organization.Presentation.Endpoints;
 
@@ -39,6 +40,10 @@ public static class OrganizationEndpoints
         group.MapPost("/", RegisterOrganizationAsync)
             .WithName("RegisterOrganization")
             .WithSummary("Registers a new Organization.");
+
+        group.MapPut("/{organizationId:guid}", RenameOrganizationAsync)
+            .WithName("RenameOrganization")
+            .WithSummary("Renames an existing Organization.");
 
         group.MapGet("/{organizationId:guid}", GetOrganizationByIdAsync)
             .WithName("GetOrganizationById")
@@ -142,6 +147,22 @@ public static class OrganizationEndpoints
         CancellationToken cancellationToken)
     {
         var result = await sender.Send(new ReactivateOrganizationCommand(organizationId), cancellationToken);
+
+        return result.IsSuccess
+            ? Results.NoContent()
+            : result.ToProblemResult(httpContext);
+    }
+
+        private static async Task<IResult> RenameOrganizationAsync(
+        Guid organizationId,
+        RenameOrganizationRequest request,
+        ISender sender,
+        HttpContext httpContext,
+        CancellationToken cancellationToken)
+    {
+        var result = await sender.Send(
+            new RenameOrganizationCommand(organizationId, request.Name),
+            cancellationToken);
 
         return result.IsSuccess
             ? Results.NoContent()

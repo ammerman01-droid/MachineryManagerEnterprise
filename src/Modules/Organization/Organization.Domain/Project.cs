@@ -76,4 +76,27 @@ public sealed class Project : AggregateRoot<ProjectId>
 
         return project;
     }
+    
+    /// <summary>Renames this Project.</summary>
+    /// <param name="name">The new name.</param>
+    /// <param name="dateTimeProvider">Provides the current UTC time for the raised domain event.</param>
+    /// <returns>A <see cref="Result"/> indicating success or a validation error.</returns>
+    public Result Rename(string name, IDateTimeProvider dateTimeProvider)
+    {
+        if (string.IsNullOrWhiteSpace(name))
+        {
+            return Result.Failure(ProjectErrors.NameRequired());
+        }
+
+        if (name.Length > MaxNameLength)
+        {
+            return Result.Failure(ProjectErrors.NameTooLong(MaxNameLength));
+        }
+
+        Name = name.Trim();
+
+        RaiseDomainEvent(new ProjectRenamed(Id, Name, dateTimeProvider.UtcNow));
+
+        return Result.Success();
+    }
 }

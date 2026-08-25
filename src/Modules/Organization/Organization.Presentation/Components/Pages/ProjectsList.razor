@@ -31,10 +31,17 @@ else
         <HeaderContent>
             <MudTh>نام</MudTh>
             <MudTh>سازمان</MudTh>
+            <MudTh>عملیات</MudTh>
         </HeaderContent>
         <RowTemplate>
             <MudTd DataLabel="نام">@context.Name</MudTd>
             <MudTd DataLabel="سازمان">@ResolveOrganizationName(context.OrganizationId)</MudTd>
+            <MudTd DataLabel="عملیات">
+                <MudButton Size="Size.Small" Variant="Variant.Text" Color="Color.Primary"
+                           OnClick="@(() => Navigation.NavigateTo($"/admin/projects/{context.Id}/edit"))">
+                    ویرایش
+                </MudButton>
+            </MudTd>
         </RowTemplate>
     </MudTable>
 

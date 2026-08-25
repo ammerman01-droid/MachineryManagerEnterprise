@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Routing;
 using OpenIddict.Validation.AspNetCore;
+using MachineryManager.Organization.Application.Features.Projects.Commands.RenameProject;
 
 namespace MachineryManager.Organization.Presentation.Endpoints;
 
@@ -32,6 +33,10 @@ public static class ProjectEndpoints
         group.MapPost("/", RegisterProjectAsync)
             .WithName("RegisterProject")
             .WithSummary("Registers a new Project under an Organization.");
+
+                group.MapPut("/{projectId:guid}", RenameProjectAsync)
+            .WithName("RenameProject")
+            .WithSummary("Renames an existing Project.");
 
         group.MapGet("/{projectId:guid}", GetProjectByIdAsync)
             .WithName("GetProjectById")
@@ -86,6 +91,22 @@ public static class ProjectEndpoints
 
         return result.IsSuccess
             ? Results.Ok(result.Value)
+            : result.ToProblemResult(httpContext);
+    }
+
+        private static async Task<IResult> RenameProjectAsync(
+        Guid projectId,
+        RenameProjectRequest request,
+        ISender sender,
+        HttpContext httpContext,
+        CancellationToken cancellationToken)
+    {
+        var result = await sender.Send(
+            new RenameProjectCommand(projectId, request.Name),
+            cancellationToken);
+
+        return result.IsSuccess
+            ? Results.NoContent()
             : result.ToProblemResult(httpContext);
     }
 }

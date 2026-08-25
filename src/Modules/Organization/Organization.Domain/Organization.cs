@@ -75,6 +75,30 @@ public sealed class Organization : AggregateRoot<OrganizationId>
         return organization;
     }
 
+    
+    /// <summary>Renames this Organization.</summary>
+    /// <param name="name">The new name.</param>
+    /// <param name="dateTimeProvider">Provides the current UTC time for the raised domain event.</param>
+    /// <returns>A <see cref="Result"/> indicating success or a validation error.</returns>
+    public Result Rename(string name, IDateTimeProvider dateTimeProvider)
+    {
+        if (string.IsNullOrWhiteSpace(name))
+        {
+            return Result.Failure(OrganizationErrors.NameRequired());
+        }
+
+        if (name.Length > MaxNameLength)
+        {
+            return Result.Failure(OrganizationErrors.NameTooLong(MaxNameLength));
+        }
+
+        Name = name.Trim();
+
+        RaiseDomainEvent(new OrganizationRenamed(Id, Name, dateTimeProvider.UtcNow));
+
+        return Result.Success();
+    }
+
     /// <summary>
     /// Assigns this Organization to a Holding (chat, 2026-08-19). An
     /// Organization belongs to at most one Holding at a time.

@@ -65,6 +65,10 @@ else
                 </div>
             </MudTd>
             <MudTd DataLabel="عملیات">
+                <MudButton Size="Size.Small" Variant="Variant.Text" Color="Color.Primary"
+                           OnClick="@(() => Navigation.NavigateTo($"/admin/organizations/{context.Id}/edit"))">
+                    ویرایش
+                </MudButton>
                 @if (context.IsSuspended)
                 {
                     <MudButton Size="Size.Small" Variant="Variant.Text" Color="Color.Success"
