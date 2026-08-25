@@ -2,11 +2,11 @@
 |------------------|--------------------|
 | **Document ID**  | DOM-007            |
 | **Title**        | Domain Events      |
-| **Version**      | 4.8.0              |
+| **Version**      | 4.9.0              |
 | **Status**       | Approved           |
 | **Owner**        | Solution Architect |
 | **Created**      | 2026-07-18         |
-| **Last Updated** | 2026-08-08         |
+| **Last Updated** | 2026-08-16         |
 
 ---
 
@@ -82,6 +82,17 @@ Every Domain Event shall contain at least:
 - CausationId (optional)
 
 Additional business data is event-specific.
+
+---
+
+# 4a. Organization Events
+
+Formalized from BR-017 (Business Specification — Organization
+Management).
+
+## OrganizationRegistered
+
+Raised when a new Organization is registered on the platform.
 
 ---
 
@@ -954,4 +965,5 @@ Each future event shall follow the rules defined in this document.
 | 4.5.0   | 2026-08-02 | Solution Architect | Added a new Internal Messaging Events section (MessageCreated, Sent, Delivered, Read, Archived, Deleted) covering BR-013's Message Lifecycle, which had no corresponding events in this catalog at all |
 | 4.6.0   | 2026-08-02 | Solution Architect | Fixed Document ID: was DOM-006 (collided with corrected 06-DomainServices.md), corrected to DOM-007 |
 | 4.7.0   | 2026-08-02 | Solution Architect | Added a new Section 6a Incident Events (IncidentReported through IncidentReopened, 10 events) covering BR-009's Incident Lifecycle, which had no corresponding events in this catalog at all |
-| 4.8.0   | 2026-08-08 | Solution Architect | Added a new Section 9a Relationship Events (RelationshipCreated through RelationshipArchived, 5 events) covering BR-015's Relationship Lifecycle, which had no corresponding events in this catalog at all |
+| 4.8.0   | 2026-08-02 | Solution Architect | Added a new Section 9a Relationship Events (RelationshipCreated through RelationshipArchived, 5 events) covering BR-015's Relationship Lifecycle, which had no corresponding events in this catalog at all |
+| 4.9.0   | 2026-08-02 | Solution Architect | Added Section 4a Organization Events (OrganizationRegistered), needed while implementing the Organization module |

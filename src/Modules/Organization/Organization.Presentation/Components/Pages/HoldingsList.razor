@@ -1,0 +1,128 @@
+@page "/admin/holdings"
+@inject IHttpClientFactory HttpClientFactory
+@inject NavigationManager Navigation
+
+<PageTitle>Holdings </PageTitle>
+
+<MudText Typo="Typo.h4" Class="mb-4">مدیریت Holding</MudText>
+
+<MudButton Variant="Variant.Filled" Color="Color.Primary" Class="mb-4"
+           OnClick="@(() => Navigation.NavigateTo("/admin/holdings/create"))">
+    Holding جدید
+</MudButton>
+
+@if (errorMessage is not null)
+{
+    <MudAlert Severity="Severity.Error" Class="my-4">@errorMessage</MudAlert>
+}
+
+@if (isLoading)
+{
+    <MudProgressLinear Indeterminate="true" Class="my-4" />
+}
+else if (items.Count == 0)
+{
+    <MudText Typo="Typo.body2" Class="mud-text-secondary">هیچ Holding ای ثبت نشده است.</MudText>
+}
+else
+{
+    <MudTable Items="@items" Hover="true" Breakpoint="Breakpoint.Sm">
+                <HeaderContent>
+            <MudTh>نام</MudTh>
+            <MudTh>عملیات</MudTh>
+        </HeaderContent>
+        <RowTemplate>
+            <MudTd DataLabel="نام">@context.Name</MudTd>
+            <MudTd DataLabel="عملیات">
+                <MudButton Variant="Variant.Text" Color="Color.Primary" Size="Size.Small"
+                           OnClick="@(() => Navigation.NavigateTo($"/admin/holdings/{context.Id}/edit"))">
+                    ویرایش
+                </MudButton>
+            </MudTd>
+        </RowTemplate>
+    </MudTable>
+
+    <div class="d-flex justify-space-between align-center mt-4">
+        <MudButton Disabled="@(!hasPreviousPage)" OnClick="@(() => LoadPageAsync(page - 1))">قبلی</MudButton>
+        <MudText Typo="Typo.body2">صفحه @(page) از @totalPages</MudText>
+        <MudButton Disabled="@(!hasNextPage)" OnClick="@(() => LoadPageAsync(page + 1))">بعدی</MudButton>
+    </div>
+}
+
+@code {
+    private sealed class HoldingItem
+    {
+        public Guid Id { get; set; }
+        public string Name { get; set; } = string.Empty;
+    }
+
+    private sealed class SearchHoldingsResponse
+    {
+        public List<HoldingItem> Items { get; set; } = new();
+        public int Page { get; set; }
+        public int PageSize { get; set; }
+        public int TotalItems { get; set; }
+        public int TotalPages { get; set; }
+        public bool HasNextPage { get; set; }
+        public bool HasPreviousPage { get; set; }
+    }
+
+    private List<HoldingItem> items = new();
+    private bool isLoading = true;
+    private string? errorMessage;
+    private int page = 1;
+    private int totalPages;
+    private bool hasNextPage;
+    private bool hasPreviousPage;
+
+    /// <summary>Initializes the component and loads the first page of holdings.</summary>
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadPageAsync(1);
+    }
+
+    /// <summary>Loads a specific page of holdings from the API.</summary>
+    /// <param name="targetPage">The one-based page number to load.</param>
+    private async Task LoadPageAsync(int targetPage)
+    {
+        isLoading = true;
+        errorMessage = null;
+
+        try
+        {
+            var client = HttpClientFactory.CreateClient("InternalApi");
+            var response = await client.GetAsync($"/api/v1/holdings?page={targetPage}&pageSize=25");
+            var content = await response.Content.ReadAsStringAsync();
+
+            if (!response.IsSuccessStatusCode)
+            {
+                errorMessage = $"خطا در دریافت Holding ها: {content}";
+                return;
+            }
+
+            var result = System.Text.Json.JsonSerializer.Deserialize<SearchHoldingsResponse>(content, new
+System.Text.Json.JsonSerializerOptions
+            { PropertyNameCaseInsensitive = true });
+
+            if (result is null)
+            {
+                errorMessage = "پاسخ نامعتبر از سرور.";
+                return;
+            }
+
+            items = result.Items;
+            page = result.Page;
+            totalPages = result.TotalPages;
+            hasNextPage = result.HasNextPage;
+            hasPreviousPage = result.HasPreviousPage;
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"خطا: {ex.Message}";
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+}

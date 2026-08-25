@@ -12,14 +12,41 @@
     <link rel="stylesheet" href="@Assets["MachineryManager.Web.styles.css"]" />
     <ImportMap />
     <link rel="icon" type="image/png" href="favicon.png" />
-    <HeadOutlet />
+    <HeadOutlet @rendermode="RenderModeForRequest()" />
 </head>
 
 <body>
-    <Routes />
+    <Routes @rendermode="RenderModeForRequest()" />
     <ReconnectModal />
     <script src="@Assets["_framework/blazor.web.js"]"></script>
     <script src="_content/MudBlazor/MudBlazor.min.js"></script>
 </body>
 
 </html>
+
+@code {
+    /// <summary>
+    /// Cascaded from the current request; used to decide per-request whether
+    /// the page tree should render statically or interactively.
+    /// </summary>
+    [CascadingParameter]
+    private HttpContext HttpContext { get; set; } = default!;
+
+    /// <summary>
+    /// Identity pages (Login, and any future Identity pages under
+    /// /identity/*) must stay Static SSR: SignInManager needs to write the
+    /// authentication cookie directly to the HTTP response, which is only
+    /// possible before the response has started — a constraint that an
+    /// Interactive Server circuit cannot satisfy. Every other page uses
+    /// InteractiveServer per the project's Global Interactivity decision.
+    /// </summary>
+    private IComponentRenderMode? RenderModeForRequest()
+    {
+        if (HttpContext.Request.Path.StartsWithSegments("/identity"))
+        {
+            return null;
+        }
+
+        return InteractiveServer;
+    }
+}

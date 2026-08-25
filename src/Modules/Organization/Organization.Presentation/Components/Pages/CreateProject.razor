@@ -1,0 +1,151 @@
+@page "/admin/projects/create"
+@inject IHttpClientFactory HttpClientFactory
+@inject NavigationManager Navigation
+
+<PageTitle>پروژه جدید</PageTitle>
+
+<MudText Typo="Typo.h4" Class="mb-4">ثبت پروژه جدید</MudText>
+
+@if (isLoading)
+{
+    <MudProgressLinear Indeterminate="true" Class="my-4" />
+}
+else if (loadErrorMessage is not null)
+{
+    <MudAlert Severity="Severity.Error" Class="my-4">@loadErrorMessage</MudAlert>
+}
+else
+{
+    @if (errorMessage is not null)
+    {
+        <MudAlert Severity="Severity.Error" Class="my-4">@errorMessage</MudAlert>
+    }
+
+    <MudPaper Class="pa-4" Style="max-width:500px;">
+        <MudForm @ref="form" @bind-IsValid="@isValid">
+            <MudSelect T="Guid" @bind-Value="selectedOrganizationId" Label="سازمان" Required="true"
+                       RequiredError="انتخاب سازمان الزامی است.">
+                @foreach (var organization in organizations)
+                {
+                    <MudSelectItem T="Guid" Value="@organization.Id">@organization.Name</MudSelectItem>
+                }
+            </MudSelect>
+
+            <MudTextField @bind-Value="name" Label="نام پروژه" Required="true"
+                          RequiredError="نام الزامی است." MaxLength="200" Class="mt-4" />
+
+            <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="SubmitAsync"
+                       Disabled="@(!isValid || isSubmitting)" Class="mt-4">
+                @if (isSubmitting)
+                {
+                    <MudProgressCircular Size="Size.Small" Indeterminate="true" />
+                }
+                else
+                {
+                    <span>ذخیره</span>
+                }
+            </MudButton>
+
+            <MudButton Variant="Variant.Outlined" OnClick="@(() => Navigation.NavigateTo("/admin/projects"))"
+                       Class="mt-4 mr-2">
+                بازگشت
+            </MudButton>
+        </MudForm>
+    </MudPaper>
+}
+
+@code {
+    private sealed class OrganizationItem
+    {
+        public Guid Id { get; set; }
+        public string Name { get; set; } = string.Empty;
+    }
+
+    private sealed class SearchOrganizationsResponse
+    {
+        public List<OrganizationItem> Items { get; set; } = new();
+    }
+
+    private MudForm? form;
+    private bool isValid;
+    private bool isSubmitting;
+    private bool isLoading = true;
+    private string? loadErrorMessage;
+    private string? errorMessage;
+
+    private List<OrganizationItem> organizations = new();
+    private Guid selectedOrganizationId;
+    private string name = string.Empty;
+
+    /// <summary>Initializes the component and loads the list of organizations for the dropdown.</summary>
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            var client = HttpClientFactory.CreateClient("InternalApi");
+            var response = await client.GetAsync("/api/v1/organizations?pageSize=200");
+            var content = await response.Content.ReadAsStringAsync();
+
+            if (!response.IsSuccessStatusCode)
+            {
+                loadErrorMessage = $"خطا در دریافت سازمان‌ها: {content}";
+                return;
+            }
+
+            var result = System.Text.Json.JsonSerializer.Deserialize<SearchOrganizationsResponse>(content, new
+System.Text.Json.JsonSerializerOptions
+            { PropertyNameCaseInsensitive = true });
+
+            organizations = result?.Items ?? new List<OrganizationItem>();
+
+            if (organizations.Count > 0)
+            {
+                selectedOrganizationId = organizations[0].Id;
+            }
+        }
+        catch (Exception ex)
+        {
+            loadErrorMessage = $"خطا: {ex.Message}";
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+
+    /// <summary>Submits the new project to the API.</summary>
+    private async Task SubmitAsync()
+    {
+        if (form is null || !isValid)
+        {
+            return;
+        }
+
+        isSubmitting = true;
+        errorMessage = null;
+
+        try
+        {
+            var client = HttpClientFactory.CreateClient("InternalApi");
+            var response = await client.PostAsJsonAsync(
+                "/api/v1/projects/",
+                new { OrganizationId = selectedOrganizationId, Name = name });
+
+            if (response.IsSuccessStatusCode)
+            {
+                Navigation.NavigateTo("/admin/projects");
+                return;
+            }
+
+            errorMessage = $"خطا در ثبت پروژه: {await response.Content.ReadAsStringAsync()}";
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"خطا: {ex.Message}";
+        }
+        finally
+        {
+            isSubmitting = false;
+        }
+    }
+}

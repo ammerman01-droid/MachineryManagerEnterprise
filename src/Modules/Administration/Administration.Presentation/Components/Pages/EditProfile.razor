@@ -1,0 +1,201 @@
+@page "/admin/profiles/{ProfileId:guid}/edit"
+@using global::Administration.Domain
+@inject IHttpClientFactory HttpClientFactory
+@inject NavigationManager Navigation
+
+<PageTitle>ویرایش پروفایل</PageTitle>
+
+<AdminOnly>
+
+    <MudText Typo="Typo.h4" Class="mb-4">ویرایش پروفایل</MudText>
+
+    @if (isLoading)
+    {
+        <MudProgressLinear Indeterminate="true" Class="my-4" />
+    }
+    else if (errorMessage is not null)
+    {
+        <MudAlert Severity="Severity.Error" Class="my-4">@errorMessage</MudAlert>
+    }
+    else
+    {
+        <MudPaper Class="pa-4" Style="max-width:900px;">
+            <MudForm @ref="form" @bind-IsValid="@isValid">
+                <MudTextField @bind-Value="name" Label="نام پروفایل" Required="true"
+                              RequiredError="نام پروفایل الزامی است." />
+
+                <MudText Typo="Typo.subtitle1" Class="mt-6 mb-2">دسترسی‌ها</MudText>
+
+                <MudSimpleTable Dense="true" Hover="true">
+                    <thead>
+                        <tr>
+                            <th>بخش</th>
+                            @foreach (var action in PermissionCatalog.Actions)
+                            {
+                                <th style="text-align:center">@ActionLabel(action)</th>
+                            }
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var section in PermissionCatalog.Sections)
+                        {
+                            <tr>
+                                <td>@section.DisplayName</td>
+                                @foreach (var action in PermissionCatalog.Actions)
+                                {
+                                    var permission = PermissionCatalog.BuildPermission(section.Key, action);
+                                    <td style="text-align:center">
+                                        <MudCheckBox T="bool"
+                                                     Value="@selectedPermissions.Contains(permission)"
+                                                     ValueChanged="@((bool isChecked) => TogglePermission(permission, isChecked))" />
+                                    </td>
+                                }
+                            </tr>
+                        }
+                    </tbody>
+                </MudSimpleTable>
+
+                <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="SubmitAsync"
+                           Disabled="@(!isValid || isSubmitting)" Class="mt-4">
+                    @if (isSubmitting)
+                    {
+                        <MudProgressCircular Size="Size.Small" Indeterminate="true" />
+                    }
+                    else
+                    {
+                        <span>ذخیره</span>
+                    }
+                </MudButton>
+
+                <MudButton Variant="Variant.Outlined" OnClick="@(() => Navigation.NavigateTo("/admin/profiles"))"
+                           Class="mt-4 mr-2">
+                    بازگشت
+                </MudButton>
+            </MudForm>
+        </MudPaper>
+    }
+
+</AdminOnly>
+
+@code {
+    /// <summary>The unique identifier of the profile being edited.</summary>
+    [Parameter]
+    public Guid ProfileId { get; set; }
+
+    private MudForm? form;
+    private bool isValid;
+    private bool isSubmitting;
+    private bool isLoading = true;
+    private string? errorMessage;
+    private string name = string.Empty;
+    private readonly HashSet<string> selectedPermissions = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadProfileAsync();
+    }
+
+    private async Task LoadProfileAsync()
+    {
+        try
+        {
+            var client = HttpClientFactory.CreateClient("InternalApi");
+            var response = await client.GetAsync($"/api/v1/profiles/{ProfileId}");
+            var content = await response.Content.ReadAsStringAsync();
+
+            if (!response.IsSuccessStatusCode)
+            {
+                errorMessage = $"خطا در بارگذاری پروفایل: {content}";
+                isLoading = false;
+                return;
+            }
+
+            var result = System.Text.Json.JsonSerializer.Deserialize<ProfileItem>(content, new
+                System.Text.Json.JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+
+            if (result is null)
+            {
+                errorMessage = "پاسخ نامعتبر از سرور.";
+                isLoading = false;
+                return;
+            }
+
+            name = result.Name;
+            selectedPermissions.Clear();
+            foreach (var permission in result.Permissions)
+            {
+                selectedPermissions.Add(permission);
+            }
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"خطا: {ex.Message}";
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+
+    private void TogglePermission(string permission, bool isChecked)
+    {
+        if (isChecked)
+        {
+            selectedPermissions.Add(permission);
+        }
+        else
+        {
+            selectedPermissions.Remove(permission);
+        }
+    }
+
+    private static string ActionLabel(string action) => action switch
+    {
+        "View" => "دیدن",
+        "Create" => "ایجاد",
+        "Edit" => "ویرایش",
+        "Delete" => "حذف",
+        _ => action,
+    };
+
+    private async Task SubmitAsync()
+    {
+        if (form is null || !isValid) return;
+
+        isSubmitting = true;
+        errorMessage = null;
+
+        try
+        {
+            var request = new { Name = name, Permissions = selectedPermissions.ToList() };
+            var client = HttpClientFactory.CreateClient("InternalApi");
+            var response = await client.PutAsJsonAsync($"/api/v1/profiles/{ProfileId}", request);
+            var content = await response.Content.ReadAsStringAsync();
+
+            if (!response.IsSuccessStatusCode)
+            {
+                errorMessage = $"خطا در ویرایش پروفایل: {content}";
+                return;
+            }
+
+            Navigation.NavigateTo("/admin/profiles");
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"خطا: {ex.Message}";
+        }
+        finally
+        {
+            isSubmitting = false;
+        }
+    }
+
+    private sealed class ProfileItem
+    {
+        public Guid Id { get; set; }
+        public string Name { get; set; } = string.Empty;
+        public List<string> Permissions { get; set; } = new();
+        public bool IsActive { get; set; }
+        public DateTimeOffset CreatedAt { get; set; }
+    }
+}
