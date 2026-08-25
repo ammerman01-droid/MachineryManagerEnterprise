@@ -27,13 +27,18 @@ else if (items.Count == 0)
 else
 {
     <MudTable Items="@items" Hover="true" Breakpoint="Breakpoint.Sm">
-        <HeaderContent>
+                <HeaderContent>
             <MudTh>نام</MudTh>
-            <MudTh>شناسه</MudTh>
+            <MudTh>عملیات</MudTh>
         </HeaderContent>
         <RowTemplate>
             <MudTd DataLabel="نام">@context.Name</MudTd>
-            <MudTd DataLabel="شناسه">@context.Id</MudTd>
+            <MudTd DataLabel="عملیات">
+                <MudButton Variant="Variant.Text" Color="Color.Primary" Size="Size.Small"
+                           OnClick="@(() => Navigation.NavigateTo($"/admin/holdings/{context.Id}/edit"))">
+                    ویرایش
+                </MudButton>
+            </MudTd>
         </RowTemplate>
     </MudTable>
 

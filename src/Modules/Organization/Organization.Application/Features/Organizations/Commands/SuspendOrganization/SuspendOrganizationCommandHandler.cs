@@ -14,7 +14,7 @@ namespace MachineryManager.Organization.Application.Features.Organizations.Comma
 public sealed class SuspendOrganizationCommandHandler
     : IRequestHandler<SuspendOrganizationCommand, Result>
 {
-    private const string RequiredPermission = "Organization.Manage";
+    private const string RequiredPermission = "Organization.Edit";
 
     private readonly IOrganizationRepository _organizationRepository;
     private readonly IUnitOfWork _unitOfWork;

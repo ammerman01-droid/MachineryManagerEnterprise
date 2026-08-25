@@ -61,4 +61,28 @@ public sealed class Holding : AggregateRoot<HoldingId>
 
         return holding;
     }
+
+    
+    /// <summary>Renames this Holding.</summary>
+    /// <param name="name">The new name.</param>
+    /// <param name="dateTimeProvider">Provides the current UTC time for the raised domain event.</param>
+    /// <returns>A <see cref="Result"/> indicating success or a validation error.</returns>
+    public Result Rename(string name, IDateTimeProvider dateTimeProvider)
+    {
+        if (string.IsNullOrWhiteSpace(name))
+        {
+            return Result.Failure(HoldingErrors.NameRequired());
+        }
+
+        if (name.Length > MaxNameLength)
+        {
+            return Result.Failure(HoldingErrors.NameTooLong(MaxNameLength));
+        }
+
+        Name = name.Trim();
+
+        RaiseDomainEvent(new HoldingRenamed(Id, Name, dateTimeProvider.UtcNow));
+
+        return Result.Success();
+    }
 }

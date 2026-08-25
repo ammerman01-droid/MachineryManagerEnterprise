@@ -13,7 +13,7 @@ namespace MachineryManager.Organization.Application.Features.Projects.Commands.R
 public sealed class RegisterProjectCommandHandler
     : IRequestHandler<RegisterProjectCommand, Result<Guid>>
 {
-    private const string RequiredPermission = "Project.Manage";
+    private const string RequiredPermission = "Project.Create";
 
     private readonly IProjectRepository _projectRepository;
     private readonly IOrganizationRepository _organizationRepository;

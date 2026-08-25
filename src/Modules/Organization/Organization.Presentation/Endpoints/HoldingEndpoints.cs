@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Routing;
 using OpenIddict.Validation.AspNetCore;
+using MachineryManager.Organization.Application.Features.Holdings.Commands.RenameHolding;
 
 namespace MachineryManager.Organization.Presentation.Endpoints;
 
@@ -32,6 +33,10 @@ public static class HoldingEndpoints
         group.MapPost("/", RegisterHoldingAsync)
             .WithName("RegisterHolding")
             .WithSummary("Registers a new Holding.");
+
+                group.MapPut("/{holdingId:guid}", RenameHoldingAsync)
+            .WithName("RenameHolding")
+            .WithSummary("Renames an existing Holding.");
 
         group.MapGet("/{holdingId:guid}", GetHoldingByIdAsync)
             .WithName("GetHoldingById")
@@ -84,6 +89,22 @@ public static class HoldingEndpoints
 
         return result.IsSuccess
             ? Results.Ok(result.Value)
+            : result.ToProblemResult(httpContext);
+    }
+
+        private static async Task<IResult> RenameHoldingAsync(
+        Guid holdingId,
+        RenameHoldingRequest request,
+        ISender sender,
+        HttpContext httpContext,
+        CancellationToken cancellationToken)
+    {
+        var result = await sender.Send(
+            new RenameHoldingCommand(holdingId, request.Name),
+            cancellationToken);
+
+        return result.IsSuccess
+            ? Results.NoContent()
             : result.ToProblemResult(httpContext);
     }
 }
