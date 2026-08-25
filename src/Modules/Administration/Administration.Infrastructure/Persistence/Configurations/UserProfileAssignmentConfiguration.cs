@@ -25,12 +25,25 @@ public sealed class UserProfileAssignmentConfiguration : IEntityTypeConfiguratio
             .HasConversion(id => id.Value, value => global::Administration.Domain.ProfileId.From(value))
             .IsRequired();
 
+        // Real database-level FK (chat, 2026-08-25): no navigation
+        // property is added on the aggregate itself, preserving the
+        // project's "no cross-aggregate navigation" DDD boundary — this
+        // only tells EF which column is the FK. ON DELETE CASCADE means
+        // deleting a Profile automatically removes every
+        // UserProfileAssignment row referencing it at the database
+        // level, as a second line of defense in addition to the
+        // explicit cleanup already done in DeleteProfileCommandHandler.
+        builder.HasOne<global::Administration.Domain.Profile>()
+            .WithMany()
+            .HasForeignKey(assignment => assignment.ProfileId)
+            .OnDelete(DeleteBehavior.Cascade);
+
         builder.Property(assignment => assignment.AssignedAt)
             .IsRequired();
 
         builder.Property(assignment => assignment.IsRevoked)
-    .IsRequired()
-    .HasDefaultValue(false);
+            .IsRequired()
+            .HasDefaultValue(false);
 
         builder.Property(assignment => assignment.RevokedAt);
 

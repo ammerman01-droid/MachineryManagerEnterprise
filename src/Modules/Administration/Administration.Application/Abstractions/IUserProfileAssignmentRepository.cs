@@ -29,4 +29,15 @@ public interface IUserProfileAssignmentRepository : IRepository<global::Administ
     Task<bool> HasActiveAssignmentsForProfileAsync(
         global::Administration.Domain.ProfileId profileId,
         CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Removes every assignment (revoked or otherwise) referencing the
+    /// given Profile. Called when the Profile itself is permanently
+    /// deleted, so no orphaned assignment rows are left pointing at a
+    /// Profile that no longer exists (gap identified and fixed, chat,
+    /// 2026-08-25).
+    /// </summary>
+    Task RemoveAllForProfileAsync(
+        global::Administration.Domain.ProfileId profileId,
+        CancellationToken cancellationToken = default);
 }

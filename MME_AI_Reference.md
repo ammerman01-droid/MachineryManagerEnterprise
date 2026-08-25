@@ -1034,6 +1034,15 @@ assignments from both HasPermissionAsync and GetAuthorizedScopesAsync
 immediately (no caching), satisfying BR-017's "Access revocation on
 reassignment" rule (Section 10.16).
 
+### Profile Deletion Cascade (chat, 2026-08-25)
+  Deleting a Profile is blocked while it has any active (non-revoked)
+  UserProfileAssignment. Once deletion is allowed, all remaining
+  (necessarily revoked) assignment records for that Profile are
+  permanently removed as well — both explicitly in
+  DeleteProfileCommandHandler and via a database-level
+  ON DELETE CASCADE foreign key (UserProfileAssignment.ProfileId →
+  Profile.Id), so no orphaned assignment rows can remain.
+
 ---
 
 

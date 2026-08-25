@@ -1,0 +1,48 @@
+@using Microsoft.AspNetCore.Components.Authorization
+@inject AuthenticationStateProvider AuthStateProvider
+@inject NavigationManager Navigation
+
+@if (shouldRender)
+{
+    @ChildContent
+}
+
+@code {
+    /// <summary>
+    /// The content to render once the current user is confirmed to be
+    /// authenticated (or the current path is exempt, e.g. /identity/*).
+    /// </summary>
+    [Parameter]
+    public RenderFragment? ChildContent { get; set; }
+
+    private bool shouldRender;
+
+    /// <summary>
+    /// Checks the current user's authentication state and redirects to
+    /// the sign-in flow if they are not authenticated. Paths under
+    /// /identity are always allowed through unchecked, since the sign-in
+    /// flow itself (and its callback) must be reachable without an
+    /// existing session.
+    /// </summary>
+    protected override async Task OnInitializedAsync()
+    {
+        var currentPath = new Uri(Navigation.Uri).AbsolutePath;
+
+        if (currentPath.StartsWith("/identity", StringComparison.OrdinalIgnoreCase))
+        {
+            shouldRender = true;
+            return;
+        }
+
+        var authState = await AuthStateProvider.GetAuthenticationStateAsync();
+
+        if (authState.User.Identity?.IsAuthenticated == true)
+        {
+            shouldRender = true;
+            return;
+        }
+
+        var returnUrl = Uri.EscapeDataString(currentPath);
+        Navigation.NavigateTo($"/identity/connect?returnUrl={returnUrl}", forceLoad: true);
+    }
+}

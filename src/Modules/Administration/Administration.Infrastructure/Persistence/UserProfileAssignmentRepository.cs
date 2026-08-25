@@ -45,4 +45,14 @@ public sealed class UserProfileAssignmentRepository : IUserProfileAssignmentRepo
     public Task<bool> HasActiveAssignmentsForProfileAsync(ProfileId profileId, CancellationToken cancellationToken = default) =>
         _dbContext.UserProfileAssignments
             .AnyAsync(a => a.ProfileId == profileId && !a.IsRevoked, cancellationToken);
+
+    /// <inheritdoc />
+    public async Task RemoveAllForProfileAsync(ProfileId profileId, CancellationToken cancellationToken = default)
+    {
+        var assignments = await _dbContext.UserProfileAssignments
+            .Where(a => a.ProfileId == profileId)
+            .ToListAsync(cancellationToken);
+
+        _dbContext.UserProfileAssignments.RemoveRange(assignments);
+    }
 }

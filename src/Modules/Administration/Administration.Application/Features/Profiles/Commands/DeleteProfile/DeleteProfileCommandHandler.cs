@@ -7,7 +7,9 @@ namespace MachineryManager.Administration.Application.Features.Profiles.Commands
 
 /// <summary>
 /// Handles <see cref="DeleteProfileCommand"/> by verifying the profile
-/// has no active assignments, then permanently removing it.
+/// has no active assignments, then permanently removing it along with
+/// any of its (already-revoked) assignment records — so no orphaned
+/// UserProfileAssignment rows are left behind (chat, 2026-08-25).
 /// </summary>
 public sealed class DeleteProfileCommandHandler
     : IRequestHandler<DeleteProfileCommand, Result>
@@ -60,6 +62,12 @@ public sealed class DeleteProfileCommandHandler
         {
             return Result.Failure(ProfileErrors.ProfileHasActiveAssignments());
         }
+
+        // Cascade cleanup: any remaining assignments at this point are
+        // necessarily revoked (active ones were blocked above). Remove
+        // them so no orphaned rows reference a Profile that is about to
+        // no longer exist.
+        await _assignmentRepository.RemoveAllForProfileAsync(profileId, cancellationToken);
 
         _profileRepository.Remove(profile);
         await _unitOfWork.SaveChangesAsync(cancellationToken);
