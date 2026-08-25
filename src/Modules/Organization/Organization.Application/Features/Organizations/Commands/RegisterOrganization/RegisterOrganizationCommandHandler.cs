@@ -10,7 +10,9 @@ namespace MachineryManager.Organization.Application.Features.Organizations.Comma
 public sealed class RegisterOrganizationCommandHandler
     : IRequestHandler<RegisterOrganizationCommand, Result<OrganizationId>>
 {
-    private const string RequiredPermission = "Organization.Manage";
+    // Aligned with the permission matrix's naming convention
+    // (Section.Action) — chat, 2026-08-23.
+    private const string RequiredPermission = "Organization.Create";
 
     private readonly IOrganizationRepository _repository;
     private readonly IUnitOfWork _unitOfWork;
@@ -34,7 +36,6 @@ public sealed class RegisterOrganizationCommandHandler
     }
 
     /// <inheritdoc />
-        /// <inheritdoc />
     public async Task<Result<OrganizationId>> Handle(RegisterOrganizationCommand request, CancellationToken cancellationToken)
     {
         if (_currentUserService.UserId is not { } userId)

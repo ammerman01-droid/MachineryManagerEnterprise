@@ -1,5 +1,4 @@
 @page "/admin/profiles"
-@rendermode InteractiveServer
 @inject IHttpClientFactory HttpClientFactory
 @inject NavigationManager Navigation
 
@@ -59,6 +58,18 @@
                                 فعال‌سازی
                             </MudButton>
                         }
+                        <MudButton Variant="Variant.Text" Color="Color.Error"
+                                   Disabled="@(deletingProfileId == context.Id)"
+                                   OnClick="@(() => DeleteAsync(context.Id))">
+                            @if (deletingProfileId == context.Id)
+                            {
+                                <MudProgressCircular Size="Size.Small" Indeterminate="true" />
+                            }
+                            else
+                            {
+                                <span>حذف</span>
+                            }
+                        </MudButton>
                     </MudTd>
                 </RowTemplate>
             </MudTable>
@@ -70,6 +81,7 @@
     private List<ProfileItem> profiles = new();
     private bool isLoading = true;
     private string? errorMessage;
+    private Guid? deletingProfileId;
 
     protected override async Task OnInitializedAsync()
     {
@@ -146,6 +158,42 @@ System.Text.Json.JsonSerializerOptions
         catch (Exception ex)
         {
             errorMessage = $"خطا: {ex.Message}";
+        }
+    }
+
+    /// <summary>
+    /// Permanently deletes a Profile. The API blocks this (409) while
+    /// the profile still has active user assignments and returns a
+    /// message explaining that; that message is surfaced here as-is
+    /// (chat, 2026-08-25).
+    /// </summary>
+    /// <param name="id">The identifier of the profile to delete.</param>
+    private async Task DeleteAsync(Guid id)
+    {
+        errorMessage = null;
+        deletingProfileId = id;
+
+        try
+        {
+            var client = HttpClientFactory.CreateClient("InternalApi");
+            var response = await client.DeleteAsync($"/api/v1/profiles/{id}");
+
+            if (response.IsSuccessStatusCode)
+            {
+                await LoadProfilesAsync();
+            }
+            else
+            {
+                errorMessage = $"خطا در حذف پروفایل: {await response.Content.ReadAsStringAsync()}";
+            }
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"خطا: {ex.Message}";
+        }
+        finally
+        {
+            deletingProfileId = null;
         }
     }
 

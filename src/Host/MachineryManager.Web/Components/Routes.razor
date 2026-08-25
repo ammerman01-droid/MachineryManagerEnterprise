@@ -1,7 +1,8 @@
 ﻿<Router AppAssembly="typeof(Program).Assembly"
         AdditionalAssemblies="new[] { 
             typeof(MachineryManager.Identity.Presentation.Components.Pages.Login).Assembly,
-            typeof(MachineryManager.Administration.Presentation.Endpoints.ProfileEndpoints).Assembly 
+            typeof(MachineryManager.Administration.Presentation.Endpoints.ProfileEndpoints).Assembly,
+            typeof(MachineryManager.Organization.Presentation.Components.Pages.OrganizationsList).Assembly
         }"
         NotFoundPage="typeof(Pages.NotFound)">
     <Found Context="routeData">

@@ -13,7 +13,6 @@ public sealed class ProfileRepository : IProfileRepository
 
     /// <summary>Initializes a new instance of the <see cref="ProfileRepository"/> class.</summary>
     /// <param name="dbContext">The Administration module's persistence context.</param>
-
     public ProfileRepository(AdministrationDbContext dbContext)
     {
         _dbContext = dbContext;
@@ -29,7 +28,10 @@ public sealed class ProfileRepository : IProfileRepository
     /// <inheritdoc />
     public void Update(global::Administration.Domain.Profile aggregate) => _dbContext.Profiles.Update(aggregate);
 
-        /// <inheritdoc />
+    /// <inheritdoc />
+    public void Remove(global::Administration.Domain.Profile aggregate) => _dbContext.Profiles.Remove(aggregate);
+
+    /// <inheritdoc />
     public async Task<SearchProfilesResponse> SearchAsync(
         string? searchTerm,
         int page,

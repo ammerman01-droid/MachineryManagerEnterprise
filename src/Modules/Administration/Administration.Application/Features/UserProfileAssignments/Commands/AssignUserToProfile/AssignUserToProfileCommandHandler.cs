@@ -66,6 +66,21 @@ public sealed class AssignUserToProfileCommandHandler
                     "Cannot assign an inactive profile to a user."));
         }
 
+        // A user may hold at most one active Profile at a time (chat,
+        // 2026-08-25). This single check also prevents the same Profile
+        // from being assigned twice to the same user, since a duplicate
+        // assignment is a specific case of "already has an active
+        // assignment".
+        var existingActiveAssignments = await _assignmentRepository.GetActiveByUserIdAsync(
+            request.UserId,
+            cancellationToken);
+
+        if (existingActiveAssignments.Count > 0)
+        {
+            return Result.Failure<Guid>(
+                ProfileErrors.UserAlreadyHasActiveAssignment(existingActiveAssignments[0].ProfileId.Value));
+        }
+
         var result = UserProfileAssignment.Create(
             request.UserId,
             profileId,

@@ -22,4 +22,12 @@ public interface IRepository<TAggregate, in TId>
 
     /// <summary>Marks an existing Aggregate as updated.</summary>
     void Update(TAggregate aggregate);
+
+    /// <summary>
+    /// Marks an existing Aggregate for permanent (hard) deletion. Callers
+    /// are responsible for enforcing any business rule that must hold
+    /// before a delete is allowed (e.g. no dependent records) — this
+    /// method performs no such check itself.
+    /// </summary>
+    void Remove(TAggregate aggregate);
 }

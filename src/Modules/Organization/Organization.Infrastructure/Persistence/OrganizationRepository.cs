@@ -39,6 +39,10 @@ public sealed class OrganizationRepository : IOrganizationRepository
         _dbContext.Organizations.Update(aggregate);
 
     /// <inheritdoc />
+    public void Remove(global::Organization.Domain.Organization aggregate) =>
+        _dbContext.Organizations.Remove(aggregate);
+
+    /// <inheritdoc />
     public async Task<SearchOrganizationsResponse> SearchAsync(
         string? searchTerm,
         int page,

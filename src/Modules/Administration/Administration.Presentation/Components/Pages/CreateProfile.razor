@@ -1,5 +1,5 @@
 @page "/admin/profiles/create"
-@rendermode InteractiveServer
+@using global::Administration.Domain
 @inject IHttpClientFactory HttpClientFactory
 @inject NavigationManager Navigation
 
@@ -9,13 +9,41 @@
 
     <MudText Typo="Typo.h4" Class="mb-4">ایجاد پروفایل جدید</MudText>
 
-    <MudPaper Class="pa-4" Style="max-width:600px;">
+    <MudPaper Class="pa-4" Style="max-width:900px;">
         <MudForm @ref="form" @bind-IsValid="@isValid">
-            <MudTextField @bind-Value="model.Name" Label="نام پروفایل" Required="true"
+            <MudTextField @bind-Value="name" Label="نام پروفایل" Required="true"
                           RequiredError="نام پروفایل الزامی است." />
 
-            <MudTextField @bind-Value="permissionInput" Label="دسترسی‌ها (با کاما جدا کنید)"
-                          HelperText="مثال: Asset.Create, Asset.View, Maintenance.Plan" Class="mt-4" />
+            <MudText Typo="Typo.subtitle1" Class="mt-6 mb-2">دسترسی‌ها</MudText>
+
+            <MudSimpleTable Dense="true" Hover="true">
+                <thead>
+                    <tr>
+                        <th>بخش</th>
+                        @foreach (var action in PermissionCatalog.Actions)
+                        {
+                            <th style="text-align:center">@ActionLabel(action)</th>
+                        }
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var section in PermissionCatalog.Sections)
+                    {
+                        <tr>
+                            <td>@section.DisplayName</td>
+                            @foreach (var action in PermissionCatalog.Actions)
+                            {
+                                var permission = PermissionCatalog.BuildPermission(section.Key, action);
+                                <td style="text-align:center">
+                                    <MudCheckBox T="bool"
+                                                 Value="@selectedPermissions.Contains(permission)"
+                                                 ValueChanged="@((bool isChecked) => ToggleatPermission(permission, isChecked))" />
+                                </td>
+                            }
+                        </tr>
+                    }
+                </tbody>
+            </MudSimpleTable>
 
             <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="SubmitAsync"
                        Disabled="@(!isValid || isSubmitting)" Class="mt-4">
@@ -48,9 +76,29 @@
     private bool isValid;
     private bool isSubmitting;
     private string? errorMessage;
+    private string name = string.Empty;
+    private readonly HashSet<string> selectedPermissions = new();
 
-    private CreateProfileModel model = new();
-    private string permissionInput = string.Empty;
+    private void ToggleatPermission(string permission, bool isChecked)
+    {
+        if (isChecked)
+        {
+            selectedPermissions.Add(permission);
+        }
+        else
+        {
+            selectedPermissions.Remove(permission);
+        }
+    }
+
+    private static string ActionLabel(string action) => action switch
+    {
+        "View" => "دیدن",
+        "Create" => "ایجاد",
+        "Edit" => "ویرایش",
+        "Delete" => "حذف",
+        _ => action,
+    };
 
     private async Task SubmitAsync()
     {
@@ -61,12 +109,7 @@
 
         try
         {
-            var permissions = permissionInput.Split(',', StringSplitOptions.RemoveEmptyEntries)
-                .Select(p => p.Trim())
-                .Where(p => !string.IsNullOrWhiteSpace(p))
-                .ToList();
-
-            var request = new { model.Name, Permissions = permissions };
+            var request = new { Name = name, Permissions = selectedPermissions.ToList() };
             var client = HttpClientFactory.CreateClient("InternalApi");
             var response = await client.PostAsJsonAsync("/api/v1/profiles", request);
             var content = await response.Content.ReadAsStringAsync();
@@ -87,10 +130,5 @@
         {
             isSubmitting = false;
         }
-    }
-
-    private sealed class CreateProfileModel
-    {
-        public string Name { get; set; } = string.Empty;
     }
 }

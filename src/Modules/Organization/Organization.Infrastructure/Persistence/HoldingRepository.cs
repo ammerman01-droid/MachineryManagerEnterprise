@@ -33,7 +33,10 @@ public sealed class HoldingRepository : IHoldingRepository
     /// <inheritdoc />
     public void Update(Holding aggregate) => _dbContext.Holdings.Update(aggregate);
 
-      /// <inheritdoc />
+    /// <inheritdoc />
+    public void Remove(Holding aggregate) => _dbContext.Holdings.Remove(aggregate);
+
+    /// <inheritdoc />
     public async Task<SearchHoldingsResponse> SearchAsync(
         string? searchTerm,
         int page,

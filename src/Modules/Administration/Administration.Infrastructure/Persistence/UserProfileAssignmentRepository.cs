@@ -27,8 +27,22 @@ public sealed class UserProfileAssignmentRepository : IUserProfileAssignmentRepo
     public void Update(UserProfileAssignment aggregate) => _dbContext.UserProfileAssignments.Update(aggregate);
 
     /// <inheritdoc />
+    public void Remove(UserProfileAssignment aggregate) => _dbContext.UserProfileAssignments.Remove(aggregate);
+
+    /// <inheritdoc />
     public async Task<IReadOnlyList<UserProfileAssignment>> GetByUserIdAsync(Guid userId, CancellationToken cancellationToken = default) =>
         await _dbContext.UserProfileAssignments
             .Where(a => a.UserId == userId)
             .ToListAsync(cancellationToken);
+
+    /// <inheritdoc />
+    public async Task<IReadOnlyList<UserProfileAssignment>> GetActiveByUserIdAsync(Guid userId, CancellationToken cancellationToken = default) =>
+        await _dbContext.UserProfileAssignments
+            .Where(a => a.UserId == userId && !a.IsRevoked)
+            .ToListAsync(cancellationToken);
+
+    /// <inheritdoc />
+    public Task<bool> HasActiveAssignmentsForProfileAsync(ProfileId profileId, CancellationToken cancellationToken = default) =>
+        _dbContext.UserProfileAssignments
+            .AnyAsync(a => a.ProfileId == profileId && !a.IsRevoked, cancellationToken);
 }

@@ -34,6 +34,9 @@ public sealed class ProjectRepository : IProjectRepository
     public void Update(Project aggregate) => _dbContext.Projects.Update(aggregate);
 
     /// <inheritdoc />
+    public void Remove(Project aggregate) => _dbContext.Projects.Remove(aggregate);
+
+    /// <inheritdoc />
     public async Task<SearchProjectsResponse> SearchAsync(
         string? searchTerm,
         int page,

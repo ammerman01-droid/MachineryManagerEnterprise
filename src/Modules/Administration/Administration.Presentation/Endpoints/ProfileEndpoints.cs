@@ -1,6 +1,7 @@
 using MachineryManager.Administration.Application.Features.Profiles.Commands.ActivateProfile;
 using MachineryManager.Administration.Application.Features.Profiles.Commands.CreateProfile;
 using MachineryManager.Administration.Application.Features.Profiles.Commands.DeactivateProfile;
+using MachineryManager.Administration.Application.Features.Profiles.Commands.DeleteProfile;
 using MachineryManager.Administration.Application.Features.Profiles.Commands.UpdateProfile;
 using MachineryManager.Administration.Application.Features.Profiles.Queries.GetProfileById;
 using MachineryManager.Administration.Application.Features.Profiles.Queries.SearchProfiles;
@@ -60,6 +61,16 @@ public static class ProfileEndpoints
         group.MapPost("/{profileId:guid}/activate", ActivateProfileAsync)
             .WithName("ActivateProfile")
             .WithSummary("Activates a Profile.")
+            .RequireAuthorization(policy => policy
+                .AddAuthenticationSchemes(OpenIddictValidationAspNetCoreDefaults.AuthenticationScheme)
+                .RequireClaim(Claims.Role, "System Administrator"));
+
+        group.MapDelete("/{profileId:guid}", DeleteProfileAsync)
+            .WithName("DeleteProfile")
+            .WithSummary("Permanently deletes a Profile. Blocked while it still has active user assignments.")
+            // Same bootstrap-phase restriction as Create/Update/Activate —
+            // deletion is an equally sensitive authorization-changing
+            // operation (chat, 2026-08-25).
             .RequireAuthorization(policy => policy
                 .AddAuthenticationSchemes(OpenIddictValidationAspNetCoreDefaults.AuthenticationScheme)
                 .RequireClaim(Claims.Role, "System Administrator"));
@@ -129,6 +140,21 @@ public static class ProfileEndpoints
     {
         var result = await sender.Send(
             new ActivateProfileCommand(profileId),
+            cancellationToken);
+
+        return result.IsSuccess
+            ? Results.NoContent()
+            : result.ToProblemResult(httpContext);
+    }
+
+    private static async Task<IResult> DeleteProfileAsync(
+        Guid profileId,
+        ISender sender,
+        HttpContext httpContext,
+        CancellationToken cancellationToken)
+    {
+        var result = await sender.Send(
+            new DeleteProfileCommand(profileId),
             cancellationToken);
 
         return result.IsSuccess
