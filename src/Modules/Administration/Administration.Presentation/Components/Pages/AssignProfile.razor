@@ -124,18 +124,6 @@
                                 }
                             </MudButton>
                         }
-                        <MudButton Variant="Variant.Text" Color="Color.Error"
-                                   Disabled="@(deletingProfileId == context.ProfileId)"
-                                   OnClick="@(() => DeleteProfileAsync(context.ProfileId))">
-                            @if (deletingProfileId == context.ProfileId)
-                            {
-                                <MudProgressCircular Size="Size.Small" Indeterminate="true" />
-                            }
-                            else
-                            {
-                                <span>حذف پروفایل</span>
-                            }
-                        </MudButton>
                     </MudTd>
                 </RowTemplate>
             </MudTable>
@@ -168,7 +156,6 @@
     private bool isLoadingAssignments = true;
     private string? assignmentsErrorMessage;
     private Guid? revokingAssignmentId;
-    private Guid? deletingProfileId;
 
     /// <summary>
     /// Initializes the component and loads the available profiles and
@@ -263,8 +250,10 @@ System.Text.Json.JsonSerializerOptions
     /// <summary>
     /// Submits the profile assignment to the API. The API rejects this
     /// (409) if the user already has an active assignment — a user may
-    /// hold at most one active Profile at a time (chat, 2026-08-25) —
-    /// and the rejection message is surfaced here as-is.
+    /// hold at most one active Profile at a time (chat, 2026-08-25);
+    /// use "لغو دسترسی" on the existing row below to free the slot
+    /// before assigning a different profile — and the rejection
+    /// message is surfaced here as-is.
     /// </summary>
     private async Task SubmitAsync()
     {
@@ -328,7 +317,11 @@ System.Text.Json.JsonSerializerOptions
     }
 
     /// <summary>
-    /// Revokes an existing assignment (BR-017, Access revocation on reassignment).
+    /// Revokes an existing assignment (BR-017, Access revocation on
+    /// reassignment). This is the correct action to free up this
+    /// user's "one active profile" slot before assigning a different
+    /// profile — it never touches the Profile entity itself, only this
+    /// specific assignment record.
     /// </summary>
     /// <param name="assignmentId">The identifier of the assignment to revoke.</param>
     private async Task RevokeAsync(Guid assignmentId)
@@ -359,45 +352,6 @@ System.Text.Json.JsonSerializerOptions
         finally
         {
             revokingAssignmentId = null;
-        }
-    }
-
-    /// <summary>
-    /// Permanently deletes the Profile referenced by this assignment row
-    /// (not just the assignment). The API blocks this (409) while the
-    /// profile still has any active assignment for any user and returns
-    /// a message telling the admin to revoke it first — that message is
-    /// surfaced here as-is (chat, 2026-08-25).
-    /// </summary>
-    /// <param name="profileId">The identifier of the profile to delete.</param>
-    private async Task DeleteProfileAsync(Guid profileId)
-    {
-        assignmentsErrorMessage = null;
-        deletingProfileId = profileId;
-
-        try
-        {
-            var client = HttpClientFactory.CreateClient("InternalApi");
-            var response = await client.DeleteAsync($"/api/v1/profiles/{profileId}");
-
-            if (response.IsSuccessStatusCode)
-            {
-                await LoadProfilesAsync();
-                await LoadAssignmentsAsync();
-            }
-            else
-            {
-                assignmentsErrorMessage =
-                    $"خطا در حذف پروفایل: {await response.Content.ReadAsStringAsync()}";
-            }
-        }
-        catch (Exception ex)
-        {
-            assignmentsErrorMessage = $"خطا: {ex.Message}";
-        }
-        finally
-        {
-            deletingProfileId = null;
         }
     }
 
