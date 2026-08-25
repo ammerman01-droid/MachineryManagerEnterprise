@@ -1,0 +1,60 @@
+@page "/identity/dev/organizations-test"
+@using System.Text.Json
+@inject IHttpClientFactory HttpClientFactory
+@inject global::MachineryManager.Identity.Domain.ICurrentAccessTokenAccessor TokenAccessor
+
+<PageTitle>تست فراخوانی API</PageTitle>
+
+<h1>تست فراخوانی Organization API با توکن ذخیره‌شده</h1>
+
+<button @onclick="LoadOrganizationsAsync">دریافت لیست Organization ها</button>
+
+@if (errorMessage is not null)
+{
+    <p style="color:red">خطا: @errorMessage</p>
+}
+
+@if (organizationsJson is not null)
+{
+    <pre>@organizationsJson</pre>
+}
+
+@code {
+    private string? organizationsJson;
+    private string? errorMessage;
+
+        protected override async Task OnInitializedAsync()
+    {
+        // Warms the token cache while a real HttpContext is still
+        // available (chat, 2026-08-22) — see CurrentAccessTokenAccessor.
+        await TokenAccessor.GetAccessTokenAsync();
+    }
+    
+    private async Task LoadOrganizationsAsync()
+    {
+        errorMessage = null;
+        organizationsJson = null;
+
+        try
+        {
+            var client = HttpClientFactory.CreateClient("InternalApi");
+            var response = await client.GetAsync("/api/v1/organizations");
+
+            var content = await response.Content.ReadAsStringAsync();
+
+            if (!response.IsSuccessStatusCode)
+            {
+                errorMessage = $"HTTP {(int)response.StatusCode}: {content}";
+                return;
+            }
+
+            organizationsJson = JsonSerializer.Serialize(
+                JsonSerializer.Deserialize<JsonElement>(content),
+                new JsonSerializerOptions { WriteIndented = true });
+        }
+        catch (Exception ex)
+        {
+            errorMessage = ex.Message;
+        }
+    }
+}

@@ -1,0 +1,89 @@
+@page "/admin/users/create"
+@inject IHttpClientFactory HttpClientFactory
+@inject NavigationManager Navigation
+
+<PageTitle>ایجاد کاربر</PageTitle>
+
+<AdminOnly>
+    <MudText Typo="Typo.h4" Class="mb-4">ایجاد کاربر جدید</MudText>
+
+    <MudPaper Class="pa-4" Style="max-width:600px;">
+        <MudForm @ref="form" @bind-IsValid="@isValid">
+            <MudTextField @bind-Value="model.UserName" Label="نام کاربری" Required="true"
+                          RequiredError="نام کاربری الزامی است." Counter="20" MaxLength="20" />
+
+            <MudTextField @bind-Value="model.Password" Label="رمز عبور" Required="true"
+                          RequiredError="رمز عبور الزامی است." InputType="InputType.Password" />
+
+            <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="SubmitAsync"
+                       Disabled="@(!isValid || isSubmitting)" Class="mt-4">
+                @if (isSubmitting)
+                {
+                    <MudProgressCircular Size="Size.Small" Indeterminate="true" />
+                }
+                else
+                {
+                    <span>ذخیره</span>
+                }
+            </MudButton>
+
+            <MudButton Variant="Variant.Outlined" OnClick="@(() => Navigation.NavigateTo("/admin/users"))"
+                       Class="mt-4 mr-2">
+                بازگشت
+            </MudButton>
+        </MudForm>
+    </MudPaper>
+
+    @if (errorMessage is not null)
+    {
+        <MudAlert Severity="Severity.Error" Class="mt-4">@errorMessage</MudAlert>
+    }
+
+</AdminOnly>
+
+@code {
+    private MudForm? form;
+    private bool isValid;
+    private bool isSubmitting;
+    private string? errorMessage;
+
+    private CreateUserModel model = new();
+
+    private async Task SubmitAsync()
+    {
+        if (form is null || !isValid) return;
+
+        isSubmitting = true;
+        errorMessage = null;
+
+        try
+        {
+            var request = new { model.UserName, model.Password, Roles = new[] { "Operator" } };
+            var client = HttpClientFactory.CreateClient("InternalApi");
+            var response = await client.PostAsJsonAsync("/api/v1/users", request);
+            var content = await response.Content.ReadAsStringAsync();
+
+            if (!response.IsSuccessStatusCode)
+            {
+                errorMessage = $"خطا در ایجاد کاربر: {content}";
+                return;
+            }
+
+            Navigation.NavigateTo("/admin/users");
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"خطا: {ex.Message}";
+        }
+        finally
+        {
+            isSubmitting = false;
+        }
+    }
+
+    private sealed class CreateUserModel
+    {
+        public string UserName { get; set; } = string.Empty;
+        public string Password { get; set; } = string.Empty;
+    }
+}

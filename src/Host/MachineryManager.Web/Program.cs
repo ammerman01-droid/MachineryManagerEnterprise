@@ -1,13 +1,21 @@
+using MachineryManager.Identity.Infrastructure;
+using MachineryManager.Identity.Presentation.Endpoints;
+using MachineryManager.Identity.Infrastructure.Persistence;
+using MachineryManager.Administration.Application;
+using MachineryManager.Administration.Infrastructure;
+using MachineryManager.Administration.Presentation.Endpoints;
+using MachineryManager.Organization.Application;
+using MachineryManager.Organization.Infrastructure;
+using MachineryManager.Organization.Presentation.Endpoints;
+using MachineryManager.SharedKernel.Infrastructure;
 using MachineryManager.Web.Components;
 using MudBlazor.Services;
 using OpenTelemetry;
 using OpenTelemetry.Metrics;
 using OpenTelemetry.Trace;
+using Scalar.AspNetCore;
 using Serilog;
 
-// Two-stage initialization (per ADR-0009 / ADR-0033): a bootstrap
-// logger captures any failure that happens before the host itself has
-// finished configuring the real logging pipeline.
 Log.Logger = new LoggerConfiguration()
     .WriteTo.Console()
     .CreateBootstrapLogger();
@@ -28,33 +36,79 @@ try
         .WithMetrics(metrics => metrics
             .AddAspNetCoreInstrumentation());
 
-    // Add services to the container.
     builder.Services.AddRazorComponents()
         .AddInteractiveServerComponents();
 
-    // UI [TE-0003 (MudBlazor / ADR-0005)]
     builder.Services.AddMudServices();
+    builder.Services.AddOpenApi();
+    builder.Services.AddSharedKernelInfrastructure();
+
+    builder.Services.AddHttpContextAccessor();
+    builder.Services.AddScoped<MachineryManager.SharedKernel.Abstractions.ICurrentUserService, MachineryManager.SharedKernel.Infrastructure.CurrentUserService>();
+
+    // Organization module
+    builder.Services.AddOrganizationApplication();
+    builder.Services.AddOrganizationInfrastructure(builder.Configuration);
+
+    // Administration module
+    builder.Services.AddAdministrationApplication();
+    builder.Services.AddAdministrationInfrastructure(builder.Configuration);
+
+    // Identity platform module
+    builder.Services.AddIdentityInfrastructure(builder.Configuration);
+    builder.Services.AddIdentityOpenIddictServer(builder.Environment);
+    builder.Services.AddIdentityOpenIddictClient(builder.Configuration, builder.Environment);
+    builder.Services.AddIdentityInternalApiClient(builder.Configuration);
 
     var app = builder.Build();
 
-    // Configure the HTTP request pipeline.
     if (!app.Environment.IsDevelopment())
     {
         app.UseExceptionHandler("/Error", createScopeForErrors: true);
-        // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
         app.UseHsts();
+    }
+    else
+    {
+        app.MapOpenApi();
+        app.MapScalarApiReference();
+    }
+
+    using (var scope = app.Services.CreateScope())
+    {
+        await IdentityDataSeeder.SeedAsync(scope.ServiceProvider, app.Environment);
     }
 
     app.UseSerilogRequestLogging();
-
-    app.UseStatusCodePagesWithReExecute("/not-found", createScopeForStatusCodePages: true);
+        app.UseWhen(
+        context => !context.Request.Path.StartsWithSegments("/api"),
+        branch => branch.UseStatusCodePagesWithReExecute("/not-found", createScopeForStatusCodePages: true));
     app.UseHttpsRedirection();
-
+    app.UseAuthentication();
+    app.UseAuthorization();
     app.UseAntiforgery();
 
     app.MapStaticAssets();
     app.MapRazorComponents<App>()
-        .AddInteractiveServerRenderMode();
+        .AddInteractiveServerRenderMode()
+        .AddAdditionalAssemblies(
+            typeof(MachineryManager.Identity.Presentation.Components.Pages.Login).Assembly,
+            typeof(MachineryManager.Administration.Presentation.Components.Pages.ProfilesList).Assembly,
+            typeof(MachineryManager.Organization.Presentation.Components.Pages.OrganizationsList).Assembly);
+
+    // Identity endpoints
+    app.MapIdentityConnectEndpoints();
+    app.MapIdentitySigninCallbackEndpoints();
+    app.MapIdentityDevTokenEndpoints(app.Environment);
+    app.MapIdentityUserEndpoints();
+
+    // Organization endpoints
+    app.MapOrganizationEndpoints();
+    app.MapHoldingEndpoints();
+    app.MapProjectEndpoints();
+
+    // Administration endpoints
+    app.MapProfileEndpoints();
+    app.MapUserProfileAssignmentEndpoints();
 
     app.Run();
 }
@@ -66,4 +120,3 @@ finally
 {
     Log.CloseAndFlush();
 }
-

@@ -1,3 +1,14 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
+  <ItemGroup>
+    <ProjectReference Include="..\Organization.Application\Organization.Application.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- Persistence [TE-0004 (EF Core 10 / ADR-0006), TE-0024 (Hybrid Persistence / ADR-0019), TE-0025 (Migrations / ADR-0037)] -->
+    <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.Binder" />
+  </ItemGroup>
+
 </Project>

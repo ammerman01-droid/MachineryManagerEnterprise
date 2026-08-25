@@ -1,0 +1,483 @@
+@page "/admin/users/{UserId:guid}/assign-profile"
+@rendermode @(new InteractiveServerRenderMode(prerender: false))
+@inject IHttpClientFactory HttpClientFactory
+@inject NavigationManager Navigation
+
+@using MachineryManager.Administration.Application.Features.Profiles.Dtos
+@using MachineryManager.Administration.Application.Features.Profiles.Queries.SearchProfiles
+@using global::Administration.Domain
+
+<PageTitle>تخصیص پروفایل</PageTitle>
+
+<AdminOnly>
+    <MudText Typo="Typo.h4" Class="mb-4">تخصیص پروفایل به کاربر</MudText>
+
+    @if (isLoading)
+    {
+        <MudProgressLinear Indeterminate="true" Class="my-4" />
+    }
+    else if (errorMessage is not null)
+    {
+        <MudAlert Severity="Severity.Error" Class="my-4">@errorMessage</MudAlert>
+    }
+    else
+    {
+        <MudPaper Class="pa-4" Style="max-width:600px;">
+            <MudForm @ref="form" @bind-IsValid="@isValid">
+                <MudSelect T="Guid" @bind-Value="selectedProfileId" Label="پروفایل" Required="true"
+                           RequiredError="انتخاب پروفایل الزامی است.">
+                    @foreach (var profile in profiles)
+                    {
+                        <MudSelectItem T="Guid" Value="@profile.Id">@profile.Name</MudSelectItem>
+                    }
+                </MudSelect>
+
+                <MudSelect T="string" @bind-Value="selectedScopeLevel" Label="سطح دسترسی" Required="true" Class="mt-4">
+                    <MudSelectItem T="string" Value="@("Platform")">Platform</MudSelectItem>
+                    <MudSelectItem T="string" Value="@("Holding")">Holding</MudSelectItem>
+                    <MudSelectItem T="string" Value="@("Organization")">Organization</MudSelectItem>
+                    <MudSelectItem T="string" Value="@("Project")">Project</MudSelectItem>
+                </MudSelect>
+
+                @if (selectedScopeLevel == "Holding")
+                {
+                    <MudTextField @bind-Value="scopeHoldingId" Label="شناسه Holding" Required="true" Class="mt-4" />
+                }
+                else if (selectedScopeLevel == "Organization")
+                {
+                    <MudTextField @bind-Value="scopeOrganizationId" Label="شناسه Organization" Required="true" Class="mt-4" />
+                }
+                else if (selectedScopeLevel == "Project")
+                {
+                    <MudTextField @bind-Value="scopeProjectId" Label="شناسه Project" Required="true" Class="mt-4" />
+                }
+
+                <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="SubmitAsync"
+                           Disabled="@(!isValid || isSubmitting)" Class="mt-4">
+                    @if (isSubmitting)
+                    {
+                        <MudProgressCircular Size="Size.Small" Indeterminate="true" />
+                    }
+                    else
+                    {
+                        <span>تخصیص به‌عنوان پروفایل فعال</span>
+                    }
+                </MudButton>
+
+                <MudButton Variant="Variant.Outlined" OnClick="@(() => Navigation.NavigateTo("/admin/users"))"
+                           Class="mt-4 mr-2">
+                    بازگشت
+                </MudButton>
+            </MudForm>
+        </MudPaper>
+
+        <MudText Typo="Typo.h5" Class="mt-8 mb-4">لیست پروفایل‌های این کاربر</MudText>
+
+        @if (assignmentsErrorMessage is not null)
+        {
+            <MudAlert Severity="Severity.Error" Class="my-4">@assignmentsErrorMessage</MudAlert>
+        }
+
+        @if (isLoadingAssignments)
+        {
+            <MudProgressLinear Indeterminate="true" Class="my-4" />
+        }
+        else if (assignments.Count == 0)
+        {
+            <MudText Typo="Typo.body2" Class="mud-text-secondary">هیچ پروفایلی برای این کاربر ثبت نشده است.</MudText>
+        }
+        else
+        {
+            <MudTable Items="@assignments" Hover="true" Breakpoint="Breakpoint.Sm">
+                <HeaderContent>
+                    <MudTh>پروفایل</MudTh>
+                    <MudTh>سطح دسترسی</MudTh>
+                    <MudTh>وضعیت</MudTh>
+                    <MudTh>تاریخ تخصیص</MudTh>
+                    <MudTh>عملیات</MudTh>
+                </HeaderContent>
+                <RowTemplate>
+                    <MudTd DataLabel="پروفایل">@ResolveProfileName(context.ProfileId)</MudTd>
+                    <MudTd DataLabel="سطح دسترسی">@context.ScopeLevel</MudTd>
+                    <MudTd DataLabel="وضعیت">
+                        <MudChip T="string" Color="@(context.IsActive ? Color.Success : Color.Default)" Size="Size.Small">
+                            @(context.IsActive ? "فعال" : "غیرفعال")
+                        </MudChip>
+                    </MudTd>
+                    <MudTd DataLabel="تاریخ تخصیص">@context.AssignedAt.ToLocalTime().ToString("yyyy/MM/dd HH:mm")</MudTd>
+                    <MudTd>
+                        @if (context.IsActive)
+                        {
+                            <MudButton Variant="Variant.Text" Color="Color.Warning"
+                                       Disabled="@(busyAssignmentId == context.Id)"
+                                       OnClick="@(() => DeactivateAsync(context.Id))">
+                                @if (busyAssignmentId == context.Id)
+                                {
+                                    <MudProgressCircular Size="Size.Small" Indeterminate="true" />
+                                }
+                                else
+                                {
+                                    <span>غیرفعال‌سازی</span>
+                                }
+                            </MudButton>
+                        }
+                        else
+                        {
+                            <MudButton Variant="Variant.Text" Color="Color.Success"
+                                       Disabled="@(busyAssignmentId == context.Id)"
+                                       OnClick="@(() => ActivateAsync(context.Id))">
+                                @if (busyAssignmentId == context.Id)
+                                {
+                                    <MudProgressCircular Size="Size.Small" Indeterminate="true" />
+                                }
+                                else
+                                {
+                                    <span>فعال‌سازی</span>
+                                }
+                            </MudButton>
+                        }
+                        <MudButton Variant="Variant.Text" Color="Color.Error"
+                                   Disabled="@(busyAssignmentId == context.Id)"
+                                   OnClick="@(() => DeleteAsync(context.Id))">
+                            @if (busyAssignmentId == context.Id)
+                            {
+                                <MudProgressCircular Size="Size.Small" Indeterminate="true" />
+                            }
+                            else
+                            {
+                                <span>حذف از لیست</span>
+                            }
+                        </MudButton>
+                    </MudTd>
+                </RowTemplate>
+            </MudTable>
+        }
+    }
+
+</AdminOnly>
+
+@code {
+    /// <summary>
+    /// The unique identifier of the user receiving the profile assignment.
+    /// </summary>
+    [Parameter]
+    public Guid UserId { get; set; }
+
+    private MudForm? form;
+    private bool isValid;
+    private bool isSubmitting;
+    private bool isLoading = true;
+    private string? errorMessage;
+
+    private List<ProfileItem> profiles = new();
+    private Guid selectedProfileId;
+    private string selectedScopeLevel = "Platform";
+    private string? scopeHoldingId;
+    private string? scopeOrganizationId;
+    private string? scopeProjectId;
+
+    private List<AssignmentItem> assignments = new();
+    private bool isLoadingAssignments = true;
+    private string? assignmentsErrorMessage;
+    private Guid? busyAssignmentId;
+
+    /// <summary>
+    /// Initializes the component and loads the available profiles and
+    /// the user's current assignments.
+    /// </summary>
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadProfilesAsync();
+        await LoadAssignmentsAsync();
+    }
+
+    /// <summary>
+    /// Loads the list of active profiles from the API.
+    /// </summary>
+    private async Task LoadProfilesAsync()
+    {
+        errorMessage = null;
+
+        try
+        {
+            var client = HttpClientFactory.CreateClient("InternalApi");
+            var response = await client.GetAsync("/api/v1/profiles?pageSize=200");
+            var content = await response.Content.ReadAsStringAsync();
+
+            if (!response.IsSuccessStatusCode)
+            {
+                errorMessage = $"خطا در دریافت پروفایل‌ها: {content}";
+                isLoading = false;
+                return;
+            }
+
+            var result = System.Text.Json.JsonSerializer.Deserialize<SearchProfilesResponse>(content, new
+System.Text.Json.JsonSerializerOptions
+            { PropertyNameCaseInsensitive = true });
+
+            if (result is null)
+            {
+                errorMessage = "پاسخ نامعتبر از سرور.";
+                isLoading = false;
+                return;
+            }
+
+            profiles = result.Items.Select(p => new ProfileItem { Id = p.Id, Name = p.Name }).ToList();
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"خطا: {ex.Message}";
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+
+    /// <summary>
+    /// Loads every assignment (active and inactive) in the user's list
+    /// from the API (chat, 2026-08-25 — revised: shows the full list,
+    /// not just active ones, so inactive rows can be reactivated).
+    /// </summary>
+    private async Task LoadAssignmentsAsync()
+    {
+        assignmentsErrorMessage = null;
+        isLoadingAssignments = true;
+
+        try
+        {
+            var client = HttpClientFactory.CreateClient("InternalApi");
+            var response = await client.GetAsync($"/api/v1/user-profile-assignments?userId={UserId}");
+            var content = await response.Content.ReadAsStringAsync();
+
+            if (!response.IsSuccessStatusCode)
+            {
+                assignmentsErrorMessage = $"خطا در دریافت لیست پروفایل‌ها: {content}";
+                return;
+            }
+
+            var result = System.Text.Json.JsonSerializer.Deserialize<List<AssignmentItem>>(content, new
+System.Text.Json.JsonSerializerOptions
+            { PropertyNameCaseInsensitive = true });
+
+            assignments = result ?? new List<AssignmentItem>();
+        }
+        catch (Exception ex)
+        {
+            assignmentsErrorMessage = $"خطا: {ex.Message}";
+        }
+        finally
+        {
+            isLoadingAssignments = false;
+        }
+    }
+
+    /// <summary>
+    /// Submits a new profile assignment to the API. The API
+    /// automatically deactivates the user's previously active
+    /// assignment, if any, and adds this one as active (chat,
+    /// 2026-08-25 — revised).
+    /// </summary>
+    private async Task SubmitAsync()
+    {
+        if (form is null || !isValid)
+        {
+            return;
+        }
+
+        isSubmitting = true;
+        errorMessage = null;
+
+        try
+        {
+            var scopeLevel = selectedScopeLevel switch
+            {
+                "Platform" => AuthorizationScopeLevel.Platform,
+                "Holding" => AuthorizationScopeLevel.Holding,
+                "Organization" => AuthorizationScopeLevel.Organization,
+                "Project" => AuthorizationScopeLevel.Project,
+                _ => throw new InvalidOperationException(
+                    $"Unsupported authorization scope level: {selectedScopeLevel}.")
+            };
+
+            Guid? holdingId = ParseScopeId(scopeHoldingId, "Holding");
+            Guid? organizationId = ParseScopeId(scopeOrganizationId, "Organization");
+            Guid? projectId = ParseScopeId(scopeProjectId, "Project");
+
+            var request =
+                new MachineryManager.Administration.Presentation.Contracts
+                    .AssignUserToProfileRequest(
+                        UserId,
+                        selectedProfileId,
+                        scopeLevel,
+                        holdingId,
+                        organizationId,
+                        projectId);
+
+            var client = HttpClientFactory.CreateClient("InternalApi");
+
+            var response = await client.PostAsJsonAsync(
+                "/api/v1/user-profile-assignments/",
+                request);
+
+            if (response.IsSuccessStatusCode)
+            {
+                await LoadAssignmentsAsync();
+                return;
+            }
+
+            errorMessage =
+                $"خطا در تخصیص پروفایل: {await response.Content.ReadAsStringAsync()}";
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"خطا: {ex.Message}";
+        }
+        finally
+        {
+            isSubmitting = false;
+        }
+    }
+
+    /// <summary>
+    /// Deactivates an assignment. The record stays in the list and can
+    /// be reactivated later (chat, 2026-08-25 — revised).
+    /// </summary>
+    /// <param name="assignmentId">The identifier of the assignment to deactivate.</param>
+    private async Task DeactivateAsync(Guid assignmentId)
+    {
+        await SendAssignmentActionAsync(
+            assignmentId,
+            client => client.PostAsync($"/api/v1/user-profile-assignments/{assignmentId}/deactivate", null),
+            "خطا در غیرفعال‌سازی");
+    }
+
+    /// <summary>
+    /// (Re)activates an assignment. The server automatically deactivates
+    /// whichever other assignment currently holds the user's active slot
+    /// (chat, 2026-08-25 — revised).
+    /// </summary>
+    /// <param name="assignmentId">The identifier of the assignment to activate.</param>
+    private async Task ActivateAsync(Guid assignmentId)
+    {
+        await SendAssignmentActionAsync(
+            assignmentId,
+            client => client.PostAsync($"/api/v1/user-profile-assignments/{assignmentId}/activate", null),
+            "خطا در فعال‌سازی");
+    }
+
+    /// <summary>
+    /// Permanently removes an assignment from the user's list — unlike
+    /// Deactivate, this cannot be undone (chat, 2026-08-25 — revised).
+    /// </summary>
+    /// <param name="assignmentId">The identifier of the assignment to delete.</param>
+    private async Task DeleteAsync(Guid assignmentId)
+    {
+        await SendAssignmentActionAsync(
+            assignmentId,
+            client => client.DeleteAsync($"/api/v1/user-profile-assignments/{assignmentId}"),
+            "خطا در حذف");
+    }
+
+    /// <summary>
+    /// Shared plumbing for the three per-row actions above: sets the
+    /// busy state, calls the API, reloads the list on success, and
+    /// surfaces the server's error message as-is on failure.
+    /// </summary>
+    private async Task SendAssignmentActionAsync(
+        Guid assignmentId,
+        Func<HttpClient, Task<HttpResponseMessage>> sendRequest,
+        string errorPrefix)
+    {
+        assignmentsErrorMessage = null;
+        busyAssignmentId = assignmentId;
+
+        try
+        {
+            var client = HttpClientFactory.CreateClient("InternalApi");
+            var response = await sendRequest(client);
+
+            if (response.IsSuccessStatusCode)
+            {
+                await LoadAssignmentsAsync();
+            }
+            else
+            {
+                assignmentsErrorMessage =
+                    $"{errorPrefix}: {await response.Content.ReadAsStringAsync()}";
+            }
+        }
+        catch (Exception ex)
+        {
+            assignmentsErrorMessage = $"خطا: {ex.Message}";
+        }
+        finally
+        {
+            busyAssignmentId = null;
+        }
+    }
+
+    /// <summary>
+    /// Resolves a profile's display name from its identifier, using the
+    /// already-loaded profile list.
+    /// </summary>
+    /// <param name="profileId">The profile identifier to resolve.</param>
+    /// <returns>The profile's name, or the raw identifier if not found.</returns>
+    private string ResolveProfileName(Guid profileId) =>
+        profiles.FirstOrDefault(p => p.Id == profileId)?.Name ?? profileId.ToString();
+
+    /// <summary>
+    /// Parses an optional authorization scope identifier.
+    /// </summary>
+    /// <param name="value">The text representation of the identifier.</param>
+    /// <param name="scopeName">The name of the authorization scope.</param>
+    /// <returns>The parsed identifier, or <see langword="null"/> when not applicable.</returns>
+    private Guid? ParseScopeId(string? value, string scopeName)
+    {
+        if (selectedScopeLevel != scopeName)
+        {
+            return null;
+        }
+
+        if (Guid.TryParse(value, out var id))
+        {
+            return id;
+        }
+
+        throw new InvalidOperationException(
+            $"شناسه {scopeName} معتبر نیست.");
+    }
+
+    /// <summary>
+    /// Represents a profile available for assignment in the user interface.
+    /// </summary>
+    private sealed class ProfileItem
+    {
+        /// <summary>
+        /// Gets or sets the unique identifier of the profile.
+        /// </summary>
+        public Guid Id { get; set; }
+
+        /// <summary>
+        /// Gets or sets the display name of the profile.
+        /// </summary>
+        public string Name { get; set; } = string.Empty;
+    }
+
+    /// <summary>
+    /// Represents a single UserProfileAssignment row in the user interface.
+    /// </summary>
+    private sealed class AssignmentItem
+    {
+        public Guid Id { get; set; }
+        public Guid UserId { get; set; }
+        public Guid ProfileId { get; set; }
+        public string ScopeLevel { get; set; } = string.Empty;
+        public Guid? ScopeHoldingId { get; set; }
+        public Guid? ScopeOrganizationId { get; set; }
+        public Guid? ScopeProjectId { get; set; }
+        public DateTimeOffset AssignedAt { get; set; }
+        public bool IsActive { get; set; }
+        public DateTimeOffset? LastChangedAt { get; set; }
+    }
+}
