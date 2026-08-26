@@ -24,4 +24,12 @@ public static class EngineModelErrors
     public static Error NotAuthorized() => Error.Failure(
         "EngineModel.NotAuthorized",
         "You do not have permission to perform this action.");
+
+    /// <summary>
+    /// Creates an error indicating the given HoldingId does not
+    /// correspond to an existing Holding (chat, 2026-08-26).
+    /// </summary>
+    public static Error HoldingNotFound(Guid holdingId) => Error.NotFound(
+        "EngineModel.HoldingNotFound",
+        $"Holding with id {holdingId} was not found.");
 }

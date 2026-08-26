@@ -7,8 +7,11 @@ namespace MachineryManager.Asset.Application.Features.AssetModels.Commands.Assig
 
 /// <summary>
 /// Handles <see cref="AssignCompatibleEngineModelCommand"/> by loading
-/// the asset model, invoking the domain compatibility behavior, and
-/// committing the unit of work.
+/// the asset model AND the referenced engine model, verifying both
+/// exist and belong to the same Holding (chat, 2026-08-26 — gap fix:
+/// AssetModel/EngineModel catalogs are Per-Holding, so a compatibility
+/// link can never cross that boundary), invoking the domain
+/// compatibility behavior, and committing the unit of work.
 /// </summary>
 public sealed class AssignCompatibleEngineModelCommandHandler
     : IRequestHandler<AssignCompatibleEngineModelCommand, Result>
@@ -16,6 +19,7 @@ public sealed class AssignCompatibleEngineModelCommandHandler
     private const string RequiredPermission = "Asset.Edit";
 
     private readonly IAssetModelRepository _assetModelRepository;
+    private readonly IEngineModelRepository _engineModelRepository;
     private readonly IUnitOfWork _unitOfWork;
     private readonly IDateTimeProvider _dateTimeProvider;
     private readonly ICurrentUserService _currentUserService;
@@ -24,12 +28,14 @@ public sealed class AssignCompatibleEngineModelCommandHandler
     /// <summary>Initializes a new instance of the <see cref="AssignCompatibleEngineModelCommandHandler"/> class.</summary>
     public AssignCompatibleEngineModelCommandHandler(
         IAssetModelRepository assetModelRepository,
+        IEngineModelRepository engineModelRepository,
         IUnitOfWork unitOfWork,
         IDateTimeProvider dateTimeProvider,
         ICurrentUserService currentUserService,
         IPermissionEvaluator permissionEvaluator)
     {
         _assetModelRepository = assetModelRepository;
+        _engineModelRepository = engineModelRepository;
         _unitOfWork = unitOfWork;
         _dateTimeProvider = dateTimeProvider;
         _currentUserService = currentUserService;
@@ -65,6 +71,22 @@ public sealed class AssignCompatibleEngineModelCommandHandler
         }
 
         var engineModelId = global::Asset.Domain.EngineModelId.From(request.EngineModelId);
+        var engineModel = await _engineModelRepository.GetByIdAsync(engineModelId, cancellationToken);
+
+        if (engineModel is null)
+        {
+            return Result.Failure(
+                global::Asset.Domain.AssetModelErrors.EngineModelNotFound(request.EngineModelId));
+        }
+
+        // AssetModel and EngineModel catalogs are Per-Holding (chat,
+        // 2026-08-26); a compatibility link may never cross Holdings.
+        if (engineModel.HoldingId != assetModel.HoldingId)
+        {
+            return Result.Failure(
+                global::Asset.Domain.AssetModelErrors.EngineModelBelongsToDifferentHolding());
+        }
+
         var result = assetModel.AssignCompatibleEngineModel(engineModelId, _dateTimeProvider);
 
         if (result.IsFailure)

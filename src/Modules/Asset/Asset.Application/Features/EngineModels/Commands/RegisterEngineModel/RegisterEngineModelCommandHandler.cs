@@ -16,6 +16,7 @@ public sealed class RegisterEngineModelCommandHandler
     private const string RequiredPermission = "Asset.Create";
 
     private readonly IEngineModelRepository _engineModelRepository;
+    private readonly IHoldingLookupService _holdingLookupService;
     private readonly IUnitOfWork _unitOfWork;
     private readonly IDateTimeProvider _dateTimeProvider;
     private readonly ICurrentUserService _currentUserService;
@@ -24,12 +25,14 @@ public sealed class RegisterEngineModelCommandHandler
     /// <summary>Initializes a new instance of the <see cref="RegisterEngineModelCommandHandler"/> class.</summary>
     public RegisterEngineModelCommandHandler(
         IEngineModelRepository engineModelRepository,
+        IHoldingLookupService holdingLookupService,
         IUnitOfWork unitOfWork,
         IDateTimeProvider dateTimeProvider,
         ICurrentUserService currentUserService,
         IPermissionEvaluator permissionEvaluator)
     {
         _engineModelRepository = engineModelRepository;
+        _holdingLookupService = holdingLookupService;
         _unitOfWork = unitOfWork;
         _dateTimeProvider = dateTimeProvider;
         _currentUserService = currentUserService;
@@ -53,6 +56,15 @@ public sealed class RegisterEngineModelCommandHandler
         if (!isAuthorized)
         {
             return Result.Failure<Guid>(global::Asset.Domain.EngineModelErrors.NotAuthorized());
+        }
+
+        // Validate the Holding actually exists before creating
+        // Holding-scoped catalog data (chat, 2026-08-26 — gap fix).
+        var holdingExists = await _holdingLookupService.ExistsAsync(request.HoldingId, cancellationToken);
+
+        if (!holdingExists)
+        {
+            return Result.Failure<Guid>(global::Asset.Domain.EngineModelErrors.HoldingNotFound(request.HoldingId));
         }
 
         var result = global::Asset.Domain.EngineModel.Register(

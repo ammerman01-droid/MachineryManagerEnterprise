@@ -16,6 +16,7 @@ public sealed class RegisterAssetModelCommandHandler
     private const string RequiredPermission = "Asset.Create";
 
     private readonly IAssetModelRepository _assetModelRepository;
+    private readonly IHoldingLookupService _holdingLookupService;
     private readonly IUnitOfWork _unitOfWork;
     private readonly IDateTimeProvider _dateTimeProvider;
     private readonly ICurrentUserService _currentUserService;
@@ -24,12 +25,14 @@ public sealed class RegisterAssetModelCommandHandler
     /// <summary>Initializes a new instance of the <see cref="RegisterAssetModelCommandHandler"/> class.</summary>
     public RegisterAssetModelCommandHandler(
         IAssetModelRepository assetModelRepository,
+        IHoldingLookupService holdingLookupService,
         IUnitOfWork unitOfWork,
         IDateTimeProvider dateTimeProvider,
         ICurrentUserService currentUserService,
         IPermissionEvaluator permissionEvaluator)
     {
         _assetModelRepository = assetModelRepository;
+        _holdingLookupService = holdingLookupService;
         _unitOfWork = unitOfWork;
         _dateTimeProvider = dateTimeProvider;
         _currentUserService = currentUserService;
@@ -53,6 +56,15 @@ public sealed class RegisterAssetModelCommandHandler
         if (!isAuthorized)
         {
             return Result.Failure<Guid>(global::Asset.Domain.AssetModelErrors.NotAuthorized());
+        }
+
+        // Validate the Holding actually exists before creating
+        // Holding-scoped catalog data (chat, 2026-08-26 — gap fix).
+        var holdingExists = await _holdingLookupService.ExistsAsync(request.HoldingId, cancellationToken);
+
+        if (!holdingExists)
+        {
+            return Result.Failure<Guid>(global::Asset.Domain.AssetModelErrors.HoldingNotFound(request.HoldingId));
         }
 
         var result = global::Asset.Domain.AssetModel.Register(

@@ -422,7 +422,9 @@ Asset Models / Component Models → Knowledge
 
 ### EngineModel Aggregate
 - **Root:** EngineModel
-- **Scope:** Per-Organization (chat, 2026-08-25)
+- **Scope:** Per-Holding — shared across every Organization under that
+  Holding, mirroring AssetModel's scope (correction, chat, 2026-08-26 —
+  supersedes the 2026-08-25 per-Organization note)
 - **Contains:** Name, Manufacturer
 - **Invariants:**
   - Mirrors AssetModel's pattern: an Engine (separate aggregate, not yet

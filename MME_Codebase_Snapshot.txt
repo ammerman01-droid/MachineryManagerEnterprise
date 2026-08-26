@@ -1,7 +1,7 @@
 ﻿
 ================================================================================
   MACHINERYMANAGERENTERPRISE - CODEBASE SNAPSHOT
-  Generated: 2026-08-26 12:25:00
+  Generated: 2026-08-26 14:58:35
   Source: C:\Users\i\source\repos\MachineryManagerEnterprise
   Purpose: Complete source code reference for AI-assisted development
   Excludes: .md, .gitignore, this script, build artifacts, binaries, IDE,
@@ -31,6 +31,7 @@ MachineryManagerEnterprise
 |   |   |   |-- ICurrentUserService.cs
 |   |   |   |-- IDateTimeProvider.cs
 |   |   |   |-- IDomainEventDispatcher.cs
+|   |   |   |-- IHoldingLookupService.cs
 |   |   |   |-- IOrganizationLookupService.cs
 |   |   |   |-- IPermissionEvaluator.cs
 |   |   |   |-- IRepository.cs
@@ -199,6 +200,8 @@ MachineryManagerEnterprise
 |   |   |   |   |-- Abstractions
 |   |   |   |   |   |-- IAssetModelRepository.cs
 |   |   |   |   |   +-- IEngineModelRepository.cs
+|   |   |   |   |-- Behaviors
+|   |   |   |   |   +-- ValidationBehavior.cs
 |   |   |   |   |-- Features
 |   |   |   |   |   |-- AssetModels
 |   |   |   |   |   |   |-- Commands
@@ -444,6 +447,7 @@ MachineryManagerEnterprise
 |   |       |   |   |-- OrganizationRepository.cs
 |   |       |   |   +-- ProjectRepository.cs
 |   |       |   |-- DependencyInjection.cs
+|   |       |   |-- HoldingLookupService.cs
 |   |       |   |-- Organization.Infrastructure.csproj
 |   |       |   +-- OrganizationLookupService.cs
 |   |       +-- Organization.Presentation
@@ -809,6 +813,31 @@ public interface IDomainEventDispatcher
     /// <param name="cancellationToken">Token to cancel the asynchronous operation.</param>
     Task DispatchAsync(IReadOnlyCollection<IDomainEvent> events, CancellationToken cancellationToken = default);
 }
+
+================================================================================
+FILE: src\BuildingBlocks\MachineryManager.SharedKernel.Abstractions\IHoldingLookupService.cs
+SIZE: 1.01 KB
+================================================================================
+namespace MachineryManager.SharedKernel.Abstractions;
+
+/// <summary>
+/// Cross-module, read-only lookup for Holding existence, needed by
+/// other modules (e.g. Asset) to validate a HoldingId they receive
+/// before creating Holding-scoped catalog data (chat, 2026-08-26).
+/// Defined here so a module other than Organization can depend on the
+/// contract without depending on Organization.Domain/Infrastructure
+/// directly, mirroring <see cref="IOrganizationLookupService"/> and
+/// <see cref="IPermissionEvaluator"/>.
+/// </summary>
+public interface IHoldingLookupService
+{
+    /// <summary>Determines whether a Holding with the given identifier currently exists.</summary>
+    /// <param name="holdingId">The Holding's identifier.</param>
+    /// <param name="cancellationToken">Token to cancel the asynchronous operation.</param>
+    /// <returns><see langword="true"/> if the Holding exists; otherwise <see langword="false"/>.</returns>
+    Task<bool> ExistsAsync(Guid holdingId, CancellationToken cancellationToken = default);
+}
+
 
 ================================================================================
 FILE: src\BuildingBlocks\MachineryManager.SharedKernel.Abstractions\IOrganizationLookupService.cs
@@ -1938,7 +1967,7 @@ SIZE: 2.3 KB
 
 ================================================================================
 FILE: src\Host\MachineryManager.Web\Program.cs
-SIZE: 4.37 KB
+SIZE: 4.48 KB
 ================================================================================
 using MachineryManager.Identity.Infrastructure;
 using MachineryManager.Identity.Presentation.Endpoints;
@@ -1957,6 +1986,7 @@ using OpenTelemetry.Metrics;
 using OpenTelemetry.Trace;
 using Scalar.AspNetCore;
 using Serilog;
+using MachineryManager.Asset.Application;
 using MachineryManager.Asset.Infrastructure;
 
 Log.Logger = new LoggerConfiguration()
@@ -1992,11 +2022,14 @@ try
     // Organization module
     builder.Services.AddOrganizationApplication();
     builder.Services.AddOrganizationInfrastructure(builder.Configuration);
-    builder.Services.AddAssetInfrastructure(builder.Configuration);
 
     // Administration module
     builder.Services.AddAdministrationApplication();
     builder.Services.AddAdministrationInfrastructure(builder.Configuration);
+
+    // Asset module
+    builder.Services.AddAssetApplication();
+    builder.Services.AddAssetInfrastructure(builder.Configuration);
 
     // Identity platform module
     builder.Services.AddIdentityInfrastructure(builder.Configuration);
@@ -7751,7 +7784,7 @@ public static class UserProfileAssignmentEndpoints
 
 ================================================================================
 FILE: src\Modules\Asset\Asset.Application\Abstractions\IAssetModelRepository.cs
-SIZE: 0.77 KB
+SIZE: 0.71 KB
 ================================================================================
 using MachineryManager.SharedKernel.Abstractions;
 
@@ -7762,10 +7795,10 @@ public interface IAssetModelRepository : IRepository<global::Asset.Domain.AssetM
 {
     /// <summary>
     /// Performs a paginated search over asset models within the given
-    /// Organization, restricted to the current user's authorized scope.
+    /// Holding.
     /// </summary>
     Task<Features.AssetModels.Queries.SearchAssetModels.SearchAssetModelsResponse> SearchAsync(
-        Guid organizationId,
+        Guid holdingId,
         string? searchTerm,
         int page,
         int pageSize,
@@ -7774,7 +7807,7 @@ public interface IAssetModelRepository : IRepository<global::Asset.Domain.AssetM
 
 ================================================================================
 FILE: src\Modules\Asset\Asset.Application\Abstractions\IEngineModelRepository.cs
-SIZE: 0.73 KB
+SIZE: 0.72 KB
 ================================================================================
 using MachineryManager.SharedKernel.Abstractions;
 
@@ -7785,10 +7818,10 @@ public interface IEngineModelRepository : IRepository<global::Asset.Domain.Engin
 {
     /// <summary>
     /// Performs a paginated search over engine models within the given
-    /// Organization.
+    /// Holding.
     /// </summary>
     Task<Features.EngineModels.Queries.SearchEngineModels.SearchEngineModelsResponse> SearchAsync(
-        Guid organizationId,
+        Guid holdingId,
         string? searchTerm,
         int page,
         int pageSize,
@@ -7817,6 +7850,105 @@ SIZE: 0.62 KB
   </ItemGroup>
 
 </Project>
+
+================================================================================
+FILE: src\Modules\Asset\Asset.Application\Behaviors\ValidationBehavior.cs
+SIZE: 3.56 KB
+================================================================================
+using FluentValidation;
+using MachineryManager.SharedKernel;
+using MediatR;
+
+namespace MachineryManager.Asset.Application.Behaviors;
+
+/// <summary>
+/// MediatR pipeline behavior that executes FluentValidation validators
+/// before the request handler. Per ADR-0036, validation runs automatically
+/// and handlers shall NOT perform ad hoc input validation.
+/// </summary>
+/// <typeparam name="TRequest">The request type.</typeparam>
+/// <typeparam name="TResponse">The response type (expected to be Result or Result&lt;T&gt;).</typeparam>
+public sealed class ValidationBehavior<TRequest, TResponse>
+    : IPipelineBehavior<TRequest, TResponse>
+    where TRequest : notnull
+{
+    private readonly IEnumerable<IValidator<TRequest>> _validators;
+
+    /// <summary>
+    /// Initializes a new instance of the <see cref="ValidationBehavior{TRequest, TResponse}"/> class.
+    /// </summary>
+    /// <param name="validators">All registered validators for <typeparamref name="TRequest"/>.</param>
+    public ValidationBehavior(IEnumerable<IValidator<TRequest>> validators)
+    {
+        _validators = validators;
+    }
+
+    /// <summary>
+    /// Validates the request before delegating to the handler. If validation fails,
+    /// returns a <see cref="Result"/> failure without invoking the handler.
+    /// </summary>
+    /// <param name="request">The incoming request.</param>
+    /// <param name="next">The delegate to execute the handler.</param>
+    /// <param name="cancellationToken">Token to cancel the asynchronous operation.</param>
+    /// <returns>The handler response, or a validation failure result.</returns>
+    /// <exception cref="InvalidOperationException">
+    /// Thrown only when validation fails but the response type does not support
+    /// the Result pattern (indicates a programming error, not a validation error).
+    /// </exception>
+    public async Task<TResponse> Handle(
+        TRequest request,
+        RequestHandlerDelegate<TResponse> next,
+        CancellationToken cancellationToken)
+    {
+        if (!_validators.Any())
+        {
+            return await next();
+        }
+
+        var context = new ValidationContext<TRequest>(request);
+        var validationResults = await Task.WhenAll(
+            _validators.Select(v => v.ValidateAsync(context, cancellationToken)));
+
+        var failures = validationResults
+            .SelectMany(r => r.Errors)
+            .Where(f => f != null)
+            .ToList();
+
+        if (failures.Count == 0)
+        {
+            return await next();
+        }
+
+        var error = Error.Validation(
+            "Validation.General",
+            string.Join("; ", failures.Select(f => f.ErrorMessage)));
+
+        var responseType = typeof(TResponse);
+
+        if (responseType == typeof(Result))
+        {
+            return (TResponse)(object)Result.Failure(error);
+        }
+
+        if (responseType.IsGenericType &&
+            responseType.GetGenericTypeDefinition() == typeof(Result<>))
+        {
+            var valueType = responseType.GetGenericArguments()[0];
+            var method = typeof(Result)
+                .GetMethod(nameof(Result.Failure), 1, new[] { typeof(Error) })
+                ?.MakeGenericMethod(valueType);
+
+            if (method != null)
+            {
+                var result = method.Invoke(null, new object[] { error });
+                return (TResponse)result!;
+            }
+        }
+
+        throw new InvalidOperationException(
+            $"Validation failed but response type {responseType.Name} does not support Result pattern.");
+    }
+}
 
 ================================================================================
 FILE: src\Modules\Asset\Asset.Application\DependencyInjection.cs
@@ -7908,7 +8040,7 @@ public sealed record AssignCompatibleEngineModelCommand(Guid AssetModelId, Guid 
 
 ================================================================================
 FILE: src\Modules\Asset\Asset.Application\Features\AssetModels\Commands\AssignCompatibleEngineModel\AssignCompatibleEngineModelCommandHandler.cs
-SIZE: 3.49 KB
+SIZE: 4.21 KB
 ================================================================================
 using MachineryManager.Asset.Application.Abstractions;
 using MachineryManager.SharedKernel;
@@ -7919,8 +8051,11 @@ namespace MachineryManager.Asset.Application.Features.AssetModels.Commands.Assig
 
 /// <summary>
 /// Handles <see cref="AssignCompatibleEngineModelCommand"/> by loading
-/// the asset model, invoking the domain compatibility behavior, and
-/// committing the unit of work.
+/// the asset model AND the referenced engine model, verifying both
+/// exist and belong to the same Holding (chat, 2026-08-26 — gap fix:
+/// AssetModel/EngineModel catalogs are Per-Holding, so a compatibility
+/// link can never cross that boundary), invoking the domain
+/// compatibility behavior, and committing the unit of work.
 /// </summary>
 public sealed class AssignCompatibleEngineModelCommandHandler
     : IRequestHandler<AssignCompatibleEngineModelCommand, Result>
@@ -7928,27 +8063,27 @@ public sealed class AssignCompatibleEngineModelCommandHandler
     private const string RequiredPermission = "Asset.Edit";
 
     private readonly IAssetModelRepository _assetModelRepository;
+    private readonly IEngineModelRepository _engineModelRepository;
     private readonly IUnitOfWork _unitOfWork;
     private readonly IDateTimeProvider _dateTimeProvider;
     private readonly ICurrentUserService _currentUserService;
     private readonly IPermissionEvaluator _permissionEvaluator;
-    private readonly IOrganizationLookupService _organizationLookupService;
 
     /// <summary>Initializes a new instance of the <see cref="AssignCompatibleEngineModelCommandHandler"/> class.</summary>
     public AssignCompatibleEngineModelCommandHandler(
         IAssetModelRepository assetModelRepository,
+        IEngineModelRepository engineModelRepository,
         IUnitOfWork unitOfWork,
         IDateTimeProvider dateTimeProvider,
         ICurrentUserService currentUserService,
-        IPermissionEvaluator permissionEvaluator,
-        IOrganizationLookupService organizationLookupService)
+        IPermissionEvaluator permissionEvaluator)
     {
         _assetModelRepository = assetModelRepository;
+        _engineModelRepository = engineModelRepository;
         _unitOfWork = unitOfWork;
         _dateTimeProvider = dateTimeProvider;
         _currentUserService = currentUserService;
         _permissionEvaluator = permissionEvaluator;
-        _organizationLookupService = organizationLookupService;
     }
 
     /// <summary>Executes the compatibility-assignment use case.</summary>
@@ -7968,12 +8103,10 @@ public sealed class AssignCompatibleEngineModelCommandHandler
             return Result.Failure(global::Asset.Domain.AssetModelErrors.NotAuthorized());
         }
 
-        var holdingId = await _organizationLookupService.GetHoldingIdAsync(assetModel.OrganizationId, cancellationToken);
-
         var isAuthorized = await _permissionEvaluator.HasPermissionAsync(
             userId,
             RequiredPermission,
-            new ResourceScope(holdingId, assetModel.OrganizationId, null),
+            new ResourceScope(assetModel.HoldingId, null, null),
             cancellationToken);
 
         if (!isAuthorized)
@@ -7982,6 +8115,22 @@ public sealed class AssignCompatibleEngineModelCommandHandler
         }
 
         var engineModelId = global::Asset.Domain.EngineModelId.From(request.EngineModelId);
+        var engineModel = await _engineModelRepository.GetByIdAsync(engineModelId, cancellationToken);
+
+        if (engineModel is null)
+        {
+            return Result.Failure(
+                global::Asset.Domain.AssetModelErrors.EngineModelNotFound(request.EngineModelId));
+        }
+
+        // AssetModel and EngineModel catalogs are Per-Holding (chat,
+        // 2026-08-26); a compatibility link may never cross Holdings.
+        if (engineModel.HoldingId != assetModel.HoldingId)
+        {
+            return Result.Failure(
+                global::Asset.Domain.AssetModelErrors.EngineModelBelongsToDifferentHolding());
+        }
+
         var result = assetModel.AssignCompatibleEngineModel(engineModelId, _dateTimeProvider);
 
         if (result.IsFailure)
@@ -7996,22 +8145,23 @@ public sealed class AssignCompatibleEngineModelCommandHandler
     }
 }
 
+
 ================================================================================
 FILE: src\Modules\Asset\Asset.Application\Features\AssetModels\Commands\RegisterAssetModel\RegisterAssetModelCommand.cs
-SIZE: 0.36 KB
+SIZE: 0.35 KB
 ================================================================================
 using MachineryManager.SharedKernel;
 using MediatR;
 
 namespace MachineryManager.Asset.Application.Features.AssetModels.Commands.RegisterAssetModel;
 
-/// <summary>Command to register a new Asset Model within an Organization.</summary>
-public sealed record RegisterAssetModelCommand(Guid OrganizationId, string Name, string Manufacturer)
+/// <summary>Command to register a new Asset Model within a Holding.</summary>
+public sealed record RegisterAssetModelCommand(Guid HoldingId, string Name, string Manufacturer)
     : IRequest<Result<Guid>>;
 
 ================================================================================
 FILE: src\Modules\Asset\Asset.Application\Features\AssetModels\Commands\RegisterAssetModel\RegisterAssetModelCommandHandler.cs
-SIZE: 3.08 KB
+SIZE: 3.33 KB
 ================================================================================
 using MachineryManager.Asset.Application.Abstractions;
 using MachineryManager.SharedKernel;
@@ -8031,27 +8181,27 @@ public sealed class RegisterAssetModelCommandHandler
     private const string RequiredPermission = "Asset.Create";
 
     private readonly IAssetModelRepository _assetModelRepository;
+    private readonly IHoldingLookupService _holdingLookupService;
     private readonly IUnitOfWork _unitOfWork;
     private readonly IDateTimeProvider _dateTimeProvider;
     private readonly ICurrentUserService _currentUserService;
     private readonly IPermissionEvaluator _permissionEvaluator;
-    private readonly IOrganizationLookupService _organizationLookupService;
 
     /// <summary>Initializes a new instance of the <see cref="RegisterAssetModelCommandHandler"/> class.</summary>
     public RegisterAssetModelCommandHandler(
         IAssetModelRepository assetModelRepository,
+        IHoldingLookupService holdingLookupService,
         IUnitOfWork unitOfWork,
         IDateTimeProvider dateTimeProvider,
         ICurrentUserService currentUserService,
-        IPermissionEvaluator permissionEvaluator,
-        IOrganizationLookupService organizationLookupService)
+        IPermissionEvaluator permissionEvaluator)
     {
         _assetModelRepository = assetModelRepository;
+        _holdingLookupService = holdingLookupService;
         _unitOfWork = unitOfWork;
         _dateTimeProvider = dateTimeProvider;
         _currentUserService = currentUserService;
         _permissionEvaluator = permissionEvaluator;
-        _organizationLookupService = organizationLookupService;
     }
 
     /// <summary>Executes the registration use case.</summary>
@@ -8062,12 +8212,10 @@ public sealed class RegisterAssetModelCommandHandler
             return Result.Failure<Guid>(global::Asset.Domain.AssetModelErrors.NotAuthorized());
         }
 
-        var holdingId = await _organizationLookupService.GetHoldingIdAsync(request.OrganizationId, cancellationToken);
-
         var isAuthorized = await _permissionEvaluator.HasPermissionAsync(
             userId,
             RequiredPermission,
-            new ResourceScope(holdingId, request.OrganizationId, null),
+            new ResourceScope(request.HoldingId, null, null),
             cancellationToken);
 
         if (!isAuthorized)
@@ -8075,8 +8223,17 @@ public sealed class RegisterAssetModelCommandHandler
             return Result.Failure<Guid>(global::Asset.Domain.AssetModelErrors.NotAuthorized());
         }
 
+        // Validate the Holding actually exists before creating
+        // Holding-scoped catalog data (chat, 2026-08-26 — gap fix).
+        var holdingExists = await _holdingLookupService.ExistsAsync(request.HoldingId, cancellationToken);
+
+        if (!holdingExists)
+        {
+            return Result.Failure<Guid>(global::Asset.Domain.AssetModelErrors.HoldingNotFound(request.HoldingId));
+        }
+
         var result = global::Asset.Domain.AssetModel.Register(
-            request.OrganizationId,
+            request.HoldingId,
             request.Name,
             request.Manufacturer,
             _dateTimeProvider);
@@ -8093,6 +8250,7 @@ public sealed class RegisterAssetModelCommandHandler
     }
 }
 
+
 ================================================================================
 FILE: src\Modules\Asset\Asset.Application\Features\AssetModels\Commands\RegisterAssetModel\RegisterAssetModelCommandValidator.cs
 SIZE: 0.79 KB
@@ -8107,7 +8265,7 @@ public sealed class RegisterAssetModelCommandValidator : AbstractValidator<Regis
     /// <summary>Initializes validation rules for the register asset model command.</summary>
     public RegisterAssetModelCommandValidator()
     {
-        RuleFor(x => x.OrganizationId).NotEmpty();
+        RuleFor(x => x.HoldingId).NotEmpty();
 
         RuleFor(x => x.Name)
             .NotEmpty()
@@ -8133,7 +8291,7 @@ public sealed record RemoveCompatibleEngineModelCommand(Guid AssetModelId, Guid 
 
 ================================================================================
 FILE: src\Modules\Asset\Asset.Application\Features\AssetModels\Commands\RemoveCompatibleEngineModel\RemoveCompatibleEngineModelCommandHandler.cs
-SIZE: 3.33 KB
+SIZE: 3 KB
 ================================================================================
 using MachineryManager.Asset.Application.Abstractions;
 using MachineryManager.SharedKernel;
@@ -8156,21 +8314,18 @@ public sealed class RemoveCompatibleEngineModelCommandHandler
     private readonly IUnitOfWork _unitOfWork;
     private readonly ICurrentUserService _currentUserService;
     private readonly IPermissionEvaluator _permissionEvaluator;
-    private readonly IOrganizationLookupService _organizationLookupService;
 
     /// <summary>Initializes a new instance of the <see cref="RemoveCompatibleEngineModelCommandHandler"/> class.</summary>
     public RemoveCompatibleEngineModelCommandHandler(
         IAssetModelRepository assetModelRepository,
         IUnitOfWork unitOfWork,
         ICurrentUserService currentUserService,
-        IPermissionEvaluator permissionEvaluator,
-        IOrganizationLookupService organizationLookupService)
+        IPermissionEvaluator permissionEvaluator)
     {
         _assetModelRepository = assetModelRepository;
         _unitOfWork = unitOfWork;
         _currentUserService = currentUserService;
         _permissionEvaluator = permissionEvaluator;
-        _organizationLookupService = organizationLookupService;
     }
 
     /// <summary>Executes the compatibility-removal use case.</summary>
@@ -8190,12 +8345,10 @@ public sealed class RemoveCompatibleEngineModelCommandHandler
             return Result.Failure(global::Asset.Domain.AssetModelErrors.NotAuthorized());
         }
 
-        var holdingId = await _organizationLookupService.GetHoldingIdAsync(assetModel.OrganizationId, cancellationToken);
-
         var isAuthorized = await _permissionEvaluator.HasPermissionAsync(
             userId,
             RequiredPermission,
-            new ResourceScope(holdingId, assetModel.OrganizationId, null),
+            new ResourceScope(assetModel.HoldingId, null, null),
             cancellationToken);
 
         if (!isAuthorized)
@@ -8232,7 +8385,7 @@ public sealed record RenameAssetModelCommand(Guid AssetModelId, string Name) : I
 
 ================================================================================
 FILE: src\Modules\Asset\Asset.Application\Features\AssetModels\Commands\RenameAssetModel\RenameAssetModelCommandHandler.cs
-SIZE: 3.09 KB
+SIZE: 2.76 KB
 ================================================================================
 using MachineryManager.Asset.Application.Abstractions;
 using MachineryManager.SharedKernel;
@@ -8255,21 +8408,18 @@ public sealed class RenameAssetModelCommandHandler
     private readonly IUnitOfWork _unitOfWork;
     private readonly ICurrentUserService _currentUserService;
     private readonly IPermissionEvaluator _permissionEvaluator;
-    private readonly IOrganizationLookupService _organizationLookupService;
 
     /// <summary>Initializes a new instance of the <see cref="RenameAssetModelCommandHandler"/> class.</summary>
     public RenameAssetModelCommandHandler(
         IAssetModelRepository assetModelRepository,
         IUnitOfWork unitOfWork,
         ICurrentUserService currentUserService,
-        IPermissionEvaluator permissionEvaluator,
-        IOrganizationLookupService organizationLookupService)
+        IPermissionEvaluator permissionEvaluator)
     {
         _assetModelRepository = assetModelRepository;
         _unitOfWork = unitOfWork;
         _currentUserService = currentUserService;
         _permissionEvaluator = permissionEvaluator;
-        _organizationLookupService = organizationLookupService;
     }
 
     /// <summary>Executes the rename use case.</summary>
@@ -8289,12 +8439,10 @@ public sealed class RenameAssetModelCommandHandler
             return Result.Failure(global::Asset.Domain.AssetModelErrors.NotAuthorized());
         }
 
-        var holdingId = await _organizationLookupService.GetHoldingIdAsync(assetModel.OrganizationId, cancellationToken);
-
         var isAuthorized = await _permissionEvaluator.HasPermissionAsync(
             userId,
             RequiredPermission,
-            new ResourceScope(holdingId, assetModel.OrganizationId, null),
+            new ResourceScope(assetModel.HoldingId, null, null),
             cancellationToken);
 
         if (!isAuthorized)
@@ -8411,7 +8559,7 @@ public sealed class GetAssetModelByIdQueryHandler
 
 ================================================================================
 FILE: src\Modules\Asset\Asset.Application\Features\AssetModels\Queries\SearchAssetModels\SearchAssetModelsQuery.cs
-SIZE: 0.76 KB
+SIZE: 0.75 KB
 ================================================================================
 using MachineryManager.Asset.Application.Features.AssetModels.Dtos;
 using MachineryManager.SharedKernel;
@@ -8419,8 +8567,8 @@ using MediatR;
 
 namespace MachineryManager.Asset.Application.Features.AssetModels.Queries.SearchAssetModels;
 
-/// <summary>Query to search Asset Models within an Organization.</summary>
-public sealed record SearchAssetModelsQuery(Guid OrganizationId, string? SearchTerm, int Page = 1, int PageSize = 20)
+/// <summary>Query to search Asset Models within a Holding.</summary>
+public sealed record SearchAssetModelsQuery(Guid HoldingId, string? SearchTerm, int Page = 1, int PageSize = 20)
     : IRequest<Result<SearchAssetModelsResponse>>;
 
 /// <summary>Paginated response for <see cref="SearchAssetModelsQuery"/>.</summary>
@@ -8435,7 +8583,7 @@ public sealed record SearchAssetModelsResponse(
 
 ================================================================================
 FILE: src\Modules\Asset\Asset.Application\Features\AssetModels\Queries\SearchAssetModels\SearchAssetModelsQueryHandler.cs
-SIZE: 1.27 KB
+SIZE: 1.26 KB
 ================================================================================
 using MachineryManager.Asset.Application.Abstractions;
 using MachineryManager.SharedKernel;
@@ -8461,7 +8609,7 @@ public sealed class SearchAssetModelsQueryHandler
         CancellationToken cancellationToken)
     {
         var response = await _assetModelRepository.SearchAsync(
-            request.OrganizationId,
+            request.HoldingId,
             request.SearchTerm,
             request.Page,
             request.PageSize,
@@ -8473,20 +8621,20 @@ public sealed class SearchAssetModelsQueryHandler
 
 ================================================================================
 FILE: src\Modules\Asset\Asset.Application\Features\EngineModels\Commands\RegisterEngineModel\RegisterEngineModelCommand.cs
-SIZE: 0.37 KB
+SIZE: 0.36 KB
 ================================================================================
 using MachineryManager.SharedKernel;
 using MediatR;
 
 namespace MachineryManager.Asset.Application.Features.EngineModels.Commands.RegisterEngineModel;
 
-/// <summary>Command to register a new Engine Model within an Organization.</summary>
-public sealed record RegisterEngineModelCommand(Guid OrganizationId, string Name, string Manufacturer)
+/// <summary>Command to register a new Engine Model within a Holding.</summary>
+public sealed record RegisterEngineModelCommand(Guid HoldingId, string Name, string Manufacturer)
     : IRequest<Result<Guid>>;
 
 ================================================================================
 FILE: src\Modules\Asset\Asset.Application\Features\EngineModels\Commands\RegisterEngineModel\RegisterEngineModelCommandHandler.cs
-SIZE: 3.1 KB
+SIZE: 3.34 KB
 ================================================================================
 using MachineryManager.Asset.Application.Abstractions;
 using MachineryManager.SharedKernel;
@@ -8506,27 +8654,27 @@ public sealed class RegisterEngineModelCommandHandler
     private const string RequiredPermission = "Asset.Create";
 
     private readonly IEngineModelRepository _engineModelRepository;
+    private readonly IHoldingLookupService _holdingLookupService;
     private readonly IUnitOfWork _unitOfWork;
     private readonly IDateTimeProvider _dateTimeProvider;
     private readonly ICurrentUserService _currentUserService;
     private readonly IPermissionEvaluator _permissionEvaluator;
-    private readonly IOrganizationLookupService _organizationLookupService;
 
     /// <summary>Initializes a new instance of the <see cref="RegisterEngineModelCommandHandler"/> class.</summary>
     public RegisterEngineModelCommandHandler(
         IEngineModelRepository engineModelRepository,
+        IHoldingLookupService holdingLookupService,
         IUnitOfWork unitOfWork,
         IDateTimeProvider dateTimeProvider,
         ICurrentUserService currentUserService,
-        IPermissionEvaluator permissionEvaluator,
-        IOrganizationLookupService organizationLookupService)
+        IPermissionEvaluator permissionEvaluator)
     {
         _engineModelRepository = engineModelRepository;
+        _holdingLookupService = holdingLookupService;
         _unitOfWork = unitOfWork;
         _dateTimeProvider = dateTimeProvider;
         _currentUserService = currentUserService;
         _permissionEvaluator = permissionEvaluator;
-        _organizationLookupService = organizationLookupService;
     }
 
     /// <summary>Executes the registration use case.</summary>
@@ -8537,12 +8685,10 @@ public sealed class RegisterEngineModelCommandHandler
             return Result.Failure<Guid>(global::Asset.Domain.EngineModelErrors.NotAuthorized());
         }
 
-        var holdingId = await _organizationLookupService.GetHoldingIdAsync(request.OrganizationId, cancellationToken);
-
         var isAuthorized = await _permissionEvaluator.HasPermissionAsync(
             userId,
             RequiredPermission,
-            new ResourceScope(holdingId, request.OrganizationId, null),
+            new ResourceScope(request.HoldingId, null, null),
             cancellationToken);
 
         if (!isAuthorized)
@@ -8550,8 +8696,17 @@ public sealed class RegisterEngineModelCommandHandler
             return Result.Failure<Guid>(global::Asset.Domain.EngineModelErrors.NotAuthorized());
         }
 
+        // Validate the Holding actually exists before creating
+        // Holding-scoped catalog data (chat, 2026-08-26 — gap fix).
+        var holdingExists = await _holdingLookupService.ExistsAsync(request.HoldingId, cancellationToken);
+
+        if (!holdingExists)
+        {
+            return Result.Failure<Guid>(global::Asset.Domain.EngineModelErrors.HoldingNotFound(request.HoldingId));
+        }
+
         var result = global::Asset.Domain.EngineModel.Register(
-            request.OrganizationId,
+            request.HoldingId,
             request.Name,
             request.Manufacturer,
             _dateTimeProvider);
@@ -8568,6 +8723,7 @@ public sealed class RegisterEngineModelCommandHandler
     }
 }
 
+
 ================================================================================
 FILE: src\Modules\Asset\Asset.Application\Features\EngineModels\Commands\RegisterEngineModel\RegisterEngineModelCommandValidator.cs
 SIZE: 0.8 KB
@@ -8582,7 +8738,7 @@ public sealed class RegisterEngineModelCommandValidator : AbstractValidator<Regi
     /// <summary>Initializes validation rules for the register engine model command.</summary>
     public RegisterEngineModelCommandValidator()
     {
-        RuleFor(x => x.OrganizationId).NotEmpty();
+        RuleFor(x => x.HoldingId).NotEmpty();
 
         RuleFor(x => x.Name)
             .NotEmpty()
@@ -8608,7 +8764,7 @@ public sealed record RenameEngineModelCommand(Guid EngineModelId, string Name) :
 
 ================================================================================
 FILE: src\Modules\Asset\Asset.Application\Features\EngineModels\Commands\RenameEngineModel\RenameEngineModelCommandHandler.cs
-SIZE: 3.12 KB
+SIZE: 2.78 KB
 ================================================================================
 using MachineryManager.Asset.Application.Abstractions;
 using MachineryManager.SharedKernel;
@@ -8631,21 +8787,18 @@ public sealed class RenameEngineModelCommandHandler
     private readonly IUnitOfWork _unitOfWork;
     private readonly ICurrentUserService _currentUserService;
     private readonly IPermissionEvaluator _permissionEvaluator;
-    private readonly IOrganizationLookupService _organizationLookupService;
 
     /// <summary>Initializes a new instance of the <see cref="RenameEngineModelCommandHandler"/> class.</summary>
     public RenameEngineModelCommandHandler(
         IEngineModelRepository engineModelRepository,
         IUnitOfWork unitOfWork,
         ICurrentUserService currentUserService,
-        IPermissionEvaluator permissionEvaluator,
-        IOrganizationLookupService organizationLookupService)
+        IPermissionEvaluator permissionEvaluator)
     {
         _engineModelRepository = engineModelRepository;
         _unitOfWork = unitOfWork;
         _currentUserService = currentUserService;
         _permissionEvaluator = permissionEvaluator;
-        _organizationLookupService = organizationLookupService;
     }
 
     /// <summary>Executes the rename use case.</summary>
@@ -8665,12 +8818,10 @@ public sealed class RenameEngineModelCommandHandler
             return Result.Failure(global::Asset.Domain.EngineModelErrors.NotAuthorized());
         }
 
-        var holdingId = await _organizationLookupService.GetHoldingIdAsync(engineModel.OrganizationId, cancellationToken);
-
         var isAuthorized = await _permissionEvaluator.HasPermissionAsync(
             userId,
             RequiredPermission,
-            new ResourceScope(holdingId, engineModel.OrganizationId, null),
+            new ResourceScope(engineModel.HoldingId, null, null),
             cancellationToken);
 
         if (!isAuthorized)
@@ -8779,7 +8930,7 @@ public sealed class GetEngineModelByIdQueryHandler
 
 ================================================================================
 FILE: src\Modules\Asset\Asset.Application\Features\EngineModels\Queries\SearchEngineModels\SearchEngineModelsQuery.cs
-SIZE: 0.77 KB
+SIZE: 0.76 KB
 ================================================================================
 using MachineryManager.Asset.Application.Features.EngineModels.Dtos;
 using MachineryManager.SharedKernel;
@@ -8787,8 +8938,8 @@ using MediatR;
 
 namespace MachineryManager.Asset.Application.Features.EngineModels.Queries.SearchEngineModels;
 
-/// <summary>Query to search Engine Models within an Organization.</summary>
-public sealed record SearchEngineModelsQuery(Guid OrganizationId, string? SearchTerm, int Page = 1, int PageSize = 20)
+/// <summary>Query to search Engine Models within a Holding.</summary>
+public sealed record SearchEngineModelsQuery(Guid HoldingId, string? SearchTerm, int Page = 1, int PageSize = 20)
     : IRequest<Result<SearchEngineModelsResponse>>;
 
 /// <summary>Paginated response for <see cref="SearchEngineModelsQuery"/>.</summary>
@@ -8829,7 +8980,7 @@ public sealed class SearchEngineModelsQueryHandler
         CancellationToken cancellationToken)
     {
         var response = await _engineModelRepository.SearchAsync(
-            request.OrganizationId,
+            request.HoldingId,
             request.SearchTerm,
             request.Page,
             request.PageSize,
@@ -8910,7 +9061,7 @@ SIZE: 0.35 KB
 
 ================================================================================
 FILE: src\Modules\Asset\Asset.Domain\AssetModel.cs
-SIZE: 5.64 KB
+SIZE: 5.73 KB
 ================================================================================
 using Asset.Domain.Events;
 using MachineryManager.SharedKernel;
@@ -8925,8 +9076,10 @@ namespace Asset.Domain;
 /// specifications; identity-specific data (serial number, license
 /// plate, manufacture year, color, ...) lives on the Asset itself, not
 /// here (chat, 2026-08-25).
-/// Scoped per Organization — each Organization maintains its own
-/// catalog (chat, 2026-08-25).
+/// Scoped per Holding — shared across every Organization under that
+/// Holding; only Asset identity records themselves are per-Organization
+/// (correction, chat, 2026-08-26 — supersedes the earlier per-Organization
+/// scope note).
 /// </summary>
 public sealed class AssetModel : AggregateRoot<AssetModelId>
 {
@@ -8938,8 +9091,8 @@ public sealed class AssetModel : AggregateRoot<AssetModelId>
 
     private readonly List<Guid> _compatibleEngineModelIds = [];
 
-    /// <summary>Gets the identifier of the Organization that owns this catalog entry.</summary>
-    public Guid OrganizationId { get; private set; }
+    /// <summary>Gets the identifier of the Holding that owns this catalog entry.</summary>
+    public Guid HoldingId { get; private set; }
 
     /// <summary>Gets the display name of the asset model (e.g. "FH16 6x4").</summary>
     public string Name { get; private set; } = string.Empty;
@@ -8959,22 +9112,22 @@ public sealed class AssetModel : AggregateRoot<AssetModelId>
     {
     }
 
-    private AssetModel(AssetModelId id, Guid organizationId, string name, string manufacturer)
+    private AssetModel(AssetModelId id, Guid holdingId, string name, string manufacturer)
         : base(id)
     {
-        OrganizationId = organizationId;
+        HoldingId = holdingId;
         Name = name;
         Manufacturer = manufacturer;
     }
 
     /// <summary>Registers a new Asset Model.</summary>
-    /// <param name="organizationId">The owning Organization.</param>
+    /// <param name="holdingId">The owning Holding.</param>
     /// <param name="name">The display name.</param>
     /// <param name="manufacturer">The manufacturer.</param>
     /// <param name="dateTimeProvider">Provides the current UTC time for the raised domain event.</param>
     /// <returns>A <see cref="Result{AssetModel}"/> containing the new aggregate, or a validation error.</returns>
     public static Result<AssetModel> Register(
-        Guid organizationId,
+        Guid holdingId,
         string name,
         string manufacturer,
         IDateTimeProvider dateTimeProvider)
@@ -8994,11 +9147,11 @@ public sealed class AssetModel : AggregateRoot<AssetModelId>
             return Result.Failure<AssetModel>(AssetModelErrors.ManufacturerRequired());
         }
 
-        var assetModel = new AssetModel(AssetModelId.New(), organizationId, name.Trim(), manufacturer.Trim());
+        var assetModel = new AssetModel(AssetModelId.New(), holdingId, name.Trim(), manufacturer.Trim());
 
         assetModel.RaiseDomainEvent(new AssetModelRegistered(
             assetModel.Id,
-            organizationId,
+            holdingId,
             assetModel.Name,
             dateTimeProvider.UtcNow));
 
@@ -9059,7 +9212,7 @@ public sealed class AssetModel : AggregateRoot<AssetModelId>
 
 ================================================================================
 FILE: src\Modules\Asset\Asset.Domain\AssetModelErrors.cs
-SIZE: 1.79 KB
+SIZE: 2.94 KB
 ================================================================================
 using MachineryManager.SharedKernel;
 
@@ -9097,7 +9250,34 @@ public static class AssetModelErrors
     public static Error NotAuthorized() => Error.Failure(
         "AssetModel.NotAuthorized",
         "You do not have permission to perform this action.");
+
+    /// <summary>
+    /// Creates an error indicating the given HoldingId does not
+    /// correspond to an existing Holding (chat, 2026-08-26).
+    /// </summary>
+    public static Error HoldingNotFound(Guid holdingId) => Error.NotFound(
+        "AssetModel.HoldingNotFound",
+        $"Holding with id {holdingId} was not found.");
+
+    /// <summary>
+    /// Creates an error indicating that the referenced Engine Model does
+    /// not exist (chat, 2026-08-26).
+    /// </summary>
+    public static Error EngineModelNotFound(Guid engineModelId) => Error.NotFound(
+        "AssetModel.EngineModelNotFound",
+        $"Engine model with id {engineModelId} was not found.");
+
+    /// <summary>
+    /// Creates an error indicating that the referenced Engine Model
+    /// belongs to a different Holding than this Asset Model — catalog
+    /// data is scoped Per-Holding and cannot cross that boundary
+    /// (chat, 2026-08-26).
+    /// </summary>
+    public static Error EngineModelBelongsToDifferentHolding() => Error.Conflict(
+        "AssetModel.EngineModelBelongsToDifferentHolding",
+        "This engine model belongs to a different Holding and cannot be marked compatible with this asset model.");
 }
+
 
 ================================================================================
 FILE: src\Modules\Asset\Asset.Domain\AssetModelId.cs
@@ -9136,7 +9316,7 @@ public sealed class AssetModelId : ValueObject
 
 ================================================================================
 FILE: src\Modules\Asset\Asset.Domain\EngineModel.cs
-SIZE: 3.84 KB
+SIZE: 3.93 KB
 ================================================================================
 using Asset.Domain.Events;
 using MachineryManager.SharedKernel;
@@ -9151,8 +9331,10 @@ namespace Asset.Domain;
 /// EngineModel and inherit its shared specifications; identity-specific
 /// data (serial number, install history) lives on the Engine instance
 /// itself, not here (chat, 2026-08-25).
-/// Scoped per Organization — each Organization maintains its own
-/// catalog (chat, 2026-08-25).
+/// Scoped per Holding — shared across every Organization under that
+/// Holding; only Engine identity records themselves are per-Organization
+/// (correction, chat, 2026-08-26 — supersedes the earlier per-Organization
+/// scope note).
 /// </summary>
 public sealed class EngineModel : AggregateRoot<EngineModelId>
 {
@@ -9162,8 +9344,8 @@ public sealed class EngineModel : AggregateRoot<EngineModelId>
     /// <summary>The maximum allowed length for the manufacturer's name.</summary>
     public const int MaxManufacturerLength = 200;
 
-    /// <summary>Gets the identifier of the Organization that owns this catalog entry.</summary>
-    public Guid OrganizationId { get; private set; }
+    /// <summary>Gets the identifier of the Holding that owns this catalog entry.</summary>
+    public Guid HoldingId { get; private set; }
 
     /// <summary>Gets the display name of the engine model (e.g. "D13").</summary>
     public string Name { get; private set; } = string.Empty;
@@ -9176,22 +9358,22 @@ public sealed class EngineModel : AggregateRoot<EngineModelId>
     {
     }
 
-    private EngineModel(EngineModelId id, Guid organizationId, string name, string manufacturer)
+    private EngineModel(EngineModelId id, Guid holdingId, string name, string manufacturer)
         : base(id)
     {
-        OrganizationId = organizationId;
+        HoldingId = holdingId;
         Name = name;
         Manufacturer = manufacturer;
     }
 
     /// <summary>Registers a new Engine Model.</summary>
-    /// <param name="organizationId">The owning Organization.</param>
+    /// <param name="holdingId">The owning Holding.</param>
     /// <param name="name">The display name.</param>
     /// <param name="manufacturer">The manufacturer.</param>
     /// <param name="dateTimeProvider">Provides the current UTC time for the raised domain event.</param>
     /// <returns>A <see cref="Result{EngineModel}"/> containing the new aggregate, or a validation error.</returns>
     public static Result<EngineModel> Register(
-        Guid organizationId,
+        Guid holdingId,
         string name,
         string manufacturer,
         IDateTimeProvider dateTimeProvider)
@@ -9211,11 +9393,11 @@ public sealed class EngineModel : AggregateRoot<EngineModelId>
             return Result.Failure<EngineModel>(EngineModelErrors.ManufacturerRequired());
         }
 
-        var engineModel = new EngineModel(EngineModelId.New(), organizationId, name.Trim(), manufacturer.Trim());
+        var engineModel = new EngineModel(EngineModelId.New(), holdingId, name.Trim(), manufacturer.Trim());
 
         engineModel.RaiseDomainEvent(new EngineModelRegistered(
             engineModel.Id,
-            organizationId,
+            holdingId,
             engineModel.Name,
             dateTimeProvider.UtcNow));
 
@@ -9245,7 +9427,7 @@ public sealed class EngineModel : AggregateRoot<EngineModelId>
 
 ================================================================================
 FILE: src\Modules\Asset\Asset.Domain\EngineModelErrors.cs
-SIZE: 1.18 KB
+SIZE: 1.49 KB
 ================================================================================
 using MachineryManager.SharedKernel;
 
@@ -9273,7 +9455,16 @@ public static class EngineModelErrors
     public static Error NotAuthorized() => Error.Failure(
         "EngineModel.NotAuthorized",
         "You do not have permission to perform this action.");
+
+    /// <summary>
+    /// Creates an error indicating the given HoldingId does not
+    /// correspond to an existing Holding (chat, 2026-08-26).
+    /// </summary>
+    public static Error HoldingNotFound(Guid holdingId) => Error.NotFound(
+        "EngineModel.HoldingNotFound",
+        $"Holding with id {holdingId} was not found.");
 }
+
 
 ================================================================================
 FILE: src\Modules\Asset\Asset.Domain\EngineModelId.cs
@@ -9312,7 +9503,7 @@ public sealed class EngineModelId : ValueObject
 
 ================================================================================
 FILE: src\Modules\Asset\Asset.Domain\Events\AssetModelRegistered.cs
-SIZE: 1.02 KB
+SIZE: 1 KB
 ================================================================================
 using MachineryManager.SharedKernel;
 
@@ -9324,8 +9515,8 @@ public sealed class AssetModelRegistered : IDomainEvent
     /// <summary>Gets the identifier of the registered asset model.</summary>
     public AssetModelId AssetModelId { get; }
 
-    /// <summary>Gets the identifier of the owning Organization.</summary>
-    public Guid OrganizationId { get; }
+    /// <summary>Gets the identifier of the owning Holding.</summary>
+    public Guid HoldingId { get; }
 
     /// <summary>Gets the name of the asset model.</summary>
     public string Name { get; }
@@ -9334,10 +9525,10 @@ public sealed class AssetModelRegistered : IDomainEvent
     public DateTimeOffset OccurredOn { get; }
 
     /// <summary>Initializes a new instance of the <see cref="AssetModelRegistered"/> class.</summary>
-    public AssetModelRegistered(AssetModelId assetModelId, Guid organizationId, string name, DateTimeOffset occurredOn)
+    public AssetModelRegistered(AssetModelId assetModelId, Guid holdingId, string name, DateTimeOffset occurredOn)
     {
         AssetModelId = assetModelId;
-        OrganizationId = organizationId;
+        HoldingId = holdingId;
         Name = name;
         OccurredOn = occurredOn;
     }
@@ -9374,7 +9565,7 @@ public sealed class EngineModelAssignedToAssetModel : IDomainEvent
 
 ================================================================================
 FILE: src\Modules\Asset\Asset.Domain\Events\EngineModelRegistered.cs
-SIZE: 1.04 KB
+SIZE: 1.01 KB
 ================================================================================
 using MachineryManager.SharedKernel;
 
@@ -9386,8 +9577,8 @@ public sealed class EngineModelRegistered : IDomainEvent
     /// <summary>Gets the identifier of the registered engine model.</summary>
     public EngineModelId EngineModelId { get; }
 
-    /// <summary>Gets the identifier of the owning Organization.</summary>
-    public Guid OrganizationId { get; }
+    /// <summary>Gets the identifier of the owning Holding.</summary>
+    public Guid HoldingId { get; }
 
     /// <summary>Gets the name of the engine model.</summary>
     public string Name { get; }
@@ -9396,10 +9587,10 @@ public sealed class EngineModelRegistered : IDomainEvent
     public DateTimeOffset OccurredOn { get; }
 
     /// <summary>Initializes a new instance of the <see cref="EngineModelRegistered"/> class.</summary>
-    public EngineModelRegistered(EngineModelId engineModelId, Guid organizationId, string name, DateTimeOffset occurredOn)
+    public EngineModelRegistered(EngineModelId engineModelId, Guid holdingId, string name, DateTimeOffset occurredOn)
     {
         EngineModelId = engineModelId;
-        OrganizationId = organizationId;
+        HoldingId = holdingId;
         Name = name;
         OccurredOn = occurredOn;
     }
@@ -9556,7 +9747,7 @@ public sealed class AssetDbContext : DbContext, IUnitOfWork
 
 ================================================================================
 FILE: src\Modules\Asset\Asset.Infrastructure\Persistence\AssetModelRepository.cs
-SIZE: 2.94 KB
+SIZE: 2.92 KB
 ================================================================================
 using Asset.Domain;
 using MachineryManager.Asset.Application.Abstractions;
@@ -9593,7 +9784,7 @@ public sealed class AssetModelRepository : IAssetModelRepository
 
     /// <inheritdoc />
     public async Task<SearchAssetModelsResponse> SearchAsync(
-        Guid organizationId,
+        Guid holdingId,
         string? searchTerm,
         int page,
         int pageSize,
@@ -9601,7 +9792,7 @@ public sealed class AssetModelRepository : IAssetModelRepository
     {
         var query = _dbContext.AssetModels
             .AsNoTracking()
-            .Where(am => am.OrganizationId == organizationId);
+            .Where(am => am.HoldingId == holdingId);
 
         if (!string.IsNullOrWhiteSpace(searchTerm))
         {
@@ -9642,7 +9833,7 @@ public sealed class AssetModelRepository : IAssetModelRepository
 
 ================================================================================
 FILE: src\Modules\Asset\Asset.Infrastructure\Persistence\Configurations\AssetModelConfiguration.cs
-SIZE: 1.69 KB
+SIZE: 1.74 KB
 ================================================================================
 using Asset.Domain;
 using Microsoft.EntityFrameworkCore;
@@ -9664,8 +9855,10 @@ public sealed class AssetModelConfiguration : IEntityTypeConfiguration<AssetMode
             .HasConversion(id => id.Value, value => AssetModelId.From(value))
             .ValueGeneratedNever();
 
-        builder.Property(am => am.OrganizationId)
+        builder.Property(am => am.HoldingId)
             .IsRequired();
+
+        builder.HasIndex(am => am.HoldingId);
 
         builder.Property(am => am.Name)
             .HasMaxLength(AssetModel.MaxNameLength)
@@ -9691,7 +9884,7 @@ public sealed class AssetModelConfiguration : IEntityTypeConfiguration<AssetMode
 
 ================================================================================
 FILE: src\Modules\Asset\Asset.Infrastructure\Persistence\Configurations\EngineModelConfiguration.cs
-SIZE: 1.04 KB
+SIZE: 1.08 KB
 ================================================================================
 using Asset.Domain;
 using Microsoft.EntityFrameworkCore;
@@ -9713,8 +9906,10 @@ public sealed class EngineModelConfiguration : IEntityTypeConfiguration<EngineMo
             .HasConversion(id => id.Value, value => EngineModelId.From(value))
             .ValueGeneratedNever();
 
-        builder.Property(em => em.OrganizationId)
+        builder.Property(em => em.HoldingId)
             .IsRequired();
+
+        builder.HasIndex(em => em.HoldingId);
 
         builder.Property(em => em.Name)
             .HasMaxLength(EngineModel.MaxNameLength)
@@ -9728,7 +9923,7 @@ public sealed class EngineModelConfiguration : IEntityTypeConfiguration<EngineMo
 
 ================================================================================
 FILE: src\Modules\Asset\Asset.Infrastructure\Persistence\EngineModelRepository.cs
-SIZE: 2.63 KB
+SIZE: 2.62 KB
 ================================================================================
 using Asset.Domain;
 using MachineryManager.Asset.Application.Abstractions;
@@ -9765,7 +9960,7 @@ public sealed class EngineModelRepository : IEngineModelRepository
 
     /// <inheritdoc />
     public async Task<SearchEngineModelsResponse> SearchAsync(
-        Guid organizationId,
+        Guid holdingId,
         string? searchTerm,
         int page,
         int pageSize,
@@ -9773,7 +9968,7 @@ public sealed class EngineModelRepository : IEngineModelRepository
     {
         var query = _dbContext.EngineModels
             .AsNoTracking()
-            .Where(em => em.OrganizationId == organizationId);
+            .Where(em => em.HoldingId == holdingId);
 
         if (!string.IsNullOrWhiteSpace(searchTerm))
         {
@@ -16758,7 +16953,7 @@ public sealed class ProjectId : ValueObject
 
 ================================================================================
 FILE: src\Modules\Organization\Organization.Infrastructure\DependencyInjection.cs
-SIZE: 2.11 KB
+SIZE: 2.14 KB
 ================================================================================
 using MachineryManager.Organization.Application.Abstractions;
 using MachineryManager.Organization.Infrastructure.Persistence;
@@ -16800,12 +16995,48 @@ public static class DependencyInjection
         services.AddScoped<IHoldingRepository, HoldingRepository>();
         services.AddScoped<IProjectRepository, ProjectRepository>();
         services.AddScoped<IOrganizationLookupService, OrganizationLookupService>();
+        services.AddScoped<IHoldingLookupService, HoldingLookupService>();
         services.AddScoped<IUnitOfWork>(serviceProvider =>
             serviceProvider.GetRequiredService<OrganizationDbContext>());
 
         return services;
     }
 }
+
+
+================================================================================
+FILE: src\Modules\Organization\Organization.Infrastructure\HoldingLookupService.cs
+SIZE: 0.91 KB
+================================================================================
+using MachineryManager.Organization.Infrastructure.Persistence;
+using MachineryManager.SharedKernel.Abstractions;
+using Microsoft.EntityFrameworkCore;
+using Organization.Domain;
+
+namespace MachineryManager.Organization.Infrastructure;
+
+/// <inheritdoc cref="IHoldingLookupService" />
+public sealed class HoldingLookupService : IHoldingLookupService
+{
+    private readonly OrganizationDbContext _dbContext;
+
+    /// <summary>Initializes a new instance of the <see cref="HoldingLookupService"/> class.</summary>
+    public HoldingLookupService(OrganizationDbContext dbContext)
+    {
+        _dbContext = dbContext;
+    }
+
+    /// <inheritdoc />
+    public async Task<bool> ExistsAsync(Guid holdingId, CancellationToken cancellationToken = default)
+    {
+        var id = HoldingId.From(holdingId);
+
+        return await _dbContext.Holdings
+            .AsNoTracking()
+            .AnyAsync(h => h.Id == id, cancellationToken);
+    }
+}
+
 
 ================================================================================
 FILE: src\Modules\Organization\Organization.Infrastructure\Organization.Infrastructure.csproj
@@ -19763,11 +19994,11 @@ SIZE: 0.53 KB
 # SECTION 3: SNAPSHOT SUMMARY
 ================================================================================
 
-Generation Time     : 00:00:01.5609666
-Total Files Scanned : 329
-Files Included      : 329
+Generation Time     : 00:00:03.8761723
+Total Files Scanned : 332
+Files Included      : 332
 Files Skipped       : 0
-Total Source Size   : 0.66 MB
+Total Source Size   : 0.67 MB
 Snapshot File Size  : 0.78 MB
 Output Path         : C:\Users\i\source\repos\MachineryManagerEnterprise\MME_Codebase_Snapshot.txt
 

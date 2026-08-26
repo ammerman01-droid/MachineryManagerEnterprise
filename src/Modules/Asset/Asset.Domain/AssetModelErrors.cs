@@ -34,4 +34,30 @@ public static class AssetModelErrors
     public static Error NotAuthorized() => Error.Failure(
         "AssetModel.NotAuthorized",
         "You do not have permission to perform this action.");
+
+    /// <summary>
+    /// Creates an error indicating the given HoldingId does not
+    /// correspond to an existing Holding (chat, 2026-08-26).
+    /// </summary>
+    public static Error HoldingNotFound(Guid holdingId) => Error.NotFound(
+        "AssetModel.HoldingNotFound",
+        $"Holding with id {holdingId} was not found.");
+
+    /// <summary>
+    /// Creates an error indicating that the referenced Engine Model does
+    /// not exist (chat, 2026-08-26).
+    /// </summary>
+    public static Error EngineModelNotFound(Guid engineModelId) => Error.NotFound(
+        "AssetModel.EngineModelNotFound",
+        $"Engine model with id {engineModelId} was not found.");
+
+    /// <summary>
+    /// Creates an error indicating that the referenced Engine Model
+    /// belongs to a different Holding than this Asset Model — catalog
+    /// data is scoped Per-Holding and cannot cross that boundary
+    /// (chat, 2026-08-26).
+    /// </summary>
+    public static Error EngineModelBelongsToDifferentHolding() => Error.Conflict(
+        "AssetModel.EngineModelBelongsToDifferentHolding",
+        "This engine model belongs to a different Holding and cannot be marked compatible with this asset model.");
 }
