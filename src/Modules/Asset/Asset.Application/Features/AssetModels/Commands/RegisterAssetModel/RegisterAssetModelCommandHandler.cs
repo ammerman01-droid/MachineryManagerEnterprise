@@ -1,0 +1,79 @@
+using MachineryManager.Asset.Application.Abstractions;
+using MachineryManager.SharedKernel;
+using MachineryManager.SharedKernel.Abstractions;
+using MediatR;
+
+namespace MachineryManager.Asset.Application.Features.AssetModels.Commands.RegisterAssetModel;
+
+/// <summary>
+/// Handles <see cref="RegisterAssetModelCommand"/> by invoking domain
+/// registration, persisting the aggregate, and committing the unit of
+/// work.
+/// </summary>
+public sealed class RegisterAssetModelCommandHandler
+    : IRequestHandler<RegisterAssetModelCommand, Result<Guid>>
+{
+    private const string RequiredPermission = "Asset.Create";
+
+    private readonly IAssetModelRepository _assetModelRepository;
+    private readonly IUnitOfWork _unitOfWork;
+    private readonly IDateTimeProvider _dateTimeProvider;
+    private readonly ICurrentUserService _currentUserService;
+    private readonly IPermissionEvaluator _permissionEvaluator;
+    private readonly IOrganizationLookupService _organizationLookupService;
+
+    /// <summary>Initializes a new instance of the <see cref="RegisterAssetModelCommandHandler"/> class.</summary>
+    public RegisterAssetModelCommandHandler(
+        IAssetModelRepository assetModelRepository,
+        IUnitOfWork unitOfWork,
+        IDateTimeProvider dateTimeProvider,
+        ICurrentUserService currentUserService,
+        IPermissionEvaluator permissionEvaluator,
+        IOrganizationLookupService organizationLookupService)
+    {
+        _assetModelRepository = assetModelRepository;
+        _unitOfWork = unitOfWork;
+        _dateTimeProvider = dateTimeProvider;
+        _currentUserService = currentUserService;
+        _permissionEvaluator = permissionEvaluator;
+        _organizationLookupService = organizationLookupService;
+    }
+
+    /// <summary>Executes the registration use case.</summary>
+    public async Task<Result<Guid>> Handle(RegisterAssetModelCommand request, CancellationToken cancellationToken)
+    {
+        if (_currentUserService.UserId is not { } userId)
+        {
+            return Result.Failure<Guid>(global::Asset.Domain.AssetModelErrors.NotAuthorized());
+        }
+
+        var holdingId = await _organizationLookupService.GetHoldingIdAsync(request.OrganizationId, cancellationToken);
+
+        var isAuthorized = await _permissionEvaluator.HasPermissionAsync(
+            userId,
+            RequiredPermission,
+            new ResourceScope(holdingId, request.OrganizationId, null),
+            cancellationToken);
+
+        if (!isAuthorized)
+        {
+            return Result.Failure<Guid>(global::Asset.Domain.AssetModelErrors.NotAuthorized());
+        }
+
+        var result = global::Asset.Domain.AssetModel.Register(
+            request.OrganizationId,
+            request.Name,
+            request.Manufacturer,
+            _dateTimeProvider);
+
+        if (result.IsFailure)
+        {
+            return Result.Failure<Guid>(result.Error);
+        }
+
+        _assetModelRepository.Add(result.Value);
+        await _unitOfWork.SaveChangesAsync(cancellationToken);
+
+        return Result.Success(result.Value.Id.Value);
+    }
+}

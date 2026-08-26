@@ -37,6 +37,7 @@ public static class DependencyInjection
         services.AddScoped<IOrganizationRepository, OrganizationRepository>();
         services.AddScoped<IHoldingRepository, HoldingRepository>();
         services.AddScoped<IProjectRepository, ProjectRepository>();
+        services.AddScoped<IOrganizationLookupService, OrganizationLookupService>();
         services.AddScoped<IUnitOfWork>(serviceProvider =>
             serviceProvider.GetRequiredService<OrganizationDbContext>());
 

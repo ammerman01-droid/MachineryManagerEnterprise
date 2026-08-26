@@ -15,6 +15,7 @@ using OpenTelemetry.Metrics;
 using OpenTelemetry.Trace;
 using Scalar.AspNetCore;
 using Serilog;
+using MachineryManager.Asset.Infrastructure;
 
 Log.Logger = new LoggerConfiguration()
     .WriteTo.Console()
@@ -49,6 +50,7 @@ try
     // Organization module
     builder.Services.AddOrganizationApplication();
     builder.Services.AddOrganizationInfrastructure(builder.Configuration);
+    builder.Services.AddAssetInfrastructure(builder.Configuration);
 
     // Administration module
     builder.Services.AddAdministrationApplication();

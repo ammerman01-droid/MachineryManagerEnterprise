@@ -1,7 +1,7 @@
 ﻿
 ================================================================================
   MACHINERYMANAGERENTERPRISE - CODEBASE SNAPSHOT
-  Generated: 2026-08-25 13:29:50
+  Generated: 2026-08-26 09:22:42
   Source: C:\Users\i\source\repos\MachineryManagerEnterprise
   Purpose: Complete source code reference for AI-assisted development
   Excludes: .md, .gitignore, this script, build artifacts, binaries, IDE,
@@ -31,6 +31,7 @@ MachineryManagerEnterprise
 |   |   |   |-- ICurrentUserService.cs
 |   |   |   |-- IDateTimeProvider.cs
 |   |   |   |-- IDomainEventDispatcher.cs
+|   |   |   |-- IOrganizationLookupService.cs
 |   |   |   |-- IPermissionEvaluator.cs
 |   |   |   |-- IRepository.cs
 |   |   |   |-- IUnitOfWork.cs
@@ -193,6 +194,79 @@ MachineryManagerEnterprise
 |   |   |       |   |-- ResultExtensions.cs
 |   |   |       |   +-- UserProfileAssignmentEndpoints.cs
 |   |   |       +-- Administration.Presentation.csproj
+|   |   |-- Asset
+|   |   |   |-- Asset.Application
+|   |   |   |   |-- Abstractions
+|   |   |   |   |   |-- IAssetModelRepository.cs
+|   |   |   |   |   +-- IEngineModelRepository.cs
+|   |   |   |   |-- Features
+|   |   |   |   |   |-- AssetModels
+|   |   |   |   |   |   |-- Commands
+|   |   |   |   |   |   |   |-- AssignCompatibleEngineModel
+|   |   |   |   |   |   |   |   |-- AssignCompatibleEngineModelCommand.cs
+|   |   |   |   |   |   |   |   +-- AssignCompatibleEngineModelCommandHandler.cs
+|   |   |   |   |   |   |   |-- RegisterAssetModel
+|   |   |   |   |   |   |   |   |-- RegisterAssetModelCommand.cs
+|   |   |   |   |   |   |   |   |-- RegisterAssetModelCommandHandler.cs
+|   |   |   |   |   |   |   |   +-- RegisterAssetModelCommandValidator.cs
+|   |   |   |   |   |   |   |-- RemoveCompatibleEngineModel
+|   |   |   |   |   |   |   |   |-- RemoveCompatibleEngineModelCommand.cs
+|   |   |   |   |   |   |   |   +-- RemoveCompatibleEngineModelCommandHandler.cs
+|   |   |   |   |   |   |   +-- RenameAssetModel
+|   |   |   |   |   |   |       |-- RenameAssetModelCommand.cs
+|   |   |   |   |   |   |       |-- RenameAssetModelCommandHandler.cs
+|   |   |   |   |   |   |       +-- RenameAssetModelCommandValidator.cs
+|   |   |   |   |   |   |-- Dtos
+|   |   |   |   |   |   |   +-- AssetModelDto.cs
+|   |   |   |   |   |   +-- Queries
+|   |   |   |   |   |       |-- GetAssetModelById
+|   |   |   |   |   |       |   |-- GetAssetModelByIdQuery.cs
+|   |   |   |   |   |       |   +-- GetAssetModelByIdQueryHandler.cs
+|   |   |   |   |   |       +-- SearchAssetModels
+|   |   |   |   |   |           |-- SearchAssetModelsQuery.cs
+|   |   |   |   |   |           +-- SearchAssetModelsQueryHandler.cs
+|   |   |   |   |   +-- EngineModels
+|   |   |   |   |       |-- Commands
+|   |   |   |   |       |   |-- RegisterEngineModel
+|   |   |   |   |       |   |   |-- RegisterEngineModelCommand.cs
+|   |   |   |   |       |   |   |-- RegisterEngineModelCommandHandler.cs
+|   |   |   |   |       |   |   +-- RegisterEngineModelCommandValidator.cs
+|   |   |   |   |       |   +-- RenameEngineModel
+|   |   |   |   |       |       |-- RenameEngineModelCommand.cs
+|   |   |   |   |       |       |-- RenameEngineModelCommandHandler.cs
+|   |   |   |   |       |       +-- RenameEngineModelCommandValidator.cs
+|   |   |   |   |       |-- Dtos
+|   |   |   |   |       |   +-- EngineModelDto.cs
+|   |   |   |   |       +-- Queries
+|   |   |   |   |           |-- GetEngineModelById
+|   |   |   |   |           |   |-- GetEngineModelByIdQuery.cs
+|   |   |   |   |           |   +-- GetEngineModelByIdQueryHandler.cs
+|   |   |   |   |           +-- SearchEngineModels
+|   |   |   |   |               |-- SearchEngineModelsQuery.cs
+|   |   |   |   |               +-- SearchEngineModelsQueryHandler.cs
+|   |   |   |   +-- Asset.Application.csproj
+|   |   |   |-- Asset.Domain
+|   |   |   |   |-- Events
+|   |   |   |   |   |-- AssetModelRegistered.cs
+|   |   |   |   |   |-- EngineModelAssignedToAssetModel.cs
+|   |   |   |   |   +-- EngineModelRegistered.cs
+|   |   |   |   |-- Asset.Domain.csproj
+|   |   |   |   |-- AssetModel.cs
+|   |   |   |   |-- AssetModelErrors.cs
+|   |   |   |   |-- AssetModelId.cs
+|   |   |   |   |-- EngineModel.cs
+|   |   |   |   |-- EngineModelErrors.cs
+|   |   |   |   +-- EngineModelId.cs
+|   |   |   +-- Asset.Infrastructure
+|   |   |       |-- Persistence
+|   |   |       |   |-- Configurations
+|   |   |       |   |   |-- AssetModelConfiguration.cs
+|   |   |       |   |   +-- EngineModelConfiguration.cs
+|   |   |       |   |-- AssetDbContext.cs
+|   |   |       |   |-- AssetModelRepository.cs
+|   |   |       |   +-- EngineModelRepository.cs
+|   |   |       |-- Asset.Infrastructure.csproj
+|   |   |       +-- DependencyInjection.cs
 |   |   |-- Identity
 |   |   |   |-- Identity.Application
 |   |   |   |   +-- Identity.Application.csproj
@@ -252,10 +326,14 @@ MachineryManagerEnterprise
 |   |       |   |-- Features
 |   |       |   |   |-- Holdings
 |   |       |   |   |   |-- Commands
-|   |       |   |   |   |   +-- RegisterHolding
-|   |       |   |   |   |       |-- RegisterHoldingCommand.cs
-|   |       |   |   |   |       |-- RegisterHoldingCommandHandler.cs
-|   |       |   |   |   |       +-- RegisterHoldingCommandValidator.cs
+|   |       |   |   |   |   |-- RegisterHolding
+|   |       |   |   |   |   |   |-- RegisterHoldingCommand.cs
+|   |       |   |   |   |   |   |-- RegisterHoldingCommandHandler.cs
+|   |       |   |   |   |   |   +-- RegisterHoldingCommandValidator.cs
+|   |       |   |   |   |   +-- RenameHolding
+|   |       |   |   |   |       |-- RenameHoldingCommand.cs
+|   |       |   |   |   |       |-- RenameHoldingCommandHandler.cs
+|   |       |   |   |   |       +-- RenameHoldingCommandValidator.cs
 |   |       |   |   |   |-- Dtos
 |   |       |   |   |   |   +-- HoldingDto.cs
 |   |       |   |   |   +-- Queries
@@ -281,6 +359,10 @@ MachineryManagerEnterprise
 |   |       |   |   |   |   |   |-- RegisterOrganizationCommand.cs
 |   |       |   |   |   |   |   |-- RegisterOrganizationCommandHandler.cs
 |   |       |   |   |   |   |   +-- RegisterOrganizationCommandValidator.cs
+|   |       |   |   |   |   |-- RenameOrganization
+|   |       |   |   |   |   |   |-- RenameOrganizationCommand.cs
+|   |       |   |   |   |   |   |-- RenameOrganizationCommandHandler.cs
+|   |       |   |   |   |   |   +-- RenameOrganizationCommandValidator.cs
 |   |       |   |   |   |   +-- SuspendOrganization
 |   |       |   |   |   |       |-- SuspendOrganizationCommand.cs
 |   |       |   |   |   |       |-- SuspendOrganizationCommandHandler.cs
@@ -298,10 +380,14 @@ MachineryManagerEnterprise
 |   |       |   |   |           +-- SearchOrganizationsQueryValidator.cs
 |   |       |   |   +-- Projects
 |   |       |   |       |-- Commands
-|   |       |   |       |   +-- RegisterProject
-|   |       |   |       |       |-- RegisterProjectCommand.cs
-|   |       |   |       |       |-- RegisterProjectCommandHandler.cs
-|   |       |   |       |       +-- RegisterProjectCommandValidator.cs
+|   |       |   |       |   |-- RegisterProject
+|   |       |   |       |   |   |-- RegisterProjectCommand.cs
+|   |       |   |       |   |   |-- RegisterProjectCommandHandler.cs
+|   |       |   |       |   |   +-- RegisterProjectCommandValidator.cs
+|   |       |   |       |   +-- RenameProject
+|   |       |   |       |       |-- RenameProjectCommand.cs
+|   |       |   |       |       |-- RenameProjectCommandHandler.cs
+|   |       |   |       |       +-- RenameProjectCommandValidator.cs
 |   |       |   |       |-- Dtos
 |   |       |   |       |   +-- ProjectDto.cs
 |   |       |   |       +-- Queries
@@ -320,11 +406,14 @@ MachineryManagerEnterprise
 |   |       |-- Organization.Domain
 |   |       |   |-- Events
 |   |       |   |   |-- HoldingRegistered.cs
+|   |       |   |   |-- HoldingRenamed.cs
 |   |       |   |   |-- OrganizationAssignedToHolding.cs
 |   |       |   |   |-- OrganizationReactivated.cs
 |   |       |   |   |-- OrganizationRegistered.cs
+|   |       |   |   |-- OrganizationRenamed.cs
 |   |       |   |   |-- OrganizationSuspended.cs
-|   |       |   |   +-- ProjectRegistered.cs
+|   |       |   |   |-- ProjectRegistered.cs
+|   |       |   |   +-- ProjectRenamed.cs
 |   |       |   |-- Holding.cs
 |   |       |   |-- HoldingErrors.cs
 |   |       |   |-- HoldingId.cs
@@ -352,13 +441,17 @@ MachineryManagerEnterprise
 |   |       |   |   |-- OrganizationRepository.cs
 |   |       |   |   +-- ProjectRepository.cs
 |   |       |   |-- DependencyInjection.cs
-|   |       |   +-- Organization.Infrastructure.csproj
+|   |       |   |-- Organization.Infrastructure.csproj
+|   |       |   +-- OrganizationLookupService.cs
 |   |       +-- Organization.Presentation
 |   |           |-- Components
 |   |           |   |-- Pages
 |   |           |   |   |-- CreateHolding.razor
 |   |           |   |   |-- CreateOrganization.razor
 |   |           |   |   |-- CreateProject.razor
+|   |           |   |   |-- EditHolding.razor
+|   |           |   |   |-- EditOrganization.razor
+|   |           |   |   |-- EditProject.razor
 |   |           |   |   |-- HoldingsList.razor
 |   |           |   |   |-- OrganizationsList.razor
 |   |           |   |   +-- ProjectsList.razor
@@ -367,7 +460,10 @@ MachineryManagerEnterprise
 |   |           |   |-- AssignOrganizationToHoldingRequest.cs
 |   |           |   |-- RegisterHoldingRequest.cs
 |   |           |   |-- RegisterOrganizationRequest.cs
-|   |           |   +-- RegisterProjectRequest.cs
+|   |           |   |-- RegisterProjectRequest.cs
+|   |           |   |-- RenameHoldingRequest.cs
+|   |           |   |-- RenameOrganizationRequest.cs
+|   |           |   +-- RenameProjectRequest.cs
 |   |           |-- Endpoints
 |   |           |   |-- HoldingEndpoints.cs
 |   |           |   |-- OrganizationEndpoints.cs
@@ -545,7 +641,7 @@ SIZE: 0.05 KB
 
 ================================================================================
 FILE: MachineryManagerEnterprise.slnx
-SIZE: 2.23 KB
+SIZE: 2.53 KB
 ================================================================================
 <Solution>
   <Folder Name="/src/" />
@@ -560,6 +656,11 @@ SIZE: 2.23 KB
     <Project Path="src/Host/MachineryManager.Web/MachineryManager.Web.csproj" />
   </Folder>
   <Folder Name="/src/Modules/" />
+  <Folder Name="/src/Modules/Asset/">
+    <Project Path="src/Modules/Asset/Asset.Application/Asset.Application.csproj" />
+    <Project Path="src/Modules/Asset/Asset.Domain/Asset.Domain.csproj" />
+    <Project Path="src/Modules/Asset/Asset.Infrastructure/Asset.Infrastructure.csproj" />
+  </Folder>
   <Folder Name="/src/Modules/Identity/">
     <Project Path="src/Modules/Identity/Identity.Domain/Identity.Domain.csproj" />
     <Project Path="src/Modules/Identity/Identity.Application/Identity.Application.csproj" />
@@ -615,7 +716,7 @@ public sealed record AuthorizedScopeSet(
 
 ================================================================================
 FILE: src\BuildingBlocks\MachineryManager.SharedKernel.Abstractions\DependencyInjection.cs
-SIZE: 0.8 KB
+SIZE: 0.82 KB
 ================================================================================
 using MachineryManager.SharedKernel.Abstractions;
 using Microsoft.Extensions.DependencyInjection;
@@ -643,7 +744,7 @@ public static class DependencyInjection
 
 ================================================================================
 FILE: src\BuildingBlocks\MachineryManager.SharedKernel.Abstractions\ICurrentUserService.cs
-SIZE: 0.81 KB
+SIZE: 0.83 KB
 ================================================================================
 namespace MachineryManager.SharedKernel.Abstractions;
 
@@ -670,7 +771,7 @@ public interface ICurrentUserService
 
 ================================================================================
 FILE: src\BuildingBlocks\MachineryManager.SharedKernel.Abstractions\IDateTimeProvider.cs
-SIZE: 0.42 KB
+SIZE: 0.43 KB
 ================================================================================
 namespace MachineryManager.SharedKernel.Abstractions;
 
@@ -704,6 +805,33 @@ public interface IDomainEventDispatcher
     /// <param name="events">The domain events to dispatch.</param>
     /// <param name="cancellationToken">Token to cancel the asynchronous operation.</param>
     Task DispatchAsync(IReadOnlyCollection<IDomainEvent> events, CancellationToken cancellationToken = default);
+}
+
+================================================================================
+FILE: src\BuildingBlocks\MachineryManager.SharedKernel.Abstractions\IOrganizationLookupService.cs
+SIZE: 1.15 KB
+================================================================================
+namespace MachineryManager.SharedKernel.Abstractions;
+
+/// <summary>
+/// Cross-module, read-only lookup for Organization tenant-hierarchy
+/// facts needed by other modules to resolve <see cref="ResourceScope"/>
+/// (e.g. Asset resources belong to an Organization, which itself may
+/// belong to a Holding — chat, 2026-08-25). Defined here so a module
+/// other than Organization can depend on the contract without
+/// depending on Organization.Domain/Infrastructure directly, mirroring
+/// how <see cref="IPermissionEvaluator"/> decouples Administration.
+/// </summary>
+public interface IOrganizationLookupService
+{
+    /// <summary>
+    /// Resolves the Holding that the given Organization currently
+    /// belongs to, if any.
+    /// </summary>
+    /// <param name="organizationId">The organization's identifier.</param>
+    /// <param name="cancellationToken">Token to cancel the asynchronous operation.</param>
+    /// <returns>The Holding's identifier, or <see langword="null"/> if the organization is unassigned or does not exist.</returns>
+    Task<Guid?> GetHoldingIdAsync(Guid organizationId, CancellationToken cancellationToken = default);
 }
 
 ================================================================================
@@ -751,7 +879,7 @@ public interface IPermissionEvaluator
 
 ================================================================================
 FILE: src\BuildingBlocks\MachineryManager.SharedKernel.Abstractions\IRepository.cs
-SIZE: 1.36 KB
+SIZE: 1.39 KB
 ================================================================================
 using MachineryManager.SharedKernel;
 
@@ -789,7 +917,7 @@ public interface IRepository<TAggregate, in TId>
 
 ================================================================================
 FILE: src\BuildingBlocks\MachineryManager.SharedKernel.Abstractions\IUnitOfWork.cs
-SIZE: 0.48 KB
+SIZE: 0.49 KB
 ================================================================================
 namespace MachineryManager.SharedKernel.Abstractions;
 
@@ -871,7 +999,7 @@ public enum ScopeLevel
 
 ================================================================================
 FILE: src\BuildingBlocks\MachineryManager.SharedKernel.Abstractions\SystemDateTimeProvider.cs
-SIZE: 0.51 KB
+SIZE: 0.52 KB
 ================================================================================
 using MachineryManager.SharedKernel.Abstractions;
 
@@ -972,7 +1100,7 @@ SIZE: 0.3 KB
 
 ================================================================================
 FILE: src\BuildingBlocks\MachineryManager.SharedKernel\AggregateRoot.cs
-SIZE: 1.72 KB
+SIZE: 1.77 KB
 ================================================================================
 namespace MachineryManager.SharedKernel;
 
@@ -1029,7 +1157,7 @@ public abstract class AggregateRoot<TId> : Entity<TId>, IHasDomainEvents
 
 ================================================================================
 FILE: src\BuildingBlocks\MachineryManager.SharedKernel\Entity.cs
-SIZE: 2.02 KB
+SIZE: 2.08 KB
 ================================================================================
 namespace MachineryManager.SharedKernel;
 
@@ -1100,7 +1228,7 @@ public abstract class Entity<TId> : IEquatable<Entity<TId>>
 
 ================================================================================
 FILE: src\BuildingBlocks\MachineryManager.SharedKernel\Error.cs
-SIZE: 1.59 KB
+SIZE: 1.62 KB
 ================================================================================
 namespace MachineryManager.SharedKernel;
 
@@ -1137,7 +1265,7 @@ public sealed record Error(string Code, string Message, ErrorType Type = ErrorTy
 
 ================================================================================
 FILE: src\BuildingBlocks\MachineryManager.SharedKernel\ErrorType.cs
-SIZE: 0.72 KB
+SIZE: 0.74 KB
 ================================================================================
 namespace MachineryManager.SharedKernel;
 
@@ -1164,7 +1292,7 @@ public enum ErrorType
 
 ================================================================================
 FILE: src\BuildingBlocks\MachineryManager.SharedKernel\IDomainEvent.cs
-SIZE: 0.48 KB
+SIZE: 0.49 KB
 ================================================================================
 namespace MachineryManager.SharedKernel;
 
@@ -1212,7 +1340,7 @@ SIZE: 0.05 KB
 
 ================================================================================
 FILE: src\BuildingBlocks\MachineryManager.SharedKernel\Result.cs
-SIZE: 2.82 KB
+SIZE: 2.9 KB
 ================================================================================
 namespace MachineryManager.SharedKernel;
 
@@ -1295,7 +1423,7 @@ public sealed class Result<TValue> : Result
 
 ================================================================================
 FILE: src\BuildingBlocks\MachineryManager.SharedKernel\ValueObject.cs
-SIZE: 1.58 KB
+SIZE: 1.62 KB
 ================================================================================
 namespace MachineryManager.SharedKernel;
 
@@ -1768,7 +1896,7 @@ SIZE: 0.65 KB
 
 ================================================================================
 FILE: src\Host\MachineryManager.Web\MachineryManager.Web.csproj
-SIZE: 2.2 KB
+SIZE: 2.3 KB
 ================================================================================
 <Project Sdk="Microsoft.NET.Sdk.Web">
 
@@ -1790,6 +1918,7 @@ SIZE: 2.2 KB
     <ProjectReference Include="..\..\Modules\Administration\Administration.Application\Administration.Application.csproj" />
     <ProjectReference Include="..\..\Modules\Administration\Administration.Infrastructure\Administration.Infrastructure.csproj" />
     <ProjectReference Include="..\..\Modules\Administration\Administration.Presentation\Administration.Presentation.csproj" />
+    <ProjectReference Include="..\..\Modules\Asset\Asset.Infrastructure\Asset.Infrastructure.csproj" />
   </ItemGroup>
 
   <ItemGroup>
@@ -1806,7 +1935,7 @@ SIZE: 2.2 KB
 
 ================================================================================
 FILE: src\Host\MachineryManager.Web\Program.cs
-SIZE: 4.26 KB
+SIZE: 4.37 KB
 ================================================================================
 using MachineryManager.Identity.Infrastructure;
 using MachineryManager.Identity.Presentation.Endpoints;
@@ -1825,6 +1954,7 @@ using OpenTelemetry.Metrics;
 using OpenTelemetry.Trace;
 using Scalar.AspNetCore;
 using Serilog;
+using MachineryManager.Asset.Infrastructure;
 
 Log.Logger = new LoggerConfiguration()
     .WriteTo.Console()
@@ -1859,6 +1989,7 @@ try
     // Organization module
     builder.Services.AddOrganizationApplication();
     builder.Services.AddOrganizationInfrastructure(builder.Configuration);
+    builder.Services.AddAssetInfrastructure(builder.Configuration);
 
     // Administration module
     builder.Services.AddAdministrationApplication();
@@ -2506,7 +2637,7 @@ public sealed class DeactivateProfileCommandHandler
 
 ================================================================================
 FILE: src\Modules\Administration\Administration.Application\Features\Profiles\Commands\DeleteProfile\DeleteProfileCommand.cs
-SIZE: 0.49 KB
+SIZE: 0.5 KB
 ================================================================================
 using MachineryManager.SharedKernel;
 using MediatR;
@@ -2525,7 +2656,7 @@ public sealed record DeleteProfileCommand(Guid ProfileId)
 
 ================================================================================
 FILE: src\Modules\Administration\Administration.Application\Features\Profiles\Commands\DeleteProfile\DeleteProfileCommandHandler.cs
-SIZE: 3.14 KB
+SIZE: 3.22 KB
 ================================================================================
 using Administration.Domain;
 using MachineryManager.Administration.Application.Abstractions;
@@ -2607,7 +2738,7 @@ public sealed class DeleteProfileCommandHandler
 
 ================================================================================
 FILE: src\Modules\Administration\Administration.Application\Features\Profiles\Commands\DeleteProfile\DeleteProfileCommandValidator.cs
-SIZE: 0.49 KB
+SIZE: 0.5 KB
 ================================================================================
 using FluentValidation;
 
@@ -7616,6 +7747,1925 @@ public static class UserProfileAssignmentEndpoints
 }
 
 ================================================================================
+FILE: src\Modules\Asset\Asset.Application\Abstractions\IAssetModelRepository.cs
+SIZE: 0.77 KB
+================================================================================
+using MachineryManager.SharedKernel.Abstractions;
+
+namespace MachineryManager.Asset.Application.Abstractions;
+
+/// <summary>Repository contract for the <see cref="global::Asset.Domain.AssetModel"/> aggregate.</summary>
+public interface IAssetModelRepository : IRepository<global::Asset.Domain.AssetModel, global::Asset.Domain.AssetModelId>
+{
+    /// <summary>
+    /// Performs a paginated search over asset models within the given
+    /// Organization, restricted to the current user's authorized scope.
+    /// </summary>
+    Task<Features.AssetModels.Queries.SearchAssetModels.SearchAssetModelsResponse> SearchAsync(
+        Guid organizationId,
+        string? searchTerm,
+        int page,
+        int pageSize,
+        CancellationToken cancellationToken = default);
+}
+
+================================================================================
+FILE: src\Modules\Asset\Asset.Application\Abstractions\IEngineModelRepository.cs
+SIZE: 0.73 KB
+================================================================================
+using MachineryManager.SharedKernel.Abstractions;
+
+namespace MachineryManager.Asset.Application.Abstractions;
+
+/// <summary>Repository contract for the <see cref="global::Asset.Domain.EngineModel"/> aggregate.</summary>
+public interface IEngineModelRepository : IRepository<global::Asset.Domain.EngineModel, global::Asset.Domain.EngineModelId>
+{
+    /// <summary>
+    /// Performs a paginated search over engine models within the given
+    /// Organization.
+    /// </summary>
+    Task<Features.EngineModels.Queries.SearchEngineModels.SearchEngineModelsResponse> SearchAsync(
+        Guid organizationId,
+        string? searchTerm,
+        int page,
+        int pageSize,
+        CancellationToken cancellationToken = default);
+}
+
+================================================================================
+FILE: src\Modules\Asset\Asset.Application\Asset.Application.csproj
+SIZE: 0.62 KB
+================================================================================
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <RootNamespace>MachineryManager.Asset.Application</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Asset.Domain\Asset.Domain.csproj" />
+    <ProjectReference Include="..\..\..\BuildingBlocks\MachineryManager.SharedKernel.Abstractions\MachineryManager.SharedKernel.Abstractions.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="MediatR" />
+    <PackageReference Include="FluentValidation" />
+    <PackageReference Include="FluentValidation.DependencyInjectionExtensions" />
+  </ItemGroup>
+
+</Project>
+
+================================================================================
+FILE: src\Modules\Asset\Asset.Application\Features\AssetModels\Commands\AssignCompatibleEngineModel\AssignCompatibleEngineModelCommand.cs
+SIZE: 0.36 KB
+================================================================================
+using MachineryManager.SharedKernel;
+using MediatR;
+
+namespace MachineryManager.Asset.Application.Features.AssetModels.Commands.AssignCompatibleEngineModel;
+
+/// <summary>Command to mark an Engine Model compatible with an Asset Model.</summary>
+public sealed record AssignCompatibleEngineModelCommand(Guid AssetModelId, Guid EngineModelId) : IRequest<Result>;
+
+================================================================================
+FILE: src\Modules\Asset\Asset.Application\Features\AssetModels\Commands\AssignCompatibleEngineModel\AssignCompatibleEngineModelCommandHandler.cs
+SIZE: 3.49 KB
+================================================================================
+using MachineryManager.Asset.Application.Abstractions;
+using MachineryManager.SharedKernel;
+using MachineryManager.SharedKernel.Abstractions;
+using MediatR;
+
+namespace MachineryManager.Asset.Application.Features.AssetModels.Commands.AssignCompatibleEngineModel;
+
+/// <summary>
+/// Handles <see cref="AssignCompatibleEngineModelCommand"/> by loading
+/// the asset model, invoking the domain compatibility behavior, and
+/// committing the unit of work.
+/// </summary>
+public sealed class AssignCompatibleEngineModelCommandHandler
+    : IRequestHandler<AssignCompatibleEngineModelCommand, Result>
+{
+    private const string RequiredPermission = "Asset.Edit";
+
+    private readonly IAssetModelRepository _assetModelRepository;
+    private readonly IUnitOfWork _unitOfWork;
+    private readonly IDateTimeProvider _dateTimeProvider;
+    private readonly ICurrentUserService _currentUserService;
+    private readonly IPermissionEvaluator _permissionEvaluator;
+    private readonly IOrganizationLookupService _organizationLookupService;
+
+    /// <summary>Initializes a new instance of the <see cref="AssignCompatibleEngineModelCommandHandler"/> class.</summary>
+    public AssignCompatibleEngineModelCommandHandler(
+        IAssetModelRepository assetModelRepository,
+        IUnitOfWork unitOfWork,
+        IDateTimeProvider dateTimeProvider,
+        ICurrentUserService currentUserService,
+        IPermissionEvaluator permissionEvaluator,
+        IOrganizationLookupService organizationLookupService)
+    {
+        _assetModelRepository = assetModelRepository;
+        _unitOfWork = unitOfWork;
+        _dateTimeProvider = dateTimeProvider;
+        _currentUserService = currentUserService;
+        _permissionEvaluator = permissionEvaluator;
+        _organizationLookupService = organizationLookupService;
+    }
+
+    /// <summary>Executes the compatibility-assignment use case.</summary>
+    public async Task<Result> Handle(AssignCompatibleEngineModelCommand request, CancellationToken cancellationToken)
+    {
+        var assetModelId = global::Asset.Domain.AssetModelId.From(request.AssetModelId);
+        var assetModel = await _assetModelRepository.GetByIdAsync(assetModelId, cancellationToken);
+
+        if (assetModel is null)
+        {
+            return Result.Failure(
+                Error.NotFound("AssetModel.NotFound", $"Asset model with id {request.AssetModelId} was not found."));
+        }
+
+        if (_currentUserService.UserId is not { } userId)
+        {
+            return Result.Failure(global::Asset.Domain.AssetModelErrors.NotAuthorized());
+        }
+
+        var holdingId = await _organizationLookupService.GetHoldingIdAsync(assetModel.OrganizationId, cancellationToken);
+
+        var isAuthorized = await _permissionEvaluator.HasPermissionAsync(
+            userId,
+            RequiredPermission,
+            new ResourceScope(holdingId, assetModel.OrganizationId, null),
+            cancellationToken);
+
+        if (!isAuthorized)
+        {
+            return Result.Failure(global::Asset.Domain.AssetModelErrors.NotAuthorized());
+        }
+
+        var engineModelId = global::Asset.Domain.EngineModelId.From(request.EngineModelId);
+        var result = assetModel.AssignCompatibleEngineModel(engineModelId, _dateTimeProvider);
+
+        if (result.IsFailure)
+        {
+            return result;
+        }
+
+        _assetModelRepository.Update(assetModel);
+        await _unitOfWork.SaveChangesAsync(cancellationToken);
+
+        return Result.Success();
+    }
+}
+
+================================================================================
+FILE: src\Modules\Asset\Asset.Application\Features\AssetModels\Commands\RegisterAssetModel\RegisterAssetModelCommand.cs
+SIZE: 0.36 KB
+================================================================================
+using MachineryManager.SharedKernel;
+using MediatR;
+
+namespace MachineryManager.Asset.Application.Features.AssetModels.Commands.RegisterAssetModel;
+
+/// <summary>Command to register a new Asset Model within an Organization.</summary>
+public sealed record RegisterAssetModelCommand(Guid OrganizationId, string Name, string Manufacturer)
+    : IRequest<Result<Guid>>;
+
+================================================================================
+FILE: src\Modules\Asset\Asset.Application\Features\AssetModels\Commands\RegisterAssetModel\RegisterAssetModelCommandHandler.cs
+SIZE: 3.08 KB
+================================================================================
+using MachineryManager.Asset.Application.Abstractions;
+using MachineryManager.SharedKernel;
+using MachineryManager.SharedKernel.Abstractions;
+using MediatR;
+
+namespace MachineryManager.Asset.Application.Features.AssetModels.Commands.RegisterAssetModel;
+
+/// <summary>
+/// Handles <see cref="RegisterAssetModelCommand"/> by invoking domain
+/// registration, persisting the aggregate, and committing the unit of
+/// work.
+/// </summary>
+public sealed class RegisterAssetModelCommandHandler
+    : IRequestHandler<RegisterAssetModelCommand, Result<Guid>>
+{
+    private const string RequiredPermission = "Asset.Create";
+
+    private readonly IAssetModelRepository _assetModelRepository;
+    private readonly IUnitOfWork _unitOfWork;
+    private readonly IDateTimeProvider _dateTimeProvider;
+    private readonly ICurrentUserService _currentUserService;
+    private readonly IPermissionEvaluator _permissionEvaluator;
+    private readonly IOrganizationLookupService _organizationLookupService;
+
+    /// <summary>Initializes a new instance of the <see cref="RegisterAssetModelCommandHandler"/> class.</summary>
+    public RegisterAssetModelCommandHandler(
+        IAssetModelRepository assetModelRepository,
+        IUnitOfWork unitOfWork,
+        IDateTimeProvider dateTimeProvider,
+        ICurrentUserService currentUserService,
+        IPermissionEvaluator permissionEvaluator,
+        IOrganizationLookupService organizationLookupService)
+    {
+        _assetModelRepository = assetModelRepository;
+        _unitOfWork = unitOfWork;
+        _dateTimeProvider = dateTimeProvider;
+        _currentUserService = currentUserService;
+        _permissionEvaluator = permissionEvaluator;
+        _organizationLookupService = organizationLookupService;
+    }
+
+    /// <summary>Executes the registration use case.</summary>
+    public async Task<Result<Guid>> Handle(RegisterAssetModelCommand request, CancellationToken cancellationToken)
+    {
+        if (_currentUserService.UserId is not { } userId)
+        {
+            return Result.Failure<Guid>(global::Asset.Domain.AssetModelErrors.NotAuthorized());
+        }
+
+        var holdingId = await _organizationLookupService.GetHoldingIdAsync(request.OrganizationId, cancellationToken);
+
+        var isAuthorized = await _permissionEvaluator.HasPermissionAsync(
+            userId,
+            RequiredPermission,
+            new ResourceScope(holdingId, request.OrganizationId, null),
+            cancellationToken);
+
+        if (!isAuthorized)
+        {
+            return Result.Failure<Guid>(global::Asset.Domain.AssetModelErrors.NotAuthorized());
+        }
+
+        var result = global::Asset.Domain.AssetModel.Register(
+            request.OrganizationId,
+            request.Name,
+            request.Manufacturer,
+            _dateTimeProvider);
+
+        if (result.IsFailure)
+        {
+            return Result.Failure<Guid>(result.Error);
+        }
+
+        _assetModelRepository.Add(result.Value);
+        await _unitOfWork.SaveChangesAsync(cancellationToken);
+
+        return Result.Success(result.Value.Id.Value);
+    }
+}
+
+================================================================================
+FILE: src\Modules\Asset\Asset.Application\Features\AssetModels\Commands\RegisterAssetModel\RegisterAssetModelCommandValidator.cs
+SIZE: 0.79 KB
+================================================================================
+using FluentValidation;
+
+namespace MachineryManager.Asset.Application.Features.AssetModels.Commands.RegisterAssetModel;
+
+/// <summary>Validates <see cref="RegisterAssetModelCommand"/> per ADR-0036.</summary>
+public sealed class RegisterAssetModelCommandValidator : AbstractValidator<RegisterAssetModelCommand>
+{
+    /// <summary>Initializes validation rules for the register asset model command.</summary>
+    public RegisterAssetModelCommandValidator()
+    {
+        RuleFor(x => x.OrganizationId).NotEmpty();
+
+        RuleFor(x => x.Name)
+            .NotEmpty()
+            .MaximumLength(global::Asset.Domain.AssetModel.MaxNameLength);
+
+        RuleFor(x => x.Manufacturer)
+            .NotEmpty()
+            .MaximumLength(global::Asset.Domain.AssetModel.MaxManufacturerLength);
+    }
+}
+
+================================================================================
+FILE: src\Modules\Asset\Asset.Application\Features\AssetModels\Commands\RemoveCompatibleEngineModel\RemoveCompatibleEngineModelCommand.cs
+SIZE: 0.38 KB
+================================================================================
+using MachineryManager.SharedKernel;
+using MediatR;
+
+namespace MachineryManager.Asset.Application.Features.AssetModels.Commands.RemoveCompatibleEngineModel;
+
+/// <summary>Command to remove a previously assigned Engine Model compatibility from an Asset Model.</summary>
+public sealed record RemoveCompatibleEngineModelCommand(Guid AssetModelId, Guid EngineModelId) : IRequest<Result>;
+
+================================================================================
+FILE: src\Modules\Asset\Asset.Application\Features\AssetModels\Commands\RemoveCompatibleEngineModel\RemoveCompatibleEngineModelCommandHandler.cs
+SIZE: 3.33 KB
+================================================================================
+using MachineryManager.Asset.Application.Abstractions;
+using MachineryManager.SharedKernel;
+using MachineryManager.SharedKernel.Abstractions;
+using MediatR;
+
+namespace MachineryManager.Asset.Application.Features.AssetModels.Commands.RemoveCompatibleEngineModel;
+
+/// <summary>
+/// Handles <see cref="RemoveCompatibleEngineModelCommand"/> by loading
+/// the asset model, invoking the domain compatibility-removal
+/// behavior, and committing the unit of work.
+/// </summary>
+public sealed class RemoveCompatibleEngineModelCommandHandler
+    : IRequestHandler<RemoveCompatibleEngineModelCommand, Result>
+{
+    private const string RequiredPermission = "Asset.Edit";
+
+    private readonly IAssetModelRepository _assetModelRepository;
+    private readonly IUnitOfWork _unitOfWork;
+    private readonly ICurrentUserService _currentUserService;
+    private readonly IPermissionEvaluator _permissionEvaluator;
+    private readonly IOrganizationLookupService _organizationLookupService;
+
+    /// <summary>Initializes a new instance of the <see cref="RemoveCompatibleEngineModelCommandHandler"/> class.</summary>
+    public RemoveCompatibleEngineModelCommandHandler(
+        IAssetModelRepository assetModelRepository,
+        IUnitOfWork unitOfWork,
+        ICurrentUserService currentUserService,
+        IPermissionEvaluator permissionEvaluator,
+        IOrganizationLookupService organizationLookupService)
+    {
+        _assetModelRepository = assetModelRepository;
+        _unitOfWork = unitOfWork;
+        _currentUserService = currentUserService;
+        _permissionEvaluator = permissionEvaluator;
+        _organizationLookupService = organizationLookupService;
+    }
+
+    /// <summary>Executes the compatibility-removal use case.</summary>
+    public async Task<Result> Handle(RemoveCompatibleEngineModelCommand request, CancellationToken cancellationToken)
+    {
+        var assetModelId = global::Asset.Domain.AssetModelId.From(request.AssetModelId);
+        var assetModel = await _assetModelRepository.GetByIdAsync(assetModelId, cancellationToken);
+
+        if (assetModel is null)
+        {
+            return Result.Failure(
+                Error.NotFound("AssetModel.NotFound", $"Asset model with id {request.AssetModelId} was not found."));
+        }
+
+        if (_currentUserService.UserId is not { } userId)
+        {
+            return Result.Failure(global::Asset.Domain.AssetModelErrors.NotAuthorized());
+        }
+
+        var holdingId = await _organizationLookupService.GetHoldingIdAsync(assetModel.OrganizationId, cancellationToken);
+
+        var isAuthorized = await _permissionEvaluator.HasPermissionAsync(
+            userId,
+            RequiredPermission,
+            new ResourceScope(holdingId, assetModel.OrganizationId, null),
+            cancellationToken);
+
+        if (!isAuthorized)
+        {
+            return Result.Failure(global::Asset.Domain.AssetModelErrors.NotAuthorized());
+        }
+
+        var engineModelId = global::Asset.Domain.EngineModelId.From(request.EngineModelId);
+        var result = assetModel.RemoveCompatibleEngineModel(engineModelId);
+
+        if (result.IsFailure)
+        {
+            return result;
+        }
+
+        _assetModelRepository.Update(assetModel);
+        await _unitOfWork.SaveChangesAsync(cancellationToken);
+
+        return Result.Success();
+    }
+}
+
+================================================================================
+FILE: src\Modules\Asset\Asset.Application\Features\AssetModels\Commands\RenameAssetModel\RenameAssetModelCommand.cs
+SIZE: 0.31 KB
+================================================================================
+using MachineryManager.SharedKernel;
+using MediatR;
+
+namespace MachineryManager.Asset.Application.Features.AssetModels.Commands.RenameAssetModel;
+
+/// <summary>Command to rename an existing Asset Model.</summary>
+public sealed record RenameAssetModelCommand(Guid AssetModelId, string Name) : IRequest<Result>;
+
+================================================================================
+FILE: src\Modules\Asset\Asset.Application\Features\AssetModels\Commands\RenameAssetModel\RenameAssetModelCommandHandler.cs
+SIZE: 3.09 KB
+================================================================================
+using MachineryManager.Asset.Application.Abstractions;
+using MachineryManager.SharedKernel;
+using MachineryManager.SharedKernel.Abstractions;
+using MediatR;
+
+namespace MachineryManager.Asset.Application.Features.AssetModels.Commands.RenameAssetModel;
+
+/// <summary>
+/// Handles <see cref="RenameAssetModelCommand"/> by loading the
+/// aggregate, invoking the domain rename behavior, and committing the
+/// unit of work.
+/// </summary>
+public sealed class RenameAssetModelCommandHandler
+    : IRequestHandler<RenameAssetModelCommand, Result>
+{
+    private const string RequiredPermission = "Asset.Edit";
+
+    private readonly IAssetModelRepository _assetModelRepository;
+    private readonly IUnitOfWork _unitOfWork;
+    private readonly ICurrentUserService _currentUserService;
+    private readonly IPermissionEvaluator _permissionEvaluator;
+    private readonly IOrganizationLookupService _organizationLookupService;
+
+    /// <summary>Initializes a new instance of the <see cref="RenameAssetModelCommandHandler"/> class.</summary>
+    public RenameAssetModelCommandHandler(
+        IAssetModelRepository assetModelRepository,
+        IUnitOfWork unitOfWork,
+        ICurrentUserService currentUserService,
+        IPermissionEvaluator permissionEvaluator,
+        IOrganizationLookupService organizationLookupService)
+    {
+        _assetModelRepository = assetModelRepository;
+        _unitOfWork = unitOfWork;
+        _currentUserService = currentUserService;
+        _permissionEvaluator = permissionEvaluator;
+        _organizationLookupService = organizationLookupService;
+    }
+
+    /// <summary>Executes the rename use case.</summary>
+    public async Task<Result> Handle(RenameAssetModelCommand request, CancellationToken cancellationToken)
+    {
+        var id = global::Asset.Domain.AssetModelId.From(request.AssetModelId);
+        var assetModel = await _assetModelRepository.GetByIdAsync(id, cancellationToken);
+
+        if (assetModel is null)
+        {
+            return Result.Failure(
+                Error.NotFound("AssetModel.NotFound", $"Asset model with id {request.AssetModelId} was not found."));
+        }
+
+        if (_currentUserService.UserId is not { } userId)
+        {
+            return Result.Failure(global::Asset.Domain.AssetModelErrors.NotAuthorized());
+        }
+
+        var holdingId = await _organizationLookupService.GetHoldingIdAsync(assetModel.OrganizationId, cancellationToken);
+
+        var isAuthorized = await _permissionEvaluator.HasPermissionAsync(
+            userId,
+            RequiredPermission,
+            new ResourceScope(holdingId, assetModel.OrganizationId, null),
+            cancellationToken);
+
+        if (!isAuthorized)
+        {
+            return Result.Failure(global::Asset.Domain.AssetModelErrors.NotAuthorized());
+        }
+
+        var result = assetModel.Rename(request.Name);
+
+        if (result.IsFailure)
+        {
+            return result;
+        }
+
+        _assetModelRepository.Update(assetModel);
+        await _unitOfWork.SaveChangesAsync(cancellationToken);
+
+        return Result.Success();
+    }
+}
+
+================================================================================
+FILE: src\Modules\Asset\Asset.Application\Features\AssetModels\Commands\RenameAssetModel\RenameAssetModelCommandValidator.cs
+SIZE: 0.63 KB
+================================================================================
+using FluentValidation;
+
+namespace MachineryManager.Asset.Application.Features.AssetModels.Commands.RenameAssetModel;
+
+/// <summary>Validates <see cref="RenameAssetModelCommand"/> per ADR-0036.</summary>
+public sealed class RenameAssetModelCommandValidator : AbstractValidator<RenameAssetModelCommand>
+{
+    /// <summary>Initializes validation rules for the rename asset model command.</summary>
+    public RenameAssetModelCommandValidator()
+    {
+        RuleFor(x => x.AssetModelId).NotEmpty();
+
+        RuleFor(x => x.Name)
+            .NotEmpty()
+            .MaximumLength(global::Asset.Domain.AssetModel.MaxNameLength);
+    }
+}
+
+================================================================================
+FILE: src\Modules\Asset\Asset.Application\Features\AssetModels\Dtos\AssetModelDto.cs
+SIZE: 0.28 KB
+================================================================================
+namespace MachineryManager.Asset.Application.Features.AssetModels.Dtos;
+
+/// <summary>Read-only view of an Asset Model.</summary>
+public sealed record AssetModelDto(
+    Guid Id,
+    string Name,
+    string Manufacturer,
+    IReadOnlyCollection<Guid> CompatibleEngineModelIds);
+
+================================================================================
+FILE: src\Modules\Asset\Asset.Application\Features\AssetModels\Queries\GetAssetModelById\GetAssetModelByIdQuery.cs
+SIZE: 0.39 KB
+================================================================================
+using MachineryManager.Asset.Application.Features.AssetModels.Dtos;
+using MachineryManager.SharedKernel;
+using MediatR;
+
+namespace MachineryManager.Asset.Application.Features.AssetModels.Queries.GetAssetModelById;
+
+/// <summary>Query to retrieve a single Asset Model by its identifier.</summary>
+public sealed record GetAssetModelByIdQuery(Guid AssetModelId) : IRequest<Result<AssetModelDto>>;
+
+================================================================================
+FILE: src\Modules\Asset\Asset.Application\Features\AssetModels\Queries\GetAssetModelById\GetAssetModelByIdQueryHandler.cs
+SIZE: 1.67 KB
+================================================================================
+using MachineryManager.Asset.Application.Abstractions;
+using MachineryManager.Asset.Application.Features.AssetModels.Dtos;
+using MachineryManager.SharedKernel;
+using MediatR;
+
+namespace MachineryManager.Asset.Application.Features.AssetModels.Queries.GetAssetModelById;
+
+/// <summary>Handles <see cref="GetAssetModelByIdQuery"/> by loading the aggregate and mapping it to a DTO.</summary>
+public sealed class GetAssetModelByIdQueryHandler
+    : IRequestHandler<GetAssetModelByIdQuery, Result<AssetModelDto>>
+{
+    private readonly IAssetModelRepository _assetModelRepository;
+
+    /// <summary>Initializes a new instance of the <see cref="GetAssetModelByIdQueryHandler"/> class.</summary>
+    public GetAssetModelByIdQueryHandler(IAssetModelRepository assetModelRepository)
+    {
+        _assetModelRepository = assetModelRepository;
+    }
+
+    /// <summary>Executes the lookup use case.</summary>
+    public async Task<Result<AssetModelDto>> Handle(GetAssetModelByIdQuery request, CancellationToken cancellationToken)
+    {
+        var id = global::Asset.Domain.AssetModelId.From(request.AssetModelId);
+        var assetModel = await _assetModelRepository.GetByIdAsync(id, cancellationToken);
+
+        if (assetModel is null)
+        {
+            return Result.Failure<AssetModelDto>(
+                Error.NotFound("AssetModel.NotFound", $"Asset model with id {request.AssetModelId} was not found."));
+        }
+
+        var dto = new AssetModelDto(
+            assetModel.Id.Value,
+            assetModel.Name,
+            assetModel.Manufacturer,
+            assetModel.CompatibleEngineModelIds.Select(x => x.Value).ToList());
+
+        return Result.Success(dto);
+    }
+}
+
+================================================================================
+FILE: src\Modules\Asset\Asset.Application\Features\AssetModels\Queries\SearchAssetModels\SearchAssetModelsQuery.cs
+SIZE: 0.76 KB
+================================================================================
+using MachineryManager.Asset.Application.Features.AssetModels.Dtos;
+using MachineryManager.SharedKernel;
+using MediatR;
+
+namespace MachineryManager.Asset.Application.Features.AssetModels.Queries.SearchAssetModels;
+
+/// <summary>Query to search Asset Models within an Organization.</summary>
+public sealed record SearchAssetModelsQuery(Guid OrganizationId, string? SearchTerm, int Page = 1, int PageSize = 20)
+    : IRequest<Result<SearchAssetModelsResponse>>;
+
+/// <summary>Paginated response for <see cref="SearchAssetModelsQuery"/>.</summary>
+public sealed record SearchAssetModelsResponse(
+    IReadOnlyCollection<AssetModelDto> Items,
+    int Page,
+    int PageSize,
+    int TotalItems,
+    int TotalPages,
+    bool HasNextPage,
+    bool HasPreviousPage);
+
+================================================================================
+FILE: src\Modules\Asset\Asset.Application\Features\AssetModels\Queries\SearchAssetModels\SearchAssetModelsQueryHandler.cs
+SIZE: 1.27 KB
+================================================================================
+using MachineryManager.Asset.Application.Abstractions;
+using MachineryManager.SharedKernel;
+using MediatR;
+
+namespace MachineryManager.Asset.Application.Features.AssetModels.Queries.SearchAssetModels;
+
+/// <summary>Handles <see cref="SearchAssetModelsQuery"/> by delegating to the repository search projection.</summary>
+public sealed class SearchAssetModelsQueryHandler
+    : IRequestHandler<SearchAssetModelsQuery, Result<SearchAssetModelsResponse>>
+{
+    private readonly IAssetModelRepository _assetModelRepository;
+
+    /// <summary>Initializes a new instance of the <see cref="SearchAssetModelsQueryHandler"/> class.</summary>
+    public SearchAssetModelsQueryHandler(IAssetModelRepository assetModelRepository)
+    {
+        _assetModelRepository = assetModelRepository;
+    }
+
+    /// <summary>Executes the search query.</summary>
+    public async Task<Result<SearchAssetModelsResponse>> Handle(
+        SearchAssetModelsQuery request,
+        CancellationToken cancellationToken)
+    {
+        var response = await _assetModelRepository.SearchAsync(
+            request.OrganizationId,
+            request.SearchTerm,
+            request.Page,
+            request.PageSize,
+            cancellationToken);
+
+        return Result.Success(response);
+    }
+}
+
+================================================================================
+FILE: src\Modules\Asset\Asset.Application\Features\EngineModels\Commands\RegisterEngineModel\RegisterEngineModelCommand.cs
+SIZE: 0.37 KB
+================================================================================
+using MachineryManager.SharedKernel;
+using MediatR;
+
+namespace MachineryManager.Asset.Application.Features.EngineModels.Commands.RegisterEngineModel;
+
+/// <summary>Command to register a new Engine Model within an Organization.</summary>
+public sealed record RegisterEngineModelCommand(Guid OrganizationId, string Name, string Manufacturer)
+    : IRequest<Result<Guid>>;
+
+================================================================================
+FILE: src\Modules\Asset\Asset.Application\Features\EngineModels\Commands\RegisterEngineModel\RegisterEngineModelCommandHandler.cs
+SIZE: 3.1 KB
+================================================================================
+using MachineryManager.Asset.Application.Abstractions;
+using MachineryManager.SharedKernel;
+using MachineryManager.SharedKernel.Abstractions;
+using MediatR;
+
+namespace MachineryManager.Asset.Application.Features.EngineModels.Commands.RegisterEngineModel;
+
+/// <summary>
+/// Handles <see cref="RegisterEngineModelCommand"/> by invoking domain
+/// registration, persisting the aggregate, and committing the unit of
+/// work.
+/// </summary>
+public sealed class RegisterEngineModelCommandHandler
+    : IRequestHandler<RegisterEngineModelCommand, Result<Guid>>
+{
+    private const string RequiredPermission = "Asset.Create";
+
+    private readonly IEngineModelRepository _engineModelRepository;
+    private readonly IUnitOfWork _unitOfWork;
+    private readonly IDateTimeProvider _dateTimeProvider;
+    private readonly ICurrentUserService _currentUserService;
+    private readonly IPermissionEvaluator _permissionEvaluator;
+    private readonly IOrganizationLookupService _organizationLookupService;
+
+    /// <summary>Initializes a new instance of the <see cref="RegisterEngineModelCommandHandler"/> class.</summary>
+    public RegisterEngineModelCommandHandler(
+        IEngineModelRepository engineModelRepository,
+        IUnitOfWork unitOfWork,
+        IDateTimeProvider dateTimeProvider,
+        ICurrentUserService currentUserService,
+        IPermissionEvaluator permissionEvaluator,
+        IOrganizationLookupService organizationLookupService)
+    {
+        _engineModelRepository = engineModelRepository;
+        _unitOfWork = unitOfWork;
+        _dateTimeProvider = dateTimeProvider;
+        _currentUserService = currentUserService;
+        _permissionEvaluator = permissionEvaluator;
+        _organizationLookupService = organizationLookupService;
+    }
+
+    /// <summary>Executes the registration use case.</summary>
+    public async Task<Result<Guid>> Handle(RegisterEngineModelCommand request, CancellationToken cancellationToken)
+    {
+        if (_currentUserService.UserId is not { } userId)
+        {
+            return Result.Failure<Guid>(global::Asset.Domain.EngineModelErrors.NotAuthorized());
+        }
+
+        var holdingId = await _organizationLookupService.GetHoldingIdAsync(request.OrganizationId, cancellationToken);
+
+        var isAuthorized = await _permissionEvaluator.HasPermissionAsync(
+            userId,
+            RequiredPermission,
+            new ResourceScope(holdingId, request.OrganizationId, null),
+            cancellationToken);
+
+        if (!isAuthorized)
+        {
+            return Result.Failure<Guid>(global::Asset.Domain.EngineModelErrors.NotAuthorized());
+        }
+
+        var result = global::Asset.Domain.EngineModel.Register(
+            request.OrganizationId,
+            request.Name,
+            request.Manufacturer,
+            _dateTimeProvider);
+
+        if (result.IsFailure)
+        {
+            return Result.Failure<Guid>(result.Error);
+        }
+
+        _engineModelRepository.Add(result.Value);
+        await _unitOfWork.SaveChangesAsync(cancellationToken);
+
+        return Result.Success(result.Value.Id.Value);
+    }
+}
+
+================================================================================
+FILE: src\Modules\Asset\Asset.Application\Features\EngineModels\Commands\RegisterEngineModel\RegisterEngineModelCommandValidator.cs
+SIZE: 0.8 KB
+================================================================================
+using FluentValidation;
+
+namespace MachineryManager.Asset.Application.Features.EngineModels.Commands.RegisterEngineModel;
+
+/// <summary>Validates <see cref="RegisterEngineModelCommand"/> per ADR-0036.</summary>
+public sealed class RegisterEngineModelCommandValidator : AbstractValidator<RegisterEngineModelCommand>
+{
+    /// <summary>Initializes validation rules for the register engine model command.</summary>
+    public RegisterEngineModelCommandValidator()
+    {
+        RuleFor(x => x.OrganizationId).NotEmpty();
+
+        RuleFor(x => x.Name)
+            .NotEmpty()
+            .MaximumLength(global::Asset.Domain.EngineModel.MaxNameLength);
+
+        RuleFor(x => x.Manufacturer)
+            .NotEmpty()
+            .MaximumLength(global::Asset.Domain.EngineModel.MaxManufacturerLength);
+    }
+}
+
+================================================================================
+FILE: src\Modules\Asset\Asset.Application\Features\EngineModels\Commands\RenameEngineModel\RenameEngineModelCommand.cs
+SIZE: 0.31 KB
+================================================================================
+using MachineryManager.SharedKernel;
+using MediatR;
+
+namespace MachineryManager.Asset.Application.Features.EngineModels.Commands.RenameEngineModel;
+
+/// <summary>Command to rename an existing Engine Model.</summary>
+public sealed record RenameEngineModelCommand(Guid EngineModelId, string Name) : IRequest<Result>;
+
+================================================================================
+FILE: src\Modules\Asset\Asset.Application\Features\EngineModels\Commands\RenameEngineModel\RenameEngineModelCommandHandler.cs
+SIZE: 3.12 KB
+================================================================================
+using MachineryManager.Asset.Application.Abstractions;
+using MachineryManager.SharedKernel;
+using MachineryManager.SharedKernel.Abstractions;
+using MediatR;
+
+namespace MachineryManager.Asset.Application.Features.EngineModels.Commands.RenameEngineModel;
+
+/// <summary>
+/// Handles <see cref="RenameEngineModelCommand"/> by loading the
+/// aggregate, invoking the domain rename behavior, and committing the
+/// unit of work.
+/// </summary>
+public sealed class RenameEngineModelCommandHandler
+    : IRequestHandler<RenameEngineModelCommand, Result>
+{
+    private const string RequiredPermission = "Asset.Edit";
+
+    private readonly IEngineModelRepository _engineModelRepository;
+    private readonly IUnitOfWork _unitOfWork;
+    private readonly ICurrentUserService _currentUserService;
+    private readonly IPermissionEvaluator _permissionEvaluator;
+    private readonly IOrganizationLookupService _organizationLookupService;
+
+    /// <summary>Initializes a new instance of the <see cref="RenameEngineModelCommandHandler"/> class.</summary>
+    public RenameEngineModelCommandHandler(
+        IEngineModelRepository engineModelRepository,
+        IUnitOfWork unitOfWork,
+        ICurrentUserService currentUserService,
+        IPermissionEvaluator permissionEvaluator,
+        IOrganizationLookupService organizationLookupService)
+    {
+        _engineModelRepository = engineModelRepository;
+        _unitOfWork = unitOfWork;
+        _currentUserService = currentUserService;
+        _permissionEvaluator = permissionEvaluator;
+        _organizationLookupService = organizationLookupService;
+    }
+
+    /// <summary>Executes the rename use case.</summary>
+    public async Task<Result> Handle(RenameEngineModelCommand request, CancellationToken cancellationToken)
+    {
+        var id = global::Asset.Domain.EngineModelId.From(request.EngineModelId);
+        var engineModel = await _engineModelRepository.GetByIdAsync(id, cancellationToken);
+
+        if (engineModel is null)
+        {
+            return Result.Failure(
+                Error.NotFound("EngineModel.NotFound", $"Engine model with id {request.EngineModelId} was not found."));
+        }
+
+        if (_currentUserService.UserId is not { } userId)
+        {
+            return Result.Failure(global::Asset.Domain.EngineModelErrors.NotAuthorized());
+        }
+
+        var holdingId = await _organizationLookupService.GetHoldingIdAsync(engineModel.OrganizationId, cancellationToken);
+
+        var isAuthorized = await _permissionEvaluator.HasPermissionAsync(
+            userId,
+            RequiredPermission,
+            new ResourceScope(holdingId, engineModel.OrganizationId, null),
+            cancellationToken);
+
+        if (!isAuthorized)
+        {
+            return Result.Failure(global::Asset.Domain.EngineModelErrors.NotAuthorized());
+        }
+
+        var result = engineModel.Rename(request.Name);
+
+        if (result.IsFailure)
+        {
+            return result;
+        }
+
+        _engineModelRepository.Update(engineModel);
+        await _unitOfWork.SaveChangesAsync(cancellationToken);
+
+        return Result.Success();
+    }
+}
+
+================================================================================
+FILE: src\Modules\Asset\Asset.Application\Features\EngineModels\Commands\RenameEngineModel\RenameEngineModelCommandValidator.cs
+SIZE: 0.64 KB
+================================================================================
+using FluentValidation;
+
+namespace MachineryManager.Asset.Application.Features.EngineModels.Commands.RenameEngineModel;
+
+/// <summary>Validates <see cref="RenameEngineModelCommand"/> per ADR-0036.</summary>
+public sealed class RenameEngineModelCommandValidator : AbstractValidator<RenameEngineModelCommand>
+{
+    /// <summary>Initializes validation rules for the rename engine model command.</summary>
+    public RenameEngineModelCommandValidator()
+    {
+        RuleFor(x => x.EngineModelId).NotEmpty();
+
+        RuleFor(x => x.Name)
+            .NotEmpty()
+            .MaximumLength(global::Asset.Domain.EngineModel.MaxNameLength);
+    }
+}
+
+================================================================================
+FILE: src\Modules\Asset\Asset.Application\Features\EngineModels\Dtos\EngineModelDto.cs
+SIZE: 0.21 KB
+================================================================================
+namespace MachineryManager.Asset.Application.Features.EngineModels.Dtos;
+
+/// <summary>Read-only view of an Engine Model.</summary>
+public sealed record EngineModelDto(Guid Id, string Name, string Manufacturer);
+
+================================================================================
+FILE: src\Modules\Asset\Asset.Application\Features\EngineModels\Queries\GetEngineModelById\GetEngineModelByIdQuery.cs
+SIZE: 0.4 KB
+================================================================================
+using MachineryManager.Asset.Application.Features.EngineModels.Dtos;
+using MachineryManager.SharedKernel;
+using MediatR;
+
+namespace MachineryManager.Asset.Application.Features.EngineModels.Queries.GetEngineModelById;
+
+/// <summary>Query to retrieve a single Engine Model by its identifier.</summary>
+public sealed record GetEngineModelByIdQuery(Guid EngineModelId) : IRequest<Result<EngineModelDto>>;
+
+================================================================================
+FILE: src\Modules\Asset\Asset.Application\Features\EngineModels\Queries\GetEngineModelById\GetEngineModelByIdQueryHandler.cs
+SIZE: 1.59 KB
+================================================================================
+using MachineryManager.Asset.Application.Abstractions;
+using MachineryManager.Asset.Application.Features.EngineModels.Dtos;
+using MachineryManager.SharedKernel;
+using MediatR;
+
+namespace MachineryManager.Asset.Application.Features.EngineModels.Queries.GetEngineModelById;
+
+/// <summary>Handles <see cref="GetEngineModelByIdQuery"/> by loading the aggregate and mapping it to a DTO.</summary>
+public sealed class GetEngineModelByIdQueryHandler
+    : IRequestHandler<GetEngineModelByIdQuery, Result<EngineModelDto>>
+{
+    private readonly IEngineModelRepository _engineModelRepository;
+
+    /// <summary>Initializes a new instance of the <see cref="GetEngineModelByIdQueryHandler"/> class.</summary>
+    public GetEngineModelByIdQueryHandler(IEngineModelRepository engineModelRepository)
+    {
+        _engineModelRepository = engineModelRepository;
+    }
+
+    /// <summary>Executes the lookup use case.</summary>
+    public async Task<Result<EngineModelDto>> Handle(GetEngineModelByIdQuery request, CancellationToken cancellationToken)
+    {
+        var id = global::Asset.Domain.EngineModelId.From(request.EngineModelId);
+        var engineModel = await _engineModelRepository.GetByIdAsync(id, cancellationToken);
+
+        if (engineModel is null)
+        {
+            return Result.Failure<EngineModelDto>(
+                Error.NotFound("EngineModel.NotFound", $"Engine model with id {request.EngineModelId} was not found."));
+        }
+
+        var dto = new EngineModelDto(engineModel.Id.Value, engineModel.Name, engineModel.Manufacturer);
+
+        return Result.Success(dto);
+    }
+}
+
+================================================================================
+FILE: src\Modules\Asset\Asset.Application\Features\EngineModels\Queries\SearchEngineModels\SearchEngineModelsQuery.cs
+SIZE: 0.77 KB
+================================================================================
+using MachineryManager.Asset.Application.Features.EngineModels.Dtos;
+using MachineryManager.SharedKernel;
+using MediatR;
+
+namespace MachineryManager.Asset.Application.Features.EngineModels.Queries.SearchEngineModels;
+
+/// <summary>Query to search Engine Models within an Organization.</summary>
+public sealed record SearchEngineModelsQuery(Guid OrganizationId, string? SearchTerm, int Page = 1, int PageSize = 20)
+    : IRequest<Result<SearchEngineModelsResponse>>;
+
+/// <summary>Paginated response for <see cref="SearchEngineModelsQuery"/>.</summary>
+public sealed record SearchEngineModelsResponse(
+    IReadOnlyCollection<EngineModelDto> Items,
+    int Page,
+    int PageSize,
+    int TotalItems,
+    int TotalPages,
+    bool HasNextPage,
+    bool HasPreviousPage);
+
+================================================================================
+FILE: src\Modules\Asset\Asset.Application\Features\EngineModels\Queries\SearchEngineModels\SearchEngineModelsQueryHandler.cs
+SIZE: 1.28 KB
+================================================================================
+using MachineryManager.Asset.Application.Abstractions;
+using MachineryManager.SharedKernel;
+using MediatR;
+
+namespace MachineryManager.Asset.Application.Features.EngineModels.Queries.SearchEngineModels;
+
+/// <summary>Handles <see cref="SearchEngineModelsQuery"/> by delegating to the repository search projection.</summary>
+public sealed class SearchEngineModelsQueryHandler
+    : IRequestHandler<SearchEngineModelsQuery, Result<SearchEngineModelsResponse>>
+{
+    private readonly IEngineModelRepository _engineModelRepository;
+
+    /// <summary>Initializes a new instance of the <see cref="SearchEngineModelsQueryHandler"/> class.</summary>
+    public SearchEngineModelsQueryHandler(IEngineModelRepository engineModelRepository)
+    {
+        _engineModelRepository = engineModelRepository;
+    }
+
+    /// <summary>Executes the search query.</summary>
+    public async Task<Result<SearchEngineModelsResponse>> Handle(
+        SearchEngineModelsQuery request,
+        CancellationToken cancellationToken)
+    {
+        var response = await _engineModelRepository.SearchAsync(
+            request.OrganizationId,
+            request.SearchTerm,
+            request.Page,
+            request.PageSize,
+            cancellationToken);
+
+        return Result.Success(response);
+    }
+}
+
+================================================================================
+FILE: src\Modules\Asset\Asset.Domain\Asset.Domain.csproj
+SIZE: 0.2 KB
+================================================================================
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\BuildingBlocks\MachineryManager.SharedKernel\MachineryManager.SharedKernel.csproj" />
+  </ItemGroup>
+
+</Project>
+
+================================================================================
+FILE: src\Modules\Asset\Asset.Domain\AssetModel.cs
+SIZE: 5.64 KB
+================================================================================
+using Asset.Domain.Events;
+using MachineryManager.SharedKernel;
+using MachineryManager.SharedKernel.Abstractions;
+
+namespace Asset.Domain;
+
+/// <summary>
+/// Aggregate Root representing a catalog of shared specifications for a
+/// class of Assets (e.g. "Volvo FH16 6x4"). Individual Asset instances
+/// reference exactly one AssetModel (BR-002) and inherit its shared
+/// specifications; identity-specific data (serial number, license
+/// plate, manufacture year, color, ...) lives on the Asset itself, not
+/// here (chat, 2026-08-25).
+/// Scoped per Organization — each Organization maintains its own
+/// catalog (chat, 2026-08-25).
+/// </summary>
+public sealed class AssetModel : AggregateRoot<AssetModelId>
+{
+    /// <summary>The maximum allowed length for the asset model's name.</summary>
+    public const int MaxNameLength = 200;
+
+    /// <summary>The maximum allowed length for the manufacturer's name.</summary>
+    public const int MaxManufacturerLength = 200;
+
+    private readonly List<Guid> _compatibleEngineModelIds = [];
+
+    /// <summary>Gets the identifier of the Organization that owns this catalog entry.</summary>
+    public Guid OrganizationId { get; private set; }
+
+    /// <summary>Gets the display name of the asset model (e.g. "FH16 6x4").</summary>
+    public string Name { get; private set; } = string.Empty;
+
+    /// <summary>Gets the manufacturer of this asset model (e.g. "Volvo").</summary>
+    public string Manufacturer { get; private set; } = string.Empty;
+
+    /// <summary>
+    /// Gets the Engine Models that are compatible with this Asset Model
+    /// (i.e. may be installed on an Asset of this model).
+    /// </summary>
+    public IReadOnlyCollection<EngineModelId> CompatibleEngineModelIds =>
+        _compatibleEngineModelIds.Select(EngineModelId.From).ToList().AsReadOnly();
+
+    // Reserved for ORM materialization only. Never used by application code.
+    private AssetModel()
+    {
+    }
+
+    private AssetModel(AssetModelId id, Guid organizationId, string name, string manufacturer)
+        : base(id)
+    {
+        OrganizationId = organizationId;
+        Name = name;
+        Manufacturer = manufacturer;
+    }
+
+    /// <summary>Registers a new Asset Model.</summary>
+    /// <param name="organizationId">The owning Organization.</param>
+    /// <param name="name">The display name.</param>
+    /// <param name="manufacturer">The manufacturer.</param>
+    /// <param name="dateTimeProvider">Provides the current UTC time for the raised domain event.</param>
+    /// <returns>A <see cref="Result{AssetModel}"/> containing the new aggregate, or a validation error.</returns>
+    public static Result<AssetModel> Register(
+        Guid organizationId,
+        string name,
+        string manufacturer,
+        IDateTimeProvider dateTimeProvider)
+    {
+        if (string.IsNullOrWhiteSpace(name))
+        {
+            return Result.Failure<AssetModel>(AssetModelErrors.NameRequired());
+        }
+
+        if (name.Length > MaxNameLength)
+        {
+            return Result.Failure<AssetModel>(AssetModelErrors.NameTooLong(MaxNameLength));
+        }
+
+        if (string.IsNullOrWhiteSpace(manufacturer))
+        {
+            return Result.Failure<AssetModel>(AssetModelErrors.ManufacturerRequired());
+        }
+
+        var assetModel = new AssetModel(AssetModelId.New(), organizationId, name.Trim(), manufacturer.Trim());
+
+        assetModel.RaiseDomainEvent(new AssetModelRegistered(
+            assetModel.Id,
+            organizationId,
+            assetModel.Name,
+            dateTimeProvider.UtcNow));
+
+        return assetModel;
+    }
+
+    /// <summary>Renames this Asset Model.</summary>
+    /// <param name="name">The new name.</param>
+    /// <returns>A <see cref="Result"/> indicating success or a validation error.</returns>
+    public Result Rename(string name)
+    {
+        if (string.IsNullOrWhiteSpace(name))
+        {
+            return Result.Failure(AssetModelErrors.NameRequired());
+        }
+
+        if (name.Length > MaxNameLength)
+        {
+            return Result.Failure(AssetModelErrors.NameTooLong(MaxNameLength));
+        }
+
+        Name = name.Trim();
+
+        return Result.Success();
+    }
+
+    /// <summary>Marks the given Engine Model as compatible with this Asset Model.</summary>
+    /// <param name="engineModelId">The engine model to mark compatible.</param>
+    /// <param name="dateTimeProvider">Provides the current UTC time for the raised domain event.</param>
+    /// <returns>A <see cref="Result"/> indicating success or a conflict if already compatible.</returns>
+    public Result AssignCompatibleEngineModel(EngineModelId engineModelId, IDateTimeProvider dateTimeProvider)
+    {
+        if (_compatibleEngineModelIds.Contains(engineModelId.Value))
+        {
+            return Result.Failure(AssetModelErrors.EngineModelAlreadyCompatible());
+        }
+
+        _compatibleEngineModelIds.Add(engineModelId.Value);
+
+        RaiseDomainEvent(new EngineModelAssignedToAssetModel(Id, engineModelId, dateTimeProvider.UtcNow));
+
+        return Result.Success();
+    }
+
+    /// <summary>Removes a previously assigned compatibility with the given Engine Model.</summary>
+    /// <param name="engineModelId">The engine model to remove.</param>
+    /// <returns>A <see cref="Result"/> indicating success or a conflict if not currently compatible.</returns>
+    public Result RemoveCompatibleEngineModel(EngineModelId engineModelId)
+    {
+        if (!_compatibleEngineModelIds.Remove(engineModelId.Value))
+        {
+            return Result.Failure(AssetModelErrors.EngineModelNotCompatible());
+        }
+
+        return Result.Success();
+    }
+}
+
+================================================================================
+FILE: src\Modules\Asset\Asset.Domain\AssetModelErrors.cs
+SIZE: 1.79 KB
+================================================================================
+using MachineryManager.SharedKernel;
+
+namespace Asset.Domain;
+
+/// <summary>Business Errors for the AssetModel aggregate.</summary>
+public static class AssetModelErrors
+{
+    /// <summary>Creates an error indicating the name was not provided.</summary>
+    public static Error NameRequired() => Error.Validation(
+        "AssetModel.NameRequired",
+        "Asset model name is required.");
+
+    /// <summary>Creates an error indicating the name exceeds the maximum length.</summary>
+    public static Error NameTooLong(int maxLength) => Error.Validation(
+        "AssetModel.NameTooLong",
+        $"Asset model name shall not exceed {maxLength} characters.");
+
+    /// <summary>Creates an error indicating the manufacturer was not provided.</summary>
+    public static Error ManufacturerRequired() => Error.Validation(
+        "AssetModel.ManufacturerRequired",
+        "Asset model manufacturer is required.");
+
+    /// <summary>Creates an error indicating the engine model is already marked compatible.</summary>
+    public static Error EngineModelAlreadyCompatible() => Error.Conflict(
+        "AssetModel.EngineModelAlreadyCompatible",
+        "This engine model is already marked compatible with this asset model.");
+
+    /// <summary>Creates an error indicating the engine model is not currently marked compatible.</summary>
+    public static Error EngineModelNotCompatible() => Error.Conflict(
+        "AssetModel.EngineModelNotCompatible",
+        "This engine model is not currently marked compatible with this asset model.");
+
+    /// <summary>Creates an error indicating the current user lacks permission for this action.</summary>
+    public static Error NotAuthorized() => Error.Failure(
+        "AssetModel.NotAuthorized",
+        "You do not have permission to perform this action.");
+}
+
+================================================================================
+FILE: src\Modules\Asset\Asset.Domain\AssetModelId.cs
+SIZE: 0.85 KB
+================================================================================
+using MachineryManager.SharedKernel;
+
+namespace Asset.Domain;
+
+/// <summary>Strongly-typed identifier for an Asset Model.</summary>
+public sealed class AssetModelId : ValueObject
+{
+    /// <summary>Gets the underlying GUID value.</summary>
+    public Guid Value { get; }
+
+    private AssetModelId(Guid value)
+    {
+        Value = value;
+    }
+
+    /// <summary>Creates a new, unique AssetModelId.</summary>
+    public static AssetModelId New() => new(Guid.NewGuid());
+
+    /// <summary>Wraps an existing identifier value (e.g. read from persistence).</summary>
+    public static AssetModelId From(Guid value) => new(value);
+
+    /// <inheritdoc />
+    protected override IEnumerable<object?> GetEqualityComponents()
+    {
+        yield return Value;
+    }
+
+    /// <inheritdoc />
+    public override string ToString() => Value.ToString();
+}
+
+================================================================================
+FILE: src\Modules\Asset\Asset.Domain\EngineModel.cs
+SIZE: 3.84 KB
+================================================================================
+using Asset.Domain.Events;
+using MachineryManager.SharedKernel;
+using MachineryManager.SharedKernel.Abstractions;
+
+namespace Asset.Domain;
+
+/// <summary>
+/// Aggregate Root representing a catalog of shared specifications for a
+/// class of Engines (e.g. "Volvo D13"). Individual Engine instances
+/// (own aggregate, not modeled in this increment) reference exactly one
+/// EngineModel and inherit its shared specifications; identity-specific
+/// data (serial number, install history) lives on the Engine instance
+/// itself, not here (chat, 2026-08-25).
+/// Scoped per Organization — each Organization maintains its own
+/// catalog (chat, 2026-08-25).
+/// </summary>
+public sealed class EngineModel : AggregateRoot<EngineModelId>
+{
+    /// <summary>The maximum allowed length for the engine model's name.</summary>
+    public const int MaxNameLength = 200;
+
+    /// <summary>The maximum allowed length for the manufacturer's name.</summary>
+    public const int MaxManufacturerLength = 200;
+
+    /// <summary>Gets the identifier of the Organization that owns this catalog entry.</summary>
+    public Guid OrganizationId { get; private set; }
+
+    /// <summary>Gets the display name of the engine model (e.g. "D13").</summary>
+    public string Name { get; private set; } = string.Empty;
+
+    /// <summary>Gets the manufacturer of this engine model (e.g. "Volvo").</summary>
+    public string Manufacturer { get; private set; } = string.Empty;
+
+    // Reserved for ORM materialization only. Never used by application code.
+    private EngineModel()
+    {
+    }
+
+    private EngineModel(EngineModelId id, Guid organizationId, string name, string manufacturer)
+        : base(id)
+    {
+        OrganizationId = organizationId;
+        Name = name;
+        Manufacturer = manufacturer;
+    }
+
+    /// <summary>Registers a new Engine Model.</summary>
+    /// <param name="organizationId">The owning Organization.</param>
+    /// <param name="name">The display name.</param>
+    /// <param name="manufacturer">The manufacturer.</param>
+    /// <param name="dateTimeProvider">Provides the current UTC time for the raised domain event.</param>
+    /// <returns>A <see cref="Result{EngineModel}"/> containing the new aggregate, or a validation error.</returns>
+    public static Result<EngineModel> Register(
+        Guid organizationId,
+        string name,
+        string manufacturer,
+        IDateTimeProvider dateTimeProvider)
+    {
+        if (string.IsNullOrWhiteSpace(name))
+        {
+            return Result.Failure<EngineModel>(EngineModelErrors.NameRequired());
+        }
+
+        if (name.Length > MaxNameLength)
+        {
+            return Result.Failure<EngineModel>(EngineModelErrors.NameTooLong(MaxNameLength));
+        }
+
+        if (string.IsNullOrWhiteSpace(manufacturer))
+        {
+            return Result.Failure<EngineModel>(EngineModelErrors.ManufacturerRequired());
+        }
+
+        var engineModel = new EngineModel(EngineModelId.New(), organizationId, name.Trim(), manufacturer.Trim());
+
+        engineModel.RaiseDomainEvent(new EngineModelRegistered(
+            engineModel.Id,
+            organizationId,
+            engineModel.Name,
+            dateTimeProvider.UtcNow));
+
+        return engineModel;
+    }
+
+    /// <summary>Renames this Engine Model.</summary>
+    /// <param name="name">The new name.</param>
+    /// <returns>A <see cref="Result"/> indicating success or a validation error.</returns>
+    public Result Rename(string name)
+    {
+        if (string.IsNullOrWhiteSpace(name))
+        {
+            return Result.Failure(EngineModelErrors.NameRequired());
+        }
+
+        if (name.Length > MaxNameLength)
+        {
+            return Result.Failure(EngineModelErrors.NameTooLong(MaxNameLength));
+        }
+
+        Name = name.Trim();
+
+        return Result.Success();
+    }
+}
+
+================================================================================
+FILE: src\Modules\Asset\Asset.Domain\EngineModelErrors.cs
+SIZE: 1.18 KB
+================================================================================
+using MachineryManager.SharedKernel;
+
+namespace Asset.Domain;
+
+/// <summary>Business Errors for the EngineModel aggregate.</summary>
+public static class EngineModelErrors
+{
+    /// <summary>Creates an error indicating the name was not provided.</summary>
+    public static Error NameRequired() => Error.Validation(
+        "EngineModel.NameRequired",
+        "Engine model name is required.");
+
+    /// <summary>Creates an error indicating the name exceeds the maximum length.</summary>
+    public static Error NameTooLong(int maxLength) => Error.Validation(
+        "EngineModel.NameTooLong",
+        $"Engine model name shall not exceed {maxLength} characters.");
+
+    /// <summary>Creates an error indicating the manufacturer was not provided.</summary>
+    public static Error ManufacturerRequired() => Error.Validation(
+        "EngineModel.ManufacturerRequired",
+        "Engine model manufacturer is required.");
+
+    /// <summary>Creates an error indicating the current user lacks permission for this action.</summary>
+    public static Error NotAuthorized() => Error.Failure(
+        "EngineModel.NotAuthorized",
+        "You do not have permission to perform this action.");
+}
+
+================================================================================
+FILE: src\Modules\Asset\Asset.Domain\EngineModelId.cs
+SIZE: 0.86 KB
+================================================================================
+using MachineryManager.SharedKernel;
+
+namespace Asset.Domain;
+
+/// <summary>Strongly-typed identifier for an Engine Model.</summary>
+public sealed class EngineModelId : ValueObject
+{
+    /// <summary>Gets the underlying GUID value.</summary>
+    public Guid Value { get; }
+
+    private EngineModelId(Guid value)
+    {
+        Value = value;
+    }
+
+    /// <summary>Creates a new, unique EngineModelId.</summary>
+    public static EngineModelId New() => new(Guid.NewGuid());
+
+    /// <summary>Wraps an existing identifier value (e.g. read from persistence).</summary>
+    public static EngineModelId From(Guid value) => new(value);
+
+    /// <inheritdoc />
+    protected override IEnumerable<object?> GetEqualityComponents()
+    {
+        yield return Value;
+    }
+
+    /// <inheritdoc />
+    public override string ToString() => Value.ToString();
+}
+
+================================================================================
+FILE: src\Modules\Asset\Asset.Domain\Events\AssetModelRegistered.cs
+SIZE: 1.02 KB
+================================================================================
+using MachineryManager.SharedKernel;
+
+namespace Asset.Domain.Events;
+
+/// <summary>Raised when a new Asset Model is registered.</summary>
+public sealed class AssetModelRegistered : IDomainEvent
+{
+    /// <summary>Gets the identifier of the registered asset model.</summary>
+    public AssetModelId AssetModelId { get; }
+
+    /// <summary>Gets the identifier of the owning Organization.</summary>
+    public Guid OrganizationId { get; }
+
+    /// <summary>Gets the name of the asset model.</summary>
+    public string Name { get; }
+
+    /// <summary>Gets the UTC timestamp when the event occurred.</summary>
+    public DateTimeOffset OccurredOn { get; }
+
+    /// <summary>Initializes a new instance of the <see cref="AssetModelRegistered"/> class.</summary>
+    public AssetModelRegistered(AssetModelId assetModelId, Guid organizationId, string name, DateTimeOffset occurredOn)
+    {
+        AssetModelId = assetModelId;
+        OrganizationId = organizationId;
+        Name = name;
+        OccurredOn = occurredOn;
+    }
+}
+
+================================================================================
+FILE: src\Modules\Asset\Asset.Domain\Events\EngineModelAssignedToAssetModel.cs
+SIZE: 0.97 KB
+================================================================================
+using MachineryManager.SharedKernel;
+
+namespace Asset.Domain.Events;
+
+/// <summary>Raised when an Engine Model is marked compatible with an Asset Model.</summary>
+public sealed class EngineModelAssignedToAssetModel : IDomainEvent
+{
+    /// <summary>Gets the identifier of the asset model.</summary>
+    public AssetModelId AssetModelId { get; }
+
+    /// <summary>Gets the identifier of the engine model now marked compatible.</summary>
+    public EngineModelId EngineModelId { get; }
+
+    /// <summary>Gets the UTC timestamp when the event occurred.</summary>
+    public DateTimeOffset OccurredOn { get; }
+
+    /// <summary>Initializes a new instance of the <see cref="EngineModelAssignedToAssetModel"/> class.</summary>
+    public EngineModelAssignedToAssetModel(AssetModelId assetModelId, EngineModelId engineModelId, DateTimeOffset occurredOn)
+    {
+        AssetModelId = assetModelId;
+        EngineModelId = engineModelId;
+        OccurredOn = occurredOn;
+    }
+}
+
+================================================================================
+FILE: src\Modules\Asset\Asset.Domain\Events\EngineModelRegistered.cs
+SIZE: 1.04 KB
+================================================================================
+using MachineryManager.SharedKernel;
+
+namespace Asset.Domain.Events;
+
+/// <summary>Raised when a new Engine Model is registered.</summary>
+public sealed class EngineModelRegistered : IDomainEvent
+{
+    /// <summary>Gets the identifier of the registered engine model.</summary>
+    public EngineModelId EngineModelId { get; }
+
+    /// <summary>Gets the identifier of the owning Organization.</summary>
+    public Guid OrganizationId { get; }
+
+    /// <summary>Gets the name of the engine model.</summary>
+    public string Name { get; }
+
+    /// <summary>Gets the UTC timestamp when the event occurred.</summary>
+    public DateTimeOffset OccurredOn { get; }
+
+    /// <summary>Initializes a new instance of the <see cref="EngineModelRegistered"/> class.</summary>
+    public EngineModelRegistered(EngineModelId engineModelId, Guid organizationId, string name, DateTimeOffset occurredOn)
+    {
+        EngineModelId = engineModelId;
+        OrganizationId = organizationId;
+        Name = name;
+        OccurredOn = occurredOn;
+    }
+}
+
+================================================================================
+FILE: src\Modules\Asset\Asset.Infrastructure\Asset.Infrastructure.csproj
+SIZE: 0.41 KB
+================================================================================
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <ItemGroup>
+    <ProjectReference Include="..\Asset.Application\Asset.Application.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.Binder" />
+  </ItemGroup>
+
+</Project>
+
+================================================================================
+FILE: src\Modules\Asset\Asset.Infrastructure\DependencyInjection.cs
+SIZE: 1.73 KB
+================================================================================
+using MachineryManager.Asset.Application.Abstractions;
+using MachineryManager.Asset.Infrastructure.Persistence;
+using MachineryManager.SharedKernel.Abstractions;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
+
+namespace MachineryManager.Asset.Infrastructure;
+
+/// <summary>Registers the Asset module's Infrastructure-layer services.</summary>
+public static class DependencyInjection
+{
+    /// <summary>
+    /// Registers the Asset module's DbContext, repositories, and Unit
+    /// of Work with the dependency injection container.
+    /// </summary>
+    /// <remarks>
+    /// Uses the shared <c>MachineryManagerDatabase</c> connection string
+    /// key, matching Organization and Administration's infrastructure
+    /// registration convention.
+    /// </remarks>
+    /// <param name="services">The service collection to configure.</param>
+    /// <param name="configuration">The application configuration, used to resolve the connection string.</param>
+    /// <returns>The same <see cref="IServiceCollection"/> for chaining.</returns>
+    public static IServiceCollection AddAssetInfrastructure(
+        this IServiceCollection services,
+        IConfiguration configuration)
+    {
+        services.AddDbContext<AssetDbContext>(options => options
+            .UseSqlServer(configuration.GetConnectionString("MachineryManagerDatabase")));
+
+        services.AddScoped<IAssetModelRepository, AssetModelRepository>();
+        services.AddScoped<IEngineModelRepository, EngineModelRepository>();
+        services.AddScoped<IUnitOfWork>(serviceProvider =>
+            serviceProvider.GetRequiredService<AssetDbContext>());
+
+        return services;
+    }
+}
+
+================================================================================
+FILE: src\Modules\Asset\Asset.Infrastructure\Persistence\AssetDbContext.cs
+SIZE: 3.05 KB
+================================================================================
+using MachineryManager.SharedKernel;
+using MachineryManager.SharedKernel.Abstractions;
+using Microsoft.EntityFrameworkCore;
+
+namespace MachineryManager.Asset.Infrastructure.Persistence;
+
+/// <summary>
+/// EF Core persistence context for the Asset module (Modular Monolith —
+/// each module owns its own DbContext and schema, per ADR-0006).
+/// </summary>
+public sealed class AssetDbContext : DbContext, IUnitOfWork
+{
+    private readonly IDomainEventDispatcher? _domainEventDispatcher;
+
+    /// <summary>Initializes a new instance of the <see cref="AssetDbContext"/> class.</summary>
+    /// <param name="options">The EF Core options for this context.</param>
+    /// <param name="domainEventDispatcher">
+    /// Optional dispatcher for publishing domain events after successful
+    /// commit. Absent during design-time migrations or test isolation.
+    /// </param>
+    public AssetDbContext(
+        DbContextOptions<AssetDbContext> options,
+        IDomainEventDispatcher? domainEventDispatcher = null)
+        : base(options)
+    {
+        _domainEventDispatcher = domainEventDispatcher;
+    }
+
+    /// <summary>Gets the set of Asset Model aggregates.</summary>
+    public DbSet<global::Asset.Domain.AssetModel> AssetModels => Set<global::Asset.Domain.AssetModel>();
+
+    /// <summary>Gets the set of Engine Model aggregates.</summary>
+    public DbSet<global::Asset.Domain.EngineModel> EngineModels => Set<global::Asset.Domain.EngineModel>();
+
+    /// <inheritdoc />
+    protected override void OnModelCreating(ModelBuilder modelBuilder)
+    {
+        modelBuilder.HasDefaultSchema("asset");
+        modelBuilder.ApplyConfigurationsFromAssembly(typeof(AssetDbContext).Assembly);
+
+        base.OnModelCreating(modelBuilder);
+    }
+
+    /// <summary>
+    /// Persists all pending changes for this module as a single atomic
+    /// unit (ADR-0006). Domain Events raised by tracked aggregates are
+    /// dispatched after a successful commit and then cleared.
+    /// </summary>
+    /// <param name="cancellationToken">Token to cancel the asynchronous operation.</param>
+    /// <returns>The number of state entries written to the database.</returns>
+    public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
+    {
+        var aggregatesWithEvents = ChangeTracker
+            .Entries()
+            .Where(e => e.Entity is IHasDomainEvents)
+            .Select(e => (IHasDomainEvents)e.Entity)
+            .Where(e => e.DomainEvents.Count > 0)
+            .ToList();
+
+        var domainEvents = aggregatesWithEvents
+            .SelectMany(a => a.DomainEvents)
+            .ToList();
+
+        var affectedRows = await base.SaveChangesAsync(cancellationToken);
+
+        if (_domainEventDispatcher is not null && domainEvents.Count > 0)
+        {
+            await _domainEventDispatcher.DispatchAsync(domainEvents, cancellationToken);
+        }
+
+        foreach (var aggregate in aggregatesWithEvents)
+        {
+            aggregate.ClearDomainEvents();
+        }
+
+        return affectedRows;
+    }
+}
+
+================================================================================
+FILE: src\Modules\Asset\Asset.Infrastructure\Persistence\AssetModelRepository.cs
+SIZE: 2.94 KB
+================================================================================
+using Asset.Domain;
+using MachineryManager.Asset.Application.Abstractions;
+using MachineryManager.Asset.Application.Features.AssetModels.Dtos;
+using MachineryManager.Asset.Application.Features.AssetModels.Queries.SearchAssetModels;
+using Microsoft.EntityFrameworkCore;
+
+namespace MachineryManager.Asset.Infrastructure.Persistence;
+
+/// <summary>EF Core implementation of <see cref="IAssetModelRepository"/>.</summary>
+public sealed class AssetModelRepository : IAssetModelRepository
+{
+    private readonly AssetDbContext _dbContext;
+
+    /// <summary>Initializes a new instance of the <see cref="AssetModelRepository"/> class.</summary>
+    /// <param name="dbContext">The Asset module's persistence context.</param>
+    public AssetModelRepository(AssetDbContext dbContext)
+    {
+        _dbContext = dbContext;
+    }
+
+    /// <inheritdoc />
+    public Task<AssetModel?> GetByIdAsync(AssetModelId id, CancellationToken cancellationToken = default) =>
+        _dbContext.AssetModels.FirstOrDefaultAsync(am => am.Id == id, cancellationToken);
+
+    /// <inheritdoc />
+    public void Add(AssetModel aggregate) => _dbContext.AssetModels.Add(aggregate);
+
+    /// <inheritdoc />
+    public void Update(AssetModel aggregate) => _dbContext.AssetModels.Update(aggregate);
+
+    /// <inheritdoc />
+    public void Remove(AssetModel aggregate) => _dbContext.AssetModels.Remove(aggregate);
+
+    /// <inheritdoc />
+    public async Task<SearchAssetModelsResponse> SearchAsync(
+        Guid organizationId,
+        string? searchTerm,
+        int page,
+        int pageSize,
+        CancellationToken cancellationToken = default)
+    {
+        var query = _dbContext.AssetModels
+            .AsNoTracking()
+            .Where(am => am.OrganizationId == organizationId);
+
+        if (!string.IsNullOrWhiteSpace(searchTerm))
+        {
+            query = query.Where(am => am.Name.Contains(searchTerm));
+        }
+
+        var totalItems = await query.CountAsync(cancellationToken);
+
+        // Materialize entities first, map to DTO in memory — avoids the
+        // EF Core 10 Select-projection translation issue hit earlier
+        // with Profile.Permissions (chat, 2026-08-25).
+        var entities = await query
+            .OrderBy(am => am.Name)
+            .Skip((page - 1) * pageSize)
+            .Take(pageSize)
+            .ToListAsync(cancellationToken);
+
+        var items = entities
+            .Select(am => new AssetModelDto(
+                am.Id.Value,
+                am.Name,
+                am.Manufacturer,
+                am.CompatibleEngineModelIds.Select(x => x.Value).ToList()))
+            .ToList();
+
+        var totalPages = totalItems == 0 ? 0 : (int)Math.Ceiling(totalItems / (double)pageSize);
+
+        return new SearchAssetModelsResponse(
+            items,
+            page,
+            pageSize,
+            totalItems,
+            totalPages,
+            page < totalPages,
+            page > 1);
+    }
+}
+
+================================================================================
+FILE: src\Modules\Asset\Asset.Infrastructure\Persistence\Configurations\AssetModelConfiguration.cs
+SIZE: 1.69 KB
+================================================================================
+using Asset.Domain;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata.Builders;
+
+namespace MachineryManager.Asset.Infrastructure.Persistence.Configurations;
+
+/// <summary>EF Core mapping for the <see cref="AssetModel"/> aggregate.</summary>
+public sealed class AssetModelConfiguration : IEntityTypeConfiguration<AssetModel>
+{
+    /// <inheritdoc />
+    public void Configure(EntityTypeBuilder<AssetModel> builder)
+    {
+        builder.ToTable("AssetModel");
+
+        builder.HasKey(am => am.Id);
+
+        builder.Property(am => am.Id)
+            .HasConversion(id => id.Value, value => AssetModelId.From(value))
+            .ValueGeneratedNever();
+
+        builder.Property(am => am.OrganizationId)
+            .IsRequired();
+
+        builder.Property(am => am.Name)
+            .HasMaxLength(AssetModel.MaxNameLength)
+            .IsRequired();
+
+        builder.Property(am => am.Manufacturer)
+            .HasMaxLength(AssetModel.MaxManufacturerLength)
+            .IsRequired();
+
+        // CompatibleEngineModelIds is a computed public property (maps
+        // Guid -> EngineModelId), so EF must never see it directly —
+        // tell it to ignore that property entirely, and instead map the
+        // real backing field (plain List<Guid>) as a shadow property by
+        // name. This sidesteps the EF Core 10 translation issue hit
+        // earlier with Profile.Permissions (chat, 2026-08-25).
+        builder.Ignore(am => am.CompatibleEngineModelIds);
+
+        builder.Property<List<Guid>>("_compatibleEngineModelIds")
+            .HasColumnName("CompatibleEngineModelIds")
+            .UsePropertyAccessMode(PropertyAccessMode.Field);
+    }
+}
+
+================================================================================
+FILE: src\Modules\Asset\Asset.Infrastructure\Persistence\Configurations\EngineModelConfiguration.cs
+SIZE: 1.04 KB
+================================================================================
+using Asset.Domain;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata.Builders;
+
+namespace MachineryManager.Asset.Infrastructure.Persistence.Configurations;
+
+/// <summary>EF Core mapping for the <see cref="EngineModel"/> aggregate.</summary>
+public sealed class EngineModelConfiguration : IEntityTypeConfiguration<EngineModel>
+{
+    /// <inheritdoc />
+    public void Configure(EntityTypeBuilder<EngineModel> builder)
+    {
+        builder.ToTable("EngineModel");
+
+        builder.HasKey(em => em.Id);
+
+        builder.Property(em => em.Id)
+            .HasConversion(id => id.Value, value => EngineModelId.From(value))
+            .ValueGeneratedNever();
+
+        builder.Property(em => em.OrganizationId)
+            .IsRequired();
+
+        builder.Property(em => em.Name)
+            .HasMaxLength(EngineModel.MaxNameLength)
+            .IsRequired();
+
+        builder.Property(em => em.Manufacturer)
+            .HasMaxLength(EngineModel.MaxManufacturerLength)
+            .IsRequired();
+    }
+}
+
+================================================================================
+FILE: src\Modules\Asset\Asset.Infrastructure\Persistence\EngineModelRepository.cs
+SIZE: 2.63 KB
+================================================================================
+using Asset.Domain;
+using MachineryManager.Asset.Application.Abstractions;
+using MachineryManager.Asset.Application.Features.EngineModels.Dtos;
+using MachineryManager.Asset.Application.Features.EngineModels.Queries.SearchEngineModels;
+using Microsoft.EntityFrameworkCore;
+
+namespace MachineryManager.Asset.Infrastructure.Persistence;
+
+/// <summary>EF Core implementation of <see cref="IEngineModelRepository"/>.</summary>
+public sealed class EngineModelRepository : IEngineModelRepository
+{
+    private readonly AssetDbContext _dbContext;
+
+    /// <summary>Initializes a new instance of the <see cref="EngineModelRepository"/> class.</summary>
+    /// <param name="dbContext">The Asset module's persistence context.</param>
+    public EngineModelRepository(AssetDbContext dbContext)
+    {
+        _dbContext = dbContext;
+    }
+
+    /// <inheritdoc />
+    public Task<EngineModel?> GetByIdAsync(EngineModelId id, CancellationToken cancellationToken = default) =>
+        _dbContext.EngineModels.FirstOrDefaultAsync(em => em.Id == id, cancellationToken);
+
+    /// <inheritdoc />
+    public void Add(EngineModel aggregate) => _dbContext.EngineModels.Add(aggregate);
+
+    /// <inheritdoc />
+    public void Update(EngineModel aggregate) => _dbContext.EngineModels.Update(aggregate);
+
+    /// <inheritdoc />
+    public void Remove(EngineModel aggregate) => _dbContext.EngineModels.Remove(aggregate);
+
+    /// <inheritdoc />
+    public async Task<SearchEngineModelsResponse> SearchAsync(
+        Guid organizationId,
+        string? searchTerm,
+        int page,
+        int pageSize,
+        CancellationToken cancellationToken = default)
+    {
+        var query = _dbContext.EngineModels
+            .AsNoTracking()
+            .Where(em => em.OrganizationId == organizationId);
+
+        if (!string.IsNullOrWhiteSpace(searchTerm))
+        {
+            query = query.Where(em => em.Name.Contains(searchTerm));
+        }
+
+        var totalItems = await query.CountAsync(cancellationToken);
+
+        var entities = await query
+            .OrderBy(em => em.Name)
+            .Skip((page - 1) * pageSize)
+            .Take(pageSize)
+            .ToListAsync(cancellationToken);
+
+        var items = entities
+            .Select(em => new EngineModelDto(em.Id.Value, em.Name, em.Manufacturer))
+            .ToList();
+
+        var totalPages = totalItems == 0 ? 0 : (int)Math.Ceiling(totalItems / (double)pageSize);
+
+        return new SearchEngineModelsResponse(
+            items,
+            page,
+            pageSize,
+            totalItems,
+            totalPages,
+            page < totalPages,
+            page > 1);
+    }
+}
+
+================================================================================
 FILE: src\Modules\Identity\Identity.Application\Identity.Application.csproj
 SIZE: 0.05 KB
 ================================================================================
@@ -11776,6 +13826,131 @@ public sealed class RegisterHoldingCommandValidator : AbstractValidator<Register
 }
 
 ================================================================================
+FILE: src\Modules\Organization\Organization.Application\Features\Holdings\Commands\RenameHolding\RenameHoldingCommand.cs
+SIZE: 0.42 KB
+================================================================================
+using MachineryManager.SharedKernel;
+using MediatR;
+
+namespace MachineryManager.Organization.Application.Features.Holdings.Commands.RenameHolding;
+
+/// <summary>Command to rename an existing Holding.</summary>
+/// <param name="HoldingId">The identifier of the holding to rename.</param>
+/// <param name="Name">The new name.</param>
+public sealed record RenameHoldingCommand(Guid HoldingId, string Name) : IRequest<Result>;
+
+================================================================================
+FILE: src\Modules\Organization\Organization.Application\Features\Holdings\Commands\RenameHolding\RenameHoldingCommandHandler.cs
+SIZE: 2.84 KB
+================================================================================
+using MachineryManager.Organization.Application.Abstractions;
+using MachineryManager.SharedKernel;
+using MachineryManager.SharedKernel.Abstractions;
+using MediatR;
+using Organization.Domain;
+
+namespace MachineryManager.Organization.Application.Features.Holdings.Commands.RenameHolding;
+
+/// <summary>
+/// Handles <see cref="RenameHoldingCommand"/> by loading the holding
+/// aggregate, invoking the domain rename behavior, and committing the
+/// unit of work.
+/// </summary>
+public sealed class RenameHoldingCommandHandler
+    : IRequestHandler<RenameHoldingCommand, Result>
+{
+    private const string RequiredPermission = "Holding.Edit";
+
+    private readonly IHoldingRepository _holdingRepository;
+    private readonly IUnitOfWork _unitOfWork;
+    private readonly IDateTimeProvider _dateTimeProvider;
+    private readonly ICurrentUserService _currentUserService;
+    private readonly IPermissionEvaluator _permissionEvaluator;
+
+    /// <summary>Initializes a new instance of the <see cref="RenameHoldingCommandHandler"/> class.</summary>
+    public RenameHoldingCommandHandler(
+        IHoldingRepository holdingRepository,
+        IUnitOfWork unitOfWork,
+        IDateTimeProvider dateTimeProvider,
+        ICurrentUserService currentUserService,
+        IPermissionEvaluator permissionEvaluator)
+    {
+        _holdingRepository = holdingRepository;
+        _unitOfWork = unitOfWork;
+        _dateTimeProvider = dateTimeProvider;
+        _currentUserService = currentUserService;
+        _permissionEvaluator = permissionEvaluator;
+    }
+
+    /// <summary>Executes the rename use case.</summary>
+    public async Task<Result> Handle(RenameHoldingCommand request, CancellationToken cancellationToken)
+    {
+        var holdingId = HoldingId.From(request.HoldingId);
+        var holding = await _holdingRepository.GetByIdAsync(holdingId, cancellationToken);
+
+        if (holding is null)
+        {
+            return Result.Failure(
+                Error.NotFound("Holding.NotFound", $"Holding with id {request.HoldingId} was not found."));
+        }
+
+        if (_currentUserService.UserId is not { } userId)
+        {
+            return Result.Failure(HoldingErrors.NotAuthorized());
+        }
+
+        var isAuthorized = await _permissionEvaluator.HasPermissionAsync(
+            userId,
+            RequiredPermission,
+            new ResourceScope(holding.Id.Value, null, null),
+            cancellationToken);
+
+        if (!isAuthorized)
+        {
+            return Result.Failure(HoldingErrors.NotAuthorized());
+        }
+
+        var result = holding.Rename(request.Name, _dateTimeProvider);
+
+        if (result.IsFailure)
+        {
+            return result;
+        }
+
+        _holdingRepository.Update(holding);
+        await _unitOfWork.SaveChangesAsync(cancellationToken);
+
+        return Result.Success();
+    }
+}
+
+================================================================================
+FILE: src\Modules\Organization\Organization.Application\Features\Holdings\Commands\RenameHolding\RenameHoldingCommandValidator.cs
+SIZE: 0.79 KB
+================================================================================
+using FluentValidation;
+
+namespace MachineryManager.Organization.Application.Features.Holdings.Commands.RenameHolding;
+
+/// <summary>Validates <see cref="RenameHoldingCommand"/> per ADR-0036.</summary>
+public sealed class RenameHoldingCommandValidator : AbstractValidator<RenameHoldingCommand>
+{
+    /// <summary>Initializes validation rules for the rename holding command.</summary>
+    public RenameHoldingCommandValidator()
+    {
+        int maxLength = global::Organization.Domain.Holding.MaxNameLength;
+
+        RuleFor(x => x.HoldingId).NotEmpty();
+
+        RuleFor(x => x.Name)
+            .NotEmpty()
+            .WithMessage("Holding name is required.")
+            .MaximumLength(maxLength)
+            .WithMessage($"Holding name shall not exceed {maxLength} characters.");
+    }
+}
+
+================================================================================
 FILE: src\Modules\Organization\Organization.Application\Features\Holdings\Dtos\HoldingDto.cs
 SIZE: 0.18 KB
 ================================================================================
@@ -12053,7 +14228,7 @@ namespace MachineryManager.Organization.Application.Features.Organizations.Comma
 public sealed class AssignOrganizationToHoldingCommandHandler
     : IRequestHandler<AssignOrganizationToHoldingCommand, Result>
 {
-    private const string RequiredPermission = "Organization.Manage";
+    private const string RequiredPermission = "Organization.Edit";
 
     private readonly IOrganizationRepository _organizationRepository;
     private readonly IUnitOfWork _unitOfWork;
@@ -12201,7 +14376,7 @@ namespace MachineryManager.Organization.Application.Features.Organizations.Comma
 public sealed class ReactivateOrganizationCommandHandler
     : IRequestHandler<ReactivateOrganizationCommand, Result>
 {
-    private const string RequiredPermission = "Organization.Manage";
+    private const string RequiredPermission = "Organization.Edit";
 
     private readonly IOrganizationRepository _organizationRepository;
     private readonly IUnitOfWork _unitOfWork;
@@ -12428,6 +14603,136 @@ public sealed class RegisterOrganizationCommandValidator
 }
 
 ================================================================================
+FILE: src\Modules\Organization\Organization.Application\Features\Organizations\Commands\RenameOrganization\RenameOrganizationCommand.cs
+SIZE: 0.45 KB
+================================================================================
+using MachineryManager.SharedKernel;
+using MediatR;
+
+namespace MachineryManager.Organization.Application.Features.Organizations.Commands.RenameOrganization;
+
+/// <summary>Command to rename an existing Organization.</summary>
+/// <param name="OrganizationId">The identifier of the organization to rename.</param>
+/// <param name="Name">The new name.</param>
+public sealed record RenameOrganizationCommand(Guid OrganizationId, string Name) : IRequest<Result>;
+
+================================================================================
+FILE: src\Modules\Organization\Organization.Application\Features\Organizations\Commands\RenameOrganization\RenameOrganizationCommandHandler.cs
+SIZE: 3.11 KB
+================================================================================
+using MachineryManager.Organization.Application.Abstractions;
+using MachineryManager.SharedKernel;
+using MachineryManager.SharedKernel.Abstractions;
+using MediatR;
+using Organization.Domain;
+
+namespace MachineryManager.Organization.Application.Features.Organizations.Commands.RenameOrganization;
+
+/// <summary>
+/// Handles <see cref="RenameOrganizationCommand"/> by loading the
+/// organization aggregate, invoking the domain rename behavior, and
+/// committing the unit of work.
+/// </summary>
+public sealed class RenameOrganizationCommandHandler
+    : IRequestHandler<RenameOrganizationCommand, Result>
+{
+    private const string RequiredPermission = "Organization.Edit";
+
+    private readonly IOrganizationRepository _organizationRepository;
+    private readonly IUnitOfWork _unitOfWork;
+    private readonly IDateTimeProvider _dateTimeProvider;
+    private readonly ICurrentUserService _currentUserService;
+    private readonly IPermissionEvaluator _permissionEvaluator;
+
+    /// <summary>Initializes a new instance of the <see cref="RenameOrganizationCommandHandler"/> class.</summary>
+    public RenameOrganizationCommandHandler(
+        IOrganizationRepository organizationRepository,
+        IUnitOfWork unitOfWork,
+        IDateTimeProvider dateTimeProvider,
+        ICurrentUserService currentUserService,
+        IPermissionEvaluator permissionEvaluator)
+    {
+        _organizationRepository = organizationRepository;
+        _unitOfWork = unitOfWork;
+        _dateTimeProvider = dateTimeProvider;
+        _currentUserService = currentUserService;
+        _permissionEvaluator = permissionEvaluator;
+    }
+
+    /// <summary>Executes the rename use case.</summary>
+    public async Task<Result> Handle(RenameOrganizationCommand request, CancellationToken cancellationToken)
+    {
+        var organizationId = OrganizationId.From(request.OrganizationId);
+        var organization = await _organizationRepository.GetByIdAsync(organizationId, cancellationToken);
+
+        if (organization is null)
+        {
+            return Result.Failure(
+                Error.NotFound("Organization.NotFound", $"Organization with id {request.OrganizationId} was not found."));
+        }
+
+        if (_currentUserService.UserId is not { } userId)
+        {
+            return Result.Failure(OrganizationErrors.NotAuthorized());
+        }
+
+        var resourceScope = new ResourceScope(
+            organization.HoldingId?.Value,
+            organization.Id.Value,
+            null);
+
+        var isAuthorized = await _permissionEvaluator.HasPermissionAsync(
+            userId,
+            RequiredPermission,
+            resourceScope,
+            cancellationToken);
+
+        if (!isAuthorized)
+        {
+            return Result.Failure(OrganizationErrors.NotAuthorized());
+        }
+
+        var result = organization.Rename(request.Name, _dateTimeProvider);
+
+        if (result.IsFailure)
+        {
+            return result;
+        }
+
+        _organizationRepository.Update(organization);
+        await _unitOfWork.SaveChangesAsync(cancellationToken);
+
+        return Result.Success();
+    }
+}
+
+================================================================================
+FILE: src\Modules\Organization\Organization.Application\Features\Organizations\Commands\RenameOrganization\RenameOrganizationCommandValidator.cs
+SIZE: 0.85 KB
+================================================================================
+using FluentValidation;
+
+namespace MachineryManager.Organization.Application.Features.Organizations.Commands.RenameOrganization;
+
+/// <summary>Validates <see cref="RenameOrganizationCommand"/> per ADR-0036.</summary>
+public sealed class RenameOrganizationCommandValidator : AbstractValidator<RenameOrganizationCommand>
+{
+    /// <summary>Initializes validation rules for the rename organization command.</summary>
+    public RenameOrganizationCommandValidator()
+    {
+        int maxLength = global::Organization.Domain.Organization.MaxNameLength;
+
+        RuleFor(x => x.OrganizationId).NotEmpty();
+
+        RuleFor(x => x.Name)
+            .NotEmpty()
+            .WithMessage("Organization name is required.")
+            .MaximumLength(maxLength)
+            .WithMessage($"Organization name shall not exceed {maxLength} characters.");
+    }
+}
+
+================================================================================
 FILE: src\Modules\Organization\Organization.Application\Features\Organizations\Commands\SuspendOrganization\SuspendOrganizationCommand.cs
 SIZE: 0.54 KB
 ================================================================================
@@ -12447,7 +14752,7 @@ public sealed record SuspendOrganizationCommand(Guid OrganizationId)
 
 ================================================================================
 FILE: src\Modules\Organization\Organization.Application\Features\Organizations\Commands\SuspendOrganization\SuspendOrganizationCommandHandler.cs
-SIZE: 3.86 KB
+SIZE: 3.85 KB
 ================================================================================
 using MachineryManager.Organization.Application.Abstractions;
 using MachineryManager.SharedKernel;
@@ -12465,7 +14770,7 @@ namespace MachineryManager.Organization.Application.Features.Organizations.Comma
 public sealed class SuspendOrganizationCommandHandler
     : IRequestHandler<SuspendOrganizationCommand, Result>
 {
-    private const string RequiredPermission = "Organization.Manage";
+    private const string RequiredPermission = "Organization.Edit";
 
     private readonly IOrganizationRepository _organizationRepository;
     private readonly IUnitOfWork _unitOfWork;
@@ -12567,7 +14872,7 @@ public sealed class SuspendOrganizationCommandValidator : AbstractValidator<Susp
 
 ================================================================================
 FILE: src\Modules\Organization\Organization.Application\Features\Organizations\Dtos\OrganizationDto.cs
-SIZE: 0.53 KB
+SIZE: 0.7 KB
 ================================================================================
 namespace MachineryManager.Organization.Application.Features.Organizations.Dtos;
 
@@ -12577,10 +14882,12 @@ namespace MachineryManager.Organization.Application.Features.Organizations.Dtos;
 /// <param name="Id">The unique identifier of the organization.</param>
 /// <param name="Name">The display name of the organization.</param>
 /// <param name="IsSuspended">Whether the organization is currently suspended (BR-017, Section 10.16).</param>
+/// <param name="HoldingId">The identifier of the Holding this organization is currently assigned to, or <see langword="null"/> if unassigned.</param>
 public sealed record OrganizationDto(
     Guid Id,
     string Name,
-    bool IsSuspended);
+    bool IsSuspended,
+    Guid? HoldingId);
 
 ================================================================================
 FILE: src\Modules\Organization\Organization.Application\Features\Organizations\Queries\GetOrganizationById\GetOrganizationByIdQuery.cs
@@ -12601,7 +14908,7 @@ public sealed record GetOrganizationByIdQuery(Guid OrganizationId)
 
 ================================================================================
 FILE: src\Modules\Organization\Organization.Application\Features\Organizations\Queries\GetOrganizationById\GetOrganizationByIdQueryHandler.cs
-SIZE: 2.25 KB
+SIZE: 2.34 KB
 ================================================================================
 using MachineryManager.Organization.Application.Abstractions;
 using MachineryManager.Organization.Application.Features.Organizations.Dtos;
@@ -12655,7 +14962,8 @@ public sealed class GetOrganizationByIdQueryHandler
         var dto = new OrganizationDto(
             organization.Id.Value,
             organization.Name,
-            organization.IsSuspended);
+            organization.IsSuspended,
+            organization.HoldingId == null ? (Guid?)null : organization.HoldingId.Value);
 
         return Result.Success(dto);
     }
@@ -12858,7 +15166,7 @@ namespace MachineryManager.Organization.Application.Features.Projects.Commands.R
 public sealed class RegisterProjectCommandHandler
     : IRequestHandler<RegisterProjectCommand, Result<Guid>>
 {
-    private const string RequiredPermission = "Project.Manage";
+    private const string RequiredPermission = "Project.Create";
 
     private readonly IProjectRepository _projectRepository;
     private readonly IOrganizationRepository _organizationRepository;
@@ -12972,6 +15280,144 @@ public sealed class RegisterProjectCommandValidator : AbstractValidator<Register
         int maxLength = global::Organization.Domain.Project.MaxNameLength;
 
         RuleFor(x => x.OrganizationId).NotEmpty();
+        RuleFor(x => x.Name)
+            .NotEmpty()
+            .WithMessage("Project name is required.")
+            .MaximumLength(maxLength)
+            .WithMessage($"Project name shall not exceed {maxLength} characters.");
+    }
+}
+
+================================================================================
+FILE: src\Modules\Organization\Organization.Application\Features\Projects\Commands\RenameProject\RenameProjectCommand.cs
+SIZE: 0.42 KB
+================================================================================
+using MachineryManager.SharedKernel;
+using MediatR;
+
+namespace MachineryManager.Organization.Application.Features.Projects.Commands.RenameProject;
+
+/// <summary>Command to rename an existing Project.</summary>
+/// <param name="ProjectId">The identifier of the project to rename.</param>
+/// <param name="Name">The new name.</param>
+public sealed record RenameProjectCommand(Guid ProjectId, string Name) : IRequest<Result>;
+
+================================================================================
+FILE: src\Modules\Organization\Organization.Application\Features\Projects\Commands\RenameProject\RenameProjectCommandHandler.cs
+SIZE: 3.46 KB
+================================================================================
+using MachineryManager.Organization.Application.Abstractions;
+using MachineryManager.SharedKernel;
+using MachineryManager.SharedKernel.Abstractions;
+using MediatR;
+using Organization.Domain;
+
+namespace MachineryManager.Organization.Application.Features.Projects.Commands.RenameProject;
+
+/// <summary>
+/// Handles <see cref="RenameProjectCommand"/> by loading the project
+/// aggregate, invoking the domain rename behavior, and committing the
+/// unit of work.
+/// </summary>
+public sealed class RenameProjectCommandHandler
+    : IRequestHandler<RenameProjectCommand, Result>
+{
+    private const string RequiredPermission = "Project.Edit";
+
+    private readonly IProjectRepository _projectRepository;
+    private readonly IOrganizationRepository _organizationRepository;
+    private readonly IUnitOfWork _unitOfWork;
+    private readonly IDateTimeProvider _dateTimeProvider;
+    private readonly ICurrentUserService _currentUserService;
+    private readonly IPermissionEvaluator _permissionEvaluator;
+
+    /// <summary>Initializes a new instance of the <see cref="RenameProjectCommandHandler"/> class.</summary>
+    public RenameProjectCommandHandler(
+        IProjectRepository projectRepository,
+        IOrganizationRepository organizationRepository,
+        IUnitOfWork unitOfWork,
+        IDateTimeProvider dateTimeProvider,
+        ICurrentUserService currentUserService,
+        IPermissionEvaluator permissionEvaluator)
+    {
+        _projectRepository = projectRepository;
+        _organizationRepository = organizationRepository;
+        _unitOfWork = unitOfWork;
+        _dateTimeProvider = dateTimeProvider;
+        _currentUserService = currentUserService;
+        _permissionEvaluator = permissionEvaluator;
+    }
+
+    /// <summary>Executes the rename use case.</summary>
+    public async Task<Result> Handle(RenameProjectCommand request, CancellationToken cancellationToken)
+    {
+        var projectId = ProjectId.From(request.ProjectId);
+        var project = await _projectRepository.GetByIdAsync(projectId, cancellationToken);
+
+        if (project is null)
+        {
+            return Result.Failure(
+                Error.NotFound("Project.NotFound", $"Project with id {request.ProjectId} was not found."));
+        }
+
+        if (_currentUserService.UserId is not { } userId)
+        {
+            return Result.Failure(ProjectErrors.NotAuthorized());
+        }
+
+        // Resolve the full scope chain via the owning Organization, so a
+        // Holding/Organization Administrator's assignment correctly
+        // covers renaming Projects beneath them.
+        var organization = await _organizationRepository.GetByIdAsync(project.OrganizationId, cancellationToken);
+
+        var resourceScope = new ResourceScope(
+            organization?.HoldingId?.Value,
+            project.OrganizationId.Value,
+            project.Id.Value);
+
+        var isAuthorized = await _permissionEvaluator.HasPermissionAsync(
+            userId,
+            RequiredPermission,
+            resourceScope,
+            cancellationToken);
+
+        if (!isAuthorized)
+        {
+            return Result.Failure(ProjectErrors.NotAuthorized());
+        }
+
+        var result = project.Rename(request.Name, _dateTimeProvider);
+
+        if (result.IsFailure)
+        {
+            return result;
+        }
+
+        _projectRepository.Update(project);
+        await _unitOfWork.SaveChangesAsync(cancellationToken);
+
+        return Result.Success();
+    }
+}
+
+================================================================================
+FILE: src\Modules\Organization\Organization.Application\Features\Projects\Commands\RenameProject\RenameProjectCommandValidator.cs
+SIZE: 0.79 KB
+================================================================================
+using FluentValidation;
+
+namespace MachineryManager.Organization.Application.Features.Projects.Commands.RenameProject;
+
+/// <summary>Validates <see cref="RenameProjectCommand"/> per ADR-0036.</summary>
+public sealed class RenameProjectCommandValidator : AbstractValidator<RenameProjectCommand>
+{
+    /// <summary>Initializes validation rules for the rename project command.</summary>
+    public RenameProjectCommandValidator()
+    {
+        int maxLength = global::Organization.Domain.Project.MaxNameLength;
+
+        RuleFor(x => x.ProjectId).NotEmpty();
+
         RuleFor(x => x.Name)
             .NotEmpty()
             .WithMessage("Project name is required.")
@@ -13336,6 +15782,35 @@ public sealed class HoldingRegistered : IDomainEvent
 }
 
 ================================================================================
+FILE: src\Modules\Organization\Organization.Domain\Events\HoldingRenamed.cs
+SIZE: 0.81 KB
+================================================================================
+using MachineryManager.SharedKernel;
+
+namespace Organization.Domain.Events;
+
+/// <summary>Raised when a Holding's name is changed.</summary>
+public sealed class HoldingRenamed : IDomainEvent
+{
+    /// <summary>Gets the identifier of the renamed holding.</summary>
+    public HoldingId HoldingId { get; }
+
+    /// <summary>Gets the new name of the holding.</summary>
+    public string Name { get; }
+
+    /// <summary>Gets the UTC timestamp when the event occurred.</summary>
+    public DateTimeOffset OccurredOn { get; }
+
+    /// <summary>Initializes a new instance of the <see cref="HoldingRenamed"/> class.</summary>
+    public HoldingRenamed(HoldingId holdingId, string name, DateTimeOffset occurredOn)
+    {
+        HoldingId = holdingId;
+        Name = name;
+        OccurredOn = occurredOn;
+    }
+}
+
+================================================================================
 FILE: src\Modules\Organization\Organization.Domain\Events\OrganizationAssignedToHolding.cs
 SIZE: 0.93 KB
 ================================================================================
@@ -13428,6 +15903,35 @@ public sealed class OrganizationRegistered : IDomainEvent
 }
 
 ================================================================================
+FILE: src\Modules\Organization\Organization.Domain\Events\OrganizationRenamed.cs
+SIZE: 0.87 KB
+================================================================================
+using MachineryManager.SharedKernel;
+
+namespace Organization.Domain.Events;
+
+/// <summary>Raised when an Organization's name is changed.</summary>
+public sealed class OrganizationRenamed : IDomainEvent
+{
+    /// <summary>Gets the identifier of the renamed organization.</summary>
+    public OrganizationId OrganizationId { get; }
+
+    /// <summary>Gets the new name of the organization.</summary>
+    public string Name { get; }
+
+    /// <summary>Gets the UTC timestamp when the event occurred.</summary>
+    public DateTimeOffset OccurredOn { get; }
+
+    /// <summary>Initializes a new instance of the <see cref="OrganizationRenamed"/> class.</summary>
+    public OrganizationRenamed(OrganizationId organizationId, string name, DateTimeOffset occurredOn)
+    {
+        OrganizationId = organizationId;
+        Name = name;
+        OccurredOn = occurredOn;
+    }
+}
+
+================================================================================
 FILE: src\Modules\Organization\Organization.Domain\Events\OrganizationSuspended.cs
 SIZE: 0.93 KB
 ================================================================================
@@ -13488,8 +15992,37 @@ public sealed class ProjectRegistered : IDomainEvent
 }
 
 ================================================================================
+FILE: src\Modules\Organization\Organization.Domain\Events\ProjectRenamed.cs
+SIZE: 0.81 KB
+================================================================================
+using MachineryManager.SharedKernel;
+
+namespace Organization.Domain.Events;
+
+/// <summary>Raised when a Project's name is changed.</summary>
+public sealed class ProjectRenamed : IDomainEvent
+{
+    /// <summary>Gets the identifier of the renamed project.</summary>
+    public ProjectId ProjectId { get; }
+
+    /// <summary>Gets the new name of the project.</summary>
+    public string Name { get; }
+
+    /// <summary>Gets the UTC timestamp when the event occurred.</summary>
+    public DateTimeOffset OccurredOn { get; }
+
+    /// <summary>Initializes a new instance of the <see cref="ProjectRenamed"/> class.</summary>
+    public ProjectRenamed(ProjectId projectId, string name, DateTimeOffset occurredOn)
+    {
+        ProjectId = projectId;
+        Name = name;
+        OccurredOn = occurredOn;
+    }
+}
+
+================================================================================
 FILE: src\Modules\Organization\Organization.Domain\Holding.cs
-SIZE: 2.33 KB
+SIZE: 3.13 KB
 ================================================================================
 using MachineryManager.SharedKernel;
 using MachineryManager.SharedKernel.Abstractions;
@@ -13553,6 +16086,30 @@ public sealed class Holding : AggregateRoot<HoldingId>
             new HoldingRegistered(holding.Id, holding.Name, dateTimeProvider.UtcNow));
 
         return holding;
+    }
+
+    
+    /// <summary>Renames this Holding.</summary>
+    /// <param name="name">The new name.</param>
+    /// <param name="dateTimeProvider">Provides the current UTC time for the raised domain event.</param>
+    /// <returns>A <see cref="Result"/> indicating success or a validation error.</returns>
+    public Result Rename(string name, IDateTimeProvider dateTimeProvider)
+    {
+        if (string.IsNullOrWhiteSpace(name))
+        {
+            return Result.Failure(HoldingErrors.NameRequired());
+        }
+
+        if (name.Length > MaxNameLength)
+        {
+            return Result.Failure(HoldingErrors.NameTooLong(MaxNameLength));
+        }
+
+        Name = name.Trim();
+
+        RaiseDomainEvent(new HoldingRenamed(Id, Name, dateTimeProvider.UtcNow));
+
+        return Result.Success();
     }
 }
 
@@ -13620,7 +16177,7 @@ public sealed class HoldingId : ValueObject
 
 ================================================================================
 FILE: src\Modules\Organization\Organization.Domain\Organization.cs
-SIZE: 5.05 KB
+SIZE: 6.01 KB
 ================================================================================
 using MachineryManager.SharedKernel;
 using MachineryManager.SharedKernel.Abstractions;
@@ -13697,6 +16254,30 @@ public sealed class Organization : AggregateRoot<OrganizationId>
             new OrganizationRegistered(organization.Id, organization.Name, dateTimeProvider.UtcNow));
 
         return organization;
+    }
+
+    
+    /// <summary>Renames this Organization.</summary>
+    /// <param name="name">The new name.</param>
+    /// <param name="dateTimeProvider">Provides the current UTC time for the raised domain event.</param>
+    /// <returns>A <see cref="Result"/> indicating success or a validation error.</returns>
+    public Result Rename(string name, IDateTimeProvider dateTimeProvider)
+    {
+        if (string.IsNullOrWhiteSpace(name))
+        {
+            return Result.Failure(OrganizationErrors.NameRequired());
+        }
+
+        if (name.Length > MaxNameLength)
+        {
+            return Result.Failure(OrganizationErrors.NameTooLong(MaxNameLength));
+        }
+
+        Name = name.Trim();
+
+        RaiseDomainEvent(new OrganizationRenamed(Id, Name, dateTimeProvider.UtcNow));
+
+        return Result.Success();
     }
 
     /// <summary>
@@ -13780,7 +16361,7 @@ SIZE: 0.35 KB
 
 ================================================================================
 FILE: src\Modules\Organization\Organization.Domain\OrganizationErrors.cs
-SIZE: 1.99 KB
+SIZE: 2.03 KB
 ================================================================================
 using MachineryManager.SharedKernel;
 
@@ -13825,7 +16406,7 @@ public static class OrganizationErrors
 
 ================================================================================
 FILE: src\Modules\Organization\Organization.Domain\OrganizationId.cs
-SIZE: 1.08 KB
+SIZE: 1.11 KB
 ================================================================================
 using MachineryManager.SharedKernel;
 
@@ -13863,7 +16444,7 @@ public sealed class OrganizationId : ValueObject
 
 ================================================================================
 FILE: src\Modules\Organization\Organization.Domain\Project.cs
-SIZE: 3.15 KB
+SIZE: 3.96 KB
 ================================================================================
 using MachineryManager.SharedKernel;
 using MachineryManager.SharedKernel.Abstractions;
@@ -13943,6 +16524,29 @@ public sealed class Project : AggregateRoot<ProjectId>
 
         return project;
     }
+    
+    /// <summary>Renames this Project.</summary>
+    /// <param name="name">The new name.</param>
+    /// <param name="dateTimeProvider">Provides the current UTC time for the raised domain event.</param>
+    /// <returns>A <see cref="Result"/> indicating success or a validation error.</returns>
+    public Result Rename(string name, IDateTimeProvider dateTimeProvider)
+    {
+        if (string.IsNullOrWhiteSpace(name))
+        {
+            return Result.Failure(ProjectErrors.NameRequired());
+        }
+
+        if (name.Length > MaxNameLength)
+        {
+            return Result.Failure(ProjectErrors.NameTooLong(MaxNameLength));
+        }
+
+        Name = name.Trim();
+
+        RaiseDomainEvent(new ProjectRenamed(Id, Name, dateTimeProvider.UtcNow));
+
+        return Result.Success();
+    }
 }
 
 ================================================================================
@@ -14014,7 +16618,7 @@ public sealed class ProjectId : ValueObject
 
 ================================================================================
 FILE: src\Modules\Organization\Organization.Infrastructure\DependencyInjection.cs
-SIZE: 1.99 KB
+SIZE: 2.11 KB
 ================================================================================
 using MachineryManager.Organization.Application.Abstractions;
 using MachineryManager.Organization.Infrastructure.Persistence;
@@ -14055,6 +16659,7 @@ public static class DependencyInjection
         services.AddScoped<IOrganizationRepository, OrganizationRepository>();
         services.AddScoped<IHoldingRepository, HoldingRepository>();
         services.AddScoped<IProjectRepository, ProjectRepository>();
+        services.AddScoped<IOrganizationLookupService, OrganizationLookupService>();
         services.AddScoped<IUnitOfWork>(serviceProvider =>
             serviceProvider.GetRequiredService<OrganizationDbContext>());
 
@@ -14080,6 +16685,42 @@ SIZE: 0.56 KB
   </ItemGroup>
 
 </Project>
+
+================================================================================
+FILE: src\Modules\Organization\Organization.Infrastructure\OrganizationLookupService.cs
+SIZE: 1.07 KB
+================================================================================
+using MachineryManager.SharedKernel.Abstractions;
+using Microsoft.EntityFrameworkCore;
+using Organization.Domain;
+
+namespace MachineryManager.Organization.Infrastructure;
+
+/// <inheritdoc cref="IOrganizationLookupService" />
+public sealed class OrganizationLookupService : IOrganizationLookupService
+{
+    private readonly OrganizationDbContext _dbContext;
+
+    /// <summary>Initializes a new instance of the <see cref="OrganizationLookupService"/> class.</summary>
+    public OrganizationLookupService(OrganizationDbContext dbContext)
+    {
+        _dbContext = dbContext;
+    }
+
+    /// <inheritdoc />
+    public async Task<Guid?> GetHoldingIdAsync(Guid organizationId, CancellationToken cancellationToken = default)
+    {
+        var id = OrganizationId.From(organizationId);
+
+        var holdingId = await _dbContext.Organizations
+            .AsNoTracking()
+            .Where(o => o.Id == id)
+            .Select(o => (Guid?)(o.HoldingId == null ? null : o.HoldingId.Value))
+            .FirstOrDefaultAsync(cancellationToken);
+
+        return holdingId;
+    }
+}
 
 ================================================================================
 FILE: src\Modules\Organization\Organization.Infrastructure\Persistence\Configurations\HoldingConfiguration.cs
@@ -14117,7 +16758,7 @@ public sealed class HoldingConfiguration : IEntityTypeConfiguration<Holding>
 
 ================================================================================
 FILE: src\Modules\Organization\Organization.Infrastructure\Persistence\Configurations\OrganizationConfiguration.cs
-SIZE: 1.76 KB
+SIZE: 1.8 KB
 ================================================================================
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
@@ -14738,7 +17379,7 @@ namespace Organization.Infrastructure.Persistence.Migrations
 
 ================================================================================
 FILE: src\Modules\Organization\Organization.Infrastructure\Persistence\OrganizationDbContext.cs
-SIZE: 3.49 KB
+SIZE: 3.58 KB
 ================================================================================
 using MachineryManager.SharedKernel;
 using MachineryManager.SharedKernel.Abstractions;
@@ -14830,7 +17471,7 @@ public sealed class OrganizationDbContext : DbContext, IUnitOfWork
 
 ================================================================================
 FILE: src\Modules\Organization\Organization.Infrastructure\Persistence\OrganizationRepository.cs
-SIZE: 3.98 KB
+SIZE: 4.17 KB
 ================================================================================
 using MachineryManager.Organization.Application.Abstractions;
 using MachineryManager.Organization.Application.Features.Organizations.Dtos;
@@ -14919,7 +17560,8 @@ public sealed class OrganizationRepository : IOrganizationRepository
             .Select(organization => new OrganizationDto(
                 organization.Id.Value,
                 organization.Name,
-                organization.IsSuspended))
+                organization.IsSuspended,
+                organization.HoldingId == null ? (Guid?)null : organization.HoldingId.Value))
             .ToListAsync(cancellationToken);
 
         var totalPages = totalItems == 0
@@ -15381,8 +18023,405 @@ System.Text.Json.JsonSerializerOptions
 }
 
 ================================================================================
+FILE: src\Modules\Organization\Organization.Presentation\Components\Pages\EditHolding.razor
+SIZE: 3.81 KB
+================================================================================
+@page "/admin/holdings/{HoldingId:guid}/edit"
+@inject IHttpClientFactory HttpClientFactory
+@inject NavigationManager Navigation
+
+<PageTitle>ویرایش Holding</PageTitle>
+
+<MudText Typo="Typo.h4" Class="mb-4">ویرایش Holding</MudText>
+
+@if (errorMessage is not null)
+{
+    <MudAlert Severity="Severity.Error" Class="my-4">@errorMessage</MudAlert>
+}
+
+@if (isLoading)
+{
+    <MudProgressLinear Indeterminate="true" Class="my-4" />
+}
+else
+{
+    <MudPaper Class="pa-4" Style="max-width:500px;">
+        <MudForm @ref="form" @bind-IsValid="@isValid">
+            <MudTextField @bind-Value="name" Label="نام Holding" Required="true"
+                          RequiredError="نام الزامی است." MaxLength="200" />
+
+            <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="SubmitAsync"
+                       Disabled="@(!isValid || isSubmitting)" Class="mt-4">
+                @if (isSubmitting)
+                {
+                    <MudProgressCircular Size="Size.Small" Indeterminate="true" />
+                }
+                else
+                {
+                    <span>ذخیره</span>
+                }
+            </MudButton>
+
+            <MudButton Variant="Variant.Outlined" OnClick="@(() => Navigation.NavigateTo("/admin/holdings"))"
+                       Class="mt-4 mr-2">
+                بازگشت
+            </MudButton>
+        </MudForm>
+    </MudPaper>
+}
+
+@code {
+    /// <summary>The identifier of the holding being edited.</summary>
+    [Parameter]
+    public Guid HoldingId { get; set; }
+
+    private sealed class HoldingDetails
+    {
+        public Guid Id { get; set; }
+        public string Name { get; set; } = string.Empty;
+    }
+
+    private MudForm? form;
+    private bool isValid;
+    private bool isSubmitting;
+    private bool isLoading = true;
+    private string name = string.Empty;
+    private string? errorMessage;
+
+    /// <summary>Loads the holding's current name.</summary>
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            var client = HttpClientFactory.CreateClient("InternalApi");
+            var response = await client.GetAsync($"/api/v1/holdings/{HoldingId}");
+            var content = await response.Content.ReadAsStringAsync();
+
+            if (!response.IsSuccessStatusCode)
+            {
+                errorMessage = $"خطا در دریافت Holding: {content}";
+                return;
+            }
+
+            var result = System.Text.Json.JsonSerializer.Deserialize<HoldingDetails>(content, new
+System.Text.Json.JsonSerializerOptions
+            { PropertyNameCaseInsensitive = true });
+
+            name = result?.Name ?? string.Empty;
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"خطا: {ex.Message}";
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+
+    /// <summary>Submits the updated name to the API.</summary>
+    private async Task SubmitAsync()
+    {
+        if (form is null || !isValid)
+        {
+            return;
+        }
+
+        isSubmitting = true;
+        errorMessage = null;
+
+        try
+        {
+            var client = HttpClientFactory.CreateClient("InternalApi");
+            var response = await client.PutAsJsonAsync($"/api/v1/holdings/{HoldingId}", new { Name = name });
+
+            if (response.IsSuccessStatusCode)
+            {
+                Navigation.NavigateTo("/admin/holdings");
+                return;
+            }
+
+            errorMessage = $"خطا در ویرایش Holding: {await response.Content.ReadAsStringAsync()}";
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"خطا: {ex.Message}";
+        }
+        finally
+        {
+            isSubmitting = false;
+        }
+    }
+}
+
+================================================================================
+FILE: src\Modules\Organization\Organization.Presentation\Components\Pages\EditOrganization.razor
+SIZE: 3.9 KB
+================================================================================
+@page "/admin/organizations/{OrganizationId:guid}/edit"
+@inject IHttpClientFactory HttpClientFactory
+@inject NavigationManager Navigation
+
+<PageTitle>ویرایش سازمان</PageTitle>
+
+<MudText Typo="Typo.h4" Class="mb-4">ویرایش سازمان</MudText>
+
+@if (errorMessage is not null)
+{
+    <MudAlert Severity="Severity.Error" Class="my-4">@errorMessage</MudAlert>
+}
+
+@if (isLoading)
+{
+    <MudProgressLinear Indeterminate="true" Class="my-4" />
+}
+else
+{
+    <MudPaper Class="pa-4" Style="max-width:500px;">
+        <MudForm @ref="form" @bind-IsValid="@isValid">
+            <MudTextField @bind-Value="name" Label="نام سازمان" Required="true"
+                          RequiredError="نام الزامی است." MaxLength="200" />
+
+            <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="SubmitAsync"
+                       Disabled="@(!isValid || isSubmitting)" Class="mt-4">
+                @if (isSubmitting)
+                {
+                    <MudProgressCircular Size="Size.Small" Indeterminate="true" />
+                }
+                else
+                {
+                    <span>ذخیره</span>
+                }
+            </MudButton>
+
+            <MudButton Variant="Variant.Outlined" OnClick="@(() => Navigation.NavigateTo("/admin/organizations"))"
+                       Class="mt-4 mr-2">
+                بازگشت
+            </MudButton>
+        </MudForm>
+    </MudPaper>
+}
+
+@code {
+    /// <summary>The identifier of the organization being edited.</summary>
+    [Parameter]
+    public Guid OrganizationId { get; set; }
+
+    private sealed class OrganizationDetails
+    {
+        public Guid Id { get; set; }
+        public string Name { get; set; } = string.Empty;
+    }
+
+    private MudForm? form;
+    private bool isValid;
+    private bool isSubmitting;
+    private bool isLoading = true;
+    private string name = string.Empty;
+    private string? errorMessage;
+
+    /// <summary>Loads the organization's current name.</summary>
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            var client = HttpClientFactory.CreateClient("InternalApi");
+            var response = await client.GetAsync($"/api/v1/organizations/{OrganizationId}");
+            var content = await response.Content.ReadAsStringAsync();
+
+            if (!response.IsSuccessStatusCode)
+            {
+                errorMessage = $"خطا در دریافت سازمان: {content}";
+                return;
+            }
+
+            var result = System.Text.Json.JsonSerializer.Deserialize<OrganizationDetails>(content, new
+System.Text.Json.JsonSerializerOptions
+            { PropertyNameCaseInsensitive = true });
+
+            name = result?.Name ?? string.Empty;
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"خطا: {ex.Message}";
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+
+    /// <summary>Submits the updated name to the API.</summary>
+    private async Task SubmitAsync()
+    {
+        if (form is null || !isValid)
+        {
+            return;
+        }
+
+        isSubmitting = true;
+        errorMessage = null;
+
+        try
+        {
+            var client = HttpClientFactory.CreateClient("InternalApi");
+            var response = await client.PutAsJsonAsync($"/api/v1/organizations/{OrganizationId}", new { Name = name });
+
+            if (response.IsSuccessStatusCode)
+            {
+                Navigation.NavigateTo("/admin/organizations");
+                return;
+            }
+
+            errorMessage = $"خطا در ویرایش سازمان: {await response.Content.ReadAsStringAsync()}";
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"خطا: {ex.Message}";
+        }
+        finally
+        {
+            isSubmitting = false;
+        }
+    }
+}
+
+================================================================================
+FILE: src\Modules\Organization\Organization.Presentation\Components\Pages\EditProject.razor
+SIZE: 3.87 KB
+================================================================================
+@page "/admin/projects/{ProjectId:guid}/edit"
+@inject IHttpClientFactory HttpClientFactory
+@inject NavigationManager Navigation
+
+<PageTitle>ویرایش پروژه</PageTitle>
+
+<MudText Typo="Typo.h4" Class="mb-4">ویرایش پروژه</MudText>
+
+@if (errorMessage is not null)
+{
+    <MudAlert Severity="Severity.Error" Class="my-4">@errorMessage</MudAlert>
+}
+
+@if (isLoading)
+{
+    <MudProgressLinear Indeterminate="true" Class="my-4" />
+}
+else
+{
+    <MudPaper Class="pa-4" Style="max-width:500px;">
+        <MudForm @ref="form" @bind-IsValid="@isValid">
+            <MudTextField @bind-Value="name" Label="نام پروژه" Required="true"
+                          RequiredError="نام الزامی است." MaxLength="200" />
+
+            <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="SubmitAsync"
+                       Disabled="@(!isValid || isSubmitting)" Class="mt-4">
+                @if (isSubmitting)
+                {
+                    <MudProgressCircular Size="Size.Small" Indeterminate="true" />
+                }
+                else
+                {
+                    <span>ذخیره</span>
+                }
+            </MudButton>
+
+            <MudButton Variant="Variant.Outlined" OnClick="@(() => Navigation.NavigateTo("/admin/projects"))"
+                       Class="mt-4 mr-2">
+                بازگشت
+            </MudButton>
+        </MudForm>
+    </MudPaper>
+}
+
+@code {
+    /// <summary>The identifier of the project being edited.</summary>
+    [Parameter]
+    public Guid ProjectId { get; set; }
+
+    private sealed class ProjectDetails
+    {
+        public Guid Id { get; set; }
+        public string Name { get; set; } = string.Empty;
+        public Guid OrganizationId { get; set; }
+    }
+
+    private MudForm? form;
+    private bool isValid;
+    private bool isSubmitting;
+    private bool isLoading = true;
+    private string name = string.Empty;
+    private string? errorMessage;
+
+    /// <summary>Loads the project's current name.</summary>
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            var client = HttpClientFactory.CreateClient("InternalApi");
+            var response = await client.GetAsync($"/api/v1/projects/{ProjectId}");
+            var content = await response.Content.ReadAsStringAsync();
+
+            if (!response.IsSuccessStatusCode)
+            {
+                errorMessage = $"خطا در دریافت پروژه: {content}";
+                return;
+            }
+
+            var result = System.Text.Json.JsonSerializer.Deserialize<ProjectDetails>(content, new
+System.Text.Json.JsonSerializerOptions
+            { PropertyNameCaseInsensitive = true });
+
+            name = result?.Name ?? string.Empty;
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"خطا: {ex.Message}";
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+
+    /// <summary>Submits the updated name to the API.</summary>
+    private async Task SubmitAsync()
+    {
+        if (form is null || !isValid)
+        {
+            return;
+        }
+
+        isSubmitting = true;
+        errorMessage = null;
+
+        try
+        {
+            var client = HttpClientFactory.CreateClient("InternalApi");
+            var response = await client.PutAsJsonAsync($"/api/v1/projects/{ProjectId}", new { Name = name });
+
+            if (response.IsSuccessStatusCode)
+            {
+                Navigation.NavigateTo("/admin/projects");
+                return;
+            }
+
+            errorMessage = $"خطا در ویرایش پروژه: {await response.Content.ReadAsStringAsync()}";
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"خطا: {ex.Message}";
+        }
+        finally
+        {
+            isSubmitting = false;
+        }
+    }
+}
+
+================================================================================
 FILE: src\Modules\Organization\Organization.Presentation\Components\Pages\HoldingsList.razor
-SIZE: 3.95 KB
+SIZE: 4.23 KB
 ================================================================================
 @page "/admin/holdings"
 @inject IHttpClientFactory HttpClientFactory
@@ -15413,13 +18452,18 @@ else if (items.Count == 0)
 else
 {
     <MudTable Items="@items" Hover="true" Breakpoint="Breakpoint.Sm">
-        <HeaderContent>
+                <HeaderContent>
             <MudTh>نام</MudTh>
-            <MudTh>شناسه</MudTh>
+            <MudTh>عملیات</MudTh>
         </HeaderContent>
         <RowTemplate>
             <MudTd DataLabel="نام">@context.Name</MudTd>
-            <MudTd DataLabel="شناسه">@context.Id</MudTd>
+            <MudTd DataLabel="عملیات">
+                <MudButton Variant="Variant.Text" Color="Color.Primary" Size="Size.Small"
+                           OnClick="@(() => Navigation.NavigateTo($"/admin/holdings/{context.Id}/edit"))">
+                    ویرایش
+                </MudButton>
+            </MudTd>
         </RowTemplate>
     </MudTable>
 
@@ -15510,7 +18554,7 @@ System.Text.Json.JsonSerializerOptions
 
 ================================================================================
 FILE: src\Modules\Organization\Organization.Presentation\Components\Pages\OrganizationsList.razor
-SIZE: 10.85 KB
+SIZE: 11.39 KB
 ================================================================================
 @page "/admin/organizations"
 @inject IHttpClientFactory HttpClientFactory
@@ -15579,6 +18623,10 @@ else
                 </div>
             </MudTd>
             <MudTd DataLabel="عملیات">
+                <MudButton Size="Size.Small" Variant="Variant.Text" Color="Color.Primary"
+                           OnClick="@(() => Navigation.NavigateTo($"/admin/organizations/{context.Id}/edit"))">
+                    ویرایش
+                </MudButton>
                 @if (context.IsSuspended)
                 {
                     <MudButton Size="Size.Small" Variant="Variant.Text" Color="Color.Success"
@@ -15607,11 +18655,12 @@ else
 }
 
 @code {
-    private sealed class OrganizationItem
+        private sealed class OrganizationItem
     {
         public Guid Id { get; set; }
         public string Name { get; set; } = string.Empty;
         public bool IsSuspended { get; set; }
+        public Guid? HoldingId { get; set; }
     }
 
     private sealed class HoldingItem
@@ -15709,6 +18758,11 @@ System.Text.Json.JsonSerializerOptions
             }
 
             items = result.Items;
+
+            foreach (var item in items)
+            {
+                selectedHoldingByOrganization[item.Id] = item.HoldingId;
+            }
             page = result.Page;
             totalPages = result.TotalPages;
             hasNextPage = result.HasNextPage;
@@ -15751,7 +18805,11 @@ System.Text.Json.JsonSerializerOptions
                 $"/api/v1/organizations/{organizationId}/assign-to-holding",
                 new { HoldingId = holdingId.Value });
 
-            if (!response.IsSuccessStatusCode)
+            if (response.IsSuccessStatusCode)
+            {
+                await LoadPageAsync(page);
+            }
+            else
             {
                 errorMessage = $"خطا در تخصیص: {await response.Content.ReadAsStringAsync()}";
             }
@@ -15808,7 +18866,7 @@ System.Text.Json.JsonSerializerOptions
 
 ================================================================================
 FILE: src\Modules\Organization\Organization.Presentation\Components\Pages\ProjectsList.razor
-SIZE: 5.92 KB
+SIZE: 6.28 KB
 ================================================================================
 @page "/admin/projects"
 @inject IHttpClientFactory HttpClientFactory
@@ -15843,10 +18901,17 @@ else
         <HeaderContent>
             <MudTh>نام</MudTh>
             <MudTh>سازمان</MudTh>
+            <MudTh>عملیات</MudTh>
         </HeaderContent>
         <RowTemplate>
             <MudTd DataLabel="نام">@context.Name</MudTd>
             <MudTd DataLabel="سازمان">@ResolveOrganizationName(context.OrganizationId)</MudTd>
+            <MudTd DataLabel="عملیات">
+                <MudButton Size="Size.Small" Variant="Variant.Text" Color="Color.Primary"
+                           OnClick="@(() => Navigation.NavigateTo($"/admin/projects/{context.Id}/edit"))">
+                    ویرایش
+                </MudButton>
+            </MudTd>
         </RowTemplate>
     </MudTable>
 
@@ -16005,7 +19070,7 @@ public sealed record RegisterHoldingRequest(string Name);
 
 ================================================================================
 FILE: src\Modules\Organization\Organization.Presentation\Contracts\RegisterOrganizationRequest.cs
-SIZE: 0.3 KB
+SIZE: 0.31 KB
 ================================================================================
 namespace MachineryManager.Organization.Presentation.Contracts;
 
@@ -16029,8 +19094,38 @@ namespace MachineryManager.Organization.Presentation.Contracts;
 public sealed record RegisterProjectRequest(Guid OrganizationId, string Name);
 
 ================================================================================
+FILE: src\Modules\Organization\Organization.Presentation\Contracts\RenameHoldingRequest.cs
+SIZE: 0.22 KB
+================================================================================
+namespace MachineryManager.Organization.Presentation.Contracts;
+
+/// <summary>Request body for renaming a Holding.</summary>
+/// <param name="Name">The new name.</param>
+public sealed record RenameHoldingRequest(string Name);
+
+================================================================================
+FILE: src\Modules\Organization\Organization.Presentation\Contracts\RenameOrganizationRequest.cs
+SIZE: 0.23 KB
+================================================================================
+namespace MachineryManager.Organization.Presentation.Contracts;
+
+/// <summary>Request body for renaming an Organization.</summary>
+/// <param name="Name">The new name.</param>
+public sealed record RenameOrganizationRequest(string Name);
+
+================================================================================
+FILE: src\Modules\Organization\Organization.Presentation\Contracts\RenameProjectRequest.cs
+SIZE: 0.22 KB
+================================================================================
+namespace MachineryManager.Organization.Presentation.Contracts;
+
+/// <summary>Request body for renaming a Project.</summary>
+/// <param name="Name">The new name.</param>
+public sealed record RenameProjectRequest(string Name);
+
+================================================================================
 FILE: src\Modules\Organization\Organization.Presentation\Endpoints\HoldingEndpoints.cs
-SIZE: 3.35 KB
+SIZE: 4.1 KB
 ================================================================================
 using MachineryManager.Organization.Application.Features.Holdings.Commands.RegisterHolding;
 using MachineryManager.Organization.Application.Features.Holdings.Queries.GetHoldingById;
@@ -16041,6 +19136,7 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Routing;
 using OpenIddict.Validation.AspNetCore;
+using MachineryManager.Organization.Application.Features.Holdings.Commands.RenameHolding;
 
 namespace MachineryManager.Organization.Presentation.Endpoints;
 
@@ -16066,6 +19162,10 @@ public static class HoldingEndpoints
         group.MapPost("/", RegisterHoldingAsync)
             .WithName("RegisterHolding")
             .WithSummary("Registers a new Holding.");
+
+                group.MapPut("/{holdingId:guid}", RenameHoldingAsync)
+            .WithName("RenameHolding")
+            .WithSummary("Renames an existing Holding.");
 
         group.MapGet("/{holdingId:guid}", GetHoldingByIdAsync)
             .WithName("GetHoldingById")
@@ -16120,11 +19220,27 @@ public static class HoldingEndpoints
             ? Results.Ok(result.Value)
             : result.ToProblemResult(httpContext);
     }
+
+        private static async Task<IResult> RenameHoldingAsync(
+        Guid holdingId,
+        RenameHoldingRequest request,
+        ISender sender,
+        HttpContext httpContext,
+        CancellationToken cancellationToken)
+    {
+        var result = await sender.Send(
+            new RenameHoldingCommand(holdingId, request.Name),
+            cancellationToken);
+
+        return result.IsSuccess
+            ? Results.NoContent()
+            : result.ToProblemResult(httpContext);
+    }
 }
 
 ================================================================================
 FILE: src\Modules\Organization\Organization.Presentation\Endpoints\OrganizationEndpoints.cs
-SIZE: 6.14 KB
+SIZE: 7.08 KB
 ================================================================================
 using MachineryManager.Organization.Application.Features.Organizations.Commands.AssignOrganizationToHolding;
 using MachineryManager.Organization.Application.Features.Organizations.Commands.ReactivateOrganization;
@@ -16138,6 +19254,7 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Routing;
 using OpenIddict.Validation.AspNetCore;
+using MachineryManager.Organization.Application.Features.Organizations.Commands.RenameOrganization;
 
 namespace MachineryManager.Organization.Presentation.Endpoints;
 
@@ -16167,6 +19284,10 @@ public static class OrganizationEndpoints
         group.MapPost("/", RegisterOrganizationAsync)
             .WithName("RegisterOrganization")
             .WithSummary("Registers a new Organization.");
+
+        group.MapPut("/{organizationId:guid}", RenameOrganizationAsync)
+            .WithName("RenameOrganization")
+            .WithSummary("Renames an existing Organization.");
 
         group.MapGet("/{organizationId:guid}", GetOrganizationByIdAsync)
             .WithName("GetOrganizationById")
@@ -16275,11 +19396,27 @@ public static class OrganizationEndpoints
             ? Results.NoContent()
             : result.ToProblemResult(httpContext);
     }
+
+        private static async Task<IResult> RenameOrganizationAsync(
+        Guid organizationId,
+        RenameOrganizationRequest request,
+        ISender sender,
+        HttpContext httpContext,
+        CancellationToken cancellationToken)
+    {
+        var result = await sender.Send(
+            new RenameOrganizationCommand(organizationId, request.Name),
+            cancellationToken);
+
+        return result.IsSuccess
+            ? Results.NoContent()
+            : result.ToProblemResult(httpContext);
+    }
 }
 
 ================================================================================
 FILE: src\Modules\Organization\Organization.Presentation\Endpoints\ProjectEndpoints.cs
-SIZE: 3.42 KB
+SIZE: 4.17 KB
 ================================================================================
 using MachineryManager.Organization.Application.Features.Projects.Commands.RegisterProject;
 using MachineryManager.Organization.Application.Features.Projects.Queries.GetProjectById;
@@ -16290,6 +19427,7 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Routing;
 using OpenIddict.Validation.AspNetCore;
+using MachineryManager.Organization.Application.Features.Projects.Commands.RenameProject;
 
 namespace MachineryManager.Organization.Presentation.Endpoints;
 
@@ -16315,6 +19453,10 @@ public static class ProjectEndpoints
         group.MapPost("/", RegisterProjectAsync)
             .WithName("RegisterProject")
             .WithSummary("Registers a new Project under an Organization.");
+
+                group.MapPut("/{projectId:guid}", RenameProjectAsync)
+            .WithName("RenameProject")
+            .WithSummary("Renames an existing Project.");
 
         group.MapGet("/{projectId:guid}", GetProjectByIdAsync)
             .WithName("GetProjectById")
@@ -16371,11 +19513,27 @@ public static class ProjectEndpoints
             ? Results.Ok(result.Value)
             : result.ToProblemResult(httpContext);
     }
+
+        private static async Task<IResult> RenameProjectAsync(
+        Guid projectId,
+        RenameProjectRequest request,
+        ISender sender,
+        HttpContext httpContext,
+        CancellationToken cancellationToken)
+    {
+        var result = await sender.Send(
+            new RenameProjectCommand(projectId, request.Name),
+            cancellationToken);
+
+        return result.IsSuccess
+            ? Results.NoContent()
+            : result.ToProblemResult(httpContext);
+    }
 }
 
 ================================================================================
 FILE: src\Modules\Organization\Organization.Presentation\Endpoints\ResultExtensions.cs
-SIZE: 2.28 KB
+SIZE: 2.34 KB
 ================================================================================
 using MachineryManager.SharedKernel;
 using Microsoft.AspNetCore.Http;
@@ -16437,7 +19595,7 @@ internal static class ResultExtensions
 
 ================================================================================
 FILE: src\Modules\Organization\Organization.Presentation\Organization.Presentation.csproj
-SIZE: 0.51 KB
+SIZE: 0.53 KB
 ================================================================================
 <Project Sdk="Microsoft.NET.Sdk.Razor">
 
@@ -16464,12 +19622,12 @@ SIZE: 0.51 KB
 # SECTION 3: SNAPSHOT SUMMARY
 ================================================================================
 
-Generation Time     : 00:00:01.2081913
-Total Files Scanned : 260
-Files Included      : 260
+Generation Time     : 00:00:03.1609007
+Total Files Scanned : 326
+Files Included      : 326
 Files Skipped       : 0
-Total Source Size   : 0.56 MB
-Snapshot File Size  : 0.65 MB
+Total Source Size   : 0.66 MB
+Snapshot File Size  : 0.77 MB
 Output Path         : C:\Users\i\source\repos\MachineryManagerEnterprise\MME_Codebase_Snapshot.txt
 
 Excluded Directories: .git, .github, .vs, .vscode, .idea, .azure, .devcontainer, bin, obj, packages, publish, out, release, releases, debug, x64, x86, arm64, artifacts, .artifacts, node_modules, dist, build, bower_components, jspm_packages, docs-english, docs-farsi, docs, tools, test-results, coverage, .coverage, TestResults, lib, .angular, .next, .nuxt, .svelte-kit, .cache, .temp, tmp

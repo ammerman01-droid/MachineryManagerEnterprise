@@ -376,7 +376,7 @@ Asset Models / Component Models → Knowledge
 - **Finance owns:** Transactions, Cost Calculations, Depreciation, Valuation
 - **Documents own:** Expiration, Version History, File Metadata
 
-## 4.5 Aggregate Design (6 Aggregates)
+## 4.5 Aggregate Design (9 Aggregates)
 
 ### Rules
 - One transaction = one aggregate ONLY (strong consistency inside, eventual consistency between)
@@ -395,6 +395,18 @@ Asset Models / Component Models → Knowledge
   - Only one active primary Meter Device per measurement type
 - **Lifecycle:** Draft → Registered → Commissioned → Operational → Inactive → Retired → Disposed
 
+### AssetModel Aggregate
+- **Root:** AssetModel
+- **Scope:** Per-Organization (each Organization maintains its own catalog — chat, 2026-08-25)
+- **Contains:** Name, Manufacturer, list of compatible EngineModelIds
+- **Invariants:**
+  - An Asset references exactly one AssetModel (BR-002); identity-specific
+    data (serial number, license plate, manufacture year, color, ...)
+    lives on the Asset itself, NEVER on the AssetModel
+  - Engine compatibility is a simple collection of EngineModelId held
+    directly on AssetModel — no dedicated compatibility entity
+    (chat, 2026-08-25)
+
 ### Engine Aggregate
 - **Root:** Engine
 - **Contains:** Engine, Specs, Status, Current Installation, Lifecycle, Installation History
@@ -404,6 +416,16 @@ Asset Models / Component Models → Knowledge
   - Every installation/removal generates historical record (never modified/removed)
   - Manufacturer, Serial Number, Manufacturing Year are immutable
 - **Lifecycle:** Stored → Installed → Removed → Under Repair → Rebuilt → Stored → ... → Retired
+
+### EngineModel Aggregate
+- **Root:** EngineModel
+- **Scope:** Per-Organization (chat, 2026-08-25)
+- **Contains:** Name, Manufacturer
+- **Invariants:**
+  - Mirrors AssetModel's pattern: an Engine (separate aggregate, not yet
+    implemented) references exactly one EngineModel and inherits its
+    shared specs; identity-specific data (serial number, install
+    history) lives on the Engine instance itself
 
 ### Maintenance Aggregate
 - **Root:** Maintenance Record
@@ -1981,6 +2003,10 @@ Released → Supported → Maintenance → Deprecated → End of Support → Arc
   - Asset hierarchy (parent/child) permitted; cycles prohibited
   - Asset relationships never transfer Asset identity
   - Historical relationships preserved; never overwritten
+
+  > **Note (chat, 2026-08-25):** AssetModel and EngineModel catalogs are
+> scoped per-Organization, not shared platform-wide. Each Organization
+> maintains and manages its own model catalog independently.
 
 ## 10.3 BR-004 — Tracked Components
 - **Purpose:** Manage components with independent lifecycle (Engine, Transmission, Tire, Battery, Hydraulic Attachment)
