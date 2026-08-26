@@ -8,7 +8,7 @@ public sealed class RegisterEngineModelCommandValidator : AbstractValidator<Regi
     /// <summary>Initializes validation rules for the register engine model command.</summary>
     public RegisterEngineModelCommandValidator()
     {
-        RuleFor(x => x.OrganizationId).NotEmpty();
+        RuleFor(x => x.HoldingId).NotEmpty();
 
         RuleFor(x => x.Name)
             .NotEmpty()

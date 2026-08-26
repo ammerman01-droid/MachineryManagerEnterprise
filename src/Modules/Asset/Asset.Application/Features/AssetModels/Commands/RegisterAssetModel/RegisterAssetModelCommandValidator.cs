@@ -8,7 +8,7 @@ public sealed class RegisterAssetModelCommandValidator : AbstractValidator<Regis
     /// <summary>Initializes validation rules for the register asset model command.</summary>
     public RegisterAssetModelCommandValidator()
     {
-        RuleFor(x => x.OrganizationId).NotEmpty();
+        RuleFor(x => x.HoldingId).NotEmpty();
 
         RuleFor(x => x.Name)
             .NotEmpty()

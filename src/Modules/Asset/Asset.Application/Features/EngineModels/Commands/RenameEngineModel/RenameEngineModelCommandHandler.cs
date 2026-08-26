@@ -19,21 +19,18 @@ public sealed class RenameEngineModelCommandHandler
     private readonly IUnitOfWork _unitOfWork;
     private readonly ICurrentUserService _currentUserService;
     private readonly IPermissionEvaluator _permissionEvaluator;
-    private readonly IOrganizationLookupService _organizationLookupService;
 
     /// <summary>Initializes a new instance of the <see cref="RenameEngineModelCommandHandler"/> class.</summary>
     public RenameEngineModelCommandHandler(
         IEngineModelRepository engineModelRepository,
         IUnitOfWork unitOfWork,
         ICurrentUserService currentUserService,
-        IPermissionEvaluator permissionEvaluator,
-        IOrganizationLookupService organizationLookupService)
+        IPermissionEvaluator permissionEvaluator)
     {
         _engineModelRepository = engineModelRepository;
         _unitOfWork = unitOfWork;
         _currentUserService = currentUserService;
         _permissionEvaluator = permissionEvaluator;
-        _organizationLookupService = organizationLookupService;
     }
 
     /// <summary>Executes the rename use case.</summary>
@@ -53,12 +50,10 @@ public sealed class RenameEngineModelCommandHandler
             return Result.Failure(global::Asset.Domain.EngineModelErrors.NotAuthorized());
         }
 
-        var holdingId = await _organizationLookupService.GetHoldingIdAsync(engineModel.OrganizationId, cancellationToken);
-
         var isAuthorized = await _permissionEvaluator.HasPermissionAsync(
             userId,
             RequiredPermission,
-            new ResourceScope(holdingId, engineModel.OrganizationId, null),
+            new ResourceScope(engineModel.HoldingId, null, null),
             cancellationToken);
 
         if (!isAuthorized)

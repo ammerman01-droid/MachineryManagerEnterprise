@@ -8,8 +8,8 @@ public sealed class AssetModelRegistered : IDomainEvent
     /// <summary>Gets the identifier of the registered asset model.</summary>
     public AssetModelId AssetModelId { get; }
 
-    /// <summary>Gets the identifier of the owning Organization.</summary>
-    public Guid OrganizationId { get; }
+    /// <summary>Gets the identifier of the owning Holding.</summary>
+    public Guid HoldingId { get; }
 
     /// <summary>Gets the name of the asset model.</summary>
     public string Name { get; }
@@ -18,10 +18,10 @@ public sealed class AssetModelRegistered : IDomainEvent
     public DateTimeOffset OccurredOn { get; }
 
     /// <summary>Initializes a new instance of the <see cref="AssetModelRegistered"/> class.</summary>
-    public AssetModelRegistered(AssetModelId assetModelId, Guid organizationId, string name, DateTimeOffset occurredOn)
+    public AssetModelRegistered(AssetModelId assetModelId, Guid holdingId, string name, DateTimeOffset occurredOn)
     {
         AssetModelId = assetModelId;
-        OrganizationId = organizationId;
+        HoldingId = holdingId;
         Name = name;
         OccurredOn = occurredOn;
     }

@@ -1,7 +1,7 @@
 ﻿
 ================================================================================
   MACHINERYMANAGERENTERPRISE - CODEBASE SNAPSHOT
-  Generated: 2026-08-26 09:22:42
+  Generated: 2026-08-26 12:25:00
   Source: C:\Users\i\source\repos\MachineryManagerEnterprise
   Purpose: Complete source code reference for AI-assisted development
   Excludes: .md, .gitignore, this script, build artifacts, binaries, IDE,
@@ -244,7 +244,10 @@ MachineryManagerEnterprise
 |   |   |   |   |           +-- SearchEngineModels
 |   |   |   |   |               |-- SearchEngineModelsQuery.cs
 |   |   |   |   |               +-- SearchEngineModelsQueryHandler.cs
-|   |   |   |   +-- Asset.Application.csproj
+|   |   |   |   |-- Asset.Application.csproj
+|   |   |   |   |-- DependencyInjection.cs
+|   |   |   |   |-- DomainEventNotification.cs
+|   |   |   |   +-- MediatRDomainEventDispatcher.cs
 |   |   |   |-- Asset.Domain
 |   |   |   |   |-- Events
 |   |   |   |   |   |-- AssetModelRegistered.cs
@@ -7816,6 +7819,82 @@ SIZE: 0.62 KB
 </Project>
 
 ================================================================================
+FILE: src\Modules\Asset\Asset.Application\DependencyInjection.cs
+SIZE: 1.34 KB
+================================================================================
+using FluentValidation;
+using MachineryManager.SharedKernel.Abstractions;
+using MediatR;
+using Microsoft.Extensions.DependencyInjection;
+
+namespace MachineryManager.Asset.Application;
+
+/// <summary>
+/// Provides extension methods for registering Asset Application layer
+/// services into the dependency injection container.
+/// </summary>
+public static class DependencyInjection
+{
+    /// <summary>
+    /// Registers MediatR handlers, FluentValidation validators, pipeline
+    /// behaviors (Validation per ADR-0036), and the domain event dispatcher.
+    /// </summary>
+    /// <param name="services">The service collection to configure.</param>
+    /// <returns>The same <see cref="IServiceCollection"/> for chaining.</returns>
+    public static IServiceCollection AddAssetApplication(
+        this IServiceCollection services)
+    {
+        var assembly = typeof(DependencyInjection).Assembly;
+
+        services.AddMediatR(configuration =>
+        {
+            configuration.RegisterServicesFromAssembly(assembly);
+        });
+
+        services.AddValidatorsFromAssembly(assembly);
+
+        services.AddTransient(
+            typeof(IPipelineBehavior<,>),
+            typeof(Behaviors.ValidationBehavior<,>));
+
+        services.AddScoped<IDomainEventDispatcher, MediatRDomainEventDispatcher>();
+
+        return services;
+    }
+}
+
+================================================================================
+FILE: src\Modules\Asset\Asset.Application\DomainEventNotification.cs
+SIZE: 0.98 KB
+================================================================================
+using MediatR;
+using MachineryManager.SharedKernel;
+
+namespace MachineryManager.Asset.Application;
+
+/// <summary>
+/// Wraps a domain event as a MediatR <see cref="INotification"/> so
+/// that Application-layer handlers can subscribe to specific domain
+/// event types via <c>INotificationHandler&lt;DomainEventNotification&lt;T&gt;&gt;</c>.
+/// </summary>
+/// <typeparam name="TDomainEvent">The type of the domain event being wrapped.</typeparam>
+public sealed class DomainEventNotification<TDomainEvent> : INotification
+    where TDomainEvent : IDomainEvent
+{
+    /// <summary>Gets the underlying domain event.</summary>
+    public TDomainEvent DomainEvent { get; }
+
+    /// <summary>
+    /// Initializes a new instance of the <see cref="DomainEventNotification{TDomainEvent}"/> class.
+    /// </summary>
+    /// <param name="domainEvent">The domain event to wrap.</param>
+    public DomainEventNotification(TDomainEvent domainEvent)
+    {
+        DomainEvent = domainEvent;
+    }
+}
+
+================================================================================
 FILE: src\Modules\Asset\Asset.Application\Features\AssetModels\Commands\AssignCompatibleEngineModel\AssignCompatibleEngineModelCommand.cs
 SIZE: 0.36 KB
 ================================================================================
@@ -8761,13 +8840,70 @@ public sealed class SearchEngineModelsQueryHandler
 }
 
 ================================================================================
+FILE: src\Modules\Asset\Asset.Application\MediatRDomainEventDispatcher.cs
+SIZE: 1.93 KB
+================================================================================
+using System.Reflection;
+using MediatR;
+using MachineryManager.SharedKernel;
+using MachineryManager.SharedKernel.Abstractions;
+
+namespace MachineryManager.Asset.Application;
+
+/// <summary>
+/// Dispatches domain events through MediatR as <see cref="INotification"/>
+/// wrappers, bridging the SharedKernel abstraction to the Application-layer
+/// messaging infrastructure (ADR-0011).
+/// </summary>
+public sealed class MediatRDomainEventDispatcher : IDomainEventDispatcher
+{
+    private readonly IMediator _mediator;
+
+    /// <summary>
+    /// Initializes a new instance of the <see cref="MediatRDomainEventDispatcher"/> class.
+    /// </summary>
+    /// <param name="mediator">The MediatR mediator.</param>
+    public MediatRDomainEventDispatcher(IMediator mediator)
+    {
+        _mediator = mediator;
+    }
+
+    /// <inheritdoc />
+    public async Task DispatchAsync(IReadOnlyCollection<IDomainEvent> events, CancellationToken cancellationToken = default)
+    {
+        foreach (var domainEvent in events)
+        {
+            var notificationType = typeof(DomainEventNotification<>).MakeGenericType(domainEvent.GetType());
+            var notification = Activator.CreateInstance(notificationType, domainEvent)!;
+
+            var method = typeof(MediatRDomainEventDispatcher)
+                .GetMethod(nameof(PublishTyped), BindingFlags.NonPublic | BindingFlags.Instance)!
+                .MakeGenericMethod(notificationType);
+
+            await (Task)method.Invoke(this, new[] { notification, cancellationToken })!;
+        }
+    }
+
+    /// <summary>
+    /// Strongly-typed helper that satisfies MediatR's generic constraint
+    /// on <see cref="INotification"/>.
+    /// </summary>
+    private async Task PublishTyped<TNotification>(TNotification notification, CancellationToken cancellationToken)
+        where TNotification : INotification
+    {
+        await _mediator.Publish(notification, cancellationToken);
+    }
+}
+
+================================================================================
 FILE: src\Modules\Asset\Asset.Domain\Asset.Domain.csproj
-SIZE: 0.2 KB
+SIZE: 0.35 KB
 ================================================================================
 <Project Sdk="Microsoft.NET.Sdk">
 
   <ItemGroup>
     <ProjectReference Include="..\..\..\BuildingBlocks\MachineryManager.SharedKernel\MachineryManager.SharedKernel.csproj" />
+    <ProjectReference Include="..\..\..\BuildingBlocks\MachineryManager.SharedKernel.Abstractions\MachineryManager.SharedKernel.Abstractions.csproj" />
   </ItemGroup>
 
 </Project>
@@ -9289,7 +9425,7 @@ SIZE: 0.41 KB
 
 ================================================================================
 FILE: src\Modules\Asset\Asset.Infrastructure\DependencyInjection.cs
-SIZE: 1.73 KB
+SIZE: 1.91 KB
 ================================================================================
 using MachineryManager.Asset.Application.Abstractions;
 using MachineryManager.Asset.Infrastructure.Persistence;
@@ -9320,7 +9456,11 @@ public static class DependencyInjection
         IConfiguration configuration)
     {
         services.AddDbContext<AssetDbContext>(options => options
-            .UseSqlServer(configuration.GetConnectionString("MachineryManagerDatabase")));
+            .UseSqlServer(
+                configuration.GetConnectionString("MachineryManagerDatabase"),
+                sqlServerOptions => sqlServerOptions.MigrationsHistoryTable(
+                    "__EFMigrationsHistory",
+                    schema: "asset")));
 
         services.AddScoped<IAssetModelRepository, AssetModelRepository>();
         services.AddScoped<IEngineModelRepository, EngineModelRepository>();
@@ -16688,8 +16828,9 @@ SIZE: 0.56 KB
 
 ================================================================================
 FILE: src\Modules\Organization\Organization.Infrastructure\OrganizationLookupService.cs
-SIZE: 1.07 KB
+SIZE: 1.14 KB
 ================================================================================
+using MachineryManager.Organization.Infrastructure.Persistence;
 using MachineryManager.SharedKernel.Abstractions;
 using Microsoft.EntityFrameworkCore;
 using Organization.Domain;
@@ -19622,12 +19763,12 @@ SIZE: 0.53 KB
 # SECTION 3: SNAPSHOT SUMMARY
 ================================================================================
 
-Generation Time     : 00:00:03.1609007
-Total Files Scanned : 326
-Files Included      : 326
+Generation Time     : 00:00:01.5609666
+Total Files Scanned : 329
+Files Included      : 329
 Files Skipped       : 0
 Total Source Size   : 0.66 MB
-Snapshot File Size  : 0.77 MB
+Snapshot File Size  : 0.78 MB
 Output Path         : C:\Users\i\source\repos\MachineryManagerEnterprise\MME_Codebase_Snapshot.txt
 
 Excluded Directories: .git, .github, .vs, .vscode, .idea, .azure, .devcontainer, bin, obj, packages, publish, out, release, releases, debug, x64, x86, arm64, artifacts, .artifacts, node_modules, dist, build, bower_components, jspm_packages, docs-english, docs-farsi, docs, tools, test-results, coverage, .coverage, TestResults, lib, .angular, .next, .nuxt, .svelte-kit, .cache, .temp, tmp

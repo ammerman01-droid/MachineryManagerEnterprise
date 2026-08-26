@@ -18,8 +18,10 @@ public sealed class AssetModelConfiguration : IEntityTypeConfiguration<AssetMode
             .HasConversion(id => id.Value, value => AssetModelId.From(value))
             .ValueGeneratedNever();
 
-        builder.Property(am => am.OrganizationId)
+        builder.Property(am => am.HoldingId)
             .IsRequired();
+
+        builder.HasIndex(am => am.HoldingId);
 
         builder.Property(am => am.Name)
             .HasMaxLength(AssetModel.MaxNameLength)

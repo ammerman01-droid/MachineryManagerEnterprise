@@ -11,8 +11,10 @@ namespace Asset.Domain;
 /// specifications; identity-specific data (serial number, license
 /// plate, manufacture year, color, ...) lives on the Asset itself, not
 /// here (chat, 2026-08-25).
-/// Scoped per Organization — each Organization maintains its own
-/// catalog (chat, 2026-08-25).
+/// Scoped per Holding — shared across every Organization under that
+/// Holding; only Asset identity records themselves are per-Organization
+/// (correction, chat, 2026-08-26 — supersedes the earlier per-Organization
+/// scope note).
 /// </summary>
 public sealed class AssetModel : AggregateRoot<AssetModelId>
 {
@@ -24,8 +26,8 @@ public sealed class AssetModel : AggregateRoot<AssetModelId>
 
     private readonly List<Guid> _compatibleEngineModelIds = [];
 
-    /// <summary>Gets the identifier of the Organization that owns this catalog entry.</summary>
-    public Guid OrganizationId { get; private set; }
+    /// <summary>Gets the identifier of the Holding that owns this catalog entry.</summary>
+    public Guid HoldingId { get; private set; }
 
     /// <summary>Gets the display name of the asset model (e.g. "FH16 6x4").</summary>
     public string Name { get; private set; } = string.Empty;
@@ -45,22 +47,22 @@ public sealed class AssetModel : AggregateRoot<AssetModelId>
     {
     }
 
-    private AssetModel(AssetModelId id, Guid organizationId, string name, string manufacturer)
+    private AssetModel(AssetModelId id, Guid holdingId, string name, string manufacturer)
         : base(id)
     {
-        OrganizationId = organizationId;
+        HoldingId = holdingId;
         Name = name;
         Manufacturer = manufacturer;
     }
 
     /// <summary>Registers a new Asset Model.</summary>
-    /// <param name="organizationId">The owning Organization.</param>
+    /// <param name="holdingId">The owning Holding.</param>
     /// <param name="name">The display name.</param>
     /// <param name="manufacturer">The manufacturer.</param>
     /// <param name="dateTimeProvider">Provides the current UTC time for the raised domain event.</param>
     /// <returns>A <see cref="Result{AssetModel}"/> containing the new aggregate, or a validation error.</returns>
     public static Result<AssetModel> Register(
-        Guid organizationId,
+        Guid holdingId,
         string name,
         string manufacturer,
         IDateTimeProvider dateTimeProvider)
@@ -80,11 +82,11 @@ public sealed class AssetModel : AggregateRoot<AssetModelId>
             return Result.Failure<AssetModel>(AssetModelErrors.ManufacturerRequired());
         }
 
-        var assetModel = new AssetModel(AssetModelId.New(), organizationId, name.Trim(), manufacturer.Trim());
+        var assetModel = new AssetModel(AssetModelId.New(), holdingId, name.Trim(), manufacturer.Trim());
 
         assetModel.RaiseDomainEvent(new AssetModelRegistered(
             assetModel.Id,
-            organizationId,
+            holdingId,
             assetModel.Name,
             dateTimeProvider.UtcNow));
 

@@ -20,7 +20,6 @@ public sealed class AssignCompatibleEngineModelCommandHandler
     private readonly IDateTimeProvider _dateTimeProvider;
     private readonly ICurrentUserService _currentUserService;
     private readonly IPermissionEvaluator _permissionEvaluator;
-    private readonly IOrganizationLookupService _organizationLookupService;
 
     /// <summary>Initializes a new instance of the <see cref="AssignCompatibleEngineModelCommandHandler"/> class.</summary>
     public AssignCompatibleEngineModelCommandHandler(
@@ -28,15 +27,13 @@ public sealed class AssignCompatibleEngineModelCommandHandler
         IUnitOfWork unitOfWork,
         IDateTimeProvider dateTimeProvider,
         ICurrentUserService currentUserService,
-        IPermissionEvaluator permissionEvaluator,
-        IOrganizationLookupService organizationLookupService)
+        IPermissionEvaluator permissionEvaluator)
     {
         _assetModelRepository = assetModelRepository;
         _unitOfWork = unitOfWork;
         _dateTimeProvider = dateTimeProvider;
         _currentUserService = currentUserService;
         _permissionEvaluator = permissionEvaluator;
-        _organizationLookupService = organizationLookupService;
     }
 
     /// <summary>Executes the compatibility-assignment use case.</summary>
@@ -56,12 +53,10 @@ public sealed class AssignCompatibleEngineModelCommandHandler
             return Result.Failure(global::Asset.Domain.AssetModelErrors.NotAuthorized());
         }
 
-        var holdingId = await _organizationLookupService.GetHoldingIdAsync(assetModel.OrganizationId, cancellationToken);
-
         var isAuthorized = await _permissionEvaluator.HasPermissionAsync(
             userId,
             RequiredPermission,
-            new ResourceScope(holdingId, assetModel.OrganizationId, null),
+            new ResourceScope(assetModel.HoldingId, null, null),
             cancellationToken);
 
         if (!isAuthorized)

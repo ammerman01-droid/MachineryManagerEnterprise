@@ -22,7 +22,7 @@ public sealed class SearchAssetModelsQueryHandler
         CancellationToken cancellationToken)
     {
         var response = await _assetModelRepository.SearchAsync(
-            request.OrganizationId,
+            request.HoldingId,
             request.SearchTerm,
             request.Page,
             request.PageSize,

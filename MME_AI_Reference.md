@@ -397,7 +397,10 @@ Asset Models / Component Models → Knowledge
 
 ### AssetModel Aggregate
 - **Root:** AssetModel
-- **Scope:** Per-Organization (each Organization maintains its own catalog — chat, 2026-08-25)
+- **Scope:** Per-Holding — shared across every Organization under that
+  Holding; only Asset identity records (not yet implemented) are
+  per-Organization (correction, chat, 2026-08-26 — supersedes the
+  2026-08-25 per-Organization note)
 - **Contains:** Name, Manufacturer, list of compatible EngineModelIds
 - **Invariants:**
   - An Asset references exactly one AssetModel (BR-002); identity-specific
@@ -2005,8 +2008,9 @@ Released → Supported → Maintenance → Deprecated → End of Support → Arc
   - Historical relationships preserved; never overwritten
 
   > **Note (chat, 2026-08-25):** AssetModel and EngineModel catalogs are
-> scoped per-Organization, not shared platform-wide. Each Organization
-> maintains and manages its own model catalog independently.
+  > scoped Per-Holding — shared across every Organization under that, 
+  > not shared platform-wide. only Asset identity records are per-Organization.
+  > Each Holding> maintains and manages its own model catalog independently.
 
 ## 10.3 BR-004 — Tracked Components
 - **Purpose:** Manage components with independent lifecycle (Engine, Transmission, Tire, Battery, Hydraulic Attachment)

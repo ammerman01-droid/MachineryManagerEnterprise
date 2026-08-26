@@ -7,10 +7,10 @@ public interface IAssetModelRepository : IRepository<global::Asset.Domain.AssetM
 {
     /// <summary>
     /// Performs a paginated search over asset models within the given
-    /// Organization, restricted to the current user's authorized scope.
+    /// Holding.
     /// </summary>
     Task<Features.AssetModels.Queries.SearchAssetModels.SearchAssetModelsResponse> SearchAsync(
-        Guid organizationId,
+        Guid holdingId,
         string? searchTerm,
         int page,
         int pageSize,

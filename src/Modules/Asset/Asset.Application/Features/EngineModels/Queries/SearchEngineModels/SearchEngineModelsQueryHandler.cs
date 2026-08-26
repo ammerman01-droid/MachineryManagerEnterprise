@@ -22,7 +22,7 @@ public sealed class SearchEngineModelsQueryHandler
         CancellationToken cancellationToken)
     {
         var response = await _engineModelRepository.SearchAsync(
-            request.OrganizationId,
+            request.HoldingId,
             request.SearchTerm,
             request.Page,
             request.PageSize,

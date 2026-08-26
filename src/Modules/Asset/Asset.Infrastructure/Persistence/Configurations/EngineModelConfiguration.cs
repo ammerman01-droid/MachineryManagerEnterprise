@@ -18,8 +18,10 @@ public sealed class EngineModelConfiguration : IEntityTypeConfiguration<EngineMo
             .HasConversion(id => id.Value, value => EngineModelId.From(value))
             .ValueGeneratedNever();
 
-        builder.Property(em => em.OrganizationId)
+        builder.Property(em => em.HoldingId)
             .IsRequired();
+
+        builder.HasIndex(em => em.HoldingId);
 
         builder.Property(em => em.Name)
             .HasMaxLength(EngineModel.MaxNameLength)

@@ -33,7 +33,7 @@ public sealed class EngineModelRepository : IEngineModelRepository
 
     /// <inheritdoc />
     public async Task<SearchEngineModelsResponse> SearchAsync(
-        Guid organizationId,
+        Guid holdingId,
         string? searchTerm,
         int page,
         int pageSize,
@@ -41,7 +41,7 @@ public sealed class EngineModelRepository : IEngineModelRepository
     {
         var query = _dbContext.EngineModels
             .AsNoTracking()
-            .Where(em => em.OrganizationId == organizationId);
+            .Where(em => em.HoldingId == holdingId);
 
         if (!string.IsNullOrWhiteSpace(searchTerm))
         {

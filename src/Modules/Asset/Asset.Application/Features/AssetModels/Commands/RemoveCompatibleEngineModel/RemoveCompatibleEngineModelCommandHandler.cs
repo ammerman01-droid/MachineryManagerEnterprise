@@ -19,21 +19,18 @@ public sealed class RemoveCompatibleEngineModelCommandHandler
     private readonly IUnitOfWork _unitOfWork;
     private readonly ICurrentUserService _currentUserService;
     private readonly IPermissionEvaluator _permissionEvaluator;
-    private readonly IOrganizationLookupService _organizationLookupService;
 
     /// <summary>Initializes a new instance of the <see cref="RemoveCompatibleEngineModelCommandHandler"/> class.</summary>
     public RemoveCompatibleEngineModelCommandHandler(
         IAssetModelRepository assetModelRepository,
         IUnitOfWork unitOfWork,
         ICurrentUserService currentUserService,
-        IPermissionEvaluator permissionEvaluator,
-        IOrganizationLookupService organizationLookupService)
+        IPermissionEvaluator permissionEvaluator)
     {
         _assetModelRepository = assetModelRepository;
         _unitOfWork = unitOfWork;
         _currentUserService = currentUserService;
         _permissionEvaluator = permissionEvaluator;
-        _organizationLookupService = organizationLookupService;
     }
 
     /// <summary>Executes the compatibility-removal use case.</summary>
@@ -53,12 +50,10 @@ public sealed class RemoveCompatibleEngineModelCommandHandler
             return Result.Failure(global::Asset.Domain.AssetModelErrors.NotAuthorized());
         }
 
-        var holdingId = await _organizationLookupService.GetHoldingIdAsync(assetModel.OrganizationId, cancellationToken);
-
         var isAuthorized = await _permissionEvaluator.HasPermissionAsync(
             userId,
             RequiredPermission,
-            new ResourceScope(holdingId, assetModel.OrganizationId, null),
+            new ResourceScope(assetModel.HoldingId, null, null),
             cancellationToken);
 
         if (!isAuthorized)

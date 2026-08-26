@@ -11,8 +11,10 @@ namespace Asset.Domain;
 /// EngineModel and inherit its shared specifications; identity-specific
 /// data (serial number, install history) lives on the Engine instance
 /// itself, not here (chat, 2026-08-25).
-/// Scoped per Organization — each Organization maintains its own
-/// catalog (chat, 2026-08-25).
+/// Scoped per Holding — shared across every Organization under that
+/// Holding; only Engine identity records themselves are per-Organization
+/// (correction, chat, 2026-08-26 — supersedes the earlier per-Organization
+/// scope note).
 /// </summary>
 public sealed class EngineModel : AggregateRoot<EngineModelId>
 {
@@ -22,8 +24,8 @@ public sealed class EngineModel : AggregateRoot<EngineModelId>
     /// <summary>The maximum allowed length for the manufacturer's name.</summary>
     public const int MaxManufacturerLength = 200;
 
-    /// <summary>Gets the identifier of the Organization that owns this catalog entry.</summary>
-    public Guid OrganizationId { get; private set; }
+    /// <summary>Gets the identifier of the Holding that owns this catalog entry.</summary>
+    public Guid HoldingId { get; private set; }
 
     /// <summary>Gets the display name of the engine model (e.g. "D13").</summary>
     public string Name { get; private set; } = string.Empty;
@@ -36,22 +38,22 @@ public sealed class EngineModel : AggregateRoot<EngineModelId>
     {
     }
 
-    private EngineModel(EngineModelId id, Guid organizationId, string name, string manufacturer)
+    private EngineModel(EngineModelId id, Guid holdingId, string name, string manufacturer)
         : base(id)
     {
-        OrganizationId = organizationId;
+        HoldingId = holdingId;
         Name = name;
         Manufacturer = manufacturer;
     }
 
     /// <summary>Registers a new Engine Model.</summary>
-    /// <param name="organizationId">The owning Organization.</param>
+    /// <param name="holdingId">The owning Holding.</param>
     /// <param name="name">The display name.</param>
     /// <param name="manufacturer">The manufacturer.</param>
     /// <param name="dateTimeProvider">Provides the current UTC time for the raised domain event.</param>
     /// <returns>A <see cref="Result{EngineModel}"/> containing the new aggregate, or a validation error.</returns>
     public static Result<EngineModel> Register(
-        Guid organizationId,
+        Guid holdingId,
         string name,
         string manufacturer,
         IDateTimeProvider dateTimeProvider)
@@ -71,11 +73,11 @@ public sealed class EngineModel : AggregateRoot<EngineModelId>
             return Result.Failure<EngineModel>(EngineModelErrors.ManufacturerRequired());
         }
 
-        var engineModel = new EngineModel(EngineModelId.New(), organizationId, name.Trim(), manufacturer.Trim());
+        var engineModel = new EngineModel(EngineModelId.New(), holdingId, name.Trim(), manufacturer.Trim());
 
         engineModel.RaiseDomainEvent(new EngineModelRegistered(
             engineModel.Id,
-            organizationId,
+            holdingId,
             engineModel.Name,
             dateTimeProvider.UtcNow));
 

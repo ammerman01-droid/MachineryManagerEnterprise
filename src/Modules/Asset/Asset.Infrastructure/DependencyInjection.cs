@@ -27,7 +27,11 @@ public static class DependencyInjection
         IConfiguration configuration)
     {
         services.AddDbContext<AssetDbContext>(options => options
-            .UseSqlServer(configuration.GetConnectionString("MachineryManagerDatabase")));
+            .UseSqlServer(
+                configuration.GetConnectionString("MachineryManagerDatabase"),
+                sqlServerOptions => sqlServerOptions.MigrationsHistoryTable(
+                    "__EFMigrationsHistory",
+                    schema: "asset")));
 
         services.AddScoped<IAssetModelRepository, AssetModelRepository>();
         services.AddScoped<IEngineModelRepository, EngineModelRepository>();

@@ -33,7 +33,7 @@ public sealed class AssetModelRepository : IAssetModelRepository
 
     /// <inheritdoc />
     public async Task<SearchAssetModelsResponse> SearchAsync(
-        Guid organizationId,
+        Guid holdingId,
         string? searchTerm,
         int page,
         int pageSize,
@@ -41,7 +41,7 @@ public sealed class AssetModelRepository : IAssetModelRepository
     {
         var query = _dbContext.AssetModels
             .AsNoTracking()
-            .Where(am => am.OrganizationId == organizationId);
+            .Where(am => am.HoldingId == holdingId);
 
         if (!string.IsNullOrWhiteSpace(searchTerm))
         {

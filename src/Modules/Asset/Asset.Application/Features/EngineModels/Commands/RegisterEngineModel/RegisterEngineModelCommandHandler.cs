@@ -20,7 +20,6 @@ public sealed class RegisterEngineModelCommandHandler
     private readonly IDateTimeProvider _dateTimeProvider;
     private readonly ICurrentUserService _currentUserService;
     private readonly IPermissionEvaluator _permissionEvaluator;
-    private readonly IOrganizationLookupService _organizationLookupService;
 
     /// <summary>Initializes a new instance of the <see cref="RegisterEngineModelCommandHandler"/> class.</summary>
     public RegisterEngineModelCommandHandler(
@@ -28,15 +27,13 @@ public sealed class RegisterEngineModelCommandHandler
         IUnitOfWork unitOfWork,
         IDateTimeProvider dateTimeProvider,
         ICurrentUserService currentUserService,
-        IPermissionEvaluator permissionEvaluator,
-        IOrganizationLookupService organizationLookupService)
+        IPermissionEvaluator permissionEvaluator)
     {
         _engineModelRepository = engineModelRepository;
         _unitOfWork = unitOfWork;
         _dateTimeProvider = dateTimeProvider;
         _currentUserService = currentUserService;
         _permissionEvaluator = permissionEvaluator;
-        _organizationLookupService = organizationLookupService;
     }
 
     /// <summary>Executes the registration use case.</summary>
@@ -47,12 +44,10 @@ public sealed class RegisterEngineModelCommandHandler
             return Result.Failure<Guid>(global::Asset.Domain.EngineModelErrors.NotAuthorized());
         }
 
-        var holdingId = await _organizationLookupService.GetHoldingIdAsync(request.OrganizationId, cancellationToken);
-
         var isAuthorized = await _permissionEvaluator.HasPermissionAsync(
             userId,
             RequiredPermission,
-            new ResourceScope(holdingId, request.OrganizationId, null),
+            new ResourceScope(request.HoldingId, null, null),
             cancellationToken);
 
         if (!isAuthorized)
@@ -61,7 +56,7 @@ public sealed class RegisterEngineModelCommandHandler
         }
 
         var result = global::Asset.Domain.EngineModel.Register(
-            request.OrganizationId,
+            request.HoldingId,
             request.Name,
             request.Manufacturer,
             _dateTimeProvider);

@@ -7,10 +7,10 @@ public interface IEngineModelRepository : IRepository<global::Asset.Domain.Engin
 {
     /// <summary>
     /// Performs a paginated search over engine models within the given
-    /// Organization.
+    /// Holding.
     /// </summary>
     Task<Features.EngineModels.Queries.SearchEngineModels.SearchEngineModelsResponse> SearchAsync(
-        Guid organizationId,
+        Guid holdingId,
         string? searchTerm,
         int page,
         int pageSize,
