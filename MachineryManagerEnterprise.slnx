@@ -15,6 +15,7 @@
     <Project Path="src/Modules/Asset/Asset.Application/Asset.Application.csproj" />
     <Project Path="src/Modules/Asset/Asset.Domain/Asset.Domain.csproj" />
     <Project Path="src/Modules/Asset/Asset.Infrastructure/Asset.Infrastructure.csproj" />
+    <Project Path="src/Modules/Asset/Asset.Presentation/Asset.Presentation.csproj" />
   </Folder>
   <Folder Name="/src/Modules/Identity/">
     <Project Path="src/Modules/Identity/Identity.Domain/Identity.Domain.csproj" />

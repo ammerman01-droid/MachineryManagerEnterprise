@@ -17,6 +17,7 @@ using Scalar.AspNetCore;
 using Serilog;
 using MachineryManager.Asset.Application;
 using MachineryManager.Asset.Infrastructure;
+using MachineryManager.Asset.Presentation.Endpoints;
 
 Log.Logger = new LoggerConfiguration()
     .WriteTo.Console()
@@ -115,6 +116,10 @@ try
     // Administration endpoints
     app.MapProfileEndpoints();
     app.MapUserProfileAssignmentEndpoints();
+
+    // Asset endpoints
+    app.MapAssetModelEndpoints();
+    app.MapEngineModelEndpoints();
 
     app.Run();
 }
