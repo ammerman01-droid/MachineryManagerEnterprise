@@ -1,0 +1,163 @@
+@page "/admin/asset-models"
+@rendermode InteractiveServer
+@inject IHttpClientFactory HttpClientFactory
+@inject NavigationManager Navigation
+
+<PageTitle>مدل‌های دارایی</PageTitle>
+
+<MudText Typo="Typo.h4" Class="mb-4">مدل‌های دارایی</MudText>
+
+<MudPaper Class="pa-4 mb-4">
+    <MudSelect T="Guid?" Label="Holding" Value="selectedHoldingId" ValueChanged="OnHoldingChangedAsync">
+        @foreach (var holding in holdings)
+        {
+            <MudSelectItem T="Guid?" Value="@((Guid?)holding.Id)">@holding.Name</MudSelectItem>
+        }
+    </MudSelect>
+</MudPaper>
+
+@if (errorMessage is not null)
+{
+    <MudAlert Severity="Severity.Error" Class="my-4">@errorMessage</MudAlert>
+}
+
+@if (selectedHoldingId is not null)
+{
+    <MudButton Variant="Variant.Filled" Color="Color.Primary" Class="mb-4"
+               OnClick="@(() => Navigation.NavigateTo($"/admin/asset-models/create?holdingId={selectedHoldingId}"))">
+        ثبت مدل جدید
+    </MudButton>
+
+    @if (isLoading)
+    {
+        <MudProgressLinear Indeterminate="true" Class="my-4" />
+    }
+    else
+    {
+        <MudTable Items="items" Hover="true">
+            <HeaderContent>
+                <MudTh>نام</MudTh>
+                <MudTh>سازنده</MudTh>
+                <MudTh>تعداد موتور سازگار</MudTh>
+                <MudTh>عملیات</MudTh>
+            </HeaderContent>
+            <RowTemplate>
+                <MudTd DataLabel="نام">@context.Name</MudTd>
+                <MudTd DataLabel="سازنده">@context.Manufacturer</MudTd>
+                <MudTd DataLabel="تعداد موتور سازگار">@context.CompatibleEngineModelIds.Count</MudTd>
+                <MudTd DataLabel="عملیات">
+                    <MudButton Size="Size.Small" Variant="Variant.Text" Color="Color.Primary"
+                               OnClick="@(() => Navigation.NavigateTo($"/admin/asset-models/{context.Id}/edit"))">
+                        ویرایش
+                    </MudButton>
+                    <MudButton Size="Size.Small" Variant="Variant.Text" Color="Color.Secondary"
+                               OnClick="@(() => Navigation.NavigateTo($"/admin/asset-models/{context.Id}/compatibility?holdingId={selectedHoldingId}"))">
+                        سازگاری موتور
+                    </MudButton>
+                </MudTd>
+            </RowTemplate>
+        </MudTable>
+    }
+}
+
+@code {
+    private sealed class HoldingItem
+    {
+        public Guid Id { get; set; }
+        public string Name { get; set; } = string.Empty;
+    }
+
+    private sealed class AssetModelItem
+    {
+        public Guid Id { get; set; }
+        public string Name { get; set; } = string.Empty;
+        public string Manufacturer { get; set; } = string.Empty;
+        public List<Guid> CompatibleEngineModelIds { get; set; } = [];
+    }
+
+    private sealed class SearchAssetModelsResult
+    {
+        public List<AssetModelItem> Items { get; set; } = [];
+    }
+
+    private sealed class SearchHoldingsResult
+    {
+        public List<HoldingItem> Items { get; set; } = [];
+    }
+
+    private List<HoldingItem> holdings = [];
+    private List<AssetModelItem> items = [];
+    private Guid? selectedHoldingId;
+    private bool isLoading;
+    private string? errorMessage;
+
+    /// <summary>Loads the list of Holdings for the selector.</summary>
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            var client = HttpClientFactory.CreateClient("InternalApi");
+            var response = await client.GetAsync("/api/v1/holdings?pageSize=200");
+            var content = await response.Content.ReadAsStringAsync();
+
+            if (!response.IsSuccessStatusCode)
+            {
+                errorMessage = $"خطا در دریافت هلدینگ‌ها: {content}";
+                return;
+            }
+
+            var result = System.Text.Json.JsonSerializer.Deserialize<SearchHoldingsResult>(content, new
+System.Text.Json.JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+
+            holdings = result?.Items ?? [];
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"خطا: {ex.Message}";
+        }
+    }
+
+    /// <summary>Handles Holding selection and loads its Asset Models.</summary>
+    private async Task OnHoldingChangedAsync(Guid? holdingId)
+    {
+        selectedHoldingId = holdingId;
+        await LoadAssetModelsAsync();
+    }
+
+    private async Task LoadAssetModelsAsync()
+    {
+        if (selectedHoldingId is null)
+        {
+            return;
+        }
+
+        isLoading = true;
+        errorMessage = null;
+
+        try
+        {
+            var client = HttpClientFactory.CreateClient("InternalApi");
+            var response = await client.GetAsync($"/api/v1/asset-models?holdingId={selectedHoldingId}&pageSize=200");
+            var content = await response.Content.ReadAsStringAsync();
+
+            if (!response.IsSuccessStatusCode)
+            {
+                errorMessage = $"خطا در دریافت مدل‌های دارایی: {content}";
+                return;
+            }
+
+            var result = System.Text.Json.JsonSerializer.Deserialize<SearchAssetModelsResult>(content, new
+System.Text.Json.JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+
+            items = result?.Items ?? [];
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"خطا: {ex.Message}";
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+}

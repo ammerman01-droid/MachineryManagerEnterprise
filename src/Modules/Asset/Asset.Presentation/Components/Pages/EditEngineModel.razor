@@ -1,0 +1,122 @@
+@page "/admin/engine-models/{EngineModelId:guid}/edit"
+@rendermode InteractiveServer
+@inject IHttpClientFactory HttpClientFactory
+@inject NavigationManager Navigation
+
+<PageTitle>ویرایش مدل موتور</PageTitle>
+
+<MudText Typo="Typo.h4" Class="mb-4">ویرایش مدل موتور</MudText>
+
+@if (errorMessage is not null)
+{
+    <MudAlert Severity="Severity.Error" Class="my-4">@errorMessage</MudAlert>
+}
+
+@if (isLoading)
+{
+    <MudProgressLinear Indeterminate="true" Class="my-4" />
+}
+else
+{
+    <MudPaper Class="pa-4" Style="max-width:500px;">
+        <MudForm @ref="form" @bind-IsValid="@isValid">
+            <MudTextField @bind-Value="name" Label="نام مدل" Required="true" RequiredError="نام الزامی است." MaxLength="200" />
+
+            <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="SubmitAsync"
+                       Disabled="@(!isValid || isSubmitting)" Class="mt-4">
+                @if (isSubmitting)
+                {
+                    <MudProgressCircular Size="Size.Small" Indeterminate="true" />
+                }
+                else
+                {
+                    <span>ذخیره</span>
+                }
+            </MudButton>
+
+            <MudButton Variant="Variant.Outlined" OnClick="@(() => Navigation.NavigateTo("/admin/engine-models"))" Class="mt-4 mr-2">
+                بازگشت
+            </MudButton>
+        </MudForm>
+    </MudPaper>
+}
+
+@code {
+    [Parameter]
+    public Guid EngineModelId { get; set; }
+
+    private sealed class EngineModelDetails
+    {
+        public Guid Id { get; set; }
+        public string Name { get; set; } = string.Empty;
+    }
+
+    private MudForm? form;
+    private bool isValid;
+    private bool isSubmitting;
+    private bool isLoading = true;
+    private string name = string.Empty;
+    private string? errorMessage;
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            var client = HttpClientFactory.CreateClient("InternalApi");
+            var response = await client.GetAsync($"/api/v1/engine-models/{EngineModelId}");
+            var content = await response.Content.ReadAsStringAsync();
+
+            if (!response.IsSuccessStatusCode)
+            {
+                errorMessage = $"خطا در دریافت مدل: {content}";
+                return;
+            }
+
+            var result = System.Text.Json.JsonSerializer.Deserialize<EngineModelDetails>(content, new
+System.Text.Json.JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+
+            name = result?.Name ?? string.Empty;
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"خطا: {ex.Message}";
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+
+    private async Task SubmitAsync()
+    {
+        if (form is null || !isValid)
+        {
+            return;
+        }
+
+        isSubmitting = true;
+        errorMessage = null;
+
+        try
+        {
+            var client = HttpClientFactory.CreateClient("InternalApi");
+            var response = await client.PutAsJsonAsync($"/api/v1/engine-models/{EngineModelId}", new { Name = name });
+
+            if (response.IsSuccessStatusCode)
+            {
+                Navigation.NavigateTo("/admin/engine-models");
+                return;
+            }
+
+            errorMessage = $"خطا در ویرایش مدل: {await response.Content.ReadAsStringAsync()}";
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"خطا: {ex.Message}";
+        }
+        finally
+        {
+            isSubmitting = false;
+        }
+    }
+}

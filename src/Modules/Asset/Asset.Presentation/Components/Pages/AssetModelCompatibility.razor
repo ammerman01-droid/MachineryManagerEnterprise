@@ -1,0 +1,193 @@
+@page "/admin/asset-models/{AssetModelId:guid}/compatibility"
+@rendermode InteractiveServer
+@inject IHttpClientFactory HttpClientFactory
+@inject NavigationManager Navigation
+
+<PageTitle>سازگاری موتور</PageTitle>
+
+<MudText Typo="Typo.h4" Class="mb-4">مدیریت سازگاری موتور</MudText>
+
+@if (errorMessage is not null)
+{
+    <MudAlert Severity="Severity.Error" Class="my-4">@errorMessage</MudAlert>
+}
+
+<MudPaper Class="pa-4 mb-4">
+    <MudSelect T="Guid?" Label="افزودن موتور سازگار" Value="selectedEngineModelIdToAdd" ValueChanged="AddCompatibilityAsync">
+        @foreach (var engine in availableEngineModels)
+        {
+            <MudSelectItem T="Guid?" Value="@((Guid?)engine.Id)">@engine.Name (@engine.Manufacturer)</MudSelectItem>
+        }
+    </MudSelect>
+</MudPaper>
+
+@if (isLoading)
+{
+    <MudProgressLinear Indeterminate="true" Class="my-4" />
+}
+else
+{
+    <MudTable Items="compatibleEngineModels" Hover="true">
+        <HeaderContent>
+            <MudTh>نام موتور</MudTh>
+            <MudTh>سازنده</MudTh>
+            <MudTh>عملیات</MudTh>
+        </HeaderContent>
+        <RowTemplate>
+            <MudTd DataLabel="نام موتور">@context.Name</MudTd>
+            <MudTd DataLabel="سازنده">@context.Manufacturer</MudTd>
+            <MudTd DataLabel="عملیات">
+                <MudButton Size="Size.Small" Variant="Variant.Text" Color="Color.Error"
+                           OnClick="@(() => RemoveCompatibilityAsync(context.Id))">
+                    حذف
+                </MudButton>
+            </MudTd>
+        </RowTemplate>
+    </MudTable>
+}
+
+<MudButton Variant="Variant.Outlined" OnClick="@(() => Navigation.NavigateTo("/admin/asset-models"))" Class="mt-4">
+    بازگشت
+</MudButton>
+
+@code {
+    [Parameter]
+    public Guid AssetModelId { get; set; }
+
+    [SupplyParameterFromQuery]
+    public Guid HoldingId { get; set; }
+
+    private sealed class AssetModelDetails
+    {
+        public Guid Id { get; set; }
+        public string Name { get; set; } = string.Empty;
+        public List<Guid> CompatibleEngineModelIds { get; set; } = [];
+    }
+
+    private sealed class EngineModelItem
+    {
+        public Guid Id { get; set; }
+        public string Name { get; set; } = string.Empty;
+        public string Manufacturer { get; set; } = string.Empty;
+    }
+
+    private sealed class SearchEngineModelsResult
+    {
+        public List<EngineModelItem> Items { get; set; } = [];
+    }
+
+    private List<EngineModelItem> allEngineModels = [];
+    private List<EngineModelItem> compatibleEngineModels = [];
+    private List<EngineModelItem> availableEngineModels = [];
+    private Guid? selectedEngineModelIdToAdd;
+    private bool isLoading = true;
+    private string? errorMessage;
+
+    protected override async Task OnInitializedAsync() => await LoadAsync();
+
+    private async Task LoadAsync()
+    {
+        isLoading = true;
+        errorMessage = null;
+
+        try
+        {
+            var client = HttpClientFactory.CreateClient("InternalApi");
+
+            var engineResponse = await client.GetAsync($"/api/v1/engine-models?holdingId={HoldingId}&pageSize=200");
+            var engineContent = await engineResponse.Content.ReadAsStringAsync();
+
+            if (!engineResponse.IsSuccessStatusCode)
+            {
+                errorMessage = $"خطا در دریافت مدل‌های موتور: {engineContent}";
+                return;
+            }
+
+            var engineResult = System.Text.Json.JsonSerializer.Deserialize<SearchEngineModelsResult>(engineContent, new
+System.Text.Json.JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+            allEngineModels = engineResult?.Items ?? [];
+
+            var assetModelResponse = await client.GetAsync($"/api/v1/asset-models/{AssetModelId}");
+            var assetModelContent = await assetModelResponse.Content.ReadAsStringAsync();
+
+            if (!assetModelResponse.IsSuccessStatusCode)
+            {
+                errorMessage = $"خطا در دریافت مدل دارایی: {assetModelContent}";
+                return;
+            }
+
+            var assetModelResult = System.Text.Json.JsonSerializer.Deserialize<AssetModelDetails>(assetModelContent, new
+System.Text.Json.JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+            var compatibleIds = assetModelResult?.CompatibleEngineModelIds ?? [];
+
+            compatibleEngineModels = allEngineModels.Where(e => compatibleIds.Contains(e.Id)).ToList();
+            availableEngineModels = allEngineModels.Where(e => !compatibleIds.Contains(e.Id)).ToList();
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"خطا: {ex.Message}";
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+
+    private async Task AddCompatibilityAsync(Guid? engineModelId)
+    {
+        selectedEngineModelIdToAdd = null;
+
+        if (engineModelId is null)
+        {
+            return;
+        }
+
+        errorMessage = null;
+
+        try
+        {
+            var client = HttpClientFactory.CreateClient("InternalApi");
+            var response = await client.PostAsJsonAsync(
+                $"/api/v1/asset-models/{AssetModelId}/compatible-engine-models",
+                new { EngineModelId = engineModelId.Value });
+
+            if (response.IsSuccessStatusCode)
+            {
+                await LoadAsync();
+            }
+            else
+            {
+                errorMessage = $"خطا در افزودن سازگاری: {await response.Content.ReadAsStringAsync()}";
+            }
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"خطا: {ex.Message}";
+        }
+    }
+
+    private async Task RemoveCompatibilityAsync(Guid engineModelId)
+    {
+        errorMessage = null;
+
+        try
+        {
+            var client = HttpClientFactory.CreateClient("InternalApi");
+            var response = await client.DeleteAsync(
+                $"/api/v1/asset-models/{AssetModelId}/compatible-engine-models/{engineModelId}");
+
+            if (response.IsSuccessStatusCode)
+            {
+                await LoadAsync();
+            }
+            else
+            {
+                errorMessage = $"خطا در حذف سازگاری: {await response.Content.ReadAsStringAsync()}";
+            }
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"خطا: {ex.Message}";
+        }
+    }
+}
