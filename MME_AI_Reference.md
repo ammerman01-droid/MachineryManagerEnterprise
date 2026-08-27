@@ -10,7 +10,7 @@
 ## 1.1 Project Identity
 - **Name:** MachineryManagerEnterprise
 - **Type:** Enterprise Asset Lifecycle Management (EALM) / EAM
-- **Status:** Phase 3 — Core Platform Modules. Identity & Access Management (ASP.NET Core Identity + OpenIddict Authorization Server/Client, Authorization Code+PKCE and Client Credentials flows, end-to-end verified) is functionally complete. Organization module's initial vertical slice (Organization aggregate, CQRS, EF Core) is complete; the Holding/Project tenant hierarchy (BR-017) is complete end-to-end (Domain, Infrastructure/EF, Presentation REST endpoints), including Organization Suspension (BR-017, Section 10.16). The Administration module (Profiles, scoped Role/Permission assignment, Assignment Revocation per BR-017) is also complete end-to-end. Remaining: Blazor Presentation UI for Holding/Organization/Project management (currently REST-only).
+- **Status:** Phase 3 — Core Platform Modules. Identity & Access Management (ASP.NET Core Identity + OpenIddict Authorization Server/Client, Authorization Code+PKCE and Client Credentials flows, end-to-end verified) is functionally complete. Organization module's initial vertical slice (Organization aggregate, CQRS, EF Core) is complete; the Holding/Project tenant hierarchy (BR-017) is complete end-to-end (Domain, Infrastructure/EF, Presentation REST endpoints), including Organization Suspension (BR-017, Section 10.16). The Administration module (Profiles, scoped Role/Permission assignment, Assignment Revocation per BR-017) is also complete end-to-end. Remaining: Blazor Presentation UI for Holding/Organization/Project management (currently REST-only).  The Asset module's catalog slice (AssetModel and EngineModel — Holding-scoped master data, including Engine-compatibility management) is now also complete end-to-end: Domain, Application, Infrastructure (EF Core, migration applied), REST API, and Blazor UI (chat, 2026-08-27). The Asset aggregate itself (the physical machine/equipment record — identity fields, lifecycle) is not yet implemented.
 - **Branch:** feature/project-bootstrap
 - **License:** Private — All Rights Reserved
 
@@ -409,6 +409,7 @@ Asset Models / Component Models → Knowledge
   - Engine compatibility is a simple collection of EngineModelId held
     directly on AssetModel — no dedicated compatibility entity
     (chat, 2026-08-25)
+- Engine-compatibility must never cross a Holding boundary: AssignCompatibleEngineModel verifies that the AssetModel and the EngineModel belong to the same Holding before allowing the assignment (chat, 2026-08-27).
 
 ### Engine Aggregate
 - **Root:** Engine
@@ -512,6 +513,16 @@ Asset Models / Component Models → Knowledge
 - **UsageValidationService:** Impossible readings, duplicates, abnormal jumps, counter rollback, operational consistency
 - **FinancialValidationService:** Transaction consistency, currency rules, depreciation inputs
 - **DocumentValidationService:** Mandatory metadata, expiration dates, document type, ownership relationships
+
+### Cross-Module Read-Only Lookup Pattern (chat, 2026-08-27)
+When one module needs a simple, read-only fact owned by another module
+(e.g., Asset needing to know which Holding an Organization belongs to)
+without violating the Modular Monolith boundary, a small interface is
+defined in `SharedKernel.Abstractions` (e.g. `IOrganizationLookupService`,
+`IHoldingLookupService`). The real implementation stays in the owning
+module's Infrastructure layer; the consuming module depends only on
+the contract. This generalizes the same decoupling pattern already
+used for `IPermissionEvaluator`.
 
 ## 4.7 Domain Events (Complete Catalog)
 
@@ -1070,6 +1081,13 @@ reassignment" rule (Section 10.16).
   ON DELETE CASCADE foreign key (UserProfileAssignment.ProfileId →
   Profile.Id), so no orphaned assignment rows can remain.
 
+> **Note (chat, 2026-08-27):** AssetModel and EngineModel do not have
+> their own Permission section in the Section×Action matrix. Both use
+> the existing `Asset` section (`Asset.Create` / `Asset.Edit` /
+> `Asset.View` / `Asset.Delete`). Whether the future Asset aggregate
+> itself needs a separate Permission section will be decided when that
+> aggregate is implemented.
+
 ---
 
 
@@ -1130,6 +1148,15 @@ Infrastructure supports higher layers but NEVER the center
 - Each module = independent bounded context with Clean Architecture internally
 - Modules communicate only through contracts and application boundaries
 - Future extraction to microservices requires NO architectural restructuring
+
+## 6.1a Checklist — Adding a New Blazor-Enabled Module
+Every module that adds Blazor pages must register its assembly in
+**both** of the following places, or its pages will render once
+during prerender and immediately flip to Not Found once the
+interactive circuit connects (the interactive Router uses a fully
+separate assembly list from the one used during prerendering):
+1. `Program.cs` → `MapRazorComponents<App>().AddAdditionalAssemblies(...)`
+2. `Routes.razor` → `<Router AdditionalAssemblies="...">`
 
 ## 6.2 Project Internal Structure
 
@@ -1258,6 +1285,28 @@ MachineryManagerEnterprise.[Layer/Module].[Feature].[Subcategory]
 - Warnings treated as defects
 - Roslyn Analyzers + .NET SDK Analyzers
 - New warnings NOT introduced
+
+## 6.5a EF Core 10 — Mapping a Collection of a Custom Value Object
+Never map a public property whose type is `List<TValueObject>` (e.g.
+`List<EngineModelId>`) directly to its backing field as an EF Core
+primitive collection. EF Core 10's query-shaping compiler throws a
+`NullReferenceException` in this exact configuration (first observed
+with `Profile.Permissions`, reproduced again with
+`AssetModel.CompatibleEngineModelIds`). Required pattern:
+
+1. The backing field must be a plain, EF-native collection type
+   (`List<Guid>`), never a collection of a custom value object.
+2. The public property computes the value-object view on read (e.g.
+   `_field.Select(EngineModelId.From)`), not a converted wrapper.
+3. In `IEntityTypeConfiguration`: call `builder.Ignore(x => x.PublicProperty)`,
+   then map the backing field independently as a shadow property:
+   `builder.Property<List<Guid>>("_backingField")` — never configure
+   it via a lambda expression pointing at the public property.
+4. In repositories, for any Search/List query that projects into a
+   different DTO type, always call `ToListAsync()` first to fully
+   materialize the entities, then `.Select(...)` into the DTO in
+   memory. Never project a computed collection property directly
+   inside the LINQ query's `.Select()`.
 
 ## 6.6 Naming Conventions
 
@@ -1653,6 +1702,8 @@ See Section 3.7 for full tech stack. Key packages:
 - Version lifecycle: New → Preview → Supported → Deprecated → Sunset → Retired
 - Clients must explicitly request version; server never silently redirects
 - Each version has independent OpenAPI spec
+- `/api/v1/asset-models` — CRUD + search (search requires `holdingId` query parameter) + Engine-compatibility management (`/compatible-engine-models` sub-route)
+- `/api/v1/engine-models` — CRUD + search (search requires `holdingId` query parameter)
 
 ## 8.3 URI Design Rules
 - Plural nouns, lowercase, hyphen (`-`) separator
@@ -1662,6 +1713,7 @@ See Section 3.7 for full tech stack. Key packages:
 - Bulk operations explicit: `POST /assets/bulk-import`
 - Search via query params: `GET /assets?serialNumber=...` (avoid `/search` endpoints unless complex)
 - NEVER: `/GetAssets`, `/AssetList`, `/CreateAsset`
+
 
 ## 8.4 HTTP Methods
 
@@ -1772,6 +1824,9 @@ See Section 3.7 for full tech stack. Key packages:
 ### Audit Logging
 - Log: successful/failed auth, authZ failures, permission changes, user lockout, admin access
 - NEVER log: passwords, tokens, secrets, connection strings, PII, payment info
+
+### sign-out mechanism
+- Sign-out is performed via a plain HTML link to `/connect/logout` (a full server-side navigation), deliberately not a Blazor button routed through the interactive circuit (chat, 2026-08-27).
 
 ## 8.9 OpenAPI Specification
 
