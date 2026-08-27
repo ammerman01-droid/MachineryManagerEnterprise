@@ -1,7 +1,7 @@
 ﻿
 ================================================================================
   MACHINERYMANAGERENTERPRISE - CODEBASE SNAPSHOT
-  Generated: 2026-08-26 15:49:53
+  Generated: 2026-08-27 09:49:09
   Source: C:\Users\i\source\repos\MachineryManagerEnterprise
   Purpose: Complete source code reference for AI-assisted development
   Excludes: .md, .gitignore, this script, build artifacts, binaries, IDE,
@@ -253,13 +253,23 @@ MachineryManagerEnterprise
 |   |   |   |   +-- MediatRDomainEventDispatcher.cs
 |   |   |   |-- Asset.Domain
 |   |   |   |   |-- Events
+|   |   |   |   |   |-- AssetActivated.cs
+|   |   |   |   |   |-- AssetCommissioned.cs
+|   |   |   |   |   |-- AssetDeactivated.cs
+|   |   |   |   |   |-- AssetDisposed.cs
 |   |   |   |   |   |-- AssetModelRegistered.cs
+|   |   |   |   |   |-- AssetRegistered.cs
+|   |   |   |   |   |-- AssetRetired.cs
 |   |   |   |   |   |-- EngineModelAssignedToAssetModel.cs
 |   |   |   |   |   +-- EngineModelRegistered.cs
+|   |   |   |   |-- Asset.cs
 |   |   |   |   |-- Asset.Domain.csproj
+|   |   |   |   |-- AssetErrors.cs
+|   |   |   |   |-- AssetId.cs
 |   |   |   |   |-- AssetModel.cs
 |   |   |   |   |-- AssetModelErrors.cs
 |   |   |   |   |-- AssetModelId.cs
+|   |   |   |   |-- AssetStatus.cs
 |   |   |   |   |-- EngineModel.cs
 |   |   |   |   |-- EngineModelErrors.cs
 |   |   |   |   +-- EngineModelId.cs
@@ -279,14 +289,15 @@ MachineryManagerEnterprise
 |   |   |   |   +-- DependencyInjection.cs
 |   |   |   +-- Asset.Presentation
 |   |   |       |-- Components
-|   |   |       |   +-- Pages
-|   |   |       |       |-- AssetModelCompatibility.razor
-|   |   |       |       |-- AssetModelsList.razor
-|   |   |       |       |-- CreateAssetModel.razor
-|   |   |       |       |-- CreateEngineModel.razor
-|   |   |       |       |-- EditAssetModel.razor
-|   |   |       |       |-- EditEngineModel.razor
-|   |   |       |       +-- EngineModelsList.razor
+|   |   |       |   |-- Pages
+|   |   |       |   |   |-- AssetModelCompatibility.razor
+|   |   |       |   |   |-- AssetModelsList.razor
+|   |   |       |   |   |-- CreateAssetModel.razor
+|   |   |       |   |   |-- CreateEngineModel.razor
+|   |   |       |   |   |-- EditAssetModel.razor
+|   |   |       |   |   |-- EditEngineModel.razor
+|   |   |       |   |   +-- EngineModelsList.razor
+|   |   |       |   +-- _Imports.razor
 |   |   |       |-- Contracts
 |   |   |       |   |-- AssignCompatibleEngineModelRequest.cs
 |   |   |       |   |-- RegisterAssetModelRequest.cs
@@ -1695,7 +1706,7 @@ SIZE: 1.87 KB
 
 ================================================================================
 FILE: src\Host\MachineryManager.Web\Components\Layout\MainLayout.razor
-SIZE: 0.73 KB
+SIZE: 0.84 KB
 ================================================================================
 @inherits LayoutComponentBase
 
@@ -1711,7 +1722,8 @@ SIZE: 0.73 KB
         </div>
 
         <main>
-            <div class="top-row px-4">
+            <div class="top-row px-4 d-flex justify-space-between">
+                <a href="/connect/logout">خروج از حساب کاربری</a>
                 <a href="https://learn.microsoft.com/aspnet/core/" target="_blank">About</a>
             </div>
 
@@ -1949,13 +1961,14 @@ SIZE: 0.12 KB
 
 ================================================================================
 FILE: src\Host\MachineryManager.Web\Components\Routes.razor
-SIZE: 0.65 KB
+SIZE: 0.75 KB
 ================================================================================
 <Router AppAssembly="typeof(Program).Assembly"
         AdditionalAssemblies="new[] { 
             typeof(MachineryManager.Identity.Presentation.Components.Pages.Login).Assembly,
             typeof(MachineryManager.Administration.Presentation.Endpoints.ProfileEndpoints).Assembly,
-            typeof(MachineryManager.Organization.Presentation.Components.Pages.OrganizationsList).Assembly
+            typeof(MachineryManager.Organization.Presentation.Components.Pages.OrganizationsList).Assembly,
+            typeof(MachineryManager.Asset.Presentation.Components.Pages.AssetModelsList).Assembly
         }"
         NotFoundPage="typeof(Pages.NotFound)">
     <Found Context="routeData">
@@ -2006,7 +2019,7 @@ SIZE: 2.4 KB
 
 ================================================================================
 FILE: src\Host\MachineryManager.Web\Program.cs
-SIZE: 4.63 KB
+SIZE: 4.73 KB
 ================================================================================
 using MachineryManager.Identity.Infrastructure;
 using MachineryManager.Identity.Presentation.Endpoints;
@@ -2105,12 +2118,13 @@ try
     app.UseAntiforgery();
 
     app.MapStaticAssets();
-    app.MapRazorComponents<App>()
+        app.MapRazorComponents<App>()
         .AddInteractiveServerRenderMode()
         .AddAdditionalAssemblies(
             typeof(MachineryManager.Identity.Presentation.Components.Pages.Login).Assembly,
             typeof(MachineryManager.Administration.Presentation.Components.Pages.ProfilesList).Assembly,
-            typeof(MachineryManager.Organization.Presentation.Components.Pages.OrganizationsList).Assembly);
+            typeof(MachineryManager.Organization.Presentation.Components.Pages.OrganizationsList).Assembly,
+            typeof(MachineryManager.Asset.Presentation.Components.Pages.AssetModelsList).Assembly);
 
     // Identity endpoints
     app.MapIdentityConnectEndpoints();
@@ -6017,7 +6031,7 @@ SIZE: 0.44 KB
 
 ================================================================================
 FILE: src\Modules\Administration\Administration.Presentation\Components\Pages\AssignProfile.razor
-SIZE: 18.55 KB
+SIZE: 19.89 KB
 ================================================================================
 @page "/admin/users/{UserId:guid}/assign-profile"
 @rendermode @(new InteractiveServerRenderMode(prerender: false))
@@ -6062,7 +6076,12 @@ SIZE: 18.55 KB
 
                 @if (selectedScopeLevel == "Holding")
                 {
-                    <MudTextField @bind-Value="scopeHoldingId" Label="شناسه Holding" Required="true" Class="mt-4" />
+                    <MudSelect T="Guid?" @bind-Value="selectedHoldingId" Label="Holding" Required="true" Class="mt-4">
+                        @foreach (var holding in holdings)
+                        {
+                            <MudSelectItem T="Guid?" Value="@((Guid?)holding.Id)">@holding.Name</MudSelectItem>
+                        }
+                    </MudSelect>
                 }
                 else if (selectedScopeLevel == "Organization")
                 {
@@ -6129,8 +6148,7 @@ SIZE: 18.55 KB
                     <MudTd>
                         @if (context.IsActive)
                         {
-                            <MudButton Variant="Variant.Text" Color="Color.Warning"
-                                       Disabled="@(busyAssignmentId == context.Id)"
+                            <MudButton Variant="Variant.Text" Color="Color.Warning" Disabled="@(busyAssignmentId == context.Id)"
                                        OnClick="@(() => DeactivateAsync(context.Id))">
                                 @if (busyAssignmentId == context.Id)
                                 {
@@ -6144,8 +6162,7 @@ SIZE: 18.55 KB
                         }
                         else
                         {
-                            <MudButton Variant="Variant.Text" Color="Color.Success"
-                                       Disabled="@(busyAssignmentId == context.Id)"
+                            <MudButton Variant="Variant.Text" Color="Color.Success" Disabled="@(busyAssignmentId == context.Id)"
                                        OnClick="@(() => ActivateAsync(context.Id))">
                                 @if (busyAssignmentId == context.Id)
                                 {
@@ -6157,8 +6174,7 @@ SIZE: 18.55 KB
                                 }
                             </MudButton>
                         }
-                        <MudButton Variant="Variant.Text" Color="Color.Error"
-                                   Disabled="@(busyAssignmentId == context.Id)"
+                        <MudButton Variant="Variant.Text" Color="Color.Error" Disabled="@(busyAssignmentId == context.Id)"
                                    OnClick="@(() => DeleteAsync(context.Id))">
                             @if (busyAssignmentId == context.Id)
                             {
@@ -6193,7 +6209,6 @@ SIZE: 18.55 KB
     private List<ProfileItem> profiles = new();
     private Guid selectedProfileId;
     private string selectedScopeLevel = "Platform";
-    private string? scopeHoldingId;
     private string? scopeOrganizationId;
     private string? scopeProjectId;
 
@@ -6206,10 +6221,41 @@ SIZE: 18.55 KB
     /// Initializes the component and loads the available profiles and
     /// the user's current assignments.
     /// </summary>
-    protected override async Task OnInitializedAsync()
+        protected override async Task OnInitializedAsync()
     {
         await LoadProfilesAsync();
+        await LoadHoldingsAsync();
         await LoadAssignmentsAsync();
+    }
+
+    private async Task LoadHoldingsAsync()
+    {
+        try
+        {
+            var client = HttpClientFactory.CreateClient("InternalApi");
+            var response = await client.GetAsync("/api/v1/holdings?pageSize=200");
+            var content = await response.Content.ReadAsStringAsync();
+
+            if (!response.IsSuccessStatusCode)
+            {
+                errorMessage = $"خطا در دریافت هلدینگ‌ها: {content}";
+                return;
+            }
+
+            var result = System.Text.Json.JsonSerializer.Deserialize<SearchHoldingsResultDto>(content, new
+System.Text.Json.JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+
+            holdings = result?.Items ?? new List<HoldingItem>();
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"خطا: {ex.Message}";
+        }
+    }
+
+    private sealed class SearchHoldingsResultDto
+    {
+        public List<HoldingItem> Items { get; set; } = new();
     }
 
     /// <summary>
@@ -6321,7 +6367,7 @@ System.Text.Json.JsonSerializerOptions
                     $"Unsupported authorization scope level: {selectedScopeLevel}.")
             };
 
-            Guid? holdingId = ParseScopeId(scopeHoldingId, "Holding");
+            Guid? holdingId = selectedHoldingId;
             Guid? organizationId = ParseScopeId(scopeOrganizationId, "Organization");
             Guid? projectId = ParseScopeId(scopeProjectId, "Project");
 
@@ -6501,6 +6547,15 @@ System.Text.Json.JsonSerializerOptions
         public bool IsActive { get; set; }
         public DateTimeOffset? LastChangedAt { get; set; }
     }
+
+    private sealed class HoldingItem
+    {
+        public Guid Id { get; set; }
+        public string Name { get; set; } = string.Empty;
+    }
+
+    private List<HoldingItem> holdings = new();
+    private Guid? selectedHoldingId;
 }
 
 ================================================================================
@@ -8558,25 +8613,39 @@ public sealed record GetAssetModelByIdQuery(Guid AssetModelId) : IRequest<Result
 
 ================================================================================
 FILE: src\Modules\Asset\Asset.Application\Features\AssetModels\Queries\GetAssetModelById\GetAssetModelByIdQueryHandler.cs
-SIZE: 1.67 KB
+SIZE: 2.76 KB
 ================================================================================
 using MachineryManager.Asset.Application.Abstractions;
 using MachineryManager.Asset.Application.Features.AssetModels.Dtos;
 using MachineryManager.SharedKernel;
+using MachineryManager.SharedKernel.Abstractions;
 using MediatR;
 
 namespace MachineryManager.Asset.Application.Features.AssetModels.Queries.GetAssetModelById;
 
-/// <summary>Handles <see cref="GetAssetModelByIdQuery"/> by loading the aggregate and mapping it to a DTO.</summary>
+/// <summary>
+/// Handles <see cref="GetAssetModelByIdQuery"/> by loading the aggregate,
+/// verifying the caller is authorized for its Holding, and mapping it
+/// to a DTO.
+/// </summary>
 public sealed class GetAssetModelByIdQueryHandler
     : IRequestHandler<GetAssetModelByIdQuery, Result<AssetModelDto>>
 {
+    private const string RequiredPermission = "Asset.View";
+
     private readonly IAssetModelRepository _assetModelRepository;
+    private readonly ICurrentUserService _currentUserService;
+    private readonly IPermissionEvaluator _permissionEvaluator;
 
     /// <summary>Initializes a new instance of the <see cref="GetAssetModelByIdQueryHandler"/> class.</summary>
-    public GetAssetModelByIdQueryHandler(IAssetModelRepository assetModelRepository)
+    public GetAssetModelByIdQueryHandler(
+        IAssetModelRepository assetModelRepository,
+        ICurrentUserService currentUserService,
+        IPermissionEvaluator permissionEvaluator)
     {
         _assetModelRepository = assetModelRepository;
+        _currentUserService = currentUserService;
+        _permissionEvaluator = permissionEvaluator;
     }
 
     /// <summary>Executes the lookup use case.</summary>
@@ -8589,6 +8658,22 @@ public sealed class GetAssetModelByIdQueryHandler
         {
             return Result.Failure<AssetModelDto>(
                 Error.NotFound("AssetModel.NotFound", $"Asset model with id {request.AssetModelId} was not found."));
+        }
+
+        if (_currentUserService.UserId is not { } userId)
+        {
+            return Result.Failure<AssetModelDto>(global::Asset.Domain.AssetModelErrors.NotAuthorized());
+        }
+
+        var isAuthorized = await _permissionEvaluator.HasPermissionAsync(
+            userId,
+            RequiredPermission,
+            new ResourceScope(assetModel.HoldingId, null, null),
+            cancellationToken);
+
+        if (!isAuthorized)
+        {
+            return Result.Failure<AssetModelDto>(global::Asset.Domain.AssetModelErrors.NotAuthorized());
         }
 
         var dto = new AssetModelDto(
@@ -8627,24 +8712,38 @@ public sealed record SearchAssetModelsResponse(
 
 ================================================================================
 FILE: src\Modules\Asset\Asset.Application\Features\AssetModels\Queries\SearchAssetModels\SearchAssetModelsQueryHandler.cs
-SIZE: 1.26 KB
+SIZE: 2.38 KB
 ================================================================================
 using MachineryManager.Asset.Application.Abstractions;
 using MachineryManager.SharedKernel;
+using MachineryManager.SharedKernel.Abstractions;
 using MediatR;
 
 namespace MachineryManager.Asset.Application.Features.AssetModels.Queries.SearchAssetModels;
 
-/// <summary>Handles <see cref="SearchAssetModelsQuery"/> by delegating to the repository search projection.</summary>
+/// <summary>
+/// Handles <see cref="SearchAssetModelsQuery"/> by verifying the caller
+/// is authorized for the requested Holding, then delegating to the
+/// repository search projection.
+/// </summary>
 public sealed class SearchAssetModelsQueryHandler
     : IRequestHandler<SearchAssetModelsQuery, Result<SearchAssetModelsResponse>>
 {
+    private const string RequiredPermission = "Asset.View";
+
     private readonly IAssetModelRepository _assetModelRepository;
+    private readonly ICurrentUserService _currentUserService;
+    private readonly IPermissionEvaluator _permissionEvaluator;
 
     /// <summary>Initializes a new instance of the <see cref="SearchAssetModelsQueryHandler"/> class.</summary>
-    public SearchAssetModelsQueryHandler(IAssetModelRepository assetModelRepository)
+    public SearchAssetModelsQueryHandler(
+        IAssetModelRepository assetModelRepository,
+        ICurrentUserService currentUserService,
+        IPermissionEvaluator permissionEvaluator)
     {
         _assetModelRepository = assetModelRepository;
+        _currentUserService = currentUserService;
+        _permissionEvaluator = permissionEvaluator;
     }
 
     /// <summary>Executes the search query.</summary>
@@ -8652,6 +8751,22 @@ public sealed class SearchAssetModelsQueryHandler
         SearchAssetModelsQuery request,
         CancellationToken cancellationToken)
     {
+        if (_currentUserService.UserId is not { } userId)
+        {
+            return Result.Failure<SearchAssetModelsResponse>(global::Asset.Domain.AssetModelErrors.NotAuthorized());
+        }
+
+        var isAuthorized = await _permissionEvaluator.HasPermissionAsync(
+            userId,
+            RequiredPermission,
+            new ResourceScope(request.HoldingId, null, null),
+            cancellationToken);
+
+        if (!isAuthorized)
+        {
+            return Result.Failure<SearchAssetModelsResponse>(global::Asset.Domain.AssetModelErrors.NotAuthorized());
+        }
+
         var response = await _assetModelRepository.SearchAsync(
             request.HoldingId,
             request.SearchTerm,
@@ -8933,25 +9048,39 @@ public sealed record GetEngineModelByIdQuery(Guid EngineModelId) : IRequest<Resu
 
 ================================================================================
 FILE: src\Modules\Asset\Asset.Application\Features\EngineModels\Queries\GetEngineModelById\GetEngineModelByIdQueryHandler.cs
-SIZE: 1.59 KB
+SIZE: 2.67 KB
 ================================================================================
 using MachineryManager.Asset.Application.Abstractions;
 using MachineryManager.Asset.Application.Features.EngineModels.Dtos;
 using MachineryManager.SharedKernel;
+using MachineryManager.SharedKernel.Abstractions;
 using MediatR;
 
 namespace MachineryManager.Asset.Application.Features.EngineModels.Queries.GetEngineModelById;
 
-/// <summary>Handles <see cref="GetEngineModelByIdQuery"/> by loading the aggregate and mapping it to a DTO.</summary>
+/// <summary>
+/// Handles <see cref="GetEngineModelByIdQuery"/> by loading the
+/// aggregate, verifying the caller is authorized for its Holding, and
+/// mapping it to a DTO.
+/// </summary>
 public sealed class GetEngineModelByIdQueryHandler
     : IRequestHandler<GetEngineModelByIdQuery, Result<EngineModelDto>>
 {
+    private const string RequiredPermission = "Asset.View";
+
     private readonly IEngineModelRepository _engineModelRepository;
+    private readonly ICurrentUserService _currentUserService;
+    private readonly IPermissionEvaluator _permissionEvaluator;
 
     /// <summary>Initializes a new instance of the <see cref="GetEngineModelByIdQueryHandler"/> class.</summary>
-    public GetEngineModelByIdQueryHandler(IEngineModelRepository engineModelRepository)
+    public GetEngineModelByIdQueryHandler(
+        IEngineModelRepository engineModelRepository,
+        ICurrentUserService currentUserService,
+        IPermissionEvaluator permissionEvaluator)
     {
         _engineModelRepository = engineModelRepository;
+        _currentUserService = currentUserService;
+        _permissionEvaluator = permissionEvaluator;
     }
 
     /// <summary>Executes the lookup use case.</summary>
@@ -8964,6 +9093,22 @@ public sealed class GetEngineModelByIdQueryHandler
         {
             return Result.Failure<EngineModelDto>(
                 Error.NotFound("EngineModel.NotFound", $"Engine model with id {request.EngineModelId} was not found."));
+        }
+
+        if (_currentUserService.UserId is not { } userId)
+        {
+            return Result.Failure<EngineModelDto>(global::Asset.Domain.EngineModelErrors.NotAuthorized());
+        }
+
+        var isAuthorized = await _permissionEvaluator.HasPermissionAsync(
+            userId,
+            RequiredPermission,
+            new ResourceScope(engineModel.HoldingId, null, null),
+            cancellationToken);
+
+        if (!isAuthorized)
+        {
+            return Result.Failure<EngineModelDto>(global::Asset.Domain.EngineModelErrors.NotAuthorized());
         }
 
         var dto = new EngineModelDto(engineModel.Id.Value, engineModel.Name, engineModel.Manufacturer);
@@ -8998,24 +9143,38 @@ public sealed record SearchEngineModelsResponse(
 
 ================================================================================
 FILE: src\Modules\Asset\Asset.Application\Features\EngineModels\Queries\SearchEngineModels\SearchEngineModelsQueryHandler.cs
-SIZE: 1.28 KB
+SIZE: 2.4 KB
 ================================================================================
 using MachineryManager.Asset.Application.Abstractions;
 using MachineryManager.SharedKernel;
+using MachineryManager.SharedKernel.Abstractions;
 using MediatR;
 
 namespace MachineryManager.Asset.Application.Features.EngineModels.Queries.SearchEngineModels;
 
-/// <summary>Handles <see cref="SearchEngineModelsQuery"/> by delegating to the repository search projection.</summary>
+/// <summary>
+/// Handles <see cref="SearchEngineModelsQuery"/> by verifying the
+/// caller is authorized for the requested Holding, then delegating to
+/// the repository search projection.
+/// </summary>
 public sealed class SearchEngineModelsQueryHandler
     : IRequestHandler<SearchEngineModelsQuery, Result<SearchEngineModelsResponse>>
 {
+    private const string RequiredPermission = "Asset.View";
+
     private readonly IEngineModelRepository _engineModelRepository;
+    private readonly ICurrentUserService _currentUserService;
+    private readonly IPermissionEvaluator _permissionEvaluator;
 
     /// <summary>Initializes a new instance of the <see cref="SearchEngineModelsQueryHandler"/> class.</summary>
-    public SearchEngineModelsQueryHandler(IEngineModelRepository engineModelRepository)
+    public SearchEngineModelsQueryHandler(
+        IEngineModelRepository engineModelRepository,
+        ICurrentUserService currentUserService,
+        IPermissionEvaluator permissionEvaluator)
     {
         _engineModelRepository = engineModelRepository;
+        _currentUserService = currentUserService;
+        _permissionEvaluator = permissionEvaluator;
     }
 
     /// <summary>Executes the search query.</summary>
@@ -9023,6 +9182,22 @@ public sealed class SearchEngineModelsQueryHandler
         SearchEngineModelsQuery request,
         CancellationToken cancellationToken)
     {
+        if (_currentUserService.UserId is not { } userId)
+        {
+            return Result.Failure<SearchEngineModelsResponse>(global::Asset.Domain.EngineModelErrors.NotAuthorized());
+        }
+
+        var isAuthorized = await _permissionEvaluator.HasPermissionAsync(
+            userId,
+            RequiredPermission,
+            new ResourceScope(request.HoldingId, null, null),
+            cancellationToken);
+
+        if (!isAuthorized)
+        {
+            return Result.Failure<SearchEngineModelsResponse>(global::Asset.Domain.EngineModelErrors.NotAuthorized());
+        }
+
         var response = await _engineModelRepository.SearchAsync(
             request.HoldingId,
             request.SearchTerm,
@@ -9091,6 +9266,203 @@ public sealed class MediatRDomainEventDispatcher : IDomainEventDispatcher
 }
 
 ================================================================================
+FILE: src\Modules\Asset\Asset.Domain\Asset.cs
+SIZE: 7.35 KB
+================================================================================
+using Asset.Domain.Events;
+using MachineryManager.SharedKernel;
+using MachineryManager.SharedKernel.Abstractions;
+
+namespace Asset.Domain;
+
+/// <summary>
+/// Aggregate Root representing a single physical Asset (BR-001–BR-004) —
+/// e.g. one specific truck or crusher. Shared specifications come from
+/// its <see cref="AssetModelId"/>; this aggregate holds only the
+/// instance-specific identity (serial number, license plate,
+/// manufacture year, color) and current lifecycle state.
+/// Owned by exactly one Organization (BR-003) — note this differs from
+/// AssetModel/EngineModel, which are Holding-scoped (chat, 2026-08-27).
+/// </summary>
+public sealed class Asset : AggregateRoot<AssetId>
+{
+    /// <summary>The maximum allowed length for the color field.</summary>
+    public const int MaxColorLength = 50;
+
+    /// <summary>The maximum allowed length for the serial number field.</summary>
+    public const int MaxSerialNumberLength = 100;
+
+    /// <summary>The maximum allowed length for the license plate field.</summary>
+    public const int MaxLicensePlateLength = 50;
+
+    /// <summary>Gets the identifier of the owning Organization (BR-003).</summary>
+    public Guid OrganizationId { get; private set; }
+
+    /// <summary>Gets the identifier of this Asset's shared specification catalog entry.</summary>
+    public AssetModelId AssetModelId { get; private set; } = null!;
+
+    /// <summary>Gets the serial number, if recorded.</summary>
+    public string? SerialNumber { get; private set; }
+
+    /// <summary>Gets the license plate, if recorded.</summary>
+    public string? LicensePlate { get; private set; }
+
+    /// <summary>Gets the manufacture year, if recorded.</summary>
+    public int? ManufactureYear { get; private set; }
+
+    /// <summary>Gets the body color.</summary>
+    public string Color { get; private set; } = string.Empty;
+
+    /// <summary>Gets the current lifecycle status.</summary>
+    public AssetStatus Status { get; private set; }
+
+    // Reserved for ORM materialization only. Never used by application code.
+    private Asset()
+    {
+    }
+
+    private Asset(
+        AssetId id,
+        Guid organizationId,
+        AssetModelId assetModelId,
+        string color,
+        string? serialNumber,
+        string? licensePlate,
+        int? manufactureYear)
+        : base(id)
+    {
+        OrganizationId = organizationId;
+        AssetModelId = assetModelId;
+        Color = color;
+        SerialNumber = serialNumber;
+        LicensePlate = licensePlate;
+        ManufactureYear = manufactureYear;
+        Status = AssetStatus.Registered;
+    }
+
+    /// <summary>
+    /// Registers a new Asset. Single-step registration (chat, 2026-08-27):
+    /// identity and model are captured together and the Asset starts
+    /// directly at <see cref="AssetStatus.Registered"/> (the Draft state
+    /// is reserved for a future two-step flow).
+    /// </summary>
+    /// <param name="organizationId">The owning Organization.</param>
+    /// <param name="assetModelId">The shared specification catalog entry.</param>
+    /// <param name="color">The body color (required).</param>
+    /// <param name="serialNumber">The serial number (optional).</param>
+    /// <param name="licensePlate">The license plate (optional).</param>
+    /// <param name="manufactureYear">The manufacture year (optional).</param>
+    /// <param name="dateTimeProvider">Provides the current UTC time for the raised domain event.</param>
+    /// <returns>A <see cref="Result{Asset}"/> containing the new aggregate, or a validation error.</returns>
+    public static Result<global::Asset.Domain.Asset> Register(
+        Guid organizationId,
+        AssetModelId assetModelId,
+        string color,
+        string? serialNumber,
+        string? licensePlate,
+        int? manufactureYear,
+        IDateTimeProvider dateTimeProvider)
+    {
+        if (string.IsNullOrWhiteSpace(color))
+        {
+            return Result.Failure<global::Asset.Domain.Asset>(AssetErrors.ColorRequired());
+        }
+
+        if (color.Length > MaxColorLength)
+        {
+            return Result.Failure<global::Asset.Domain.Asset>(
+                Error.Validation("Asset.ColorTooLong", $"Asset color shall not exceed {MaxColorLength} characters."));
+        }
+
+        var asset = new global::Asset.Domain.Asset(
+            AssetId.New(),
+            organizationId,
+            assetModelId,
+            color.Trim(),
+            string.IsNullOrWhiteSpace(serialNumber) ? null : serialNumber.Trim(),
+            string.IsNullOrWhiteSpace(licensePlate) ? null : licensePlate.Trim(),
+            manufactureYear);
+
+        asset.RaiseDomainEvent(new AssetRegistered(asset.Id, organizationId, assetModelId, dateTimeProvider.UtcNow));
+
+        return asset;
+    }
+
+    /// <summary>Completes commissioning (Registered → Commissioned).</summary>
+    public Result Commission(IDateTimeProvider dateTimeProvider)
+    {
+        if (Status != AssetStatus.Registered)
+        {
+            return Result.Failure(AssetErrors.InvalidTransition(Status, AssetStatus.Commissioned));
+        }
+
+        Status = AssetStatus.Commissioned;
+        RaiseDomainEvent(new AssetCommissioned(Id, dateTimeProvider.UtcNow));
+
+        return Result.Success();
+    }
+
+    /// <summary>Places the Asset into operation (Commissioned → Operational, or Inactive → Operational).</summary>
+    public Result Activate(IDateTimeProvider dateTimeProvider)
+    {
+        if (Status is not (AssetStatus.Commissioned or AssetStatus.Inactive))
+        {
+            return Result.Failure(AssetErrors.InvalidTransition(Status, AssetStatus.Operational));
+        }
+
+        Status = AssetStatus.Operational;
+        RaiseDomainEvent(new AssetActivated(Id, dateTimeProvider.UtcNow));
+
+        return Result.Success();
+    }
+
+    /// <summary>Temporarily takes the Asset out of use (Operational → Inactive).</summary>
+    public Result Deactivate(IDateTimeProvider dateTimeProvider)
+    {
+        if (Status != AssetStatus.Operational)
+        {
+            return Result.Failure(AssetErrors.InvalidTransition(Status, AssetStatus.Inactive));
+        }
+
+        Status = AssetStatus.Inactive;
+        RaiseDomainEvent(new AssetDeactivated(Id, dateTimeProvider.UtcNow));
+
+        return Result.Success();
+    }
+
+    /// <summary>Permanently withdraws the Asset from use (Operational or Inactive → Retired).</summary>
+    public Result Retire(IDateTimeProvider dateTimeProvider)
+    {
+        if (Status is not (AssetStatus.Operational or AssetStatus.Inactive))
+        {
+            return Result.Failure(AssetErrors.InvalidTransition(Status, AssetStatus.Retired));
+        }
+
+        Status = AssetStatus.Retired;
+        RaiseDomainEvent(new AssetRetired(Id, dateTimeProvider.UtcNow));
+
+        return Result.Success();
+    }
+
+    /// <summary>
+    /// Marks the Asset as physically disposed of (final state; BR-004 —
+    /// history is preserved, never overwritten).
+    /// </summary>
+    public Result Dispose(IDateTimeProvider dateTimeProvider)
+    {
+        if (Status != AssetStatus.Retired)
+        {
+            return Result.Failure(AssetErrors.InvalidTransition(Status, AssetStatus.Disposed));
+        }
+
+        Status = AssetStatus.Disposed;
+        RaiseDomainEvent(new AssetDisposed(Id, dateTimeProvider.UtcNow));
+
+        return Result.Success();
+    }
+}
+
+================================================================================
 FILE: src\Modules\Asset\Asset.Domain\Asset.Domain.csproj
 SIZE: 0.35 KB
 ================================================================================
@@ -9102,6 +9474,68 @@ SIZE: 0.35 KB
   </ItemGroup>
 
 </Project>
+
+================================================================================
+FILE: src\Modules\Asset\Asset.Domain\AssetErrors.cs
+SIZE: 0.93 KB
+================================================================================
+using MachineryManager.SharedKernel;
+
+namespace Asset.Domain;
+
+/// <summary>Business Errors for the Asset aggregate.</summary>
+public static class AssetErrors
+{
+    /// <summary>Creates an error indicating the color was not provided.</summary>
+    public static Error ColorRequired() => Error.Validation(
+        "Asset.ColorRequired",
+        "Asset color is required.");
+
+    /// <summary>Creates an error indicating an invalid lifecycle transition was attempted.</summary>
+    public static Error InvalidTransition(AssetStatus from, AssetStatus to) => Error.Conflict(
+        "Asset.InvalidTransition",
+        $"Cannot transition an Asset from '{from}' to '{to}'.");
+
+    /// <summary>Creates an error indicating the current user lacks permission for this action.</summary>
+    public static Error NotAuthorized() => Error.Failure(
+        "Asset.NotAuthorized",
+        "You do not have permission to perform this action.");
+}
+
+================================================================================
+FILE: src\Modules\Asset\Asset.Domain\AssetId.cs
+SIZE: 0.85 KB
+================================================================================
+using MachineryManager.SharedKernel;
+
+namespace Asset.Domain;
+
+/// <summary>Strongly-typed identifier for an Asset (BR-001 — a permanent identity).</summary>
+public sealed class AssetId : ValueObject
+{
+    /// <summary>Gets the underlying GUID value.</summary>
+    public Guid Value { get; }
+
+    private AssetId(Guid value)
+    {
+        Value = value;
+    }
+
+    /// <summary>Creates a new, unique AssetId.</summary>
+    public static AssetId New() => new(Guid.NewGuid());
+
+    /// <summary>Wraps an existing identifier value (e.g. read from persistence).</summary>
+    public static AssetId From(Guid value) => new(value);
+
+    /// <inheritdoc />
+    protected override IEnumerable<object?> GetEqualityComponents()
+    {
+        yield return Value;
+    }
+
+    /// <inheritdoc />
+    public override string ToString() => Value.ToString();
+}
 
 ================================================================================
 FILE: src\Modules\Asset\Asset.Domain\AssetModel.cs
@@ -9359,6 +9793,40 @@ public sealed class AssetModelId : ValueObject
 }
 
 ================================================================================
+FILE: src\Modules\Asset\Asset.Domain\AssetStatus.cs
+SIZE: 0.99 KB
+================================================================================
+namespace Asset.Domain;
+
+/// <summary>
+/// The lifecycle state of an Asset (Section 4.9, State Machines):
+/// Draft → Registered → Commissioned → Operational ↔ Inactive → Retired → Disposed.
+/// </summary>
+public enum AssetStatus
+{
+    /// <summary>Not yet used by this first increment (single-step registration creates directly at Registered — chat, 2026-08-27); reserved for a future two-step registration flow.</summary>
+    Draft = 0,
+
+    /// <summary>Identity captured; not yet commissioned for use.</summary>
+    Registered = 1,
+
+    /// <summary>Commissioning complete; not yet placed into operation.</summary>
+    Commissioned = 2,
+
+    /// <summary>Actively in use.</summary>
+    Operational = 3,
+
+    /// <summary>Temporarily out of use; can return to Operational.</summary>
+    Inactive = 4,
+
+    /// <summary>Permanently withdrawn from use.</summary>
+    Retired = 5,
+
+    /// <summary>Final state — physically disposed of.</summary>
+    Disposed = 6,
+}
+
+================================================================================
 FILE: src\Modules\Asset\Asset.Domain\EngineModel.cs
 SIZE: 3.93 KB
 ================================================================================
@@ -9546,6 +10014,91 @@ public sealed class EngineModelId : ValueObject
 }
 
 ================================================================================
+FILE: src\Modules\Asset\Asset.Domain\Events\AssetActivated.cs
+SIZE: 0.48 KB
+================================================================================
+using MachineryManager.SharedKernel;
+
+namespace Asset.Domain.Events;
+
+/// <summary>Raised when an Asset is placed into operation (Commissioned → Operational, or Inactive → Operational).</summary>
+public sealed class AssetActivated : IDomainEvent
+{
+    public AssetId AssetId { get; }
+    public DateTimeOffset OccurredOn { get; }
+
+    public AssetActivated(AssetId assetId, DateTimeOffset occurredOn)
+    {
+        AssetId = assetId;
+        OccurredOn = occurredOn;
+    }
+}
+
+================================================================================
+FILE: src\Modules\Asset\Asset.Domain\Events\AssetCommissioned.cs
+SIZE: 0.46 KB
+================================================================================
+using MachineryManager.SharedKernel;
+
+namespace Asset.Domain.Events;
+
+/// <summary>Raised when an Asset completes commissioning (Registered → Commissioned).</summary>
+public sealed class AssetCommissioned : IDomainEvent
+{
+    public AssetId AssetId { get; }
+    public DateTimeOffset OccurredOn { get; }
+
+    public AssetCommissioned(AssetId assetId, DateTimeOffset occurredOn)
+    {
+        AssetId = assetId;
+        OccurredOn = occurredOn;
+    }
+}
+
+================================================================================
+FILE: src\Modules\Asset\Asset.Domain\Events\AssetDeactivated.cs
+SIZE: 0.54 KB
+================================================================================
+// Events/AssetDeactivated.cs (added, not in original doc — chat, 2026-08-27)
+using MachineryManager.SharedKernel;
+
+namespace Asset.Domain.Events;
+
+/// <summary>Raised when an Asset is temporarily taken out of use (Operational → Inactive).</summary>
+public sealed class AssetDeactivated : IDomainEvent
+{
+    public AssetId AssetId { get; }
+    public DateTimeOffset OccurredOn { get; }
+
+    public AssetDeactivated(AssetId assetId, DateTimeOffset occurredOn)
+    {
+        AssetId = assetId;
+        OccurredOn = occurredOn;
+    }
+}
+
+================================================================================
+FILE: src\Modules\Asset\Asset.Domain\Events\AssetDisposed.cs
+SIZE: 0.47 KB
+================================================================================
+using MachineryManager.SharedKernel;
+
+namespace Asset.Domain.Events;
+
+/// <summary>Raised when an Asset is physically disposed of (final state, BR-004 — history is preserved).</summary>
+public sealed class AssetDisposed : IDomainEvent
+{
+    public AssetId AssetId { get; }
+    public DateTimeOffset OccurredOn { get; }
+
+    public AssetDisposed(AssetId assetId, DateTimeOffset occurredOn)
+    {
+        AssetId = assetId;
+        OccurredOn = occurredOn;
+    }
+}
+
+================================================================================
 FILE: src\Modules\Asset\Asset.Domain\Events\AssetModelRegistered.cs
 SIZE: 1 KB
 ================================================================================
@@ -9574,6 +10127,52 @@ public sealed class AssetModelRegistered : IDomainEvent
         AssetModelId = assetModelId;
         HoldingId = holdingId;
         Name = name;
+        OccurredOn = occurredOn;
+    }
+}
+
+================================================================================
+FILE: src\Modules\Asset\Asset.Domain\Events\AssetRegistered.cs
+SIZE: 0.63 KB
+================================================================================
+using MachineryManager.SharedKernel;
+
+namespace Asset.Domain.Events;
+
+/// <summary>Raised when a new Asset is registered.</summary>
+public sealed class AssetRegistered : IDomainEvent
+{
+    public AssetId AssetId { get; }
+    public Guid OrganizationId { get; }
+    public AssetModelId AssetModelId { get; }
+    public DateTimeOffset OccurredOn { get; }
+
+    public AssetRegistered(AssetId assetId, Guid organizationId, AssetModelId assetModelId, DateTimeOffset occurredOn)
+    {
+        AssetId = assetId;
+        OrganizationId = organizationId;
+        AssetModelId = assetModelId;
+        OccurredOn = occurredOn;
+    }
+}
+
+================================================================================
+FILE: src\Modules\Asset\Asset.Domain\Events\AssetRetired.cs
+SIZE: 0.43 KB
+================================================================================
+using MachineryManager.SharedKernel;
+
+namespace Asset.Domain.Events;
+
+/// <summary>Raised when an Asset is permanently withdrawn from use.</summary>
+public sealed class AssetRetired : IDomainEvent
+{
+    public AssetId AssetId { get; }
+    public DateTimeOffset OccurredOn { get; }
+
+    public AssetRetired(AssetId assetId, DateTimeOffset occurredOn)
+    {
+        AssetId = assetId;
         OccurredOn = occurredOn;
     }
 }
@@ -10330,6 +10929,19 @@ SIZE: 0.51 KB
 </Project>
 
 ================================================================================
+FILE: src\Modules\Asset\Asset.Presentation\Components\_Imports.razor
+SIZE: 0.32 KB
+================================================================================
+@using Microsoft.AspNetCore.Components
+@using Microsoft.AspNetCore.Components.Web
+@using Microsoft.AspNetCore.Components.Routing
+@using Microsoft.AspNetCore.Components.Web.Virtualization
+@using Microsoft.JSInterop
+@using MudBlazor
+@using System.Net.Http.Json
+@using static Microsoft.AspNetCore.Components.Web.RenderMode
+
+================================================================================
 FILE: src\Modules\Asset\Asset.Presentation\Components\Pages\AssetModelCompatibility.razor
 SIZE: 6.49 KB
 ================================================================================
@@ -10529,7 +11141,7 @@ System.Text.Json.JsonSerializerOptions { PropertyNameCaseInsensitive = true });
 
 ================================================================================
 FILE: src\Modules\Asset\Asset.Presentation\Components\Pages\AssetModelsList.razor
-SIZE: 5.55 KB
+SIZE: 6.02 KB
 ================================================================================
 @page "/admin/asset-models"
 @rendermode InteractiveServer
@@ -10540,14 +11152,17 @@ SIZE: 5.55 KB
 
 <MudText Typo="Typo.h4" Class="mb-4">مدل‌های دارایی</MudText>
 
-<MudPaper Class="pa-4 mb-4">
-    <MudSelect T="Guid?" Label="Holding" Value="selectedHoldingId" ValueChanged="OnHoldingChangedAsync">
-        @foreach (var holding in holdings)
-        {
-            <MudSelectItem T="Guid?" Value="@((Guid?)holding.Id)">@holding.Name</MudSelectItem>
-        }
-    </MudSelect>
-</MudPaper>
+@if (holdings.Count > 1)
+{
+    <MudPaper Class="pa-4 mb-4">
+        <MudSelect T="Guid?" Label="Holding" Value="selectedHoldingId" ValueChanged="OnHoldingChangedAsync">
+            @foreach (var holding in holdings)
+            {
+                <MudSelectItem T="Guid?" Value="@((Guid?)holding.Id)">@holding.Name</MudSelectItem>
+            }
+        </MudSelect>
+    </MudPaper>
+}
 
 @if (errorMessage is not null)
 {
@@ -10625,7 +11240,7 @@ SIZE: 5.55 KB
     private string? errorMessage;
 
     /// <summary>Loads the list of Holdings for the selector.</summary>
-    protected override async Task OnInitializedAsync()
+        protected override async Task OnInitializedAsync()
     {
         try
         {
@@ -10643,6 +11258,15 @@ SIZE: 5.55 KB
 System.Text.Json.JsonSerializerOptions { PropertyNameCaseInsensitive = true });
 
             holdings = result?.Items ?? [];
+
+            // If the user's scope only grants them one Holding, the API
+            // above already returns just that one (Phase 3 scope
+            // filtering) — auto-select it instead of showing a picker
+            // with a single option (chat, 2026-08-27).
+            if (holdings.Count == 1)
+            {
+                await OnHoldingChangedAsync(holdings[0].Id);
+            }
         }
         catch (Exception ex)
         {
@@ -11127,7 +11751,7 @@ System.Text.Json.JsonSerializerOptions { PropertyNameCaseInsensitive = true });
 
 ================================================================================
 FILE: src\Modules\Asset\Asset.Presentation\Components\Pages\EngineModelsList.razor
-SIZE: 4.83 KB
+SIZE: 5.28 KB
 ================================================================================
 @page "/admin/engine-models"
 @rendermode InteractiveServer
@@ -11138,14 +11762,17 @@ SIZE: 4.83 KB
 
 <MudText Typo="Typo.h4" Class="mb-4">مدل‌های موتور</MudText>
 
-<MudPaper Class="pa-4 mb-4">
-    <MudSelect T="Guid?" Label="Holding" Value="selectedHoldingId" ValueChanged="OnHoldingChangedAsync">
-        @foreach (var holding in holdings)
-        {
-            <MudSelectItem T="Guid?" Value="@((Guid?)holding.Id)">@holding.Name</MudSelectItem>
-        }
-    </MudSelect>
-</MudPaper>
+@if (holdings.Count > 1)
+{
+    <MudPaper Class="pa-4 mb-4">
+        <MudSelect T="Guid?" Label="Holding" Value="selectedHoldingId" ValueChanged="OnHoldingChangedAsync">
+            @foreach (var holding in holdings)
+            {
+                <MudSelectItem T="Guid?" Value="@((Guid?)holding.Id)">@holding.Name</MudSelectItem>
+            }
+        </MudSelect>
+    </MudPaper>
+}
 
 @if (errorMessage is not null)
 {
@@ -11233,6 +11860,15 @@ SIZE: 4.83 KB
 System.Text.Json.JsonSerializerOptions { PropertyNameCaseInsensitive = true });
 
             holdings = result?.Items ?? [];
+
+            // If the user's scope only grants them one Holding, the API
+            // above already returns just that one (Phase 3 scope
+            // filtering) — auto-select it instead of showing a picker
+            // with a single option (chat, 2026-08-27).
+            if (holdings.Count == 1)
+            {
+                await OnHoldingChangedAsync(holdings[0].Id);
+            }
         }
         catch (Exception ex)
         {
@@ -21650,12 +22286,12 @@ SIZE: 0.53 KB
 # SECTION 3: SNAPSHOT SUMMARY
 ================================================================================
 
-Generation Time     : 00:00:03.4077123
-Total Files Scanned : 351
-Files Included      : 351
+Generation Time     : 00:00:01.7409619
+Total Files Scanned : 362
+Files Included      : 362
 Files Skipped       : 0
-Total Source Size   : 0.72 MB
-Snapshot File Size  : 0.84 MB
+Total Source Size   : 0.74 MB
+Snapshot File Size  : 0.86 MB
 Output Path         : C:\Users\i\source\repos\MachineryManagerEnterprise\MME_Codebase_Snapshot.txt
 
 Excluded Directories: .git, .github, .vs, .vscode, .idea, .azure, .devcontainer, bin, obj, packages, publish, out, release, releases, debug, x64, x86, arm64, artifacts, .artifacts, node_modules, dist, build, bower_components, jspm_packages, docs-english, docs-farsi, docs, tools, test-results, coverage, .coverage, TestResults, lib, .angular, .next, .nuxt, .svelte-kit, .cache, .temp, tmp

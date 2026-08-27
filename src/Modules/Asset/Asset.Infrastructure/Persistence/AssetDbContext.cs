@@ -26,6 +26,9 @@ public sealed class AssetDbContext : DbContext, IUnitOfWork
         _domainEventDispatcher = domainEventDispatcher;
     }
 
+    /// <summary>Gets the set of Asset aggregates.</summary>
+    public DbSet<global::Asset.Domain.Asset> Assets => Set<global::Asset.Domain.Asset>();
+
     /// <summary>Gets the set of Asset Model aggregates.</summary>
     public DbSet<global::Asset.Domain.AssetModel> AssetModels => Set<global::Asset.Domain.AssetModel>();
 

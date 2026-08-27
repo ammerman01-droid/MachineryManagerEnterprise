@@ -532,7 +532,7 @@ EventId, EventType, OccurredAt, AggregateId, AggregateType, EventVersion, Correl
 ### Naming Convention: `BusinessObject + PastTenseVerb` (e.g., AssetRegistered, EngineInstalled)
 
 ### Asset Events
-AssetRegistered, AssetActivated, AssetTransferred, AssetRetired, AssetDisposed
+AssetRegistered, AssetCommissioned, AssetActivated, AssetDeactivated, AssetReactivated, AssetTransferred, AssetRetired, AssetDisposed
 
 ### Component Events
 EngineInstalled, EngineRemoved, EngineRebuilt, ComponentInstalled, ComponentRemoved, ComponentReplaced
@@ -1046,7 +1046,8 @@ Examples:
 - Document.Upload, Document.Replace, Document.Archive
 - Forecast.Generate, Forecast.View, Forecast.Compare
 - User.Create, User.Disable, Role.Assign, Permission.Assign, Organization.Manage, Holding.Manage, Project.Manage
-- Organization.View, Holding.View, Project.View (Phase 3 — Scope-based Filtering; consumed by GetAuthorizedScopesAsync, see 07-api or ADR referencing IPermissionEvaluator)
+- Organization.View, Holding.View, Project.View , Asset.Create, Asset.Edit, Asset.View
+(chat, 2026-08-27 — required by GetAssetModelById/SearchAssetModels/GetEngineModelById/SearchEngineModels; previously these queries had no authorization check at all — gap identified and fixed)
 
 ### Profiles (RESOLVED, chat 2026-08-19)
 A **Profile** is a named, reusable bundle of Permissions (e.g. "Maintenance Technician — Project X") that a SuperUser (or higher-level SuperUser) can define once and assign to multiple Users, rather than assigning individual Permissions one by one. A Profile bundles Permissions only — it does NOT itself carry a scope (which Organizations/Projects); scope is assigned separately per User, so the same Profile can be reused for different Users across different scopes.

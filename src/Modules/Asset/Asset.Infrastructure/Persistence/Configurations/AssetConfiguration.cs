@@ -1,0 +1,49 @@
+using Asset.Domain;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata.Builders;
+
+namespace MachineryManager.Asset.Infrastructure.Persistence.Configurations;
+
+/// <summary>EF Core mapping for the <see cref="global::Asset.Domain.Asset"/> aggregate.</summary>
+public sealed class AssetConfiguration : IEntityTypeConfiguration<global::Asset.Domain.Asset>
+{
+    /// <inheritdoc />
+    public void Configure(EntityTypeBuilder<global::Asset.Domain.Asset> builder)
+    {
+        builder.ToTable("Asset");
+
+        builder.HasKey(a => a.Id);
+
+        builder.Property(a => a.Id)
+            .HasConversion(id => id.Value, value => AssetId.From(value))
+            .ValueGeneratedNever();
+
+        builder.Property(a => a.OrganizationId)
+            .IsRequired();
+
+        builder.HasIndex(a => a.OrganizationId);
+
+        builder.Property(a => a.AssetModelId)
+            .HasConversion(id => id.Value, value => AssetModelId.From(value))
+            .IsRequired();
+
+        builder.HasIndex(a => a.AssetModelId);
+
+        builder.Property(a => a.SerialNumber)
+            .HasMaxLength(global::Asset.Domain.Asset.MaxSerialNumberLength);
+
+        builder.Property(a => a.LicensePlate)
+            .HasMaxLength(global::Asset.Domain.Asset.MaxLicensePlateLength);
+
+        builder.Property(a => a.ManufactureYear);
+
+        builder.Property(a => a.Color)
+            .HasMaxLength(global::Asset.Domain.Asset.MaxColorLength)
+            .IsRequired();
+
+        builder.Property(a => a.Status)
+            .HasConversion<string>()
+            .HasMaxLength(20)
+            .IsRequired();
+    }
+}
