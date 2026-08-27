@@ -131,7 +131,13 @@ public sealed class Asset : AggregateRoot<AssetId>
         return Result.Success();
     }
 
-    /// <summary>Places the Asset into operation (Commissioned → Operational, or Inactive → Operational).</summary>
+    /// <summary>
+    /// Places the Asset into operation (Commissioned → Operational, or
+    /// Inactive → Operational). Raises <see cref="AssetActivated"/> for
+    /// the first case and <see cref="AssetReactivated"/> for the second,
+    /// so the audit trail distinguishes initial activation from later
+    /// reactivations (chat, 2026-08-27).
+    /// </summary>
     public Result Activate(IDateTimeProvider dateTimeProvider)
     {
         if (Status is not (AssetStatus.Commissioned or AssetStatus.Inactive))
@@ -139,8 +145,18 @@ public sealed class Asset : AggregateRoot<AssetId>
             return Result.Failure(AssetErrors.InvalidTransition(Status, AssetStatus.Operational));
         }
 
+        var wasInactive = Status == AssetStatus.Inactive;
+
         Status = AssetStatus.Operational;
-        RaiseDomainEvent(new AssetActivated(Id, dateTimeProvider.UtcNow));
+
+        if (wasInactive)
+        {
+            RaiseDomainEvent(new AssetReactivated(Id, dateTimeProvider.UtcNow));
+        }
+        else
+        {
+            RaiseDomainEvent(new AssetActivated(Id, dateTimeProvider.UtcNow));
+        }
 
         return Result.Success();
     }

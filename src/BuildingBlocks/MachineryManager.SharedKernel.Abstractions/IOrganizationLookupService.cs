@@ -19,4 +19,15 @@ public interface IOrganizationLookupService
     /// <param name="cancellationToken">Token to cancel the asynchronous operation.</param>
     /// <returns>The Holding's identifier, or <see langword="null"/> if the organization is unassigned or does not exist.</returns>
     Task<Guid?> GetHoldingIdAsync(Guid organizationId, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Determines whether an Organization with the given identifier
+    /// currently exists (chat, 2026-08-27 — needed to validate
+    /// Organization-scoped input, such as when registering an Asset,
+    /// mirroring <see cref="IHoldingLookupService.ExistsAsync"/>).
+    /// </summary>
+    /// <param name="organizationId">The organization's identifier.</param>
+    /// <param name="cancellationToken">Token to cancel the asynchronous operation.</param>
+    /// <returns><see langword="true"/> if the Organization exists; otherwise <see langword="false"/>.</returns>
+    Task<bool> ExistsAsync(Guid organizationId, CancellationToken cancellationToken = default);
 }

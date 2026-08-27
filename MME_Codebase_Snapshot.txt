@@ -1,7 +1,7 @@
 ﻿
 ================================================================================
   MACHINERYMANAGERENTERPRISE - CODEBASE SNAPSHOT
-  Generated: 2026-08-27 09:49:09
+  Generated: 2026-08-27 10:46:54
   Source: C:\Users\i\source\repos\MachineryManagerEnterprise
   Purpose: Complete source code reference for AI-assisted development
   Excludes: .md, .gitignore, this script, build artifacts, binaries, IDE,
@@ -199,6 +199,7 @@ MachineryManagerEnterprise
 |   |   |   |-- Asset.Application
 |   |   |   |   |-- Abstractions
 |   |   |   |   |   |-- IAssetModelRepository.cs
+|   |   |   |   |   |-- IAssetRepository.cs
 |   |   |   |   |   +-- IEngineModelRepository.cs
 |   |   |   |   |-- Behaviors
 |   |   |   |   |   +-- ValidationBehavior.cs
@@ -228,6 +229,32 @@ MachineryManagerEnterprise
 |   |   |   |   |   |       +-- SearchAssetModels
 |   |   |   |   |   |           |-- SearchAssetModelsQuery.cs
 |   |   |   |   |   |           +-- SearchAssetModelsQueryHandler.cs
+|   |   |   |   |   |-- Assets
+|   |   |   |   |   |   +-- Commands
+|   |   |   |   |   |       |-- ActivateAsset
+|   |   |   |   |   |       |   |-- ActivateAssetCommand.cs
+|   |   |   |   |   |       |   |-- ActivateAssetCommandHandler.cs
+|   |   |   |   |   |       |   +-- ActivateAssetCommandValidator.cs
+|   |   |   |   |   |       |-- CommissionAsset
+|   |   |   |   |   |       |   |-- CommissionAssetCommand.cs
+|   |   |   |   |   |       |   |-- CommissionAssetCommandHandler.cs
+|   |   |   |   |   |       |   +-- CommissionAssetCommandValidator.cs
+|   |   |   |   |   |       |-- DeactivateAsset
+|   |   |   |   |   |       |   |-- DeactivateAssetCommand.cs
+|   |   |   |   |   |       |   |-- DeactivateAssetCommandHandler.cs
+|   |   |   |   |   |       |   +-- DeactivateAssetCommandValidator.cs
+|   |   |   |   |   |       |-- DisposeAsset
+|   |   |   |   |   |       |   |-- DisposeAssetCommand.cs
+|   |   |   |   |   |       |   |-- DisposeAssetCommandHandler.cs
+|   |   |   |   |   |       |   +-- DisposeAssetCommandValidator.cs
+|   |   |   |   |   |       |-- RegisterAsset
+|   |   |   |   |   |       |   |-- RegisterAssetCommand.cs
+|   |   |   |   |   |       |   |-- RegisterAssetCommandHandler.cs
+|   |   |   |   |   |       |   +-- RegisterAssetCommandValidator.cs
+|   |   |   |   |   |       +-- RetireAsset
+|   |   |   |   |   |           |-- RetireAssetCommand.cs
+|   |   |   |   |   |           |-- RetireAssetCommandHandler.cs
+|   |   |   |   |   |           +-- RetireAssetCommandValidator.cs
 |   |   |   |   |   +-- EngineModels
 |   |   |   |   |       |-- Commands
 |   |   |   |   |       |   |-- RegisterEngineModel
@@ -258,6 +285,7 @@ MachineryManagerEnterprise
 |   |   |   |   |   |-- AssetDeactivated.cs
 |   |   |   |   |   |-- AssetDisposed.cs
 |   |   |   |   |   |-- AssetModelRegistered.cs
+|   |   |   |   |   |-- AssetReactivated.cs
 |   |   |   |   |   |-- AssetRegistered.cs
 |   |   |   |   |   |-- AssetRetired.cs
 |   |   |   |   |   |-- EngineModelAssignedToAssetModel.cs
@@ -280,10 +308,12 @@ MachineryManagerEnterprise
 |   |   |   |   |   +-- AssetDbContextModelSnapshot.cs
 |   |   |   |   |-- Persistence
 |   |   |   |   |   |-- Configurations
+|   |   |   |   |   |   |-- AssetConfiguration.cs
 |   |   |   |   |   |   |-- AssetModelConfiguration.cs
 |   |   |   |   |   |   +-- EngineModelConfiguration.cs
 |   |   |   |   |   |-- AssetDbContext.cs
 |   |   |   |   |   |-- AssetModelRepository.cs
+|   |   |   |   |   |-- AssetRepository.cs
 |   |   |   |   |   +-- EngineModelRepository.cs
 |   |   |   |   |-- Asset.Infrastructure.csproj
 |   |   |   |   +-- DependencyInjection.cs
@@ -480,6 +510,7 @@ MachineryManagerEnterprise
 |   |       |   |   |   +-- OrganizationDbContextModelSnapshot.cs
 |   |       |   |   |-- HoldingRepository.cs
 |   |       |   |   |-- OrganizationDbContext.cs
+|   |       |   |   |-- OrganizationLookupService.cs
 |   |       |   |   |-- OrganizationRepository.cs
 |   |       |   |   +-- ProjectRepository.cs
 |   |       |   |-- DependencyInjection.cs
@@ -878,7 +909,7 @@ public interface IHoldingLookupService
 
 ================================================================================
 FILE: src\BuildingBlocks\MachineryManager.SharedKernel.Abstractions\IOrganizationLookupService.cs
-SIZE: 1.15 KB
+SIZE: 1.83 KB
 ================================================================================
 namespace MachineryManager.SharedKernel.Abstractions;
 
@@ -901,6 +932,17 @@ public interface IOrganizationLookupService
     /// <param name="cancellationToken">Token to cancel the asynchronous operation.</param>
     /// <returns>The Holding's identifier, or <see langword="null"/> if the organization is unassigned or does not exist.</returns>
     Task<Guid?> GetHoldingIdAsync(Guid organizationId, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Determines whether an Organization with the given identifier
+    /// currently exists (chat, 2026-08-27 — needed to validate
+    /// Organization-scoped input, such as when registering an Asset,
+    /// mirroring <see cref="IHoldingLookupService.ExistsAsync"/>).
+    /// </summary>
+    /// <param name="organizationId">The organization's identifier.</param>
+    /// <param name="cancellationToken">Token to cancel the asynchronous operation.</param>
+    /// <returns><see langword="true"/> if the Organization exists; otherwise <see langword="false"/>.</returns>
+    Task<bool> ExistsAsync(Guid organizationId, CancellationToken cancellationToken = default);
 }
 
 ================================================================================
@@ -7905,6 +7947,19 @@ public interface IAssetModelRepository : IRepository<global::Asset.Domain.AssetM
 }
 
 ================================================================================
+FILE: src\Modules\Asset\Asset.Application\Abstractions\IAssetRepository.cs
+SIZE: 0.32 KB
+================================================================================
+using MachineryManager.SharedKernel.Abstractions;
+
+namespace MachineryManager.Asset.Application.Abstractions;
+
+/// <summary>Repository contract for the <see cref="global::Asset.Domain.Asset"/> aggregate.</summary>
+public interface IAssetRepository : IRepository<global::Asset.Domain.Asset, global::Asset.Domain.AssetId>
+{
+}
+
+================================================================================
 FILE: src\Modules\Asset\Asset.Application\Abstractions\IEngineModelRepository.cs
 SIZE: 0.72 KB
 ================================================================================
@@ -8779,6 +8834,754 @@ public sealed class SearchAssetModelsQueryHandler
 }
 
 ================================================================================
+FILE: src\Modules\Asset\Asset.Application\Features\Assets\Commands\ActivateAsset\ActivateAssetCommand.cs
+SIZE: 0.32 KB
+================================================================================
+using MachineryManager.SharedKernel;
+using MediatR;
+
+namespace MachineryManager.Asset.Application.Features.Assets.Commands.ActivateAsset;
+
+/// <summary>Command to place an Asset into operation (Commissioned or Inactive → Operational).</summary>
+public sealed record ActivateAssetCommand(Guid AssetId) : IRequest<Result>;
+
+================================================================================
+FILE: src\Modules\Asset\Asset.Application\Features\Assets\Commands\ActivateAsset\ActivateAssetCommandHandler.cs
+SIZE: 3.12 KB
+================================================================================
+using MachineryManager.Asset.Application.Abstractions;
+using MachineryManager.SharedKernel;
+using MachineryManager.SharedKernel.Abstractions;
+using MediatR;
+
+namespace MachineryManager.Asset.Application.Features.Assets.Commands.ActivateAsset;
+
+/// <summary>
+/// Handles <see cref="ActivateAssetCommand"/> by loading the aggregate,
+/// invoking the domain activation behavior, and committing the unit of
+/// work.
+/// </summary>
+public sealed class ActivateAssetCommandHandler
+    : IRequestHandler<ActivateAssetCommand, Result>
+{
+    private const string RequiredPermission = "Asset.Edit";
+
+    private readonly IAssetRepository _assetRepository;
+    private readonly IUnitOfWork _unitOfWork;
+    private readonly IDateTimeProvider _dateTimeProvider;
+    private readonly ICurrentUserService _currentUserService;
+    private readonly IPermissionEvaluator _permissionEvaluator;
+    private readonly IOrganizationLookupService _organizationLookupService;
+
+    /// <summary>Initializes a new instance of the <see cref="ActivateAssetCommandHandler"/> class.</summary>
+    public ActivateAssetCommandHandler(
+        IAssetRepository assetRepository,
+        IUnitOfWork unitOfWork,
+        IDateTimeProvider dateTimeProvider,
+        ICurrentUserService currentUserService,
+        IPermissionEvaluator permissionEvaluator,
+        IOrganizationLookupService organizationLookupService)
+    {
+        _assetRepository = assetRepository;
+        _unitOfWork = unitOfWork;
+        _dateTimeProvider = dateTimeProvider;
+        _currentUserService = currentUserService;
+        _permissionEvaluator = permissionEvaluator;
+        _organizationLookupService = organizationLookupService;
+    }
+
+    /// <summary>Executes the activation use case.</summary>
+    public async Task<Result> Handle(ActivateAssetCommand request, CancellationToken cancellationToken)
+    {
+        var id = global::Asset.Domain.AssetId.From(request.AssetId);
+        var asset = await _assetRepository.GetByIdAsync(id, cancellationToken);
+
+        if (asset is null)
+        {
+            return Result.Failure(
+                Error.NotFound("Asset.NotFound", $"Asset with id {request.AssetId} was not found."));
+        }
+
+        if (_currentUserService.UserId is not { } userId)
+        {
+            return Result.Failure(global::Asset.Domain.AssetErrors.NotAuthorized());
+        }
+
+        var holdingId = await _organizationLookupService.GetHoldingIdAsync(asset.OrganizationId, cancellationToken);
+
+        var isAuthorized = await _permissionEvaluator.HasPermissionAsync(
+            userId,
+            RequiredPermission,
+            new ResourceScope(holdingId, asset.OrganizationId, null),
+            cancellationToken);
+
+        if (!isAuthorized)
+        {
+            return Result.Failure(global::Asset.Domain.AssetErrors.NotAuthorized());
+        }
+
+        var result = asset.Activate(_dateTimeProvider);
+
+        if (result.IsFailure)
+        {
+            return result;
+        }
+
+        _assetRepository.Update(asset);
+        await _unitOfWork.SaveChangesAsync(cancellationToken);
+
+        return Result.Success();
+    }
+}
+
+================================================================================
+FILE: src\Modules\Asset\Asset.Application\Features\Assets\Commands\ActivateAsset\ActivateAssetCommandValidator.cs
+SIZE: 0.48 KB
+================================================================================
+using FluentValidation;
+
+namespace MachineryManager.Asset.Application.Features.Assets.Commands.ActivateAsset;
+
+/// <summary>Validates <see cref="ActivateAssetCommand"/> per ADR-0036.</summary>
+public sealed class ActivateAssetCommandValidator : AbstractValidator<ActivateAssetCommand>
+{
+    /// <summary>Initializes validation rules for the activate asset command.</summary>
+    public ActivateAssetCommandValidator()
+    {
+        RuleFor(x => x.AssetId).NotEmpty();
+    }
+}
+
+================================================================================
+FILE: src\Modules\Asset\Asset.Application\Features\Assets\Commands\CommissionAsset\CommissionAssetCommand.cs
+SIZE: 0.32 KB
+================================================================================
+using MachineryManager.SharedKernel;
+using MediatR;
+
+namespace MachineryManager.Asset.Application.Features.Assets.Commands.CommissionAsset;
+
+/// <summary>Command to complete commissioning of an Asset (Registered → Commissioned).</summary>
+public sealed record CommissionAssetCommand(Guid AssetId) : IRequest<Result>;
+
+================================================================================
+FILE: src\Modules\Asset\Asset.Application\Features\Assets\Commands\CommissionAsset\CommissionAssetCommandHandler.cs
+SIZE: 3.14 KB
+================================================================================
+using MachineryManager.Asset.Application.Abstractions;
+using MachineryManager.SharedKernel;
+using MachineryManager.SharedKernel.Abstractions;
+using MediatR;
+
+namespace MachineryManager.Asset.Application.Features.Assets.Commands.CommissionAsset;
+
+/// <summary>
+/// Handles <see cref="CommissionAssetCommand"/> by loading the
+/// aggregate, invoking the domain commissioning behavior, and
+/// committing the unit of work.
+/// </summary>
+public sealed class CommissionAssetCommandHandler
+    : IRequestHandler<CommissionAssetCommand, Result>
+{
+    private const string RequiredPermission = "Asset.Edit";
+
+    private readonly IAssetRepository _assetRepository;
+    private readonly IUnitOfWork _unitOfWork;
+    private readonly IDateTimeProvider _dateTimeProvider;
+    private readonly ICurrentUserService _currentUserService;
+    private readonly IPermissionEvaluator _permissionEvaluator;
+    private readonly IOrganizationLookupService _organizationLookupService;
+
+    /// <summary>Initializes a new instance of the <see cref="CommissionAssetCommandHandler"/> class.</summary>
+    public CommissionAssetCommandHandler(
+        IAssetRepository assetRepository,
+        IUnitOfWork unitOfWork,
+        IDateTimeProvider dateTimeProvider,
+        ICurrentUserService currentUserService,
+        IPermissionEvaluator permissionEvaluator,
+        IOrganizationLookupService organizationLookupService)
+    {
+        _assetRepository = assetRepository;
+        _unitOfWork = unitOfWork;
+        _dateTimeProvider = dateTimeProvider;
+        _currentUserService = currentUserService;
+        _permissionEvaluator = permissionEvaluator;
+        _organizationLookupService = organizationLookupService;
+    }
+
+    /// <summary>Executes the commissioning use case.</summary>
+    public async Task<Result> Handle(CommissionAssetCommand request, CancellationToken cancellationToken)
+    {
+        var id = global::Asset.Domain.AssetId.From(request.AssetId);
+        var asset = await _assetRepository.GetByIdAsync(id, cancellationToken);
+
+        if (asset is null)
+        {
+            return Result.Failure(
+                Error.NotFound("Asset.NotFound", $"Asset with id {request.AssetId} was not found."));
+        }
+
+        if (_currentUserService.UserId is not { } userId)
+        {
+            return Result.Failure(global::Asset.Domain.AssetErrors.NotAuthorized());
+        }
+
+        var holdingId = await _organizationLookupService.GetHoldingIdAsync(asset.OrganizationId, cancellationToken);
+
+        var isAuthorized = await _permissionEvaluator.HasPermissionAsync(
+            userId,
+            RequiredPermission,
+            new ResourceScope(holdingId, asset.OrganizationId, null),
+            cancellationToken);
+
+        if (!isAuthorized)
+        {
+            return Result.Failure(global::Asset.Domain.AssetErrors.NotAuthorized());
+        }
+
+        var result = asset.Commission(_dateTimeProvider);
+
+        if (result.IsFailure)
+        {
+            return result;
+        }
+
+        _assetRepository.Update(asset);
+        await _unitOfWork.SaveChangesAsync(cancellationToken);
+
+        return Result.Success();
+    }
+}
+
+================================================================================
+FILE: src\Modules\Asset\Asset.Application\Features\Assets\Commands\CommissionAsset\CommissionAssetCommandValidator.cs
+SIZE: 0.49 KB
+================================================================================
+using FluentValidation;
+
+namespace MachineryManager.Asset.Application.Features.Assets.Commands.CommissionAsset;
+
+/// <summary>Validates <see cref="CommissionAssetCommand"/> per ADR-0036.</summary>
+public sealed class CommissionAssetCommandValidator : AbstractValidator<CommissionAssetCommand>
+{
+    /// <summary>Initializes validation rules for the commission asset command.</summary>
+    public CommissionAssetCommandValidator()
+    {
+        RuleFor(x => x.AssetId).NotEmpty();
+    }
+}
+
+================================================================================
+FILE: src\Modules\Asset\Asset.Application\Features\Assets\Commands\DeactivateAsset\DeactivateAssetCommand.cs
+SIZE: 0.32 KB
+================================================================================
+using MachineryManager.SharedKernel;
+using MediatR;
+
+namespace MachineryManager.Asset.Application.Features.Assets.Commands.DeactivateAsset;
+
+/// <summary>Command to temporarily take an Asset out of use (Operational → Inactive).</summary>
+public sealed record DeactivateAssetCommand(Guid AssetId) : IRequest<Result>;
+
+================================================================================
+FILE: src\Modules\Asset\Asset.Application\Features\Assets\Commands\DeactivateAsset\DeactivateAssetCommandHandler.cs
+SIZE: 3.14 KB
+================================================================================
+using MachineryManager.Asset.Application.Abstractions;
+using MachineryManager.SharedKernel;
+using MachineryManager.SharedKernel.Abstractions;
+using MediatR;
+
+namespace MachineryManager.Asset.Application.Features.Assets.Commands.DeactivateAsset;
+
+/// <summary>
+/// Handles <see cref="DeactivateAssetCommand"/> by loading the
+/// aggregate, invoking the domain deactivation behavior, and
+/// committing the unit of work.
+/// </summary>
+public sealed class DeactivateAssetCommandHandler
+    : IRequestHandler<DeactivateAssetCommand, Result>
+{
+    private const string RequiredPermission = "Asset.Edit";
+
+    private readonly IAssetRepository _assetRepository;
+    private readonly IUnitOfWork _unitOfWork;
+    private readonly IDateTimeProvider _dateTimeProvider;
+    private readonly ICurrentUserService _currentUserService;
+    private readonly IPermissionEvaluator _permissionEvaluator;
+    private readonly IOrganizationLookupService _organizationLookupService;
+
+    /// <summary>Initializes a new instance of the <see cref="DeactivateAssetCommandHandler"/> class.</summary>
+    public DeactivateAssetCommandHandler(
+        IAssetRepository assetRepository,
+        IUnitOfWork unitOfWork,
+        IDateTimeProvider dateTimeProvider,
+        ICurrentUserService currentUserService,
+        IPermissionEvaluator permissionEvaluator,
+        IOrganizationLookupService organizationLookupService)
+    {
+        _assetRepository = assetRepository;
+        _unitOfWork = unitOfWork;
+        _dateTimeProvider = dateTimeProvider;
+        _currentUserService = currentUserService;
+        _permissionEvaluator = permissionEvaluator;
+        _organizationLookupService = organizationLookupService;
+    }
+
+    /// <summary>Executes the deactivation use case.</summary>
+    public async Task<Result> Handle(DeactivateAssetCommand request, CancellationToken cancellationToken)
+    {
+        var id = global::Asset.Domain.AssetId.From(request.AssetId);
+        var asset = await _assetRepository.GetByIdAsync(id, cancellationToken);
+
+        if (asset is null)
+        {
+            return Result.Failure(
+                Error.NotFound("Asset.NotFound", $"Asset with id {request.AssetId} was not found."));
+        }
+
+        if (_currentUserService.UserId is not { } userId)
+        {
+            return Result.Failure(global::Asset.Domain.AssetErrors.NotAuthorized());
+        }
+
+        var holdingId = await _organizationLookupService.GetHoldingIdAsync(asset.OrganizationId, cancellationToken);
+
+        var isAuthorized = await _permissionEvaluator.HasPermissionAsync(
+            userId,
+            RequiredPermission,
+            new ResourceScope(holdingId, asset.OrganizationId, null),
+            cancellationToken);
+
+        if (!isAuthorized)
+        {
+            return Result.Failure(global::Asset.Domain.AssetErrors.NotAuthorized());
+        }
+
+        var result = asset.Deactivate(_dateTimeProvider);
+
+        if (result.IsFailure)
+        {
+            return result;
+        }
+
+        _assetRepository.Update(asset);
+        await _unitOfWork.SaveChangesAsync(cancellationToken);
+
+        return Result.Success();
+    }
+}
+
+================================================================================
+FILE: src\Modules\Asset\Asset.Application\Features\Assets\Commands\DeactivateAsset\DeactivateAssetCommandValidator.cs
+SIZE: 0.49 KB
+================================================================================
+using FluentValidation;
+
+namespace MachineryManager.Asset.Application.Features.Assets.Commands.DeactivateAsset;
+
+/// <summary>Validates <see cref="DeactivateAssetCommand"/> per ADR-0036.</summary>
+public sealed class DeactivateAssetCommandValidator : AbstractValidator<DeactivateAssetCommand>
+{
+    /// <summary>Initializes validation rules for the deactivate asset command.</summary>
+    public DeactivateAssetCommandValidator()
+    {
+        RuleFor(x => x.AssetId).NotEmpty();
+    }
+}
+
+================================================================================
+FILE: src\Modules\Asset\Asset.Application\Features\Assets\Commands\DisposeAsset\DisposeAssetCommand.cs
+SIZE: 0.31 KB
+================================================================================
+using MachineryManager.SharedKernel;
+using MediatR;
+
+namespace MachineryManager.Asset.Application.Features.Assets.Commands.DisposeAsset;
+
+/// <summary>Command to mark a Retired Asset as physically disposed of (final state, BR-004).</summary>
+public sealed record DisposeAssetCommand(Guid AssetId) : IRequest<Result>;
+
+================================================================================
+FILE: src\Modules\Asset\Asset.Application\Features\Assets\Commands\DisposeAsset\DisposeAssetCommandHandler.cs
+SIZE: 3.11 KB
+================================================================================
+using MachineryManager.Asset.Application.Abstractions;
+using MachineryManager.SharedKernel;
+using MachineryManager.SharedKernel.Abstractions;
+using MediatR;
+
+namespace MachineryManager.Asset.Application.Features.Assets.Commands.DisposeAsset;
+
+/// <summary>
+/// Handles <see cref="DisposeAssetCommand"/> by loading the aggregate,
+/// invoking the domain disposal behavior, and committing the unit of
+/// work.
+/// </summary>
+public sealed class DisposeAssetCommandHandler
+    : IRequestHandler<DisposeAssetCommand, Result>
+{
+    private const string RequiredPermission = "Asset.Edit";
+
+    private readonly IAssetRepository _assetRepository;
+    private readonly IUnitOfWork _unitOfWork;
+    private readonly IDateTimeProvider _dateTimeProvider;
+    private readonly ICurrentUserService _currentUserService;
+    private readonly IPermissionEvaluator _permissionEvaluator;
+    private readonly IOrganizationLookupService _organizationLookupService;
+
+    /// <summary>Initializes a new instance of the <see cref="DisposeAssetCommandHandler"/> class.</summary>
+    public DisposeAssetCommandHandler(
+        IAssetRepository assetRepository,
+        IUnitOfWork unitOfWork,
+        IDateTimeProvider dateTimeProvider,
+        ICurrentUserService currentUserService,
+        IPermissionEvaluator permissionEvaluator,
+        IOrganizationLookupService organizationLookupService)
+    {
+        _assetRepository = assetRepository;
+        _unitOfWork = unitOfWork;
+        _dateTimeProvider = dateTimeProvider;
+        _currentUserService = currentUserService;
+        _permissionEvaluator = permissionEvaluator;
+        _organizationLookupService = organizationLookupService;
+    }
+
+    /// <summary>Executes the disposal use case.</summary>
+    public async Task<Result> Handle(DisposeAssetCommand request, CancellationToken cancellationToken)
+    {
+        var id = global::Asset.Domain.AssetId.From(request.AssetId);
+        var asset = await _assetRepository.GetByIdAsync(id, cancellationToken);
+
+        if (asset is null)
+        {
+            return Result.Failure(
+                Error.NotFound("Asset.NotFound", $"Asset with id {request.AssetId} was not found."));
+        }
+
+        if (_currentUserService.UserId is not { } userId)
+        {
+            return Result.Failure(global::Asset.Domain.AssetErrors.NotAuthorized());
+        }
+
+        var holdingId = await _organizationLookupService.GetHoldingIdAsync(asset.OrganizationId, cancellationToken);
+
+        var isAuthorized = await _permissionEvaluator.HasPermissionAsync(
+            userId,
+            RequiredPermission,
+            new ResourceScope(holdingId, asset.OrganizationId, null),
+            cancellationToken);
+
+        if (!isAuthorized)
+        {
+            return Result.Failure(global::Asset.Domain.AssetErrors.NotAuthorized());
+        }
+
+        var result = asset.Dispose(_dateTimeProvider);
+
+        if (result.IsFailure)
+        {
+            return result;
+        }
+
+        _assetRepository.Update(asset);
+        await _unitOfWork.SaveChangesAsync(cancellationToken);
+
+        return Result.Success();
+    }
+}
+
+================================================================================
+FILE: src\Modules\Asset\Asset.Application\Features\Assets\Commands\DisposeAsset\DisposeAssetCommandValidator.cs
+SIZE: 0.47 KB
+================================================================================
+using FluentValidation;
+
+namespace MachineryManager.Asset.Application.Features.Assets.Commands.DisposeAsset;
+
+/// <summary>Validates <see cref="DisposeAssetCommand"/> per ADR-0036.</summary>
+public sealed class DisposeAssetCommandValidator : AbstractValidator<DisposeAssetCommand>
+{
+    /// <summary>Initializes validation rules for the dispose asset command.</summary>
+    public DisposeAssetCommandValidator()
+    {
+        RuleFor(x => x.AssetId).NotEmpty();
+    }
+}
+
+================================================================================
+FILE: src\Modules\Asset\Asset.Application\Features\Assets\Commands\RegisterAsset\RegisterAssetCommand.cs
+SIZE: 0.44 KB
+================================================================================
+using MachineryManager.SharedKernel;
+using MediatR;
+
+namespace MachineryManager.Asset.Application.Features.Assets.Commands.RegisterAsset;
+
+/// <summary>Command to register a new Asset within an Organization (BR-003).</summary>
+public sealed record RegisterAssetCommand(
+    Guid OrganizationId,
+    Guid AssetModelId,
+    string Color,
+    string? SerialNumber,
+    string? LicensePlate,
+    int? ManufactureYear) : IRequest<Result<Guid>>;
+
+================================================================================
+FILE: src\Modules\Asset\Asset.Application\Features\Assets\Commands\RegisterAsset\RegisterAssetCommandHandler.cs
+SIZE: 3.98 KB
+================================================================================
+using MachineryManager.Asset.Application.Abstractions;
+using MachineryManager.SharedKernel;
+using MachineryManager.SharedKernel.Abstractions;
+using MediatR;
+
+namespace MachineryManager.Asset.Application.Features.Assets.Commands.RegisterAsset;
+
+/// <summary>
+/// Handles <see cref="RegisterAssetCommand"/> by validating the
+/// referenced Organization and Asset Model exist, invoking domain
+/// registration, persisting the aggregate, and committing the unit of
+/// work.
+/// </summary>
+public sealed class RegisterAssetCommandHandler
+    : IRequestHandler<RegisterAssetCommand, Result<Guid>>
+{
+    private const string RequiredPermission = "Asset.Create";
+
+    private readonly IAssetRepository _assetRepository;
+    private readonly IAssetModelRepository _assetModelRepository;
+    private readonly IUnitOfWork _unitOfWork;
+    private readonly IDateTimeProvider _dateTimeProvider;
+    private readonly ICurrentUserService _currentUserService;
+    private readonly IPermissionEvaluator _permissionEvaluator;
+    private readonly IOrganizationLookupService _organizationLookupService;
+
+    /// <summary>Initializes a new instance of the <see cref="RegisterAssetCommandHandler"/> class.</summary>
+    public RegisterAssetCommandHandler(
+        IAssetRepository assetRepository,
+        IAssetModelRepository assetModelRepository,
+        IUnitOfWork unitOfWork,
+        IDateTimeProvider dateTimeProvider,
+        ICurrentUserService currentUserService,
+        IPermissionEvaluator permissionEvaluator,
+        IOrganizationLookupService organizationLookupService)
+    {
+        _assetRepository = assetRepository;
+        _assetModelRepository = assetModelRepository;
+        _unitOfWork = unitOfWork;
+        _dateTimeProvider = dateTimeProvider;
+        _currentUserService = currentUserService;
+        _permissionEvaluator = permissionEvaluator;
+        _organizationLookupService = organizationLookupService;
+    }
+
+    /// <summary>Executes the registration use case.</summary>
+    public async Task<Result<Guid>> Handle(RegisterAssetCommand request, CancellationToken cancellationToken)
+    {
+        if (_currentUserService.UserId is not { } userId)
+        {
+            return Result.Failure<Guid>(global::Asset.Domain.AssetErrors.NotAuthorized());
+        }
+
+        var holdingId = await _organizationLookupService.GetHoldingIdAsync(request.OrganizationId, cancellationToken);
+
+        var isAuthorized = await _permissionEvaluator.HasPermissionAsync(
+            userId,
+            RequiredPermission,
+            new ResourceScope(holdingId, request.OrganizationId, null),
+            cancellationToken);
+
+        if (!isAuthorized)
+        {
+            return Result.Failure<Guid>(global::Asset.Domain.AssetErrors.NotAuthorized());
+        }
+
+        var organizationExists = await _organizationLookupService.ExistsAsync(request.OrganizationId, cancellationToken);
+
+        if (!organizationExists)
+        {
+            return Result.Failure<Guid>(global::Asset.Domain.AssetErrors.OrganizationNotFound(request.OrganizationId));
+        }
+
+        var assetModelId = global::Asset.Domain.AssetModelId.From(request.AssetModelId);
+        var assetModel = await _assetModelRepository.GetByIdAsync(assetModelId, cancellationToken);
+
+        if (assetModel is null)
+        {
+            return Result.Failure<Guid>(global::Asset.Domain.AssetErrors.AssetModelNotFound(request.AssetModelId));
+        }
+
+        var result = global::Asset.Domain.Asset.Register(
+            request.OrganizationId,
+            assetModelId,
+            request.Color,
+            request.SerialNumber,
+            request.LicensePlate,
+            request.ManufactureYear,
+            _dateTimeProvider);
+
+        if (result.IsFailure)
+        {
+            return Result.Failure<Guid>(result.Error);
+        }
+
+        _assetRepository.Add(result.Value);
+        await _unitOfWork.SaveChangesAsync(cancellationToken);
+
+        return Result.Success(result.Value.Id.Value);
+    }
+}
+
+================================================================================
+FILE: src\Modules\Asset\Asset.Application\Features\Assets\Commands\RegisterAsset\RegisterAssetCommandValidator.cs
+SIZE: 0.89 KB
+================================================================================
+using FluentValidation;
+
+namespace MachineryManager.Asset.Application.Features.Assets.Commands.RegisterAsset;
+
+/// <summary>Validates <see cref="RegisterAssetCommand"/> per ADR-0036.</summary>
+public sealed class RegisterAssetCommandValidator : AbstractValidator<RegisterAssetCommand>
+{
+    /// <summary>Initializes validation rules for the register asset command.</summary>
+    public RegisterAssetCommandValidator()
+    {
+        RuleFor(x => x.OrganizationId).NotEmpty();
+        RuleFor(x => x.AssetModelId).NotEmpty();
+
+        RuleFor(x => x.Color)
+            .NotEmpty()
+            .MaximumLength(global::Asset.Domain.Asset.MaxColorLength);
+
+        RuleFor(x => x.SerialNumber)
+            .MaximumLength(global::Asset.Domain.Asset.MaxSerialNumberLength);
+
+        RuleFor(x => x.LicensePlate)
+            .MaximumLength(global::Asset.Domain.Asset.MaxLicensePlateLength);
+    }
+}
+
+================================================================================
+FILE: src\Modules\Asset\Asset.Application\Features\Assets\Commands\RetireAsset\RetireAssetCommand.cs
+SIZE: 0.32 KB
+================================================================================
+using MachineryManager.SharedKernel;
+using MediatR;
+
+namespace MachineryManager.Asset.Application.Features.Assets.Commands.RetireAsset;
+
+/// <summary>Command to permanently withdraw an Asset from use (Operational or Inactive → Retired).</summary>
+public sealed record RetireAssetCommand(Guid AssetId) : IRequest<Result>;
+
+================================================================================
+FILE: src\Modules\Asset\Asset.Application\Features\Assets\Commands\RetireAsset\RetireAssetCommandHandler.cs
+SIZE: 3.11 KB
+================================================================================
+using MachineryManager.Asset.Application.Abstractions;
+using MachineryManager.SharedKernel;
+using MachineryManager.SharedKernel.Abstractions;
+using MediatR;
+
+namespace MachineryManager.Asset.Application.Features.Assets.Commands.RetireAsset;
+
+/// <summary>
+/// Handles <see cref="RetireAssetCommand"/> by loading the aggregate,
+/// invoking the domain retirement behavior, and committing the unit of
+/// work.
+/// </summary>
+public sealed class RetireAssetCommandHandler
+    : IRequestHandler<RetireAssetCommand, Result>
+{
+    private const string RequiredPermission = "Asset.Edit";
+
+    private readonly IAssetRepository _assetRepository;
+    private readonly IUnitOfWork _unitOfWork;
+    private readonly IDateTimeProvider _dateTimeProvider;
+    private readonly ICurrentUserService _currentUserService;
+    private readonly IPermissionEvaluator _permissionEvaluator;
+    private readonly IOrganizationLookupService _organizationLookupService;
+
+    /// <summary>Initializes a new instance of the <see cref="RetireAssetCommandHandler"/> class.</summary>
+    public RetireAssetCommandHandler(
+        IAssetRepository assetRepository,
+        IUnitOfWork unitOfWork,
+        IDateTimeProvider dateTimeProvider,
+        ICurrentUserService currentUserService,
+        IPermissionEvaluator permissionEvaluator,
+        IOrganizationLookupService organizationLookupService)
+    {
+        _assetRepository = assetRepository;
+        _unitOfWork = unitOfWork;
+        _dateTimeProvider = dateTimeProvider;
+        _currentUserService = currentUserService;
+        _permissionEvaluator = permissionEvaluator;
+        _organizationLookupService = organizationLookupService;
+    }
+
+    /// <summary>Executes the retirement use case.</summary>
+    public async Task<Result> Handle(RetireAssetCommand request, CancellationToken cancellationToken)
+    {
+        var id = global::Asset.Domain.AssetId.From(request.AssetId);
+        var asset = await _assetRepository.GetByIdAsync(id, cancellationToken);
+
+        if (asset is null)
+        {
+            return Result.Failure(
+                Error.NotFound("Asset.NotFound", $"Asset with id {request.AssetId} was not found."));
+        }
+
+        if (_currentUserService.UserId is not { } userId)
+        {
+            return Result.Failure(global::Asset.Domain.AssetErrors.NotAuthorized());
+        }
+
+        var holdingId = await _organizationLookupService.GetHoldingIdAsync(asset.OrganizationId, cancellationToken);
+
+        var isAuthorized = await _permissionEvaluator.HasPermissionAsync(
+            userId,
+            RequiredPermission,
+            new ResourceScope(holdingId, asset.OrganizationId, null),
+            cancellationToken);
+
+        if (!isAuthorized)
+        {
+            return Result.Failure(global::Asset.Domain.AssetErrors.NotAuthorized());
+        }
+
+        var result = asset.Retire(_dateTimeProvider);
+
+        if (result.IsFailure)
+        {
+            return result;
+        }
+
+        _assetRepository.Update(asset);
+        await _unitOfWork.SaveChangesAsync(cancellationToken);
+
+        return Result.Success();
+    }
+}
+
+================================================================================
+FILE: src\Modules\Asset\Asset.Application\Features\Assets\Commands\RetireAsset\RetireAssetCommandValidator.cs
+SIZE: 0.46 KB
+================================================================================
+using FluentValidation;
+
+namespace MachineryManager.Asset.Application.Features.Assets.Commands.RetireAsset;
+
+/// <summary>Validates <see cref="RetireAssetCommand"/> per ADR-0036.</summary>
+public sealed class RetireAssetCommandValidator : AbstractValidator<RetireAssetCommand>
+{
+    /// <summary>Initializes validation rules for the retire asset command.</summary>
+    public RetireAssetCommandValidator()
+    {
+        RuleFor(x => x.AssetId).NotEmpty();
+    }
+}
+
+================================================================================
 FILE: src\Modules\Asset\Asset.Application\Features\EngineModels\Commands\RegisterEngineModel\RegisterEngineModelCommand.cs
 SIZE: 0.36 KB
 ================================================================================
@@ -9267,7 +10070,7 @@ public sealed class MediatRDomainEventDispatcher : IDomainEventDispatcher
 
 ================================================================================
 FILE: src\Modules\Asset\Asset.Domain\Asset.cs
-SIZE: 7.35 KB
+SIZE: 7.83 KB
 ================================================================================
 using Asset.Domain.Events;
 using MachineryManager.SharedKernel;
@@ -9402,7 +10205,13 @@ public sealed class Asset : AggregateRoot<AssetId>
         return Result.Success();
     }
 
-    /// <summary>Places the Asset into operation (Commissioned → Operational, or Inactive → Operational).</summary>
+    /// <summary>
+    /// Places the Asset into operation (Commissioned → Operational, or
+    /// Inactive → Operational). Raises <see cref="AssetActivated"/> for
+    /// the first case and <see cref="AssetReactivated"/> for the second,
+    /// so the audit trail distinguishes initial activation from later
+    /// reactivations (chat, 2026-08-27).
+    /// </summary>
     public Result Activate(IDateTimeProvider dateTimeProvider)
     {
         if (Status is not (AssetStatus.Commissioned or AssetStatus.Inactive))
@@ -9410,8 +10219,18 @@ public sealed class Asset : AggregateRoot<AssetId>
             return Result.Failure(AssetErrors.InvalidTransition(Status, AssetStatus.Operational));
         }
 
+        var wasInactive = Status == AssetStatus.Inactive;
+
         Status = AssetStatus.Operational;
-        RaiseDomainEvent(new AssetActivated(Id, dateTimeProvider.UtcNow));
+
+        if (wasInactive)
+        {
+            RaiseDomainEvent(new AssetReactivated(Id, dateTimeProvider.UtcNow));
+        }
+        else
+        {
+            RaiseDomainEvent(new AssetActivated(Id, dateTimeProvider.UtcNow));
+        }
 
         return Result.Success();
     }
@@ -9477,7 +10296,7 @@ SIZE: 0.35 KB
 
 ================================================================================
 FILE: src\Modules\Asset\Asset.Domain\AssetErrors.cs
-SIZE: 0.93 KB
+SIZE: 1.64 KB
 ================================================================================
 using MachineryManager.SharedKernel;
 
@@ -9500,6 +10319,22 @@ public static class AssetErrors
     public static Error NotAuthorized() => Error.Failure(
         "Asset.NotAuthorized",
         "You do not have permission to perform this action.");
+
+    /// <summary>
+    /// Creates an error indicating the given OrganizationId does not
+    /// correspond to an existing Organization (chat, 2026-08-27).
+    /// </summary>
+    public static Error OrganizationNotFound(Guid organizationId) => Error.NotFound(
+        "Asset.OrganizationNotFound",
+        $"Organization with id {organizationId} was not found.");
+
+    /// <summary>
+    /// Creates an error indicating the given AssetModelId does not
+    /// correspond to an existing Asset Model (chat, 2026-08-27).
+    /// </summary>
+    public static Error AssetModelNotFound(Guid assetModelId) => Error.NotFound(
+        "Asset.AssetModelNotFound",
+        $"Asset model with id {assetModelId} was not found.");
 }
 
 ================================================================================
@@ -10015,7 +10850,7 @@ public sealed class EngineModelId : ValueObject
 
 ================================================================================
 FILE: src\Modules\Asset\Asset.Domain\Events\AssetActivated.cs
-SIZE: 0.48 KB
+SIZE: 0.88 KB
 ================================================================================
 using MachineryManager.SharedKernel;
 
@@ -10024,9 +10859,15 @@ namespace Asset.Domain.Events;
 /// <summary>Raised when an Asset is placed into operation (Commissioned → Operational, or Inactive → Operational).</summary>
 public sealed class AssetActivated : IDomainEvent
 {
+    /// <summary>Gets the identifier of the activated asset.</summary>
     public AssetId AssetId { get; }
+
+    /// <summary>Gets the UTC timestamp when the event occurred.</summary>
     public DateTimeOffset OccurredOn { get; }
 
+    /// <summary>Initializes a new instance of the <see cref="AssetActivated"/> class.</summary>
+    /// <param name="assetId">The identifier of the activated asset.</param>
+    /// <param name="occurredOn">The UTC timestamp when the event occurred.</param>
     public AssetActivated(AssetId assetId, DateTimeOffset occurredOn)
     {
         AssetId = assetId;
@@ -10036,7 +10877,7 @@ public sealed class AssetActivated : IDomainEvent
 
 ================================================================================
 FILE: src\Modules\Asset\Asset.Domain\Events\AssetCommissioned.cs
-SIZE: 0.46 KB
+SIZE: 0.87 KB
 ================================================================================
 using MachineryManager.SharedKernel;
 
@@ -10045,9 +10886,15 @@ namespace Asset.Domain.Events;
 /// <summary>Raised when an Asset completes commissioning (Registered → Commissioned).</summary>
 public sealed class AssetCommissioned : IDomainEvent
 {
+    /// <summary>Gets the identifier of the commissioned asset.</summary>
     public AssetId AssetId { get; }
+
+    /// <summary>Gets the UTC timestamp when the event occurred.</summary>
     public DateTimeOffset OccurredOn { get; }
 
+    /// <summary>Initializes a new instance of the <see cref="AssetCommissioned"/> class.</summary>
+    /// <param name="assetId">The identifier of the commissioned asset.</param>
+    /// <param name="occurredOn">The UTC timestamp when the event occurred.</param>
     public AssetCommissioned(AssetId assetId, DateTimeOffset occurredOn)
     {
         AssetId = assetId;
@@ -10057,9 +10904,8 @@ public sealed class AssetCommissioned : IDomainEvent
 
 ================================================================================
 FILE: src\Modules\Asset\Asset.Domain\Events\AssetDeactivated.cs
-SIZE: 0.54 KB
+SIZE: 0.87 KB
 ================================================================================
-// Events/AssetDeactivated.cs (added, not in original doc — chat, 2026-08-27)
 using MachineryManager.SharedKernel;
 
 namespace Asset.Domain.Events;
@@ -10067,9 +10913,15 @@ namespace Asset.Domain.Events;
 /// <summary>Raised when an Asset is temporarily taken out of use (Operational → Inactive).</summary>
 public sealed class AssetDeactivated : IDomainEvent
 {
+    /// <summary>Gets the identifier of the deactivated asset.</summary>
     public AssetId AssetId { get; }
+
+    /// <summary>Gets the UTC timestamp when the event occurred.</summary>
     public DateTimeOffset OccurredOn { get; }
 
+    /// <summary>Initializes a new instance of the <see cref="AssetDeactivated"/> class.</summary>
+    /// <param name="assetId">The identifier of the deactivated asset.</param>
+    /// <param name="occurredOn">The UTC timestamp when the event occurred.</param>
     public AssetDeactivated(AssetId assetId, DateTimeOffset occurredOn)
     {
         AssetId = assetId;
@@ -10079,7 +10931,7 @@ public sealed class AssetDeactivated : IDomainEvent
 
 ================================================================================
 FILE: src\Modules\Asset\Asset.Domain\Events\AssetDisposed.cs
-SIZE: 0.47 KB
+SIZE: 0.87 KB
 ================================================================================
 using MachineryManager.SharedKernel;
 
@@ -10088,9 +10940,15 @@ namespace Asset.Domain.Events;
 /// <summary>Raised when an Asset is physically disposed of (final state, BR-004 — history is preserved).</summary>
 public sealed class AssetDisposed : IDomainEvent
 {
+    /// <summary>Gets the identifier of the disposed asset.</summary>
     public AssetId AssetId { get; }
+
+    /// <summary>Gets the UTC timestamp when the event occurred.</summary>
     public DateTimeOffset OccurredOn { get; }
 
+    /// <summary>Initializes a new instance of the <see cref="AssetDisposed"/> class.</summary>
+    /// <param name="assetId">The identifier of the disposed asset.</param>
+    /// <param name="occurredOn">The UTC timestamp when the event occurred.</param>
     public AssetDisposed(AssetId assetId, DateTimeOffset occurredOn)
     {
         AssetId = assetId;
@@ -10132,8 +10990,41 @@ public sealed class AssetModelRegistered : IDomainEvent
 }
 
 ================================================================================
+FILE: src\Modules\Asset\Asset.Domain\Events\AssetReactivated.cs
+SIZE: 1.13 KB
+================================================================================
+using MachineryManager.SharedKernel;
+
+namespace Asset.Domain.Events;
+
+/// <summary>
+/// Raised when a previously Inactive Asset returns to operation
+/// (Inactive → Operational). Distinct from <see cref="AssetActivated"/>,
+/// which covers the initial Commissioned → Operational transition —
+/// keeping them separate preserves an accurate audit trail of first
+/// activation vs. later reactivations (chat, 2026-08-27).
+/// </summary>
+public sealed class AssetReactivated : IDomainEvent
+{
+    /// <summary>Gets the identifier of the reactivated asset.</summary>
+    public AssetId AssetId { get; }
+
+    /// <summary>Gets the UTC timestamp when the event occurred.</summary>
+    public DateTimeOffset OccurredOn { get; }
+
+    /// <summary>Initializes a new instance of the <see cref="AssetReactivated"/> class.</summary>
+    /// <param name="assetId">The identifier of the reactivated asset.</param>
+    /// <param name="occurredOn">The UTC timestamp when the event occurred.</param>
+    public AssetReactivated(AssetId assetId, DateTimeOffset occurredOn)
+    {
+        AssetId = assetId;
+        OccurredOn = occurredOn;
+    }
+}
+
+================================================================================
 FILE: src\Modules\Asset\Asset.Domain\Events\AssetRegistered.cs
-SIZE: 0.63 KB
+SIZE: 1.41 KB
 ================================================================================
 using MachineryManager.SharedKernel;
 
@@ -10142,11 +11033,23 @@ namespace Asset.Domain.Events;
 /// <summary>Raised when a new Asset is registered.</summary>
 public sealed class AssetRegistered : IDomainEvent
 {
+    /// <summary>Gets the identifier of the registered asset.</summary>
     public AssetId AssetId { get; }
+
+    /// <summary>Gets the identifier of the owning Organization (BR-003).</summary>
     public Guid OrganizationId { get; }
+
+    /// <summary>Gets the identifier of the asset's shared specification catalog entry.</summary>
     public AssetModelId AssetModelId { get; }
+
+    /// <summary>Gets the UTC timestamp when the event occurred.</summary>
     public DateTimeOffset OccurredOn { get; }
 
+    /// <summary>Initializes a new instance of the <see cref="AssetRegistered"/> class.</summary>
+    /// <param name="assetId">The identifier of the registered asset.</param>
+    /// <param name="organizationId">The identifier of the owning Organization.</param>
+    /// <param name="assetModelId">The identifier of the asset's shared specification catalog entry.</param>
+    /// <param name="occurredOn">The UTC timestamp when the event occurred.</param>
     public AssetRegistered(AssetId assetId, Guid organizationId, AssetModelId assetModelId, DateTimeOffset occurredOn)
     {
         AssetId = assetId;
@@ -10158,7 +11061,7 @@ public sealed class AssetRegistered : IDomainEvent
 
 ================================================================================
 FILE: src\Modules\Asset\Asset.Domain\Events\AssetRetired.cs
-SIZE: 0.43 KB
+SIZE: 0.82 KB
 ================================================================================
 using MachineryManager.SharedKernel;
 
@@ -10167,9 +11070,15 @@ namespace Asset.Domain.Events;
 /// <summary>Raised when an Asset is permanently withdrawn from use.</summary>
 public sealed class AssetRetired : IDomainEvent
 {
+    /// <summary>Gets the identifier of the retired asset.</summary>
     public AssetId AssetId { get; }
+
+    /// <summary>Gets the UTC timestamp when the event occurred.</summary>
     public DateTimeOffset OccurredOn { get; }
 
+    /// <summary>Initializes a new instance of the <see cref="AssetRetired"/> class.</summary>
+    /// <param name="assetId">The identifier of the retired asset.</param>
+    /// <param name="occurredOn">The UTC timestamp when the event occurred.</param>
     public AssetRetired(AssetId assetId, DateTimeOffset occurredOn)
     {
         AssetId = assetId;
@@ -10259,7 +11168,7 @@ SIZE: 0.41 KB
 
 ================================================================================
 FILE: src\Modules\Asset\Asset.Infrastructure\DependencyInjection.cs
-SIZE: 1.91 KB
+SIZE: 1.97 KB
 ================================================================================
 using MachineryManager.Asset.Application.Abstractions;
 using MachineryManager.Asset.Infrastructure.Persistence;
@@ -10296,6 +11205,7 @@ public static class DependencyInjection
                     "__EFMigrationsHistory",
                     schema: "asset")));
 
+        services.AddScoped<IAssetRepository, AssetRepository>();
         services.AddScoped<IAssetModelRepository, AssetModelRepository>();
         services.AddScoped<IEngineModelRepository, EngineModelRepository>();
         services.AddScoped<IUnitOfWork>(serviceProvider =>
@@ -10567,7 +11477,7 @@ namespace Asset.Infrastructure.Migrations
 
 ================================================================================
 FILE: src\Modules\Asset\Asset.Infrastructure\Persistence\AssetDbContext.cs
-SIZE: 3.05 KB
+SIZE: 3.2 KB
 ================================================================================
 using MachineryManager.SharedKernel;
 using MachineryManager.SharedKernel.Abstractions;
@@ -10596,6 +11506,9 @@ public sealed class AssetDbContext : DbContext, IUnitOfWork
     {
         _domainEventDispatcher = domainEventDispatcher;
     }
+
+    /// <summary>Gets the set of Asset aggregates.</summary>
+    public DbSet<global::Asset.Domain.Asset> Assets => Set<global::Asset.Domain.Asset>();
 
     /// <summary>Gets the set of Asset Model aggregates.</summary>
     public DbSet<global::Asset.Domain.AssetModel> AssetModels => Set<global::Asset.Domain.AssetModel>();
@@ -10731,6 +11644,96 @@ public sealed class AssetModelRepository : IAssetModelRepository
             totalPages,
             page < totalPages,
             page > 1);
+    }
+}
+
+================================================================================
+FILE: src\Modules\Asset\Asset.Infrastructure\Persistence\AssetRepository.cs
+SIZE: 1.23 KB
+================================================================================
+using Asset.Domain;
+using MachineryManager.Asset.Application.Abstractions;
+using Microsoft.EntityFrameworkCore;
+
+namespace MachineryManager.Asset.Infrastructure.Persistence;
+
+/// <summary>EF Core implementation of <see cref="IAssetRepository"/>.</summary>
+public sealed class AssetRepository : IAssetRepository
+{
+    private readonly AssetDbContext _dbContext;
+
+    /// <summary>Initializes a new instance of the <see cref="AssetRepository"/> class.</summary>
+    /// <param name="dbContext">The Asset module's persistence context.</param>
+    public AssetRepository(AssetDbContext dbContext)
+    {
+        _dbContext = dbContext;
+    }
+
+    /// <inheritdoc />
+    public Task<global::Asset.Domain.Asset?> GetByIdAsync(AssetId id, CancellationToken cancellationToken = default) =>
+        _dbContext.Assets.FirstOrDefaultAsync(a => a.Id == id, cancellationToken);
+
+    /// <inheritdoc />
+    public void Add(global::Asset.Domain.Asset aggregate) => _dbContext.Assets.Add(aggregate);
+
+    /// <inheritdoc />
+    public void Update(global::Asset.Domain.Asset aggregate) => _dbContext.Assets.Update(aggregate);
+
+    /// <inheritdoc />
+    public void Remove(global::Asset.Domain.Asset aggregate) => _dbContext.Assets.Remove(aggregate);
+}
+
+================================================================================
+FILE: src\Modules\Asset\Asset.Infrastructure\Persistence\Configurations\AssetConfiguration.cs
+SIZE: 1.62 KB
+================================================================================
+using Asset.Domain;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata.Builders;
+
+namespace MachineryManager.Asset.Infrastructure.Persistence.Configurations;
+
+/// <summary>EF Core mapping for the <see cref="global::Asset.Domain.Asset"/> aggregate.</summary>
+public sealed class AssetConfiguration : IEntityTypeConfiguration<global::Asset.Domain.Asset>
+{
+    /// <inheritdoc />
+    public void Configure(EntityTypeBuilder<global::Asset.Domain.Asset> builder)
+    {
+        builder.ToTable("Asset");
+
+        builder.HasKey(a => a.Id);
+
+        builder.Property(a => a.Id)
+            .HasConversion(id => id.Value, value => AssetId.From(value))
+            .ValueGeneratedNever();
+
+        builder.Property(a => a.OrganizationId)
+            .IsRequired();
+
+        builder.HasIndex(a => a.OrganizationId);
+
+        builder.Property(a => a.AssetModelId)
+            .HasConversion(id => id.Value, value => AssetModelId.From(value))
+            .IsRequired();
+
+        builder.HasIndex(a => a.AssetModelId);
+
+        builder.Property(a => a.SerialNumber)
+            .HasMaxLength(global::Asset.Domain.Asset.MaxSerialNumberLength);
+
+        builder.Property(a => a.LicensePlate)
+            .HasMaxLength(global::Asset.Domain.Asset.MaxLicensePlateLength);
+
+        builder.Property(a => a.ManufactureYear);
+
+        builder.Property(a => a.Color)
+            .HasMaxLength(global::Asset.Domain.Asset.MaxColorLength)
+            .IsRequired();
+
+        builder.Property(a => a.Status)
+            .HasConversion<string>()
+            .HasMaxLength(20)
+            .IsRequired();
     }
 }
 
@@ -20134,6 +21137,53 @@ public sealed class OrganizationDbContext : DbContext, IUnitOfWork
 }
 
 ================================================================================
+FILE: src\Modules\Organization\Organization.Infrastructure\Persistence\OrganizationLookupService.cs
+SIZE: 1.47 KB
+================================================================================
+using MachineryManager.Organization.Infrastructure.Persistence;
+using MachineryManager.SharedKernel.Abstractions;
+using Microsoft.EntityFrameworkCore;
+using Organization.Domain;
+
+namespace MachineryManager.Organization.Infrastructure;
+
+/// <inheritdoc cref="IOrganizationLookupService" />
+public sealed class OrganizationLookupService : IOrganizationLookupService
+{
+    private readonly OrganizationDbContext _dbContext;
+
+    /// <summary>Initializes a new instance of the <see cref="OrganizationLookupService"/> class.</summary>
+    public OrganizationLookupService(OrganizationDbContext dbContext)
+    {
+        _dbContext = dbContext;
+    }
+
+    /// <inheritdoc />
+    public async Task<Guid?> GetHoldingIdAsync(Guid organizationId, CancellationToken cancellationToken = default)
+    {
+        var id = OrganizationId.From(organizationId);
+
+        var holdingId = await _dbContext.Organizations
+            .AsNoTracking()
+            .Where(o => o.Id == id)
+            .Select(o => (Guid?)(o.HoldingId == null ? null : o.HoldingId.Value))
+            .FirstOrDefaultAsync(cancellationToken);
+
+        return holdingId;
+    }
+
+    /// <inheritdoc />
+    public async Task<bool> ExistsAsync(Guid organizationId, CancellationToken cancellationToken = default)
+    {
+        var id = OrganizationId.From(organizationId);
+
+        return await _dbContext.Organizations
+            .AsNoTracking()
+            .AnyAsync(o => o.Id == id, cancellationToken);
+    }
+}
+
+================================================================================
 FILE: src\Modules\Organization\Organization.Infrastructure\Persistence\OrganizationRepository.cs
 SIZE: 4.17 KB
 ================================================================================
@@ -22286,12 +23336,12 @@ SIZE: 0.53 KB
 # SECTION 3: SNAPSHOT SUMMARY
 ================================================================================
 
-Generation Time     : 00:00:01.7409619
-Total Files Scanned : 362
-Files Included      : 362
+Generation Time     : 00:00:02.0234521
+Total Files Scanned : 385
+Files Included      : 385
 Files Skipped       : 0
-Total Source Size   : 0.74 MB
-Snapshot File Size  : 0.86 MB
+Total Source Size   : 0.78 MB
+Snapshot File Size  : 0.91 MB
 Output Path         : C:\Users\i\source\repos\MachineryManagerEnterprise\MME_Codebase_Snapshot.txt
 
 Excluded Directories: .git, .github, .vs, .vscode, .idea, .azure, .devcontainer, bin, obj, packages, publish, out, release, releases, debug, x64, x86, arm64, artifacts, .artifacts, node_modules, dist, build, bower_components, jspm_packages, docs-english, docs-farsi, docs, tools, test-results, coverage, .coverage, TestResults, lib, .angular, .next, .nuxt, .svelte-kit, .cache, .temp, tmp

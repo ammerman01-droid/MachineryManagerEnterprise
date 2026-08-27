@@ -29,4 +29,14 @@ public sealed class OrganizationLookupService : IOrganizationLookupService
 
         return holdingId;
     }
+
+    /// <inheritdoc />
+    public async Task<bool> ExistsAsync(Guid organizationId, CancellationToken cancellationToken = default)
+    {
+        var id = OrganizationId.From(organizationId);
+
+        return await _dbContext.Organizations
+            .AsNoTracking()
+            .AnyAsync(o => o.Id == id, cancellationToken);
+    }
 }

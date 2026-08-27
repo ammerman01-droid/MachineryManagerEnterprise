@@ -19,4 +19,20 @@ public static class AssetErrors
     public static Error NotAuthorized() => Error.Failure(
         "Asset.NotAuthorized",
         "You do not have permission to perform this action.");
+
+    /// <summary>
+    /// Creates an error indicating the given OrganizationId does not
+    /// correspond to an existing Organization (chat, 2026-08-27).
+    /// </summary>
+    public static Error OrganizationNotFound(Guid organizationId) => Error.NotFound(
+        "Asset.OrganizationNotFound",
+        $"Organization with id {organizationId} was not found.");
+
+    /// <summary>
+    /// Creates an error indicating the given AssetModelId does not
+    /// correspond to an existing Asset Model (chat, 2026-08-27).
+    /// </summary>
+    public static Error AssetModelNotFound(Guid assetModelId) => Error.NotFound(
+        "Asset.AssetModelNotFound",
+        $"Asset model with id {assetModelId} was not found.");
 }

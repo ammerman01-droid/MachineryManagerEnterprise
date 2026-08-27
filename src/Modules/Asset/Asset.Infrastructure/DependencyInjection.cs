@@ -33,6 +33,7 @@ public static class DependencyInjection
                     "__EFMigrationsHistory",
                     schema: "asset")));
 
+        services.AddScoped<IAssetRepository, AssetRepository>();
         services.AddScoped<IAssetModelRepository, AssetModelRepository>();
         services.AddScoped<IEngineModelRepository, EngineModelRepository>();
         services.AddScoped<IUnitOfWork>(serviceProvider =>

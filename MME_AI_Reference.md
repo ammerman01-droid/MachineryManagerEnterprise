@@ -394,6 +394,10 @@ Asset Models / Component Models → Knowledge
   - Zero or one installed primary Engine
   - Only one active primary Meter Device per measurement type
 - **Lifecycle:** Draft → Registered → Commissioned → Operational → Inactive → Retired → Disposed
+> Note (chat, 2026-08-27): the Commissioned→Operational transition
+> raises AssetActivated; the later Inactive→Operational transition
+> raises the distinct AssetReactivated event, preserving an accurate
+> audit trail of first activation vs. reactivation.
 
 ### AssetModel Aggregate
 - **Root:** AssetModel
