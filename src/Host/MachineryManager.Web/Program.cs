@@ -95,12 +95,13 @@ try
     app.UseAntiforgery();
 
     app.MapStaticAssets();
-    app.MapRazorComponents<App>()
+        app.MapRazorComponents<App>()
         .AddInteractiveServerRenderMode()
         .AddAdditionalAssemblies(
             typeof(MachineryManager.Identity.Presentation.Components.Pages.Login).Assembly,
             typeof(MachineryManager.Administration.Presentation.Components.Pages.ProfilesList).Assembly,
-            typeof(MachineryManager.Organization.Presentation.Components.Pages.OrganizationsList).Assembly);
+            typeof(MachineryManager.Organization.Presentation.Components.Pages.OrganizationsList).Assembly,
+            typeof(MachineryManager.Asset.Presentation.Components.Pages.AssetModelsList).Assembly);
 
     // Identity endpoints
     app.MapIdentityConnectEndpoints();

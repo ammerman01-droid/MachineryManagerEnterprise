@@ -41,7 +41,12 @@
 
                 @if (selectedScopeLevel == "Holding")
                 {
-                    <MudTextField @bind-Value="scopeHoldingId" Label="شناسه Holding" Required="true" Class="mt-4" />
+                    <MudSelect T="Guid?" @bind-Value="selectedHoldingId" Label="Holding" Required="true" Class="mt-4">
+                        @foreach (var holding in holdings)
+                        {
+                            <MudSelectItem T="Guid?" Value="@((Guid?)holding.Id)">@holding.Name</MudSelectItem>
+                        }
+                    </MudSelect>
                 }
                 else if (selectedScopeLevel == "Organization")
                 {
@@ -108,8 +113,7 @@
                     <MudTd>
                         @if (context.IsActive)
                         {
-                            <MudButton Variant="Variant.Text" Color="Color.Warning"
-                                       Disabled="@(busyAssignmentId == context.Id)"
+                            <MudButton Variant="Variant.Text" Color="Color.Warning" Disabled="@(busyAssignmentId == context.Id)"
                                        OnClick="@(() => DeactivateAsync(context.Id))">
                                 @if (busyAssignmentId == context.Id)
                                 {
@@ -123,8 +127,7 @@
                         }
                         else
                         {
-                            <MudButton Variant="Variant.Text" Color="Color.Success"
-                                       Disabled="@(busyAssignmentId == context.Id)"
+                            <MudButton Variant="Variant.Text" Color="Color.Success" Disabled="@(busyAssignmentId == context.Id)"
                                        OnClick="@(() => ActivateAsync(context.Id))">
                                 @if (busyAssignmentId == context.Id)
                                 {
@@ -136,8 +139,7 @@
                                 }
                             </MudButton>
                         }
-                        <MudButton Variant="Variant.Text" Color="Color.Error"
-                                   Disabled="@(busyAssignmentId == context.Id)"
+                        <MudButton Variant="Variant.Text" Color="Color.Error" Disabled="@(busyAssignmentId == context.Id)"
                                    OnClick="@(() => DeleteAsync(context.Id))">
                             @if (busyAssignmentId == context.Id)
                             {
@@ -172,7 +174,6 @@
     private List<ProfileItem> profiles = new();
     private Guid selectedProfileId;
     private string selectedScopeLevel = "Platform";
-    private string? scopeHoldingId;
     private string? scopeOrganizationId;
     private string? scopeProjectId;
 
@@ -185,10 +186,41 @@
     /// Initializes the component and loads the available profiles and
     /// the user's current assignments.
     /// </summary>
-    protected override async Task OnInitializedAsync()
+        protected override async Task OnInitializedAsync()
     {
         await LoadProfilesAsync();
+        await LoadHoldingsAsync();
         await LoadAssignmentsAsync();
+    }
+
+    private async Task LoadHoldingsAsync()
+    {
+        try
+        {
+            var client = HttpClientFactory.CreateClient("InternalApi");
+            var response = await client.GetAsync("/api/v1/holdings?pageSize=200");
+            var content = await response.Content.ReadAsStringAsync();
+
+            if (!response.IsSuccessStatusCode)
+            {
+                errorMessage = $"خطا در دریافت هلدینگ‌ها: {content}";
+                return;
+            }
+
+            var result = System.Text.Json.JsonSerializer.Deserialize<SearchHoldingsResultDto>(content, new
+System.Text.Json.JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+
+            holdings = result?.Items ?? new List<HoldingItem>();
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"خطا: {ex.Message}";
+        }
+    }
+
+    private sealed class SearchHoldingsResultDto
+    {
+        public List<HoldingItem> Items { get; set; } = new();
     }
 
     /// <summary>
@@ -300,7 +332,7 @@ System.Text.Json.JsonSerializerOptions
                     $"Unsupported authorization scope level: {selectedScopeLevel}.")
             };
 
-            Guid? holdingId = ParseScopeId(scopeHoldingId, "Holding");
+            Guid? holdingId = selectedHoldingId;
             Guid? organizationId = ParseScopeId(scopeOrganizationId, "Organization");
             Guid? projectId = ParseScopeId(scopeProjectId, "Project");
 
@@ -480,4 +512,13 @@ System.Text.Json.JsonSerializerOptions
         public bool IsActive { get; set; }
         public DateTimeOffset? LastChangedAt { get; set; }
     }
+
+    private sealed class HoldingItem
+    {
+        public Guid Id { get; set; }
+        public string Name { get; set; } = string.Empty;
+    }
+
+    private List<HoldingItem> holdings = new();
+    private Guid? selectedHoldingId;
 }

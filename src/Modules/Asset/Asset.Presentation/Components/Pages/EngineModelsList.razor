@@ -7,14 +7,17 @@
 
 <MudText Typo="Typo.h4" Class="mb-4">مدل‌های موتور</MudText>
 
-<MudPaper Class="pa-4 mb-4">
-    <MudSelect T="Guid?" Label="Holding" Value="selectedHoldingId" ValueChanged="OnHoldingChangedAsync">
-        @foreach (var holding in holdings)
-        {
-            <MudSelectItem T="Guid?" Value="@((Guid?)holding.Id)">@holding.Name</MudSelectItem>
-        }
-    </MudSelect>
-</MudPaper>
+@if (holdings.Count > 1)
+{
+    <MudPaper Class="pa-4 mb-4">
+        <MudSelect T="Guid?" Label="Holding" Value="selectedHoldingId" ValueChanged="OnHoldingChangedAsync">
+            @foreach (var holding in holdings)
+            {
+                <MudSelectItem T="Guid?" Value="@((Guid?)holding.Id)">@holding.Name</MudSelectItem>
+            }
+        </MudSelect>
+    </MudPaper>
+}
 
 @if (errorMessage is not null)
 {
@@ -102,6 +105,15 @@
 System.Text.Json.JsonSerializerOptions { PropertyNameCaseInsensitive = true });
 
             holdings = result?.Items ?? [];
+
+            // If the user's scope only grants them one Holding, the API
+            // above already returns just that one (Phase 3 scope
+            // filtering) — auto-select it instead of showing a picker
+            // with a single option (chat, 2026-08-27).
+            if (holdings.Count == 1)
+            {
+                await OnHoldingChangedAsync(holdings[0].Id);
+            }
         }
         catch (Exception ex)
         {
