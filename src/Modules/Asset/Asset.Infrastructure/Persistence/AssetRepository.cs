@@ -1,5 +1,7 @@
 using Asset.Domain;
 using MachineryManager.Asset.Application.Abstractions;
+using MachineryManager.Asset.Application.Features.Assets.Dtos;
+using MachineryManager.Asset.Application.Features.Assets.Queries.SearchAssets;
 using Microsoft.EntityFrameworkCore;
 
 namespace MachineryManager.Asset.Infrastructure.Persistence;
@@ -28,4 +30,59 @@ public sealed class AssetRepository : IAssetRepository
 
     /// <inheritdoc />
     public void Remove(global::Asset.Domain.Asset aggregate) => _dbContext.Assets.Remove(aggregate);
+
+    /// <inheritdoc />
+    public async Task<SearchAssetsResponse> SearchAsync(
+        Guid organizationId,
+        string? searchTerm,
+        int page,
+        int pageSize,
+        CancellationToken cancellationToken = default)
+    {
+        var query = _dbContext.Assets
+            .AsNoTracking()
+            .Where(a => a.OrganizationId == organizationId);
+
+        if (!string.IsNullOrWhiteSpace(searchTerm))
+        {
+            query = query.Where(a =>
+                (a.SerialNumber != null && a.SerialNumber.Contains(searchTerm)) ||
+                (a.LicensePlate != null && a.LicensePlate.Contains(searchTerm)));
+        }
+
+        var totalItems = await query.CountAsync(cancellationToken);
+
+        // Materialize entities first, map to DTO in memory — avoids the
+        // EF Core 10 Select-projection translation issue hit earlier
+        // with Profile.Permissions / AssetModel.CompatibleEngineModelIds
+        // (chat, 2026-08-25).
+        var entities = await query
+            .OrderBy(a => a.SerialNumber)
+            .Skip((page - 1) * pageSize)
+            .Take(pageSize)
+            .ToListAsync(cancellationToken);
+
+        var items = entities
+            .Select(a => new AssetDto(
+                a.Id.Value,
+                a.OrganizationId,
+                a.AssetModelId.Value,
+                a.SerialNumber,
+                a.LicensePlate,
+                a.ManufactureYear,
+                a.Color,
+                a.Status.ToString()))
+            .ToList();
+
+        var totalPages = totalItems == 0 ? 0 : (int)Math.Ceiling(totalItems / (double)pageSize);
+
+        return new SearchAssetsResponse(
+            items,
+            page,
+            pageSize,
+            totalItems,
+            totalPages,
+            page < totalPages,
+            page > 1);
+    }
 }

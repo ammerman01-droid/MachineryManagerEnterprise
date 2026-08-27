@@ -29,6 +29,19 @@ public sealed class AssetConfiguration : IEntityTypeConfiguration<global::Asset.
 
         builder.HasIndex(a => a.AssetModelId);
 
+        // Real database-level FK (chat, 2026-08-27): no navigation
+        // property on the aggregate itself, preserving the project's
+        // "no cross-aggregate navigation" DDD boundary — this only
+        // tells EF which column is the FK. Restrict (not Cascade,
+        // unlike UserProfileAssignment -> Profile): an Asset is a real
+        // physical asset, so deleting its AssetModel must never
+        // cascade-delete real Asset records; the AssetModel cannot be
+        // removed while any Asset still references it.
+        builder.HasOne<AssetModel>()
+            .WithMany()
+            .HasForeignKey(a => a.AssetModelId)
+            .OnDelete(DeleteBehavior.Restrict);
+
         builder.Property(a => a.SerialNumber)
             .HasMaxLength(global::Asset.Domain.Asset.MaxSerialNumberLength);
 

@@ -1,7 +1,7 @@
 ﻿
 ================================================================================
   MACHINERYMANAGERENTERPRISE - CODEBASE SNAPSHOT
-  Generated: 2026-08-27 10:46:54
+  Generated: 2026-08-27 11:04:26
   Source: C:\Users\i\source\repos\MachineryManagerEnterprise
   Purpose: Complete source code reference for AI-assisted development
   Excludes: .md, .gitignore, this script, build artifacts, binaries, IDE,
@@ -510,7 +510,6 @@ MachineryManagerEnterprise
 |   |       |   |   |   +-- OrganizationDbContextModelSnapshot.cs
 |   |       |   |   |-- HoldingRepository.cs
 |   |       |   |   |-- OrganizationDbContext.cs
-|   |       |   |   |-- OrganizationLookupService.cs
 |   |       |   |   |-- OrganizationRepository.cs
 |   |       |   |   +-- ProjectRepository.cs
 |   |       |   |-- DependencyInjection.cs
@@ -20354,7 +20353,7 @@ SIZE: 0.56 KB
 
 ================================================================================
 FILE: src\Modules\Organization\Organization.Infrastructure\OrganizationLookupService.cs
-SIZE: 1.14 KB
+SIZE: 1.47 KB
 ================================================================================
 using MachineryManager.Organization.Infrastructure.Persistence;
 using MachineryManager.SharedKernel.Abstractions;
@@ -20386,6 +20385,16 @@ public sealed class OrganizationLookupService : IOrganizationLookupService
             .FirstOrDefaultAsync(cancellationToken);
 
         return holdingId;
+    }
+
+    /// <inheritdoc />
+    public async Task<bool> ExistsAsync(Guid organizationId, CancellationToken cancellationToken = default)
+    {
+        var id = OrganizationId.From(organizationId);
+
+        return await _dbContext.Organizations
+            .AsNoTracking()
+            .AnyAsync(o => o.Id == id, cancellationToken);
     }
 }
 
@@ -21133,53 +21142,6 @@ public sealed class OrganizationDbContext : DbContext, IUnitOfWork
         }
 
         return affectedRows;
-    }
-}
-
-================================================================================
-FILE: src\Modules\Organization\Organization.Infrastructure\Persistence\OrganizationLookupService.cs
-SIZE: 1.47 KB
-================================================================================
-using MachineryManager.Organization.Infrastructure.Persistence;
-using MachineryManager.SharedKernel.Abstractions;
-using Microsoft.EntityFrameworkCore;
-using Organization.Domain;
-
-namespace MachineryManager.Organization.Infrastructure;
-
-/// <inheritdoc cref="IOrganizationLookupService" />
-public sealed class OrganizationLookupService : IOrganizationLookupService
-{
-    private readonly OrganizationDbContext _dbContext;
-
-    /// <summary>Initializes a new instance of the <see cref="OrganizationLookupService"/> class.</summary>
-    public OrganizationLookupService(OrganizationDbContext dbContext)
-    {
-        _dbContext = dbContext;
-    }
-
-    /// <inheritdoc />
-    public async Task<Guid?> GetHoldingIdAsync(Guid organizationId, CancellationToken cancellationToken = default)
-    {
-        var id = OrganizationId.From(organizationId);
-
-        var holdingId = await _dbContext.Organizations
-            .AsNoTracking()
-            .Where(o => o.Id == id)
-            .Select(o => (Guid?)(o.HoldingId == null ? null : o.HoldingId.Value))
-            .FirstOrDefaultAsync(cancellationToken);
-
-        return holdingId;
-    }
-
-    /// <inheritdoc />
-    public async Task<bool> ExistsAsync(Guid organizationId, CancellationToken cancellationToken = default)
-    {
-        var id = OrganizationId.From(organizationId);
-
-        return await _dbContext.Organizations
-            .AsNoTracking()
-            .AnyAsync(o => o.Id == id, cancellationToken);
     }
 }
 
@@ -23336,12 +23298,12 @@ SIZE: 0.53 KB
 # SECTION 3: SNAPSHOT SUMMARY
 ================================================================================
 
-Generation Time     : 00:00:02.0234521
-Total Files Scanned : 385
-Files Included      : 385
+Generation Time     : 00:00:02.5466341
+Total Files Scanned : 384
+Files Included      : 384
 Files Skipped       : 0
 Total Source Size   : 0.78 MB
-Snapshot File Size  : 0.91 MB
+Snapshot File Size  : 0.9 MB
 Output Path         : C:\Users\i\source\repos\MachineryManagerEnterprise\MME_Codebase_Snapshot.txt
 
 Excluded Directories: .git, .github, .vs, .vscode, .idea, .azure, .devcontainer, bin, obj, packages, publish, out, release, releases, debug, x64, x86, arm64, artifacts, .artifacts, node_modules, dist, build, bower_components, jspm_packages, docs-english, docs-farsi, docs, tools, test-results, coverage, .coverage, TestResults, lib, .angular, .next, .nuxt, .svelte-kit, .cache, .temp, tmp

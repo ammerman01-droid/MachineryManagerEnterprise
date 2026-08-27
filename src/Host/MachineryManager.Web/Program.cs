@@ -121,6 +121,7 @@ try
     // Asset endpoints
     app.MapAssetModelEndpoints();
     app.MapEngineModelEndpoints();
+    app.MapAssetEndpoints();
 
     app.Run();
 }
