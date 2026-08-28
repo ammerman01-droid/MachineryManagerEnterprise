@@ -15,7 +15,7 @@ public sealed class RegisterOrganizationCommandHandler
     private const string RequiredPermission = "Organization.Create";
 
     private readonly IOrganizationRepository _repository;
-    private readonly IUnitOfWork _unitOfWork;
+    private readonly IOrganizationUnitOfWork _unitOfWork;
     private readonly IDateTimeProvider _dateTimeProvider;
     private readonly ICurrentUserService _currentUserService;
     private readonly IPermissionEvaluator _permissionEvaluator;
@@ -23,7 +23,7 @@ public sealed class RegisterOrganizationCommandHandler
     /// <summary>Initializes a new instance of the <see cref="RegisterOrganizationCommandHandler"/> class.</summary>
     public RegisterOrganizationCommandHandler(
         IOrganizationRepository repository,
-        IUnitOfWork unitOfWork,
+        IOrganizationUnitOfWork unitOfWork,
         IDateTimeProvider dateTimeProvider,
         ICurrentUserService currentUserService,
         IPermissionEvaluator permissionEvaluator)

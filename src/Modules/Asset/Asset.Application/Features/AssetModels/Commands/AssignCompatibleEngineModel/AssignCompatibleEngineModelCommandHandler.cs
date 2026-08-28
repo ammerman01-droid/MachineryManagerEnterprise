@@ -20,7 +20,7 @@ public sealed class AssignCompatibleEngineModelCommandHandler
 
     private readonly IAssetModelRepository _assetModelRepository;
     private readonly IEngineModelRepository _engineModelRepository;
-    private readonly IUnitOfWork _unitOfWork;
+    private readonly IAssetUnitOfWork _unitOfWork;
     private readonly IDateTimeProvider _dateTimeProvider;
     private readonly ICurrentUserService _currentUserService;
     private readonly IPermissionEvaluator _permissionEvaluator;
@@ -29,7 +29,7 @@ public sealed class AssignCompatibleEngineModelCommandHandler
     public AssignCompatibleEngineModelCommandHandler(
         IAssetModelRepository assetModelRepository,
         IEngineModelRepository engineModelRepository,
-        IUnitOfWork unitOfWork,
+        IAssetUnitOfWork unitOfWork,
         IDateTimeProvider dateTimeProvider,
         ICurrentUserService currentUserService,
         IPermissionEvaluator permissionEvaluator)

@@ -1,7 +1,7 @@
 ﻿
 ================================================================================
   MACHINERYMANAGERENTERPRISE - CODEBASE SNAPSHOT
-  Generated: 2026-08-27 17:41:37
+  Generated: 2026-08-28 10:11:32
   Source: C:\Users\i\source\repos\MachineryManagerEnterprise
   Purpose: Complete source code reference for AI-assisted development
   Excludes: .md, .gitignore, this script, build artifacts, binaries, IDE,
@@ -331,8 +331,11 @@ MachineryManagerEnterprise
 |   |   |   +-- Asset.Presentation
 |   |   |       |-- Components
 |   |   |       |   |-- Pages
+|   |   |       |   |   |-- AssetDetails.razor
 |   |   |       |   |   |-- AssetModelCompatibility.razor
 |   |   |       |   |   |-- AssetModelsList.razor
+|   |   |       |   |   |-- AssetsList.razor
+|   |   |       |   |   |-- CreateAsset.razor
 |   |   |       |   |   |-- CreateAssetModel.razor
 |   |   |       |   |   |-- CreateEngineModel.razor
 |   |   |       |   |   |-- EditAssetModel.razor
@@ -1796,7 +1799,7 @@ SIZE: 0.84 KB
 
 ================================================================================
 FILE: src\Host\MachineryManager.Web\Components\Layout\NavMenu.razor
-SIZE: 2.33 KB
+SIZE: 2.55 KB
 ================================================================================
 <div class="top-row ps-3 navbar navbar-dark">
     <div class="container-fluid">
@@ -1813,7 +1816,7 @@ SIZE: 2.33 KB
                 <span class="bi bi-house-door-fill-nav-menu" aria-hidden="true"></span> Home
             </NavLink>
         </div>
-        
+
         <div class="nav-item px-3">
             <NavLink class="nav-link" href="admin/holdings">
                 <span class="bi bi-diagram-3-nav-menu" aria-hidden="true"></span> هلدینگ ها
@@ -1832,7 +1835,7 @@ SIZE: 2.33 KB
             </NavLink>
         </div>
 
-                <div class="nav-item px-3">
+        <div class="nav-item px-3">
             <NavLink class="nav-link" href="admin/asset-models">
                 <span class="bi bi-truck-front-nav-menu" aria-hidden="true"></span> مدل‌های دارایی
             </NavLink>
@@ -1841,6 +1844,12 @@ SIZE: 2.33 KB
         <div class="nav-item px-3">
             <NavLink class="nav-link" href="admin/engine-models">
                 <span class="bi bi-gear-wide-connected-nav-menu" aria-hidden="true"></span> مدل‌های موتور
+            </NavLink>
+        </div>
+
+        <div class="nav-item px-3">
+            <NavLink class="nav-link" href="admin/assets">
+                <span class="bi bi-truck-nav-menu" aria-hidden="true"></span> دارایی‌ها
             </NavLink>
         </div>
 
@@ -12512,7 +12521,7 @@ SIZE: 0.51 KB
 
 ================================================================================
 FILE: src\Modules\Asset\Asset.Presentation\Components\_Imports.razor
-SIZE: 0.32 KB
+SIZE: 0.37 KB
 ================================================================================
 @using Microsoft.AspNetCore.Components
 @using Microsoft.AspNetCore.Components.Web
@@ -12522,6 +12531,191 @@ SIZE: 0.32 KB
 @using MudBlazor
 @using System.Net.Http.Json
 @using static Microsoft.AspNetCore.Components.Web.RenderMode
+@using MachineryManager.Asset.Presentation.Contracts
+
+================================================================================
+FILE: src\Modules\Asset\Asset.Presentation\Components\Pages\AssetDetails.razor
+SIZE: 6.52 KB
+================================================================================
+@page "/admin/assets/{AssetId:guid}"
+@rendermode InteractiveServer
+@inject IHttpClientFactory HttpClientFactory
+@inject NavigationManager Navigation
+
+<PageTitle>جزئیات دارایی</PageTitle>
+
+@if (errorMessage is not null)
+{
+    <MudAlert Severity="Severity.Error" Class="my-4">@errorMessage</MudAlert>
+}
+
+@if (isLoading)
+{
+    <MudProgressLinear Indeterminate="true" Class="my-4" />
+}
+else if (asset is not null)
+{
+    <MudText Typo="Typo.h4" Class="mb-4">جزئیات دارایی</MudText>
+
+    <MudPaper Class="pa-4 mb-4">
+        <MudGrid>
+            <MudItem xs="12" md="6">
+                <MudField Label="شناسه" Variant="Variant.Outlined">@asset.Id</MudField>
+            </MudItem>
+            <MudItem xs="12" md="6">
+                <MudField Label="سازمان" Variant="Variant.Outlined">@asset.OrganizationId</MudField>
+            </MudItem>
+            <MudItem xs="12" md="6">
+                <MudField Label="مدل دارایی" Variant="Variant.Outlined">@asset.AssetModelId</MudField>
+            </MudItem>
+            <MudItem xs="12" md="6">
+                <MudField Label="شماره سریال" Variant="Variant.Outlined">@(asset.SerialNumber ?? "-")</MudField>
+            </MudItem>
+            <MudItem xs="12" md="6">
+                <MudField Label="پلاک" Variant="Variant.Outlined">@(asset.LicensePlate ?? "-")</MudField>
+            </MudItem>
+            <MudItem xs="12" md="6">
+                <MudField Label="سال ساخت" Variant="Variant.Outlined">@(asset.ManufactureYear?.ToString() ?? "-")</MudField>
+            </MudItem>
+            <MudItem xs="12" md="6">
+                <MudField Label="رنگ" Variant="Variant.Outlined">@asset.Color</MudField>
+            </MudItem>
+            <MudItem xs="12" md="6">
+                <MudField Label="وضعیت" Variant="Variant.Outlined">@TranslateStatus(asset.Status)</MudField>
+            </MudItem>
+        </MudGrid>
+    </MudPaper>
+
+    <MudText Typo="Typo.h6" Class="mb-2">عملیات چرخه حیات</MudText>
+    <MudPaper Class="pa-4">
+        @if (asset.Status == "Registered")
+        {
+            <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick='() => ExecuteActionAsync("commission")' Disabled="isActing">راه‌اندازی</MudButton>
+        }
+        else if (asset.Status == "Commissioned" || asset.Status == "Inactive")
+        {
+            <MudButton Variant="Variant.Filled" Color="Color.Success" OnClick='() => ExecuteActionAsync("activate")' Disabled="isActing">فعال‌سازی</MudButton>
+        }
+
+        @if (asset.Status == "Operational")
+        {
+            <MudButton Variant="Variant.Filled" Color="Color.Warning" OnClick='() => ExecuteActionAsync("deactivate")' Disabled="isActing" Class="mx-2">غیرفعال‌سازی</MudButton>
+            <MudButton Variant="Variant.Filled" Color="Color.Error" OnClick='() => ExecuteActionAsync("retire")' Disabled="isActing">بازنشستگی</MudButton>
+        }
+
+        @if (asset.Status == "Inactive")
+        {
+            <MudButton Variant="Variant.Filled" Color="Color.Error" OnClick='() => ExecuteActionAsync("retire")' Disabled="isActing" Class="mx-2">بازنشستگی</MudButton>
+        }
+
+        @if (asset.Status == "Retired")
+        {
+            <MudButton Variant="Variant.Filled" Color="Color.Dark" OnClick='() => ExecuteActionAsync("dispose")' Disabled="isActing">اسقاط</MudButton>
+        }
+    </MudPaper>
+
+    <MudButton Variant="Variant.Outlined" Color="Color.Secondary" Class="mt-4" OnClick="@(() => Navigation.NavigateTo("/admin/assets"))">
+        بازگشت به لیست
+    </MudButton>
+}
+
+@code {
+    private sealed class AssetDetail
+    {
+        public Guid Id { get; set; }
+        public Guid OrganizationId { get; set; }
+        public Guid AssetModelId { get; set; }
+        public string? SerialNumber { get; set; }
+        public string? LicensePlate { get; set; }
+        public int? ManufactureYear { get; set; }
+        public string Color { get; set; } = string.Empty;
+        public string Status { get; set; } = string.Empty;
+    }
+
+    [Parameter]
+    public Guid AssetId { get; set; }
+
+    private AssetDetail? asset;
+    private bool isLoading = true;
+    private bool isActing;
+    private string? errorMessage;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadAssetAsync();
+    }
+
+    private async Task LoadAssetAsync()
+    {
+        isLoading = true;
+        errorMessage = null;
+
+        try
+        {
+            var client = HttpClientFactory.CreateClient("InternalApi");
+            var response = await client.GetAsync($"/api/v1/assets/{AssetId}");
+            var content = await response.Content.ReadAsStringAsync();
+
+            if (response.IsSuccessStatusCode)
+            {
+                asset = System.Text.Json.JsonSerializer.Deserialize<AssetDetail>(content, new System.Text.Json.JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+            }
+            else
+            {
+                errorMessage = $"خطا در دریافت دارایی: {content}";
+            }
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"خطا: {ex.Message}";
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+
+    private async Task ExecuteActionAsync(string action)
+    {
+        isActing = true;
+        errorMessage = null;
+
+        try
+        {
+            var client = HttpClientFactory.CreateClient("InternalApi");
+            var response = await client.PostAsync($"/api/v1/assets/{AssetId}/{action}", null);
+            var content = await response.Content.ReadAsStringAsync();
+
+            if (response.IsSuccessStatusCode)
+            {
+                await LoadAssetAsync();
+            }
+            else
+            {
+                errorMessage = $"خطا در عملیات: {content}";
+            }
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"خطا: {ex.Message}";
+        }
+        finally
+        {
+            isActing = false;
+        }
+    }
+
+    private static string TranslateStatus(string status) => status switch
+    {
+        "Registered" => "ثبت‌شده",
+        "Commissioned" => "راه‌اندازی‌شده",
+        "Operational" => "در حال بهره‌برداری",
+        "Inactive" => "غیرفعال",
+        "Retired" => "بازنشسته",
+        "Disposed" => "اسقاط‌شده",
+        _ => status
+    };
+}
 
 ================================================================================
 FILE: src\Modules\Asset\Asset.Presentation\Components\Pages\AssetModelCompatibility.razor
@@ -12897,6 +13091,431 @@ System.Text.Json.JsonSerializerOptions { PropertyNameCaseInsensitive = true });
         finally
         {
             isLoading = false;
+        }
+    }
+}
+
+================================================================================
+FILE: src\Modules\Asset\Asset.Presentation\Components\Pages\AssetsList.razor
+SIZE: 7.82 KB
+================================================================================
+@page "/admin/assets"
+@rendermode InteractiveServer
+@inject IHttpClientFactory HttpClientFactory
+@inject NavigationManager Navigation
+
+<PageTitle>دارایی‌ها</PageTitle>
+
+<MudText Typo="Typo.h4" Class="mb-4">دارایی‌ها</MudText>
+
+@if (errorMessage is not null)
+{
+    <MudAlert Severity="Severity.Error" Class="my-4">@errorMessage</MudAlert>
+}
+
+@if (organizations.Count > 1)
+{
+    <MudPaper Class="pa-4 mb-4">
+        <MudSelect T="Guid?" Label="سازمان" Value="selectedOrganizationId" ValueChanged="OnOrganizationChangedAsync">
+            @foreach (var org in organizations)
+            {
+                <MudSelectItem T="Guid?" Value="@((Guid?)org.Id)">@org.Name</MudSelectItem>
+            }
+        </MudSelect>
+    </MudPaper>
+}
+
+@if (selectedOrganizationId is not null)
+{
+    <MudButton Variant="Variant.Filled" Color="Color.Primary" Class="mb-4"
+               OnClick="@(() => Navigation.NavigateTo($"/admin/assets/create?organizationId={selectedOrganizationId}&holdingId={selectedHoldingId}"))">
+        ثبت دارایی جدید
+    </MudButton>
+
+    @if (isLoading)
+    {
+        <MudProgressLinear Indeterminate="true" Class="my-4" />
+    }
+    else
+    {
+        <MudTable Items="items" Hover="true">
+            <HeaderContent>
+                <MudTh>مدل</MudTh>
+                <MudTh>شماره سریال</MudTh>
+                <MudTh>پلاک</MudTh>
+                <MudTh>سال ساخت</MudTh>
+                <MudTh>رنگ</MudTh>
+                <MudTh>وضعیت</MudTh>
+                <MudTh>عملیات</MudTh>
+            </HeaderContent>
+            <RowTemplate>
+                <MudTd DataLabel="مدل">@GetAssetModelName(context.AssetModelId)</MudTd>
+                <MudTd DataLabel="شماره سریال">@(context.SerialNumber ?? "-")</MudTd>
+                <MudTd DataLabel="پلاک">@(context.LicensePlate ?? "-")</MudTd>
+                <MudTd DataLabel="سال ساخت">@(context.ManufactureYear?.ToString() ?? "-")</MudTd>
+                <MudTd DataLabel="رنگ">@context.Color</MudTd>
+                <MudTd DataLabel="وضعیت">@TranslateStatus(context.Status)</MudTd>
+                <MudTd DataLabel="عملیات">
+                    <MudButton Size="Size.Small" Variant="Variant.Text" Color="Color.Primary"
+                               OnClick="@(() => Navigation.NavigateTo($"/admin/assets/{context.Id}"))">
+                        جزئیات
+                    </MudButton>
+                </MudTd>
+            </RowTemplate>
+        </MudTable>
+    }
+}
+
+@code {
+    private sealed class OrganizationItem
+    {
+        public Guid Id { get; set; }
+        public string Name { get; set; } = string.Empty;
+        public Guid HoldingId { get; set; }
+    }
+
+    private sealed class AssetModelItem
+    {
+        public Guid Id { get; set; }
+        public string Name { get; set; } = string.Empty;
+    }
+
+    private sealed class AssetItem
+    {
+        public Guid Id { get; set; }
+        public Guid OrganizationId { get; set; }
+        public Guid AssetModelId { get; set; }
+        public string? SerialNumber { get; set; }
+        public string? LicensePlate { get; set; }
+        public int? ManufactureYear { get; set; }
+        public string Color { get; set; } = string.Empty;
+        public string Status { get; set; } = string.Empty;
+    }
+
+    private sealed class SearchAssetsResult
+    {
+        public List<AssetItem> Items { get; set; } = [];
+    }
+
+    private sealed class SearchOrganizationsResult
+    {
+        public List<OrganizationItem> Items { get; set; } = [];
+    }
+
+    private sealed class SearchAssetModelsResult
+    {
+        public List<AssetModelItem> Items { get; set; } = [];
+    }
+
+    private List<OrganizationItem> organizations = [];
+    private List<AssetItem> items = [];
+    private Dictionary<Guid, string> assetModelNames = [];
+    private Guid? selectedOrganizationId;
+    private Guid selectedHoldingId;
+    private bool isLoading;
+    private string? errorMessage;
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            var client = HttpClientFactory.CreateClient("InternalApi");
+            var response = await client.GetAsync("/api/v1/organizations?pageSize=200");
+            var content = await response.Content.ReadAsStringAsync();
+
+            if (!response.IsSuccessStatusCode)
+            {
+                errorMessage = $"خطا در دریافت سازمان‌ها: {content}";
+                return;
+            }
+
+            var result = System.Text.Json.JsonSerializer.Deserialize<SearchOrganizationsResult>(content, new System.Text.Json.JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+            organizations = result?.Items ?? [];
+
+            if (organizations.Count == 1)
+            {
+                await OnOrganizationChangedAsync(organizations[0].Id);
+            }
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"خطا: {ex.Message}";
+        }
+    }
+
+    private async Task OnOrganizationChangedAsync(Guid? organizationId)
+    {
+        selectedOrganizationId = organizationId;
+        selectedHoldingId = organizations.FirstOrDefault(o => o.Id == organizationId)?.HoldingId ?? Guid.Empty;
+        await LoadAssetsAsync();
+        if (selectedHoldingId != Guid.Empty)
+        {
+            await LoadAssetModelsAsync();
+        }
+    }
+
+    private async Task LoadAssetsAsync()
+    {
+        if (selectedOrganizationId is null) return;
+
+        isLoading = true;
+        errorMessage = null;
+
+        try
+        {
+            var client = HttpClientFactory.CreateClient("InternalApi");
+            var response = await client.GetAsync($"/api/v1/assets?organizationId={selectedOrganizationId}&pageSize=200");
+            var content = await response.Content.ReadAsStringAsync();
+
+            if (!response.IsSuccessStatusCode)
+            {
+                errorMessage = $"خطا در دریافت دارایی‌ها: {content}";
+                return;
+            }
+
+            var result = System.Text.Json.JsonSerializer.Deserialize<SearchAssetsResult>(content, new System.Text.Json.JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+            items = result?.Items ?? [];
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"خطا: {ex.Message}";
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+
+    private async Task LoadAssetModelsAsync()
+    {
+        try
+        {
+            var client = HttpClientFactory.CreateClient("InternalApi");
+            var response = await client.GetAsync($"/api/v1/asset-models?holdingId={selectedHoldingId}&pageSize=200");
+            var content = await response.Content.ReadAsStringAsync();
+
+            if (response.IsSuccessStatusCode)
+            {
+                var result = System.Text.Json.JsonSerializer.Deserialize<SearchAssetModelsResult>(content, new System.Text.Json.JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+                assetModelNames = (result?.Items ?? []).ToDictionary(a => a.Id, a => a.Name);
+            }
+        }
+        catch
+        {
+            // Best effort
+        }
+    }
+
+    private string GetAssetModelName(Guid assetModelId)
+    {
+        return assetModelNames.TryGetValue(assetModelId, out var name) ? name : assetModelId.ToString();
+    }
+
+    private static string TranslateStatus(string status) => status switch
+    {
+        "Registered" => "ثبت‌شده",
+        "Commissioned" => "راه‌اندازی‌شده",
+        "Operational" => "در حال بهره‌برداری",
+        "Inactive" => "غیرفعال",
+        "Retired" => "بازنشسته",
+        "Disposed" => "اسقاط‌شده",
+        _ => status
+    };
+}
+
+================================================================================
+FILE: src\Modules\Asset\Asset.Presentation\Components\Pages\CreateAsset.razor
+SIZE: 6.71 KB
+================================================================================
+@page "/admin/assets/create"
+@rendermode InteractiveServer
+@inject IHttpClientFactory HttpClientFactory
+@inject NavigationManager Navigation
+
+<PageTitle>ثبت دارایی جدید</PageTitle>
+
+<MudText Typo="Typo.h4" Class="mb-4">ثبت دارایی جدید</MudText>
+
+@if (errorMessage is not null)
+{
+    <MudAlert Severity="Severity.Error" Class="my-4">@errorMessage</MudAlert>
+}
+
+@if (isLoading)
+{
+    <MudProgressLinear Indeterminate="true" Class="my-4" />
+}
+else
+{
+    <MudPaper Class="pa-4">
+        <MudForm @ref="form">
+            <MudSelect T="Guid" Label="سازمان" @bind-Value="model.OrganizationId" Required="true" RequiredError="سازمان الزامی است">
+                @foreach (var org in organizations)
+                {
+                    <MudSelectItem T="Guid" Value="@org.Id">@org.Name</MudSelectItem>
+                }
+            </MudSelect>
+
+            <MudSelect T="Guid" Label="مدل دارایی" @bind-Value="model.AssetModelId" Required="true" RequiredError="مدل دارایی الزامی است" Class="mt-4">
+                @foreach (var am in assetModels)
+                {
+                    <MudSelectItem T="Guid" Value="@am.Id">@am.Name</MudSelectItem>
+                }
+            </MudSelect>
+
+            <MudTextField T="string" Label="رنگ" @bind-Value="model.Color" Required="true" RequiredError="رنگ الزامی است" MaxLength="50" Class="mt-4" />
+            <MudTextField T="string" Label="شماره سریال" @bind-Value="model.SerialNumber" MaxLength="100" Class="mt-4" />
+            <MudTextField T="string" Label="پلاک" @bind-Value="model.LicensePlate" MaxLength="50" Class="mt-4" />
+            <MudNumericField T="int?" Label="سال ساخت" @bind-Value="model.ManufactureYear" Min="1900" Max="2100" Class="mt-4" />
+
+            <MudButton Variant="Variant.Filled" Color="Color.Primary" Class="mt-4" OnClick="SubmitAsync" Disabled="isSubmitting">
+                @(isSubmitting ? "در حال ثبت..." : "ثبت")
+            </MudButton>
+            <MudButton Variant="Variant.Outlined" Color="Color.Secondary" Class="mt-4 ml-2" OnClick="@(() => Navigation.NavigateTo("/admin/assets"))">
+                انصراف
+            </MudButton>
+        </MudForm>
+    </MudPaper>
+}
+
+@code {
+    private sealed class OrganizationItem
+    {
+        public Guid Id { get; set; }
+        public string Name { get; set; } = string.Empty;
+        public Guid HoldingId { get; set; }
+    }
+
+    private sealed class AssetModelItem
+    {
+        public Guid Id { get; set; }
+        public string Name { get; set; } = string.Empty;
+    }
+
+    private sealed class SearchOrganizationsResult
+    {
+        public List<OrganizationItem> Items { get; set; } = [];
+    }
+
+    private sealed class SearchAssetModelsResult
+    {
+        public List<AssetModelItem> Items { get; set; } = [];
+    }
+
+    private sealed class RegisterAssetModel
+    {
+        public Guid OrganizationId { get; set; }
+        public Guid AssetModelId { get; set; }
+        public string Color { get; set; } = string.Empty;
+        public string? SerialNumber { get; set; }
+        public string? LicensePlate { get; set; }
+        public int? ManufactureYear { get; set; }
+    }
+
+    private MudForm form = null!;
+    private RegisterAssetModel model = new();
+    private List<OrganizationItem> organizations = [];
+    private List<AssetModelItem> assetModels = [];
+    private bool isLoading = true;
+    private bool isSubmitting;
+    private string? errorMessage;
+
+    [SupplyParameterFromQuery]
+    public Guid? OrganizationId { get; set; }
+
+    [SupplyParameterFromQuery]
+    public Guid? HoldingId { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadOrganizationsAsync();
+        if (OrganizationId.HasValue)
+        {
+            model.OrganizationId = OrganizationId.Value;
+            var org = organizations.FirstOrDefault(o => o.Id == OrganizationId.Value);
+            var holdingId = HoldingId ?? org?.HoldingId ?? Guid.Empty;
+            if (holdingId != Guid.Empty)
+            {
+                await LoadAssetModelsAsync(holdingId);
+            }
+        }
+        isLoading = false;
+    }
+
+    private async Task LoadOrganizationsAsync()
+    {
+        try
+        {
+            var client = HttpClientFactory.CreateClient("InternalApi");
+            var response = await client.GetAsync("/api/v1/organizations?pageSize=200");
+            var content = await response.Content.ReadAsStringAsync();
+
+            if (response.IsSuccessStatusCode)
+            {
+                var result = System.Text.Json.JsonSerializer.Deserialize<SearchOrganizationsResult>(content, new System.Text.Json.JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+                organizations = result?.Items ?? [];
+            }
+            else
+            {
+                errorMessage = $"خطا در دریافت سازمان‌ها: {content}";
+            }
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"خطا: {ex.Message}";
+        }
+    }
+
+    private async Task LoadAssetModelsAsync(Guid holdingId)
+    {
+        try
+        {
+            var client = HttpClientFactory.CreateClient("InternalApi");
+            var response = await client.GetAsync($"/api/v1/asset-models?holdingId={holdingId}&pageSize=200");
+            var content = await response.Content.ReadAsStringAsync();
+
+            if (response.IsSuccessStatusCode)
+            {
+                var result = System.Text.Json.JsonSerializer.Deserialize<SearchAssetModelsResult>(content, new System.Text.Json.JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+                assetModels = result?.Items ?? [];
+            }
+        }
+        catch
+        {
+            // Best effort
+        }
+    }
+
+    private async Task SubmitAsync()
+    {
+        await form.Validate();
+        if (!form.IsValid) return;
+
+        isSubmitting = true;
+        errorMessage = null;
+
+        try
+        {
+            var client = HttpClientFactory.CreateClient("InternalApi");
+            var response = await client.PostAsJsonAsync("/api/v1/assets", model);
+            var content = await response.Content.ReadAsStringAsync();
+
+            if (response.IsSuccessStatusCode)
+            {
+                Navigation.NavigateTo("/admin/assets");
+            }
+            else
+            {
+                errorMessage = $"خطا در ثبت دارایی: {content}";
+            }
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"خطا: {ex.Message}";
+        }
+        finally
+        {
+            isSubmitting = false;
         }
     }
 }
@@ -24085,12 +24704,12 @@ SIZE: 0.53 KB
 # SECTION 3: SNAPSHOT SUMMARY
 ================================================================================
 
-Generation Time     : 00:00:03.6690039
-Total Files Scanned : 393
-Files Included      : 393
+Generation Time     : 00:00:07.3780742
+Total Files Scanned : 396
+Files Included      : 396
 Files Skipped       : 0
-Total Source Size   : 0.8 MB
-Snapshot File Size  : 0.93 MB
+Total Source Size   : 0.82 MB
+Snapshot File Size  : 0.95 MB
 Output Path         : C:\Users\i\source\repos\MachineryManagerEnterprise\MME_Codebase_Snapshot.txt
 
 Excluded Directories: .git, .github, .vs, .vscode, .idea, .azure, .devcontainer, bin, obj, packages, publish, out, release, releases, debug, x64, x86, arm64, artifacts, .artifacts, node_modules, dist, build, bower_components, jspm_packages, docs-english, docs-farsi, docs, tools, test-results, coverage, .coverage, TestResults, lib, .angular, .next, .nuxt, .svelte-kit, .cache, .temp, tmp

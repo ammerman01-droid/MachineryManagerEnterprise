@@ -528,6 +528,19 @@ module's Infrastructure layer; the consuming module depends only on
 the contract. This generalizes the same decoupling pattern already
 used for `IPermissionEvaluator`.
 
+ ### Module-Specific Unit of Work (chat, 2026-08-27)
+ Every module MUST define and register its own Unit-of-Work interface
+ (e.g. IOrganizationUnitOfWork, IAssetUnitOfWork, IAdministrationUnitOfWork)
+ that extends the shared IUnitOfWork — never register the shared
+ IUnitOfWork directly from more than one module. Registering the
+ shared interface from multiple modules causes a DI collision: the
+ last module registered in Program.cs silently wins for the entire
+ application, so other modules' SaveChangesAsync calls resolve to the
+ wrong DbContext and silently discard their changes (no exception is
+ thrown). This exact bug affected Organization and Asset until fixed
+ on this date; Administration was unaffected because it already
+ followed this pattern.
+
 ## 4.7 Domain Events (Complete Catalog)
 
 ### Event Structure (Required Fields)

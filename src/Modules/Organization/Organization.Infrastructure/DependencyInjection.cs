@@ -23,6 +23,9 @@ public static class DependencyInjection
     /// was documented in the approved references, so this key is an
     /// explicit assumption — flagged in the completion report — not a
     /// silently invented convention.
+    /// Registers <see cref="IOrganizationUnitOfWork"/>, not the shared
+    /// <see cref="IUnitOfWork"/> directly (chat, 2026-08-27 fix — the
+    /// shared interface caused a cross-module DI collision).
     /// </remarks>
     /// <param name="services">The service collection to configure.</param>
     /// <param name="configuration">The application configuration, used to resolve the connection string.</param>
@@ -39,7 +42,7 @@ public static class DependencyInjection
         services.AddScoped<IProjectRepository, ProjectRepository>();
         services.AddScoped<IOrganizationLookupService, OrganizationLookupService>();
         services.AddScoped<IHoldingLookupService, HoldingLookupService>();
-        services.AddScoped<IUnitOfWork>(serviceProvider =>
+        services.AddScoped<IOrganizationUnitOfWork>(serviceProvider =>
             serviceProvider.GetRequiredService<OrganizationDbContext>());
 
         return services;

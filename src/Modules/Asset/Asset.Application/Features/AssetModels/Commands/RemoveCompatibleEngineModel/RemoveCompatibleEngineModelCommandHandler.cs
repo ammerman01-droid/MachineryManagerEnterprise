@@ -16,14 +16,14 @@ public sealed class RemoveCompatibleEngineModelCommandHandler
     private const string RequiredPermission = "Asset.Edit";
 
     private readonly IAssetModelRepository _assetModelRepository;
-    private readonly IUnitOfWork _unitOfWork;
+    private readonly IAssetUnitOfWork _unitOfWork;
     private readonly ICurrentUserService _currentUserService;
     private readonly IPermissionEvaluator _permissionEvaluator;
 
     /// <summary>Initializes a new instance of the <see cref="RemoveCompatibleEngineModelCommandHandler"/> class.</summary>
     public RemoveCompatibleEngineModelCommandHandler(
         IAssetModelRepository assetModelRepository,
-        IUnitOfWork unitOfWork,
+        IAssetUnitOfWork unitOfWork,
         ICurrentUserService currentUserService,
         IPermissionEvaluator permissionEvaluator)
     {

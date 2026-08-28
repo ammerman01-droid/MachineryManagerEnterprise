@@ -17,7 +17,7 @@ public sealed class RenameHoldingCommandHandler
     private const string RequiredPermission = "Holding.Edit";
 
     private readonly IHoldingRepository _holdingRepository;
-    private readonly IUnitOfWork _unitOfWork;
+    private readonly IOrganizationUnitOfWork _unitOfWork;
     private readonly IDateTimeProvider _dateTimeProvider;
     private readonly ICurrentUserService _currentUserService;
     private readonly IPermissionEvaluator _permissionEvaluator;
@@ -25,7 +25,7 @@ public sealed class RenameHoldingCommandHandler
     /// <summary>Initializes a new instance of the <see cref="RenameHoldingCommandHandler"/> class.</summary>
     public RenameHoldingCommandHandler(
         IHoldingRepository holdingRepository,
-        IUnitOfWork unitOfWork,
+        IOrganizationUnitOfWork unitOfWork,
         IDateTimeProvider dateTimeProvider,
         ICurrentUserService currentUserService,
         IPermissionEvaluator permissionEvaluator)

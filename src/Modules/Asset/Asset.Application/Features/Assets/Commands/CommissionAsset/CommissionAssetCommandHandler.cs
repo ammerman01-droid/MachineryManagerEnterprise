@@ -16,7 +16,7 @@ public sealed class CommissionAssetCommandHandler
     private const string RequiredPermission = "Asset.Edit";
 
     private readonly IAssetRepository _assetRepository;
-    private readonly IUnitOfWork _unitOfWork;
+    private readonly IAssetUnitOfWork _unitOfWork;
     private readonly IDateTimeProvider _dateTimeProvider;
     private readonly ICurrentUserService _currentUserService;
     private readonly IPermissionEvaluator _permissionEvaluator;
@@ -25,7 +25,7 @@ public sealed class CommissionAssetCommandHandler
     /// <summary>Initializes a new instance of the <see cref="CommissionAssetCommandHandler"/> class.</summary>
     public CommissionAssetCommandHandler(
         IAssetRepository assetRepository,
-        IUnitOfWork unitOfWork,
+        IAssetUnitOfWork unitOfWork,
         IDateTimeProvider dateTimeProvider,
         ICurrentUserService currentUserService,
         IPermissionEvaluator permissionEvaluator,

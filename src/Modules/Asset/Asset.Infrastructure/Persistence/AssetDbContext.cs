@@ -1,3 +1,4 @@
+using MachineryManager.Asset.Application.Abstractions;
 using MachineryManager.SharedKernel;
 using MachineryManager.SharedKernel.Abstractions;
 using Microsoft.EntityFrameworkCore;
@@ -6,9 +7,13 @@ namespace MachineryManager.Asset.Infrastructure.Persistence;
 
 /// <summary>
 /// EF Core persistence context for the Asset module (Modular Monolith —
-/// each module owns its own DbContext and schema, per ADR-0006).
+/// each module owns its own DbContext and schema, per ADR-0006). Also
+/// serves as this module's <see cref="IAssetUnitOfWork"/> implementation
+/// (chat, 2026-08-27 — was the shared <see cref="IUnitOfWork"/> directly,
+/// which caused a DI registration collision with other modules'
+/// DbContexts).
 /// </summary>
-public sealed class AssetDbContext : DbContext, IUnitOfWork
+public sealed class AssetDbContext : DbContext, IAssetUnitOfWork
 {
     private readonly IDomainEventDispatcher? _domainEventDispatcher;
 

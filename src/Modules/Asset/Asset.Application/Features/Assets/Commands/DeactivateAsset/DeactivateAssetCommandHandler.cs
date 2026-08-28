@@ -16,7 +16,7 @@ public sealed class DeactivateAssetCommandHandler
     private const string RequiredPermission = "Asset.Edit";
 
     private readonly IAssetRepository _assetRepository;
-    private readonly IUnitOfWork _unitOfWork;
+    private readonly IAssetUnitOfWork _unitOfWork;
     private readonly IDateTimeProvider _dateTimeProvider;
     private readonly ICurrentUserService _currentUserService;
     private readonly IPermissionEvaluator _permissionEvaluator;
@@ -25,7 +25,7 @@ public sealed class DeactivateAssetCommandHandler
     /// <summary>Initializes a new instance of the <see cref="DeactivateAssetCommandHandler"/> class.</summary>
     public DeactivateAssetCommandHandler(
         IAssetRepository assetRepository,
-        IUnitOfWork unitOfWork,
+        IAssetUnitOfWork unitOfWork,
         IDateTimeProvider dateTimeProvider,
         ICurrentUserService currentUserService,
         IPermissionEvaluator permissionEvaluator,

@@ -18,6 +18,13 @@ public static class DependencyInjection
     /// Uses the shared <c>MachineryManagerDatabase</c> connection string
     /// key, matching Organization and Administration's infrastructure
     /// registration convention.
+    /// Registers <see cref="IAssetUnitOfWork"/>, not the shared
+    /// <see cref="IUnitOfWork"/> directly (chat, 2026-08-27 fix — the
+    /// shared interface caused a cross-module DI collision: whichever
+    /// module's <c>AddScoped&lt;IUnitOfWork&gt;</c> ran last in
+    /// Program.cs silently won for the entire application, so
+    /// Organization's SaveChangesAsync calls were resolving to
+    /// AssetDbContext instead and discarding their changes).
     /// </remarks>
     /// <param name="services">The service collection to configure.</param>
     /// <param name="configuration">The application configuration, used to resolve the connection string.</param>
@@ -36,7 +43,7 @@ public static class DependencyInjection
         services.AddScoped<IAssetRepository, AssetRepository>();
         services.AddScoped<IAssetModelRepository, AssetModelRepository>();
         services.AddScoped<IEngineModelRepository, EngineModelRepository>();
-        services.AddScoped<IUnitOfWork>(serviceProvider =>
+        services.AddScoped<IAssetUnitOfWork>(serviceProvider =>
             serviceProvider.GetRequiredService<AssetDbContext>());
 
         return services;

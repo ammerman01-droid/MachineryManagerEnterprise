@@ -17,7 +17,7 @@ public sealed class RegisterAssetModelCommandHandler
 
     private readonly IAssetModelRepository _assetModelRepository;
     private readonly IHoldingLookupService _holdingLookupService;
-    private readonly IUnitOfWork _unitOfWork;
+    private readonly IAssetUnitOfWork _unitOfWork;
     private readonly IDateTimeProvider _dateTimeProvider;
     private readonly ICurrentUserService _currentUserService;
     private readonly IPermissionEvaluator _permissionEvaluator;
@@ -26,7 +26,7 @@ public sealed class RegisterAssetModelCommandHandler
     public RegisterAssetModelCommandHandler(
         IAssetModelRepository assetModelRepository,
         IHoldingLookupService holdingLookupService,
-        IUnitOfWork unitOfWork,
+        IAssetUnitOfWork unitOfWork,
         IDateTimeProvider dateTimeProvider,
         ICurrentUserService currentUserService,
         IPermissionEvaluator permissionEvaluator)

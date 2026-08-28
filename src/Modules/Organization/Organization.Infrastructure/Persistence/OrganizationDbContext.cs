@@ -1,3 +1,4 @@
+using MachineryManager.Organization.Application.Abstractions;
 using MachineryManager.SharedKernel;
 using MachineryManager.SharedKernel.Abstractions;
 using Microsoft.EntityFrameworkCore;
@@ -9,9 +10,12 @@ namespace MachineryManager.Organization.Infrastructure.Persistence;
 /// ADR-0019 Hybrid Persistence Strategy). Owns the "organization" schema
 /// exclusively; per the Modular Monolith Rules (06-development, Section
 /// 6.1) no other module may reference these tables directly. Also
-/// serves as this module's <see cref="IUnitOfWork"/> implementation.
+/// serves as this module's <see cref="IOrganizationUnitOfWork"/>
+/// implementation (chat, 2026-08-27 — was the shared
+/// <see cref="IUnitOfWork"/> directly, which caused a DI registration
+/// collision with other modules' DbContexts).
 /// </summary>
-public sealed class OrganizationDbContext : DbContext, IUnitOfWork
+public sealed class OrganizationDbContext : DbContext, IOrganizationUnitOfWork
 {
     private readonly IDomainEventDispatcher? _domainEventDispatcher;
 

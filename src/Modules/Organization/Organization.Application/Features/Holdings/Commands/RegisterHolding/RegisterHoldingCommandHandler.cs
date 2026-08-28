@@ -16,7 +16,7 @@ public sealed class RegisterHoldingCommandHandler
     private const string RequiredPermission = "Holding.Manage";
 
     private readonly IHoldingRepository _holdingRepository;
-    private readonly IUnitOfWork _unitOfWork;
+    private readonly IOrganizationUnitOfWork _unitOfWork;
     private readonly IDateTimeProvider _dateTimeProvider;
     private readonly ICurrentUserService _currentUserService;
     private readonly IPermissionEvaluator _permissionEvaluator;
@@ -31,7 +31,7 @@ public sealed class RegisterHoldingCommandHandler
     /// <param name="permissionEvaluator">Evaluates the current user's permissions at request time.</param>
     public RegisterHoldingCommandHandler(
         IHoldingRepository holdingRepository,
-        IUnitOfWork unitOfWork,
+        IOrganizationUnitOfWork unitOfWork,
         IDateTimeProvider dateTimeProvider,
         ICurrentUserService currentUserService,
         IPermissionEvaluator permissionEvaluator)

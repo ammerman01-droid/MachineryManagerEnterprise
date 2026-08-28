@@ -16,14 +16,14 @@ public sealed class RenameEngineModelCommandHandler
     private const string RequiredPermission = "Asset.Edit";
 
     private readonly IEngineModelRepository _engineModelRepository;
-    private readonly IUnitOfWork _unitOfWork;
+    private readonly IAssetUnitOfWork _unitOfWork;
     private readonly ICurrentUserService _currentUserService;
     private readonly IPermissionEvaluator _permissionEvaluator;
 
     /// <summary>Initializes a new instance of the <see cref="RenameEngineModelCommandHandler"/> class.</summary>
     public RenameEngineModelCommandHandler(
         IEngineModelRepository engineModelRepository,
-        IUnitOfWork unitOfWork,
+        IAssetUnitOfWork unitOfWork,
         ICurrentUserService currentUserService,
         IPermissionEvaluator permissionEvaluator)
     {
