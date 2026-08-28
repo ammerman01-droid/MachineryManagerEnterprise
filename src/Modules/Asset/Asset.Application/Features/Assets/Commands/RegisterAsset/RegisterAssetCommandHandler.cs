@@ -79,6 +79,16 @@ public sealed class RegisterAssetCommandHandler
             return Result.Failure<Guid>(global::Asset.Domain.AssetErrors.AssetModelNotFound(request.AssetModelId));
         }
 
+        // The Organization's Holding must match the AssetModel's Holding
+        // — the UI already enforces this by only listing models from the
+        // Organization's own Holding, but the API must not rely on that
+        // (chat, 2026-08-27; mirrors the same rule already enforced for
+        // Engine-compatibility assignment).
+        if (holdingId is null || assetModel.HoldingId != holdingId.Value)
+        {
+            return Result.Failure<Guid>(global::Asset.Domain.AssetErrors.AssetModelHoldingMismatch());
+        }
+
         var result = global::Asset.Domain.Asset.Register(
             request.OrganizationId,
             assetModelId,

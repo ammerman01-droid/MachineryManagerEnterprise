@@ -35,4 +35,13 @@ public static class AssetErrors
     public static Error AssetModelNotFound(Guid assetModelId) => Error.NotFound(
         "Asset.AssetModelNotFound",
         $"Asset model with id {assetModelId} was not found.");
+
+    
+    /// <summary>
+    /// Creates an error indicating the selected Asset Model belongs to
+    /// a different Holding than the target Organization (chat, 2026-08-27).
+    /// </summary>
+    public static Error AssetModelHoldingMismatch() => Error.Conflict(
+        "Asset.AssetModelHoldingMismatch",
+        "The selected Asset Model does not belong to the same Holding as the target Organization.");
 }
