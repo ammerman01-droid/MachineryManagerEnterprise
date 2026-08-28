@@ -1,0 +1,179 @@
+@page "/admin/assets/{AssetId:guid}"
+@rendermode InteractiveServer
+@inject IHttpClientFactory HttpClientFactory
+@inject NavigationManager Navigation
+
+<PageTitle>جزئیات دارایی</PageTitle>
+
+@if (errorMessage is not null)
+{
+    <MudAlert Severity="Severity.Error" Class="my-4">@errorMessage</MudAlert>
+}
+
+@if (isLoading)
+{
+    <MudProgressLinear Indeterminate="true" Class="my-4" />
+}
+else if (asset is not null)
+{
+    <MudText Typo="Typo.h4" Class="mb-4">جزئیات دارایی</MudText>
+
+    <MudPaper Class="pa-4 mb-4">
+        <MudGrid>
+            <MudItem xs="12" md="6">
+                <MudField Label="شناسه" Variant="Variant.Outlined">@asset.Id</MudField>
+            </MudItem>
+            <MudItem xs="12" md="6">
+                <MudField Label="سازمان" Variant="Variant.Outlined">@asset.OrganizationId</MudField>
+            </MudItem>
+            <MudItem xs="12" md="6">
+                <MudField Label="مدل دارایی" Variant="Variant.Outlined">@asset.AssetModelId</MudField>
+            </MudItem>
+            <MudItem xs="12" md="6">
+                <MudField Label="شماره سریال" Variant="Variant.Outlined">@(asset.SerialNumber ?? "-")</MudField>
+            </MudItem>
+            <MudItem xs="12" md="6">
+                <MudField Label="پلاک" Variant="Variant.Outlined">@(asset.LicensePlate ?? "-")</MudField>
+            </MudItem>
+            <MudItem xs="12" md="6">
+                <MudField Label="سال ساخت" Variant="Variant.Outlined">@(asset.ManufactureYear?.ToString() ?? "-")</MudField>
+            </MudItem>
+            <MudItem xs="12" md="6">
+                <MudField Label="رنگ" Variant="Variant.Outlined">@asset.Color</MudField>
+            </MudItem>
+            <MudItem xs="12" md="6">
+                <MudField Label="وضعیت" Variant="Variant.Outlined">@TranslateStatus(asset.Status)</MudField>
+            </MudItem>
+        </MudGrid>
+    </MudPaper>
+
+    <MudText Typo="Typo.h6" Class="mb-2">عملیات چرخه حیات</MudText>
+    <MudPaper Class="pa-4">
+        @if (asset.Status == "Registered")
+        {
+            <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick='() => ExecuteActionAsync("commission")' Disabled="isActing">راه‌اندازی</MudButton>
+        }
+        else if (asset.Status == "Commissioned" || asset.Status == "Inactive")
+        {
+            <MudButton Variant="Variant.Filled" Color="Color.Success" OnClick='() => ExecuteActionAsync("activate")' Disabled="isActing">فعال‌سازی</MudButton>
+        }
+
+        @if (asset.Status == "Operational")
+        {
+            <MudButton Variant="Variant.Filled" Color="Color.Warning" OnClick='() => ExecuteActionAsync("deactivate")' Disabled="isActing" Class="mx-2">غیرفعال‌سازی</MudButton>
+            <MudButton Variant="Variant.Filled" Color="Color.Error" OnClick='() => ExecuteActionAsync("retire")' Disabled="isActing">بازنشستگی</MudButton>
+        }
+
+        @if (asset.Status == "Inactive")
+        {
+            <MudButton Variant="Variant.Filled" Color="Color.Error" OnClick='() => ExecuteActionAsync("retire")' Disabled="isActing" Class="mx-2">بازنشستگی</MudButton>
+        }
+
+        @if (asset.Status == "Retired")
+        {
+            <MudButton Variant="Variant.Filled" Color="Color.Dark" OnClick='() => ExecuteActionAsync("dispose")' Disabled="isActing">اسقاط</MudButton>
+        }
+    </MudPaper>
+
+    <MudButton Variant="Variant.Outlined" Color="Color.Secondary" Class="mt-4" OnClick="@(() => Navigation.NavigateTo("/admin/assets"))">
+        بازگشت به لیست
+    </MudButton>
+}
+
+@code {
+    private sealed class AssetDetail
+    {
+        public Guid Id { get; set; }
+        public Guid OrganizationId { get; set; }
+        public Guid AssetModelId { get; set; }
+        public string? SerialNumber { get; set; }
+        public string? LicensePlate { get; set; }
+        public int? ManufactureYear { get; set; }
+        public string Color { get; set; } = string.Empty;
+        public string Status { get; set; } = string.Empty;
+    }
+
+    [Parameter]
+    public Guid AssetId { get; set; }
+
+    private AssetDetail? asset;
+    private bool isLoading = true;
+    private bool isActing;
+    private string? errorMessage;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadAssetAsync();
+    }
+
+    private async Task LoadAssetAsync()
+    {
+        isLoading = true;
+        errorMessage = null;
+
+        try
+        {
+            var client = HttpClientFactory.CreateClient("InternalApi");
+            var response = await client.GetAsync($"/api/v1/assets/{AssetId}");
+            var content = await response.Content.ReadAsStringAsync();
+
+            if (response.IsSuccessStatusCode)
+            {
+                asset = System.Text.Json.JsonSerializer.Deserialize<AssetDetail>(content, new System.Text.Json.JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+            }
+            else
+            {
+                errorMessage = $"خطا در دریافت دارایی: {content}";
+            }
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"خطا: {ex.Message}";
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+
+    private async Task ExecuteActionAsync(string action)
+    {
+        isActing = true;
+        errorMessage = null;
+
+        try
+        {
+            var client = HttpClientFactory.CreateClient("InternalApi");
+            var response = await client.PostAsync($"/api/v1/assets/{AssetId}/{action}", null);
+            var content = await response.Content.ReadAsStringAsync();
+
+            if (response.IsSuccessStatusCode)
+            {
+                await LoadAssetAsync();
+            }
+            else
+            {
+                errorMessage = $"خطا در عملیات: {content}";
+            }
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"خطا: {ex.Message}";
+        }
+        finally
+        {
+            isActing = false;
+        }
+    }
+
+    private static string TranslateStatus(string status) => status switch
+    {
+        "Registered" => "ثبت‌شده",
+        "Commissioned" => "راه‌اندازی‌شده",
+        "Operational" => "در حال بهره‌برداری",
+        "Inactive" => "غیرفعال",
+        "Retired" => "بازنشسته",
+        "Disposed" => "اسقاط‌شده",
+        _ => status
+    };
+}

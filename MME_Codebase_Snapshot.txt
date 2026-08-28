@@ -1,7 +1,7 @@
 ﻿
 ================================================================================
   MACHINERYMANAGERENTERPRISE - CODEBASE SNAPSHOT
-  Generated: 2026-08-27 11:04:26
+  Generated: 2026-08-27 17:41:37
   Source: C:\Users\i\source\repos\MachineryManagerEnterprise
   Purpose: Complete source code reference for AI-assisted development
   Excludes: .md, .gitignore, this script, build artifacts, binaries, IDE,
@@ -230,31 +230,40 @@ MachineryManagerEnterprise
 |   |   |   |   |   |           |-- SearchAssetModelsQuery.cs
 |   |   |   |   |   |           +-- SearchAssetModelsQueryHandler.cs
 |   |   |   |   |   |-- Assets
-|   |   |   |   |   |   +-- Commands
-|   |   |   |   |   |       |-- ActivateAsset
-|   |   |   |   |   |       |   |-- ActivateAssetCommand.cs
-|   |   |   |   |   |       |   |-- ActivateAssetCommandHandler.cs
-|   |   |   |   |   |       |   +-- ActivateAssetCommandValidator.cs
-|   |   |   |   |   |       |-- CommissionAsset
-|   |   |   |   |   |       |   |-- CommissionAssetCommand.cs
-|   |   |   |   |   |       |   |-- CommissionAssetCommandHandler.cs
-|   |   |   |   |   |       |   +-- CommissionAssetCommandValidator.cs
-|   |   |   |   |   |       |-- DeactivateAsset
-|   |   |   |   |   |       |   |-- DeactivateAssetCommand.cs
-|   |   |   |   |   |       |   |-- DeactivateAssetCommandHandler.cs
-|   |   |   |   |   |       |   +-- DeactivateAssetCommandValidator.cs
-|   |   |   |   |   |       |-- DisposeAsset
-|   |   |   |   |   |       |   |-- DisposeAssetCommand.cs
-|   |   |   |   |   |       |   |-- DisposeAssetCommandHandler.cs
-|   |   |   |   |   |       |   +-- DisposeAssetCommandValidator.cs
-|   |   |   |   |   |       |-- RegisterAsset
-|   |   |   |   |   |       |   |-- RegisterAssetCommand.cs
-|   |   |   |   |   |       |   |-- RegisterAssetCommandHandler.cs
-|   |   |   |   |   |       |   +-- RegisterAssetCommandValidator.cs
-|   |   |   |   |   |       +-- RetireAsset
-|   |   |   |   |   |           |-- RetireAssetCommand.cs
-|   |   |   |   |   |           |-- RetireAssetCommandHandler.cs
-|   |   |   |   |   |           +-- RetireAssetCommandValidator.cs
+|   |   |   |   |   |   |-- Commands
+|   |   |   |   |   |   |   |-- ActivateAsset
+|   |   |   |   |   |   |   |   |-- ActivateAssetCommand.cs
+|   |   |   |   |   |   |   |   |-- ActivateAssetCommandHandler.cs
+|   |   |   |   |   |   |   |   +-- ActivateAssetCommandValidator.cs
+|   |   |   |   |   |   |   |-- CommissionAsset
+|   |   |   |   |   |   |   |   |-- CommissionAssetCommand.cs
+|   |   |   |   |   |   |   |   |-- CommissionAssetCommandHandler.cs
+|   |   |   |   |   |   |   |   +-- CommissionAssetCommandValidator.cs
+|   |   |   |   |   |   |   |-- DeactivateAsset
+|   |   |   |   |   |   |   |   |-- DeactivateAssetCommand.cs
+|   |   |   |   |   |   |   |   |-- DeactivateAssetCommandHandler.cs
+|   |   |   |   |   |   |   |   +-- DeactivateAssetCommandValidator.cs
+|   |   |   |   |   |   |   |-- DisposeAsset
+|   |   |   |   |   |   |   |   |-- DisposeAssetCommand.cs
+|   |   |   |   |   |   |   |   |-- DisposeAssetCommandHandler.cs
+|   |   |   |   |   |   |   |   +-- DisposeAssetCommandValidator.cs
+|   |   |   |   |   |   |   |-- RegisterAsset
+|   |   |   |   |   |   |   |   |-- RegisterAssetCommand.cs
+|   |   |   |   |   |   |   |   |-- RegisterAssetCommandHandler.cs
+|   |   |   |   |   |   |   |   +-- RegisterAssetCommandValidator.cs
+|   |   |   |   |   |   |   +-- RetireAsset
+|   |   |   |   |   |   |       |-- RetireAssetCommand.cs
+|   |   |   |   |   |   |       |-- RetireAssetCommandHandler.cs
+|   |   |   |   |   |   |       +-- RetireAssetCommandValidator.cs
+|   |   |   |   |   |   |-- Dtos
+|   |   |   |   |   |   |   +-- AssetDto.cs
+|   |   |   |   |   |   +-- Queries
+|   |   |   |   |   |       |-- GetAssetById
+|   |   |   |   |   |       |   |-- GetAssetByIdQuery.cs
+|   |   |   |   |   |       |   +-- GetAssetByIdQueryHandler.cs
+|   |   |   |   |   |       +-- SearchAssets
+|   |   |   |   |   |           |-- SearchAssetsQuery.cs
+|   |   |   |   |   |           +-- SearchAssetsQueryHandler.cs
 |   |   |   |   |   +-- EngineModels
 |   |   |   |   |       |-- Commands
 |   |   |   |   |       |   |-- RegisterEngineModel
@@ -305,6 +314,8 @@ MachineryManagerEnterprise
 |   |   |   |   |-- Migrations
 |   |   |   |   |   |-- 20260826113743_InitialAssetSchema.cs
 |   |   |   |   |   |-- 20260826113743_InitialAssetSchema.Designer.cs
+|   |   |   |   |   |-- 20260827080120_AddAssetAggregate.cs
+|   |   |   |   |   |-- 20260827080120_AddAssetAggregate.Designer.cs
 |   |   |   |   |   +-- AssetDbContextModelSnapshot.cs
 |   |   |   |   |-- Persistence
 |   |   |   |   |   |-- Configurations
@@ -331,10 +342,12 @@ MachineryManagerEnterprise
 |   |   |       |-- Contracts
 |   |   |       |   |-- AssignCompatibleEngineModelRequest.cs
 |   |   |       |   |-- RegisterAssetModelRequest.cs
+|   |   |       |   |-- RegisterAssetRequest.cs
 |   |   |       |   |-- RegisterEngineModelRequest.cs
 |   |   |       |   |-- RenameAssetModelRequest.cs
 |   |   |       |   +-- RenameEngineModelRequest.cs
 |   |   |       |-- Endpoints
+|   |   |       |   |-- AssetEndpoints.cs
 |   |   |       |   |-- AssetModelEndpoints.cs
 |   |   |       |   |-- EngineModelEndpoints.cs
 |   |   |       |   +-- ResultExtensions.cs
@@ -2060,7 +2073,7 @@ SIZE: 2.4 KB
 
 ================================================================================
 FILE: src\Host\MachineryManager.Web\Program.cs
-SIZE: 4.73 KB
+SIZE: 4.76 KB
 ================================================================================
 using MachineryManager.Identity.Infrastructure;
 using MachineryManager.Identity.Presentation.Endpoints;
@@ -2185,6 +2198,7 @@ try
     // Asset endpoints
     app.MapAssetModelEndpoints();
     app.MapEngineModelEndpoints();
+    app.MapAssetEndpoints();
 
     app.Run();
 }
@@ -7947,7 +7961,7 @@ public interface IAssetModelRepository : IRepository<global::Asset.Domain.AssetM
 
 ================================================================================
 FILE: src\Modules\Asset\Asset.Application\Abstractions\IAssetRepository.cs
-SIZE: 0.32 KB
+SIZE: 0.68 KB
 ================================================================================
 using MachineryManager.SharedKernel.Abstractions;
 
@@ -7956,7 +7970,18 @@ namespace MachineryManager.Asset.Application.Abstractions;
 /// <summary>Repository contract for the <see cref="global::Asset.Domain.Asset"/> aggregate.</summary>
 public interface IAssetRepository : IRepository<global::Asset.Domain.Asset, global::Asset.Domain.AssetId>
 {
+    /// <summary>
+    /// Performs a paginated search over Assets within the given
+    /// Organization.
+    /// </summary>
+    Task<Features.Assets.Queries.SearchAssets.SearchAssetsResponse> SearchAsync(
+        Guid organizationId,
+        string? searchTerm,
+        int page,
+        int pageSize,
+        CancellationToken cancellationToken = default);
 }
+
 
 ================================================================================
 FILE: src\Modules\Asset\Asset.Application\Abstractions\IEngineModelRepository.cs
@@ -9579,6 +9604,230 @@ public sealed class RetireAssetCommandValidator : AbstractValidator<RetireAssetC
         RuleFor(x => x.AssetId).NotEmpty();
     }
 }
+
+================================================================================
+FILE: src\Modules\Asset\Asset.Application\Features\Assets\Dtos\AssetDto.cs
+SIZE: 0.35 KB
+================================================================================
+namespace MachineryManager.Asset.Application.Features.Assets.Dtos;
+
+/// <summary>Read-only projection of an Asset for API/UI consumption.</summary>
+public sealed record AssetDto(
+    Guid Id,
+    Guid OrganizationId,
+    Guid AssetModelId,
+    string? SerialNumber,
+    string? LicensePlate,
+    int? ManufactureYear,
+    string Color,
+    string Status);
+
+
+================================================================================
+FILE: src\Modules\Asset\Asset.Application\Features\Assets\Queries\GetAssetById\GetAssetByIdQuery.cs
+SIZE: 0.35 KB
+================================================================================
+using MachineryManager.Asset.Application.Features.Assets.Dtos;
+using MachineryManager.SharedKernel;
+using MediatR;
+
+namespace MachineryManager.Asset.Application.Features.Assets.Queries.GetAssetById;
+
+/// <summary>Query to retrieve a single Asset by its identifier.</summary>
+public sealed record GetAssetByIdQuery(Guid AssetId) : IRequest<Result<AssetDto>>;
+
+
+================================================================================
+FILE: src\Modules\Asset\Asset.Application\Features\Assets\Queries\GetAssetById\GetAssetByIdQueryHandler.cs
+SIZE: 2.95 KB
+================================================================================
+using MachineryManager.Asset.Application.Abstractions;
+using MachineryManager.Asset.Application.Features.Assets.Dtos;
+using MachineryManager.SharedKernel;
+using MachineryManager.SharedKernel.Abstractions;
+using MediatR;
+
+namespace MachineryManager.Asset.Application.Features.Assets.Queries.GetAssetById;
+
+/// <summary>
+/// Handles <see cref="GetAssetByIdQuery"/> by loading the aggregate,
+/// verifying the caller is authorized for its owning Organization, and
+/// mapping it to a DTO.
+/// </summary>
+public sealed class GetAssetByIdQueryHandler
+    : IRequestHandler<GetAssetByIdQuery, Result<AssetDto>>
+{
+    private const string RequiredPermission = "Asset.View";
+
+    private readonly IAssetRepository _assetRepository;
+    private readonly ICurrentUserService _currentUserService;
+    private readonly IPermissionEvaluator _permissionEvaluator;
+    private readonly IOrganizationLookupService _organizationLookupService;
+
+    /// <summary>Initializes a new instance of the <see cref="GetAssetByIdQueryHandler"/> class.</summary>
+    public GetAssetByIdQueryHandler(
+        IAssetRepository assetRepository,
+        ICurrentUserService currentUserService,
+        IPermissionEvaluator permissionEvaluator,
+        IOrganizationLookupService organizationLookupService)
+    {
+        _assetRepository = assetRepository;
+        _currentUserService = currentUserService;
+        _permissionEvaluator = permissionEvaluator;
+        _organizationLookupService = organizationLookupService;
+    }
+
+    /// <summary>Executes the lookup use case.</summary>
+    public async Task<Result<AssetDto>> Handle(GetAssetByIdQuery request, CancellationToken cancellationToken)
+    {
+        var id = global::Asset.Domain.AssetId.From(request.AssetId);
+        var asset = await _assetRepository.GetByIdAsync(id, cancellationToken);
+
+        if (asset is null)
+        {
+            return Result.Failure<AssetDto>(
+                Error.NotFound("Asset.NotFound", $"Asset with id {request.AssetId} was not found."));
+        }
+
+        if (_currentUserService.UserId is not { } userId)
+        {
+            return Result.Failure<AssetDto>(global::Asset.Domain.AssetErrors.NotAuthorized());
+        }
+
+        var holdingId = await _organizationLookupService.GetHoldingIdAsync(asset.OrganizationId, cancellationToken);
+
+        var isAuthorized = await _permissionEvaluator.HasPermissionAsync(
+            userId,
+            RequiredPermission,
+            new ResourceScope(holdingId, asset.OrganizationId, null),
+            cancellationToken);
+
+        if (!isAuthorized)
+        {
+            return Result.Failure<AssetDto>(global::Asset.Domain.AssetErrors.NotAuthorized());
+        }
+
+        var dto = new AssetDto(
+            asset.Id.Value,
+            asset.OrganizationId,
+            asset.AssetModelId.Value,
+            asset.SerialNumber,
+            asset.LicensePlate,
+            asset.ManufactureYear,
+            asset.Color,
+            asset.Status.ToString());
+
+        return Result.Success(dto);
+    }
+}
+
+
+================================================================================
+FILE: src\Modules\Asset\Asset.Application\Features\Assets\Queries\SearchAssets\SearchAssetsQuery.cs
+SIZE: 0.96 KB
+================================================================================
+using MachineryManager.Asset.Application.Features.Assets.Dtos;
+using MachineryManager.SharedKernel;
+using MediatR;
+
+namespace MachineryManager.Asset.Application.Features.Assets.Queries.SearchAssets;
+
+/// <summary>
+/// Query to search Assets within an Organization. <see cref="SearchTerm"/>,
+/// when provided, matches against SerialNumber or LicensePlate — Asset
+/// has no Name field of its own (assumption, chat, 2026-08-27: not
+/// explicitly specified; these are the only free-text identity fields
+/// on the aggregate).
+/// </summary>
+public sealed record SearchAssetsQuery(Guid OrganizationId, string? SearchTerm, int Page = 1, int PageSize = 20)
+    : IRequest<Result<SearchAssetsResponse>>;
+
+/// <summary>Paginated response for <see cref="SearchAssetsQuery"/>.</summary>
+public sealed record SearchAssetsResponse(
+    IReadOnlyCollection<AssetDto> Items,
+    int Page,
+    int PageSize,
+    int TotalItems,
+    int TotalPages,
+    bool HasNextPage,
+    bool HasPreviousPage);
+
+
+================================================================================
+FILE: src\Modules\Asset\Asset.Application\Features\Assets\Queries\SearchAssets\SearchAssetsQueryHandler.cs
+SIZE: 2.57 KB
+================================================================================
+using MachineryManager.Asset.Application.Abstractions;
+using MachineryManager.SharedKernel;
+using MachineryManager.SharedKernel.Abstractions;
+using MediatR;
+
+namespace MachineryManager.Asset.Application.Features.Assets.Queries.SearchAssets;
+
+/// <summary>
+/// Handles <see cref="SearchAssetsQuery"/> by verifying the caller is
+/// authorized for the requested Organization, then delegating to the
+/// repository search projection.
+/// </summary>
+public sealed class SearchAssetsQueryHandler
+    : IRequestHandler<SearchAssetsQuery, Result<SearchAssetsResponse>>
+{
+    private const string RequiredPermission = "Asset.View";
+
+    private readonly IAssetRepository _assetRepository;
+    private readonly ICurrentUserService _currentUserService;
+    private readonly IPermissionEvaluator _permissionEvaluator;
+    private readonly IOrganizationLookupService _organizationLookupService;
+
+    /// <summary>Initializes a new instance of the <see cref="SearchAssetsQueryHandler"/> class.</summary>
+    public SearchAssetsQueryHandler(
+        IAssetRepository assetRepository,
+        ICurrentUserService currentUserService,
+        IPermissionEvaluator permissionEvaluator,
+        IOrganizationLookupService organizationLookupService)
+    {
+        _assetRepository = assetRepository;
+        _currentUserService = currentUserService;
+        _permissionEvaluator = permissionEvaluator;
+        _organizationLookupService = organizationLookupService;
+    }
+
+    /// <summary>Executes the search query.</summary>
+    public async Task<Result<SearchAssetsResponse>> Handle(
+        SearchAssetsQuery request,
+        CancellationToken cancellationToken)
+    {
+        if (_currentUserService.UserId is not { } userId)
+        {
+            return Result.Failure<SearchAssetsResponse>(global::Asset.Domain.AssetErrors.NotAuthorized());
+        }
+
+        var holdingId = await _organizationLookupService.GetHoldingIdAsync(
+            request.OrganizationId,
+            cancellationToken);
+
+        var isAuthorized = await _permissionEvaluator.HasPermissionAsync(
+            userId,
+            RequiredPermission,
+            new ResourceScope(holdingId, request.OrganizationId, null),
+            cancellationToken);
+
+        if (!isAuthorized)
+        {
+            return Result.Failure<SearchAssetsResponse>(global::Asset.Domain.AssetErrors.NotAuthorized());
+        }
+
+        var response = await _assetRepository.SearchAsync(
+            request.OrganizationId,
+            request.SearchTerm,
+            request.Page,
+            request.PageSize,
+            cancellationToken);
+
+        return Result.Success(response);
+    }
+}
+
 
 ================================================================================
 FILE: src\Modules\Asset\Asset.Application\Features\EngineModels\Commands\RegisterEngineModel\RegisterEngineModelCommand.cs
@@ -11386,8 +11635,75 @@ namespace Asset.Infrastructure.Migrations
 
 
 ================================================================================
-FILE: src\Modules\Asset\Asset.Infrastructure\Migrations\AssetDbContextModelSnapshot.cs
-SIZE: 2.83 KB
+FILE: src\Modules\Asset\Asset.Infrastructure\Migrations\20260827080120_AddAssetAggregate.cs
+SIZE: 2.45 KB
+================================================================================
+using System;
+using Microsoft.EntityFrameworkCore.Migrations;
+
+#nullable disable
+
+namespace Asset.Infrastructure.Migrations
+{
+    /// <inheritdoc />
+    public partial class AddAssetAggregate : Migration
+    {
+        /// <inheritdoc />
+        protected override void Up(MigrationBuilder migrationBuilder)
+        {
+            migrationBuilder.CreateTable(
+                name: "Asset",
+                schema: "asset",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    OrganizationId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    AssetModelId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    SerialNumber = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: true),
+                    LicensePlate = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: true),
+                    ManufactureYear = table.Column<int>(type: "int", nullable: true),
+                    Color = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
+                    Status = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Asset", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Asset_AssetModel_AssetModelId",
+                        column: x => x.AssetModelId,
+                        principalSchema: "asset",
+                        principalTable: "AssetModel",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                });
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Asset_AssetModelId",
+                schema: "asset",
+                table: "Asset",
+                column: "AssetModelId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Asset_OrganizationId",
+                schema: "asset",
+                table: "Asset",
+                column: "OrganizationId");
+        }
+
+        /// <inheritdoc />
+        protected override void Down(MigrationBuilder migrationBuilder)
+        {
+            migrationBuilder.DropTable(
+                name: "Asset",
+                schema: "asset");
+        }
+    }
+}
+
+
+================================================================================
+FILE: src\Modules\Asset\Asset.Infrastructure\Migrations\20260827080120_AddAssetAggregate.Designer.cs
+SIZE: 4.7 KB
 ================================================================================
 // <auto-generated />
 using System;
@@ -11395,6 +11711,7 @@ using MachineryManager.Asset.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11402,9 +11719,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Asset.Infrastructure.Migrations
 {
     [DbContext(typeof(AssetDbContext))]
-    partial class AssetDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260827080120_AddAssetAggregate")]
+    partial class AddAssetAggregate
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -11413,6 +11732,47 @@ namespace Asset.Infrastructure.Migrations
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
+
+            modelBuilder.Entity("Asset.Domain.Asset", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("AssetModelId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Color")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<string>("LicensePlate")
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<int?>("ManufactureYear")
+                        .HasColumnType("int");
+
+                    b.Property<Guid>("OrganizationId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("SerialNumber")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("AssetModelId");
+
+                    b.HasIndex("OrganizationId");
+
+                    b.ToTable("Asset", "asset");
+                });
 
             modelBuilder.Entity("Asset.Domain.AssetModel", b =>
                 {
@@ -11467,6 +11827,154 @@ namespace Asset.Infrastructure.Migrations
                     b.HasIndex("HoldingId");
 
                     b.ToTable("EngineModel", "asset");
+                });
+
+            modelBuilder.Entity("Asset.Domain.Asset", b =>
+                {
+                    b.HasOne("Asset.Domain.AssetModel", null)
+                        .WithMany()
+                        .HasForeignKey("AssetModelId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+                });
+#pragma warning restore 612, 618
+        }
+    }
+}
+
+
+================================================================================
+FILE: src\Modules\Asset\Asset.Infrastructure\Migrations\AssetDbContextModelSnapshot.cs
+SIZE: 4.59 KB
+================================================================================
+// <auto-generated />
+using System;
+using MachineryManager.Asset.Infrastructure.Persistence;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
+
+#nullable disable
+
+namespace Asset.Infrastructure.Migrations
+{
+    [DbContext(typeof(AssetDbContext))]
+    partial class AssetDbContextModelSnapshot : ModelSnapshot
+    {
+        protected override void BuildModel(ModelBuilder modelBuilder)
+        {
+#pragma warning disable 612, 618
+            modelBuilder
+                .HasDefaultSchema("asset")
+                .HasAnnotation("ProductVersion", "10.0.10")
+                .HasAnnotation("Relational:MaxIdentifierLength", 128);
+
+            SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
+
+            modelBuilder.Entity("Asset.Domain.Asset", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("AssetModelId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Color")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<string>("LicensePlate")
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<int?>("ManufactureYear")
+                        .HasColumnType("int");
+
+                    b.Property<Guid>("OrganizationId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("SerialNumber")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("AssetModelId");
+
+                    b.HasIndex("OrganizationId");
+
+                    b.ToTable("Asset", "asset");
+                });
+
+            modelBuilder.Entity("Asset.Domain.AssetModel", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("HoldingId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Manufacturer")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.PrimitiveCollection<string>("_compatibleEngineModelIds")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)")
+                        .HasColumnName("CompatibleEngineModelIds");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("HoldingId");
+
+                    b.ToTable("AssetModel", "asset");
+                });
+
+            modelBuilder.Entity("Asset.Domain.EngineModel", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("HoldingId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Manufacturer")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("HoldingId");
+
+                    b.ToTable("EngineModel", "asset");
+                });
+
+            modelBuilder.Entity("Asset.Domain.Asset", b =>
+                {
+                    b.HasOne("Asset.Domain.AssetModel", null)
+                        .WithMany()
+                        .HasForeignKey("AssetModelId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
                 });
 #pragma warning restore 612, 618
         }
@@ -11648,10 +12156,12 @@ public sealed class AssetModelRepository : IAssetModelRepository
 
 ================================================================================
 FILE: src\Modules\Asset\Asset.Infrastructure\Persistence\AssetRepository.cs
-SIZE: 1.23 KB
+SIZE: 3.12 KB
 ================================================================================
 using Asset.Domain;
 using MachineryManager.Asset.Application.Abstractions;
+using MachineryManager.Asset.Application.Features.Assets.Dtos;
+using MachineryManager.Asset.Application.Features.Assets.Queries.SearchAssets;
 using Microsoft.EntityFrameworkCore;
 
 namespace MachineryManager.Asset.Infrastructure.Persistence;
@@ -11680,11 +12190,67 @@ public sealed class AssetRepository : IAssetRepository
 
     /// <inheritdoc />
     public void Remove(global::Asset.Domain.Asset aggregate) => _dbContext.Assets.Remove(aggregate);
+
+    /// <inheritdoc />
+    public async Task<SearchAssetsResponse> SearchAsync(
+        Guid organizationId,
+        string? searchTerm,
+        int page,
+        int pageSize,
+        CancellationToken cancellationToken = default)
+    {
+        var query = _dbContext.Assets
+            .AsNoTracking()
+            .Where(a => a.OrganizationId == organizationId);
+
+        if (!string.IsNullOrWhiteSpace(searchTerm))
+        {
+            query = query.Where(a =>
+                (a.SerialNumber != null && a.SerialNumber.Contains(searchTerm)) ||
+                (a.LicensePlate != null && a.LicensePlate.Contains(searchTerm)));
+        }
+
+        var totalItems = await query.CountAsync(cancellationToken);
+
+        // Materialize entities first, map to DTO in memory — avoids the
+        // EF Core 10 Select-projection translation issue hit earlier
+        // with Profile.Permissions / AssetModel.CompatibleEngineModelIds
+        // (chat, 2026-08-25).
+        var entities = await query
+            .OrderBy(a => a.SerialNumber)
+            .Skip((page - 1) * pageSize)
+            .Take(pageSize)
+            .ToListAsync(cancellationToken);
+
+        var items = entities
+            .Select(a => new AssetDto(
+                a.Id.Value,
+                a.OrganizationId,
+                a.AssetModelId.Value,
+                a.SerialNumber,
+                a.LicensePlate,
+                a.ManufactureYear,
+                a.Color,
+                a.Status.ToString()))
+            .ToList();
+
+        var totalPages = totalItems == 0 ? 0 : (int)Math.Ceiling(totalItems / (double)pageSize);
+
+        return new SearchAssetsResponse(
+            items,
+            page,
+            pageSize,
+            totalItems,
+            totalPages,
+            page < totalPages,
+            page > 1);
+    }
 }
+
 
 ================================================================================
 FILE: src\Modules\Asset\Asset.Infrastructure\Persistence\Configurations\AssetConfiguration.cs
-SIZE: 1.62 KB
+SIZE: 2.32 KB
 ================================================================================
 using Asset.Domain;
 using Microsoft.EntityFrameworkCore;
@@ -11717,6 +12283,19 @@ public sealed class AssetConfiguration : IEntityTypeConfiguration<global::Asset.
 
         builder.HasIndex(a => a.AssetModelId);
 
+        // Real database-level FK (chat, 2026-08-27): no navigation
+        // property on the aggregate itself, preserving the project's
+        // "no cross-aggregate navigation" DDD boundary — this only
+        // tells EF which column is the FK. Restrict (not Cascade,
+        // unlike UserProfileAssignment -> Profile): an Asset is a real
+        // physical asset, so deleting its AssetModel must never
+        // cascade-delete real Asset records; the AssetModel cannot be
+        // removed while any Asset still references it.
+        builder.HasOne<AssetModel>()
+            .WithMany()
+            .HasForeignKey(a => a.AssetModelId)
+            .OnDelete(DeleteBehavior.Restrict);
+
         builder.Property(a => a.SerialNumber)
             .HasMaxLength(global::Asset.Domain.Asset.MaxSerialNumberLength);
 
@@ -11735,6 +12314,7 @@ public sealed class AssetConfiguration : IEntityTypeConfiguration<global::Asset.
             .IsRequired();
     }
 }
+
 
 ================================================================================
 FILE: src\Modules\Asset\Asset.Infrastructure\Persistence\Configurations\AssetModelConfiguration.cs
@@ -12941,6 +13521,22 @@ namespace MachineryManager.Asset.Presentation.Contracts;
 public sealed record RegisterAssetModelRequest(Guid HoldingId, string Name, string Manufacturer);
 
 ================================================================================
+FILE: src\Modules\Asset\Asset.Presentation\Contracts\RegisterAssetRequest.cs
+SIZE: 0.3 KB
+================================================================================
+namespace MachineryManager.Asset.Presentation.Contracts;
+
+/// <summary>Request body for registering a new Asset.</summary>
+public sealed record RegisterAssetRequest(
+    Guid OrganizationId,
+    Guid AssetModelId,
+    string Color,
+    string? SerialNumber,
+    string? LicensePlate,
+    int? ManufactureYear);
+
+
+================================================================================
 FILE: src\Modules\Asset\Asset.Presentation\Contracts\RegisterEngineModelRequest.cs
 SIZE: 0.23 KB
 ================================================================================
@@ -12966,6 +13562,197 @@ namespace MachineryManager.Asset.Presentation.Contracts;
 
 /// <summary>Request body for renaming an Engine Model.</summary>
 public sealed record RenameEngineModelRequest(string Name);
+
+================================================================================
+FILE: src\Modules\Asset\Asset.Presentation\Endpoints\AssetEndpoints.cs
+SIZE: 6.78 KB
+================================================================================
+using MachineryManager.Asset.Application.Features.Assets.Commands.ActivateAsset;
+using MachineryManager.Asset.Application.Features.Assets.Commands.CommissionAsset;
+using MachineryManager.Asset.Application.Features.Assets.Commands.DeactivateAsset;
+using MachineryManager.Asset.Application.Features.Assets.Commands.DisposeAsset;
+using MachineryManager.Asset.Application.Features.Assets.Commands.RegisterAsset;
+using MachineryManager.Asset.Application.Features.Assets.Commands.RetireAsset;
+using MachineryManager.Asset.Application.Features.Assets.Queries.GetAssetById;
+using MachineryManager.Asset.Application.Features.Assets.Queries.SearchAssets;
+using MachineryManager.Asset.Presentation.Contracts;
+using MediatR;
+using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Routing;
+using OpenIddict.Validation.AspNetCore;
+
+namespace MachineryManager.Asset.Presentation.Endpoints;
+
+/// <summary>
+/// Maps the Asset module's Asset REST endpoints per 07-api conventions
+/// (Section 8): base path <c>/api/v1/assets</c>.
+/// </summary>
+public static class AssetEndpoints
+{
+    /// <summary>Registers the Asset endpoints on the application's route builder.</summary>
+    public static IEndpointRouteBuilder MapAssetEndpoints(this IEndpointRouteBuilder endpoints)
+    {
+        var group = endpoints
+            .MapGroup("/api/v1/assets")
+            .WithTags("Assets")
+            .RequireAuthorization(policy => policy
+                .AddAuthenticationSchemes(OpenIddictValidationAspNetCoreDefaults.AuthenticationScheme)
+                .RequireAuthenticatedUser());
+
+        group.MapPost("/", RegisterAssetAsync)
+            .WithName("RegisterAsset")
+            .WithSummary("Registers a new Asset within an Organization.");
+
+        group.MapGet("/{assetId:guid}", GetAssetByIdAsync)
+            .WithName("GetAssetById")
+            .WithSummary("Retrieves a single Asset by its identifier.");
+
+        group.MapGet("/", SearchAssetsAsync)
+            .WithName("SearchAssets")
+            .WithSummary("Searches Assets within an Organization, with optional text filtering and pagination.");
+
+        group.MapPost("/{assetId:guid}/commission", CommissionAssetAsync)
+            .WithName("CommissionAsset")
+            .WithSummary("Completes commissioning of an Asset (Registered → Commissioned).");
+
+        group.MapPost("/{assetId:guid}/activate", ActivateAssetAsync)
+            .WithName("ActivateAsset")
+            .WithSummary("Places an Asset into operation (Commissioned or Inactive → Operational).");
+
+        group.MapPost("/{assetId:guid}/deactivate", DeactivateAssetAsync)
+            .WithName("DeactivateAsset")
+            .WithSummary("Temporarily takes an Asset out of use (Operational → Inactive).");
+
+        group.MapPost("/{assetId:guid}/retire", RetireAssetAsync)
+            .WithName("RetireAsset")
+            .WithSummary("Permanently withdraws an Asset from use (Operational or Inactive → Retired).");
+
+        group.MapPost("/{assetId:guid}/dispose", DisposeAssetAsync)
+            .WithName("DisposeAsset")
+            .WithSummary("Marks a Retired Asset as physically disposed of (final state).");
+
+        return endpoints;
+    }
+
+    private static async Task<IResult> RegisterAssetAsync(
+        RegisterAssetRequest request,
+        ISender sender,
+        HttpContext httpContext,
+        CancellationToken cancellationToken)
+    {
+        var result = await sender.Send(
+            new RegisterAssetCommand(
+                request.OrganizationId,
+                request.AssetModelId,
+                request.Color,
+                request.SerialNumber,
+                request.LicensePlate,
+                request.ManufactureYear),
+            cancellationToken);
+
+        return result.IsSuccess
+            ? Results.Created($"/api/v1/assets/{result.Value}", new { id = result.Value })
+            : result.ToProblemResult(httpContext);
+    }
+
+    private static async Task<IResult> GetAssetByIdAsync(
+        Guid assetId,
+        ISender sender,
+        HttpContext httpContext,
+        CancellationToken cancellationToken)
+    {
+        var result = await sender.Send(new GetAssetByIdQuery(assetId), cancellationToken);
+
+        return result.IsSuccess
+            ? Results.Ok(result.Value)
+            : result.ToProblemResult(httpContext);
+    }
+
+    private static async Task<IResult> SearchAssetsAsync(
+        Guid organizationId,
+        ISender sender,
+        HttpContext httpContext,
+        CancellationToken cancellationToken,
+        string? search = null,
+        int page = 1,
+        int pageSize = 25)
+    {
+        var result = await sender.Send(
+            new SearchAssetsQuery(organizationId, search, page, pageSize),
+            cancellationToken);
+
+        return result.IsSuccess
+            ? Results.Ok(result.Value)
+            : result.ToProblemResult(httpContext);
+    }
+
+    private static async Task<IResult> CommissionAssetAsync(
+        Guid assetId,
+        ISender sender,
+        HttpContext httpContext,
+        CancellationToken cancellationToken)
+    {
+        var result = await sender.Send(new CommissionAssetCommand(assetId), cancellationToken);
+
+        return result.IsSuccess
+            ? Results.NoContent()
+            : result.ToProblemResult(httpContext);
+    }
+
+    private static async Task<IResult> ActivateAssetAsync(
+        Guid assetId,
+        ISender sender,
+        HttpContext httpContext,
+        CancellationToken cancellationToken)
+    {
+        var result = await sender.Send(new ActivateAssetCommand(assetId), cancellationToken);
+
+        return result.IsSuccess
+            ? Results.NoContent()
+            : result.ToProblemResult(httpContext);
+    }
+
+    private static async Task<IResult> DeactivateAssetAsync(
+        Guid assetId,
+        ISender sender,
+        HttpContext httpContext,
+        CancellationToken cancellationToken)
+    {
+        var result = await sender.Send(new DeactivateAssetCommand(assetId), cancellationToken);
+
+        return result.IsSuccess
+            ? Results.NoContent()
+            : result.ToProblemResult(httpContext);
+    }
+
+    private static async Task<IResult> RetireAssetAsync(
+        Guid assetId,
+        ISender sender,
+        HttpContext httpContext,
+        CancellationToken cancellationToken)
+    {
+        var result = await sender.Send(new RetireAssetCommand(assetId), cancellationToken);
+
+        return result.IsSuccess
+            ? Results.NoContent()
+            : result.ToProblemResult(httpContext);
+    }
+
+    private static async Task<IResult> DisposeAssetAsync(
+        Guid assetId,
+        ISender sender,
+        HttpContext httpContext,
+        CancellationToken cancellationToken)
+    {
+        var result = await sender.Send(new DisposeAssetCommand(assetId), cancellationToken);
+
+        return result.IsSuccess
+            ? Results.NoContent()
+            : result.ToProblemResult(httpContext);
+    }
+}
+
 
 ================================================================================
 FILE: src\Modules\Asset\Asset.Presentation\Endpoints\AssetModelEndpoints.cs
@@ -23298,12 +24085,12 @@ SIZE: 0.53 KB
 # SECTION 3: SNAPSHOT SUMMARY
 ================================================================================
 
-Generation Time     : 00:00:02.5466341
-Total Files Scanned : 384
-Files Included      : 384
+Generation Time     : 00:00:03.6690039
+Total Files Scanned : 393
+Files Included      : 393
 Files Skipped       : 0
-Total Source Size   : 0.78 MB
-Snapshot File Size  : 0.9 MB
+Total Source Size   : 0.8 MB
+Snapshot File Size  : 0.93 MB
 Output Path         : C:\Users\i\source\repos\MachineryManagerEnterprise\MME_Codebase_Snapshot.txt
 
 Excluded Directories: .git, .github, .vs, .vscode, .idea, .azure, .devcontainer, bin, obj, packages, publish, out, release, releases, debug, x64, x86, arm64, artifacts, .artifacts, node_modules, dist, build, bower_components, jspm_packages, docs-english, docs-farsi, docs, tools, test-results, coverage, .coverage, TestResults, lib, .angular, .next, .nuxt, .svelte-kit, .cache, .temp, tmp

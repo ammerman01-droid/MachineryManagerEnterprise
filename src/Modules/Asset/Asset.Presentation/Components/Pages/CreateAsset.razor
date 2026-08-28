@@ -1,0 +1,192 @@
+@page "/admin/assets/create"
+@rendermode InteractiveServer
+@inject IHttpClientFactory HttpClientFactory
+@inject NavigationManager Navigation
+
+<PageTitle>ثبت دارایی جدید</PageTitle>
+
+<MudText Typo="Typo.h4" Class="mb-4">ثبت دارایی جدید</MudText>
+
+@if (errorMessage is not null)
+{
+    <MudAlert Severity="Severity.Error" Class="my-4">@errorMessage</MudAlert>
+}
+
+@if (isLoading)
+{
+    <MudProgressLinear Indeterminate="true" Class="my-4" />
+}
+else
+{
+    <MudPaper Class="pa-4">
+        <MudForm @ref="form">
+            <MudSelect T="Guid" Label="سازمان" @bind-Value="model.OrganizationId" Required="true" RequiredError="سازمان الزامی است">
+                @foreach (var org in organizations)
+                {
+                    <MudSelectItem T="Guid" Value="@org.Id">@org.Name</MudSelectItem>
+                }
+            </MudSelect>
+
+            <MudSelect T="Guid" Label="مدل دارایی" @bind-Value="model.AssetModelId" Required="true" RequiredError="مدل دارایی الزامی است" Class="mt-4">
+                @foreach (var am in assetModels)
+                {
+                    <MudSelectItem T="Guid" Value="@am.Id">@am.Name</MudSelectItem>
+                }
+            </MudSelect>
+
+            <MudTextField T="string" Label="رنگ" @bind-Value="model.Color" Required="true" RequiredError="رنگ الزامی است" MaxLength="50" Class="mt-4" />
+            <MudTextField T="string" Label="شماره سریال" @bind-Value="model.SerialNumber" MaxLength="100" Class="mt-4" />
+            <MudTextField T="string" Label="پلاک" @bind-Value="model.LicensePlate" MaxLength="50" Class="mt-4" />
+            <MudNumericField T="int?" Label="سال ساخت" @bind-Value="model.ManufactureYear" Min="1900" Max="2100" Class="mt-4" />
+
+            <MudButton Variant="Variant.Filled" Color="Color.Primary" Class="mt-4" OnClick="SubmitAsync" Disabled="isSubmitting">
+                @(isSubmitting ? "در حال ثبت..." : "ثبت")
+            </MudButton>
+            <MudButton Variant="Variant.Outlined" Color="Color.Secondary" Class="mt-4 ml-2" OnClick="@(() => Navigation.NavigateTo("/admin/assets"))">
+                انصراف
+            </MudButton>
+        </MudForm>
+    </MudPaper>
+}
+
+@code {
+    private sealed class OrganizationItem
+    {
+        public Guid Id { get; set; }
+        public string Name { get; set; } = string.Empty;
+        public Guid HoldingId { get; set; }
+    }
+
+    private sealed class AssetModelItem
+    {
+        public Guid Id { get; set; }
+        public string Name { get; set; } = string.Empty;
+    }
+
+    private sealed class SearchOrganizationsResult
+    {
+        public List<OrganizationItem> Items { get; set; } = [];
+    }
+
+    private sealed class SearchAssetModelsResult
+    {
+        public List<AssetModelItem> Items { get; set; } = [];
+    }
+
+    private sealed class RegisterAssetModel
+    {
+        public Guid OrganizationId { get; set; }
+        public Guid AssetModelId { get; set; }
+        public string Color { get; set; } = string.Empty;
+        public string? SerialNumber { get; set; }
+        public string? LicensePlate { get; set; }
+        public int? ManufactureYear { get; set; }
+    }
+
+    private MudForm form = null!;
+    private RegisterAssetModel model = new();
+    private List<OrganizationItem> organizations = [];
+    private List<AssetModelItem> assetModels = [];
+    private bool isLoading = true;
+    private bool isSubmitting;
+    private string? errorMessage;
+
+    [SupplyParameterFromQuery]
+    public Guid? OrganizationId { get; set; }
+
+    [SupplyParameterFromQuery]
+    public Guid? HoldingId { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadOrganizationsAsync();
+        if (OrganizationId.HasValue)
+        {
+            model.OrganizationId = OrganizationId.Value;
+            var org = organizations.FirstOrDefault(o => o.Id == OrganizationId.Value);
+            var holdingId = HoldingId ?? org?.HoldingId ?? Guid.Empty;
+            if (holdingId != Guid.Empty)
+            {
+                await LoadAssetModelsAsync(holdingId);
+            }
+        }
+        isLoading = false;
+    }
+
+    private async Task LoadOrganizationsAsync()
+    {
+        try
+        {
+            var client = HttpClientFactory.CreateClient("InternalApi");
+            var response = await client.GetAsync("/api/v1/organizations?pageSize=200");
+            var content = await response.Content.ReadAsStringAsync();
+
+            if (response.IsSuccessStatusCode)
+            {
+                var result = System.Text.Json.JsonSerializer.Deserialize<SearchOrganizationsResult>(content, new System.Text.Json.JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+                organizations = result?.Items ?? [];
+            }
+            else
+            {
+                errorMessage = $"خطا در دریافت سازمان‌ها: {content}";
+            }
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"خطا: {ex.Message}";
+        }
+    }
+
+    private async Task LoadAssetModelsAsync(Guid holdingId)
+    {
+        try
+        {
+            var client = HttpClientFactory.CreateClient("InternalApi");
+            var response = await client.GetAsync($"/api/v1/asset-models?holdingId={holdingId}&pageSize=200");
+            var content = await response.Content.ReadAsStringAsync();
+
+            if (response.IsSuccessStatusCode)
+            {
+                var result = System.Text.Json.JsonSerializer.Deserialize<SearchAssetModelsResult>(content, new System.Text.Json.JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+                assetModels = result?.Items ?? [];
+            }
+        }
+        catch
+        {
+            // Best effort
+        }
+    }
+
+    private async Task SubmitAsync()
+    {
+        await form.Validate();
+        if (!form.IsValid) return;
+
+        isSubmitting = true;
+        errorMessage = null;
+
+        try
+        {
+            var client = HttpClientFactory.CreateClient("InternalApi");
+            var response = await client.PostAsJsonAsync("/api/v1/assets", model);
+            var content = await response.Content.ReadAsStringAsync();
+
+            if (response.IsSuccessStatusCode)
+            {
+                Navigation.NavigateTo("/admin/assets");
+            }
+            else
+            {
+                errorMessage = $"خطا در ثبت دارایی: {content}";
+            }
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"خطا: {ex.Message}";
+        }
+        finally
+        {
+            isSubmitting = false;
+        }
+    }
+}
