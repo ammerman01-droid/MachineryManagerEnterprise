@@ -1,7 +1,7 @@
 ﻿
 ================================================================================
   MACHINERYMANAGERENTERPRISE - CODEBASE SNAPSHOT
-  Generated: 2026-08-28 10:11:32
+  Generated: 2026-08-28 12:09:50
   Source: C:\Users\i\source\repos\MachineryManagerEnterprise
   Purpose: Complete source code reference for AI-assisted development
   Excludes: .md, .gitignore, this script, build artifacts, binaries, IDE,
@@ -200,6 +200,7 @@ MachineryManagerEnterprise
 |   |   |   |   |-- Abstractions
 |   |   |   |   |   |-- IAssetModelRepository.cs
 |   |   |   |   |   |-- IAssetRepository.cs
+|   |   |   |   |   |-- IAssetUnitOfWork.cs
 |   |   |   |   |   +-- IEngineModelRepository.cs
 |   |   |   |   |-- Behaviors
 |   |   |   |   |   +-- ValidationBehavior.cs
@@ -408,6 +409,7 @@ MachineryManagerEnterprise
 |   |       |   |-- Abstractions
 |   |       |   |   |-- IHoldingRepository.cs
 |   |       |   |   |-- IOrganizationRepository.cs
+|   |       |   |   |-- IOrganizationUnitOfWork.cs
 |   |       |   |   +-- IProjectRepository.cs
 |   |       |   |-- Behaviors
 |   |       |   |   +-- ValidationBehavior.cs
@@ -7993,6 +7995,29 @@ public interface IAssetRepository : IRepository<global::Asset.Domain.Asset, glob
 
 
 ================================================================================
+FILE: src\Modules\Asset\Asset.Application\Abstractions\IAssetUnitOfWork.cs
+SIZE: 0.77 KB
+================================================================================
+using MachineryManager.SharedKernel.Abstractions;
+
+namespace MachineryManager.Asset.Application.Abstractions;
+
+/// <summary>
+/// Unit of work for the Asset module. Distinct from every other
+/// module's UoW so that each module commits its own aggregates
+/// (ADR-0001, Modular Monolith Rules) — mirrors
+/// <c>IAdministrationUnitOfWork</c>. Introduced (chat, 2026-08-27) to
+/// fix a DI collision: registering the shared <see cref="IUnitOfWork"/>
+/// directly from more than one module causes the last module
+/// registered in Program.cs to silently win for the entire
+/// application, so other modules' SaveChangesAsync calls were
+/// resolving to the wrong DbContext and discarding their changes.
+/// </summary>
+public interface IAssetUnitOfWork : IUnitOfWork
+{
+}
+
+================================================================================
 FILE: src\Modules\Asset\Asset.Application\Abstractions\IEngineModelRepository.cs
 SIZE: 0.72 KB
 ================================================================================
@@ -8227,7 +8252,7 @@ public sealed record AssignCompatibleEngineModelCommand(Guid AssetModelId, Guid 
 
 ================================================================================
 FILE: src\Modules\Asset\Asset.Application\Features\AssetModels\Commands\AssignCompatibleEngineModel\AssignCompatibleEngineModelCommandHandler.cs
-SIZE: 4.21 KB
+SIZE: 4.22 KB
 ================================================================================
 using MachineryManager.Asset.Application.Abstractions;
 using MachineryManager.SharedKernel;
@@ -8251,7 +8276,7 @@ public sealed class AssignCompatibleEngineModelCommandHandler
 
     private readonly IAssetModelRepository _assetModelRepository;
     private readonly IEngineModelRepository _engineModelRepository;
-    private readonly IUnitOfWork _unitOfWork;
+    private readonly IAssetUnitOfWork _unitOfWork;
     private readonly IDateTimeProvider _dateTimeProvider;
     private readonly ICurrentUserService _currentUserService;
     private readonly IPermissionEvaluator _permissionEvaluator;
@@ -8260,7 +8285,7 @@ public sealed class AssignCompatibleEngineModelCommandHandler
     public AssignCompatibleEngineModelCommandHandler(
         IAssetModelRepository assetModelRepository,
         IEngineModelRepository engineModelRepository,
-        IUnitOfWork unitOfWork,
+        IAssetUnitOfWork unitOfWork,
         IDateTimeProvider dateTimeProvider,
         ICurrentUserService currentUserService,
         IPermissionEvaluator permissionEvaluator)
@@ -8369,7 +8394,7 @@ public sealed class RegisterAssetModelCommandHandler
 
     private readonly IAssetModelRepository _assetModelRepository;
     private readonly IHoldingLookupService _holdingLookupService;
-    private readonly IUnitOfWork _unitOfWork;
+    private readonly IAssetUnitOfWork _unitOfWork;
     private readonly IDateTimeProvider _dateTimeProvider;
     private readonly ICurrentUserService _currentUserService;
     private readonly IPermissionEvaluator _permissionEvaluator;
@@ -8378,7 +8403,7 @@ public sealed class RegisterAssetModelCommandHandler
     public RegisterAssetModelCommandHandler(
         IAssetModelRepository assetModelRepository,
         IHoldingLookupService holdingLookupService,
-        IUnitOfWork unitOfWork,
+        IAssetUnitOfWork unitOfWork,
         IDateTimeProvider dateTimeProvider,
         ICurrentUserService currentUserService,
         IPermissionEvaluator permissionEvaluator)
@@ -8436,7 +8461,6 @@ public sealed class RegisterAssetModelCommandHandler
         return Result.Success(result.Value.Id.Value);
     }
 }
-
 
 ================================================================================
 FILE: src\Modules\Asset\Asset.Application\Features\AssetModels\Commands\RegisterAssetModel\RegisterAssetModelCommandValidator.cs
@@ -8498,14 +8522,14 @@ public sealed class RemoveCompatibleEngineModelCommandHandler
     private const string RequiredPermission = "Asset.Edit";
 
     private readonly IAssetModelRepository _assetModelRepository;
-    private readonly IUnitOfWork _unitOfWork;
+    private readonly IAssetUnitOfWork _unitOfWork;
     private readonly ICurrentUserService _currentUserService;
     private readonly IPermissionEvaluator _permissionEvaluator;
 
     /// <summary>Initializes a new instance of the <see cref="RemoveCompatibleEngineModelCommandHandler"/> class.</summary>
     public RemoveCompatibleEngineModelCommandHandler(
         IAssetModelRepository assetModelRepository,
-        IUnitOfWork unitOfWork,
+        IAssetUnitOfWork unitOfWork,
         ICurrentUserService currentUserService,
         IPermissionEvaluator permissionEvaluator)
     {
@@ -8572,7 +8596,7 @@ public sealed record RenameAssetModelCommand(Guid AssetModelId, string Name) : I
 
 ================================================================================
 FILE: src\Modules\Asset\Asset.Application\Features\AssetModels\Commands\RenameAssetModel\RenameAssetModelCommandHandler.cs
-SIZE: 2.76 KB
+SIZE: 2.77 KB
 ================================================================================
 using MachineryManager.Asset.Application.Abstractions;
 using MachineryManager.SharedKernel;
@@ -8592,14 +8616,14 @@ public sealed class RenameAssetModelCommandHandler
     private const string RequiredPermission = "Asset.Edit";
 
     private readonly IAssetModelRepository _assetModelRepository;
-    private readonly IUnitOfWork _unitOfWork;
+    private readonly IAssetUnitOfWork _unitOfWork;
     private readonly ICurrentUserService _currentUserService;
     private readonly IPermissionEvaluator _permissionEvaluator;
 
     /// <summary>Initializes a new instance of the <see cref="RenameAssetModelCommandHandler"/> class.</summary>
     public RenameAssetModelCommandHandler(
         IAssetModelRepository assetModelRepository,
-        IUnitOfWork unitOfWork,
+        IAssetUnitOfWork unitOfWork,
         ICurrentUserService currentUserService,
         IPermissionEvaluator permissionEvaluator)
     {
@@ -8880,7 +8904,7 @@ public sealed record ActivateAssetCommand(Guid AssetId) : IRequest<Result>;
 
 ================================================================================
 FILE: src\Modules\Asset\Asset.Application\Features\Assets\Commands\ActivateAsset\ActivateAssetCommandHandler.cs
-SIZE: 3.12 KB
+SIZE: 3.13 KB
 ================================================================================
 using MachineryManager.Asset.Application.Abstractions;
 using MachineryManager.SharedKernel;
@@ -8900,7 +8924,7 @@ public sealed class ActivateAssetCommandHandler
     private const string RequiredPermission = "Asset.Edit";
 
     private readonly IAssetRepository _assetRepository;
-    private readonly IUnitOfWork _unitOfWork;
+    private readonly IAssetUnitOfWork _unitOfWork;
     private readonly IDateTimeProvider _dateTimeProvider;
     private readonly ICurrentUserService _currentUserService;
     private readonly IPermissionEvaluator _permissionEvaluator;
@@ -8909,7 +8933,7 @@ public sealed class ActivateAssetCommandHandler
     /// <summary>Initializes a new instance of the <see cref="ActivateAssetCommandHandler"/> class.</summary>
     public ActivateAssetCommandHandler(
         IAssetRepository assetRepository,
-        IUnitOfWork unitOfWork,
+        IAssetUnitOfWork unitOfWork,
         IDateTimeProvider dateTimeProvider,
         ICurrentUserService currentUserService,
         IPermissionEvaluator permissionEvaluator,
@@ -8999,7 +9023,7 @@ public sealed record CommissionAssetCommand(Guid AssetId) : IRequest<Result>;
 
 ================================================================================
 FILE: src\Modules\Asset\Asset.Application\Features\Assets\Commands\CommissionAsset\CommissionAssetCommandHandler.cs
-SIZE: 3.14 KB
+SIZE: 3.15 KB
 ================================================================================
 using MachineryManager.Asset.Application.Abstractions;
 using MachineryManager.SharedKernel;
@@ -9019,7 +9043,7 @@ public sealed class CommissionAssetCommandHandler
     private const string RequiredPermission = "Asset.Edit";
 
     private readonly IAssetRepository _assetRepository;
-    private readonly IUnitOfWork _unitOfWork;
+    private readonly IAssetUnitOfWork _unitOfWork;
     private readonly IDateTimeProvider _dateTimeProvider;
     private readonly ICurrentUserService _currentUserService;
     private readonly IPermissionEvaluator _permissionEvaluator;
@@ -9028,7 +9052,7 @@ public sealed class CommissionAssetCommandHandler
     /// <summary>Initializes a new instance of the <see cref="CommissionAssetCommandHandler"/> class.</summary>
     public CommissionAssetCommandHandler(
         IAssetRepository assetRepository,
-        IUnitOfWork unitOfWork,
+        IAssetUnitOfWork unitOfWork,
         IDateTimeProvider dateTimeProvider,
         ICurrentUserService currentUserService,
         IPermissionEvaluator permissionEvaluator,
@@ -9118,7 +9142,7 @@ public sealed record DeactivateAssetCommand(Guid AssetId) : IRequest<Result>;
 
 ================================================================================
 FILE: src\Modules\Asset\Asset.Application\Features\Assets\Commands\DeactivateAsset\DeactivateAssetCommandHandler.cs
-SIZE: 3.14 KB
+SIZE: 3.15 KB
 ================================================================================
 using MachineryManager.Asset.Application.Abstractions;
 using MachineryManager.SharedKernel;
@@ -9138,7 +9162,7 @@ public sealed class DeactivateAssetCommandHandler
     private const string RequiredPermission = "Asset.Edit";
 
     private readonly IAssetRepository _assetRepository;
-    private readonly IUnitOfWork _unitOfWork;
+    private readonly IAssetUnitOfWork _unitOfWork;
     private readonly IDateTimeProvider _dateTimeProvider;
     private readonly ICurrentUserService _currentUserService;
     private readonly IPermissionEvaluator _permissionEvaluator;
@@ -9147,7 +9171,7 @@ public sealed class DeactivateAssetCommandHandler
     /// <summary>Initializes a new instance of the <see cref="DeactivateAssetCommandHandler"/> class.</summary>
     public DeactivateAssetCommandHandler(
         IAssetRepository assetRepository,
-        IUnitOfWork unitOfWork,
+        IAssetUnitOfWork unitOfWork,
         IDateTimeProvider dateTimeProvider,
         ICurrentUserService currentUserService,
         IPermissionEvaluator permissionEvaluator,
@@ -9237,7 +9261,7 @@ public sealed record DisposeAssetCommand(Guid AssetId) : IRequest<Result>;
 
 ================================================================================
 FILE: src\Modules\Asset\Asset.Application\Features\Assets\Commands\DisposeAsset\DisposeAssetCommandHandler.cs
-SIZE: 3.11 KB
+SIZE: 3.12 KB
 ================================================================================
 using MachineryManager.Asset.Application.Abstractions;
 using MachineryManager.SharedKernel;
@@ -9257,7 +9281,7 @@ public sealed class DisposeAssetCommandHandler
     private const string RequiredPermission = "Asset.Edit";
 
     private readonly IAssetRepository _assetRepository;
-    private readonly IUnitOfWork _unitOfWork;
+    private readonly IAssetUnitOfWork _unitOfWork;
     private readonly IDateTimeProvider _dateTimeProvider;
     private readonly ICurrentUserService _currentUserService;
     private readonly IPermissionEvaluator _permissionEvaluator;
@@ -9266,7 +9290,7 @@ public sealed class DisposeAssetCommandHandler
     /// <summary>Initializes a new instance of the <see cref="DisposeAssetCommandHandler"/> class.</summary>
     public DisposeAssetCommandHandler(
         IAssetRepository assetRepository,
-        IUnitOfWork unitOfWork,
+        IAssetUnitOfWork unitOfWork,
         IDateTimeProvider dateTimeProvider,
         ICurrentUserService currentUserService,
         IPermissionEvaluator permissionEvaluator,
@@ -9362,7 +9386,7 @@ public sealed record RegisterAssetCommand(
 
 ================================================================================
 FILE: src\Modules\Asset\Asset.Application\Features\Assets\Commands\RegisterAsset\RegisterAssetCommandHandler.cs
-SIZE: 3.98 KB
+SIZE: 3.99 KB
 ================================================================================
 using MachineryManager.Asset.Application.Abstractions;
 using MachineryManager.SharedKernel;
@@ -9384,7 +9408,7 @@ public sealed class RegisterAssetCommandHandler
 
     private readonly IAssetRepository _assetRepository;
     private readonly IAssetModelRepository _assetModelRepository;
-    private readonly IUnitOfWork _unitOfWork;
+    private readonly IAssetUnitOfWork _unitOfWork;
     private readonly IDateTimeProvider _dateTimeProvider;
     private readonly ICurrentUserService _currentUserService;
     private readonly IPermissionEvaluator _permissionEvaluator;
@@ -9394,7 +9418,7 @@ public sealed class RegisterAssetCommandHandler
     public RegisterAssetCommandHandler(
         IAssetRepository assetRepository,
         IAssetModelRepository assetModelRepository,
-        IUnitOfWork unitOfWork,
+        IAssetUnitOfWork unitOfWork,
         IDateTimeProvider dateTimeProvider,
         ICurrentUserService currentUserService,
         IPermissionEvaluator permissionEvaluator,
@@ -9509,7 +9533,7 @@ public sealed record RetireAssetCommand(Guid AssetId) : IRequest<Result>;
 
 ================================================================================
 FILE: src\Modules\Asset\Asset.Application\Features\Assets\Commands\RetireAsset\RetireAssetCommandHandler.cs
-SIZE: 3.11 KB
+SIZE: 3.12 KB
 ================================================================================
 using MachineryManager.Asset.Application.Abstractions;
 using MachineryManager.SharedKernel;
@@ -9529,7 +9553,7 @@ public sealed class RetireAssetCommandHandler
     private const string RequiredPermission = "Asset.Edit";
 
     private readonly IAssetRepository _assetRepository;
-    private readonly IUnitOfWork _unitOfWork;
+    private readonly IAssetUnitOfWork _unitOfWork;
     private readonly IDateTimeProvider _dateTimeProvider;
     private readonly ICurrentUserService _currentUserService;
     private readonly IPermissionEvaluator _permissionEvaluator;
@@ -9538,7 +9562,7 @@ public sealed class RetireAssetCommandHandler
     /// <summary>Initializes a new instance of the <see cref="RetireAssetCommandHandler"/> class.</summary>
     public RetireAssetCommandHandler(
         IAssetRepository assetRepository,
-        IUnitOfWork unitOfWork,
+        IAssetUnitOfWork unitOfWork,
         IDateTimeProvider dateTimeProvider,
         ICurrentUserService currentUserService,
         IPermissionEvaluator permissionEvaluator,
@@ -9853,7 +9877,7 @@ public sealed record RegisterEngineModelCommand(Guid HoldingId, string Name, str
 
 ================================================================================
 FILE: src\Modules\Asset\Asset.Application\Features\EngineModels\Commands\RegisterEngineModel\RegisterEngineModelCommandHandler.cs
-SIZE: 3.34 KB
+SIZE: 3.35 KB
 ================================================================================
 using MachineryManager.Asset.Application.Abstractions;
 using MachineryManager.SharedKernel;
@@ -9874,7 +9898,7 @@ public sealed class RegisterEngineModelCommandHandler
 
     private readonly IEngineModelRepository _engineModelRepository;
     private readonly IHoldingLookupService _holdingLookupService;
-    private readonly IUnitOfWork _unitOfWork;
+    private readonly IAssetUnitOfWork _unitOfWork;
     private readonly IDateTimeProvider _dateTimeProvider;
     private readonly ICurrentUserService _currentUserService;
     private readonly IPermissionEvaluator _permissionEvaluator;
@@ -9883,7 +9907,7 @@ public sealed class RegisterEngineModelCommandHandler
     public RegisterEngineModelCommandHandler(
         IEngineModelRepository engineModelRepository,
         IHoldingLookupService holdingLookupService,
-        IUnitOfWork unitOfWork,
+        IAssetUnitOfWork unitOfWork,
         IDateTimeProvider dateTimeProvider,
         ICurrentUserService currentUserService,
         IPermissionEvaluator permissionEvaluator)
@@ -9983,7 +10007,7 @@ public sealed record RenameEngineModelCommand(Guid EngineModelId, string Name) :
 
 ================================================================================
 FILE: src\Modules\Asset\Asset.Application\Features\EngineModels\Commands\RenameEngineModel\RenameEngineModelCommandHandler.cs
-SIZE: 2.78 KB
+SIZE: 2.79 KB
 ================================================================================
 using MachineryManager.Asset.Application.Abstractions;
 using MachineryManager.SharedKernel;
@@ -10003,14 +10027,14 @@ public sealed class RenameEngineModelCommandHandler
     private const string RequiredPermission = "Asset.Edit";
 
     private readonly IEngineModelRepository _engineModelRepository;
-    private readonly IUnitOfWork _unitOfWork;
+    private readonly IAssetUnitOfWork _unitOfWork;
     private readonly ICurrentUserService _currentUserService;
     private readonly IPermissionEvaluator _permissionEvaluator;
 
     /// <summary>Initializes a new instance of the <see cref="RenameEngineModelCommandHandler"/> class.</summary>
     public RenameEngineModelCommandHandler(
         IEngineModelRepository engineModelRepository,
-        IUnitOfWork unitOfWork,
+        IAssetUnitOfWork unitOfWork,
         ICurrentUserService currentUserService,
         IPermissionEvaluator permissionEvaluator)
     {
@@ -11425,7 +11449,7 @@ SIZE: 0.41 KB
 
 ================================================================================
 FILE: src\Modules\Asset\Asset.Infrastructure\DependencyInjection.cs
-SIZE: 1.97 KB
+SIZE: 2.43 KB
 ================================================================================
 using MachineryManager.Asset.Application.Abstractions;
 using MachineryManager.Asset.Infrastructure.Persistence;
@@ -11447,6 +11471,13 @@ public static class DependencyInjection
     /// Uses the shared <c>MachineryManagerDatabase</c> connection string
     /// key, matching Organization and Administration's infrastructure
     /// registration convention.
+    /// Registers <see cref="IAssetUnitOfWork"/>, not the shared
+    /// <see cref="IUnitOfWork"/> directly (chat, 2026-08-27 fix — the
+    /// shared interface caused a cross-module DI collision: whichever
+    /// module's <c>AddScoped&lt;IUnitOfWork&gt;</c> ran last in
+    /// Program.cs silently won for the entire application, so
+    /// Organization's SaveChangesAsync calls were resolving to
+    /// AssetDbContext instead and discarding their changes).
     /// </remarks>
     /// <param name="services">The service collection to configure.</param>
     /// <param name="configuration">The application configuration, used to resolve the connection string.</param>
@@ -11465,7 +11496,7 @@ public static class DependencyInjection
         services.AddScoped<IAssetRepository, AssetRepository>();
         services.AddScoped<IAssetModelRepository, AssetModelRepository>();
         services.AddScoped<IEngineModelRepository, EngineModelRepository>();
-        services.AddScoped<IUnitOfWork>(serviceProvider =>
+        services.AddScoped<IAssetUnitOfWork>(serviceProvider =>
             serviceProvider.GetRequiredService<AssetDbContext>());
 
         return services;
@@ -11993,8 +12024,9 @@ namespace Asset.Infrastructure.Migrations
 
 ================================================================================
 FILE: src\Modules\Asset\Asset.Infrastructure\Persistence\AssetDbContext.cs
-SIZE: 3.2 KB
+SIZE: 3.5 KB
 ================================================================================
+using MachineryManager.Asset.Application.Abstractions;
 using MachineryManager.SharedKernel;
 using MachineryManager.SharedKernel.Abstractions;
 using Microsoft.EntityFrameworkCore;
@@ -12003,9 +12035,13 @@ namespace MachineryManager.Asset.Infrastructure.Persistence;
 
 /// <summary>
 /// EF Core persistence context for the Asset module (Modular Monolith —
-/// each module owns its own DbContext and schema, per ADR-0006).
+/// each module owns its own DbContext and schema, per ADR-0006). Also
+/// serves as this module's <see cref="IAssetUnitOfWork"/> implementation
+/// (chat, 2026-08-27 — was the shared <see cref="IUnitOfWork"/> directly,
+/// which caused a DI registration collision with other modules'
+/// DbContexts).
 /// </summary>
-public sealed class AssetDbContext : DbContext, IUnitOfWork
+public sealed class AssetDbContext : DbContext, IAssetUnitOfWork
 {
     private readonly IDomainEventDispatcher? _domainEventDispatcher;
 
@@ -18529,6 +18565,29 @@ public interface IOrganizationRepository
 }
 
 ================================================================================
+FILE: src\Modules\Organization\Organization.Application\Abstractions\IOrganizationUnitOfWork.cs
+SIZE: 0.79 KB
+================================================================================
+using MachineryManager.SharedKernel.Abstractions;
+
+namespace MachineryManager.Organization.Application.Abstractions;
+
+/// <summary>
+/// Unit of work for the Organization module. Distinct from every other
+/// module's UoW so that each module commits its own aggregates
+/// (ADR-0001, Modular Monolith Rules) — mirrors
+/// <c>IAdministrationUnitOfWork</c>. Introduced (chat, 2026-08-27) to
+/// fix a DI collision: registering the shared <see cref="IUnitOfWork"/>
+/// directly from more than one module causes the last module
+/// registered in Program.cs to silently win for the entire
+/// application, so other modules' SaveChangesAsync calls were
+/// resolving to the wrong DbContext and discarding their changes.
+/// </summary>
+public interface IOrganizationUnitOfWork : IUnitOfWork
+{
+}
+
+================================================================================
 FILE: src\Modules\Organization\Organization.Application\Abstractions\IProjectRepository.cs
 SIZE: 0.73 KB
 ================================================================================
@@ -18742,7 +18801,7 @@ public sealed record RegisterHoldingCommand(string Name)
 
 ================================================================================
 FILE: src\Modules\Organization\Organization.Application\Features\Holdings\Commands\RegisterHolding\RegisterHoldingCommandHandler.cs
-SIZE: 3.52 KB
+SIZE: 3.54 KB
 ================================================================================
 using MachineryManager.Organization.Application.Abstractions;
 using MachineryManager.SharedKernel;
@@ -18762,7 +18821,7 @@ public sealed class RegisterHoldingCommandHandler
     private const string RequiredPermission = "Holding.Manage";
 
     private readonly IHoldingRepository _holdingRepository;
-    private readonly IUnitOfWork _unitOfWork;
+    private readonly IOrganizationUnitOfWork _unitOfWork;
     private readonly IDateTimeProvider _dateTimeProvider;
     private readonly ICurrentUserService _currentUserService;
     private readonly IPermissionEvaluator _permissionEvaluator;
@@ -18777,7 +18836,7 @@ public sealed class RegisterHoldingCommandHandler
     /// <param name="permissionEvaluator">Evaluates the current user's permissions at request time.</param>
     public RegisterHoldingCommandHandler(
         IHoldingRepository holdingRepository,
-        IUnitOfWork unitOfWork,
+        IOrganizationUnitOfWork unitOfWork,
         IDateTimeProvider dateTimeProvider,
         ICurrentUserService currentUserService,
         IPermissionEvaluator permissionEvaluator)
@@ -18876,7 +18935,7 @@ public sealed record RenameHoldingCommand(Guid HoldingId, string Name) : IReques
 
 ================================================================================
 FILE: src\Modules\Organization\Organization.Application\Features\Holdings\Commands\RenameHolding\RenameHoldingCommandHandler.cs
-SIZE: 2.84 KB
+SIZE: 2.87 KB
 ================================================================================
 using MachineryManager.Organization.Application.Abstractions;
 using MachineryManager.SharedKernel;
@@ -18897,7 +18956,7 @@ public sealed class RenameHoldingCommandHandler
     private const string RequiredPermission = "Holding.Edit";
 
     private readonly IHoldingRepository _holdingRepository;
-    private readonly IUnitOfWork _unitOfWork;
+    private readonly IOrganizationUnitOfWork _unitOfWork;
     private readonly IDateTimeProvider _dateTimeProvider;
     private readonly ICurrentUserService _currentUserService;
     private readonly IPermissionEvaluator _permissionEvaluator;
@@ -18905,7 +18964,7 @@ public sealed class RenameHoldingCommandHandler
     /// <summary>Initializes a new instance of the <see cref="RenameHoldingCommandHandler"/> class.</summary>
     public RenameHoldingCommandHandler(
         IHoldingRepository holdingRepository,
-        IUnitOfWork unitOfWork,
+        IOrganizationUnitOfWork unitOfWork,
         IDateTimeProvider dateTimeProvider,
         ICurrentUserService currentUserService,
         IPermissionEvaluator permissionEvaluator)
@@ -19245,7 +19304,7 @@ public sealed record AssignOrganizationToHoldingCommand(Guid OrganizationId, Gui
 
 ================================================================================
 FILE: src\Modules\Organization\Organization.Application\Features\Organizations\Commands\AssignOrganizationToHolding\AssignOrganizationToHoldingCommandHandler.cs
-SIZE: 4.27 KB
+SIZE: 4.29 KB
 ================================================================================
 using MachineryManager.Organization.Application.Abstractions;
 using MachineryManager.SharedKernel;
@@ -19266,7 +19325,7 @@ public sealed class AssignOrganizationToHoldingCommandHandler
     private const string RequiredPermission = "Organization.Edit";
 
     private readonly IOrganizationRepository _organizationRepository;
-    private readonly IUnitOfWork _unitOfWork;
+    private readonly IOrganizationUnitOfWork _unitOfWork;
     private readonly IDateTimeProvider _dateTimeProvider;
     private readonly ICurrentUserService _currentUserService;
     private readonly IPermissionEvaluator _permissionEvaluator;
@@ -19281,7 +19340,7 @@ public sealed class AssignOrganizationToHoldingCommandHandler
     /// <param name="permissionEvaluator">Evaluates the current user's permissions at request time.</param>
     public AssignOrganizationToHoldingCommandHandler(
         IOrganizationRepository organizationRepository,
-        IUnitOfWork unitOfWork,
+        IOrganizationUnitOfWork unitOfWork,
         IDateTimeProvider dateTimeProvider,
         ICurrentUserService currentUserService,
         IPermissionEvaluator permissionEvaluator)
@@ -19393,7 +19452,7 @@ public sealed record ReactivateOrganizationCommand(Guid OrganizationId)
 
 ================================================================================
 FILE: src\Modules\Organization\Organization.Application\Features\Organizations\Commands\ReactivateOrganization\ReactivateOrganizationCommandHandler.cs
-SIZE: 3.86 KB
+SIZE: 3.88 KB
 ================================================================================
 using MachineryManager.Organization.Application.Abstractions;
 using MachineryManager.SharedKernel;
@@ -19414,7 +19473,7 @@ public sealed class ReactivateOrganizationCommandHandler
     private const string RequiredPermission = "Organization.Edit";
 
     private readonly IOrganizationRepository _organizationRepository;
-    private readonly IUnitOfWork _unitOfWork;
+    private readonly IOrganizationUnitOfWork _unitOfWork;
     private readonly IDateTimeProvider _dateTimeProvider;
     private readonly ICurrentUserService _currentUserService;
     private readonly IPermissionEvaluator _permissionEvaluator;
@@ -19427,7 +19486,7 @@ public sealed class ReactivateOrganizationCommandHandler
     /// <param name="permissionEvaluator">Evaluates the current user's permissions at request time.</param>
     public ReactivateOrganizationCommandHandler(
         IOrganizationRepository organizationRepository,
-        IUnitOfWork unitOfWork,
+        IOrganizationUnitOfWork unitOfWork,
         IDateTimeProvider dateTimeProvider,
         ICurrentUserService currentUserService,
         IPermissionEvaluator permissionEvaluator)
@@ -19530,7 +19589,7 @@ public sealed record RegisterOrganizationCommand(string Name)
 
 ================================================================================
 FILE: src\Modules\Organization\Organization.Application\Features\Organizations\Commands\RegisterOrganization\RegisterOrganizationCommandHandler.cs
-SIZE: 2.9 KB
+SIZE: 2.93 KB
 ================================================================================
 using MachineryManager.SharedKernel;
 using MachineryManager.SharedKernel.Abstractions;
@@ -19549,7 +19608,7 @@ public sealed class RegisterOrganizationCommandHandler
     private const string RequiredPermission = "Organization.Create";
 
     private readonly IOrganizationRepository _repository;
-    private readonly IUnitOfWork _unitOfWork;
+    private readonly IOrganizationUnitOfWork _unitOfWork;
     private readonly IDateTimeProvider _dateTimeProvider;
     private readonly ICurrentUserService _currentUserService;
     private readonly IPermissionEvaluator _permissionEvaluator;
@@ -19557,7 +19616,7 @@ public sealed class RegisterOrganizationCommandHandler
     /// <summary>Initializes a new instance of the <see cref="RegisterOrganizationCommandHandler"/> class.</summary>
     public RegisterOrganizationCommandHandler(
         IOrganizationRepository repository,
-        IUnitOfWork unitOfWork,
+        IOrganizationUnitOfWork unitOfWork,
         IDateTimeProvider dateTimeProvider,
         ICurrentUserService currentUserService,
         IPermissionEvaluator permissionEvaluator)
@@ -19653,7 +19712,7 @@ public sealed record RenameOrganizationCommand(Guid OrganizationId, string Name)
 
 ================================================================================
 FILE: src\Modules\Organization\Organization.Application\Features\Organizations\Commands\RenameOrganization\RenameOrganizationCommandHandler.cs
-SIZE: 3.11 KB
+SIZE: 3.13 KB
 ================================================================================
 using MachineryManager.Organization.Application.Abstractions;
 using MachineryManager.SharedKernel;
@@ -19674,7 +19733,7 @@ public sealed class RenameOrganizationCommandHandler
     private const string RequiredPermission = "Organization.Edit";
 
     private readonly IOrganizationRepository _organizationRepository;
-    private readonly IUnitOfWork _unitOfWork;
+    private readonly IOrganizationUnitOfWork _unitOfWork;
     private readonly IDateTimeProvider _dateTimeProvider;
     private readonly ICurrentUserService _currentUserService;
     private readonly IPermissionEvaluator _permissionEvaluator;
@@ -19682,7 +19741,7 @@ public sealed class RenameOrganizationCommandHandler
     /// <summary>Initializes a new instance of the <see cref="RenameOrganizationCommandHandler"/> class.</summary>
     public RenameOrganizationCommandHandler(
         IOrganizationRepository organizationRepository,
-        IUnitOfWork unitOfWork,
+        IOrganizationUnitOfWork unitOfWork,
         IDateTimeProvider dateTimeProvider,
         ICurrentUserService currentUserService,
         IPermissionEvaluator permissionEvaluator)
@@ -19787,7 +19846,7 @@ public sealed record SuspendOrganizationCommand(Guid OrganizationId)
 
 ================================================================================
 FILE: src\Modules\Organization\Organization.Application\Features\Organizations\Commands\SuspendOrganization\SuspendOrganizationCommandHandler.cs
-SIZE: 3.85 KB
+SIZE: 3.88 KB
 ================================================================================
 using MachineryManager.Organization.Application.Abstractions;
 using MachineryManager.SharedKernel;
@@ -19808,7 +19867,7 @@ public sealed class SuspendOrganizationCommandHandler
     private const string RequiredPermission = "Organization.Edit";
 
     private readonly IOrganizationRepository _organizationRepository;
-    private readonly IUnitOfWork _unitOfWork;
+    private readonly IOrganizationUnitOfWork _unitOfWork;
     private readonly IDateTimeProvider _dateTimeProvider;
     private readonly ICurrentUserService _currentUserService;
     private readonly IPermissionEvaluator _permissionEvaluator;
@@ -19821,7 +19880,7 @@ public sealed class SuspendOrganizationCommandHandler
     /// <param name="permissionEvaluator">Evaluates the current user's permissions at request time.</param>
     public SuspendOrganizationCommandHandler(
         IOrganizationRepository organizationRepository,
-        IUnitOfWork unitOfWork,
+        IOrganizationUnitOfWork unitOfWork,
         IDateTimeProvider dateTimeProvider,
         ICurrentUserService currentUserService,
         IPermissionEvaluator permissionEvaluator)
@@ -20184,7 +20243,7 @@ public sealed record RegisterProjectCommand(Guid OrganizationId, string Name)
 
 ================================================================================
 FILE: src\Modules\Organization\Organization.Application\Features\Projects\Commands\RegisterProject\RegisterProjectCommandHandler.cs
-SIZE: 4.43 KB
+SIZE: 4.45 KB
 ================================================================================
 using MachineryManager.Organization.Application.Abstractions;
 using MachineryManager.SharedKernel;
@@ -20205,7 +20264,7 @@ public sealed class RegisterProjectCommandHandler
 
     private readonly IProjectRepository _projectRepository;
     private readonly IOrganizationRepository _organizationRepository;
-    private readonly IUnitOfWork _unitOfWork;
+    private readonly IOrganizationUnitOfWork _unitOfWork;
     private readonly IDateTimeProvider _dateTimeProvider;
     private readonly ICurrentUserService _currentUserService;
     private readonly IPermissionEvaluator _permissionEvaluator;
@@ -20222,7 +20281,7 @@ public sealed class RegisterProjectCommandHandler
     public RegisterProjectCommandHandler(
         IProjectRepository projectRepository,
         IOrganizationRepository organizationRepository,
-        IUnitOfWork unitOfWork,
+        IOrganizationUnitOfWork unitOfWork,
         IDateTimeProvider dateTimeProvider,
         ICurrentUserService currentUserService,
         IPermissionEvaluator permissionEvaluator)
@@ -20339,7 +20398,7 @@ public sealed record RenameProjectCommand(Guid ProjectId, string Name) : IReques
 
 ================================================================================
 FILE: src\Modules\Organization\Organization.Application\Features\Projects\Commands\RenameProject\RenameProjectCommandHandler.cs
-SIZE: 3.46 KB
+SIZE: 3.49 KB
 ================================================================================
 using MachineryManager.Organization.Application.Abstractions;
 using MachineryManager.SharedKernel;
@@ -20361,7 +20420,7 @@ public sealed class RenameProjectCommandHandler
 
     private readonly IProjectRepository _projectRepository;
     private readonly IOrganizationRepository _organizationRepository;
-    private readonly IUnitOfWork _unitOfWork;
+    private readonly IOrganizationUnitOfWork _unitOfWork;
     private readonly IDateTimeProvider _dateTimeProvider;
     private readonly ICurrentUserService _currentUserService;
     private readonly IPermissionEvaluator _permissionEvaluator;
@@ -20370,7 +20429,7 @@ public sealed class RenameProjectCommandHandler
     public RenameProjectCommandHandler(
         IProjectRepository projectRepository,
         IOrganizationRepository organizationRepository,
-        IUnitOfWork unitOfWork,
+        IOrganizationUnitOfWork unitOfWork,
         IDateTimeProvider dateTimeProvider,
         ICurrentUserService currentUserService,
         IPermissionEvaluator permissionEvaluator)
@@ -21653,7 +21712,7 @@ public sealed class ProjectId : ValueObject
 
 ================================================================================
 FILE: src\Modules\Organization\Organization.Infrastructure\DependencyInjection.cs
-SIZE: 2.14 KB
+SIZE: 2.36 KB
 ================================================================================
 using MachineryManager.Organization.Application.Abstractions;
 using MachineryManager.Organization.Infrastructure.Persistence;
@@ -21680,6 +21739,9 @@ public static class DependencyInjection
     /// was documented in the approved references, so this key is an
     /// explicit assumption — flagged in the completion report — not a
     /// silently invented convention.
+    /// Registers <see cref="IOrganizationUnitOfWork"/>, not the shared
+    /// <see cref="IUnitOfWork"/> directly (chat, 2026-08-27 fix — the
+    /// shared interface caused a cross-module DI collision).
     /// </remarks>
     /// <param name="services">The service collection to configure.</param>
     /// <param name="configuration">The application configuration, used to resolve the connection string.</param>
@@ -21696,13 +21758,12 @@ public static class DependencyInjection
         services.AddScoped<IProjectRepository, ProjectRepository>();
         services.AddScoped<IOrganizationLookupService, OrganizationLookupService>();
         services.AddScoped<IHoldingLookupService, HoldingLookupService>();
-        services.AddScoped<IUnitOfWork>(serviceProvider =>
+        services.AddScoped<IOrganizationUnitOfWork>(serviceProvider =>
             serviceProvider.GetRequiredService<OrganizationDbContext>());
 
         return services;
     }
 }
-
 
 ================================================================================
 FILE: src\Modules\Organization\Organization.Infrastructure\HoldingLookupService.cs
@@ -22461,8 +22522,9 @@ namespace Organization.Infrastructure.Persistence.Migrations
 
 ================================================================================
 FILE: src\Modules\Organization\Organization.Infrastructure\Persistence\OrganizationDbContext.cs
-SIZE: 3.58 KB
+SIZE: 3.82 KB
 ================================================================================
+using MachineryManager.Organization.Application.Abstractions;
 using MachineryManager.SharedKernel;
 using MachineryManager.SharedKernel.Abstractions;
 using Microsoft.EntityFrameworkCore;
@@ -22474,9 +22536,12 @@ namespace MachineryManager.Organization.Infrastructure.Persistence;
 /// ADR-0019 Hybrid Persistence Strategy). Owns the "organization" schema
 /// exclusively; per the Modular Monolith Rules (06-development, Section
 /// 6.1) no other module may reference these tables directly. Also
-/// serves as this module's <see cref="IUnitOfWork"/> implementation.
+/// serves as this module's <see cref="IOrganizationUnitOfWork"/>
+/// implementation (chat, 2026-08-27 — was the shared
+/// <see cref="IUnitOfWork"/> directly, which caused a DI registration
+/// collision with other modules' DbContexts).
 /// </summary>
-public sealed class OrganizationDbContext : DbContext, IUnitOfWork
+public sealed class OrganizationDbContext : DbContext, IOrganizationUnitOfWork
 {
     private readonly IDomainEventDispatcher? _domainEventDispatcher;
 
@@ -24704,12 +24769,12 @@ SIZE: 0.53 KB
 # SECTION 3: SNAPSHOT SUMMARY
 ================================================================================
 
-Generation Time     : 00:00:07.3780742
-Total Files Scanned : 396
-Files Included      : 396
+Generation Time     : 00:00:01.8425796
+Total Files Scanned : 398
+Files Included      : 398
 Files Skipped       : 0
-Total Source Size   : 0.82 MB
-Snapshot File Size  : 0.95 MB
+Total Source Size   : 0.83 MB
+Snapshot File Size  : 0.96 MB
 Output Path         : C:\Users\i\source\repos\MachineryManagerEnterprise\MME_Codebase_Snapshot.txt
 
 Excluded Directories: .git, .github, .vs, .vscode, .idea, .azure, .devcontainer, bin, obj, packages, publish, out, release, releases, debug, x64, x86, arm64, artifacts, .artifacts, node_modules, dist, build, bower_components, jspm_packages, docs-english, docs-farsi, docs, tools, test-results, coverage, .coverage, TestResults, lib, .angular, .next, .nuxt, .svelte-kit, .cache, .temp, tmp
