@@ -27,13 +27,12 @@ public sealed class AssetConfiguration : IEntityTypeConfiguration<global::Asset.
             .HasMaxLength(global::Asset.Domain.Asset.MaxCodeLength)
             .IsRequired();
 
-        // Code is unique within its owning Organization, not
-        // globally (chat, 2026-08-28) — a composite unique index gives
-        // the database-level guarantee as a second line of defense,
-        // in addition to the explicit check in
-        // RegisterAssetCommandHandler.
         builder.HasIndex(a => new { a.OrganizationId, a.Code })
             .IsUnique();
+
+        builder.Property(a => a.Name)
+            .HasMaxLength(global::Asset.Domain.Asset.MaxNameLength)
+            .IsRequired();
 
         builder.Property(a => a.AssetModelId)
             .HasConversion(id => id.Value, value => AssetModelId.From(value))
@@ -41,30 +40,41 @@ public sealed class AssetConfiguration : IEntityTypeConfiguration<global::Asset.
 
         builder.HasIndex(a => a.AssetModelId);
 
-        // Real database-level FK (chat, 2026-08-27): no navigation
-        // property on the aggregate itself, preserving the project's
-        // "no cross-aggregate navigation" DDD boundary — this only
-        // tells EF which column is the FK. Restrict (not Cascade,
-        // unlike UserProfileAssignment -> Profile): an Asset is a real
-        // physical asset, so deleting its AssetModel must never
-        // cascade-delete real Asset records; the AssetModel cannot be
-        // removed while any Asset still references it.
         builder.HasOne<AssetModel>()
             .WithMany()
             .HasForeignKey(a => a.AssetModelId)
             .OnDelete(DeleteBehavior.Restrict);
 
+        builder.Property(a => a.ColorId)
+            .HasConversion(id => id.Value, value => ColorId.From(value))
+            .IsRequired();
+
+        builder.HasIndex(a => a.ColorId);
+
+        // Real database-level FK to Color (chat, 2026-08-28) — Restrict,
+        // same reasoning as the AssetModel FK: a Color cannot be
+        // removed while any Asset still references it.
+        builder.HasOne<Color>()
+            .WithMany()
+            .HasForeignKey(a => a.ColorId)
+            .OnDelete(DeleteBehavior.Restrict);
+
         builder.Property(a => a.SerialNumber)
             .HasMaxLength(global::Asset.Domain.Asset.MaxSerialNumberLength);
+
+        builder.Property(a => a.ChassisNumber)
+            .HasMaxLength(global::Asset.Domain.Asset.MaxChassisBodyVinLength);
+
+        builder.Property(a => a.BodyNumber)
+            .HasMaxLength(global::Asset.Domain.Asset.MaxChassisBodyVinLength);
+
+        builder.Property(a => a.Vin)
+            .HasMaxLength(global::Asset.Domain.Asset.MaxChassisBodyVinLength);
 
         builder.Property(a => a.LicensePlate)
             .HasMaxLength(global::Asset.Domain.Asset.MaxLicensePlateLength);
 
         builder.Property(a => a.ManufactureYear);
-
-        builder.Property(a => a.Color)
-            .HasMaxLength(global::Asset.Domain.Asset.MaxColorLength)
-            .IsRequired();
 
         builder.Property(a => a.Status)
             .HasConversion<string>()

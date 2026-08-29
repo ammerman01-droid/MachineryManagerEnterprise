@@ -68,11 +68,15 @@ public sealed class GetAssetByIdQueryHandler
             asset.Id.Value,
             asset.OrganizationId,
             asset.Code,
+            asset.Name,
             asset.AssetModelId.Value,
+            asset.ColorId.Value,
             asset.SerialNumber,
+            asset.ChassisNumber,
+            asset.BodyNumber,
+            asset.Vin,
             asset.LicensePlate,
             asset.ManufactureYear,
-            asset.Color,
             asset.Status.ToString());
 
         return Result.Success(dto);

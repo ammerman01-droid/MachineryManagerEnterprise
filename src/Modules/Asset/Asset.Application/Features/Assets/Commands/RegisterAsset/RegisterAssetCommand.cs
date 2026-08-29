@@ -7,8 +7,12 @@ namespace MachineryManager.Asset.Application.Features.Assets.Commands.RegisterAs
 public sealed record RegisterAssetCommand(
     Guid OrganizationId,
     string Code,
+    string Name,
     Guid AssetModelId,
-    string Color,
+    Guid ColorId,
     string? SerialNumber,
+    string? ChassisNumber,
+    string? BodyNumber,
+    string? Vin,
     string? LicensePlate,
     int? ManufactureYear) : IRequest<Result<Guid>>;

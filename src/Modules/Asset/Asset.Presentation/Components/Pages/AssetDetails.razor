@@ -23,13 +23,25 @@ else if (asset is not null)
                 <MudField Label="شناسه" Variant="Variant.Outlined">@asset.Id</MudField>
             </MudItem>
             <MudItem xs="12" md="6">
-+                <MudField Label="کد" Variant="Variant.Outlined">@asset.Code</MudField>
-+            </MudItem>
+                <MudField Label="کد" Variant="Variant.Outlined">@asset.Code</MudField>
+            </MudItem>
+            <MudItem xs="12" md="6">
+                <MudField Label="نام" Variant="Variant.Outlined">@asset.Name</MudField>
+            </MudItem>
             <MudItem xs="12" md="6">
                 <MudField Label="سازمان" Variant="Variant.Outlined">@asset.OrganizationId</MudField>
             </MudItem>
             <MudItem xs="12" md="6">
                 <MudField Label="مدل دارایی" Variant="Variant.Outlined">@asset.AssetModelId</MudField>
+            </MudItem>
+            <MudItem xs="12" md="6">
+                <MudField Label="شماره شاسی" Variant="Variant.Outlined">@(asset.ChassisNumber ?? "-")</MudField>
+            </MudItem>
+            <MudItem xs="12" md="6">
+                <MudField Label="شماره بدنه" Variant="Variant.Outlined">@(asset.BodyNumber ?? "-")</MudField>
+            </MudItem>
+            <MudItem xs="12" md="6">
+                <MudField Label="VIN" Variant="Variant.Outlined">@(asset.Vin ?? "-")</MudField>
             </MudItem>
             <MudItem xs="12" md="6">
                 <MudField Label="شماره سریال" Variant="Variant.Outlined">@(asset.SerialNumber ?? "-")</MudField>
@@ -41,7 +53,7 @@ else if (asset is not null)
                 <MudField Label="سال ساخت" Variant="Variant.Outlined">@(asset.ManufactureYear?.ToString() ?? "-")</MudField>
             </MudItem>
             <MudItem xs="12" md="6">
-                <MudField Label="رنگ" Variant="Variant.Outlined">@asset.Color</MudField>
+                <MudField Label="رنگ" Variant="Variant.Outlined">@asset.ColorId</MudField>
             </MudItem>
             <MudItem xs="12" md="6">
                 <MudField Label="وضعیت" Variant="Variant.Outlined">@TranslateStatus(asset.Status)</MudField>
@@ -53,31 +65,38 @@ else if (asset is not null)
     <MudPaper Class="pa-4">
         @if (asset.Status == "Registered")
         {
-            <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick='() => ExecuteActionAsync("commission")' Disabled="isActing">راه‌اندازی</MudButton>
+            <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick='() => ExecuteActionAsync("commission")'
+                       Disabled="isActing">راه‌اندازی</MudButton>
         }
         else if (asset.Status == "Commissioned" || asset.Status == "Inactive")
         {
-            <MudButton Variant="Variant.Filled" Color="Color.Success" OnClick='() => ExecuteActionAsync("activate")' Disabled="isActing">فعال‌سازی</MudButton>
+            <MudButton Variant="Variant.Filled" Color="Color.Success" OnClick='() => ExecuteActionAsync("activate")'
+                       Disabled="isActing">فعال‌سازی</MudButton>
         }
 
         @if (asset.Status == "Operational")
         {
-            <MudButton Variant="Variant.Filled" Color="Color.Warning" OnClick='() => ExecuteActionAsync("deactivate")' Disabled="isActing" Class="mx-2">غیرفعال‌سازی</MudButton>
-            <MudButton Variant="Variant.Filled" Color="Color.Error" OnClick='() => ExecuteActionAsync("retire")' Disabled="isActing">بازنشستگی</MudButton>
+            <MudButton Variant="Variant.Filled" Color="Color.Warning" OnClick='() => ExecuteActionAsync("deactivate")'
+                       Disabled="isActing" Class="mx-2">غیرفعال‌سازی</MudButton>
+            <MudButton Variant="Variant.Filled" Color="Color.Error" OnClick='() => ExecuteActionAsync("retire")'
+                       Disabled="isActing">بازنشستگی</MudButton>
         }
 
         @if (asset.Status == "Inactive")
         {
-            <MudButton Variant="Variant.Filled" Color="Color.Error" OnClick='() => ExecuteActionAsync("retire")' Disabled="isActing" Class="mx-2">بازنشستگی</MudButton>
+            <MudButton Variant="Variant.Filled" Color="Color.Error" OnClick='() => ExecuteActionAsync("retire")'
+                       Disabled="isActing" Class="mx-2">بازنشستگی</MudButton>
         }
 
         @if (asset.Status == "Retired")
         {
-            <MudButton Variant="Variant.Filled" Color="Color.Dark" OnClick='() => ExecuteActionAsync("dispose")' Disabled="isActing">اسقاط</MudButton>
+            <MudButton Variant="Variant.Filled" Color="Color.Dark" OnClick='() => ExecuteActionAsync("dispose")'
+                       Disabled="isActing">اسقاط</MudButton>
         }
     </MudPaper>
 
-    <MudButton Variant="Variant.Outlined" Color="Color.Secondary" Class="mt-4" OnClick="@(() => Navigation.NavigateTo("/admin/assets"))">
+    <MudButton Variant="Variant.Outlined" Color="Color.Secondary" Class="mt-4"
+               OnClick="@(() => Navigation.NavigateTo("/admin/assets"))">
         بازگشت به لیست
     </MudButton>
 }
@@ -88,11 +107,15 @@ else if (asset is not null)
         public Guid Id { get; set; }
         public Guid OrganizationId { get; set; }
         public string Code { get; set; } = string.Empty;
+        public string Name { get; set; } = string.Empty;
         public Guid AssetModelId { get; set; }
+        public Guid ColorId { get; set; }
         public string? SerialNumber { get; set; }
+        public string? ChassisNumber { get; set; }
+        public string? BodyNumber { get; set; }
+        public string? Vin { get; set; }
         public string? LicensePlate { get; set; }
         public int? ManufactureYear { get; set; }
-        public string Color { get; set; } = string.Empty;
         public string Status { get; set; } = string.Empty;
     }
 
@@ -122,7 +145,10 @@ else if (asset is not null)
 
             if (response.IsSuccessStatusCode)
             {
-                asset = System.Text.Json.JsonSerializer.Deserialize<AssetDetail>(content, new System.Text.Json.JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+                asset = System.Text.Json.JsonSerializer.Deserialize<AssetDetail>(content, new System.Text.Json.JsonSerializerOptions
+                {
+                    PropertyNameCaseInsensitive = true
+                });
             }
             else
             {

@@ -4,8 +4,12 @@ namespace MachineryManager.Asset.Presentation.Contracts;
 public sealed record RegisterAssetRequest(
     Guid OrganizationId,
     string Code,
+    string Name,
     Guid AssetModelId,
-    string Color,
+    Guid ColorId,
     string? SerialNumber,
+    string? ChassisNumber,
+    string? BodyNumber,
+    string? Vin,
     string? LicensePlate,
     int? ManufactureYear);

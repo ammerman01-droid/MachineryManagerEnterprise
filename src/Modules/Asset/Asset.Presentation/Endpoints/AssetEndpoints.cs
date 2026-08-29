@@ -76,9 +76,13 @@ public static class AssetEndpoints
             new RegisterAssetCommand(
                 request.OrganizationId,
                 request.Code,
+                request.Name,
                 request.AssetModelId,
-                request.Color,
+                request.ColorId,
                 request.SerialNumber,
+                request.ChassisNumber,
+                request.BodyNumber,
+                request.Vin,
                 request.LicensePlate,
                 request.ManufactureYear),
             cancellationToken);

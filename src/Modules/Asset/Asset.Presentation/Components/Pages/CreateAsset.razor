@@ -28,6 +28,8 @@ else
 
             <MudTextField T="string" Label="کد شناسایی" @bind-Value="model.Code" Required="true" RequiredError="کد شناسایی الزامی است" MaxLength="20" Class="mt-4" HelperText="حداکثر ۲۰ کاراکتر — باید در این سازمان یکتا باشد" />
 
+            <MudTextField T="string" Label="نام" @bind-Value="model.Name" Required="true" RequiredError="نام الزامی است" MaxLength="60" Class="mt-4" />
+
             <MudSelect T="Guid" Label="مدل دارایی" @bind-Value="model.AssetModelId" Required="true" RequiredError="مدل دارایی الزامی است" Class="mt-4">
                 @foreach (var am in assetModels)
                 {
@@ -35,8 +37,33 @@ else
                 }
             </MudSelect>
 
-            <MudTextField T="string" Label="رنگ" @bind-Value="model.Color" Required="true" RequiredError="رنگ الزامی است" MaxLength="50" Class="mt-4" />
+            <div class="d-flex align-center gap-2 mt-4">
+                <MudSelect T="Guid" Label="رنگ" @bind-Value="model.ColorId" Required="true" RequiredError="رنگ الزامی است">
+                    @foreach (var c in colors)
+                    {
+                        <MudSelectItem T="Guid" Value="@c.Id">@c.Name</MudSelectItem>
+                    }
+                </MudSelect>
+                <MudButton Variant="Variant.Outlined" Size="Size.Small" OnClick="@(() => showAddColor = !showAddColor)">
+                    افزودن رنگ جدید
+                </MudButton>
+            </div>
+
+            @if (showAddColor)
+            {
+                <div class="d-flex align-center gap-2 mt-2">
+                    <MudTextField T="string" Label="نام رنگ جدید" @bind-Value="newColorName" MaxLength="50" />
+                    <MudButton Variant="Variant.Filled" Color="Color.Primary" Size="Size.Small"
+                               OnClick="AddColorAsync" Disabled="isAddingColor">
+                        @(isAddingColor ? "..." : "ثبت رنگ")
+                    </MudButton>
+                </div>
+            }
+
             <MudTextField T="string" Label="شماره سریال" @bind-Value="model.SerialNumber" MaxLength="100" Class="mt-4" />
+            <MudTextField T="string" Label="شماره شاسی" @bind-Value="model.ChassisNumber" MaxLength="30" Class="mt-4" />
+            <MudTextField T="string" Label="شماره بدنه" @bind-Value="model.BodyNumber" MaxLength="30" Class="mt-4" />
+            <MudTextField T="string" Label="VIN" @bind-Value="model.Vin" MaxLength="30" Class="mt-4" />
             <MudTextField T="string" Label="پلاک" @bind-Value="model.LicensePlate" MaxLength="50" Class="mt-4" />
             <MudNumericField T="int?" Label="سال ساخت" @bind-Value="model.ManufactureYear" Min="1900" Max="2100" Class="mt-4" />
 
@@ -64,6 +91,12 @@ else
         public string Name { get; set; } = string.Empty;
     }
 
+    private sealed class ColorItem
+    {
+        public Guid Id { get; set; }
+        public string Name { get; set; } = string.Empty;
+    }
+
     private sealed class SearchOrganizationsResult
     {
         public List<OrganizationItem> Items { get; set; } = [];
@@ -78,9 +111,13 @@ else
     {
         public Guid OrganizationId { get; set; }
         public string Code { get; set; } = string.Empty;
+        public string Name { get; set; } = string.Empty;
         public Guid AssetModelId { get; set; }
-        public string Color { get; set; } = string.Empty;
+        public Guid ColorId { get; set; }
         public string? SerialNumber { get; set; }
+        public string? ChassisNumber { get; set; }
+        public string? BodyNumber { get; set; }
+        public string? Vin { get; set; }
         public string? LicensePlate { get; set; }
         public int? ManufactureYear { get; set; }
     }
@@ -89,8 +126,12 @@ else
     private RegisterAssetModel model = new();
     private List<OrganizationItem> organizations = [];
     private List<AssetModelItem> assetModels = [];
+    private List<ColorItem> colors = [];
     private bool isLoading = true;
     private bool isSubmitting;
+    private bool showAddColor;
+    private bool isAddingColor;
+    private string newColorName = string.Empty;
     private string? errorMessage;
 
     [SupplyParameterFromQuery]
@@ -111,6 +152,7 @@ else
             {
                 await LoadAssetModelsAsync(holdingId);
             }
+            await LoadColorsAsync();
         }
         isLoading = false;
     }
@@ -156,6 +198,61 @@ else
         catch
         {
             // Best effort
+        }
+    }
+
+    private async Task LoadColorsAsync()
+    {
+        try
+        {
+            var client = HttpClientFactory.CreateClient("InternalApi");
+            var response = await client.GetAsync($"/api/v1/colors?organizationId={model.OrganizationId}");
+            var content = await response.Content.ReadAsStringAsync();
+
+            if (response.IsSuccessStatusCode)
+            {
+                colors = System.Text.Json.JsonSerializer.Deserialize<List<ColorItem>>(content, new System.Text.Json.JsonSerializerOptions { PropertyNameCaseInsensitive = true }) ?? [];
+            }
+        }
+        catch
+        {
+            // Best effort
+        }
+    }
+
+    private async Task AddColorAsync()
+    {
+        if (string.IsNullOrWhiteSpace(newColorName))
+        {
+            return;
+        }
+
+        isAddingColor = true;
+
+        try
+        {
+            var client = HttpClientFactory.CreateClient("InternalApi");
+            var response = await client.PostAsJsonAsync("/api/v1/colors", new { OrganizationId = model.OrganizationId, Name = newColorName });
+            var content = await response.Content.ReadAsStringAsync();
+
+            if (response.IsSuccessStatusCode)
+            {
+                newColorName = string.Empty;
+                showAddColor = false;
+                await LoadColorsAsync();
+            }
+            else
+            {
+                errorMessage = $"خطا در ثبت رنگ: {content}";
+            }
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"خطا: {ex.Message}";
+        }
+        finally
+        {
+            isAddingColor = false;
         }
     }
 

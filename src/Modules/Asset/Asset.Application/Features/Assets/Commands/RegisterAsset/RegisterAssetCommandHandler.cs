@@ -7,10 +7,10 @@ namespace MachineryManager.Asset.Application.Features.Assets.Commands.RegisterAs
 
 /// <summary>
 /// Handles <see cref="RegisterAssetCommand"/> by validating the
-/// referenced Organization and Asset Model exist, ensuring the
-/// identification code is unique within the Organization, invoking
-/// domain registration, persisting the aggregate, and committing the
-/// unit of work.
+/// referenced Organization, Asset Model, and Color exist and are
+/// consistent, ensuring the identification code is unique within the
+/// Organization, invoking domain registration, persisting the
+/// aggregate, and committing the unit of work.
 /// </summary>
 public sealed class RegisterAssetCommandHandler
     : IRequestHandler<RegisterAssetCommand, Result<Guid>>
@@ -19,6 +19,7 @@ public sealed class RegisterAssetCommandHandler
 
     private readonly IAssetRepository _assetRepository;
     private readonly IAssetModelRepository _assetModelRepository;
+    private readonly IColorRepository _colorRepository;
     private readonly IAssetUnitOfWork _unitOfWork;
     private readonly IDateTimeProvider _dateTimeProvider;
     private readonly ICurrentUserService _currentUserService;
@@ -29,6 +30,7 @@ public sealed class RegisterAssetCommandHandler
     public RegisterAssetCommandHandler(
         IAssetRepository assetRepository,
         IAssetModelRepository assetModelRepository,
+        IColorRepository colorRepository,
         IAssetUnitOfWork unitOfWork,
         IDateTimeProvider dateTimeProvider,
         ICurrentUserService currentUserService,
@@ -37,6 +39,7 @@ public sealed class RegisterAssetCommandHandler
     {
         _assetRepository = assetRepository;
         _assetModelRepository = assetModelRepository;
+        _colorRepository = colorRepository;
         _unitOfWork = unitOfWork;
         _dateTimeProvider = dateTimeProvider;
         _currentUserService = currentUserService;
@@ -80,20 +83,24 @@ public sealed class RegisterAssetCommandHandler
             return Result.Failure<Guid>(global::Asset.Domain.AssetErrors.AssetModelNotFound(request.AssetModelId));
         }
 
-        // The Organization's Holding must match the AssetModel's Holding
-        // — the UI already enforces this by only listing models from the
-        // Organization's own Holding, but the API must not rely on that
-        // (chat, 2026-08-27; mirrors the same rule already enforced for
-        // Engine-compatibility assignment).
         if (holdingId is null || assetModel.HoldingId != holdingId.Value)
         {
             return Result.Failure<Guid>(global::Asset.Domain.AssetErrors.AssetModelHoldingMismatch());
         }
 
-        // Code is unique per Organization (chat, 2026-08-28). Checked
-        // here rather than relying solely on the database unique index
-        // so the caller gets a clear, typed business error instead of a
-        // raw SQL exception.
+        var colorId = global::Asset.Domain.ColorId.From(request.ColorId);
+        var color = await _colorRepository.GetByIdAsync(colorId, cancellationToken);
+
+        if (color is null)
+        {
+            return Result.Failure<Guid>(global::Asset.Domain.AssetErrors.ColorNotFound(request.ColorId));
+        }
+
+        if (color.OrganizationId != request.OrganizationId)
+        {
+            return Result.Failure<Guid>(global::Asset.Domain.AssetErrors.ColorOrganizationMismatch());
+        }
+
         var codeAlreadyUsed = await _assetRepository.ExistsWithCodeAsync(
             request.OrganizationId,
             request.Code,
@@ -107,9 +114,13 @@ public sealed class RegisterAssetCommandHandler
         var result = global::Asset.Domain.Asset.Register(
             request.OrganizationId,
             request.Code,
+            request.Name,
             assetModelId,
-            request.Color,
+            colorId,
             request.SerialNumber,
+            request.ChassisNumber,
+            request.BodyNumber,
+            request.Vin,
             request.LicensePlate,
             request.ManufactureYear,
             _dateTimeProvider);

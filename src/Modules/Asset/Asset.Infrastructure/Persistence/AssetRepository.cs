@@ -12,7 +12,6 @@ public sealed class AssetRepository : IAssetRepository
     private readonly AssetDbContext _dbContext;
 
     /// <summary>Initializes a new instance of the <see cref="AssetRepository"/> class.</summary>
-    /// <param name="dbContext">The Asset module's persistence context.</param>
     public AssetRepository(AssetDbContext dbContext)
     {
         _dbContext = dbContext;
@@ -53,16 +52,13 @@ public sealed class AssetRepository : IAssetRepository
         {
             query = query.Where(a =>
                 a.Code.Contains(searchTerm) ||
+                a.Name.Contains(searchTerm) ||
                 (a.SerialNumber != null && a.SerialNumber.Contains(searchTerm)) ||
                 (a.LicensePlate != null && a.LicensePlate.Contains(searchTerm)));
         }
 
         var totalItems = await query.CountAsync(cancellationToken);
 
-        // Materialize entities first, map to DTO in memory — avoids the
-        // EF Core 10 Select-projection translation issue hit earlier
-        // with Profile.Permissions / AssetModel.CompatibleEngineModelIds
-        // (chat, 2026-08-25).
         var entities = await query
             .OrderBy(a => a.Code)
             .Skip((page - 1) * pageSize)
@@ -74,23 +70,21 @@ public sealed class AssetRepository : IAssetRepository
                 a.Id.Value,
                 a.OrganizationId,
                 a.Code,
+                a.Name,
                 a.AssetModelId.Value,
+                a.ColorId.Value,
                 a.SerialNumber,
+                a.ChassisNumber,
+                a.BodyNumber,
+                a.Vin,
                 a.LicensePlate,
                 a.ManufactureYear,
-                a.Color,
                 a.Status.ToString()))
             .ToList();
 
         var totalPages = totalItems == 0 ? 0 : (int)Math.Ceiling(totalItems / (double)pageSize);
 
         return new SearchAssetsResponse(
-            items,
-            page,
-            pageSize,
-            totalItems,
-            totalPages,
-            page < totalPages,
-            page > 1);
+            items, page, pageSize, totalItems, totalPages, page < totalPages, page > 1);
     }
 }

@@ -14,14 +14,24 @@ public sealed class RegisterAssetCommandValidator : AbstractValidator<RegisterAs
             .NotEmpty()
             .MaximumLength(global::Asset.Domain.Asset.MaxCodeLength);
 
-        RuleFor(x => x.AssetModelId).NotEmpty();
-
-        RuleFor(x => x.Color)
+        RuleFor(x => x.Name)
             .NotEmpty()
-            .MaximumLength(global::Asset.Domain.Asset.MaxColorLength);
+            .MaximumLength(global::Asset.Domain.Asset.MaxNameLength);
+
+        RuleFor(x => x.AssetModelId).NotEmpty();
+        RuleFor(x => x.ColorId).NotEmpty();
 
         RuleFor(x => x.SerialNumber)
             .MaximumLength(global::Asset.Domain.Asset.MaxSerialNumberLength);
+
+        RuleFor(x => x.ChassisNumber)
+            .MaximumLength(global::Asset.Domain.Asset.MaxChassisBodyVinLength);
+
+        RuleFor(x => x.BodyNumber)
+            .MaximumLength(global::Asset.Domain.Asset.MaxChassisBodyVinLength);
+
+        RuleFor(x => x.Vin)
+            .MaximumLength(global::Asset.Domain.Asset.MaxChassisBodyVinLength);
 
         RuleFor(x => x.LicensePlate)
             .MaximumLength(global::Asset.Domain.Asset.MaxLicensePlateLength);
