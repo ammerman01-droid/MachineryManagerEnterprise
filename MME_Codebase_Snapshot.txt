@@ -1,7 +1,7 @@
 ﻿
 ================================================================================
   MACHINERYMANAGERENTERPRISE - CODEBASE SNAPSHOT
-  Generated: 2026-08-28 16:09:20
+  Generated: 2026-08-29 13:37:20
   Source: C:\Users\i\source\repos\MachineryManagerEnterprise
   Purpose: Complete source code reference for AI-assisted development
   Excludes: .md, .gitignore, this script, build artifacts, binaries, IDE,
@@ -201,7 +201,9 @@ MachineryManagerEnterprise
 |   |   |   |   |   |-- IAssetModelRepository.cs
 |   |   |   |   |   |-- IAssetRepository.cs
 |   |   |   |   |   |-- IAssetUnitOfWork.cs
-|   |   |   |   |   +-- IEngineModelRepository.cs
+|   |   |   |   |   |-- IColorRepository.cs
+|   |   |   |   |   |-- IEngineModelRepository.cs
+|   |   |   |   |   +-- IUnitOfMeasurementRepository.cs
 |   |   |   |   |-- Behaviors
 |   |   |   |   |   +-- ValidationBehavior.cs
 |   |   |   |   |-- Features
@@ -265,25 +267,49 @@ MachineryManagerEnterprise
 |   |   |   |   |   |       +-- SearchAssets
 |   |   |   |   |   |           |-- SearchAssetsQuery.cs
 |   |   |   |   |   |           +-- SearchAssetsQueryHandler.cs
-|   |   |   |   |   +-- EngineModels
+|   |   |   |   |   |-- Colors
+|   |   |   |   |   |   |-- Commands
+|   |   |   |   |   |   |   +-- RegisterColor
+|   |   |   |   |   |   |       |-- RegisterColorCommand.cs
+|   |   |   |   |   |   |       |-- RegisterColorCommandHandler.cs
+|   |   |   |   |   |   |       +-- RegisterColorCommandValidator.cs
+|   |   |   |   |   |   |-- Dtos
+|   |   |   |   |   |   |   +-- ColorDto.cs
+|   |   |   |   |   |   +-- Queries
+|   |   |   |   |   |       +-- GetColorsByOrganization
+|   |   |   |   |   |           |-- GetColorsByOrganizationQuery.cs
+|   |   |   |   |   |           +-- GetColorsByOrganizationQueryHandler.cs
+|   |   |   |   |   |-- EngineModels
+|   |   |   |   |   |   |-- Commands
+|   |   |   |   |   |   |   |-- RegisterEngineModel
+|   |   |   |   |   |   |   |   |-- RegisterEngineModelCommand.cs
+|   |   |   |   |   |   |   |   |-- RegisterEngineModelCommandHandler.cs
+|   |   |   |   |   |   |   |   +-- RegisterEngineModelCommandValidator.cs
+|   |   |   |   |   |   |   +-- RenameEngineModel
+|   |   |   |   |   |   |       |-- RenameEngineModelCommand.cs
+|   |   |   |   |   |   |       |-- RenameEngineModelCommandHandler.cs
+|   |   |   |   |   |   |       +-- RenameEngineModelCommandValidator.cs
+|   |   |   |   |   |   |-- Dtos
+|   |   |   |   |   |   |   +-- EngineModelDto.cs
+|   |   |   |   |   |   +-- Queries
+|   |   |   |   |   |       |-- GetEngineModelById
+|   |   |   |   |   |       |   |-- GetEngineModelByIdQuery.cs
+|   |   |   |   |   |       |   +-- GetEngineModelByIdQueryHandler.cs
+|   |   |   |   |   |       +-- SearchEngineModels
+|   |   |   |   |   |           |-- SearchEngineModelsQuery.cs
+|   |   |   |   |   |           +-- SearchEngineModelsQueryHandler.cs
+|   |   |   |   |   +-- UnitsOfMeasurement
 |   |   |   |   |       |-- Commands
-|   |   |   |   |       |   |-- RegisterEngineModel
-|   |   |   |   |       |   |   |-- RegisterEngineModelCommand.cs
-|   |   |   |   |       |   |   |-- RegisterEngineModelCommandHandler.cs
-|   |   |   |   |       |   |   +-- RegisterEngineModelCommandValidator.cs
-|   |   |   |   |       |   +-- RenameEngineModel
-|   |   |   |   |       |       |-- RenameEngineModelCommand.cs
-|   |   |   |   |       |       |-- RenameEngineModelCommandHandler.cs
-|   |   |   |   |       |       +-- RenameEngineModelCommandValidator.cs
+|   |   |   |   |       |   +-- RegisterUnitOfMeasurement
+|   |   |   |   |       |       |-- RegisterUnitOfMeasurementCommand.cs
+|   |   |   |   |       |       |-- RegisterUnitOfMeasurementCommandHandler.cs
+|   |   |   |   |       |       +-- RegisterUnitOfMeasurementCommandValidator.cs
 |   |   |   |   |       |-- Dtos
-|   |   |   |   |       |   +-- EngineModelDto.cs
+|   |   |   |   |       |   +-- UnitOfMeasurementDto.cs
 |   |   |   |   |       +-- Queries
-|   |   |   |   |           |-- GetEngineModelById
-|   |   |   |   |           |   |-- GetEngineModelByIdQuery.cs
-|   |   |   |   |           |   +-- GetEngineModelByIdQueryHandler.cs
-|   |   |   |   |           +-- SearchEngineModels
-|   |   |   |   |               |-- SearchEngineModelsQuery.cs
-|   |   |   |   |               +-- SearchEngineModelsQueryHandler.cs
+|   |   |   |   |           +-- GetUnitsOfMeasurementByOrganization
+|   |   |   |   |               |-- GetUnitsOfMeasurementByOrganizationQuery.cs
+|   |   |   |   |               +-- GetUnitsOfMeasurementByOrganizationQueryHandler.cs
 |   |   |   |   |-- Asset.Application.csproj
 |   |   |   |   |-- DependencyInjection.cs
 |   |   |   |   |-- DomainEventNotification.cs
@@ -298,8 +324,10 @@ MachineryManagerEnterprise
 |   |   |   |   |   |-- AssetReactivated.cs
 |   |   |   |   |   |-- AssetRegistered.cs
 |   |   |   |   |   |-- AssetRetired.cs
+|   |   |   |   |   |-- ColorRegistered.cs
 |   |   |   |   |   |-- EngineModelAssignedToAssetModel.cs
-|   |   |   |   |   +-- EngineModelRegistered.cs
+|   |   |   |   |   |-- EngineModelRegistered.cs
+|   |   |   |   |   +-- UnitOfMeasurementRegistered.cs
 |   |   |   |   |-- Asset.cs
 |   |   |   |   |-- Asset.Domain.csproj
 |   |   |   |   |-- AssetErrors.cs
@@ -308,25 +336,39 @@ MachineryManagerEnterprise
 |   |   |   |   |-- AssetModelErrors.cs
 |   |   |   |   |-- AssetModelId.cs
 |   |   |   |   |-- AssetStatus.cs
+|   |   |   |   |-- Color.cs
+|   |   |   |   |-- ColorErrors.cs
+|   |   |   |   |-- ColorId.cs
 |   |   |   |   |-- EngineModel.cs
 |   |   |   |   |-- EngineModelErrors.cs
-|   |   |   |   +-- EngineModelId.cs
+|   |   |   |   |-- EngineModelId.cs
+|   |   |   |   |-- UnitOfMeasurement.cs
+|   |   |   |   |-- UnitOfMeasurementErrors.cs
+|   |   |   |   +-- UnitOfMeasurementId.cs
 |   |   |   |-- Asset.Infrastructure
 |   |   |   |   |-- Migrations
 |   |   |   |   |   |-- 20260826113743_InitialAssetSchema.cs
 |   |   |   |   |   |-- 20260826113743_InitialAssetSchema.Designer.cs
 |   |   |   |   |   |-- 20260827080120_AddAssetAggregate.cs
 |   |   |   |   |   |-- 20260827080120_AddAssetAggregate.Designer.cs
+|   |   |   |   |   |-- 20260829073901_AddAssetCode.cs
+|   |   |   |   |   |-- 20260829073901_AddAssetCode.Designer.cs
+|   |   |   |   |   |-- 20260829082556_AddColorAndAssetFields.cs
+|   |   |   |   |   |-- 20260829082556_AddColorAndAssetFields.Designer.cs
 |   |   |   |   |   +-- AssetDbContextModelSnapshot.cs
 |   |   |   |   |-- Persistence
 |   |   |   |   |   |-- Configurations
 |   |   |   |   |   |   |-- AssetConfiguration.cs
 |   |   |   |   |   |   |-- AssetModelConfiguration.cs
-|   |   |   |   |   |   +-- EngineModelConfiguration.cs
+|   |   |   |   |   |   |-- ColorConfiguration.cs
+|   |   |   |   |   |   |-- EngineModelConfiguration.cs
+|   |   |   |   |   |   +-- UnitOfMeasurementConfiguration.cs
 |   |   |   |   |   |-- AssetDbContext.cs
 |   |   |   |   |   |-- AssetModelRepository.cs
 |   |   |   |   |   |-- AssetRepository.cs
-|   |   |   |   |   +-- EngineModelRepository.cs
+|   |   |   |   |   |-- ColorRepository.cs
+|   |   |   |   |   |-- EngineModelRepository.cs
+|   |   |   |   |   +-- UnitOfMeasurementRepository.cs
 |   |   |   |   |-- Asset.Infrastructure.csproj
 |   |   |   |   +-- DependencyInjection.cs
 |   |   |   +-- Asset.Presentation
@@ -347,14 +389,18 @@ MachineryManagerEnterprise
 |   |   |       |   |-- AssignCompatibleEngineModelRequest.cs
 |   |   |       |   |-- RegisterAssetModelRequest.cs
 |   |   |       |   |-- RegisterAssetRequest.cs
+|   |   |       |   |-- RegisterColorRequest.cs
 |   |   |       |   |-- RegisterEngineModelRequest.cs
+|   |   |       |   |-- RegisterUnitOfMeasurementRequest.cs
 |   |   |       |   |-- RenameAssetModelRequest.cs
 |   |   |       |   +-- RenameEngineModelRequest.cs
 |   |   |       |-- Endpoints
 |   |   |       |   |-- AssetEndpoints.cs
 |   |   |       |   |-- AssetModelEndpoints.cs
+|   |   |       |   |-- ColorEndpoints.cs
 |   |   |       |   |-- EngineModelEndpoints.cs
-|   |   |       |   +-- ResultExtensions.cs
+|   |   |       |   |-- ResultExtensions.cs
+|   |   |       |   +-- UnitOfMeasurementEndpoints.cs
 |   |   |       +-- Asset.Presentation.csproj
 |   |   |-- Identity
 |   |   |   |-- Identity.Application
@@ -2084,7 +2130,7 @@ SIZE: 2.4 KB
 
 ================================================================================
 FILE: src\Host\MachineryManager.Web\Program.cs
-SIZE: 4.76 KB
+SIZE: 4.85 KB
 ================================================================================
 using MachineryManager.Identity.Infrastructure;
 using MachineryManager.Identity.Presentation.Endpoints;
@@ -2210,6 +2256,10 @@ try
     app.MapAssetModelEndpoints();
     app.MapEngineModelEndpoints();
     app.MapAssetEndpoints();
+
+    //General endpoints
+    app.MapColorEndpoints();
+    app.MapUnitOfMeasurementEndpoints();
 
     app.Run();
 }
@@ -4157,7 +4207,7 @@ public sealed class UserProfileAssignmentDeactivated : IDomainEvent
 
 ================================================================================
 FILE: src\Modules\Administration\Administration.Domain\PermissionCatalog.cs
-SIZE: 2.22 KB
+SIZE: 2.35 KB
 ================================================================================
 namespace Administration.Domain;
 
@@ -4187,7 +4237,9 @@ public static class PermissionCatalog
         new PermissionSection("Project", "پروژه"),
         new PermissionSection("User", "کاربران"),
         new PermissionSection("Profile", "پروفایل‌ها"),
-        new PermissionSection("Asset", "دارایی‌ها (به‌زودی)"),
+        new PermissionSection("Asset", "دارایی‌ها"),
+        new PermissionSection("Color", "رنگ‌ها"),
+        new PermissionSection("UnitOfMeasurement", "واحدهای اندازه‌گیری"),
     ];
 
     /// <summary>Builds the canonical permission string for a section/action pair (e.g. "Organization.Create").</summary>
@@ -7972,7 +8024,7 @@ public interface IAssetModelRepository : IRepository<global::Asset.Domain.AssetM
 
 ================================================================================
 FILE: src\Modules\Asset\Asset.Application\Abstractions\IAssetRepository.cs
-SIZE: 0.68 KB
+SIZE: 1.04 KB
 ================================================================================
 using MachineryManager.SharedKernel.Abstractions;
 
@@ -7991,8 +8043,17 @@ public interface IAssetRepository : IRepository<global::Asset.Domain.Asset, glob
         int page,
         int pageSize,
         CancellationToken cancellationToken = default);
-}
 
+    /// <summary>
+    /// Determines whether another Asset in the given Organization
+    /// already uses the given identification code (chat, 2026-08-28 —
+    /// Code is unique per Organization).
+    /// </summary>
+    Task<bool> ExistsWithCodeAsync(
+        Guid organizationId,
+        string code,
+        CancellationToken cancellationToken = default);
+}
 
 ================================================================================
 FILE: src\Modules\Asset\Asset.Application\Abstractions\IAssetUnitOfWork.cs
@@ -8018,6 +8079,23 @@ public interface IAssetUnitOfWork : IUnitOfWork
 }
 
 ================================================================================
+FILE: src\Modules\Asset\Asset.Application\Abstractions\IColorRepository.cs
+SIZE: 0.61 KB
+================================================================================
+using MachineryManager.SharedKernel.Abstractions;
+
+namespace MachineryManager.Asset.Application.Abstractions;
+
+/// <summary>Repository contract for the <see cref="global::Asset.Domain.Color"/> aggregate.</summary>
+public interface IColorRepository : IRepository<global::Asset.Domain.Color, global::Asset.Domain.ColorId>
+{
+    /// <summary>Retrieves every Color registered for the given Organization (used to populate selection lists).</summary>
+    Task<IReadOnlyList<Features.Colors.Dtos.ColorDto>> GetByOrganizationIdAsync(
+        Guid organizationId,
+        CancellationToken cancellationToken = default);
+}
+
+================================================================================
 FILE: src\Modules\Asset\Asset.Application\Abstractions\IEngineModelRepository.cs
 SIZE: 0.72 KB
 ================================================================================
@@ -8037,6 +8115,24 @@ public interface IEngineModelRepository : IRepository<global::Asset.Domain.Engin
         string? searchTerm,
         int page,
         int pageSize,
+        CancellationToken cancellationToken = default);
+}
+
+================================================================================
+FILE: src\Modules\Asset\Asset.Application\Abstractions\IUnitOfMeasurementRepository.cs
+SIZE: 0.66 KB
+================================================================================
+using MachineryManager.SharedKernel.Abstractions;
+
+namespace MachineryManager.Asset.Application.Abstractions;
+
+/// <summary>Repository contract for the <see cref="global::Asset.Domain.UnitOfMeasurement"/> aggregate.</summary>
+public interface IUnitOfMeasurementRepository
+    : IRepository<global::Asset.Domain.UnitOfMeasurement, global::Asset.Domain.UnitOfMeasurementId>
+{
+    /// <summary>Retrieves every Unit of Measurement registered for the given Organization.</summary>
+    Task<IReadOnlyList<Features.UnitsOfMeasurement.Dtos.UnitOfMeasurementDto>> GetByOrganizationAsync(
+        Guid organizationId,
         CancellationToken cancellationToken = default);
 }
 
@@ -9368,7 +9464,7 @@ public sealed class DisposeAssetCommandValidator : AbstractValidator<DisposeAsse
 
 ================================================================================
 FILE: src\Modules\Asset\Asset.Application\Features\Assets\Commands\RegisterAsset\RegisterAssetCommand.cs
-SIZE: 0.44 KB
+SIZE: 0.54 KB
 ================================================================================
 using MachineryManager.SharedKernel;
 using MediatR;
@@ -9378,15 +9474,20 @@ namespace MachineryManager.Asset.Application.Features.Assets.Commands.RegisterAs
 /// <summary>Command to register a new Asset within an Organization (BR-003).</summary>
 public sealed record RegisterAssetCommand(
     Guid OrganizationId,
+    string Code,
+    string Name,
     Guid AssetModelId,
-    string Color,
+    Guid ColorId,
     string? SerialNumber,
+    string? ChassisNumber,
+    string? BodyNumber,
+    string? Vin,
     string? LicensePlate,
     int? ManufactureYear) : IRequest<Result<Guid>>;
 
 ================================================================================
 FILE: src\Modules\Asset\Asset.Application\Features\Assets\Commands\RegisterAsset\RegisterAssetCommandHandler.cs
-SIZE: 4.53 KB
+SIZE: 5.39 KB
 ================================================================================
 using MachineryManager.Asset.Application.Abstractions;
 using MachineryManager.SharedKernel;
@@ -9397,9 +9498,10 @@ namespace MachineryManager.Asset.Application.Features.Assets.Commands.RegisterAs
 
 /// <summary>
 /// Handles <see cref="RegisterAssetCommand"/> by validating the
-/// referenced Organization and Asset Model exist, invoking domain
-/// registration, persisting the aggregate, and committing the unit of
-/// work.
+/// referenced Organization, Asset Model, and Color exist and are
+/// consistent, ensuring the identification code is unique within the
+/// Organization, invoking domain registration, persisting the
+/// aggregate, and committing the unit of work.
 /// </summary>
 public sealed class RegisterAssetCommandHandler
     : IRequestHandler<RegisterAssetCommand, Result<Guid>>
@@ -9408,6 +9510,7 @@ public sealed class RegisterAssetCommandHandler
 
     private readonly IAssetRepository _assetRepository;
     private readonly IAssetModelRepository _assetModelRepository;
+    private readonly IColorRepository _colorRepository;
     private readonly IAssetUnitOfWork _unitOfWork;
     private readonly IDateTimeProvider _dateTimeProvider;
     private readonly ICurrentUserService _currentUserService;
@@ -9418,6 +9521,7 @@ public sealed class RegisterAssetCommandHandler
     public RegisterAssetCommandHandler(
         IAssetRepository assetRepository,
         IAssetModelRepository assetModelRepository,
+        IColorRepository colorRepository,
         IAssetUnitOfWork unitOfWork,
         IDateTimeProvider dateTimeProvider,
         ICurrentUserService currentUserService,
@@ -9426,6 +9530,7 @@ public sealed class RegisterAssetCommandHandler
     {
         _assetRepository = assetRepository;
         _assetModelRepository = assetModelRepository;
+        _colorRepository = colorRepository;
         _unitOfWork = unitOfWork;
         _dateTimeProvider = dateTimeProvider;
         _currentUserService = currentUserService;
@@ -9469,21 +9574,44 @@ public sealed class RegisterAssetCommandHandler
             return Result.Failure<Guid>(global::Asset.Domain.AssetErrors.AssetModelNotFound(request.AssetModelId));
         }
 
-        // The Organization's Holding must match the AssetModel's Holding
-        // — the UI already enforces this by only listing models from the
-        // Organization's own Holding, but the API must not rely on that
-        // (chat, 2026-08-27; mirrors the same rule already enforced for
-        // Engine-compatibility assignment).
         if (holdingId is null || assetModel.HoldingId != holdingId.Value)
         {
             return Result.Failure<Guid>(global::Asset.Domain.AssetErrors.AssetModelHoldingMismatch());
         }
 
+        var colorId = global::Asset.Domain.ColorId.From(request.ColorId);
+        var color = await _colorRepository.GetByIdAsync(colorId, cancellationToken);
+
+        if (color is null)
+        {
+            return Result.Failure<Guid>(global::Asset.Domain.AssetErrors.ColorNotFound(request.ColorId));
+        }
+
+        if (color.OrganizationId != request.OrganizationId)
+        {
+            return Result.Failure<Guid>(global::Asset.Domain.AssetErrors.ColorOrganizationMismatch());
+        }
+
+        var codeAlreadyUsed = await _assetRepository.ExistsWithCodeAsync(
+            request.OrganizationId,
+            request.Code,
+            cancellationToken);
+
+        if (codeAlreadyUsed)
+        {
+            return Result.Failure<Guid>(global::Asset.Domain.AssetErrors.DuplicateCode(request.Code));
+        }
+
         var result = global::Asset.Domain.Asset.Register(
             request.OrganizationId,
+            request.Code,
+            request.Name,
             assetModelId,
-            request.Color,
+            colorId,
             request.SerialNumber,
+            request.ChassisNumber,
+            request.BodyNumber,
+            request.Vin,
             request.LicensePlate,
             request.ManufactureYear,
             _dateTimeProvider);
@@ -9502,7 +9630,7 @@ public sealed class RegisterAssetCommandHandler
 
 ================================================================================
 FILE: src\Modules\Asset\Asset.Application\Features\Assets\Commands\RegisterAsset\RegisterAssetCommandValidator.cs
-SIZE: 0.89 KB
+SIZE: 1.4 KB
 ================================================================================
 using FluentValidation;
 
@@ -9515,14 +9643,29 @@ public sealed class RegisterAssetCommandValidator : AbstractValidator<RegisterAs
     public RegisterAssetCommandValidator()
     {
         RuleFor(x => x.OrganizationId).NotEmpty();
-        RuleFor(x => x.AssetModelId).NotEmpty();
 
-        RuleFor(x => x.Color)
+        RuleFor(x => x.Code)
             .NotEmpty()
-            .MaximumLength(global::Asset.Domain.Asset.MaxColorLength);
+            .MaximumLength(global::Asset.Domain.Asset.MaxCodeLength);
+
+        RuleFor(x => x.Name)
+            .NotEmpty()
+            .MaximumLength(global::Asset.Domain.Asset.MaxNameLength);
+
+        RuleFor(x => x.AssetModelId).NotEmpty();
+        RuleFor(x => x.ColorId).NotEmpty();
 
         RuleFor(x => x.SerialNumber)
             .MaximumLength(global::Asset.Domain.Asset.MaxSerialNumberLength);
+
+        RuleFor(x => x.ChassisNumber)
+            .MaximumLength(global::Asset.Domain.Asset.MaxChassisBodyVinLength);
+
+        RuleFor(x => x.BodyNumber)
+            .MaximumLength(global::Asset.Domain.Asset.MaxChassisBodyVinLength);
+
+        RuleFor(x => x.Vin)
+            .MaximumLength(global::Asset.Domain.Asset.MaxChassisBodyVinLength);
 
         RuleFor(x => x.LicensePlate)
             .MaximumLength(global::Asset.Domain.Asset.MaxLicensePlateLength);
@@ -9650,7 +9793,7 @@ public sealed class RetireAssetCommandValidator : AbstractValidator<RetireAssetC
 
 ================================================================================
 FILE: src\Modules\Asset\Asset.Application\Features\Assets\Dtos\AssetDto.cs
-SIZE: 0.35 KB
+SIZE: 0.45 KB
 ================================================================================
 namespace MachineryManager.Asset.Application.Features.Assets.Dtos;
 
@@ -9658,13 +9801,17 @@ namespace MachineryManager.Asset.Application.Features.Assets.Dtos;
 public sealed record AssetDto(
     Guid Id,
     Guid OrganizationId,
+    string Code,
+    string Name,
     Guid AssetModelId,
+    Guid ColorId,
     string? SerialNumber,
+    string? ChassisNumber,
+    string? BodyNumber,
+    string? Vin,
     string? LicensePlate,
     int? ManufactureYear,
-    string Color,
     string Status);
-
 
 ================================================================================
 FILE: src\Modules\Asset\Asset.Application\Features\Assets\Queries\GetAssetById\GetAssetByIdQuery.cs
@@ -9682,7 +9829,7 @@ public sealed record GetAssetByIdQuery(Guid AssetId) : IRequest<Result<AssetDto>
 
 ================================================================================
 FILE: src\Modules\Asset\Asset.Application\Features\Assets\Queries\GetAssetById\GetAssetByIdQueryHandler.cs
-SIZE: 2.95 KB
+SIZE: 3.08 KB
 ================================================================================
 using MachineryManager.Asset.Application.Abstractions;
 using MachineryManager.Asset.Application.Features.Assets.Dtos;
@@ -9753,21 +9900,25 @@ public sealed class GetAssetByIdQueryHandler
         var dto = new AssetDto(
             asset.Id.Value,
             asset.OrganizationId,
+            asset.Code,
+            asset.Name,
             asset.AssetModelId.Value,
+            asset.ColorId.Value,
             asset.SerialNumber,
+            asset.ChassisNumber,
+            asset.BodyNumber,
+            asset.Vin,
             asset.LicensePlate,
             asset.ManufactureYear,
-            asset.Color,
             asset.Status.ToString());
 
         return Result.Success(dto);
     }
 }
 
-
 ================================================================================
 FILE: src\Modules\Asset\Asset.Application\Features\Assets\Queries\SearchAssets\SearchAssetsQuery.cs
-SIZE: 0.96 KB
+SIZE: 0.83 KB
 ================================================================================
 using MachineryManager.Asset.Application.Features.Assets.Dtos;
 using MachineryManager.SharedKernel;
@@ -9777,10 +9928,8 @@ namespace MachineryManager.Asset.Application.Features.Assets.Queries.SearchAsset
 
 /// <summary>
 /// Query to search Assets within an Organization. <see cref="SearchTerm"/>,
-/// when provided, matches against SerialNumber or LicensePlate — Asset
-/// has no Name field of its own (assumption, chat, 2026-08-27: not
-/// explicitly specified; these are the only free-text identity fields
-/// on the aggregate).
+/// when provided, matches against Code, Name, SerialNumber, or
+/// LicensePlate (chat, 2026-08-28).
 /// </summary>
 public sealed record SearchAssetsQuery(Guid OrganizationId, string? SearchTerm, int Page = 1, int PageSize = 20)
     : IRequest<Result<SearchAssetsResponse>>;
@@ -9794,7 +9943,6 @@ public sealed record SearchAssetsResponse(
     int TotalPages,
     bool HasNextPage,
     bool HasPreviousPage);
-
 
 ================================================================================
 FILE: src\Modules\Asset\Asset.Application\Features\Assets\Queries\SearchAssets\SearchAssetsQueryHandler.cs
@@ -9871,6 +10019,207 @@ public sealed class SearchAssetsQueryHandler
     }
 }
 
+
+================================================================================
+FILE: src\Modules\Asset\Asset.Application\Features\Colors\Commands\RegisterColor\RegisterColorCommand.cs
+SIZE: 0.32 KB
+================================================================================
+using MachineryManager.SharedKernel;
+using MediatR;
+
+namespace MachineryManager.Asset.Application.Features.Colors.Commands.RegisterColor;
+
+/// <summary>Command to register a new Color option within an Organization.</summary>
+public sealed record RegisterColorCommand(Guid OrganizationId, string Name) : IRequest<Result<Guid>>;
+
+================================================================================
+FILE: src\Modules\Asset\Asset.Application\Features\Colors\Commands\RegisterColor\RegisterColorCommandHandler.cs
+SIZE: 3.07 KB
+================================================================================
+using MachineryManager.Asset.Application.Abstractions;
+using MachineryManager.SharedKernel;
+using MachineryManager.SharedKernel.Abstractions;
+using MediatR;
+
+namespace MachineryManager.Asset.Application.Features.Colors.Commands.RegisterColor;
+
+/// <summary>
+/// Handles <see cref="RegisterColorCommand"/> by verifying the caller
+/// holds either Asset.Create or Asset.Edit (chat, 2026-08-28 — any user
+/// who can work with Assets may extend the Organization's color list),
+/// then invoking domain registration.
+/// </summary>
+public sealed class RegisterColorCommandHandler
+    : IRequestHandler<RegisterColorCommand, Result<Guid>>
+{
+    private readonly IColorRepository _colorRepository;
+    private readonly IAssetUnitOfWork _unitOfWork;
+    private readonly IDateTimeProvider _dateTimeProvider;
+    private readonly ICurrentUserService _currentUserService;
+    private readonly IPermissionEvaluator _permissionEvaluator;
+    private readonly IOrganizationLookupService _organizationLookupService;
+
+    /// <summary>Initializes a new instance of the <see cref="RegisterColorCommandHandler"/> class.</summary>
+    public RegisterColorCommandHandler(
+        IColorRepository colorRepository,
+        IAssetUnitOfWork unitOfWork,
+        IDateTimeProvider dateTimeProvider,
+        ICurrentUserService currentUserService,
+        IPermissionEvaluator permissionEvaluator,
+        IOrganizationLookupService organizationLookupService)
+    {
+        _colorRepository = colorRepository;
+        _unitOfWork = unitOfWork;
+        _dateTimeProvider = dateTimeProvider;
+        _currentUserService = currentUserService;
+        _permissionEvaluator = permissionEvaluator;
+        _organizationLookupService = organizationLookupService;
+    }
+
+    /// <summary>Executes the registration use case.</summary>
+    public async Task<Result<Guid>> Handle(RegisterColorCommand request, CancellationToken cancellationToken)
+    {
+        if (_currentUserService.UserId is not { } userId)
+        {
+            return Result.Failure<Guid>(global::Asset.Domain.ColorErrors.NotAuthorized());
+        }
+
+        var holdingId = await _organizationLookupService.GetHoldingIdAsync(request.OrganizationId, cancellationToken);
+        var scope = new ResourceScope(holdingId, request.OrganizationId, null);
+
+                var canCreate = await _permissionEvaluator.HasPermissionAsync(userId, "Color.Create", scope, cancellationToken);
+        var canEdit = canCreate || await _permissionEvaluator.HasPermissionAsync(userId, "Color.Edit", scope, cancellationToken);
+
+        if (!canEdit)
+        {
+            return Result.Failure<Guid>(global::Asset.Domain.ColorErrors.NotAuthorized());
+        }
+
+        var result = global::Asset.Domain.Color.Register(request.OrganizationId, request.Name, _dateTimeProvider);
+
+        if (result.IsFailure)
+        {
+            return Result.Failure<Guid>(result.Error);
+        }
+
+        _colorRepository.Add(result.Value);
+        await _unitOfWork.SaveChangesAsync(cancellationToken);
+
+        return Result.Success(result.Value.Id.Value);
+    }
+}
+
+================================================================================
+FILE: src\Modules\Asset\Asset.Application\Features\Colors\Commands\RegisterColor\RegisterColorCommandValidator.cs
+SIZE: 0.61 KB
+================================================================================
+using FluentValidation;
+
+namespace MachineryManager.Asset.Application.Features.Colors.Commands.RegisterColor;
+
+/// <summary>Validates <see cref="RegisterColorCommand"/> per ADR-0036.</summary>
+public sealed class RegisterColorCommandValidator : AbstractValidator<RegisterColorCommand>
+{
+    /// <summary>Initializes validation rules for the register color command.</summary>
+    public RegisterColorCommandValidator()
+    {
+        RuleFor(x => x.OrganizationId).NotEmpty();
+
+        RuleFor(x => x.Name)
+            .NotEmpty()
+            .MaximumLength(global::Asset.Domain.Color.MaxNameLength);
+    }
+}
+
+================================================================================
+FILE: src\Modules\Asset\Asset.Application\Features\Colors\Dtos\ColorDto.cs
+SIZE: 0.22 KB
+================================================================================
+namespace MachineryManager.Asset.Application.Features.Colors.Dtos;
+
+/// <summary>Read-only projection of a Color for API/UI consumption.</summary>
+public sealed record ColorDto(Guid Id, Guid OrganizationId, string Name);
+
+================================================================================
+FILE: src\Modules\Asset\Asset.Application\Features\Colors\Queries\GetColorsByOrganization\GetColorsByOrganizationQuery.cs
+SIZE: 0.44 KB
+================================================================================
+using MachineryManager.Asset.Application.Features.Colors.Dtos;
+using MachineryManager.SharedKernel;
+using MediatR;
+
+namespace MachineryManager.Asset.Application.Features.Colors.Queries.GetColorsByOrganization;
+
+/// <summary>Query to retrieve every Color registered for an Organization (used to populate selection lists).</summary>
+public sealed record GetColorsByOrganizationQuery(Guid OrganizationId) : IRequest<Result<IReadOnlyList<ColorDto>>>;
+
+================================================================================
+FILE: src\Modules\Asset\Asset.Application\Features\Colors\Queries\GetColorsByOrganization\GetColorsByOrganizationQueryHandler.cs
+SIZE: 2.65 KB
+================================================================================
+using MachineryManager.Asset.Application.Abstractions;
+using MachineryManager.Asset.Application.Features.Colors.Dtos;
+using MachineryManager.SharedKernel;
+using MachineryManager.SharedKernel.Abstractions;
+using MediatR;
+
+namespace MachineryManager.Asset.Application.Features.Colors.Queries.GetColorsByOrganization;
+
+/// <summary>
+/// Handles <see cref="GetColorsByOrganizationQuery"/> by verifying the
+/// caller holds Asset.View for the Organization, then returning the
+/// Organization's full color list.
+/// </summary>
+public sealed class GetColorsByOrganizationQueryHandler
+    : IRequestHandler<GetColorsByOrganizationQuery, Result<IReadOnlyList<ColorDto>>>
+{
+    private const string RequiredPermission = "Color.View";
+    private readonly IColorRepository _colorRepository;
+    private readonly ICurrentUserService _currentUserService;
+    private readonly IPermissionEvaluator _permissionEvaluator;
+    private readonly IOrganizationLookupService _organizationLookupService;
+
+    /// <summary>Initializes a new instance of the <see cref="GetColorsByOrganizationQueryHandler"/> class.</summary>
+    public GetColorsByOrganizationQueryHandler(
+        IColorRepository colorRepository,
+        ICurrentUserService currentUserService,
+        IPermissionEvaluator permissionEvaluator,
+        IOrganizationLookupService organizationLookupService)
+    {
+        _colorRepository = colorRepository;
+        _currentUserService = currentUserService;
+        _permissionEvaluator = permissionEvaluator;
+        _organizationLookupService = organizationLookupService;
+    }
+
+    /// <summary>Executes the lookup use case.</summary>
+    public async Task<Result<IReadOnlyList<ColorDto>>> Handle(
+        GetColorsByOrganizationQuery request,
+        CancellationToken cancellationToken)
+    {
+        if (_currentUserService.UserId is not { } userId)
+        {
+            return Result.Failure<IReadOnlyList<ColorDto>>(global::Asset.Domain.ColorErrors.NotAuthorized());
+        }
+
+        var holdingId = await _organizationLookupService.GetHoldingIdAsync(request.OrganizationId, cancellationToken);
+
+        var isAuthorized = await _permissionEvaluator.HasPermissionAsync(
+            userId,
+            RequiredPermission,
+            new ResourceScope(holdingId, request.OrganizationId, null),
+            cancellationToken);
+
+        if (!isAuthorized)
+        {
+            return Result.Failure<IReadOnlyList<ColorDto>>(global::Asset.Domain.ColorErrors.NotAuthorized());
+        }
+
+        var colors = await _colorRepository.GetByOrganizationIdAsync(request.OrganizationId, cancellationToken);
+
+        return Result.Success(colors);
+    }
+}
 
 ================================================================================
 FILE: src\Modules\Asset\Asset.Application\Features\EngineModels\Commands\RegisterEngineModel\RegisterEngineModelCommand.cs
@@ -10304,6 +10653,212 @@ public sealed class SearchEngineModelsQueryHandler
 }
 
 ================================================================================
+FILE: src\Modules\Asset\Asset.Application\Features\UnitsOfMeasurement\Commands\RegisterUnitOfMeasurement\RegisterUnitOfMeasurementCommand.cs
+SIZE: 0.39 KB
+================================================================================
+using MachineryManager.SharedKernel;
+using MediatR;
+
+namespace MachineryManager.Asset.Application.Features.UnitsOfMeasurement.Commands.RegisterUnitOfMeasurement;
+
+/// <summary>Command to register a new Unit of Measurement within an Organization.</summary>
+public sealed record RegisterUnitOfMeasurementCommand(Guid OrganizationId, string Name, string Category)
+    : IRequest<Result<Guid>>;
+
+================================================================================
+FILE: src\Modules\Asset\Asset.Application\Features\UnitsOfMeasurement\Commands\RegisterUnitOfMeasurement\RegisterUnitOfMeasurementCommandHandler.cs
+SIZE: 3.24 KB
+================================================================================
+using MachineryManager.Asset.Application.Abstractions;
+using MachineryManager.SharedKernel;
+using MachineryManager.SharedKernel.Abstractions;
+using MediatR;
+
+namespace MachineryManager.Asset.Application.Features.UnitsOfMeasurement.Commands.RegisterUnitOfMeasurement;
+
+/// <summary>
+/// Handles <see cref="RegisterUnitOfMeasurementCommand"/> by verifying
+/// the caller holds UnitOfMeasurement.Create (a dedicated Permission
+/// section, independent of Asset.* — chat, 2026-08-29), then invoking
+/// domain registration.
+/// </summary>
+public sealed class RegisterUnitOfMeasurementCommandHandler
+    : IRequestHandler<RegisterUnitOfMeasurementCommand, Result<Guid>>
+{
+    private const string RequiredPermission = "UnitOfMeasurement.Create";
+
+    private readonly IUnitOfMeasurementRepository _unitOfMeasurementRepository;
+    private readonly IAssetUnitOfWork _unitOfWork;
+    private readonly IDateTimeProvider _dateTimeProvider;
+    private readonly ICurrentUserService _currentUserService;
+    private readonly IPermissionEvaluator _permissionEvaluator;
+    private readonly IOrganizationLookupService _organizationLookupService;
+
+    /// <summary>Initializes a new instance of the <see cref="RegisterUnitOfMeasurementCommandHandler"/> class.</summary>
+    public RegisterUnitOfMeasurementCommandHandler(
+        IUnitOfMeasurementRepository unitOfMeasurementRepository,
+        IAssetUnitOfWork unitOfWork,
+        IDateTimeProvider dateTimeProvider,
+        ICurrentUserService currentUserService,
+        IPermissionEvaluator permissionEvaluator,
+        IOrganizationLookupService organizationLookupService)
+    {
+        _unitOfMeasurementRepository = unitOfMeasurementRepository;
+        _unitOfWork = unitOfWork;
+        _dateTimeProvider = dateTimeProvider;
+        _currentUserService = currentUserService;
+        _permissionEvaluator = permissionEvaluator;
+        _organizationLookupService = organizationLookupService;
+    }
+
+    /// <summary>Executes the registration use case.</summary>
+    public async Task<Result<Guid>> Handle(RegisterUnitOfMeasurementCommand request, CancellationToken cancellationToken)
+    {
+        if (_currentUserService.UserId is not { } userId)
+        {
+            return Result.Failure<Guid>(global::Asset.Domain.UnitOfMeasurementErrors.NotAuthorized());
+        }
+
+        var holdingId = await _organizationLookupService.GetHoldingIdAsync(request.OrganizationId, cancellationToken);
+        var scope = new ResourceScope(holdingId, request.OrganizationId, null);
+
+        var isAuthorized = await _permissionEvaluator.HasPermissionAsync(userId, RequiredPermission, scope, cancellationToken);
+
+        if (!isAuthorized)
+        {
+            return Result.Failure<Guid>(global::Asset.Domain.UnitOfMeasurementErrors.NotAuthorized());
+        }
+
+        var result = global::Asset.Domain.UnitOfMeasurement.Register(
+            request.OrganizationId, request.Name, request.Category, _dateTimeProvider);
+
+        if (result.IsFailure)
+        {
+            return Result.Failure<Guid>(result.Error);
+        }
+
+        _unitOfMeasurementRepository.Add(result.Value);
+        await _unitOfWork.SaveChangesAsync(cancellationToken);
+
+        return Result.Success(result.Value.Id.Value);
+    }
+}
+
+================================================================================
+FILE: src\Modules\Asset\Asset.Application\Features\UnitsOfMeasurement\Commands\RegisterUnitOfMeasurement\RegisterUnitOfMeasurementCommandValidator.cs
+SIZE: 0.75 KB
+================================================================================
+using FluentValidation;
+
+namespace MachineryManager.Asset.Application.Features.UnitsOfMeasurement.Commands.RegisterUnitOfMeasurement;
+
+/// <summary>Validates <see cref="RegisterUnitOfMeasurementCommand"/> per ADR-0036.</summary>
+public sealed class RegisterUnitOfMeasurementCommandValidator : AbstractValidator<RegisterUnitOfMeasurementCommand>
+{
+    public RegisterUnitOfMeasurementCommandValidator()
+    {
+        RuleFor(x => x.OrganizationId).NotEmpty();
+
+        RuleFor(x => x.Name)
+            .NotEmpty()
+            .MaximumLength(global::Asset.Domain.UnitOfMeasurement.MaxNameLength);
+
+        RuleFor(x => x.Category)
+            .NotEmpty()
+            .MaximumLength(global::Asset.Domain.UnitOfMeasurement.MaxCategoryLength);
+    }
+}
+
+================================================================================
+FILE: src\Modules\Asset\Asset.Application\Features\UnitsOfMeasurement\Dtos\UnitOfMeasurementDto.cs
+SIZE: 0.25 KB
+================================================================================
+namespace MachineryManager.Asset.Application.Features.UnitsOfMeasurement.Dtos;
+
+/// <summary>Read-only projection of a Unit of Measurement for API/UI consumption.</summary>
+public sealed record UnitOfMeasurementDto(Guid Id, string Name, string Category);
+
+================================================================================
+FILE: src\Modules\Asset\Asset.Application\Features\UnitsOfMeasurement\Queries\GetUnitsOfMeasurementByOrganization\GetUnitsOfMeasurementByOrganizationQuery.cs
+SIZE: 0.49 KB
+================================================================================
+using MachineryManager.Asset.Application.Features.UnitsOfMeasurement.Dtos;
+using MachineryManager.SharedKernel;
+using MediatR;
+
+namespace MachineryManager.Asset.Application.Features.UnitsOfMeasurement.Queries.GetUnitsOfMeasurementByOrganization;
+
+/// <summary>Query to retrieve every Unit of Measurement registered for an Organization.</summary>
+public sealed record GetUnitsOfMeasurementByOrganizationQuery(Guid OrganizationId)
+    : IRequest<Result<IReadOnlyList<UnitOfMeasurementDto>>>;
+
+================================================================================
+FILE: src\Modules\Asset\Asset.Application\Features\UnitsOfMeasurement\Queries\GetUnitsOfMeasurementByOrganization\GetUnitsOfMeasurementByOrganizationQueryHandler.cs
+SIZE: 2.88 KB
+================================================================================
+using MachineryManager.Asset.Application.Abstractions;
+using MachineryManager.Asset.Application.Features.UnitsOfMeasurement.Dtos;
+using MachineryManager.SharedKernel;
+using MachineryManager.SharedKernel.Abstractions;
+using MediatR;
+
+namespace MachineryManager.Asset.Application.Features.UnitsOfMeasurement.Queries.GetUnitsOfMeasurementByOrganization;
+
+/// <summary>
+/// Handles <see cref="GetUnitsOfMeasurementByOrganizationQuery"/> by
+/// verifying the caller holds UnitOfMeasurement.View, then returning
+/// the Organization's full unit list.
+/// </summary>
+public sealed class GetUnitsOfMeasurementByOrganizationQueryHandler
+    : IRequestHandler<GetUnitsOfMeasurementByOrganizationQuery, Result<IReadOnlyList<UnitOfMeasurementDto>>>
+{
+    private const string RequiredPermission = "UnitOfMeasurement.View";
+
+    private readonly IUnitOfMeasurementRepository _unitOfMeasurementRepository;
+    private readonly ICurrentUserService _currentUserService;
+    private readonly IPermissionEvaluator _permissionEvaluator;
+    private readonly IOrganizationLookupService _organizationLookupService;
+
+    /// <summary>Initializes a new instance of the <see cref="GetUnitsOfMeasurementByOrganizationQueryHandler"/> class.</summary>
+    public GetUnitsOfMeasurementByOrganizationQueryHandler(
+        IUnitOfMeasurementRepository unitOfMeasurementRepository,
+        ICurrentUserService currentUserService,
+        IPermissionEvaluator permissionEvaluator,
+        IOrganizationLookupService organizationLookupService)
+    {
+        _unitOfMeasurementRepository = unitOfMeasurementRepository;
+        _currentUserService = currentUserService;
+        _permissionEvaluator = permissionEvaluator;
+        _organizationLookupService = organizationLookupService;
+    }
+
+    /// <summary>Executes the lookup use case.</summary>
+    public async Task<Result<IReadOnlyList<UnitOfMeasurementDto>>> Handle(
+        GetUnitsOfMeasurementByOrganizationQuery request,
+        CancellationToken cancellationToken)
+    {
+        if (_currentUserService.UserId is not { } userId)
+        {
+            return Result.Failure<IReadOnlyList<UnitOfMeasurementDto>>(global::Asset.Domain.UnitOfMeasurementErrors.NotAuthorized());
+        }
+
+        var holdingId = await _organizationLookupService.GetHoldingIdAsync(request.OrganizationId, cancellationToken);
+        var scope = new ResourceScope(holdingId, request.OrganizationId, null);
+
+        var isAuthorized = await _permissionEvaluator.HasPermissionAsync(userId, RequiredPermission, scope, cancellationToken);
+
+        if (!isAuthorized)
+        {
+            return Result.Failure<IReadOnlyList<UnitOfMeasurementDto>>(global::Asset.Domain.UnitOfMeasurementErrors.NotAuthorized());
+        }
+
+        var units = await _unitOfMeasurementRepository.GetByOrganizationAsync(request.OrganizationId, cancellationToken);
+
+        return Result.Success(units);
+    }
+}
+
+================================================================================
 FILE: src\Modules\Asset\Asset.Application\MediatRDomainEventDispatcher.cs
 SIZE: 1.93 KB
 ================================================================================
@@ -10361,7 +10916,7 @@ public sealed class MediatRDomainEventDispatcher : IDomainEventDispatcher
 
 ================================================================================
 FILE: src\Modules\Asset\Asset.Domain\Asset.cs
-SIZE: 7.83 KB
+SIZE: 10.38 KB
 ================================================================================
 using Asset.Domain.Events;
 using MachineryManager.SharedKernel;
@@ -10373,15 +10928,19 @@ namespace Asset.Domain;
 /// Aggregate Root representing a single physical Asset (BR-001–BR-004) —
 /// e.g. one specific truck or crusher. Shared specifications come from
 /// its <see cref="AssetModelId"/>; this aggregate holds only the
-/// instance-specific identity (serial number, license plate,
-/// manufacture year, color) and current lifecycle state.
+/// instance-specific identity (identification code, name, serial
+/// number, chassis/body number, VIN, license plate, manufacture year,
+/// color) and current lifecycle state.
 /// Owned by exactly one Organization (BR-003) — note this differs from
 /// AssetModel/EngineModel, which are Holding-scoped (chat, 2026-08-27).
 /// </summary>
 public sealed class Asset : AggregateRoot<AssetId>
 {
-    /// <summary>The maximum allowed length for the color field.</summary>
-    public const int MaxColorLength = 50;
+    /// <summary>The maximum allowed length for the identification code field.</summary>
+    public const int MaxCodeLength = 20;
+
+    /// <summary>The maximum allowed length for the name field.</summary>
+    public const int MaxNameLength = 60;
 
     /// <summary>The maximum allowed length for the serial number field.</summary>
     public const int MaxSerialNumberLength = 100;
@@ -10389,23 +10948,48 @@ public sealed class Asset : AggregateRoot<AssetId>
     /// <summary>The maximum allowed length for the license plate field.</summary>
     public const int MaxLicensePlateLength = 50;
 
+    /// <summary>The maximum allowed length for the chassis number, body number, and VIN fields.</summary>
+    public const int MaxChassisBodyVinLength = 30;
+
     /// <summary>Gets the identifier of the owning Organization (BR-003).</summary>
     public Guid OrganizationId { get; private set; }
+
+    /// <summary>
+    /// Gets the Asset's identification code — required, and unique
+    /// within its owning Organization (chat, 2026-08-28).
+    /// </summary>
+    public string Code { get; private set; } = string.Empty;
+
+    /// <summary>Gets the display name of the Asset (required, chat, 2026-08-28).</summary>
+    public string Name { get; private set; } = string.Empty;
 
     /// <summary>Gets the identifier of this Asset's shared specification catalog entry.</summary>
     public AssetModelId AssetModelId { get; private set; } = null!;
 
+    /// <summary>
+    /// Gets the identifier of the selected Color option (chat,
+    /// 2026-08-28 — Color is now a reference to the per-Organization
+    /// Color catalog, not a free-text field).
+    /// </summary>
+    public ColorId ColorId { get; private set; } = null!;
+
     /// <summary>Gets the serial number, if recorded.</summary>
     public string? SerialNumber { get; private set; }
+
+    /// <summary>Gets the chassis number, if recorded (chat, 2026-08-28).</summary>
+    public string? ChassisNumber { get; private set; }
+
+    /// <summary>Gets the body number, if recorded (chat, 2026-08-28).</summary>
+    public string? BodyNumber { get; private set; }
+
+    /// <summary>Gets the Vehicle Identification Number, if recorded (chat, 2026-08-28).</summary>
+    public string? Vin { get; private set; }
 
     /// <summary>Gets the license plate, if recorded.</summary>
     public string? LicensePlate { get; private set; }
 
     /// <summary>Gets the manufacture year, if recorded.</summary>
     public int? ManufactureYear { get; private set; }
-
-    /// <summary>Gets the body color.</summary>
-    public string Color { get; private set; } = string.Empty;
 
     /// <summary>Gets the current lifecycle status.</summary>
     public AssetStatus Status { get; private set; }
@@ -10418,17 +11002,27 @@ public sealed class Asset : AggregateRoot<AssetId>
     private Asset(
         AssetId id,
         Guid organizationId,
+        string code,
+        string name,
         AssetModelId assetModelId,
-        string color,
+        ColorId colorId,
         string? serialNumber,
+        string? chassisNumber,
+        string? bodyNumber,
+        string? vin,
         string? licensePlate,
         int? manufactureYear)
         : base(id)
     {
         OrganizationId = organizationId;
+        Code = code;
+        Name = name;
         AssetModelId = assetModelId;
-        Color = color;
+        ColorId = colorId;
         SerialNumber = serialNumber;
+        ChassisNumber = chassisNumber;
+        BodyNumber = bodyNumber;
+        Vin = vin;
         LicensePlate = licensePlate;
         ManufactureYear = manufactureYear;
         Status = AssetStatus.Registered;
@@ -10438,42 +11032,76 @@ public sealed class Asset : AggregateRoot<AssetId>
     /// Registers a new Asset. Single-step registration (chat, 2026-08-27):
     /// identity and model are captured together and the Asset starts
     /// directly at <see cref="AssetStatus.Registered"/> (the Draft state
-    /// is reserved for a future two-step flow).
+    /// is reserved for a future two-step flow). Uniqueness of
+    /// <paramref name="code"/> within the Organization, existence of the
+    /// referenced AssetModel/Color, and Organization/Holding consistency
+    /// are all enforced by the caller (Application layer) before this
+    /// method is invoked — the aggregate itself cannot check other
+    /// aggregates.
     /// </summary>
-    /// <param name="organizationId">The owning Organization.</param>
-    /// <param name="assetModelId">The shared specification catalog entry.</param>
-    /// <param name="color">The body color (required).</param>
-    /// <param name="serialNumber">The serial number (optional).</param>
-    /// <param name="licensePlate">The license plate (optional).</param>
-    /// <param name="manufactureYear">The manufacture year (optional).</param>
-    /// <param name="dateTimeProvider">Provides the current UTC time for the raised domain event.</param>
-    /// <returns>A <see cref="Result{Asset}"/> containing the new aggregate, or a validation error.</returns>
     public static Result<global::Asset.Domain.Asset> Register(
         Guid organizationId,
+        string code,
+        string name,
         AssetModelId assetModelId,
-        string color,
+        ColorId colorId,
         string? serialNumber,
+        string? chassisNumber,
+        string? bodyNumber,
+        string? vin,
         string? licensePlate,
         int? manufactureYear,
         IDateTimeProvider dateTimeProvider)
     {
-        if (string.IsNullOrWhiteSpace(color))
+        if (string.IsNullOrWhiteSpace(code))
         {
-            return Result.Failure<global::Asset.Domain.Asset>(AssetErrors.ColorRequired());
+            return Result.Failure<global::Asset.Domain.Asset>(AssetErrors.CodeRequired());
         }
 
-        if (color.Length > MaxColorLength)
+        if (code.Length > MaxCodeLength)
+        {
+            return Result.Failure<global::Asset.Domain.Asset>(AssetErrors.CodeTooLong(MaxCodeLength));
+        }
+
+        if (string.IsNullOrWhiteSpace(name))
+        {
+            return Result.Failure<global::Asset.Domain.Asset>(AssetErrors.NameRequired());
+        }
+
+        if (name.Length > MaxNameLength)
+        {
+            return Result.Failure<global::Asset.Domain.Asset>(AssetErrors.NameTooLong(MaxNameLength));
+        }
+
+        if (chassisNumber is { Length: > 0 } && chassisNumber.Length > MaxChassisBodyVinLength)
         {
             return Result.Failure<global::Asset.Domain.Asset>(
-                Error.Validation("Asset.ColorTooLong", $"Asset color shall not exceed {MaxColorLength} characters."));
+                AssetErrors.FieldTooLong(nameof(ChassisNumber), MaxChassisBodyVinLength));
+        }
+
+        if (bodyNumber is { Length: > 0 } && bodyNumber.Length > MaxChassisBodyVinLength)
+        {
+            return Result.Failure<global::Asset.Domain.Asset>(
+                AssetErrors.FieldTooLong(nameof(BodyNumber), MaxChassisBodyVinLength));
+        }
+
+        if (vin is { Length: > 0 } && vin.Length > MaxChassisBodyVinLength)
+        {
+            return Result.Failure<global::Asset.Domain.Asset>(
+                AssetErrors.FieldTooLong(nameof(Vin), MaxChassisBodyVinLength));
         }
 
         var asset = new global::Asset.Domain.Asset(
             AssetId.New(),
             organizationId,
+            code.Trim(),
+            name.Trim(),
             assetModelId,
-            color.Trim(),
+            colorId,
             string.IsNullOrWhiteSpace(serialNumber) ? null : serialNumber.Trim(),
+            string.IsNullOrWhiteSpace(chassisNumber) ? null : chassisNumber.Trim(),
+            string.IsNullOrWhiteSpace(bodyNumber) ? null : bodyNumber.Trim(),
+            string.IsNullOrWhiteSpace(vin) ? null : vin.Trim(),
             string.IsNullOrWhiteSpace(licensePlate) ? null : licensePlate.Trim(),
             manufactureYear);
 
@@ -10499,9 +11127,7 @@ public sealed class Asset : AggregateRoot<AssetId>
     /// <summary>
     /// Places the Asset into operation (Commissioned → Operational, or
     /// Inactive → Operational). Raises <see cref="AssetActivated"/> for
-    /// the first case and <see cref="AssetReactivated"/> for the second,
-    /// so the audit trail distinguishes initial activation from later
-    /// reactivations (chat, 2026-08-27).
+    /// the first case and <see cref="AssetReactivated"/> for the second.
     /// </summary>
     public Result Activate(IDateTimeProvider dateTimeProvider)
     {
@@ -10587,7 +11213,7 @@ SIZE: 0.35 KB
 
 ================================================================================
 FILE: src\Modules\Asset\Asset.Domain\AssetErrors.cs
-SIZE: 2.05 KB
+SIZE: 3.94 KB
 ================================================================================
 using MachineryManager.SharedKernel;
 
@@ -10596,10 +11222,38 @@ namespace Asset.Domain;
 /// <summary>Business Errors for the Asset aggregate.</summary>
 public static class AssetErrors
 {
-    /// <summary>Creates an error indicating the color was not provided.</summary>
-    public static Error ColorRequired() => Error.Validation(
-        "Asset.ColorRequired",
-        "Asset color is required.");
+    /// <summary>Creates an error indicating the identification code was not provided.</summary>
+    public static Error CodeRequired() => Error.Validation(
+        "Asset.CodeRequired",
+        "Asset identification code is required.");
+
+    /// <summary>Creates an error indicating the identification code exceeds the maximum length.</summary>
+    public static Error CodeTooLong(int maxLength) => Error.Validation(
+        "Asset.CodeTooLong",
+        $"Asset identification code shall not exceed {maxLength} characters.");
+
+    /// <summary>
+    /// Creates an error indicating another Asset within the same
+    /// Organization already uses this identification code.
+    /// </summary>
+    public static Error DuplicateCode(string code) => Error.Conflict(
+        "Asset.DuplicateCode",
+        $"An asset with code '{code}' already exists in this organization.");
+
+    /// <summary>Creates an error indicating the name was not provided (chat, 2026-08-28).</summary>
+    public static Error NameRequired() => Error.Validation(
+        "Asset.NameRequired",
+        "Asset name is required.");
+
+    /// <summary>Creates an error indicating the name exceeds the maximum length.</summary>
+    public static Error NameTooLong(int maxLength) => Error.Validation(
+        "Asset.NameTooLong",
+        $"Asset name shall not exceed {maxLength} characters.");
+
+    /// <summary>Creates a generic "field too long" error for the optional identity fields.</summary>
+    public static Error FieldTooLong(string fieldName, int maxLength) => Error.Validation(
+        $"Asset.{fieldName}TooLong",
+        $"{fieldName} shall not exceed {maxLength} characters.");
 
     /// <summary>Creates an error indicating an invalid lifecycle transition was attempted.</summary>
     public static Error InvalidTransition(AssetStatus from, AssetStatus to) => Error.Conflict(
@@ -10611,30 +11265,30 @@ public static class AssetErrors
         "Asset.NotAuthorized",
         "You do not have permission to perform this action.");
 
-    /// <summary>
-    /// Creates an error indicating the given OrganizationId does not
-    /// correspond to an existing Organization (chat, 2026-08-27).
-    /// </summary>
+    /// <summary>Creates an error indicating the given OrganizationId does not correspond to an existing Organization.</summary>
     public static Error OrganizationNotFound(Guid organizationId) => Error.NotFound(
         "Asset.OrganizationNotFound",
         $"Organization with id {organizationId} was not found.");
 
-    /// <summary>
-    /// Creates an error indicating the given AssetModelId does not
-    /// correspond to an existing Asset Model (chat, 2026-08-27).
-    /// </summary>
+    /// <summary>Creates an error indicating the given AssetModelId does not correspond to an existing Asset Model.</summary>
     public static Error AssetModelNotFound(Guid assetModelId) => Error.NotFound(
         "Asset.AssetModelNotFound",
         $"Asset model with id {assetModelId} was not found.");
 
-    
-    /// <summary>
-    /// Creates an error indicating the selected Asset Model belongs to
-    /// a different Holding than the target Organization (chat, 2026-08-27).
-    /// </summary>
+    /// <summary>Creates an error indicating the selected Asset Model belongs to a different Holding than the target Organization.</summary>
     public static Error AssetModelHoldingMismatch() => Error.Conflict(
         "Asset.AssetModelHoldingMismatch",
         "The selected Asset Model does not belong to the same Holding as the target Organization.");
+
+    /// <summary>Creates an error indicating the given ColorId does not correspond to an existing Color (chat, 2026-08-28).</summary>
+    public static Error ColorNotFound(Guid colorId) => Error.NotFound(
+        "Asset.ColorNotFound",
+        $"Color with id {colorId} was not found.");
+
+    /// <summary>Creates an error indicating the selected Color belongs to a different Organization (chat, 2026-08-28).</summary>
+    public static Error ColorOrganizationMismatch() => Error.Conflict(
+        "Asset.ColorOrganizationMismatch",
+        "The selected Color does not belong to the target Organization.");
 }
 
 ================================================================================
@@ -10959,6 +11613,121 @@ public enum AssetStatus
 
     /// <summary>Final state — physically disposed of.</summary>
     Disposed = 6,
+}
+
+================================================================================
+FILE: src\Modules\Asset\Asset.Domain\Color.cs
+SIZE: 2.2 KB
+================================================================================
+using Asset.Domain.Events;
+using MachineryManager.SharedKernel;
+using MachineryManager.SharedKernel.Abstractions;
+
+namespace Asset.Domain;
+
+/// <summary>
+/// Aggregate Root representing a selectable color option for Assets.
+/// Scoped per-Organization (chat, 2026-08-28) — each Organization
+/// maintains its own color list, unlike AssetModel/EngineModel which
+/// are Holding-scoped.
+/// </summary>
+public sealed class Color : AggregateRoot<ColorId>
+{
+    /// <summary>The maximum allowed length for the color name.</summary>
+    public const int MaxNameLength = 50;
+
+    /// <summary>Gets the identifier of the owning Organization.</summary>
+    public Guid OrganizationId { get; private set; }
+
+    /// <summary>Gets the display name of the color (e.g. "سفید", "مشکی").</summary>
+    public string Name { get; private set; } = string.Empty;
+
+    // Reserved for ORM materialization only. Never used by application code.
+    private Color()
+    {
+    }
+
+    private Color(ColorId id, Guid organizationId, string name)
+        : base(id)
+    {
+        OrganizationId = organizationId;
+        Name = name;
+    }
+
+    /// <summary>Registers a new Color option within an Organization.</summary>
+    /// <param name="organizationId">The owning Organization.</param>
+    /// <param name="name">The display name (required, max 50 characters).</param>
+    /// <param name="dateTimeProvider">Provides the current UTC time for the raised domain event.</param>
+    /// <returns>A <see cref="Result{Color}"/> containing the new aggregate, or a validation error.</returns>
+    public static Result<Color> Register(Guid organizationId, string name, IDateTimeProvider dateTimeProvider)
+    {
+        if (string.IsNullOrWhiteSpace(name))
+        {
+            return Result.Failure<Color>(ColorErrors.NameRequired());
+        }
+
+        if (name.Length > MaxNameLength)
+        {
+            return Result.Failure<Color>(ColorErrors.NameTooLong(MaxNameLength));
+        }
+
+        var color = new Color(ColorId.New(), organizationId, name.Trim());
+
+        color.RaiseDomainEvent(new ColorRegistered(color.Id, organizationId, color.Name, dateTimeProvider.UtcNow));
+
+        return color;
+    }
+}
+
+================================================================================
+FILE: src\Modules\Asset\Asset.Domain\ColorErrors.cs
+SIZE: 0.9 KB
+================================================================================
+using MachineryManager.SharedKernel;
+
+namespace Asset.Domain;
+
+/// <summary>Business Errors for the Color aggregate.</summary>
+public static class ColorErrors
+{
+    /// <summary>Creates an error indicating the color name was not provided.</summary>
+    public static Error NameRequired() => Error.Validation(
+        "Color.NameRequired",
+        "Color name is required.");
+
+    /// <summary>Creates an error indicating the color name exceeds the maximum length.</summary>
+    public static Error NameTooLong(int maxLength) => Error.Validation(
+        "Color.NameTooLong",
+        $"Color name shall not exceed {maxLength} characters.");
+
+    /// <summary>Creates an error indicating the current user lacks permission for this action.</summary>
+    public static Error NotAuthorized() => Error.Failure(
+        "Color.NotAuthorized",
+        "You do not have permission to perform this action.");
+}
+
+================================================================================
+FILE: src\Modules\Asset\Asset.Domain\ColorId.cs
+SIZE: 0.61 KB
+================================================================================
+namespace Asset.Domain;
+
+/// <summary>Strongly-typed identifier for the <see cref="Color"/> aggregate.</summary>
+public sealed record ColorId
+{
+    /// <summary>Gets the underlying <see cref="Guid"/> value.</summary>
+    public Guid Value { get; }
+
+    private ColorId(Guid value)
+    {
+        Value = value;
+    }
+
+    /// <summary>Creates a new, unique <see cref="ColorId"/>.</summary>
+    public static ColorId New() => new(Guid.NewGuid());
+
+    /// <summary>Wraps an existing <see cref="Guid"/> value as a <see cref="ColorId"/>.</summary>
+    public static ColorId From(Guid value) => new(value);
 }
 
 ================================================================================
@@ -11387,6 +12156,39 @@ public sealed class AssetRetired : IDomainEvent
 }
 
 ================================================================================
+FILE: src\Modules\Asset\Asset.Domain\Events\ColorRegistered.cs
+SIZE: 0.97 KB
+================================================================================
+using MachineryManager.SharedKernel;
+
+namespace Asset.Domain.Events;
+
+/// <summary>Raised when a new Color option is registered.</summary>
+public sealed class ColorRegistered : IDomainEvent
+{
+    /// <summary>Gets the identifier of the registered color.</summary>
+    public ColorId ColorId { get; }
+
+    /// <summary>Gets the identifier of the owning Organization.</summary>
+    public Guid OrganizationId { get; }
+
+    /// <summary>Gets the name of the color.</summary>
+    public string Name { get; }
+
+    /// <summary>Gets the UTC timestamp when the event occurred.</summary>
+    public DateTimeOffset OccurredOn { get; }
+
+    /// <summary>Initializes a new instance of the <see cref="ColorRegistered"/> class.</summary>
+    public ColorRegistered(ColorId colorId, Guid organizationId, string name, DateTimeOffset occurredOn)
+    {
+        ColorId = colorId;
+        OrganizationId = organizationId;
+        Name = name;
+        OccurredOn = occurredOn;
+    }
+}
+
+================================================================================
 FILE: src\Modules\Asset\Asset.Domain\Events\EngineModelAssignedToAssetModel.cs
 SIZE: 0.97 KB
 ================================================================================
@@ -11449,6 +12251,188 @@ public sealed class EngineModelRegistered : IDomainEvent
 }
 
 ================================================================================
+FILE: src\Modules\Asset\Asset.Domain\Events\UnitOfMeasurementRegistered.cs
+SIZE: 0.82 KB
+================================================================================
+using MachineryManager.SharedKernel;
+
+namespace Asset.Domain.Events;
+
+/// <summary>Raised when a new Unit of Measurement is registered.</summary>
+public sealed class UnitOfMeasurementRegistered : IDomainEvent
+{
+    public UnitOfMeasurementId UnitOfMeasurementId { get; }
+    public Guid OrganizationId { get; }
+    public string Name { get; }
+    public string Category { get; }
+    public DateTimeOffset OccurredOn { get; }
+
+    public UnitOfMeasurementRegistered(
+        UnitOfMeasurementId unitOfMeasurementId,
+        Guid organizationId,
+        string name,
+        string category,
+        DateTimeOffset occurredOn)
+    {
+        UnitOfMeasurementId = unitOfMeasurementId;
+        OrganizationId = organizationId;
+        Name = name;
+        Category = category;
+        OccurredOn = occurredOn;
+    }
+}
+
+================================================================================
+FILE: src\Modules\Asset\Asset.Domain\UnitOfMeasurement.cs
+SIZE: 3.3 KB
+================================================================================
+using Asset.Domain.Events;
+using MachineryManager.SharedKernel;
+using MachineryManager.SharedKernel.Abstractions;
+
+namespace Asset.Domain;
+
+/// <summary>
+/// Aggregate Root representing a selectable unit of measurement (e.g.
+/// "اسب بخار" / "کیلووات" for power). Scoped per-Organization, same as
+/// Color. Grouped by Category (e.g. Power, Volume, Length, Weight) for
+/// future filtering — a free-text field for now, not a closed list
+/// (chat, 2026-08-29).
+/// </summary>
+public sealed class UnitOfMeasurement : AggregateRoot<UnitOfMeasurementId>
+{
+    /// <summary>The maximum allowed length for the unit's name.</summary>
+    public const int MaxNameLength = 50;
+
+    /// <summary>The maximum allowed length for the category.</summary>
+    public const int MaxCategoryLength = 50;
+
+    /// <summary>Gets the identifier of the owning Organization.</summary>
+    public Guid OrganizationId { get; private set; }
+
+    /// <summary>Gets the display name of the unit (e.g. "کیلووات").</summary>
+    public string Name { get; private set; } = string.Empty;
+
+    /// <summary>Gets the category this unit belongs to (e.g. "Power", "Volume").</summary>
+    public string Category { get; private set; } = string.Empty;
+
+    // Reserved for ORM materialization only. Never used by application code.
+    private UnitOfMeasurement()
+    {
+    }
+
+    private UnitOfMeasurement(UnitOfMeasurementId id, Guid organizationId, string name, string category)
+        : base(id)
+    {
+        OrganizationId = organizationId;
+        Name = name;
+        Category = category;
+    }
+
+    /// <summary>Registers a new Unit of Measurement within an Organization.</summary>
+    /// <param name="organizationId">The owning Organization.</param>
+    /// <param name="name">The display name (required, max 50 characters).</param>
+    /// <param name="category">The category (required, max 50 characters).</param>
+    /// <param name="dateTimeProvider">Provides the current UTC time for the raised domain event.</param>
+    /// <returns>A <see cref="Result{UnitOfMeasurement}"/> containing the new aggregate, or a validation error.</returns>
+    public static Result<UnitOfMeasurement> Register(
+        Guid organizationId,
+        string name,
+        string category,
+        IDateTimeProvider dateTimeProvider)
+    {
+        if (string.IsNullOrWhiteSpace(name))
+        {
+            return Result.Failure<UnitOfMeasurement>(UnitOfMeasurementErrors.NameRequired());
+        }
+
+        if (name.Length > MaxNameLength)
+        {
+            return Result.Failure<UnitOfMeasurement>(UnitOfMeasurementErrors.NameTooLong(MaxNameLength));
+        }
+
+        if (string.IsNullOrWhiteSpace(category))
+        {
+            return Result.Failure<UnitOfMeasurement>(UnitOfMeasurementErrors.CategoryRequired());
+        }
+
+        if (category.Length > MaxCategoryLength)
+        {
+            return Result.Failure<UnitOfMeasurement>(UnitOfMeasurementErrors.CategoryTooLong(MaxCategoryLength));
+        }
+
+        var unit = new UnitOfMeasurement(UnitOfMeasurementId.New(), organizationId, name.Trim(), category.Trim());
+
+        unit.RaiseDomainEvent(new UnitOfMeasurementRegistered(
+            unit.Id, organizationId, unit.Name, unit.Category, dateTimeProvider.UtcNow));
+
+        return unit;
+    }
+}
+
+================================================================================
+FILE: src\Modules\Asset\Asset.Domain\UnitOfMeasurementErrors.cs
+SIZE: 1.07 KB
+================================================================================
+using MachineryManager.SharedKernel;
+
+namespace Asset.Domain;
+
+/// <summary>Business Errors for the UnitOfMeasurement aggregate.</summary>
+public static class UnitOfMeasurementErrors
+{
+    public static Error NameRequired() => Error.Validation(
+        "UnitOfMeasurement.NameRequired",
+        "Unit of measurement name is required.");
+
+    public static Error NameTooLong(int maxLength) => Error.Validation(
+        "UnitOfMeasurement.NameTooLong",
+        $"Unit of measurement name shall not exceed {maxLength} characters.");
+
+    public static Error CategoryRequired() => Error.Validation(
+        "UnitOfMeasurement.CategoryRequired",
+        "Unit of measurement category is required.");
+
+    public static Error CategoryTooLong(int maxLength) => Error.Validation(
+        "UnitOfMeasurement.CategoryTooLong",
+        $"Unit of measurement category shall not exceed {maxLength} characters.");
+
+    public static Error NotAuthorized() => Error.Failure(
+        "UnitOfMeasurement.NotAuthorized",
+        "You do not have permission to perform this action.");
+}
+
+================================================================================
+FILE: src\Modules\Asset\Asset.Domain\UnitOfMeasurementId.cs
+SIZE: 0.62 KB
+================================================================================
+using MachineryManager.SharedKernel;
+
+namespace Asset.Domain;
+
+/// <summary>Strongly-typed identifier for a Unit of Measurement.</summary>
+public sealed class UnitOfMeasurementId : ValueObject
+{
+    public Guid Value { get; }
+
+    private UnitOfMeasurementId(Guid value)
+    {
+        Value = value;
+    }
+
+    public static UnitOfMeasurementId New() => new(Guid.NewGuid());
+
+    public static UnitOfMeasurementId From(Guid value) => new(value);
+
+    protected override IEnumerable<object?> GetEqualityComponents()
+    {
+        yield return Value;
+    }
+
+    public override string ToString() => Value.ToString();
+}
+
+================================================================================
 FILE: src\Modules\Asset\Asset.Infrastructure\Asset.Infrastructure.csproj
 SIZE: 0.41 KB
 ================================================================================
@@ -11468,7 +12452,7 @@ SIZE: 0.41 KB
 
 ================================================================================
 FILE: src\Modules\Asset\Asset.Infrastructure\DependencyInjection.cs
-SIZE: 2.43 KB
+SIZE: 2.59 KB
 ================================================================================
 using MachineryManager.Asset.Application.Abstractions;
 using MachineryManager.Asset.Infrastructure.Persistence;
@@ -11517,6 +12501,8 @@ public static class DependencyInjection
         services.AddScoped<IEngineModelRepository, EngineModelRepository>();
         services.AddScoped<IAssetUnitOfWork>(serviceProvider =>
             serviceProvider.GetRequiredService<AssetDbContext>());
+        services.AddScoped<IColorRepository, ColorRepository>();
+        services.AddScoped<IUnitOfMeasurementRepository, UnitOfMeasurementRepository>();
 
         return services;
     }
@@ -11903,8 +12889,58 @@ namespace Asset.Infrastructure.Migrations
 
 
 ================================================================================
-FILE: src\Modules\Asset\Asset.Infrastructure\Migrations\AssetDbContextModelSnapshot.cs
-SIZE: 4.59 KB
+FILE: src\Modules\Asset\Asset.Infrastructure\Migrations\20260829073901_AddAssetCode.cs
+SIZE: 1.28 KB
+================================================================================
+using Microsoft.EntityFrameworkCore.Migrations;
+
+#nullable disable
+
+namespace Asset.Infrastructure.Migrations
+{
+    /// <inheritdoc />
+    public partial class AddAssetCode : Migration
+    {
+        /// <inheritdoc />
+        protected override void Up(MigrationBuilder migrationBuilder)
+        {
+            migrationBuilder.AddColumn<string>(
+                name: "Code",
+                schema: "asset",
+                table: "Asset",
+                type: "nvarchar(20)",
+                maxLength: 20,
+                nullable: false,
+                defaultValue: "");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Asset_OrganizationId_Code",
+                schema: "asset",
+                table: "Asset",
+                columns: new[] { "OrganizationId", "Code" },
+                unique: true);
+        }
+
+        /// <inheritdoc />
+        protected override void Down(MigrationBuilder migrationBuilder)
+        {
+            migrationBuilder.DropIndex(
+                name: "IX_Asset_OrganizationId_Code",
+                schema: "asset",
+                table: "Asset");
+
+            migrationBuilder.DropColumn(
+                name: "Code",
+                schema: "asset",
+                table: "Asset");
+        }
+    }
+}
+
+
+================================================================================
+FILE: src\Modules\Asset\Asset.Infrastructure\Migrations\20260829073901_AddAssetCode.Designer.cs
+SIZE: 4.97 KB
 ================================================================================
 // <auto-generated />
 using System;
@@ -11912,6 +12948,7 @@ using MachineryManager.Asset.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11919,9 +12956,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Asset.Infrastructure.Migrations
 {
     [DbContext(typeof(AssetDbContext))]
-    partial class AssetDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260829073901_AddAssetCode")]
+    partial class AddAssetCode
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -11938,6 +12977,11 @@ namespace Asset.Infrastructure.Migrations
 
                     b.Property<Guid>("AssetModelId")
                         .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Code")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
 
                     b.Property<string>("Color")
                         .IsRequired()
@@ -11968,6 +13012,9 @@ namespace Asset.Infrastructure.Migrations
                     b.HasIndex("AssetModelId");
 
                     b.HasIndex("OrganizationId");
+
+                    b.HasIndex("OrganizationId", "Code")
+                        .IsUnique();
 
                     b.ToTable("Asset", "asset");
                 });
@@ -12042,8 +13089,546 @@ namespace Asset.Infrastructure.Migrations
 
 
 ================================================================================
+FILE: src\Modules\Asset\Asset.Infrastructure\Migrations\20260829082556_AddColorAndAssetFields.cs
+SIZE: 4.74 KB
+================================================================================
+using System;
+using Microsoft.EntityFrameworkCore.Migrations;
+
+#nullable disable
+
+namespace Asset.Infrastructure.Migrations
+{
+    /// <inheritdoc />
+    public partial class AddColorAndAssetFields : Migration
+    {
+        /// <inheritdoc />
+        protected override void Up(MigrationBuilder migrationBuilder)
+        {
+            migrationBuilder.DropColumn(
+                name: "Color",
+                schema: "asset",
+                table: "Asset");
+
+            migrationBuilder.AddColumn<string>(
+                name: "BodyNumber",
+                schema: "asset",
+                table: "Asset",
+                type: "nvarchar(30)",
+                maxLength: 30,
+                nullable: true);
+
+            migrationBuilder.AddColumn<string>(
+                name: "ChassisNumber",
+                schema: "asset",
+                table: "Asset",
+                type: "nvarchar(30)",
+                maxLength: 30,
+                nullable: true);
+
+            migrationBuilder.AddColumn<Guid>(
+                name: "ColorId",
+                schema: "asset",
+                table: "Asset",
+                type: "uniqueidentifier",
+                nullable: false,
+                defaultValue: new Guid("00000000-0000-0000-0000-000000000000"));
+
+            migrationBuilder.AddColumn<string>(
+                name: "Name",
+                schema: "asset",
+                table: "Asset",
+                type: "nvarchar(60)",
+                maxLength: 60,
+                nullable: false,
+                defaultValue: "");
+
+            migrationBuilder.AddColumn<string>(
+                name: "Vin",
+                schema: "asset",
+                table: "Asset",
+                type: "nvarchar(30)",
+                maxLength: 30,
+                nullable: true);
+
+            migrationBuilder.CreateTable(
+                name: "Color",
+                schema: "asset",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    OrganizationId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    Name = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Color", x => x.Id);
+                });
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Asset_ColorId",
+                schema: "asset",
+                table: "Asset",
+                column: "ColorId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Color_OrganizationId",
+                schema: "asset",
+                table: "Color",
+                column: "OrganizationId");
+
+            migrationBuilder.AddForeignKey(
+                name: "FK_Asset_Color_ColorId",
+                schema: "asset",
+                table: "Asset",
+                column: "ColorId",
+                principalSchema: "asset",
+                principalTable: "Color",
+                principalColumn: "Id",
+                onDelete: ReferentialAction.Restrict);
+        }
+
+        /// <inheritdoc />
+        protected override void Down(MigrationBuilder migrationBuilder)
+        {
+            migrationBuilder.DropForeignKey(
+                name: "FK_Asset_Color_ColorId",
+                schema: "asset",
+                table: "Asset");
+
+            migrationBuilder.DropTable(
+                name: "Color",
+                schema: "asset");
+
+            migrationBuilder.DropIndex(
+                name: "IX_Asset_ColorId",
+                schema: "asset",
+                table: "Asset");
+
+            migrationBuilder.DropColumn(
+                name: "BodyNumber",
+                schema: "asset",
+                table: "Asset");
+
+            migrationBuilder.DropColumn(
+                name: "ChassisNumber",
+                schema: "asset",
+                table: "Asset");
+
+            migrationBuilder.DropColumn(
+                name: "ColorId",
+                schema: "asset",
+                table: "Asset");
+
+            migrationBuilder.DropColumn(
+                name: "Name",
+                schema: "asset",
+                table: "Asset");
+
+            migrationBuilder.DropColumn(
+                name: "Vin",
+                schema: "asset",
+                table: "Asset");
+
+            migrationBuilder.AddColumn<string>(
+                name: "Color",
+                schema: "asset",
+                table: "Asset",
+                type: "nvarchar(50)",
+                maxLength: 50,
+                nullable: false,
+                defaultValue: "");
+        }
+    }
+}
+
+
+================================================================================
+FILE: src\Modules\Asset\Asset.Infrastructure\Migrations\20260829082556_AddColorAndAssetFields.Designer.cs
+SIZE: 6.48 KB
+================================================================================
+// <auto-generated />
+using System;
+using MachineryManager.Asset.Infrastructure.Persistence;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
+using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
+
+#nullable disable
+
+namespace Asset.Infrastructure.Migrations
+{
+    [DbContext(typeof(AssetDbContext))]
+    [Migration("20260829082556_AddColorAndAssetFields")]
+    partial class AddColorAndAssetFields
+    {
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
+        {
+#pragma warning disable 612, 618
+            modelBuilder
+                .HasDefaultSchema("asset")
+                .HasAnnotation("ProductVersion", "10.0.10")
+                .HasAnnotation("Relational:MaxIdentifierLength", 128);
+
+            SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
+
+            modelBuilder.Entity("Asset.Domain.Asset", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("AssetModelId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("BodyNumber")
+                        .HasMaxLength(30)
+                        .HasColumnType("nvarchar(30)");
+
+                    b.Property<string>("ChassisNumber")
+                        .HasMaxLength(30)
+                        .HasColumnType("nvarchar(30)");
+
+                    b.Property<string>("Code")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
+
+                    b.Property<Guid>("ColorId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("LicensePlate")
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<int?>("ManufactureYear")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(60)
+                        .HasColumnType("nvarchar(60)");
+
+                    b.Property<Guid>("OrganizationId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("SerialNumber")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
+
+                    b.Property<string>("Vin")
+                        .HasMaxLength(30)
+                        .HasColumnType("nvarchar(30)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("AssetModelId");
+
+                    b.HasIndex("ColorId");
+
+                    b.HasIndex("OrganizationId");
+
+                    b.HasIndex("OrganizationId", "Code")
+                        .IsUnique();
+
+                    b.ToTable("Asset", "asset");
+                });
+
+            modelBuilder.Entity("Asset.Domain.AssetModel", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("HoldingId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Manufacturer")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.PrimitiveCollection<string>("_compatibleEngineModelIds")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)")
+                        .HasColumnName("CompatibleEngineModelIds");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("HoldingId");
+
+                    b.ToTable("AssetModel", "asset");
+                });
+
+            modelBuilder.Entity("Asset.Domain.Color", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<Guid>("OrganizationId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("OrganizationId");
+
+                    b.ToTable("Color", "asset");
+                });
+
+            modelBuilder.Entity("Asset.Domain.EngineModel", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("HoldingId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Manufacturer")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("HoldingId");
+
+                    b.ToTable("EngineModel", "asset");
+                });
+
+            modelBuilder.Entity("Asset.Domain.Asset", b =>
+                {
+                    b.HasOne("Asset.Domain.AssetModel", null)
+                        .WithMany()
+                        .HasForeignKey("AssetModelId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("Asset.Domain.Color", null)
+                        .WithMany()
+                        .HasForeignKey("ColorId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+                });
+#pragma warning restore 612, 618
+        }
+    }
+}
+
+
+================================================================================
+FILE: src\Modules\Asset\Asset.Infrastructure\Migrations\AssetDbContextModelSnapshot.cs
+SIZE: 6.37 KB
+================================================================================
+// <auto-generated />
+using System;
+using MachineryManager.Asset.Infrastructure.Persistence;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
+
+#nullable disable
+
+namespace Asset.Infrastructure.Migrations
+{
+    [DbContext(typeof(AssetDbContext))]
+    partial class AssetDbContextModelSnapshot : ModelSnapshot
+    {
+        protected override void BuildModel(ModelBuilder modelBuilder)
+        {
+#pragma warning disable 612, 618
+            modelBuilder
+                .HasDefaultSchema("asset")
+                .HasAnnotation("ProductVersion", "10.0.10")
+                .HasAnnotation("Relational:MaxIdentifierLength", 128);
+
+            SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
+
+            modelBuilder.Entity("Asset.Domain.Asset", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("AssetModelId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("BodyNumber")
+                        .HasMaxLength(30)
+                        .HasColumnType("nvarchar(30)");
+
+                    b.Property<string>("ChassisNumber")
+                        .HasMaxLength(30)
+                        .HasColumnType("nvarchar(30)");
+
+                    b.Property<string>("Code")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
+
+                    b.Property<Guid>("ColorId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("LicensePlate")
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<int?>("ManufactureYear")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(60)
+                        .HasColumnType("nvarchar(60)");
+
+                    b.Property<Guid>("OrganizationId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("SerialNumber")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
+
+                    b.Property<string>("Vin")
+                        .HasMaxLength(30)
+                        .HasColumnType("nvarchar(30)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("AssetModelId");
+
+                    b.HasIndex("ColorId");
+
+                    b.HasIndex("OrganizationId");
+
+                    b.HasIndex("OrganizationId", "Code")
+                        .IsUnique();
+
+                    b.ToTable("Asset", "asset");
+                });
+
+            modelBuilder.Entity("Asset.Domain.AssetModel", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("HoldingId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Manufacturer")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.PrimitiveCollection<string>("_compatibleEngineModelIds")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)")
+                        .HasColumnName("CompatibleEngineModelIds");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("HoldingId");
+
+                    b.ToTable("AssetModel", "asset");
+                });
+
+            modelBuilder.Entity("Asset.Domain.Color", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<Guid>("OrganizationId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("OrganizationId");
+
+                    b.ToTable("Color", "asset");
+                });
+
+            modelBuilder.Entity("Asset.Domain.EngineModel", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("HoldingId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Manufacturer")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("HoldingId");
+
+                    b.ToTable("EngineModel", "asset");
+                });
+
+            modelBuilder.Entity("Asset.Domain.Asset", b =>
+                {
+                    b.HasOne("Asset.Domain.AssetModel", null)
+                        .WithMany()
+                        .HasForeignKey("AssetModelId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("Asset.Domain.Color", null)
+                        .WithMany()
+                        .HasForeignKey("ColorId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+                });
+#pragma warning restore 612, 618
+        }
+    }
+}
+
+
+================================================================================
 FILE: src\Modules\Asset\Asset.Infrastructure\Persistence\AssetDbContext.cs
-SIZE: 3.5 KB
+SIZE: 3.85 KB
 ================================================================================
 using MachineryManager.Asset.Application.Abstractions;
 using MachineryManager.SharedKernel;
@@ -12086,6 +13671,12 @@ public sealed class AssetDbContext : DbContext, IAssetUnitOfWork
 
     /// <summary>Gets the set of Engine Model aggregates.</summary>
     public DbSet<global::Asset.Domain.EngineModel> EngineModels => Set<global::Asset.Domain.EngineModel>();
+
+    /// <summary>Gets the set of Color aggregates.</summary>
+    public DbSet<global::Asset.Domain.Color> Colors => Set<global::Asset.Domain.Color>();
+
+    /// <summary>Gets the set of Unit of Measurement aggregates.</summary>
+    public DbSet<global::Asset.Domain.UnitOfMeasurement> UnitsOfMeasurement => Set<global::Asset.Domain.UnitOfMeasurement>();
 
     /// <inheritdoc />
     protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -12220,7 +13811,7 @@ public sealed class AssetModelRepository : IAssetModelRepository
 
 ================================================================================
 FILE: src\Modules\Asset\Asset.Infrastructure\Persistence\AssetRepository.cs
-SIZE: 3.12 KB
+SIZE: 3.23 KB
 ================================================================================
 using Asset.Domain;
 using MachineryManager.Asset.Application.Abstractions;
@@ -12236,7 +13827,6 @@ public sealed class AssetRepository : IAssetRepository
     private readonly AssetDbContext _dbContext;
 
     /// <summary>Initializes a new instance of the <see cref="AssetRepository"/> class.</summary>
-    /// <param name="dbContext">The Asset module's persistence context.</param>
     public AssetRepository(AssetDbContext dbContext)
     {
         _dbContext = dbContext;
@@ -12256,6 +13846,12 @@ public sealed class AssetRepository : IAssetRepository
     public void Remove(global::Asset.Domain.Asset aggregate) => _dbContext.Assets.Remove(aggregate);
 
     /// <inheritdoc />
+    public Task<bool> ExistsWithCodeAsync(Guid organizationId, string code, CancellationToken cancellationToken = default) =>
+        _dbContext.Assets.AnyAsync(
+            a => a.OrganizationId == organizationId && a.Code == code,
+            cancellationToken);
+
+    /// <inheritdoc />
     public async Task<SearchAssetsResponse> SearchAsync(
         Guid organizationId,
         string? searchTerm,
@@ -12270,18 +13866,16 @@ public sealed class AssetRepository : IAssetRepository
         if (!string.IsNullOrWhiteSpace(searchTerm))
         {
             query = query.Where(a =>
+                a.Code.Contains(searchTerm) ||
+                a.Name.Contains(searchTerm) ||
                 (a.SerialNumber != null && a.SerialNumber.Contains(searchTerm)) ||
                 (a.LicensePlate != null && a.LicensePlate.Contains(searchTerm)));
         }
 
         var totalItems = await query.CountAsync(cancellationToken);
 
-        // Materialize entities first, map to DTO in memory — avoids the
-        // EF Core 10 Select-projection translation issue hit earlier
-        // with Profile.Permissions / AssetModel.CompatibleEngineModelIds
-        // (chat, 2026-08-25).
         var entities = await query
-            .OrderBy(a => a.SerialNumber)
+            .OrderBy(a => a.Code)
             .Skip((page - 1) * pageSize)
             .Take(pageSize)
             .ToListAsync(cancellationToken);
@@ -12290,31 +13884,81 @@ public sealed class AssetRepository : IAssetRepository
             .Select(a => new AssetDto(
                 a.Id.Value,
                 a.OrganizationId,
+                a.Code,
+                a.Name,
                 a.AssetModelId.Value,
+                a.ColorId.Value,
                 a.SerialNumber,
+                a.ChassisNumber,
+                a.BodyNumber,
+                a.Vin,
                 a.LicensePlate,
                 a.ManufactureYear,
-                a.Color,
                 a.Status.ToString()))
             .ToList();
 
         var totalPages = totalItems == 0 ? 0 : (int)Math.Ceiling(totalItems / (double)pageSize);
 
         return new SearchAssetsResponse(
-            items,
-            page,
-            pageSize,
-            totalItems,
-            totalPages,
-            page < totalPages,
-            page > 1);
+            items, page, pageSize, totalItems, totalPages, page < totalPages, page > 1);
     }
 }
 
+================================================================================
+FILE: src\Modules\Asset\Asset.Infrastructure\Persistence\ColorRepository.cs
+SIZE: 1.67 KB
+================================================================================
+using Asset.Domain;
+using MachineryManager.Asset.Application.Abstractions;
+using MachineryManager.Asset.Application.Features.Colors.Dtos;
+using Microsoft.EntityFrameworkCore;
+
+namespace MachineryManager.Asset.Infrastructure.Persistence;
+
+/// <summary>EF Core implementation of <see cref="IColorRepository"/>.</summary>
+public sealed class ColorRepository : IColorRepository
+{
+    private readonly AssetDbContext _dbContext;
+
+    /// <summary>Initializes a new instance of the <see cref="ColorRepository"/> class.</summary>
+    public ColorRepository(AssetDbContext dbContext)
+    {
+        _dbContext = dbContext;
+    }
+
+    /// <inheritdoc />
+    public Task<Color?> GetByIdAsync(ColorId id, CancellationToken cancellationToken = default) =>
+        _dbContext.Colors.FirstOrDefaultAsync(c => c.Id == id, cancellationToken);
+
+    /// <inheritdoc />
+    public void Add(Color aggregate) => _dbContext.Colors.Add(aggregate);
+
+    /// <inheritdoc />
+    public void Update(Color aggregate) => _dbContext.Colors.Update(aggregate);
+
+    /// <inheritdoc />
+    public void Remove(Color aggregate) => _dbContext.Colors.Remove(aggregate);
+
+    /// <inheritdoc />
+    public async Task<IReadOnlyList<ColorDto>> GetByOrganizationIdAsync(
+        Guid organizationId,
+        CancellationToken cancellationToken = default)
+    {
+        var entities = await _dbContext.Colors
+            .AsNoTracking()
+            .Where(c => c.OrganizationId == organizationId)
+            .OrderBy(c => c.Name)
+            .ToListAsync(cancellationToken);
+
+        return entities
+            .Select(c => new ColorDto(c.Id.Value, c.OrganizationId, c.Name))
+            .ToList();
+    }
+}
 
 ================================================================================
 FILE: src\Modules\Asset\Asset.Infrastructure\Persistence\Configurations\AssetConfiguration.cs
-SIZE: 2.32 KB
+SIZE: 2.91 KB
 ================================================================================
 using Asset.Domain;
 using Microsoft.EntityFrameworkCore;
@@ -12341,36 +13985,58 @@ public sealed class AssetConfiguration : IEntityTypeConfiguration<global::Asset.
 
         builder.HasIndex(a => a.OrganizationId);
 
+        builder.Property(a => a.Code)
+            .HasMaxLength(global::Asset.Domain.Asset.MaxCodeLength)
+            .IsRequired();
+
+        builder.HasIndex(a => new { a.OrganizationId, a.Code })
+            .IsUnique();
+
+        builder.Property(a => a.Name)
+            .HasMaxLength(global::Asset.Domain.Asset.MaxNameLength)
+            .IsRequired();
+
         builder.Property(a => a.AssetModelId)
             .HasConversion(id => id.Value, value => AssetModelId.From(value))
             .IsRequired();
 
         builder.HasIndex(a => a.AssetModelId);
 
-        // Real database-level FK (chat, 2026-08-27): no navigation
-        // property on the aggregate itself, preserving the project's
-        // "no cross-aggregate navigation" DDD boundary — this only
-        // tells EF which column is the FK. Restrict (not Cascade,
-        // unlike UserProfileAssignment -> Profile): an Asset is a real
-        // physical asset, so deleting its AssetModel must never
-        // cascade-delete real Asset records; the AssetModel cannot be
-        // removed while any Asset still references it.
         builder.HasOne<AssetModel>()
             .WithMany()
             .HasForeignKey(a => a.AssetModelId)
             .OnDelete(DeleteBehavior.Restrict);
 
+        builder.Property(a => a.ColorId)
+            .HasConversion(id => id.Value, value => ColorId.From(value))
+            .IsRequired();
+
+        builder.HasIndex(a => a.ColorId);
+
+        // Real database-level FK to Color (chat, 2026-08-28) — Restrict,
+        // same reasoning as the AssetModel FK: a Color cannot be
+        // removed while any Asset still references it.
+        builder.HasOne<Color>()
+            .WithMany()
+            .HasForeignKey(a => a.ColorId)
+            .OnDelete(DeleteBehavior.Restrict);
+
         builder.Property(a => a.SerialNumber)
             .HasMaxLength(global::Asset.Domain.Asset.MaxSerialNumberLength);
+
+        builder.Property(a => a.ChassisNumber)
+            .HasMaxLength(global::Asset.Domain.Asset.MaxChassisBodyVinLength);
+
+        builder.Property(a => a.BodyNumber)
+            .HasMaxLength(global::Asset.Domain.Asset.MaxChassisBodyVinLength);
+
+        builder.Property(a => a.Vin)
+            .HasMaxLength(global::Asset.Domain.Asset.MaxChassisBodyVinLength);
 
         builder.Property(a => a.LicensePlate)
             .HasMaxLength(global::Asset.Domain.Asset.MaxLicensePlateLength);
 
         builder.Property(a => a.ManufactureYear);
-
-        builder.Property(a => a.Color)
-            .HasMaxLength(global::Asset.Domain.Asset.MaxColorLength)
-            .IsRequired();
 
         builder.Property(a => a.Status)
             .HasConversion<string>()
@@ -12378,7 +14044,6 @@ public sealed class AssetConfiguration : IEntityTypeConfiguration<global::Asset.
             .IsRequired();
     }
 }
-
 
 ================================================================================
 FILE: src\Modules\Asset\Asset.Infrastructure\Persistence\Configurations\AssetModelConfiguration.cs
@@ -12432,6 +14097,41 @@ public sealed class AssetModelConfiguration : IEntityTypeConfiguration<AssetMode
 }
 
 ================================================================================
+FILE: src\Modules\Asset\Asset.Infrastructure\Persistence\Configurations\ColorConfiguration.cs
+SIZE: 0.9 KB
+================================================================================
+using Asset.Domain;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata.Builders;
+
+namespace MachineryManager.Asset.Infrastructure.Persistence.Configurations;
+
+/// <summary>EF Core mapping for the <see cref="Color"/> aggregate.</summary>
+public sealed class ColorConfiguration : IEntityTypeConfiguration<Color>
+{
+    /// <inheritdoc />
+    public void Configure(EntityTypeBuilder<Color> builder)
+    {
+        builder.ToTable("Color");
+
+        builder.HasKey(c => c.Id);
+
+        builder.Property(c => c.Id)
+            .HasConversion(id => id.Value, value => ColorId.From(value))
+            .ValueGeneratedNever();
+
+        builder.Property(c => c.OrganizationId)
+            .IsRequired();
+
+        builder.HasIndex(c => c.OrganizationId);
+
+        builder.Property(c => c.Name)
+            .HasMaxLength(Color.MaxNameLength)
+            .IsRequired();
+    }
+}
+
+================================================================================
 FILE: src\Modules\Asset\Asset.Infrastructure\Persistence\Configurations\EngineModelConfiguration.cs
 SIZE: 1.08 KB
 ================================================================================
@@ -12467,6 +14167,45 @@ public sealed class EngineModelConfiguration : IEntityTypeConfiguration<EngineMo
         builder.Property(em => em.Manufacturer)
             .HasMaxLength(EngineModel.MaxManufacturerLength)
             .IsRequired();
+    }
+}
+
+================================================================================
+FILE: src\Modules\Asset\Asset.Infrastructure\Persistence\Configurations\UnitOfMeasurementConfiguration.cs
+SIZE: 1.16 KB
+================================================================================
+using Asset.Domain;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata.Builders;
+
+namespace MachineryManager.Asset.Infrastructure.Persistence.Configurations;
+
+/// <summary>EF Core mapping for the <see cref="UnitOfMeasurement"/> aggregate.</summary>
+public sealed class UnitOfMeasurementConfiguration : IEntityTypeConfiguration<UnitOfMeasurement>
+{
+    public void Configure(EntityTypeBuilder<UnitOfMeasurement> builder)
+    {
+        builder.ToTable("UnitOfMeasurement");
+
+        builder.HasKey(u => u.Id);
+
+        builder.Property(u => u.Id)
+            .HasConversion(id => id.Value, value => UnitOfMeasurementId.From(value))
+            .ValueGeneratedNever();
+
+        builder.Property(u => u.OrganizationId)
+            .IsRequired();
+
+        builder.Property(u => u.Name)
+            .HasMaxLength(UnitOfMeasurement.MaxNameLength)
+            .IsRequired();
+
+        builder.Property(u => u.Category)
+            .HasMaxLength(UnitOfMeasurement.MaxCategoryLength)
+            .IsRequired();
+
+        builder.HasIndex(u => u.OrganizationId);
+        builder.HasIndex(u => new { u.OrganizationId, u.Category });
     }
 }
 
@@ -12550,6 +14289,59 @@ public sealed class EngineModelRepository : IEngineModelRepository
 }
 
 ================================================================================
+FILE: src\Modules\Asset\Asset.Infrastructure\Persistence\UnitOfMeasurementRepository.cs
+SIZE: 1.91 KB
+================================================================================
+using Asset.Domain;
+using MachineryManager.Asset.Application.Abstractions;
+using MachineryManager.Asset.Application.Features.UnitsOfMeasurement.Dtos;
+using Microsoft.EntityFrameworkCore;
+
+namespace MachineryManager.Asset.Infrastructure.Persistence;
+
+/// <summary>EF Core implementation of <see cref="IUnitOfMeasurementRepository"/>.</summary>
+public sealed class UnitOfMeasurementRepository : IUnitOfMeasurementRepository
+{
+    private readonly AssetDbContext _dbContext;
+
+    /// <summary>Initializes a new instance of the <see cref="UnitOfMeasurementRepository"/> class.</summary>
+    public UnitOfMeasurementRepository(AssetDbContext dbContext)
+    {
+        _dbContext = dbContext;
+    }
+
+    /// <inheritdoc />
+    public Task<UnitOfMeasurement?> GetByIdAsync(UnitOfMeasurementId id, CancellationToken cancellationToken = default) =>
+        _dbContext.UnitsOfMeasurement.FirstOrDefaultAsync(u => u.Id == id, cancellationToken);
+
+    /// <inheritdoc />
+    public void Add(UnitOfMeasurement aggregate) => _dbContext.UnitsOfMeasurement.Add(aggregate);
+
+    /// <inheritdoc />
+    public void Update(UnitOfMeasurement aggregate) => _dbContext.UnitsOfMeasurement.Update(aggregate);
+
+    /// <inheritdoc />
+    public void Remove(UnitOfMeasurement aggregate) => _dbContext.UnitsOfMeasurement.Remove(aggregate);
+
+    /// <inheritdoc />
+    public async Task<IReadOnlyList<UnitOfMeasurementDto>> GetByOrganizationAsync(
+        Guid organizationId,
+        CancellationToken cancellationToken = default)
+    {
+        var entities = await _dbContext.UnitsOfMeasurement
+            .AsNoTracking()
+            .Where(u => u.OrganizationId == organizationId)
+            .OrderBy(u => u.Category)
+            .ThenBy(u => u.Name)
+            .ToListAsync(cancellationToken);
+
+        return entities
+            .Select(u => new UnitOfMeasurementDto(u.Id.Value, u.Name, u.Category))
+            .ToList();
+    }
+}
+
+================================================================================
 FILE: src\Modules\Asset\Asset.Presentation\Asset.Presentation.csproj
 SIZE: 0.51 KB
 ================================================================================
@@ -12590,7 +14382,7 @@ SIZE: 0.37 KB
 
 ================================================================================
 FILE: src\Modules\Asset\Asset.Presentation\Components\Pages\AssetDetails.razor
-SIZE: 6.49 KB
+SIZE: 7.75 KB
 ================================================================================
 @page "/admin/assets/{AssetId:guid}"
 @inject IHttpClientFactory HttpClientFactory
@@ -12617,10 +14409,25 @@ else if (asset is not null)
                 <MudField Label="شناسه" Variant="Variant.Outlined">@asset.Id</MudField>
             </MudItem>
             <MudItem xs="12" md="6">
+                <MudField Label="کد" Variant="Variant.Outlined">@asset.Code</MudField>
+            </MudItem>
+            <MudItem xs="12" md="6">
+                <MudField Label="نام" Variant="Variant.Outlined">@asset.Name</MudField>
+            </MudItem>
+            <MudItem xs="12" md="6">
                 <MudField Label="سازمان" Variant="Variant.Outlined">@asset.OrganizationId</MudField>
             </MudItem>
             <MudItem xs="12" md="6">
                 <MudField Label="مدل دارایی" Variant="Variant.Outlined">@asset.AssetModelId</MudField>
+            </MudItem>
+            <MudItem xs="12" md="6">
+                <MudField Label="شماره شاسی" Variant="Variant.Outlined">@(asset.ChassisNumber ?? "-")</MudField>
+            </MudItem>
+            <MudItem xs="12" md="6">
+                <MudField Label="شماره بدنه" Variant="Variant.Outlined">@(asset.BodyNumber ?? "-")</MudField>
+            </MudItem>
+            <MudItem xs="12" md="6">
+                <MudField Label="VIN" Variant="Variant.Outlined">@(asset.Vin ?? "-")</MudField>
             </MudItem>
             <MudItem xs="12" md="6">
                 <MudField Label="شماره سریال" Variant="Variant.Outlined">@(asset.SerialNumber ?? "-")</MudField>
@@ -12632,7 +14439,7 @@ else if (asset is not null)
                 <MudField Label="سال ساخت" Variant="Variant.Outlined">@(asset.ManufactureYear?.ToString() ?? "-")</MudField>
             </MudItem>
             <MudItem xs="12" md="6">
-                <MudField Label="رنگ" Variant="Variant.Outlined">@asset.Color</MudField>
+                <MudField Label="رنگ" Variant="Variant.Outlined">@asset.ColorId</MudField>
             </MudItem>
             <MudItem xs="12" md="6">
                 <MudField Label="وضعیت" Variant="Variant.Outlined">@TranslateStatus(asset.Status)</MudField>
@@ -12644,31 +14451,38 @@ else if (asset is not null)
     <MudPaper Class="pa-4">
         @if (asset.Status == "Registered")
         {
-            <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick='() => ExecuteActionAsync("commission")' Disabled="isActing">راه‌اندازی</MudButton>
+            <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick='() => ExecuteActionAsync("commission")'
+                       Disabled="isActing">راه‌اندازی</MudButton>
         }
         else if (asset.Status == "Commissioned" || asset.Status == "Inactive")
         {
-            <MudButton Variant="Variant.Filled" Color="Color.Success" OnClick='() => ExecuteActionAsync("activate")' Disabled="isActing">فعال‌سازی</MudButton>
+            <MudButton Variant="Variant.Filled" Color="Color.Success" OnClick='() => ExecuteActionAsync("activate")'
+                       Disabled="isActing">فعال‌سازی</MudButton>
         }
 
         @if (asset.Status == "Operational")
         {
-            <MudButton Variant="Variant.Filled" Color="Color.Warning" OnClick='() => ExecuteActionAsync("deactivate")' Disabled="isActing" Class="mx-2">غیرفعال‌سازی</MudButton>
-            <MudButton Variant="Variant.Filled" Color="Color.Error" OnClick='() => ExecuteActionAsync("retire")' Disabled="isActing">بازنشستگی</MudButton>
+            <MudButton Variant="Variant.Filled" Color="Color.Warning" OnClick='() => ExecuteActionAsync("deactivate")'
+                       Disabled="isActing" Class="mx-2">غیرفعال‌سازی</MudButton>
+            <MudButton Variant="Variant.Filled" Color="Color.Error" OnClick='() => ExecuteActionAsync("retire")'
+                       Disabled="isActing">بازنشستگی</MudButton>
         }
 
         @if (asset.Status == "Inactive")
         {
-            <MudButton Variant="Variant.Filled" Color="Color.Error" OnClick='() => ExecuteActionAsync("retire")' Disabled="isActing" Class="mx-2">بازنشستگی</MudButton>
+            <MudButton Variant="Variant.Filled" Color="Color.Error" OnClick='() => ExecuteActionAsync("retire")'
+                       Disabled="isActing" Class="mx-2">بازنشستگی</MudButton>
         }
 
         @if (asset.Status == "Retired")
         {
-            <MudButton Variant="Variant.Filled" Color="Color.Dark" OnClick='() => ExecuteActionAsync("dispose")' Disabled="isActing">اسقاط</MudButton>
+            <MudButton Variant="Variant.Filled" Color="Color.Dark" OnClick='() => ExecuteActionAsync("dispose")'
+                       Disabled="isActing">اسقاط</MudButton>
         }
     </MudPaper>
 
-    <MudButton Variant="Variant.Outlined" Color="Color.Secondary" Class="mt-4" OnClick="@(() => Navigation.NavigateTo("/admin/assets"))">
+    <MudButton Variant="Variant.Outlined" Color="Color.Secondary" Class="mt-4"
+               OnClick="@(() => Navigation.NavigateTo("/admin/assets"))">
         بازگشت به لیست
     </MudButton>
 }
@@ -12678,11 +14492,16 @@ else if (asset is not null)
     {
         public Guid Id { get; set; }
         public Guid OrganizationId { get; set; }
+        public string Code { get; set; } = string.Empty;
+        public string Name { get; set; } = string.Empty;
         public Guid AssetModelId { get; set; }
+        public Guid ColorId { get; set; }
         public string? SerialNumber { get; set; }
+        public string? ChassisNumber { get; set; }
+        public string? BodyNumber { get; set; }
+        public string? Vin { get; set; }
         public string? LicensePlate { get; set; }
         public int? ManufactureYear { get; set; }
-        public string Color { get; set; } = string.Empty;
         public string Status { get; set; } = string.Empty;
     }
 
@@ -12712,7 +14531,10 @@ else if (asset is not null)
 
             if (response.IsSuccessStatusCode)
             {
-                asset = System.Text.Json.JsonSerializer.Deserialize<AssetDetail>(content, new System.Text.Json.JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+                asset = System.Text.Json.JsonSerializer.Deserialize<AssetDetail>(content, new System.Text.Json.JsonSerializerOptions
+                {
+                    PropertyNameCaseInsensitive = true
+                });
             }
             else
             {
@@ -13149,7 +14971,7 @@ System.Text.Json.JsonSerializerOptions { PropertyNameCaseInsensitive = true });
 
 ================================================================================
 FILE: src\Modules\Asset\Asset.Presentation\Components\Pages\AssetsList.razor
-SIZE: 7.79 KB
+SIZE: 9.27 KB
 ================================================================================
 @page "/admin/assets"
 @inject IHttpClientFactory HttpClientFactory
@@ -13191,6 +15013,8 @@ SIZE: 7.79 KB
     {
         <MudTable Items="items" Hover="true">
             <HeaderContent>
+                <MudTh>کد</MudTh>
+                <MudTh>نام</MudTh>
                 <MudTh>مدل</MudTh>
                 <MudTh>شماره سریال</MudTh>
                 <MudTh>پلاک</MudTh>
@@ -13200,11 +15024,13 @@ SIZE: 7.79 KB
                 <MudTh>عملیات</MudTh>
             </HeaderContent>
             <RowTemplate>
+                <MudTd DataLabel="کد">@context.Code</MudTd>
+                <MudTd DataLabel="نام">@context.Name</MudTd>
                 <MudTd DataLabel="مدل">@GetAssetModelName(context.AssetModelId)</MudTd>
                 <MudTd DataLabel="شماره سریال">@(context.SerialNumber ?? "-")</MudTd>
                 <MudTd DataLabel="پلاک">@(context.LicensePlate ?? "-")</MudTd>
                 <MudTd DataLabel="سال ساخت">@(context.ManufactureYear?.ToString() ?? "-")</MudTd>
-                <MudTd DataLabel="رنگ">@context.Color</MudTd>
+                <MudTd DataLabel="رنگ">@GetColorName(context.ColorId)</MudTd>
                 <MudTd DataLabel="وضعیت">@TranslateStatus(context.Status)</MudTd>
                 <MudTd DataLabel="عملیات">
                     <MudButton Size="Size.Small" Variant="Variant.Text" Color="Color.Primary"
@@ -13235,11 +15061,13 @@ SIZE: 7.79 KB
     {
         public Guid Id { get; set; }
         public Guid OrganizationId { get; set; }
+        public string Code { get; set; } = string.Empty;
+        public string Name { get; set; } = string.Empty;
         public Guid AssetModelId { get; set; }
+        public Guid ColorId { get; set; }
         public string? SerialNumber { get; set; }
         public string? LicensePlate { get; set; }
         public int? ManufactureYear { get; set; }
-        public string Color { get; set; } = string.Empty;
         public string Status { get; set; } = string.Empty;
     }
 
@@ -13261,6 +15089,9 @@ SIZE: 7.79 KB
     private List<OrganizationItem> organizations = [];
     private List<AssetItem> items = [];
     private Dictionary<Guid, string> assetModelNames = [];
+    private Dictionary<Guid, string> colorNames = [];
+    private string GetColorName(Guid colorId) =>
+        colorNames.TryGetValue(colorId, out var name) ? name : colorId.ToString();
     private Guid? selectedOrganizationId;
     private Guid selectedHoldingId;
     private bool isLoading;
@@ -13280,7 +15111,9 @@ SIZE: 7.79 KB
                 return;
             }
 
-            var result = System.Text.Json.JsonSerializer.Deserialize<SearchOrganizationsResult>(content, new System.Text.Json.JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+            var result = System.Text.Json.JsonSerializer.Deserialize<SearchOrganizationsResult>(content, new
+System.Text.Json.JsonSerializerOptions
+            { PropertyNameCaseInsensitive = true });
             organizations = result?.Items ?? [];
 
             if (organizations.Count == 1)
@@ -13302,6 +15135,7 @@ SIZE: 7.79 KB
         if (selectedHoldingId != Guid.Empty)
         {
             await LoadAssetModelsAsync();
+            await LoadColorsAsync();
         }
     }
 
@@ -13324,7 +15158,9 @@ SIZE: 7.79 KB
                 return;
             }
 
-            var result = System.Text.Json.JsonSerializer.Deserialize<SearchAssetsResult>(content, new System.Text.Json.JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+            var result = System.Text.Json.JsonSerializer.Deserialize<SearchAssetsResult>(content, new
+System.Text.Json.JsonSerializerOptions
+            { PropertyNameCaseInsensitive = true });
             items = result?.Items ?? [];
         }
         catch (Exception ex)
@@ -13347,7 +15183,9 @@ SIZE: 7.79 KB
 
             if (response.IsSuccessStatusCode)
             {
-                var result = System.Text.Json.JsonSerializer.Deserialize<SearchAssetModelsResult>(content, new System.Text.Json.JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+                var result = System.Text.Json.JsonSerializer.Deserialize<SearchAssetModelsResult>(content, new
+System.Text.Json.JsonSerializerOptions
+                { PropertyNameCaseInsensitive = true });
                 assetModelNames = (result?.Items ?? []).ToDictionary(a => a.Id, a => a.Name);
             }
         }
@@ -13372,11 +15210,37 @@ SIZE: 7.79 KB
         "Disposed" => "اسقاط‌شده",
         _ => status
     };
+
+        private async Task LoadColorsAsync()
+    {
+        try
+        {
+            var client = HttpClientFactory.CreateClient("InternalApi");
+            var response = await client.GetAsync($"/api/v1/colors?organizationId={selectedOrganizationId}");
+            var content = await response.Content.ReadAsStringAsync();
+
+            if (response.IsSuccessStatusCode)
+            {
+                var result = System.Text.Json.JsonSerializer.Deserialize<List<ColorLookupItem>>(content, new System.Text.Json.JsonSerializerOptions { PropertyNameCaseInsensitive = true }) ?? [];
+                colorNames = result.ToDictionary(c => c.Id, c => c.Name);
+            }
+        }
+        catch
+        {
+            // Best effort
+        }
+    }
+
+    private sealed class ColorLookupItem
+    {
+        public Guid Id { get; set; }
+        public string Name { get; set; } = string.Empty;
+    }
 }
 
 ================================================================================
 FILE: src\Modules\Asset\Asset.Presentation\Components\Pages\CreateAsset.razor
-SIZE: 6.68 KB
+SIZE: 10.71 KB
 ================================================================================
 @page "/admin/assets/create"
 @inject IHttpClientFactory HttpClientFactory
@@ -13406,6 +15270,10 @@ else
                 }
             </MudSelect>
 
+            <MudTextField T="string" Label="کد شناسایی" @bind-Value="model.Code" Required="true" RequiredError="کد شناسایی الزامی است" MaxLength="20" Class="mt-4" HelperText="حداکثر ۲۰ کاراکتر — باید در این سازمان یکتا باشد" />
+
+            <MudTextField T="string" Label="نام" @bind-Value="model.Name" Required="true" RequiredError="نام الزامی است" MaxLength="60" Class="mt-4" />
+
             <MudSelect T="Guid" Label="مدل دارایی" @bind-Value="model.AssetModelId" Required="true" RequiredError="مدل دارایی الزامی است" Class="mt-4">
                 @foreach (var am in assetModels)
                 {
@@ -13413,8 +15281,33 @@ else
                 }
             </MudSelect>
 
-            <MudTextField T="string" Label="رنگ" @bind-Value="model.Color" Required="true" RequiredError="رنگ الزامی است" MaxLength="50" Class="mt-4" />
+            <div class="d-flex align-center gap-2 mt-4">
+                <MudSelect T="Guid" Label="رنگ" @bind-Value="model.ColorId" Required="true" RequiredError="رنگ الزامی است">
+                    @foreach (var c in colors)
+                    {
+                        <MudSelectItem T="Guid" Value="@c.Id">@c.Name</MudSelectItem>
+                    }
+                </MudSelect>
+                <MudButton Variant="Variant.Outlined" Size="Size.Small" OnClick="@(() => showAddColor = !showAddColor)">
+                    افزودن رنگ جدید
+                </MudButton>
+            </div>
+
+            @if (showAddColor)
+            {
+                <div class="d-flex align-center gap-2 mt-2">
+                    <MudTextField T="string" Label="نام رنگ جدید" @bind-Value="newColorName" MaxLength="50" />
+                    <MudButton Variant="Variant.Filled" Color="Color.Primary" Size="Size.Small"
+                               OnClick="AddColorAsync" Disabled="isAddingColor">
+                        @(isAddingColor ? "..." : "ثبت رنگ")
+                    </MudButton>
+                </div>
+            }
+
             <MudTextField T="string" Label="شماره سریال" @bind-Value="model.SerialNumber" MaxLength="100" Class="mt-4" />
+            <MudTextField T="string" Label="شماره شاسی" @bind-Value="model.ChassisNumber" MaxLength="30" Class="mt-4" />
+            <MudTextField T="string" Label="شماره بدنه" @bind-Value="model.BodyNumber" MaxLength="30" Class="mt-4" />
+            <MudTextField T="string" Label="VIN" @bind-Value="model.Vin" MaxLength="30" Class="mt-4" />
             <MudTextField T="string" Label="پلاک" @bind-Value="model.LicensePlate" MaxLength="50" Class="mt-4" />
             <MudNumericField T="int?" Label="سال ساخت" @bind-Value="model.ManufactureYear" Min="1900" Max="2100" Class="mt-4" />
 
@@ -13442,6 +15335,12 @@ else
         public string Name { get; set; } = string.Empty;
     }
 
+    private sealed class ColorItem
+    {
+        public Guid Id { get; set; }
+        public string Name { get; set; } = string.Empty;
+    }
+
     private sealed class SearchOrganizationsResult
     {
         public List<OrganizationItem> Items { get; set; } = [];
@@ -13455,9 +15354,14 @@ else
     private sealed class RegisterAssetModel
     {
         public Guid OrganizationId { get; set; }
+        public string Code { get; set; } = string.Empty;
+        public string Name { get; set; } = string.Empty;
         public Guid AssetModelId { get; set; }
-        public string Color { get; set; } = string.Empty;
+        public Guid ColorId { get; set; }
         public string? SerialNumber { get; set; }
+        public string? ChassisNumber { get; set; }
+        public string? BodyNumber { get; set; }
+        public string? Vin { get; set; }
         public string? LicensePlate { get; set; }
         public int? ManufactureYear { get; set; }
     }
@@ -13466,8 +15370,12 @@ else
     private RegisterAssetModel model = new();
     private List<OrganizationItem> organizations = [];
     private List<AssetModelItem> assetModels = [];
+    private List<ColorItem> colors = [];
     private bool isLoading = true;
     private bool isSubmitting;
+    private bool showAddColor;
+    private bool isAddingColor;
+    private string newColorName = string.Empty;
     private string? errorMessage;
 
     [SupplyParameterFromQuery]
@@ -13488,6 +15396,7 @@ else
             {
                 await LoadAssetModelsAsync(holdingId);
             }
+            await LoadColorsAsync();
         }
         isLoading = false;
     }
@@ -13533,6 +15442,61 @@ else
         catch
         {
             // Best effort
+        }
+    }
+
+    private async Task LoadColorsAsync()
+    {
+        try
+        {
+            var client = HttpClientFactory.CreateClient("InternalApi");
+            var response = await client.GetAsync($"/api/v1/colors?organizationId={model.OrganizationId}");
+            var content = await response.Content.ReadAsStringAsync();
+
+            if (response.IsSuccessStatusCode)
+            {
+                colors = System.Text.Json.JsonSerializer.Deserialize<List<ColorItem>>(content, new System.Text.Json.JsonSerializerOptions { PropertyNameCaseInsensitive = true }) ?? [];
+            }
+        }
+        catch
+        {
+            // Best effort
+        }
+    }
+
+    private async Task AddColorAsync()
+    {
+        if (string.IsNullOrWhiteSpace(newColorName))
+        {
+            return;
+        }
+
+        isAddingColor = true;
+
+        try
+        {
+            var client = HttpClientFactory.CreateClient("InternalApi");
+            var response = await client.PostAsJsonAsync("/api/v1/colors", new { OrganizationId = model.OrganizationId, Name = newColorName });
+            var content = await response.Content.ReadAsStringAsync();
+
+            if (response.IsSuccessStatusCode)
+            {
+                newColorName = string.Empty;
+                showAddColor = false;
+                await LoadColorsAsync();
+            }
+            else
+            {
+                errorMessage = $"خطا در ثبت رنگ: {content}";
+            }
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"خطا: {ex.Message}";
+        }
+        finally
+        {
+            isAddingColor = false;
         }
     }
 
@@ -14186,19 +16150,32 @@ public sealed record RegisterAssetModelRequest(Guid HoldingId, string Name, stri
 
 ================================================================================
 FILE: src\Modules\Asset\Asset.Presentation\Contracts\RegisterAssetRequest.cs
-SIZE: 0.3 KB
+SIZE: 0.4 KB
 ================================================================================
 namespace MachineryManager.Asset.Presentation.Contracts;
 
 /// <summary>Request body for registering a new Asset.</summary>
 public sealed record RegisterAssetRequest(
     Guid OrganizationId,
+    string Code,
+    string Name,
     Guid AssetModelId,
-    string Color,
+    Guid ColorId,
     string? SerialNumber,
+    string? ChassisNumber,
+    string? BodyNumber,
+    string? Vin,
     string? LicensePlate,
     int? ManufactureYear);
 
+================================================================================
+FILE: src\Modules\Asset\Asset.Presentation\Contracts\RegisterColorRequest.cs
+SIZE: 0.2 KB
+================================================================================
+namespace MachineryManager.Asset.Presentation.Contracts;
+
+/// <summary>Request body for registering a new Color option.</summary>
+public sealed record RegisterColorRequest(Guid OrganizationId, string Name);
 
 ================================================================================
 FILE: src\Modules\Asset\Asset.Presentation\Contracts\RegisterEngineModelRequest.cs
@@ -14208,6 +16185,15 @@ namespace MachineryManager.Asset.Presentation.Contracts;
 
 /// <summary>Request body for registering a new Engine Model.</summary>
 public sealed record RegisterEngineModelRequest(Guid HoldingId, string Name, string Manufacturer);
+
+================================================================================
+FILE: src\Modules\Asset\Asset.Presentation\Contracts\RegisterUnitOfMeasurementRequest.cs
+SIZE: 0.24 KB
+================================================================================
+namespace MachineryManager.Asset.Presentation.Contracts;
+
+/// <summary>Request body for registering a new Unit of Measurement.</summary>
+public sealed record RegisterUnitOfMeasurementRequest(Guid OrganizationId, string Name, string Category);
 
 ================================================================================
 FILE: src\Modules\Asset\Asset.Presentation\Contracts\RenameAssetModelRequest.cs
@@ -14229,7 +16215,7 @@ public sealed record RenameEngineModelRequest(string Name);
 
 ================================================================================
 FILE: src\Modules\Asset\Asset.Presentation\Endpoints\AssetEndpoints.cs
-SIZE: 6.78 KB
+SIZE: 6.94 KB
 ================================================================================
 using MachineryManager.Asset.Application.Features.Assets.Commands.ActivateAsset;
 using MachineryManager.Asset.Application.Features.Assets.Commands.CommissionAsset;
@@ -14308,9 +16294,14 @@ public static class AssetEndpoints
         var result = await sender.Send(
             new RegisterAssetCommand(
                 request.OrganizationId,
+                request.Code,
+                request.Name,
                 request.AssetModelId,
-                request.Color,
+                request.ColorId,
                 request.SerialNumber,
+                request.ChassisNumber,
+                request.BodyNumber,
+                request.Vin,
                 request.LicensePlate,
                 request.ManufactureYear),
             cancellationToken);
@@ -14416,7 +16407,6 @@ public static class AssetEndpoints
             : result.ToProblemResult(httpContext);
     }
 }
-
 
 ================================================================================
 FILE: src\Modules\Asset\Asset.Presentation\Endpoints\AssetModelEndpoints.cs
@@ -14571,6 +16561,72 @@ public static class AssetModelEndpoints
 
         return result.IsSuccess
             ? Results.NoContent()
+            : result.ToProblemResult(httpContext);
+    }
+}
+
+================================================================================
+FILE: src\Modules\Asset\Asset.Presentation\Endpoints\ColorEndpoints.cs
+SIZE: 2.43 KB
+================================================================================
+using MachineryManager.Asset.Application.Features.Colors.Commands.RegisterColor;
+using MachineryManager.Asset.Application.Features.Colors.Queries.GetColorsByOrganization;
+using MachineryManager.Asset.Presentation.Contracts;
+using MediatR;
+using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Routing;
+using OpenIddict.Validation.AspNetCore;
+
+namespace MachineryManager.Asset.Presentation.Endpoints;
+
+/// <summary>Maps the Asset module's Color REST endpoints: base path <c>/api/v1/colors</c>.</summary>
+public static class ColorEndpoints
+{
+    /// <summary>Registers the Color endpoints on the application's route builder.</summary>
+    public static IEndpointRouteBuilder MapColorEndpoints(this IEndpointRouteBuilder endpoints)
+    {
+        var group = endpoints
+            .MapGroup("/api/v1/colors")
+            .WithTags("Colors")
+            .RequireAuthorization(policy => policy
+                .AddAuthenticationSchemes(OpenIddictValidationAspNetCoreDefaults.AuthenticationScheme)
+                .RequireAuthenticatedUser());
+
+        group.MapPost("/", RegisterColorAsync)
+            .WithName("RegisterColor")
+            .WithSummary("Registers a new Color option within an Organization.");
+
+        group.MapGet("/", GetColorsByOrganizationAsync)
+            .WithName("GetColorsByOrganization")
+            .WithSummary("Retrieves every Color registered for an Organization.");
+
+        return endpoints;
+    }
+
+    private static async Task<IResult> RegisterColorAsync(
+        RegisterColorRequest request,
+        ISender sender,
+        HttpContext httpContext,
+        CancellationToken cancellationToken)
+    {
+        var result = await sender.Send(new RegisterColorCommand(request.OrganizationId, request.Name), cancellationToken);
+
+        return result.IsSuccess
+            ? Results.Created($"/api/v1/colors/{result.Value}", new { id = result.Value })
+            : result.ToProblemResult(httpContext);
+    }
+
+    private static async Task<IResult> GetColorsByOrganizationAsync(
+        Guid organizationId,
+        ISender sender,
+        HttpContext httpContext,
+        CancellationToken cancellationToken)
+    {
+        var result = await sender.Send(new GetColorsByOrganizationQuery(organizationId), cancellationToken);
+
+        return result.IsSuccess
+            ? Results.Ok(result.Value)
             : result.ToProblemResult(httpContext);
     }
 }
@@ -14742,6 +16798,74 @@ internal static class ResultExtensions
                 details = Array.Empty<string>(),
             },
             statusCode: statusCode);
+    }
+}
+
+================================================================================
+FILE: src\Modules\Asset\Asset.Presentation\Endpoints\UnitOfMeasurementEndpoints.cs
+SIZE: 2.75 KB
+================================================================================
+using MachineryManager.Asset.Application.Features.UnitsOfMeasurement.Commands.RegisterUnitOfMeasurement;
+using MachineryManager.Asset.Application.Features.UnitsOfMeasurement.Queries.GetUnitsOfMeasurementByOrganization;
+using MachineryManager.Asset.Presentation.Contracts;
+using MediatR;
+using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Routing;
+using OpenIddict.Validation.AspNetCore;
+
+namespace MachineryManager.Asset.Presentation.Endpoints;
+
+/// <summary>Maps the Asset module's Unit of Measurement REST endpoints: base path <c>/api/v1/units-of-measurement</c>.</summary>
+public static class UnitOfMeasurementEndpoints
+{
+    /// <summary>Registers the Unit of Measurement endpoints on the application's route builder.</summary>
+    public static IEndpointRouteBuilder MapUnitOfMeasurementEndpoints(this IEndpointRouteBuilder endpoints)
+    {
+        var group = endpoints
+            .MapGroup("/api/v1/units-of-measurement")
+            .WithTags("UnitsOfMeasurement")
+            .RequireAuthorization(policy => policy
+                .AddAuthenticationSchemes(OpenIddictValidationAspNetCoreDefaults.AuthenticationScheme)
+                .RequireAuthenticatedUser());
+
+        group.MapPost("/", RegisterUnitOfMeasurementAsync)
+            .WithName("RegisterUnitOfMeasurement")
+            .WithSummary("Registers a new Unit of Measurement within an Organization.");
+
+        group.MapGet("/", GetUnitsOfMeasurementByOrganizationAsync)
+            .WithName("GetUnitsOfMeasurementByOrganization")
+            .WithSummary("Retrieves every Unit of Measurement registered for an Organization.");
+
+        return endpoints;
+    }
+
+    private static async Task<IResult> RegisterUnitOfMeasurementAsync(
+        RegisterUnitOfMeasurementRequest request,
+        ISender sender,
+        HttpContext httpContext,
+        CancellationToken cancellationToken)
+    {
+        var result = await sender.Send(
+            new RegisterUnitOfMeasurementCommand(request.OrganizationId, request.Name, request.Category),
+            cancellationToken);
+
+        return result.IsSuccess
+            ? Results.Created($"/api/v1/units-of-measurement/{result.Value}", new { id = result.Value })
+            : result.ToProblemResult(httpContext);
+    }
+
+    private static async Task<IResult> GetUnitsOfMeasurementByOrganizationAsync(
+        Guid organizationId,
+        ISender sender,
+        HttpContext httpContext,
+        CancellationToken cancellationToken)
+    {
+        var result = await sender.Send(new GetUnitsOfMeasurementByOrganizationQuery(organizationId), cancellationToken);
+
+        return result.IsSuccess
+            ? Results.Ok(result.Value)
+            : result.ToProblemResult(httpContext);
     }
 }
 
@@ -24778,12 +26902,12 @@ SIZE: 0.53 KB
 # SECTION 3: SNAPSHOT SUMMARY
 ================================================================================
 
-Generation Time     : 00:00:03.1481086
-Total Files Scanned : 398
-Files Included      : 398
+Generation Time     : 00:01:31.8343344
+Total Files Scanned : 432
+Files Included      : 432
 Files Skipped       : 0
-Total Source Size   : 0.83 MB
-Snapshot File Size  : 0.96 MB
+Total Source Size   : 0.9 MB
+Snapshot File Size  : 1.04 MB
 Output Path         : C:\Users\i\source\repos\MachineryManagerEnterprise\MME_Codebase_Snapshot.txt
 
 Excluded Directories: .git, .github, .vs, .vscode, .idea, .azure, .devcontainer, bin, obj, packages, publish, out, release, releases, debug, x64, x86, arm64, artifacts, .artifacts, node_modules, dist, build, bower_components, jspm_packages, docs-english, docs-farsi, docs, tools, test-results, coverage, .coverage, TestResults, lib, .angular, .next, .nuxt, .svelte-kit, .cache, .temp, tmp

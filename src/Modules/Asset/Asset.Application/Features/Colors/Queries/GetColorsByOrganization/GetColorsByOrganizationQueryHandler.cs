@@ -14,8 +14,7 @@ namespace MachineryManager.Asset.Application.Features.Colors.Queries.GetColorsBy
 public sealed class GetColorsByOrganizationQueryHandler
     : IRequestHandler<GetColorsByOrganizationQuery, Result<IReadOnlyList<ColorDto>>>
 {
-    private const string RequiredPermission = "Asset.View";
-
+    private const string RequiredPermission = "Color.View";
     private readonly IColorRepository _colorRepository;
     private readonly ICurrentUserService _currentUserService;
     private readonly IPermissionEvaluator _permissionEvaluator;

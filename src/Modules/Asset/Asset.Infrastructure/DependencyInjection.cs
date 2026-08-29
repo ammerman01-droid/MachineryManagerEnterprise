@@ -46,6 +46,7 @@ public static class DependencyInjection
         services.AddScoped<IAssetUnitOfWork>(serviceProvider =>
             serviceProvider.GetRequiredService<AssetDbContext>());
         services.AddScoped<IColorRepository, ColorRepository>();
+        services.AddScoped<IUnitOfMeasurementRepository, UnitOfMeasurementRepository>();
 
         return services;
     }

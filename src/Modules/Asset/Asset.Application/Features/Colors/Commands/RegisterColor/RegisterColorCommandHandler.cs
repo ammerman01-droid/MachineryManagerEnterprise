@@ -49,8 +49,8 @@ public sealed class RegisterColorCommandHandler
         var holdingId = await _organizationLookupService.GetHoldingIdAsync(request.OrganizationId, cancellationToken);
         var scope = new ResourceScope(holdingId, request.OrganizationId, null);
 
-        var canCreate = await _permissionEvaluator.HasPermissionAsync(userId, "Asset.Create", scope, cancellationToken);
-        var canEdit = canCreate || await _permissionEvaluator.HasPermissionAsync(userId, "Asset.Edit", scope, cancellationToken);
+                var canCreate = await _permissionEvaluator.HasPermissionAsync(userId, "Color.Create", scope, cancellationToken);
+        var canEdit = canCreate || await _permissionEvaluator.HasPermissionAsync(userId, "Color.Edit", scope, cancellationToken);
 
         if (!canEdit)
         {

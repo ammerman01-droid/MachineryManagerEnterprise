@@ -123,6 +123,10 @@ try
     app.MapEngineModelEndpoints();
     app.MapAssetEndpoints();
 
+    //General endpoints
+    app.MapColorEndpoints();
+    app.MapUnitOfMeasurementEndpoints();
+
     app.Run();
 }
 catch (Exception ex) when (ex is not HostAbortedException)
