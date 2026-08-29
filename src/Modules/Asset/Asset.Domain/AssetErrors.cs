@@ -5,6 +5,25 @@ namespace Asset.Domain;
 /// <summary>Business Errors for the Asset aggregate.</summary>
 public static class AssetErrors
 {
+    /// <summary>Creates an error indicating the identification code was not provided.</summary>
+    public static Error CodeRequired() => Error.Validation(
+        "Asset.CodeRequired",
+        "Asset identification code is required.");
+
+    /// <summary>Creates an error indicating the identification code exceeds the maximum length.</summary>
+    public static Error CodeTooLong(int maxLength) => Error.Validation(
+        "Asset.CodeTooLong",
+        $"Asset identification code shall not exceed {maxLength} characters.");
+
+    /// <summary>
+    /// Creates an error indicating another Asset within the same
+    /// Organization already uses this identification code
+    /// (chat, 2026-08-28 — Code is unique per Organization).
+    /// </summary>
+    public static Error DuplicateCode(string code) => Error.Conflict(
+        "Asset.DuplicateCode",
+        $"An asset with code '{code}' already exists in this organization.");
+
     /// <summary>Creates an error indicating the color was not provided.</summary>
     public static Error ColorRequired() => Error.Validation(
         "Asset.ColorRequired",
@@ -36,7 +55,6 @@ public static class AssetErrors
         "Asset.AssetModelNotFound",
         $"Asset model with id {assetModelId} was not found.");
 
-    
     /// <summary>
     /// Creates an error indicating the selected Asset Model belongs to
     /// a different Holding than the target Organization (chat, 2026-08-27).

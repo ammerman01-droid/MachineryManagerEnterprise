@@ -8,13 +8,16 @@ namespace Asset.Domain;
 /// Aggregate Root representing a single physical Asset (BR-001–BR-004) —
 /// e.g. one specific truck or crusher. Shared specifications come from
 /// its <see cref="AssetModelId"/>; this aggregate holds only the
-/// instance-specific identity (serial number, license plate,
-/// manufacture year, color) and current lifecycle state.
+/// instance-specific identity (identification code, serial number,
+/// license plate, manufacture year, color) and current lifecycle state.
 /// Owned by exactly one Organization (BR-003) — note this differs from
 /// AssetModel/EngineModel, which are Holding-scoped (chat, 2026-08-27).
 /// </summary>
 public sealed class Asset : AggregateRoot<AssetId>
 {
+    /// <summary>The maximum allowed length for the identification code field.</summary>
+    public const int MaxCodeLength = 20;
+
     /// <summary>The maximum allowed length for the color field.</summary>
     public const int MaxColorLength = 50;
 
@@ -26,6 +29,12 @@ public sealed class Asset : AggregateRoot<AssetId>
 
     /// <summary>Gets the identifier of the owning Organization (BR-003).</summary>
     public Guid OrganizationId { get; private set; }
+
+    /// <summary>
+    /// Gets the Asset's identification code — required, and unique
+    /// within its owning Organization (chat, 2026-08-28).
+    /// </summary>
+    public string Code { get; private set; } = string.Empty;
 
     /// <summary>Gets the identifier of this Asset's shared specification catalog entry.</summary>
     public AssetModelId AssetModelId { get; private set; } = null!;
@@ -53,6 +62,7 @@ public sealed class Asset : AggregateRoot<AssetId>
     private Asset(
         AssetId id,
         Guid organizationId,
+        string code,
         AssetModelId assetModelId,
         string color,
         string? serialNumber,
@@ -61,6 +71,7 @@ public sealed class Asset : AggregateRoot<AssetId>
         : base(id)
     {
         OrganizationId = organizationId;
+        Code = code;
         AssetModelId = assetModelId;
         Color = color;
         SerialNumber = serialNumber;
@@ -73,9 +84,13 @@ public sealed class Asset : AggregateRoot<AssetId>
     /// Registers a new Asset. Single-step registration (chat, 2026-08-27):
     /// identity and model are captured together and the Asset starts
     /// directly at <see cref="AssetStatus.Registered"/> (the Draft state
-    /// is reserved for a future two-step flow).
+    /// is reserved for a future two-step flow). Uniqueness of
+    /// <paramref name="code"/> within the Organization is enforced by
+    /// the caller (Application layer) before this method is invoked —
+    /// the aggregate itself cannot check other Assets.
     /// </summary>
     /// <param name="organizationId">The owning Organization.</param>
+    /// <param name="code">The identification code (required, max 20 characters, unique within the Organization).</param>
     /// <param name="assetModelId">The shared specification catalog entry.</param>
     /// <param name="color">The body color (required).</param>
     /// <param name="serialNumber">The serial number (optional).</param>
@@ -85,6 +100,7 @@ public sealed class Asset : AggregateRoot<AssetId>
     /// <returns>A <see cref="Result{Asset}"/> containing the new aggregate, or a validation error.</returns>
     public static Result<global::Asset.Domain.Asset> Register(
         Guid organizationId,
+        string code,
         AssetModelId assetModelId,
         string color,
         string? serialNumber,
@@ -92,6 +108,16 @@ public sealed class Asset : AggregateRoot<AssetId>
         int? manufactureYear,
         IDateTimeProvider dateTimeProvider)
     {
+        if (string.IsNullOrWhiteSpace(code))
+        {
+            return Result.Failure<global::Asset.Domain.Asset>(AssetErrors.CodeRequired());
+        }
+
+        if (code.Length > MaxCodeLength)
+        {
+            return Result.Failure<global::Asset.Domain.Asset>(AssetErrors.CodeTooLong(MaxCodeLength));
+        }
+
         if (string.IsNullOrWhiteSpace(color))
         {
             return Result.Failure<global::Asset.Domain.Asset>(AssetErrors.ColorRequired());
@@ -106,6 +132,7 @@ public sealed class Asset : AggregateRoot<AssetId>
         var asset = new global::Asset.Domain.Asset(
             AssetId.New(),
             organizationId,
+            code.Trim(),
             assetModelId,
             color.Trim(),
             string.IsNullOrWhiteSpace(serialNumber) ? null : serialNumber.Trim(),

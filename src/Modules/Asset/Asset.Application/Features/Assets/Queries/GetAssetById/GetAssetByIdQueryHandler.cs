@@ -67,6 +67,7 @@ public sealed class GetAssetByIdQueryHandler
         var dto = new AssetDto(
             asset.Id.Value,
             asset.OrganizationId,
+            asset.Code,
             asset.AssetModelId.Value,
             asset.SerialNumber,
             asset.LicensePlate,

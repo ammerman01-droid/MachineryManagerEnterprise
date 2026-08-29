@@ -6,10 +6,9 @@ namespace MachineryManager.Asset.Application.Features.Assets.Queries.SearchAsset
 
 /// <summary>
 /// Query to search Assets within an Organization. <see cref="SearchTerm"/>,
-/// when provided, matches against SerialNumber or LicensePlate — Asset
-/// has no Name field of its own (assumption, chat, 2026-08-27: not
-/// explicitly specified; these are the only free-text identity fields
-/// on the aggregate).
+/// when provided, matches against Code, SerialNumber, or LicensePlate
+/// (updated, chat, 2026-08-28 — Code is now the primary free-text
+/// identity field).
 /// </summary>
 public sealed record SearchAssetsQuery(Guid OrganizationId, string? SearchTerm, int Page = 1, int PageSize = 20)
     : IRequest<Result<SearchAssetsResponse>>;

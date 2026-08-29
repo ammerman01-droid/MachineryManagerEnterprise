@@ -1,7 +1,7 @@
 ﻿
 ================================================================================
   MACHINERYMANAGERENTERPRISE - CODEBASE SNAPSHOT
-  Generated: 2026-08-28 12:09:50
+  Generated: 2026-08-28 16:09:20
   Source: C:\Users\i\source\repos\MachineryManagerEnterprise
   Purpose: Complete source code reference for AI-assisted development
   Excludes: .md, .gitignore, this script, build artifacts, binaries, IDE,
@@ -9386,7 +9386,7 @@ public sealed record RegisterAssetCommand(
 
 ================================================================================
 FILE: src\Modules\Asset\Asset.Application\Features\Assets\Commands\RegisterAsset\RegisterAssetCommandHandler.cs
-SIZE: 3.99 KB
+SIZE: 4.53 KB
 ================================================================================
 using MachineryManager.Asset.Application.Abstractions;
 using MachineryManager.SharedKernel;
@@ -9467,6 +9467,16 @@ public sealed class RegisterAssetCommandHandler
         if (assetModel is null)
         {
             return Result.Failure<Guid>(global::Asset.Domain.AssetErrors.AssetModelNotFound(request.AssetModelId));
+        }
+
+        // The Organization's Holding must match the AssetModel's Holding
+        // — the UI already enforces this by only listing models from the
+        // Organization's own Holding, but the API must not rely on that
+        // (chat, 2026-08-27; mirrors the same rule already enforced for
+        // Engine-compatibility assignment).
+        if (holdingId is null || assetModel.HoldingId != holdingId.Value)
+        {
+            return Result.Failure<Guid>(global::Asset.Domain.AssetErrors.AssetModelHoldingMismatch());
         }
 
         var result = global::Asset.Domain.Asset.Register(
@@ -10577,7 +10587,7 @@ SIZE: 0.35 KB
 
 ================================================================================
 FILE: src\Modules\Asset\Asset.Domain\AssetErrors.cs
-SIZE: 1.64 KB
+SIZE: 2.05 KB
 ================================================================================
 using MachineryManager.SharedKernel;
 
@@ -10616,6 +10626,15 @@ public static class AssetErrors
     public static Error AssetModelNotFound(Guid assetModelId) => Error.NotFound(
         "Asset.AssetModelNotFound",
         $"Asset model with id {assetModelId} was not found.");
+
+    
+    /// <summary>
+    /// Creates an error indicating the selected Asset Model belongs to
+    /// a different Holding than the target Organization (chat, 2026-08-27).
+    /// </summary>
+    public static Error AssetModelHoldingMismatch() => Error.Conflict(
+        "Asset.AssetModelHoldingMismatch",
+        "The selected Asset Model does not belong to the same Holding as the target Organization.");
 }
 
 ================================================================================
@@ -12571,10 +12590,9 @@ SIZE: 0.37 KB
 
 ================================================================================
 FILE: src\Modules\Asset\Asset.Presentation\Components\Pages\AssetDetails.razor
-SIZE: 6.52 KB
+SIZE: 6.49 KB
 ================================================================================
 @page "/admin/assets/{AssetId:guid}"
-@rendermode InteractiveServer
 @inject IHttpClientFactory HttpClientFactory
 @inject NavigationManager Navigation
 
@@ -12755,10 +12773,9 @@ else if (asset is not null)
 
 ================================================================================
 FILE: src\Modules\Asset\Asset.Presentation\Components\Pages\AssetModelCompatibility.razor
-SIZE: 6.49 KB
+SIZE: 6.46 KB
 ================================================================================
 @page "/admin/asset-models/{AssetModelId:guid}/compatibility"
-@rendermode InteractiveServer
 @inject IHttpClientFactory HttpClientFactory
 @inject NavigationManager Navigation
 
@@ -12953,10 +12970,9 @@ System.Text.Json.JsonSerializerOptions { PropertyNameCaseInsensitive = true });
 
 ================================================================================
 FILE: src\Modules\Asset\Asset.Presentation\Components\Pages\AssetModelsList.razor
-SIZE: 6.02 KB
+SIZE: 5.99 KB
 ================================================================================
 @page "/admin/asset-models"
-@rendermode InteractiveServer
 @inject IHttpClientFactory HttpClientFactory
 @inject NavigationManager Navigation
 
@@ -13133,10 +13149,9 @@ System.Text.Json.JsonSerializerOptions { PropertyNameCaseInsensitive = true });
 
 ================================================================================
 FILE: src\Modules\Asset\Asset.Presentation\Components\Pages\AssetsList.razor
-SIZE: 7.82 KB
+SIZE: 7.79 KB
 ================================================================================
 @page "/admin/assets"
-@rendermode InteractiveServer
 @inject IHttpClientFactory HttpClientFactory
 @inject NavigationManager Navigation
 
@@ -13361,10 +13376,9 @@ SIZE: 7.82 KB
 
 ================================================================================
 FILE: src\Modules\Asset\Asset.Presentation\Components\Pages\CreateAsset.razor
-SIZE: 6.71 KB
+SIZE: 6.68 KB
 ================================================================================
 @page "/admin/assets/create"
-@rendermode InteractiveServer
 @inject IHttpClientFactory HttpClientFactory
 @inject NavigationManager Navigation
 
@@ -13558,10 +13572,9 @@ else
 
 ================================================================================
 FILE: src\Modules\Asset\Asset.Presentation\Components\Pages\CreateAssetModel.razor
-SIZE: 2.62 KB
+SIZE: 2.59 KB
 ================================================================================
 @page "/admin/asset-models/create"
-@rendermode InteractiveServer
 @inject IHttpClientFactory HttpClientFactory
 @inject NavigationManager Navigation
 
@@ -13646,10 +13659,9 @@ SIZE: 2.62 KB
 
 ================================================================================
 FILE: src\Modules\Asset\Asset.Presentation\Components\Pages\CreateEngineModel.razor
-SIZE: 2.62 KB
+SIZE: 2.59 KB
 ================================================================================
 @page "/admin/engine-models/create"
-@rendermode InteractiveServer
 @inject IHttpClientFactory HttpClientFactory
 @inject NavigationManager Navigation
 
@@ -13734,10 +13746,9 @@ SIZE: 2.62 KB
 
 ================================================================================
 FILE: src\Modules\Asset\Asset.Presentation\Components\Pages\EditAssetModel.razor
-SIZE: 3.64 KB
+SIZE: 3.61 KB
 ================================================================================
 @page "/admin/asset-models/{AssetModelId:guid}/edit"
-@rendermode InteractiveServer
 @inject IHttpClientFactory HttpClientFactory
 @inject NavigationManager Navigation
 
@@ -13861,10 +13872,9 @@ System.Text.Json.JsonSerializerOptions { PropertyNameCaseInsensitive = true });
 
 ================================================================================
 FILE: src\Modules\Asset\Asset.Presentation\Components\Pages\EditEngineModel.razor
-SIZE: 3.65 KB
+SIZE: 3.62 KB
 ================================================================================
 @page "/admin/engine-models/{EngineModelId:guid}/edit"
-@rendermode InteractiveServer
 @inject IHttpClientFactory HttpClientFactory
 @inject NavigationManager Navigation
 
@@ -13988,10 +13998,9 @@ System.Text.Json.JsonSerializerOptions { PropertyNameCaseInsensitive = true });
 
 ================================================================================
 FILE: src\Modules\Asset\Asset.Presentation\Components\Pages\EngineModelsList.razor
-SIZE: 5.28 KB
+SIZE: 5.25 KB
 ================================================================================
 @page "/admin/engine-models"
-@rendermode InteractiveServer
 @inject IHttpClientFactory HttpClientFactory
 @inject NavigationManager Navigation
 
@@ -24769,7 +24778,7 @@ SIZE: 0.53 KB
 # SECTION 3: SNAPSHOT SUMMARY
 ================================================================================
 
-Generation Time     : 00:00:01.8425796
+Generation Time     : 00:00:03.1481086
 Total Files Scanned : 398
 Files Included      : 398
 Files Skipped       : 0

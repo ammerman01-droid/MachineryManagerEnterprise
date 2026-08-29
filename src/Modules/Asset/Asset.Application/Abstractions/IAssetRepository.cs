@@ -15,4 +15,14 @@ public interface IAssetRepository : IRepository<global::Asset.Domain.Asset, glob
         int page,
         int pageSize,
         CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Determines whether another Asset in the given Organization
+    /// already uses the given identification code (chat, 2026-08-28 —
+    /// Code is unique per Organization).
+    /// </summary>
+    Task<bool> ExistsWithCodeAsync(
+        Guid organizationId,
+        string code,
+        CancellationToken cancellationToken = default);
 }

@@ -26,6 +26,8 @@ else
                 }
             </MudSelect>
 
+            <MudTextField T="string" Label="کد شناسایی" @bind-Value="model.Code" Required="true" RequiredError="کد شناسایی الزامی است" MaxLength="20" Class="mt-4" HelperText="حداکثر ۲۰ کاراکتر — باید در این سازمان یکتا باشد" />
+
             <MudSelect T="Guid" Label="مدل دارایی" @bind-Value="model.AssetModelId" Required="true" RequiredError="مدل دارایی الزامی است" Class="mt-4">
                 @foreach (var am in assetModels)
                 {
@@ -75,6 +77,7 @@ else
     private sealed class RegisterAssetModel
     {
         public Guid OrganizationId { get; set; }
+        public string Code { get; set; } = string.Empty;
         public Guid AssetModelId { get; set; }
         public string Color { get; set; } = string.Empty;
         public string? SerialNumber { get; set; }

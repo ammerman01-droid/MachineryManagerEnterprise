@@ -75,6 +75,7 @@ public static class AssetEndpoints
         var result = await sender.Send(
             new RegisterAssetCommand(
                 request.OrganizationId,
+                request.Code,
                 request.AssetModelId,
                 request.Color,
                 request.SerialNumber,

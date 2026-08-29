@@ -38,6 +38,7 @@
     {
         <MudTable Items="items" Hover="true">
             <HeaderContent>
+                <MudTh>کد</MudTh>
                 <MudTh>مدل</MudTh>
                 <MudTh>شماره سریال</MudTh>
                 <MudTh>پلاک</MudTh>
@@ -47,6 +48,7 @@
                 <MudTh>عملیات</MudTh>
             </HeaderContent>
             <RowTemplate>
+                <MudTd DataLabel="کد">@context.Code</MudTd>
                 <MudTd DataLabel="مدل">@GetAssetModelName(context.AssetModelId)</MudTd>
                 <MudTd DataLabel="شماره سریال">@(context.SerialNumber ?? "-")</MudTd>
                 <MudTd DataLabel="پلاک">@(context.LicensePlate ?? "-")</MudTd>
@@ -82,6 +84,7 @@
     {
         public Guid Id { get; set; }
         public Guid OrganizationId { get; set; }
+        public string Code { get; set; } = string.Empty;
         public Guid AssetModelId { get; set; }
         public string? SerialNumber { get; set; }
         public string? LicensePlate { get; set; }
@@ -127,7 +130,9 @@
                 return;
             }
 
-            var result = System.Text.Json.JsonSerializer.Deserialize<SearchOrganizationsResult>(content, new System.Text.Json.JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+            var result = System.Text.Json.JsonSerializer.Deserialize<SearchOrganizationsResult>(content, new
+System.Text.Json.JsonSerializerOptions
+            { PropertyNameCaseInsensitive = true });
             organizations = result?.Items ?? [];
 
             if (organizations.Count == 1)
@@ -171,7 +176,9 @@
                 return;
             }
 
-            var result = System.Text.Json.JsonSerializer.Deserialize<SearchAssetsResult>(content, new System.Text.Json.JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+            var result = System.Text.Json.JsonSerializer.Deserialize<SearchAssetsResult>(content, new
+System.Text.Json.JsonSerializerOptions
+            { PropertyNameCaseInsensitive = true });
             items = result?.Items ?? [];
         }
         catch (Exception ex)
@@ -194,7 +201,9 @@
 
             if (response.IsSuccessStatusCode)
             {
-                var result = System.Text.Json.JsonSerializer.Deserialize<SearchAssetModelsResult>(content, new System.Text.Json.JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+                var result = System.Text.Json.JsonSerializer.Deserialize<SearchAssetModelsResult>(content, new
+System.Text.Json.JsonSerializerOptions
+                { PropertyNameCaseInsensitive = true });
                 assetModelNames = (result?.Items ?? []).ToDictionary(a => a.Id, a => a.Name);
             }
         }

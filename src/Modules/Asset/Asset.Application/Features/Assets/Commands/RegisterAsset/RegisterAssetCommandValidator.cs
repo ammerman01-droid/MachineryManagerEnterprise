@@ -9,6 +9,11 @@ public sealed class RegisterAssetCommandValidator : AbstractValidator<RegisterAs
     public RegisterAssetCommandValidator()
     {
         RuleFor(x => x.OrganizationId).NotEmpty();
+
+        RuleFor(x => x.Code)
+            .NotEmpty()
+            .MaximumLength(global::Asset.Domain.Asset.MaxCodeLength);
+
         RuleFor(x => x.AssetModelId).NotEmpty();
 
         RuleFor(x => x.Color)

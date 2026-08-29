@@ -23,6 +23,18 @@ public sealed class AssetConfiguration : IEntityTypeConfiguration<global::Asset.
 
         builder.HasIndex(a => a.OrganizationId);
 
+        builder.Property(a => a.Code)
+            .HasMaxLength(global::Asset.Domain.Asset.MaxCodeLength)
+            .IsRequired();
+
+        // Code is unique within its owning Organization, not
+        // globally (chat, 2026-08-28) — a composite unique index gives
+        // the database-level guarantee as a second line of defense,
+        // in addition to the explicit check in
+        // RegisterAssetCommandHandler.
+        builder.HasIndex(a => new { a.OrganizationId, a.Code })
+            .IsUnique();
+
         builder.Property(a => a.AssetModelId)
             .HasConversion(id => id.Value, value => AssetModelId.From(value))
             .IsRequired();

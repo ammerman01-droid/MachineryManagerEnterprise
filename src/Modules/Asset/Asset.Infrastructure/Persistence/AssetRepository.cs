@@ -32,6 +32,12 @@ public sealed class AssetRepository : IAssetRepository
     public void Remove(global::Asset.Domain.Asset aggregate) => _dbContext.Assets.Remove(aggregate);
 
     /// <inheritdoc />
+    public Task<bool> ExistsWithCodeAsync(Guid organizationId, string code, CancellationToken cancellationToken = default) =>
+        _dbContext.Assets.AnyAsync(
+            a => a.OrganizationId == organizationId && a.Code == code,
+            cancellationToken);
+
+    /// <inheritdoc />
     public async Task<SearchAssetsResponse> SearchAsync(
         Guid organizationId,
         string? searchTerm,
@@ -46,6 +52,7 @@ public sealed class AssetRepository : IAssetRepository
         if (!string.IsNullOrWhiteSpace(searchTerm))
         {
             query = query.Where(a =>
+                a.Code.Contains(searchTerm) ||
                 (a.SerialNumber != null && a.SerialNumber.Contains(searchTerm)) ||
                 (a.LicensePlate != null && a.LicensePlate.Contains(searchTerm)));
         }
@@ -57,7 +64,7 @@ public sealed class AssetRepository : IAssetRepository
         // with Profile.Permissions / AssetModel.CompatibleEngineModelIds
         // (chat, 2026-08-25).
         var entities = await query
-            .OrderBy(a => a.SerialNumber)
+            .OrderBy(a => a.Code)
             .Skip((page - 1) * pageSize)
             .Take(pageSize)
             .ToListAsync(cancellationToken);
@@ -66,6 +73,7 @@ public sealed class AssetRepository : IAssetRepository
             .Select(a => new AssetDto(
                 a.Id.Value,
                 a.OrganizationId,
+                a.Code,
                 a.AssetModelId.Value,
                 a.SerialNumber,
                 a.LicensePlate,

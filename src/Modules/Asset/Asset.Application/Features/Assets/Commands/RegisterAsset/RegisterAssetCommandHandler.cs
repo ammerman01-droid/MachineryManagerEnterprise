@@ -7,9 +7,10 @@ namespace MachineryManager.Asset.Application.Features.Assets.Commands.RegisterAs
 
 /// <summary>
 /// Handles <see cref="RegisterAssetCommand"/> by validating the
-/// referenced Organization and Asset Model exist, invoking domain
-/// registration, persisting the aggregate, and committing the unit of
-/// work.
+/// referenced Organization and Asset Model exist, ensuring the
+/// identification code is unique within the Organization, invoking
+/// domain registration, persisting the aggregate, and committing the
+/// unit of work.
 /// </summary>
 public sealed class RegisterAssetCommandHandler
     : IRequestHandler<RegisterAssetCommand, Result<Guid>>
@@ -89,8 +90,23 @@ public sealed class RegisterAssetCommandHandler
             return Result.Failure<Guid>(global::Asset.Domain.AssetErrors.AssetModelHoldingMismatch());
         }
 
+        // Code is unique per Organization (chat, 2026-08-28). Checked
+        // here rather than relying solely on the database unique index
+        // so the caller gets a clear, typed business error instead of a
+        // raw SQL exception.
+        var codeAlreadyUsed = await _assetRepository.ExistsWithCodeAsync(
+            request.OrganizationId,
+            request.Code,
+            cancellationToken);
+
+        if (codeAlreadyUsed)
+        {
+            return Result.Failure<Guid>(global::Asset.Domain.AssetErrors.DuplicateCode(request.Code));
+        }
+
         var result = global::Asset.Domain.Asset.Register(
             request.OrganizationId,
+            request.Code,
             assetModelId,
             request.Color,
             request.SerialNumber,

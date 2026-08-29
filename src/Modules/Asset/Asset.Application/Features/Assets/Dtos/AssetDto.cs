@@ -4,6 +4,7 @@ namespace MachineryManager.Asset.Application.Features.Assets.Dtos;
 public sealed record AssetDto(
     Guid Id,
     Guid OrganizationId,
+    string Code,
     Guid AssetModelId,
     string? SerialNumber,
     string? LicensePlate,

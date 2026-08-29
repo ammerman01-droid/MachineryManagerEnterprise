@@ -23,6 +23,9 @@ else if (asset is not null)
                 <MudField Label="شناسه" Variant="Variant.Outlined">@asset.Id</MudField>
             </MudItem>
             <MudItem xs="12" md="6">
++                <MudField Label="کد" Variant="Variant.Outlined">@asset.Code</MudField>
++            </MudItem>
+            <MudItem xs="12" md="6">
                 <MudField Label="سازمان" Variant="Variant.Outlined">@asset.OrganizationId</MudField>
             </MudItem>
             <MudItem xs="12" md="6">
@@ -84,6 +87,7 @@ else if (asset is not null)
     {
         public Guid Id { get; set; }
         public Guid OrganizationId { get; set; }
+        public string Code { get; set; } = string.Empty;
         public Guid AssetModelId { get; set; }
         public string? SerialNumber { get; set; }
         public string? LicensePlate { get; set; }
