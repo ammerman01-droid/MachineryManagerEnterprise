@@ -19,7 +19,7 @@ public sealed class RegisterAssetCommandHandler
 
     private readonly IAssetRepository _assetRepository;
     private readonly IAssetModelRepository _assetModelRepository;
-    private readonly IColorRepository _colorRepository;
+    private readonly IConfigurationLookupService _configurationLookupService;
     private readonly IAssetUnitOfWork _unitOfWork;
     private readonly IDateTimeProvider _dateTimeProvider;
     private readonly ICurrentUserService _currentUserService;
@@ -27,10 +27,18 @@ public sealed class RegisterAssetCommandHandler
     private readonly IOrganizationLookupService _organizationLookupService;
 
     /// <summary>Initializes a new instance of the <see cref="RegisterAssetCommandHandler"/> class.</summary>
+    /// <param name="assetRepository">The Asset repository.</param>
+    /// <param name="assetModelRepository">The Asset Model repository, used to verify the referenced model exists and belongs to the correct Holding.</param>
+    /// <param name="configurationLookupService">Cross-module, read-only lookup into the Configuration module, used to verify the referenced Color exists within the correct Holding.</param>
+    /// <param name="unitOfWork">The Asset module's Unit of Work, used to commit the new aggregate.</param>
+    /// <param name="dateTimeProvider">Provides the current UTC time for the raised domain event.</param>
+    /// <param name="currentUserService">Provides the authenticated user context.</param>
+    /// <param name="permissionEvaluator">Evaluates the current user's permissions at request time.</param>
+    /// <param name="organizationLookupService">Cross-module, read-only lookup into the Organization module, used to verify the target Organization exists and to resolve its Holding.</param>
     public RegisterAssetCommandHandler(
         IAssetRepository assetRepository,
         IAssetModelRepository assetModelRepository,
-        IColorRepository colorRepository,
+        IConfigurationLookupService configurationLookupService,
         IAssetUnitOfWork unitOfWork,
         IDateTimeProvider dateTimeProvider,
         ICurrentUserService currentUserService,
@@ -39,7 +47,7 @@ public sealed class RegisterAssetCommandHandler
     {
         _assetRepository = assetRepository;
         _assetModelRepository = assetModelRepository;
-        _colorRepository = colorRepository;
+        _configurationLookupService = configurationLookupService;
         _unitOfWork = unitOfWork;
         _dateTimeProvider = dateTimeProvider;
         _currentUserService = currentUserService;
@@ -48,6 +56,12 @@ public sealed class RegisterAssetCommandHandler
     }
 
     /// <summary>Executes the registration use case.</summary>
+    /// <param name="request">The registration command, containing the target Organization, Asset Model, Color, identification code, and optional identity fields.</param>
+    /// <param name="cancellationToken">Token to cancel the asynchronous operation.</param>
+    /// <returns>
+    /// A <see cref="Result{Guid}"/> containing the new Asset's identifier on success; otherwise a
+    /// validation, not-found, conflict, or authorization error.
+    /// </returns>
     public async Task<Result<Guid>> Handle(RegisterAssetCommand request, CancellationToken cancellationToken)
     {
         if (_currentUserService.UserId is not { } userId)
@@ -88,17 +102,19 @@ public sealed class RegisterAssetCommandHandler
             return Result.Failure<Guid>(global::Asset.Domain.AssetErrors.AssetModelHoldingMismatch());
         }
 
-        var colorId = global::Asset.Domain.ColorId.From(request.ColorId);
-        var color = await _colorRepository.GetByIdAsync(colorId, cancellationToken);
+        // Color now lives in the Configuration module and is
+        // Holding-scoped — existence + Holding-match are both checked
+        // via this single cross-module lookup call, reusing the same
+        // holdingId already resolved above for the AssetModel check
+        // (chat, 2026-08-30). Unlike AssetModel, there is no local
+        // Color entity to load here, so no further per-field
+        // comparison is needed or possible after this check.
+        var colorExists = await _configurationLookupService.ColorExistsInHoldingAsync(
+            request.ColorId, holdingId.Value, cancellationToken);
 
-        if (color is null)
+        if (!colorExists)
         {
-            return Result.Failure<Guid>(global::Asset.Domain.AssetErrors.ColorNotFound(request.ColorId));
-        }
-
-        if (color.OrganizationId != request.OrganizationId)
-        {
-            return Result.Failure<Guid>(global::Asset.Domain.AssetErrors.ColorOrganizationMismatch());
+            return Result.Failure<Guid>(global::Asset.Domain.AssetErrors.ColorNotFoundInHolding(request.ColorId));
         }
 
         var codeAlreadyUsed = await _assetRepository.ExistsWithCodeAsync(
@@ -116,7 +132,7 @@ public sealed class RegisterAssetCommandHandler
             request.Code,
             request.Name,
             assetModelId,
-            colorId,
+            request.ColorId,
             request.SerialNumber,
             request.ChassisNumber,
             request.BodyNumber,

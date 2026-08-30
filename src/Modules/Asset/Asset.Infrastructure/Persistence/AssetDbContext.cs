@@ -40,12 +40,6 @@ public sealed class AssetDbContext : DbContext, IAssetUnitOfWork
     /// <summary>Gets the set of Engine Model aggregates.</summary>
     public DbSet<global::Asset.Domain.EngineModel> EngineModels => Set<global::Asset.Domain.EngineModel>();
 
-    /// <summary>Gets the set of Color aggregates.</summary>
-    public DbSet<global::Asset.Domain.Color> Colors => Set<global::Asset.Domain.Color>();
-
-    /// <summary>Gets the set of Unit of Measurement aggregates.</summary>
-    public DbSet<global::Asset.Domain.UnitOfMeasurement> UnitsOfMeasurement => Set<global::Asset.Domain.UnitOfMeasurement>();
-
     /// <inheritdoc />
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

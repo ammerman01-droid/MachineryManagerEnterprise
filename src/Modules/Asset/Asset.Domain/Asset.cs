@@ -47,11 +47,12 @@ public sealed class Asset : AggregateRoot<AssetId>
     public AssetModelId AssetModelId { get; private set; } = null!;
 
     /// <summary>
-    /// Gets the identifier of the selected Color option (chat,
-    /// 2026-08-28 — Color is now a reference to the per-Organization
-    /// Color catalog, not a free-text field).
+    /// Gets the identifier of this Asset's Color, a reference into the
+    /// Configuration module (chat, 2026-08-30). Stored as a plain Guid,
+    /// not a typed value object, because Asset.Domain must not depend
+    /// on Configuration.Domain directly (Modular Monolith boundary).
     /// </summary>
-    public ColorId ColorId { get; private set; } = null!;
+    public Guid ColorId { get; private set; }
 
     /// <summary>Gets the serial number, if recorded.</summary>
     public string? SerialNumber { get; private set; }
@@ -85,7 +86,7 @@ public sealed class Asset : AggregateRoot<AssetId>
         string code,
         string name,
         AssetModelId assetModelId,
-        ColorId colorId,
+        Guid colorId,
         string? serialNumber,
         string? chassisNumber,
         string? bodyNumber,
@@ -124,7 +125,7 @@ public sealed class Asset : AggregateRoot<AssetId>
         string code,
         string name,
         AssetModelId assetModelId,
-        ColorId colorId,
+        Guid colorId,
         string? serialNumber,
         string? chassisNumber,
         string? bodyNumber,

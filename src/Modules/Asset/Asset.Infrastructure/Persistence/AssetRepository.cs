@@ -12,6 +12,7 @@ public sealed class AssetRepository : IAssetRepository
     private readonly AssetDbContext _dbContext;
 
     /// <summary>Initializes a new instance of the <see cref="AssetRepository"/> class.</summary>
+    /// <param name="dbContext">The Asset module's persistence context.</param>
     public AssetRepository(AssetDbContext dbContext)
     {
         _dbContext = dbContext;
@@ -59,6 +60,10 @@ public sealed class AssetRepository : IAssetRepository
 
         var totalItems = await query.CountAsync(cancellationToken);
 
+        // Materialize entities first, map to DTO in memory afterward —
+        // avoids the EF Core 10 Select-projection translation issue
+        // documented for field-backed collection/value-object
+        // properties (chat, 2026-08-25).
         var entities = await query
             .OrderBy(a => a.Code)
             .Skip((page - 1) * pageSize)
@@ -72,7 +77,7 @@ public sealed class AssetRepository : IAssetRepository
                 a.Code,
                 a.Name,
                 a.AssetModelId.Value,
-                a.ColorId.Value,
+                a.ColorId,
                 a.SerialNumber,
                 a.ChassisNumber,
                 a.BodyNumber,

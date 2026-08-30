@@ -35,4 +35,10 @@
     <Project Path="src/Modules/Administration/Administration.Infrastructure/Administration.Infrastructure.csproj" />
     <Project Path="src/Modules/Administration/Administration.Presentation/Administration.Presentation.csproj" />
   </Folder>
+  <Folder Name="/src/Modules/Configuration/">
+    <Project Path="src/Modules/Configuration/Configuration.Application/Configuration.Application.csproj" />
+    <Project Path="src/Modules/Configuration/Configuration.Domain/Configuration.Domain.csproj" />
+    <Project Path="src/Modules/Configuration/Configuration.Infrastructure/Configuration.Infrastructure.csproj" />
+    <Project Path="src/Modules/Configuration/Configuration.Presentation/Configuration.Presentation.csproj" />
+  </Folder>
 </Solution>

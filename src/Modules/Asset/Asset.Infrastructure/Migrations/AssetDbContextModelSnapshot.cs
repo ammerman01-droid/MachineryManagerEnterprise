@@ -79,8 +79,6 @@ namespace Asset.Infrastructure.Migrations
 
                     b.HasIndex("AssetModelId");
 
-                    b.HasIndex("ColorId");
-
                     b.HasIndex("OrganizationId");
 
                     b.HasIndex("OrganizationId", "Code")
@@ -119,26 +117,6 @@ namespace Asset.Infrastructure.Migrations
                     b.ToTable("AssetModel", "asset");
                 });
 
-            modelBuilder.Entity("Asset.Domain.Color", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
-
-                    b.Property<Guid>("OrganizationId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("OrganizationId");
-
-                    b.ToTable("Color", "asset");
-                });
-
             modelBuilder.Entity("Asset.Domain.EngineModel", b =>
                 {
                     b.Property<Guid>("Id")
@@ -164,44 +142,11 @@ namespace Asset.Infrastructure.Migrations
                     b.ToTable("EngineModel", "asset");
                 });
 
-            modelBuilder.Entity("Asset.Domain.UnitOfMeasurement", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("Category")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
-
-                    b.Property<Guid>("OrganizationId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("OrganizationId");
-
-                    b.HasIndex("OrganizationId", "Category");
-
-                    b.ToTable("UnitOfMeasurement", "asset");
-                });
-
             modelBuilder.Entity("Asset.Domain.Asset", b =>
                 {
                     b.HasOne("Asset.Domain.AssetModel", null)
                         .WithMany()
                         .HasForeignKey("AssetModelId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.HasOne("Asset.Domain.Color", null)
-                        .WithMany()
-                        .HasForeignKey("ColorId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
                 });

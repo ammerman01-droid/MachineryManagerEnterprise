@@ -20,6 +20,8 @@
     <ProjectReference Include="..\..\Modules\Administration\Administration.Presentation\Administration.Presentation.csproj" />
     <ProjectReference Include="..\..\Modules\Asset\Asset.Infrastructure\Asset.Infrastructure.csproj" />
     <ProjectReference Include="..\..\Modules\Asset\Asset.Presentation\Asset.Presentation.csproj" />
+    <ProjectReference Include="..\..\Modules\Configuration\Configuration.Infrastructure\Configuration.Infrastructure.csproj" />
+    <ProjectReference Include="..\..\Modules\Configuration\Configuration.Presentation\Configuration.Presentation.csproj" />
   </ItemGroup>
 
   <ItemGroup>

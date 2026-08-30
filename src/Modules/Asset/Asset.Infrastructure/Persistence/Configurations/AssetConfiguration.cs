@@ -45,19 +45,7 @@ public sealed class AssetConfiguration : IEntityTypeConfiguration<global::Asset.
             .HasForeignKey(a => a.AssetModelId)
             .OnDelete(DeleteBehavior.Restrict);
 
-        builder.Property(a => a.ColorId)
-            .HasConversion(id => id.Value, value => ColorId.From(value))
-            .IsRequired();
-
-        builder.HasIndex(a => a.ColorId);
-
-        // Real database-level FK to Color (chat, 2026-08-28) — Restrict,
-        // same reasoning as the AssetModel FK: a Color cannot be
-        // removed while any Asset still references it.
-        builder.HasOne<Color>()
-            .WithMany()
-            .HasForeignKey(a => a.ColorId)
-            .OnDelete(DeleteBehavior.Restrict);
+        builder.Property(a => a.ColorId).IsRequired();
 
         builder.Property(a => a.SerialNumber)
             .HasMaxLength(global::Asset.Domain.Asset.MaxSerialNumberLength);

@@ -22,6 +22,10 @@ public sealed class GetAssetByIdQueryHandler
     private readonly IOrganizationLookupService _organizationLookupService;
 
     /// <summary>Initializes a new instance of the <see cref="GetAssetByIdQueryHandler"/> class.</summary>
+    /// <param name="assetRepository">The Asset repository.</param>
+    /// <param name="currentUserService">Provides the authenticated user context.</param>
+    /// <param name="permissionEvaluator">Evaluates the current user's permissions at request time.</param>
+    /// <param name="organizationLookupService">Cross-module, read-only lookup into the Organization module, used to resolve the owning Organization's Holding for scope evaluation.</param>
     public GetAssetByIdQueryHandler(
         IAssetRepository assetRepository,
         ICurrentUserService currentUserService,
@@ -35,6 +39,12 @@ public sealed class GetAssetByIdQueryHandler
     }
 
     /// <summary>Executes the lookup use case.</summary>
+    /// <param name="request">The query, containing the identifier of the Asset to retrieve.</param>
+    /// <param name="cancellationToken">Token to cancel the asynchronous operation.</param>
+    /// <returns>
+    /// A <see cref="Result{AssetDto}"/> containing the Asset's details on success; a not-found error if no
+    /// Asset with the given identifier exists; otherwise an authorization error.
+    /// </returns>
     public async Task<Result<AssetDto>> Handle(GetAssetByIdQuery request, CancellationToken cancellationToken)
     {
         var id = global::Asset.Domain.AssetId.From(request.AssetId);
@@ -70,7 +80,7 @@ public sealed class GetAssetByIdQueryHandler
             asset.Code,
             asset.Name,
             asset.AssetModelId.Value,
-            asset.ColorId.Value,
+            asset.ColorId,
             asset.SerialNumber,
             asset.ChassisNumber,
             asset.BodyNumber,

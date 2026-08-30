@@ -473,6 +473,21 @@ Asset Models / Component Models → Knowledge
 - **Contains:** Manual, Repair Guide, Parts Catalogue, Service Bulletin, Technical Drawing
 - **Invariants:** Documents belong to Models whenever possible; same doc may serve many Assets
 
+### UnitCategory Aggregate
+- **Root:** UnitCategory
+- **Scope:** Per-Organization (chat, 2026-08-29)
+- **Contains:** Name
+- **Rationale:** A separate table, not an enum — so new categories
+  (e.g. "Pressure") can be added at runtime without a code deployment.
+
+### UnitOfMeasurement Aggregate
+- **Root:** UnitOfMeasurement
+- **Scope:** Per-Organization (chat, 2026-08-29)
+- **Contains:** Name, CategoryId (reference to UnitCategory)
+- **Invariant:** CategoryId must reference a UnitCategory belonging to
+  the same Organization (checked at Application layer, not a DB FK —
+  aggregates stay independent, same pattern as Asset→AssetModel).
+
 ## 4.6 Domain Services (by Category)
 
 ### Asset Lifecycle Services
@@ -1106,6 +1121,14 @@ reassignment" rule (Section 10.16).
 > itself needs a separate Permission section will be decided when that
 > aggregate is implemented.
 
+> **Note (chat, 2026-08-29):** Color now has its own dedicated
+> Permission section (`Color.Create/Edit/View/Delete`) — it no longer
+> piggybacks on `Asset.*`. UnitCategory and UnitOfMeasurement share a
+> single Permission section, `UnitOfMeasurement` (both use
+> `UnitOfMeasurement.Create/Edit/View`), since category management is
+> a supporting concern of unit management, not a separate business
+> capability.
+
 ---
 
 
@@ -1722,6 +1745,8 @@ See Section 3.7 for full tech stack. Key packages:
 - Each version has independent OpenAPI spec
 - `/api/v1/asset-models` — CRUD + search (search requires `holdingId` query parameter) + Engine-compatibility management (`/compatible-engine-models` sub-route)
 - `/api/v1/engine-models` — CRUD + search (search requires `holdingId` query parameter)
+- `/api/v1/unit-categories` — CRUD + list (Organization-scoped)
+- `/api/v1/units-of-measurement` — CRUD + list (Organization-scoped, each unit references a UnitCategory in the same Organization)
 
 ## 8.3 URI Design Rules
 - Plural nouns, lowercase, hyphen (`-`) separator

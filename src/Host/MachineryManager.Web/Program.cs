@@ -18,6 +18,9 @@ using Serilog;
 using MachineryManager.Asset.Application;
 using MachineryManager.Asset.Infrastructure;
 using MachineryManager.Asset.Presentation.Endpoints;
+using MachineryManager.Configuration.Infrastructure;
+using MachineryManager.Configuration.Presentation.Endpoints;
+using MachineryManager.Configuration.Application;
 
 Log.Logger = new LoggerConfiguration()
     .WriteTo.Console()
@@ -67,6 +70,10 @@ try
     builder.Services.AddIdentityOpenIddictClient(builder.Configuration, builder.Environment);
     builder.Services.AddIdentityInternalApiClient(builder.Configuration);
 
+    // Configuration module
+    builder.Services.AddConfigurationApplication();
+    builder.Services.AddConfigurationInfrastructure(builder.Configuration);
+
     var app = builder.Build();
 
     if (!app.Environment.IsDevelopment())
@@ -86,22 +93,23 @@ try
     }
 
     app.UseSerilogRequestLogging();
-        app.UseWhen(
-        context => !context.Request.Path.StartsWithSegments("/api"),
-        branch => branch.UseStatusCodePagesWithReExecute("/not-found", createScopeForStatusCodePages: true));
+    app.UseWhen(
+    context => !context.Request.Path.StartsWithSegments("/api"),
+    branch => branch.UseStatusCodePagesWithReExecute("/not-found", createScopeForStatusCodePages: true));
     app.UseHttpsRedirection();
     app.UseAuthentication();
     app.UseAuthorization();
     app.UseAntiforgery();
 
     app.MapStaticAssets();
-        app.MapRazorComponents<App>()
-        .AddInteractiveServerRenderMode()
-        .AddAdditionalAssemblies(
-            typeof(MachineryManager.Identity.Presentation.Components.Pages.Login).Assembly,
-            typeof(MachineryManager.Administration.Presentation.Components.Pages.ProfilesList).Assembly,
-            typeof(MachineryManager.Organization.Presentation.Components.Pages.OrganizationsList).Assembly,
-            typeof(MachineryManager.Asset.Presentation.Components.Pages.AssetModelsList).Assembly);
+    app.MapRazorComponents<App>()
+    .AddInteractiveServerRenderMode()
+    .AddAdditionalAssemblies(
+        typeof(MachineryManager.Identity.Presentation.Components.Pages.Login).Assembly,
+        typeof(MachineryManager.Administration.Presentation.Components.Pages.ProfilesList).Assembly,
+        typeof(MachineryManager.Organization.Presentation.Components.Pages.OrganizationsList).Assembly,
+        typeof(MachineryManager.Asset.Presentation.Components.Pages.AssetModelsList).Assembly,
+        typeof(MachineryManager.Configuration.Presentation.Components.Pages.ColorsList).Assembly);
 
     // Identity endpoints
     app.MapIdentityConnectEndpoints();
@@ -123,8 +131,9 @@ try
     app.MapEngineModelEndpoints();
     app.MapAssetEndpoints();
 
-    //General endpoints
+    //Configuration endpoints
     app.MapColorEndpoints();
+    app.MapUnitCategoryEndpoints();
     app.MapUnitOfMeasurementEndpoints();
 
     app.Run();

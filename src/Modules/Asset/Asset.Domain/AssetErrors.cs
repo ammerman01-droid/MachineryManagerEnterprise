@@ -72,4 +72,14 @@ public static class AssetErrors
     public static Error ColorOrganizationMismatch() => Error.Conflict(
         "Asset.ColorOrganizationMismatch",
         "The selected Color does not belong to the target Organization.");
+
+    /// <summary>
+    /// Creates an error indicating the selected Color does not exist,
+    /// or does not belong to the target Organization's Holding.
+    /// </summary>
+    /// <param name="colorId">The Color identifier that failed the check.</param>
+    /// <returns>A <see cref="Error"/> of type NotFound.</returns>
+    public static Error ColorNotFoundInHolding(Guid colorId) => Error.NotFound(
+        "Asset.ColorNotFoundInHolding",
+        $"Color with id {colorId} was not found in the target Organization's Holding.");
 }

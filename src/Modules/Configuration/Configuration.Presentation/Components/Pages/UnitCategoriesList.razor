@@ -1,0 +1,148 @@
+@page "/admin/unit-categories"
+@inject IHttpClientFactory HttpClientFactory
+@inject NavigationManager Navigation
+
+<PageTitle>دسته‌بندی واحدها</PageTitle>
+
+<MudText Typo="Typo.h4" Class="mb-4">مدیریت دسته‌بندی واحدهای اندازه‌گیری</MudText>
+
+<MudSelect T="Guid" Label="Holding" @bind-Value="selectedHoldingId" @bind-Value:after="OnHoldingChangedAsync" Class="mb-4">
+    @foreach (var holding in holdings)
+    {
+        <MudSelectItem T="Guid" Value="@holding.Id">@holding.Name</MudSelectItem>
+    }
+</MudSelect>
+
+@if (errorMessage is not null)
+{
+    <MudAlert Severity="Severity.Error" Class="my-4">@errorMessage</MudAlert>
+}
+
+@if (selectedHoldingId != Guid.Empty)
+{
+    <MudButton Variant="Variant.Filled" Color="Color.Primary" Class="mb-4"
+               OnClick="@(() => Navigation.NavigateTo($"/admin/unit-categories/create?holdingId={selectedHoldingId}"))">
+        دسته‌بندی جدید
+    </MudButton>
+}
+
+@if (isLoading)
+{
+    <MudProgressLinear Indeterminate="true" Class="my-4" />
+}
+else if (selectedHoldingId != Guid.Empty && categories.Count == 0)
+{
+    <MudText Typo="Typo.body2" Class="mud-text-secondary">هیچ دسته‌بندی‌ای برای این Holding ثبت نشده است.</MudText>
+}
+else if (categories.Count > 0)
+{
+    <MudTable Items="@categories" Hover="true" Breakpoint="Breakpoint.Sm">
+        <HeaderContent>
+            <MudTh>نام</MudTh>
+        </HeaderContent>
+        <RowTemplate>
+            <MudTd DataLabel="نام">@context.Name</MudTd>
+        </RowTemplate>
+    </MudTable>
+}
+
+@code {
+    /// <summary>Represents a Holding option in the selection dropdown.</summary>
+    private sealed class HoldingItem
+    {
+        /// <summary>Gets or sets the Holding's unique identifier.</summary>
+        public Guid Id { get; set; }
+
+        /// <summary>Gets or sets the Holding's display name.</summary>
+        public string Name { get; set; } = string.Empty;
+    }
+
+    /// <summary>Represents a UnitCategory option in the current Holding's list.</summary>
+    private sealed class UnitCategoryItem
+    {
+        /// <summary>Gets or sets the category's unique identifier.</summary>
+        public Guid Id { get; set; }
+
+        /// <summary>Gets or sets the category's display name.</summary>
+        public string Name { get; set; } = string.Empty;
+    }
+
+    private sealed class SearchHoldingsResult
+    {
+        public List<HoldingItem> Items { get; set; } = [];
+    }
+
+    private List<HoldingItem> holdings = [];
+    private List<UnitCategoryItem> categories = [];
+    private Guid selectedHoldingId;
+    private bool isLoading = true;
+    private string? errorMessage;
+
+    /// <summary>Loads the list of Holdings when the page is first rendered.</summary>
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadHoldingsAsync();
+        isLoading = false;
+    }
+
+    private async Task LoadHoldingsAsync()
+    {
+        try
+        {
+            var client = HttpClientFactory.CreateClient("InternalApi");
+            var response = await client.GetAsync("/api/v1/holdings?pageSize=200");
+            var content = await response.Content.ReadAsStringAsync();
+
+            if (response.IsSuccessStatusCode)
+            {
+                var result = JsonSerializer.Deserialize<SearchHoldingsResult>(content, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+                holdings = result?.Items ?? [];
+            }
+            else
+            {
+                errorMessage = $"خطا در دریافت Holding ها: {content}";
+            }
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"خطا: {ex.Message}";
+        }
+    }
+
+    /// <summary>Reloads the category list whenever the selected Holding changes.</summary>
+    private async Task OnHoldingChangedAsync()
+    {
+        if (selectedHoldingId == Guid.Empty)
+        {
+            categories = [];
+            return;
+        }
+
+        isLoading = true;
+        errorMessage = null;
+
+        try
+        {
+            var client = HttpClientFactory.CreateClient("InternalApi");
+            var response = await client.GetAsync($"/api/v1/unit-categories?holdingId={selectedHoldingId}");
+            var content = await response.Content.ReadAsStringAsync();
+
+            if (response.IsSuccessStatusCode)
+            {
+                categories = JsonSerializer.Deserialize<List<UnitCategoryItem>>(content, new JsonSerializerOptions { PropertyNameCaseInsensitive = true }) ?? [];
+            }
+            else
+            {
+                errorMessage = $"خطا در دریافت دسته‌بندی‌ها: {content}";
+            }
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"خطا: {ex.Message}";
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+}

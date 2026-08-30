@@ -1,0 +1,73 @@
+@page "/admin/unit-categories/create"
+@inject IHttpClientFactory HttpClientFactory
+@inject NavigationManager Navigation
+
+<PageTitle>دسته‌بندی جدید</PageTitle>
+
+<MudText Typo="Typo.h4" Class="mb-4">ثبت دسته‌بندی جدید</MudText>
+
+@if (errorMessage is not null)
+{
+    <MudAlert Severity="Severity.Error" Class="my-4">@errorMessage</MudAlert>
+}
+
+<MudPaper Class="pa-4" Style="max-width:500px;">
+    <MudForm @ref="form">
+        <MudTextField T="string" Label="نام دسته‌بندی" @bind-Value="name" Required="true" RequiredError="نام الزامی است" MaxLength="50" />
+
+        <MudButton Variant="Variant.Filled" Color="Color.Primary" Class="mt-4" OnClick="SubmitAsync" Disabled="isSubmitting">
+            @(isSubmitting ? "در حال ثبت..." : "ثبت")
+        </MudButton>
+        <MudButton Variant="Variant.Outlined" Color="Color.Secondary" Class="mt-4 ml-2"
+                   OnClick="@(() => Navigation.NavigateTo("/admin/unit-categories"))">
+            انصراف
+        </MudButton>
+    </MudForm>
+</MudPaper>
+
+@code {
+    /// <summary>Gets or sets the identifier of the Holding this UnitCategory will belong to, supplied via the query string.</summary>
+    [SupplyParameterFromQuery]
+    public Guid HoldingId { get; set; }
+
+    private MudForm form = null!;
+    private string name = string.Empty;
+    private bool isSubmitting;
+    private string? errorMessage;
+
+    private async Task SubmitAsync()
+    {
+        await form.Validate();
+        if (!form.IsValid)
+        {
+            return;
+        }
+
+        isSubmitting = true;
+        errorMessage = null;
+
+        try
+        {
+            var client = HttpClientFactory.CreateClient("InternalApi");
+            var response = await client.PostAsJsonAsync("/api/v1/unit-categories", new { HoldingId, Name = name });
+            var content = await response.Content.ReadAsStringAsync();
+
+            if (response.IsSuccessStatusCode)
+            {
+                Navigation.NavigateTo("/admin/unit-categories");
+            }
+            else
+            {
+                errorMessage = $"خطا در ثبت دسته‌بندی: {content}";
+            }
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"خطا: {ex.Message}";
+        }
+        finally
+        {
+            isSubmitting = false;
+        }
+    }
+}
