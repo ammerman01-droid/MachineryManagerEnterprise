@@ -6,109 +6,50 @@
 
 <MudText Typo="Typo.h4" Class="mb-4">ثبت واحد اندازه‌گیری جدید</MudText>
 
-@if (isLoading)
+@if (errorMessage is not null)
 {
-    <MudProgressLinear Indeterminate="true" Class="my-4" />
+    <MudAlert Severity="Severity.Error" Class="my-4">@errorMessage</MudAlert>
 }
-else
-{
-    @if (errorMessage is not null)
-    {
-        <MudAlert Severity="Severity.Error" Class="my-4">@errorMessage</MudAlert>
-    }
 
-    <MudPaper Class="pa-4" Style="max-width:500px;">
-        <MudForm @ref="form">
-            <MudTextField T="string" Label="نام واحد" @bind-Value="name" Required="true" RequiredError="نام الزامی است" MaxLength="50" />
+<MudPaper Class="pa-4" Style="max-width:500px;">
+    <MudForm @ref="form">
+        <MudTextField T="string" Label="نام واحد" @bind-Value="name" Required="true" RequiredError="نام الزامی است" MaxLength="50" />
 
-            <MudSelect T="Guid" Label="دسته‌بندی" @bind-Value="categoryId" Required="true" RequiredError="دسته‌بندی الزامی است" Class="mt-4">
-                @foreach (var category in categories)
-                {
-                    <MudSelectItem T="Guid" Value="@category.Id">@category.Name</MudSelectItem>
-                }
-            </MudSelect>
+        <MudSelect T="PhysicalQuantityKind" Label="نوع کمیت فیزیکی" @bind-Value="kind" Required="true" Class="mt-4">
+            <MudSelectItem T="PhysicalQuantityKind" Value="PhysicalQuantityKind.Force">نیرو (توان، قدرت، فشار، گشتاور)</MudSelectItem>
+            <MudSelectItem T="PhysicalQuantityKind" Value="PhysicalQuantityKind.Dimension">ابعاد (طول، مساحت، حجم)</MudSelectItem>
+            <MudSelectItem T="PhysicalQuantityKind" Value="PhysicalQuantityKind.Weight">وزن (جرم)</MudSelectItem>
+            <MudSelectItem T="PhysicalQuantityKind" Value="PhysicalQuantityKind.Temperature">دما</MudSelectItem>
+            <MudSelectItem T="PhysicalQuantityKind" Value="PhysicalQuantityKind.Electrical">الکتریکی (آمپر، ولت و ...)</MudSelectItem>
+            <MudSelectItem T="PhysicalQuantityKind" Value="PhysicalQuantityKind.FlowRate">دبی (شدت جریان سیالات)</MudSelectItem>
+            <MudSelectItem T="PhysicalQuantityKind" Value="PhysicalQuantityKind.Other">سایر</MudSelectItem>
+        </MudSelect>
 
-            @if (categories.Count == 0)
-            {
-                <MudAlert Severity="Severity.Info" Class="mt-4">
-                    هیچ دسته‌بندی‌ای برای این Holding ثبت نشده — ابتدا یک دسته‌بندی بسازید.
-                </MudAlert>
-            }
-
-            <MudButton Variant="Variant.Filled" Color="Color.Primary" Class="mt-4" OnClick="SubmitAsync" Disabled="@(isSubmitting || categories.Count == 0)">
-                @(isSubmitting ? "در حال ثبت..." : "ثبت")
-            </MudButton>
-            <MudButton Variant="Variant.Outlined" Color="Color.Secondary" Class="mt-4 ml-2"
-                       OnClick="@(() => Navigation.NavigateTo("/admin/units-of-measurement"))">
-                انصراف
-            </MudButton>
-        </MudForm>
-    </MudPaper>
-}
+        <MudButton Variant="Variant.Filled" Color="Color.Primary" Class="mt-4" OnClick="SubmitAsync" Disabled="isSubmitting">
+            @(isSubmitting ? "در حال ثبت..." : "ثبت")
+        </MudButton>
+        <MudButton Variant="Variant.Outlined" Color="Color.Secondary" Class="mt-4 ml-2"
+                   OnClick="@(() => Navigation.NavigateTo("/admin/units-of-measurement"))">
+            انصراف
+        </MudButton>
+    </MudForm>
+</MudPaper>
 
 @code {
     /// <summary>Gets or sets the identifier of the Holding this unit will belong to, supplied via the query string.</summary>
     [SupplyParameterFromQuery]
     public Guid HoldingId { get; set; }
 
-    /// <summary>Represents a UnitCategory option in the dropdown.</summary>
-    private sealed class UnitCategoryItem
-    {
-        /// <summary>Gets or sets the category's unique identifier.</summary>
-        public Guid Id { get; set; }
-
-        /// <summary>Gets or sets the category's display name.</summary>
-        public string Name { get; set; } = string.Empty;
-    }
-
     private MudForm form = null!;
-    private List<UnitCategoryItem> categories = [];
     private string name = string.Empty;
-    private Guid categoryId;
-    private bool isLoading = true;
+    private PhysicalQuantityKind kind = PhysicalQuantityKind.Other;
     private bool isSubmitting;
     private string? errorMessage;
-
-    /// <summary>Loads the Holding's Unit Categories for the dropdown when the page is first rendered.</summary>
-    protected override async Task OnInitializedAsync()
-    {
-        try
-        {
-            var client = HttpClientFactory.CreateClient("InternalApi");
-            var response = await client.GetAsync($"/api/v1/unit-categories?holdingId={HoldingId}");
-            var content = await response.Content.ReadAsStringAsync();
-
-            if (response.IsSuccessStatusCode)
-            {
-                categories = System.Text.Json.JsonSerializer.Deserialize<List<UnitCategoryItem>>(content, new System.Text.Json.JsonSerializerOptions { PropertyNameCaseInsensitive = true }) ?? [];
-
-                if (categories.Count > 0)
-                {
-                    categoryId = categories[0].Id;
-                }
-            }
-            else
-            {
-                errorMessage = $"خطا در دریافت دسته‌بندی‌ها: {content}";
-            }
-        }
-        catch (Exception ex)
-        {
-            errorMessage = $"خطا: {ex.Message}";
-        }
-        finally
-        {
-            isLoading = false;
-        }
-    }
 
     private async Task SubmitAsync()
     {
         await form.Validate();
-        if (!form.IsValid)
-        {
-            return;
-        }
+        if (!form.IsValid) return;
 
         isSubmitting = true;
         errorMessage = null;
@@ -116,17 +57,13 @@ else
         try
         {
             var client = HttpClientFactory.CreateClient("InternalApi");
-            var response = await client.PostAsJsonAsync("/api/v1/units-of-measurement", new { HoldingId, Name = name, CategoryId = categoryId });
+            var response = await client.PostAsJsonAsync("/api/v1/units-of-measurement", new { HoldingId, Name = name, Kind = kind });
             var content = await response.Content.ReadAsStringAsync();
 
             if (response.IsSuccessStatusCode)
-            {
                 Navigation.NavigateTo("/admin/units-of-measurement");
-            }
             else
-            {
                 errorMessage = $"خطا در ثبت واحد: {content}";
-            }
         }
         catch (Exception ex)
         {

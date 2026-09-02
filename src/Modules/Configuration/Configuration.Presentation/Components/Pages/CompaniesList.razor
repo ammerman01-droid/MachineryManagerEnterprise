@@ -1,10 +1,10 @@
-@page "/admin/unit-categories"
+@page "/admin/companies"
 @inject IHttpClientFactory HttpClientFactory
 @inject NavigationManager Navigation
 
-<PageTitle>دسته‌بندی واحدها</PageTitle>
+<PageTitle>شرکت‌های سازنده</PageTitle>
 
-<MudText Typo="Typo.h4" Class="mb-4">مدیریت دسته‌بندی واحدهای اندازه‌گیری</MudText>
+<MudText Typo="Typo.h4" Class="mb-4">مدیریت شرکت‌های سازنده</MudText>
 
 <MudSelect T="Guid" Label="Holding" @bind-Value="selectedHoldingId" @bind-Value:after="OnHoldingChangedAsync" Class="mb-4">
     @foreach (var holding in holdings)
@@ -21,8 +21,8 @@
 @if (selectedHoldingId != Guid.Empty)
 {
     <MudButton Variant="Variant.Filled" Color="Color.Primary" Class="mb-4"
-               OnClick="@(() => Navigation.NavigateTo($"/admin/unit-categories/create?holdingId={selectedHoldingId}"))">
-        دسته‌بندی جدید
+               OnClick="@(() => Navigation.NavigateTo($"/admin/companies/create?holdingId={selectedHoldingId}"))">
+        شرکت جدید
     </MudButton>
 }
 
@@ -30,13 +30,13 @@
 {
     <MudProgressLinear Indeterminate="true" Class="my-4" />
 }
-else if (selectedHoldingId != Guid.Empty && categories.Count == 0)
+else if (selectedHoldingId != Guid.Empty && companies.Count == 0)
 {
-    <MudText Typo="Typo.body2" Class="mud-text-secondary">هیچ دسته‌بندی‌ای برای این Holding ثبت نشده است.</MudText>
+    <MudText Typo="Typo.body2" Class="mud-text-secondary">هیچ شرکتی برای این Holding ثبت نشده است.</MudText>
 }
-else if (categories.Count > 0)
+else if (companies.Count > 0)
 {
-    <MudTable Items="@categories" Hover="true" Breakpoint="Breakpoint.Sm">
+    <MudTable Items="@companies" Hover="true" Breakpoint="Breakpoint.Sm">
         <HeaderContent>
             <MudTh>نام</MudTh>
         </HeaderContent>
@@ -57,13 +57,13 @@ else if (categories.Count > 0)
         public string Name { get; set; } = string.Empty;
     }
 
-    /// <summary>Represents a UnitCategory option in the current Holding's list.</summary>
-    private sealed class UnitCategoryItem
+    /// <summary>Represents a Company option in the current Holding's list.</summary>
+    private sealed class CompanyItem
     {
-        /// <summary>Gets or sets the category's unique identifier.</summary>
+        /// <summary>Gets or sets the Company's unique identifier.</summary>
         public Guid Id { get; set; }
 
-        /// <summary>Gets or sets the category's display name.</summary>
+        /// <summary>Gets or sets the Company's display name.</summary>
         public string Name { get; set; } = string.Empty;
     }
 
@@ -73,7 +73,7 @@ else if (categories.Count > 0)
     }
 
     private List<HoldingItem> holdings = [];
-    private List<UnitCategoryItem> categories = [];
+    private List<CompanyItem> companies = [];
     private Guid selectedHoldingId;
     private bool isLoading = true;
     private string? errorMessage;
@@ -109,12 +109,12 @@ else if (categories.Count > 0)
         }
     }
 
-    /// <summary>Reloads the category list whenever the selected Holding changes.</summary>
+    /// <summary>Reloads the company list whenever the selected Holding changes.</summary>
     private async Task OnHoldingChangedAsync()
     {
         if (selectedHoldingId == Guid.Empty)
         {
-            categories = [];
+            companies = [];
             return;
         }
 
@@ -124,16 +124,16 @@ else if (categories.Count > 0)
         try
         {
             var client = HttpClientFactory.CreateClient("InternalApi");
-            var response = await client.GetAsync($"/api/v1/unit-categories?holdingId={selectedHoldingId}");
+            var response = await client.GetAsync($"/api/v1/companies?holdingId={selectedHoldingId}");
             var content = await response.Content.ReadAsStringAsync();
 
             if (response.IsSuccessStatusCode)
             {
-                categories = JsonSerializer.Deserialize<List<UnitCategoryItem>>(content, new JsonSerializerOptions { PropertyNameCaseInsensitive = true }) ?? [];
+                companies = JsonSerializer.Deserialize<List<CompanyItem>>(content, new JsonSerializerOptions { PropertyNameCaseInsensitive = true }) ?? [];
             }
             else
             {
-                errorMessage = $"خطا در دریافت دسته‌بندی‌ها: {content}";
+                errorMessage = $"خطا در دریافت شرکت‌ها: {content}";
             }
         }
         catch (Exception ex)

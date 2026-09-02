@@ -27,8 +27,38 @@ public sealed class EngineModelConfiguration : IEntityTypeConfiguration<EngineMo
             .HasMaxLength(EngineModel.MaxNameLength)
             .IsRequired();
 
-        builder.Property(em => em.Manufacturer)
-            .HasMaxLength(EngineModel.MaxManufacturerLength)
+        // Changed from a free-text Manufacturer string to a reference
+        // into the new Company aggregate (chat, 2026-09-01) — plain
+        // Guid column, index only, no database-level FK since Company
+        // lives in the separate Configuration module/DbContext, same
+        // pattern as HoldingId itself.
+        builder.Property(em => em.CompanyId)
             .IsRequired();
+
+        builder.HasIndex(em => em.CompanyId);
+
+        builder.Property(em => em.CylinderCount);
+
+        builder.Property(em => em.EngineDisplacementValue)
+            .HasPrecision(18, 4);
+
+        // Plain Guid columns, index only — no database-level FK, since
+        // UnitOfMeasurement now lives in the separate Configuration
+        // module/DbContext (chat, 2026-08-30). Existence and same-Holding
+        // membership are enforced at the application layer via
+        // IUnitOfMeasurementLookupService, the same pattern already used
+        // for HoldingId itself.
+        builder.Property(em => em.EngineDisplacementUnitOfMeasurementId);
+        builder.HasIndex(em => em.EngineDisplacementUnitOfMeasurementId);
+
+        builder.Property(em => em.EnginePowerValue)
+            .HasPrecision(18, 4);
+        builder.Property(em => em.EnginePowerUnitOfMeasurementId);
+        builder.HasIndex(em => em.EnginePowerUnitOfMeasurementId);
+
+        builder.Property(em => em.WeightValue)
+            .HasPrecision(18, 4);
+        builder.Property(em => em.WeightUnitOfMeasurementId);
+        builder.HasIndex(em => em.WeightUnitOfMeasurementId);
     }
 }

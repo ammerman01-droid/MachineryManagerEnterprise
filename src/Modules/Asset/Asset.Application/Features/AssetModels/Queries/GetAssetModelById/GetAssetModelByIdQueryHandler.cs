@@ -62,7 +62,7 @@ public sealed class GetAssetModelByIdQueryHandler
         var dto = new AssetModelDto(
             assetModel.Id.Value,
             assetModel.Name,
-            assetModel.Manufacturer,
+            assetModel.CompanyId,
             assetModel.CompatibleEngineModelIds.Select(x => x.Value).ToList());
 
         return Result.Success(dto);

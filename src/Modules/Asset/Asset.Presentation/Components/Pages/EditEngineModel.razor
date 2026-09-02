@@ -1,6 +1,8 @@
 @page "/admin/engine-models/{EngineModelId:guid}/edit"
 @inject IHttpClientFactory HttpClientFactory
 @inject NavigationManager Navigation
+@using System.Text.Json
+@using MachineryManager.SharedKernel
 
 <PageTitle>ویرایش مدل موتور</PageTitle>
 
@@ -17,9 +19,63 @@
 }
 else
 {
-    <MudPaper Class="pa-4" Style="max-width:500px;">
+    <MudPaper Class="pa-4" Style="max-width:700px;">
         <MudForm @ref="form" @bind-IsValid="@isValid">
-            <MudTextField @bind-Value="name" Label="نام مدل" Required="true" RequiredError="نام الزامی است." MaxLength="200" />
+            <MudTextField @bind-Value="name" Label="نام مدل" Required="true" RequiredError="نام الزامی است." MaxLength="200" Disabled="true" Class="mb-4" />
+
+            <MudSelect T="Guid" Label="شرکت سازنده" @bind-Value="companyId" Required="true" RequiredError="شرکت سازنده الزامی است." Class="mb-4">
+                @foreach (var company in companies)
+                {
+                    <MudSelectItem T="Guid" Value="@company.Id">@company.Name</MudSelectItem>
+                }
+            </MudSelect>
+
+            <MudNumericField T="int?" @bind-Value="cylinderCount" Label="تعداد سیلندر" Min="1" Class="mb-4" />
+
+            <MudGrid Class="mb-4">
+                <MudItem xs="6">
+                    <MudNumericField T="decimal?" @bind-Value="engineDisplacementValue" Label="حجم موتور" Min="0.0001M" />
+                </MudItem>
+                <MudItem xs="6">
+                    <MudSelect T="Guid?" Label="واحد حجم" @bind-Value="engineDisplacementUnitOfMeasurementId">
+                        <MudSelectItem T="Guid?" Value="@((Guid?)null)">—</MudSelectItem>
+                        @foreach (var unit in dimensionUnits)
+                        {
+                            <MudSelectItem T="Guid?" Value="@((Guid?)unit.Id)">@unit.Name</MudSelectItem>
+                        }
+                    </MudSelect>
+                </MudItem>
+            </MudGrid>
+
+            <MudGrid Class="mb-4">
+                <MudItem xs="6">
+                    <MudNumericField T="decimal?" @bind-Value="enginePowerValue" Label="قدرت موتور" Min="0.0001M" />
+                </MudItem>
+                <MudItem xs="6">
+                    <MudSelect T="Guid?" Label="واحد قدرت" @bind-Value="enginePowerUnitOfMeasurementId">
+                        <MudSelectItem T="Guid?" Value="@((Guid?)null)">—</MudSelectItem>
+                        @foreach (var unit in forceUnits)
+                        {
+                            <MudSelectItem T="Guid?" Value="@((Guid?)unit.Id)">@unit.Name</MudSelectItem>
+                        }
+                    </MudSelect>
+                </MudItem>
+            </MudGrid>
+
+            <MudGrid Class="mb-4">
+                <MudItem xs="6">
+                    <MudNumericField T="decimal?" @bind-Value="weightValue" Label="وزن" Min="0.0001M" />
+                </MudItem>
+                <MudItem xs="6">
+                    <MudSelect T="Guid?" Label="واحد وزن" @bind-Value="weightUnitOfMeasurementId">
+                        <MudSelectItem T="Guid?" Value="@((Guid?)null)">—</MudSelectItem>
+                        @foreach (var unit in weightUnits)
+                        {
+                            <MudSelectItem T="Guid?" Value="@((Guid?)unit.Id)">@unit.Name</MudSelectItem>
+                        }
+                    </MudSelect>
+                </MudItem>
+            </MudGrid>
 
             <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="SubmitAsync"
                        Disabled="@(!isValid || isSubmitting)" Class="mt-4">
@@ -44,37 +100,70 @@ else
     [Parameter]
     public Guid EngineModelId { get; set; }
 
+    /// <summary>Represents a Company option in the dropdown.</summary>
+    private sealed class CompanyItem
+    {
+        public Guid Id { get; set; }
+        public string Name { get; set; } = string.Empty;
+    }
+
+    /// <summary>Represents a Unit of Measurement option in the dropdown.</summary>
+    private sealed class UnitItem
+    {
+        public Guid Id { get; set; }
+        public string Name { get; set; } = string.Empty;
+        public PhysicalQuantityKind Kind { get; set; }
+    }
+
+    /// <summary>Represents the full Engine Model details returned by the API.</summary>
     private sealed class EngineModelDetails
     {
         public Guid Id { get; set; }
         public string Name { get; set; } = string.Empty;
+        public Guid HoldingId { get; set; }
+        public Guid CompanyId { get; set; }
+        public int? CylinderCount { get; set; }
+        public decimal? EngineDisplacementValue { get; set; }
+        public Guid? EngineDisplacementUnitOfMeasurementId { get; set; }
+        public decimal? EnginePowerValue { get; set; }
+        public Guid? EnginePowerUnitOfMeasurementId { get; set; }
+        public decimal? WeightValue { get; set; }
+        public Guid? WeightUnitOfMeasurementId { get; set; }
     }
 
     private MudForm? form;
     private bool isValid;
     private bool isSubmitting;
     private bool isLoading = true;
-    private string name = string.Empty;
     private string? errorMessage;
+
+    private string name = string.Empty;
+    private Guid holdingId;
+    private Guid companyId;
+    private int? cylinderCount;
+    private decimal? engineDisplacementValue;
+    private Guid? engineDisplacementUnitOfMeasurementId;
+    private decimal? enginePowerValue;
+    private Guid? enginePowerUnitOfMeasurementId;
+    private decimal? weightValue;
+    private Guid? weightUnitOfMeasurementId;
+
+    private List<CompanyItem> companies = [];
+    private List<UnitItem> allUnits = [];
+    private List<UnitItem> dimensionUnits => allUnits.Where(u => u.Kind == PhysicalQuantityKind.Dimension).ToList();
+    private List<UnitItem> forceUnits => allUnits.Where(u => u.Kind == PhysicalQuantityKind.Force).ToList();
+    private List<UnitItem> weightUnits => allUnits.Where(u => u.Kind == PhysicalQuantityKind.Weight).ToList();
 
     protected override async Task OnInitializedAsync()
     {
         try
         {
-            var client = HttpClientFactory.CreateClient("InternalApi");
-            var response = await client.GetAsync($"/api/v1/engine-models/{EngineModelId}");
-            var content = await response.Content.ReadAsStringAsync();
-
-            if (!response.IsSuccessStatusCode)
+            await LoadEngineModelAsync();
+            if (holdingId != Guid.Empty)
             {
-                errorMessage = $"خطا در دریافت مدل: {content}";
-                return;
+                await LoadCompaniesAsync();
+                await LoadUnitsAsync();
             }
-
-            var result = System.Text.Json.JsonSerializer.Deserialize<EngineModelDetails>(content, new
-System.Text.Json.JsonSerializerOptions { PropertyNameCaseInsensitive = true });
-
-            name = result?.Name ?? string.Empty;
         }
         catch (Exception ex)
         {
@@ -83,6 +172,83 @@ System.Text.Json.JsonSerializerOptions { PropertyNameCaseInsensitive = true });
         finally
         {
             isLoading = false;
+        }
+    }
+
+    private async Task LoadEngineModelAsync()
+    {
+        var client = HttpClientFactory.CreateClient("InternalApi");
+        var response = await client.GetAsync($"/api/v1/engine-models/{EngineModelId}");
+        var content = await response.Content.ReadAsStringAsync();
+
+        if (!response.IsSuccessStatusCode)
+        {
+            errorMessage = $"خطا در دریافت مدل موتور: {content}";
+            return;
+        }
+
+        var result = JsonSerializer.Deserialize<EngineModelDetails>(content, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+        if (result is null)
+        {
+            errorMessage = "داده‌ای دریافت نشد.";
+            return;
+        }
+
+        name = result.Name;
+        holdingId = result.HoldingId;
+        companyId = result.CompanyId;
+        cylinderCount = result.CylinderCount;
+        engineDisplacementValue = result.EngineDisplacementValue;
+        engineDisplacementUnitOfMeasurementId = result.EngineDisplacementUnitOfMeasurementId;
+        enginePowerValue = result.EnginePowerValue;
+        enginePowerUnitOfMeasurementId = result.EnginePowerUnitOfMeasurementId;
+        weightValue = result.WeightValue;
+        weightUnitOfMeasurementId = result.WeightUnitOfMeasurementId;
+    }
+
+    private async Task LoadCompaniesAsync()
+    {
+        try
+        {
+            var client = HttpClientFactory.CreateClient("InternalApi");
+            var response = await client.GetAsync($"/api/v1/companies?holdingId={holdingId}");
+            var content = await response.Content.ReadAsStringAsync();
+
+            if (response.IsSuccessStatusCode)
+            {
+                companies = JsonSerializer.Deserialize<List<CompanyItem>>(content, new JsonSerializerOptions { PropertyNameCaseInsensitive = true }) ?? [];
+            }
+            else
+            {
+                errorMessage = $"خطا در دریافت شرکت‌ها: {content}";
+            }
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"خطا در دریافت شرکت‌ها: {ex.Message}";
+        }
+    }
+
+    private async Task LoadUnitsAsync()
+    {
+        try
+        {
+            var client = HttpClientFactory.CreateClient("InternalApi");
+            var response = await client.GetAsync($"/api/v1/units-of-measurement?holdingId={holdingId}");
+            var content = await response.Content.ReadAsStringAsync();
+
+            if (response.IsSuccessStatusCode)
+            {
+                allUnits = JsonSerializer.Deserialize<List<UnitItem>>(content, new JsonSerializerOptions { PropertyNameCaseInsensitive = true }) ?? [];
+            }
+            else
+            {
+                errorMessage = $"خطا در دریافت واحدها: {content}";
+            }
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"خطا در دریافت واحدها: {ex.Message}";
         }
     }
 
@@ -99,7 +265,19 @@ System.Text.Json.JsonSerializerOptions { PropertyNameCaseInsensitive = true });
         try
         {
             var client = HttpClientFactory.CreateClient("InternalApi");
-            var response = await client.PutAsJsonAsync($"/api/v1/engine-models/{EngineModelId}", new { Name = name });
+            var payload = new
+            {
+                CompanyId = companyId,
+                CylinderCount = cylinderCount,
+                EngineDisplacementValue = engineDisplacementValue,
+                EngineDisplacementUnitOfMeasurementId = engineDisplacementUnitOfMeasurementId,
+                EnginePowerValue = enginePowerValue,
+                EnginePowerUnitOfMeasurementId = enginePowerUnitOfMeasurementId,
+                WeightValue = weightValue,
+                WeightUnitOfMeasurementId = weightUnitOfMeasurementId
+            };
+
+            var response = await client.PutAsJsonAsync($"/api/v1/engine-models/{EngineModelId}/specifications", payload);
 
             if (response.IsSuccessStatusCode)
             {
@@ -107,7 +285,7 @@ System.Text.Json.JsonSerializerOptions { PropertyNameCaseInsensitive = true });
                 return;
             }
 
-            errorMessage = $"خطا در ویرایش مدل: {await response.Content.ReadAsStringAsync()}";
+            errorMessage = $"خطا در ویرایش مدل موتور: {await response.Content.ReadAsStringAsync()}";
         }
         catch (Exception ex)
         {

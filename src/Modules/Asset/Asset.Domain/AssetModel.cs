@@ -26,14 +26,14 @@ public sealed class AssetModel : AggregateRoot<AssetModelId>
 
     private readonly List<Guid> _compatibleEngineModelIds = [];
 
-    /// <summary>Gets the identifier of the Holding that owns this catalog entry.</summary>
+/// <summary>Gets the identifier of the Holding that owns this catalog entry.</summary>
     public Guid HoldingId { get; private set; }
 
     /// <summary>Gets the display name of the asset model (e.g. "FH16 6x4").</summary>
     public string Name { get; private set; } = string.Empty;
 
-    /// <summary>Gets the manufacturer of this asset model (e.g. "Volvo").</summary>
-    public string Manufacturer { get; private set; } = string.Empty;
+    /// <summary>Gets the identifier of the manufacturer Company.</summary>
+    public Guid CompanyId { get; private set; }
 
     /// <summary>
     /// Gets the Engine Models that are compatible with this Asset Model
@@ -41,30 +41,29 @@ public sealed class AssetModel : AggregateRoot<AssetModelId>
     /// </summary>
     public IReadOnlyCollection<EngineModelId> CompatibleEngineModelIds =>
         _compatibleEngineModelIds.Select(EngineModelId.From).ToList().AsReadOnly();
-
-    // Reserved for ORM materialization only. Never used by application code.
+// Reserved for ORM materialization only. Never used by application code.
     private AssetModel()
     {
     }
 
-    private AssetModel(AssetModelId id, Guid holdingId, string name, string manufacturer)
+    private AssetModel(AssetModelId id, Guid holdingId, string name, Guid companyId)
         : base(id)
     {
         HoldingId = holdingId;
         Name = name;
-        Manufacturer = manufacturer;
+        CompanyId = companyId;
     }
 
     /// <summary>Registers a new Asset Model.</summary>
     /// <param name="holdingId">The owning Holding.</param>
     /// <param name="name">The display name.</param>
-    /// <param name="manufacturer">The manufacturer.</param>
+    /// <param name="companyId">The manufacturer.</param>
     /// <param name="dateTimeProvider">Provides the current UTC time for the raised domain event.</param>
     /// <returns>A <see cref="Result{AssetModel}"/> containing the new aggregate, or a validation error.</returns>
     public static Result<AssetModel> Register(
         Guid holdingId,
         string name,
-        string manufacturer,
+        Guid companyId,
         IDateTimeProvider dateTimeProvider)
     {
         if (string.IsNullOrWhiteSpace(name))
@@ -77,12 +76,7 @@ public sealed class AssetModel : AggregateRoot<AssetModelId>
             return Result.Failure<AssetModel>(AssetModelErrors.NameTooLong(MaxNameLength));
         }
 
-        if (string.IsNullOrWhiteSpace(manufacturer))
-        {
-            return Result.Failure<AssetModel>(AssetModelErrors.ManufacturerRequired());
-        }
-
-        var assetModel = new AssetModel(AssetModelId.New(), holdingId, name.Trim(), manufacturer.Trim());
+        var assetModel = new AssetModel(AssetModelId.New(), holdingId, name.Trim(), companyId);
 
         assetModel.RaiseDomainEvent(new AssetModelRegistered(
             assetModel.Id,

@@ -6,7 +6,8 @@
 
 <MudText Typo="Typo.h4" Class="mb-4">مدیریت واحدهای اندازه‌گیری</MudText>
 
-<MudSelect T="Guid" Label="Holding" @bind-Value="selectedHoldingId" @bind-Value:after="OnHoldingChangedAsync" Class="mb-4">
+<MudSelect T="Guid" Label="Holding" @bind-Value="selectedHoldingId" @bind-Value:after="OnHoldingChangedAsync"
+           Class="mb-4">
     @foreach (var holding in holdings)
     {
         <MudSelectItem T="Guid" Value="@holding.Id">@holding.Name</MudSelectItem>
@@ -39,11 +40,11 @@ else if (units.Count > 0)
     <MudTable Items="@units" Hover="true" Breakpoint="Breakpoint.Sm">
         <HeaderContent>
             <MudTh>نام</MudTh>
-            <MudTh>دسته‌بندی</MudTh>
+            <MudTh>نوع کمیت فیزیکی</MudTh>
         </HeaderContent>
         <RowTemplate>
             <MudTd DataLabel="نام">@context.Name</MudTd>
-            <MudTd DataLabel="دسته‌بندی">@context.CategoryName</MudTd>
+            <MudTd DataLabel="نوع کمیت فیزیکی">@context.Kind</MudTd>
         </RowTemplate>
     </MudTable>
 }
@@ -67,12 +68,7 @@ else if (units.Count > 0)
 
         /// <summary>Gets or sets the unit's display name.</summary>
         public string Name { get; set; } = string.Empty;
-
-        /// <summary>Gets or sets the identifier of the unit's category.</summary>
-        public Guid CategoryId { get; set; }
-
-        /// <summary>Gets or sets the display name of the unit's category.</summary>
-        public string CategoryName { get; set; } = string.Empty;
+        public PhysicalQuantityKind Kind { get; set; }
     }
 
     private sealed class SearchHoldingsResult
@@ -103,7 +99,10 @@ else if (units.Count > 0)
 
             if (response.IsSuccessStatusCode)
             {
-                var result = JsonSerializer.Deserialize<SearchHoldingsResult>(content, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+                var result = JsonSerializer.Deserialize<SearchHoldingsResult>(content, new JsonSerializerOptions
+                {
+                    PropertyNameCaseInsensitive = true
+                });
                 holdings = result?.Items ?? [];
             }
             else
@@ -137,7 +136,10 @@ else if (units.Count > 0)
 
             if (response.IsSuccessStatusCode)
             {
-                units = JsonSerializer.Deserialize<List<UnitOfMeasurementItem>>(content, new JsonSerializerOptions { PropertyNameCaseInsensitive = true }) ?? [];
+                units = JsonSerializer.Deserialize<List<UnitOfMeasurementItem>>(content, new JsonSerializerOptions
+                {
+                    PropertyNameCaseInsensitive = true
+                }) ?? [];
             }
             else
             {

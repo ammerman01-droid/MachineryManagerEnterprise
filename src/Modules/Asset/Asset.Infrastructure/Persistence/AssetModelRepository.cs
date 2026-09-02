@@ -63,7 +63,7 @@ public sealed class AssetModelRepository : IAssetModelRepository
             .Select(am => new AssetModelDto(
                 am.Id.Value,
                 am.Name,
-                am.Manufacturer,
+                am.CompanyId,
                 am.CompatibleEngineModelIds.Select(x => x.Value).ToList()))
             .ToList();
 

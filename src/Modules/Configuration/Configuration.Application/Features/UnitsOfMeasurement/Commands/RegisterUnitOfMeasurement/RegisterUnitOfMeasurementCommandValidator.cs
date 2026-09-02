@@ -9,7 +9,7 @@ public sealed class RegisterUnitOfMeasurementCommandValidator : AbstractValidato
     public RegisterUnitOfMeasurementCommandValidator()
     {
         RuleFor(x => x.HoldingId).NotEmpty();
-        RuleFor(x => x.CategoryId).NotEmpty();
         RuleFor(x => x.Name).NotEmpty().MaximumLength(global::Configuration.Domain.UnitOfMeasurement.MaxNameLength);
+        RuleFor(x => x.Kind).IsInEnum();
     }
 }

@@ -14,8 +14,6 @@ public sealed class RegisterAssetModelCommandValidator : AbstractValidator<Regis
             .NotEmpty()
             .MaximumLength(global::Asset.Domain.AssetModel.MaxNameLength);
 
-        RuleFor(x => x.Manufacturer)
-            .NotEmpty()
-            .MaximumLength(global::Asset.Domain.AssetModel.MaxManufacturerLength);
+        RuleFor(x => x.CompanyId).NotEmpty();
     }
 }

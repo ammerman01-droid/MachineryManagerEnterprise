@@ -82,7 +82,13 @@ else
     {
         public Guid Id { get; set; }
         public string Name { get; set; } = string.Empty;
-        public Guid HoldingId { get; set; }
+
+        // Fixed (chat, 2026-08-30): must be nullable — an Organization
+        // may not yet be assigned to any Holding (holdingId: null in
+        // the API response). A non-nullable Guid here throws
+        // "could not be converted to System.Guid" the moment such an
+        // organization appears in the list.
+        public Guid? HoldingId { get; set; }
     }
 
     private sealed class AssetModelItem
@@ -134,6 +140,11 @@ else
     private string newColorName = string.Empty;
     private string? errorMessage;
 
+    // Added (chat, 2026-08-30): Color is now Holding-scoped, not
+    // Organization-scoped — LoadColorsAsync and AddColorAsync both need
+    // the resolved HoldingId, not just the OrganizationId from the form.
+    private Guid selectedHoldingId;
+
     [SupplyParameterFromQuery]
     public Guid? OrganizationId { get; set; }
 
@@ -147,12 +158,12 @@ else
         {
             model.OrganizationId = OrganizationId.Value;
             var org = organizations.FirstOrDefault(o => o.Id == OrganizationId.Value);
-            var holdingId = HoldingId ?? org?.HoldingId ?? Guid.Empty;
-            if (holdingId != Guid.Empty)
+            selectedHoldingId = HoldingId ?? org?.HoldingId ?? Guid.Empty;
+            if (selectedHoldingId != Guid.Empty)
             {
-                await LoadAssetModelsAsync(holdingId);
+                await LoadAssetModelsAsync(selectedHoldingId);
+                await LoadColorsAsync();
             }
-            await LoadColorsAsync();
         }
         isLoading = false;
     }
@@ -203,10 +214,17 @@ else
 
     private async Task LoadColorsAsync()
     {
+        if (selectedHoldingId == Guid.Empty)
+        {
+            return;
+        }
+
         try
         {
             var client = HttpClientFactory.CreateClient("InternalApi");
-            var response = await client.GetAsync($"/api/v1/colors?organizationId={model.OrganizationId}");
+            // Fixed (chat, 2026-08-30): Color moved to Holding scope —
+            // the endpoint now expects holdingId, not organizationId.
+            var response = await client.GetAsync($"/api/v1/colors?holdingId={selectedHoldingId}");
             var content = await response.Content.ReadAsStringAsync();
 
             if (response.IsSuccessStatusCode)
@@ -222,7 +240,7 @@ else
 
     private async Task AddColorAsync()
     {
-        if (string.IsNullOrWhiteSpace(newColorName))
+        if (string.IsNullOrWhiteSpace(newColorName) || selectedHoldingId == Guid.Empty)
         {
             return;
         }
@@ -232,7 +250,9 @@ else
         try
         {
             var client = HttpClientFactory.CreateClient("InternalApi");
-            var response = await client.PostAsJsonAsync("/api/v1/colors", new { OrganizationId = model.OrganizationId, Name = newColorName });
+            // Fixed (chat, 2026-08-30): Color registration now takes
+            // HoldingId, not OrganizationId.
+            var response = await client.PostAsJsonAsync("/api/v1/colors", new { HoldingId = selectedHoldingId, Name = newColorName });
             var content = await response.Content.ReadAsStringAsync();
 
             if (response.IsSuccessStatusCode)

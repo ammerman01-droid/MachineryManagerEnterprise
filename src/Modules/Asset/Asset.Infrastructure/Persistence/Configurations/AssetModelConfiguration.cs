@@ -27,9 +27,15 @@ public sealed class AssetModelConfiguration : IEntityTypeConfiguration<AssetMode
             .HasMaxLength(AssetModel.MaxNameLength)
             .IsRequired();
 
-        builder.Property(am => am.Manufacturer)
-            .HasMaxLength(AssetModel.MaxManufacturerLength)
+        // Changed from a free-text Manufacturer string to a reference
+        // into the new Company aggregate (chat, 2026-09-01) — plain
+        // Guid column, index only, no database-level FK since Company
+        // lives in the separate Configuration module/DbContext, same
+        // pattern as HoldingId itself.
+        builder.Property(am => am.CompanyId)
             .IsRequired();
+
+        builder.HasIndex(am => am.CompanyId);
 
         // CompatibleEngineModelIds is a computed public property (maps
         // Guid -> EngineModelId), so EF must never see it directly —

@@ -25,4 +25,20 @@ public sealed class ConfigurationLookupService : IConfigurationLookupService
         var id = UnitOfMeasurementId.From(unitOfMeasurementId);
         return _dbContext.UnitsOfMeasurement.AsNoTracking().AnyAsync(u => u.Id == id && u.HoldingId == holdingId, cancellationToken);
     }
+
+    /// <inheritdoc />
+    public Task<bool> CompanyExistsInHoldingAsync(
+        Guid companyId,
+        Guid holdingId,
+        CancellationToken cancellationToken = default)
+    {
+        var id = CompanyId.From(companyId);
+
+        return _dbContext.Companies
+            .AsNoTracking()
+            .AnyAsync(
+                c => c.Id == id &&
+                     c.HoldingId == holdingId,
+                cancellationToken);
+    }
 }

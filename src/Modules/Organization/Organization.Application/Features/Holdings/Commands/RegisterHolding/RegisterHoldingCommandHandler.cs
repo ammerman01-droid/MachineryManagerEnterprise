@@ -13,7 +13,12 @@ namespace MachineryManager.Organization.Application.Features.Holdings.Commands.R
 public sealed class RegisterHoldingCommandHandler
     : IRequestHandler<RegisterHoldingCommand, Result<Guid>>
 {
-    private const string RequiredPermission = "Holding.Manage";
+    // Corrected (chat, 2026-08-30): every other module in the
+    // permission catalog uses the View/Create/Edit/Delete convention
+    // (see Holding.View, Holding.Edit, Holding.Delete already in use
+    // elsewhere) — "Holding.Manage" was never a real permission and
+    // could never be granted through the Profile permissions UI.
+    private const string RequiredPermission = "Holding.Create";
 
     private readonly IHoldingRepository _holdingRepository;
     private readonly IOrganizationUnitOfWork _unitOfWork;

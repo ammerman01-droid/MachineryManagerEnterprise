@@ -28,18 +28,18 @@ public sealed class ConfigurationDbContext : DbContext, IConfigurationUnitOfWork
     /// <summary>Gets the set of Color aggregates.</summary>
     public DbSet<global::Configuration.Domain.Color> Colors => Set<global::Configuration.Domain.Color>();
 
-    /// <summary>Gets the set of UnitCategory aggregates.</summary>
-    public DbSet<global::Configuration.Domain.UnitCategory> UnitCategories => Set<global::Configuration.Domain.UnitCategory>();
-
     /// <summary>Gets the set of UnitOfMeasurement aggregates.</summary>
     public DbSet<global::Configuration.Domain.UnitOfMeasurement> UnitsOfMeasurement => Set<global::Configuration.Domain.UnitOfMeasurement>();
+
+    /// <summary>Gets the set of Company aggregates.</summary>
+    public DbSet<global::Configuration.Domain.Company> Companies =>
+        Set<global::Configuration.Domain.Company>();
 
     /// <inheritdoc />
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.HasDefaultSchema("configuration");
         modelBuilder.ApplyConfigurationsFromAssembly(typeof(ConfigurationDbContext).Assembly);
-
         base.OnModelCreating(modelBuilder);
     }
 
@@ -54,18 +54,13 @@ public sealed class ConfigurationDbContext : DbContext, IConfigurationUnitOfWork
             .ToList();
 
         var domainEvents = aggregatesWithEvents.SelectMany(a => a.DomainEvents).ToList();
-
         var affectedRows = await base.SaveChangesAsync(cancellationToken);
 
         if (_domainEventDispatcher is not null && domainEvents.Count > 0)
-        {
             await _domainEventDispatcher.DispatchAsync(domainEvents, cancellationToken);
-        }
 
         foreach (var aggregate in aggregatesWithEvents)
-        {
             aggregate.ClearDomainEvents();
-        }
 
         return affectedRows;
     }

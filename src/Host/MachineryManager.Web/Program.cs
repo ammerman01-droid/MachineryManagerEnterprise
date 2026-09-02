@@ -133,8 +133,8 @@ try
 
     //Configuration endpoints
     app.MapColorEndpoints();
-    app.MapUnitCategoryEndpoints();
     app.MapUnitOfMeasurementEndpoints();
+    app.MapCompanyEndpoints();
 
     app.Run();
 }

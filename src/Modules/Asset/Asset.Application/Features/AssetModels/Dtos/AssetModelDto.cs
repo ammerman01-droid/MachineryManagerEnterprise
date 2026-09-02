@@ -4,5 +4,5 @@ namespace MachineryManager.Asset.Application.Features.AssetModels.Dtos;
 public sealed record AssetModelDto(
     Guid Id,
     string Name,
-    string Manufacturer,
+    Guid CompanyId,
     IReadOnlyCollection<Guid> CompatibleEngineModelIds);

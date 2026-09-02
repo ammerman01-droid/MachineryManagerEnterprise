@@ -14,8 +14,22 @@ public sealed class RegisterEngineModelCommandValidator : AbstractValidator<Regi
             .NotEmpty()
             .MaximumLength(global::Asset.Domain.EngineModel.MaxNameLength);
 
-        RuleFor(x => x.Manufacturer)
-            .NotEmpty()
-            .MaximumLength(global::Asset.Domain.EngineModel.MaxManufacturerLength);
+        RuleFor(x => x.CompanyId).NotEmpty();
+
+        RuleFor(x => x.CylinderCount)
+            .GreaterThan(0)
+            .When(x => x.CylinderCount.HasValue);
+
+        RuleFor(x => x.EngineDisplacementValue)
+            .GreaterThan(0)
+            .When(x => x.EngineDisplacementValue.HasValue);
+
+        RuleFor(x => x.EnginePowerValue)
+            .GreaterThan(0)
+            .When(x => x.EnginePowerValue.HasValue);
+
+        RuleFor(x => x.WeightValue)
+            .GreaterThan(0)
+            .When(x => x.WeightValue.HasValue);
     }
 }

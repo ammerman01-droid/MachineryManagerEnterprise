@@ -1,5 +1,6 @@
 using MachineryManager.Asset.Application.Features.EngineModels.Commands.RegisterEngineModel;
 using MachineryManager.Asset.Application.Features.EngineModels.Commands.RenameEngineModel;
+using MachineryManager.Asset.Application.Features.EngineModels.Commands.UpdateEngineModelSpecifications;
 using MachineryManager.Asset.Application.Features.EngineModels.Queries.GetEngineModelById;
 using MachineryManager.Asset.Application.Features.EngineModels.Queries.SearchEngineModels;
 using MachineryManager.Asset.Presentation.Contracts;
@@ -35,6 +36,10 @@ public static class EngineModelEndpoints
             .WithName("RenameEngineModel")
             .WithSummary("Renames an existing Engine Model.");
 
+        group.MapPut("/{engineModelId:guid}/specifications", UpdateEngineModelSpecificationsAsync)
+            .WithName("UpdateEngineModelSpecifications")
+            .WithSummary("Updates the technical specifications of an existing Engine Model.");
+
         group.MapGet("/{engineModelId:guid}", GetEngineModelByIdAsync)
             .WithName("GetEngineModelById")
             .WithSummary("Retrieves a single Engine Model by its identifier.");
@@ -53,8 +58,18 @@ public static class EngineModelEndpoints
         CancellationToken cancellationToken)
     {
         var result = await sender.Send(
-            new RegisterEngineModelCommand(request.HoldingId, request.Name, request.Manufacturer),
-            cancellationToken);
+            new RegisterEngineModelCommand(
+                request.HoldingId,
+                request.Name,
+                request.CompanyId,
+                request.CylinderCount,
+                request.EngineDisplacementValue,
+                request.EngineDisplacementUnitOfMeasurementId,
+                request.EnginePowerValue,
+                request.EnginePowerUnitOfMeasurementId,
+                request.WeightValue,
+                request.WeightUnitOfMeasurementId),
+                cancellationToken);
 
         return result.IsSuccess
             ? Results.Created($"/api/v1/engine-models/{result.Value}", new { id = result.Value })
@@ -70,6 +85,31 @@ public static class EngineModelEndpoints
     {
         var result = await sender.Send(
             new RenameEngineModelCommand(engineModelId, request.Name),
+            cancellationToken);
+
+        return result.IsSuccess
+            ? Results.NoContent()
+            : result.ToProblemResult(httpContext);
+    }
+
+    private static async Task<IResult> UpdateEngineModelSpecificationsAsync(
+        Guid engineModelId,
+        UpdateEngineModelSpecificationsRequest request,
+        ISender sender,
+        HttpContext httpContext,
+        CancellationToken cancellationToken)
+    {
+        var result = await sender.Send(
+            new UpdateEngineModelSpecificationsCommand(
+                engineModelId,
+                request.CompanyId,
+                request.CylinderCount,
+                request.EngineDisplacementValue,
+                request.EngineDisplacementUnitOfMeasurementId,
+                request.EnginePowerValue,
+                request.EnginePowerUnitOfMeasurementId,
+                request.WeightValue,
+                request.WeightUnitOfMeasurementId),
             cancellationToken);
 
         return result.IsSuccess

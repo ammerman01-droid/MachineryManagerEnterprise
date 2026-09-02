@@ -9,10 +9,7 @@ using OpenIddict.Validation.AspNetCore;
 
 namespace MachineryManager.Configuration.Presentation.Endpoints;
 
-/// <summary>
-/// Maps the Configuration module's Unit of Measurement REST endpoints:
-/// base path <c>/api/v1/units-of-measurement</c>.
-/// </summary>
+/// <summary>Maps the Configuration module's Unit of Measurement REST endpoints: base path <c>/api/v1/units-of-measurement</c>.</summary>
 public static class UnitOfMeasurementEndpoints
 {
     /// <summary>Registers the Unit of Measurement endpoints on the application's route builder.</summary>
@@ -33,12 +30,12 @@ public static class UnitOfMeasurementEndpoints
 
         group.MapGet("/", GetUnitsOfMeasurementByHoldingAsync)
             .WithName("GetUnitsOfMeasurementByHolding")
-            .WithSummary("Retrieves every Unit of Measurement registered for a Holding, including its category's display name.");
+            .WithSummary("Retrieves every Unit of Measurement registered for a Holding.");
 
         return endpoints;
     }
 
-    /// <summary>Handles <c>POST /api/v1/units-of-measurement</c>.</summary>
+/// <summary>Handles <c>POST /api/v1/units-of-measurement</c>.</summary>
     /// <param name="request">The registration payload (HoldingId, Name, CategoryId).</param>
     /// <param name="sender">MediatR sender used to dispatch the <see cref="RegisterUnitOfMeasurementCommand"/>.</param>
     /// <param name="httpContext">The current request's HTTP context, used for error correlation ids.</param>
@@ -55,7 +52,7 @@ public static class UnitOfMeasurementEndpoints
         CancellationToken cancellationToken)
     {
         var result = await sender.Send(
-            new RegisterUnitOfMeasurementCommand(request.HoldingId, request.Name, request.CategoryId),
+            new RegisterUnitOfMeasurementCommand(request.HoldingId, request.Name, request.Kind),
             cancellationToken);
 
         return result.IsSuccess
@@ -76,7 +73,6 @@ public static class UnitOfMeasurementEndpoints
         CancellationToken cancellationToken)
     {
         var result = await sender.Send(new GetUnitsOfMeasurementByHoldingQuery(holdingId), cancellationToken);
-
         return result.IsSuccess ? Results.Ok(result.Value) : result.ToProblemResult(httpContext);
     }
 }

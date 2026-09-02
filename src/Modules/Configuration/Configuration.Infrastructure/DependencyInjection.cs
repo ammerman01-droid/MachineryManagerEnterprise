@@ -26,10 +26,11 @@ public static class DependencyInjection
             .UseSqlServer(configuration.GetConnectionString("MachineryManagerDatabase")));
 
         services.AddScoped<IColorRepository, ColorRepository>();
-        services.AddScoped<IUnitCategoryRepository, UnitCategoryRepository>();
         services.AddScoped<IUnitOfMeasurementRepository, UnitOfMeasurementRepository>();
+        services.AddScoped<ICompanyRepository, CompanyRepository>();
         services.AddScoped<IConfigurationLookupService, ConfigurationLookupService>();
         services.AddScoped<IConfigurationUnitOfWork>(sp => sp.GetRequiredService<ConfigurationDbContext>());
+        services.AddScoped<IUnitOfMeasurementLookupService, UnitOfMeasurementLookupService>();
 
         return services;
     }

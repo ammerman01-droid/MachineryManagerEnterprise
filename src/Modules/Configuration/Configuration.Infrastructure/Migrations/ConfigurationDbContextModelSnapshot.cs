@@ -43,7 +43,7 @@ namespace Configuration.Infrastructure.Migrations
                     b.ToTable("Color", "configuration");
                 });
 
-            modelBuilder.Entity("Configuration.Domain.UnitCategory", b =>
+            modelBuilder.Entity("Configuration.Domain.Company", b =>
                 {
                     b.Property<Guid>("Id")
                         .HasColumnType("uniqueidentifier");
@@ -53,14 +53,17 @@ namespace Configuration.Infrastructure.Migrations
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
 
                     b.HasKey("Id");
 
                     b.HasIndex("HoldingId");
 
-                    b.ToTable("UnitCategory", "configuration");
+                    b.HasIndex("HoldingId", "Name")
+                        .IsUnique();
+
+                    b.ToTable("Company", "configuration");
                 });
 
             modelBuilder.Entity("Configuration.Domain.UnitOfMeasurement", b =>
@@ -68,11 +71,13 @@ namespace Configuration.Infrastructure.Migrations
                     b.Property<Guid>("Id")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<Guid>("CategoryId")
-                        .HasColumnType("uniqueidentifier");
-
                     b.Property<Guid>("HoldingId")
                         .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Kind")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
 
                     b.Property<string>("Name")
                         .IsRequired()
@@ -81,22 +86,11 @@ namespace Configuration.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("CategoryId");
-
                     b.HasIndex("HoldingId");
 
-                    b.HasIndex("HoldingId", "CategoryId");
+                    b.HasIndex("HoldingId", "Kind");
 
                     b.ToTable("UnitOfMeasurement", "configuration");
-                });
-
-            modelBuilder.Entity("Configuration.Domain.UnitOfMeasurement", b =>
-                {
-                    b.HasOne("Configuration.Domain.UnitCategory", null)
-                        .WithMany()
-                        .HasForeignKey("CategoryId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
                 });
 #pragma warning restore 612, 618
         }

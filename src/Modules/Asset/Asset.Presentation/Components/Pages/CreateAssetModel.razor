@@ -1,49 +1,165 @@
 @page "/admin/asset-models/create"
 @inject IHttpClientFactory HttpClientFactory
 @inject NavigationManager Navigation
+@using System.Text.Json
 
 <PageTitle>ثبت مدل دارایی</PageTitle>
 
 <MudText Typo="Typo.h4" Class="mb-4">ثبت مدل دارایی جدید</MudText>
 
-@if (errorMessage is not null)
+@if (isLoading)
 {
-    <MudAlert Severity="Severity.Error" Class="my-4">@errorMessage</MudAlert>
+    <MudProgressLinear Indeterminate="true" Class="my-4" />
+}
+else
+{
+    @if (errorMessage is not null)
+    {
+        <MudAlert Severity="Severity.Error" Class="my-4">@errorMessage</MudAlert>
+    }
+
+    <MudPaper Class="pa-4" Style="max-width:500px;">
+        <MudForm @ref="form" @bind-IsValid="@isValid">
+            <MudTextField @bind-Value="name" Label="نام مدل" Required="true" RequiredError="نام الزامی است." MaxLength="200" />
+
+            <div class="d-flex align-center gap-2 mt-4">
+                <MudSelect T="Guid?" @bind-Value="companyId" Label="شرکت سازنده" Required="true"
+                           RequiredError="انتخاب شرکت سازنده الزامی است.">
+                    @foreach (var company in companies)
+                    {
+                        <MudSelectItem T="Guid?" Value="@((Guid?)company.Id)">@company.Name</MudSelectItem>
+                    }
+                </MudSelect>
+                <MudButton Variant="Variant.Outlined" Size="Size.Small" OnClick="@(() => showAddCompany = !showAddCompany)">
+                    افزودن شرکت جدید
+                </MudButton>
+            </div>
+
+            @if (showAddCompany)
+            {
+                <div class="d-flex align-center gap-2 mt-2">
+                    <MudTextField T="string" Label="نام شرکت جدید" @bind-Value="newCompanyName" MaxLength="200" />
+                    <MudButton Variant="Variant.Filled" Color="Color.Primary" Size="Size.Small"
+                               OnClick="AddCompanyAsync" Disabled="isAddingCompany">
+                        @(isAddingCompany ? "..." : "ثبت شرکت")
+                    </MudButton>
+                </div>
+            }
+
+            <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="SubmitAsync"
+                       Disabled="@(!isValid || isSubmitting)" Class="mt-4">
+                @if (isSubmitting)
+                {
+                    <MudProgressCircular Size="Size.Small" Indeterminate="true" />
+                }
+                else
+                {
+                    <span>ثبت</span>
+                }
+            </MudButton>
+
+            <MudButton Variant="Variant.Outlined" OnClick="@(() => Navigation.NavigateTo("/admin/asset-models"))" Class="mt-4 mr-2">
+                بازگشت
+            </MudButton>
+        </MudForm>
+    </MudPaper>
 }
 
-<MudPaper Class="pa-4" Style="max-width:500px;">
-    <MudForm @ref="form" @bind-IsValid="@isValid">
-        <MudTextField @bind-Value="name" Label="نام مدل" Required="true" RequiredError="نام الزامی است." MaxLength="200" />
-        <MudTextField @bind-Value="manufacturer" Label="سازنده" Required="true" RequiredError="سازنده الزامی است." MaxLength="200" Class="mt-2" />
-
-        <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="SubmitAsync"
-                   Disabled="@(!isValid || isSubmitting)" Class="mt-4">
-            @if (isSubmitting)
-            {
-                <MudProgressCircular Size="Size.Small" Indeterminate="true" />
-            }
-            else
-            {
-                <span>ثبت</span>
-            }
-        </MudButton>
-
-        <MudButton Variant="Variant.Outlined" OnClick="@(() => Navigation.NavigateTo("/admin/asset-models"))" Class="mt-4 mr-2">
-            بازگشت
-        </MudButton>
-    </MudForm>
-</MudPaper>
-
 @code {
+    /// <summary>Gets or sets the identifier of the Holding this Asset Model will belong to, supplied via the query string.</summary>
     [SupplyParameterFromQuery]
     public Guid HoldingId { get; set; }
 
+    /// <summary>Represents a Company option in the manufacturer selection dropdown.</summary>
+    private sealed class CompanyItem
+    {
+        /// <summary>Gets or sets the Company's unique identifier.</summary>
+        public Guid Id { get; set; }
+
+        /// <summary>Gets or sets the Company's display name.</summary>
+        public string Name { get; set; } = string.Empty;
+    }
+
     private MudForm? form;
     private bool isValid;
+    private bool isLoading = true;
     private bool isSubmitting;
+    private bool showAddCompany;
+    private bool isAddingCompany;
     private string name = string.Empty;
-    private string manufacturer = string.Empty;
+    private Guid? companyId;
+    private string newCompanyName = string.Empty;
     private string? errorMessage;
+    private List<CompanyItem> companies = [];
+
+    /// <summary>Loads the Holding's Company catalog for the manufacturer dropdown.</summary>
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadCompaniesAsync();
+        isLoading = false;
+    }
+
+    private async Task LoadCompaniesAsync()
+    {
+        try
+        {
+            var client = HttpClientFactory.CreateClient("InternalApi");
+            var response = await client.GetAsync($"/api/v1/companies?holdingId={HoldingId}");
+            var content = await response.Content.ReadAsStringAsync();
+
+            if (response.IsSuccessStatusCode)
+            {
+                companies = JsonSerializer.Deserialize<List<CompanyItem>>(
+                    content, new JsonSerializerOptions { PropertyNameCaseInsensitive = true }) ?? [];
+            }
+            else
+            {
+                errorMessage = $"خطا در دریافت شرکت‌ها: {content}";
+            }
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"خطا: {ex.Message}";
+        }
+    }
+
+    /// <summary>Registers a new Company inline, without leaving this page.</summary>
+    private async Task AddCompanyAsync()
+    {
+        if (string.IsNullOrWhiteSpace(newCompanyName))
+        {
+            return;
+        }
+
+        isAddingCompany = true;
+
+        try
+        {
+            var client = HttpClientFactory.CreateClient("InternalApi");
+            var response = await client.PostAsJsonAsync(
+                "/api/v1/companies", new { HoldingId, Name = newCompanyName });
+            var content = await response.Content.ReadAsStringAsync();
+
+            if (response.IsSuccessStatusCode)
+            {
+                newCompanyName = string.Empty;
+                showAddCompany = false;
+                await LoadCompaniesAsync();
+            }
+            else
+            {
+                errorMessage = $"خطا در ثبت شرکت: {content}";
+            }
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"خطا: {ex.Message}";
+        }
+        finally
+        {
+            isAddingCompany = false;
+        }
+    }
 
     private async Task SubmitAsync()
     {
@@ -60,7 +176,7 @@
             var client = HttpClientFactory.CreateClient("InternalApi");
             var response = await client.PostAsJsonAsync(
                 "/api/v1/asset-models",
-                new { HoldingId, Name = name, Manufacturer = manufacturer });
+                new { HoldingId, Name = name, CompanyId = companyId });
 
             if (response.IsSuccessStatusCode)
             {

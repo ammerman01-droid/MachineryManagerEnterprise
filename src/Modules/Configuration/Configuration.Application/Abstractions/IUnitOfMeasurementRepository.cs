@@ -12,6 +12,6 @@ public interface IUnitOfMeasurementRepository
     /// <param name="holdingId">The Holding whose unit of measurement catalog should be returned.</param>
     /// <param name="cancellationToken">Token to cancel the asynchronous operation.</param>
     /// <returns>The list of unit of measurements belonging to the given Holding, ordered by name.</returns>
-    Task<IReadOnlyList<(Guid Id, string Name, Guid CategoryId)>> GetByHoldingAsync(
+    Task<IReadOnlyList<Features.UnitsOfMeasurement.Dtos.UnitOfMeasurementDto>> GetByHoldingAsync(
         Guid holdingId, CancellationToken cancellationToken = default);
 }

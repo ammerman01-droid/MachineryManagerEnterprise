@@ -92,13 +92,11 @@ namespace Asset.Infrastructure.Migrations
                     b.Property<Guid>("Id")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<Guid>("HoldingId")
+                    b.Property<Guid>("CompanyId")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<string>("Manufacturer")
-                        .IsRequired()
-                        .HasMaxLength(200)
-                        .HasColumnType("nvarchar(200)");
+                    b.Property<Guid>("HoldingId")
+                        .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("Name")
                         .IsRequired()
@@ -112,6 +110,8 @@ namespace Asset.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("CompanyId");
+
                     b.HasIndex("HoldingId");
 
                     b.ToTable("AssetModel", "asset");
@@ -122,22 +122,52 @@ namespace Asset.Infrastructure.Migrations
                     b.Property<Guid>("Id")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<Guid>("HoldingId")
+                    b.Property<Guid>("CompanyId")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<string>("Manufacturer")
-                        .IsRequired()
-                        .HasMaxLength(200)
-                        .HasColumnType("nvarchar(200)");
+                    b.Property<int?>("CylinderCount")
+                        .HasColumnType("int");
+
+                    b.Property<Guid?>("EngineDisplacementUnitOfMeasurementId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<decimal?>("EngineDisplacementValue")
+                        .HasPrecision(18, 4)
+                        .HasColumnType("decimal(18,4)");
+
+                    b.Property<Guid?>("EnginePowerUnitOfMeasurementId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<decimal?>("EnginePowerValue")
+                        .HasPrecision(18, 4)
+                        .HasColumnType("decimal(18,4)");
+
+                    b.Property<Guid>("HoldingId")
+                        .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(200)
                         .HasColumnType("nvarchar(200)");
 
+                    b.Property<Guid?>("WeightUnitOfMeasurementId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<decimal?>("WeightValue")
+                        .HasPrecision(18, 4)
+                        .HasColumnType("decimal(18,4)");
+
                     b.HasKey("Id");
 
+                    b.HasIndex("CompanyId");
+
+                    b.HasIndex("EngineDisplacementUnitOfMeasurementId");
+
+                    b.HasIndex("EnginePowerUnitOfMeasurementId");
+
                     b.HasIndex("HoldingId");
+
+                    b.HasIndex("WeightUnitOfMeasurementId");
 
                     b.ToTable("EngineModel", "asset");
                 });

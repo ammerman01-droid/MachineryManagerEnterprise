@@ -1,6 +1,7 @@
 @page "/admin/engine-models"
 @inject IHttpClientFactory HttpClientFactory
 @inject NavigationManager Navigation
+@using System.Text.Json
 
 <PageTitle>مدل‌های موتور</PageTitle>
 
@@ -39,12 +40,20 @@
         <MudTable Items="items" Hover="true">
             <HeaderContent>
                 <MudTh>نام</MudTh>
-                <MudTh>سازنده</MudTh>
+                <MudTh>شرکت سازنده</MudTh>
+                <MudTh>تعداد سیلندر</MudTh>
+                <MudTh>حجم موتور</MudTh>
+                <MudTh>قدرت موتور</MudTh>
+                <MudTh>وزن</MudTh>
                 <MudTh>عملیات</MudTh>
             </HeaderContent>
             <RowTemplate>
                 <MudTd DataLabel="نام">@context.Name</MudTd>
-                <MudTd DataLabel="سازنده">@context.Manufacturer</MudTd>
+                <MudTd DataLabel="شرکت سازنده">@ResolveCompanyName(context.CompanyId)</MudTd>
+                <MudTd DataLabel="تعداد سیلندر">@(context.CylinderCount?.ToString() ?? "-")</MudTd>
+                <MudTd DataLabel="حجم موتور">@FormatSpecification(context.EngineDisplacementValue, context.EngineDisplacementUnitOfMeasurementId)</MudTd>
+                <MudTd DataLabel="قدرت موتور">@FormatSpecification(context.EnginePowerValue, context.EnginePowerUnitOfMeasurementId)</MudTd>
+                <MudTd DataLabel="وزن">@FormatSpecification(context.WeightValue, context.WeightUnitOfMeasurementId)</MudTd>
                 <MudTd DataLabel="عملیات">
                     <MudButton Size="Size.Small" Variant="Variant.Text" Color="Color.Primary"
                                OnClick="@(() => Navigation.NavigateTo($"/admin/engine-models/{context.Id}/edit"))">
@@ -57,17 +66,58 @@
 }
 
 @code {
+    /// <summary>Represents a Holding option in the selection dropdown.</summary>
     private sealed class HoldingItem
     {
+        /// <summary>Gets or sets the Holding's unique identifier.</summary>
         public Guid Id { get; set; }
+
+        /// <summary>Gets or sets the Holding's display name.</summary>
         public string Name { get; set; } = string.Empty;
     }
 
+    /// <summary>Represents a Company option, used only to resolve display names.</summary>
+    private sealed class CompanyItem
+    {
+        /// <summary>Gets or sets the Company's unique identifier.</summary>
+        public Guid Id { get; set; }
+
+        /// <summary>Gets or sets the Company's display name.</summary>
+        public string Name { get; set; } = string.Empty;
+    }
+
+    /// <summary>Represents a single Engine Model row in the list.</summary>
     private sealed class EngineModelItem
     {
+        /// <summary>Gets or sets the Engine Model's unique identifier.</summary>
         public Guid Id { get; set; }
+
+        /// <summary>Gets or sets the Engine Model's display name.</summary>
         public string Name { get; set; } = string.Empty;
-        public string Manufacturer { get; set; } = string.Empty;
+
+        /// <summary>Gets or sets the identifier of the manufacturer Company.</summary>
+        public Guid CompanyId { get; set; }
+
+        /// <summary>Gets or sets the number of cylinders, if specified.</summary>
+        public int? CylinderCount { get; set; }
+
+        /// <summary>Gets or sets the engine displacement value, if specified.</summary>
+        public decimal? EngineDisplacementValue { get; set; }
+
+        /// <summary>Gets or sets the identifier of the unit of measurement for the displacement value, if specified.</summary>
+        public Guid? EngineDisplacementUnitOfMeasurementId { get; set; }
+
+        /// <summary>Gets or sets the engine power value, if specified.</summary>
+        public decimal? EnginePowerValue { get; set; }
+
+        /// <summary>Gets or sets the identifier of the unit of measurement for the power value, if specified.</summary>
+        public Guid? EnginePowerUnitOfMeasurementId { get; set; }
+
+        /// <summary>Gets or sets the weight value, if specified.</summary>
+        public decimal? WeightValue { get; set; }
+
+        /// <summary>Gets or sets the identifier of the unit of measurement for the weight value, if specified.</summary>
+        public Guid? WeightUnitOfMeasurementId { get; set; }
     }
 
     private sealed class SearchEngineModelsResult
@@ -82,10 +132,13 @@
 
     private List<HoldingItem> holdings = [];
     private List<EngineModelItem> items = [];
+    private List<CompanyItem> companies = [];
+    private Dictionary<Guid, string> unitOfMeasurementNames = [];
     private Guid? selectedHoldingId;
     private bool isLoading;
     private string? errorMessage;
 
+    /// <summary>Loads the list of Holdings when the page is first rendered.</summary>
     protected override async Task OnInitializedAsync()
     {
         try
@@ -100,8 +153,8 @@
                 return;
             }
 
-            var result = System.Text.Json.JsonSerializer.Deserialize<SearchHoldingsResult>(content, new
-System.Text.Json.JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+            var result = JsonSerializer.Deserialize<SearchHoldingsResult>(
+                content, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
 
             holdings = result?.Items ?? [];
 
@@ -120,10 +173,68 @@ System.Text.Json.JsonSerializerOptions { PropertyNameCaseInsensitive = true });
         }
     }
 
+    /// <summary>Reloads Companies, Units of Measurement, and Engine Models whenever the selected Holding changes.</summary>
+    /// <param name="holdingId">The newly selected Holding identifier.</param>
     private async Task OnHoldingChangedAsync(Guid? holdingId)
     {
         selectedHoldingId = holdingId;
+        await LoadCompaniesAsync();
+        await LoadUnitOfMeasurementNamesAsync();
         await LoadEngineModelsAsync();
+    }
+
+    private async Task LoadCompaniesAsync()
+    {
+        if (selectedHoldingId is null)
+        {
+            return;
+        }
+
+        try
+        {
+            var client = HttpClientFactory.CreateClient("InternalApi");
+            var response = await client.GetAsync($"/api/v1/companies?holdingId={selectedHoldingId}");
+            var content = await response.Content.ReadAsStringAsync();
+
+            if (response.IsSuccessStatusCode)
+            {
+                companies = JsonSerializer.Deserialize<List<CompanyItem>>(
+                    content, new JsonSerializerOptions { PropertyNameCaseInsensitive = true }) ?? [];
+            }
+        }
+        catch
+        {
+            // Best effort — a failed Company lookup only degrades the
+            // display (raw GUID shown instead of a name), it must not
+            // block the rest of the page.
+        }
+    }
+
+    private async Task LoadUnitOfMeasurementNamesAsync()
+    {
+        if (selectedHoldingId is null)
+        {
+            return;
+        }
+
+        try
+        {
+            var client = HttpClientFactory.CreateClient("InternalApi");
+            var response = await client.GetAsync($"/api/v1/units-of-measurement?holdingId={selectedHoldingId}");
+            var content = await response.Content.ReadAsStringAsync();
+
+            if (response.IsSuccessStatusCode)
+            {
+                var units = JsonSerializer.Deserialize<List<CompanyItem>>(
+                    content, new JsonSerializerOptions { PropertyNameCaseInsensitive = true }) ?? [];
+
+                unitOfMeasurementNames = units.ToDictionary(u => u.Id, u => u.Name);
+            }
+        }
+        catch
+        {
+            // Best effort — same reasoning as LoadCompaniesAsync.
+        }
     }
 
     private async Task LoadEngineModelsAsync()
@@ -148,8 +259,8 @@ System.Text.Json.JsonSerializerOptions { PropertyNameCaseInsensitive = true });
                 return;
             }
 
-            var result = System.Text.Json.JsonSerializer.Deserialize<SearchEngineModelsResult>(content, new
-System.Text.Json.JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+            var result = JsonSerializer.Deserialize<SearchEngineModelsResult>(
+                content, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
 
             items = result?.Items ?? [];
         }
@@ -161,5 +272,29 @@ System.Text.Json.JsonSerializerOptions { PropertyNameCaseInsensitive = true });
         {
             isLoading = false;
         }
+    }
+
+    /// <summary>Resolves a Company's display name from its identifier, using the already-loaded list.</summary>
+    /// <param name="companyId">The Company identifier to resolve.</param>
+    /// <returns>The Company's name, or the raw identifier if not found.</returns>
+    private string ResolveCompanyName(Guid companyId) =>
+        companies.FirstOrDefault(c => c.Id == companyId)?.Name ?? companyId.ToString();
+
+    /// <summary>Formats an optional technical specification value together with its unit of measurement's name.</summary>
+    /// <param name="value">The specification's numeric value, if any.</param>
+    /// <param name="unitOfMeasurementId">The identifier of the specification's unit of measurement, if any.</param>
+    /// <returns>A display string such as "12.5 لیتر", or "-" if the value is not specified.</returns>
+    private string FormatSpecification(decimal? value, Guid? unitOfMeasurementId)
+    {
+        if (value is not { } actualValue)
+        {
+            return "-";
+        }
+
+        var unitName = unitOfMeasurementId is { } id && unitOfMeasurementNames.TryGetValue(id, out var name)
+            ? name
+            : unitOfMeasurementId?.ToString() ?? string.Empty;
+
+        return $"{actualValue} {unitName}".Trim();
     }
 }

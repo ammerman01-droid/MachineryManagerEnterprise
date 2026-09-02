@@ -17,27 +17,18 @@ public sealed class UnitOfMeasurementConfiguration : IEntityTypeConfiguration<Un
             .HasConversion(id => id.Value, value => UnitOfMeasurementId.From(value))
             .ValueGeneratedNever();
 
-        builder.Property(u => u.HoldingId)
-            .IsRequired();
+        builder.Property(u => u.HoldingId).IsRequired();
 
         builder.Property(u => u.Name)
             .HasMaxLength(UnitOfMeasurement.MaxNameLength)
             .IsRequired();
 
-        builder.Property(u => u.CategoryId)
-            .HasConversion(id => id.Value, value => UnitCategoryId.From(value))
+        builder.Property(u => u.Kind)
+            .HasConversion<string>()
+            .HasMaxLength(20)
             .IsRequired();
 
-        // Real database-level FK to UnitCategory — Restrict (not
-        // Cascade): a UnitCategory cannot be removed while any Unit of
-        // Measurement still references it, same reasoning as the
-        // AssetModel/Color FKs on the Asset aggregate.
-        builder.HasOne<UnitCategory>()
-            .WithMany()
-            .HasForeignKey(u => u.CategoryId)
-            .OnDelete(DeleteBehavior.Restrict);
-
         builder.HasIndex(u => u.HoldingId);
-        builder.HasIndex(u => new { u.HoldingId, u.CategoryId });
+        builder.HasIndex(u => new { u.HoldingId, u.Kind });
     }
 }

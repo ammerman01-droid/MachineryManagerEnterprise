@@ -1,5 +1,6 @@
 using Configuration.Domain;
 using MachineryManager.Configuration.Application.Abstractions;
+using MachineryManager.Configuration.Application.Features.UnitsOfMeasurement.Dtos;
 using Microsoft.EntityFrameworkCore;
 
 namespace MachineryManager.Configuration.Infrastructure.Persistence;
@@ -26,15 +27,16 @@ public sealed class UnitOfMeasurementRepository : IUnitOfMeasurementRepository
     public void Remove(UnitOfMeasurement aggregate) => _dbContext.UnitsOfMeasurement.Remove(aggregate);
 
     /// <inheritdoc />
-    public async Task<IReadOnlyList<(Guid Id, string Name, Guid CategoryId)>> GetByHoldingAsync(
+    public async Task<IReadOnlyList<UnitOfMeasurementDto>> GetByHoldingAsync(
         Guid holdingId, CancellationToken cancellationToken = default)
     {
         var entities = await _dbContext.UnitsOfMeasurement
             .AsNoTracking()
             .Where(u => u.HoldingId == holdingId)
-            .OrderBy(u => u.Name)
+            .OrderBy(u => u.Kind)
+            .ThenBy(u => u.Name)
             .ToListAsync(cancellationToken);
 
-        return entities.Select(u => (u.Id.Value, u.Name, u.CategoryId.Value)).ToList();
+        return entities.Select(u => new UnitOfMeasurementDto(u.Id.Value, u.Name, u.Kind)).ToList();
     }
 }

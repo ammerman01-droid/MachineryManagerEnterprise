@@ -60,4 +60,13 @@ public static class AssetModelErrors
     public static Error EngineModelBelongsToDifferentHolding() => Error.Conflict(
         "AssetModel.EngineModelBelongsToDifferentHolding",
         "This engine model belongs to a different Holding and cannot be marked compatible with this asset model.");
+
+        /// <summary>
+    /// Creates an error indicating that the given CompanyId does not
+    /// correspond to an existing Company within this Asset Model's
+    /// Holding (chat, 2026-09-01).
+    /// </summary>
+    public static Error CompanyNotFound(Guid companyId) => Error.NotFound(
+        "AssetModel.CompanyNotFound",
+        $"Company with id {companyId} was not found.");
 }

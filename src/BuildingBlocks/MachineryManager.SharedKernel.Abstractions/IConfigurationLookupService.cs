@@ -2,11 +2,7 @@ namespace MachineryManager.SharedKernel.Abstractions;
 
 /// <summary>
 /// Cross-module, read-only lookup for Configuration-module master data
-/// (Color, Unit of Measurement) needed by other modules — e.g. Asset
-/// verifying a selected Color belongs to the correct Holding — without
-/// depending on Configuration.Application/Domain directly. Mirrors
-/// <see cref="IOrganizationLookupService"/> and
-/// <see cref="IHoldingLookupService"/> (chat, 2026-08-30).
+/// (Color, Unit of Measurement, Company) needed by other modules.
 /// </summary>
 public interface IConfigurationLookupService
 {
@@ -15,4 +11,7 @@ public interface IConfigurationLookupService
 
     /// <summary>Checks whether the given Unit of Measurement exists and belongs to the given Holding.</summary>
     Task<bool> UnitOfMeasurementExistsInHoldingAsync(Guid unitOfMeasurementId, Guid holdingId, CancellationToken cancellationToken = default);
+
+    /// <summary>Checks whether the given Company exists and belongs to the given Holding.</summary>
+    Task<bool> CompanyExistsInHoldingAsync(Guid companyId, Guid holdingId, CancellationToken cancellationToken = default);
 }

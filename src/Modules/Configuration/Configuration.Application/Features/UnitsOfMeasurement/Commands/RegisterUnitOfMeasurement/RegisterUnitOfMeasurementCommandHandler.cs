@@ -11,16 +11,14 @@ public sealed class RegisterUnitOfMeasurementCommandHandler : IRequestHandler<Re
     private const string RequiredPermission = "UnitOfMeasurement.Create";
 
     private readonly IUnitOfMeasurementRepository _unitOfMeasurementRepository;
-    private readonly IUnitCategoryRepository _unitCategoryRepository;
     private readonly IHoldingLookupService _holdingLookupService;
     private readonly IConfigurationUnitOfWork _unitOfWork;
     private readonly IDateTimeProvider _dateTimeProvider;
     private readonly ICurrentUserService _currentUserService;
     private readonly IPermissionEvaluator _permissionEvaluator;
 
-    /// <summary>Initializes a new instance of the <see cref="RegisterUnitOfMeasurementCommandHandler"/> class.</summary>
+/// <summary>Initializes a new instance of the <see cref="RegisterUnitOfMeasurementCommandHandler"/> class.</summary>
     /// <param name="unitOfMeasurementRepository">The Unit of Measurement repository.</param>
-    /// <param name="unitCategoryRepository">The Unit Category repository, used to validate <see cref="RegisterUnitOfMeasurementCommand.CategoryId"/>.</param>
     /// <param name="holdingLookupService">Used to verify the target Holding exists.</param>
     /// <param name="unitOfWork">The Configuration module's unit of work.</param>
     /// <param name="dateTimeProvider">Provides the current UTC time.</param>
@@ -28,7 +26,6 @@ public sealed class RegisterUnitOfMeasurementCommandHandler : IRequestHandler<Re
     /// <param name="permissionEvaluator">Evaluates the current user's authorization.</param>
     public RegisterUnitOfMeasurementCommandHandler(
         IUnitOfMeasurementRepository unitOfMeasurementRepository,
-        IUnitCategoryRepository unitCategoryRepository,
         IHoldingLookupService holdingLookupService,
         IConfigurationUnitOfWork unitOfWork,
         IDateTimeProvider dateTimeProvider,
@@ -36,7 +33,6 @@ public sealed class RegisterUnitOfMeasurementCommandHandler : IRequestHandler<Re
         IPermissionEvaluator permissionEvaluator)
     {
         _unitOfMeasurementRepository = unitOfMeasurementRepository;
-        _unitCategoryRepository = unitCategoryRepository;
         _holdingLookupService = holdingLookupService;
         _unitOfWork = unitOfWork;
         _dateTimeProvider = dateTimeProvider;
@@ -51,43 +47,22 @@ public sealed class RegisterUnitOfMeasurementCommandHandler : IRequestHandler<Re
     public async Task<Result<Guid>> Handle(RegisterUnitOfMeasurementCommand request, CancellationToken cancellationToken)
     {
         if (_currentUserService.UserId is not { } userId)
-        {
             return Result.Failure<Guid>(global::Configuration.Domain.UnitOfMeasurementErrors.NotAuthorized());
-        }
 
         if (!await _holdingLookupService.ExistsAsync(request.HoldingId, cancellationToken))
-        {
             return Result.Failure<Guid>(Error.NotFound("Holding.NotFound", $"Holding with id {request.HoldingId} was not found."));
-        }
 
         var scope = new ResourceScope(request.HoldingId, null, null);
         var isAuthorized = await _permissionEvaluator.HasPermissionAsync(userId, RequiredPermission, scope, cancellationToken);
 
         if (!isAuthorized)
-        {
             return Result.Failure<Guid>(global::Configuration.Domain.UnitOfMeasurementErrors.NotAuthorized());
-        }
-
-        var categoryId = global::Configuration.Domain.UnitCategoryId.From(request.CategoryId);
-        var category = await _unitCategoryRepository.GetByIdAsync(categoryId, cancellationToken);
-
-        if (category is null)
-        {
-            return Result.Failure<Guid>(global::Configuration.Domain.UnitOfMeasurementErrors.CategoryNotFound(request.CategoryId));
-        }
-
-        if (category.HoldingId != request.HoldingId)
-        {
-            return Result.Failure<Guid>(global::Configuration.Domain.UnitOfMeasurementErrors.CategoryHoldingMismatch());
-        }
 
         var result = global::Configuration.Domain.UnitOfMeasurement.Register(
-            request.HoldingId, request.Name, categoryId, _dateTimeProvider);
+            request.HoldingId, request.Name, request.Kind, _dateTimeProvider);
 
         if (result.IsFailure)
-        {
             return Result.Failure<Guid>(result.Error);
-        }
 
         _unitOfMeasurementRepository.Add(result.Value);
         await _unitOfWork.SaveChangesAsync(cancellationToken);

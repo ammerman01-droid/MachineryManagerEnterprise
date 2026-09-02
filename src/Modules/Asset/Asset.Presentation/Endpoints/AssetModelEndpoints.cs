@@ -63,7 +63,7 @@ public static class AssetModelEndpoints
         CancellationToken cancellationToken)
     {
         var result = await sender.Send(
-            new RegisterAssetModelCommand(request.HoldingId, request.Name, request.Manufacturer),
+            new RegisterAssetModelCommand(request.HoldingId, request.Name, request.CompanyId),
             cancellationToken);
 
         return result.IsSuccess

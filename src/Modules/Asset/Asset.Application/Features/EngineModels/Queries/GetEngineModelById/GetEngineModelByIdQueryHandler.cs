@@ -59,7 +59,18 @@ public sealed class GetEngineModelByIdQueryHandler
             return Result.Failure<EngineModelDto>(global::Asset.Domain.EngineModelErrors.NotAuthorized());
         }
 
-        var dto = new EngineModelDto(engineModel.Id.Value, engineModel.Name, engineModel.Manufacturer);
+        var dto = new EngineModelDto(
+            engineModel.Id.Value,
+            engineModel.Name,
+            engineModel.CompanyId,
+            engineModel.CylinderCount,
+            engineModel.EngineDisplacementValue,
+            engineModel.EngineDisplacementUnitOfMeasurementId,
+            engineModel.EnginePowerValue,
+            engineModel.EnginePowerUnitOfMeasurementId,
+            engineModel.WeightValue,
+            engineModel.WeightUnitOfMeasurementId,
+            engineModel.HoldingId);
 
         return Result.Success(dto);
     }

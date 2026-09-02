@@ -1,49 +1,192 @@
 @page "/admin/engine-models/create"
 @inject IHttpClientFactory HttpClientFactory
 @inject NavigationManager Navigation
+@using MachineryManager.SharedKernel
+@using System.Text.Json
 
 <PageTitle>ثبت مدل موتور</PageTitle>
 
 <MudText Typo="Typo.h4" Class="mb-4">ثبت مدل موتور جدید</MudText>
 
-@if (errorMessage is not null)
+
+@if (isLoading)
 {
-    <MudAlert Severity="Severity.Error" Class="my-4">@errorMessage</MudAlert>
+    <MudProgressLinear Indeterminate="true" Class="my-4" />
+}
+else
+{
+    @if (errorMessage is not null)
+    {
+        <MudAlert Severity="Severity.Error" Class="my-4">@errorMessage</MudAlert>
+    }
+
+    <MudPaper Class="pa-4" Style="max-width:600px;">
+        <MudForm @ref="form" @bind-IsValid="@isValid">
+            <MudTextField @bind-Value="name" Label="نام مدل" Required="true" RequiredError="نام الزامی است."
+                          MaxLength="200" />
+            <MudSelect T="Guid?" @bind-Value="companyId" Label="شرکت سازنده" Required="true"
+                       RequiredError="انتخاب شرکت سازنده الزامی است." Class="mt-2">
+
+                @foreach (var company in companies)
+                {
+                    <MudSelectItem T="Guid?" Value="@((Guid?)company.Id)">
+                        @company.Name
+                    </MudSelectItem>
+                }
+
+            </MudSelect>
+            <MudNumericField T="int?" @bind-Value="cylinderCount" Label="تعداد سیلندر" Min="1" Class="mt-4" />
+
+            <MudText Typo="Typo.subtitle1" Class="mt-6 mb-2">حجم موتور</MudText>
+            <MudNumericField T="decimal?" @bind-Value="engineDisplacementValue" Label="مقدار حجم موتور" Min="0" />
+            <MudSelect T="Guid?" @bind-Value="engineDisplacementUnitOfMeasurementId" Label="واحد حجم موتور" Class="mt-2">
+                @foreach (var unit in volumeUnits)
+                {
+                    <MudSelectItem T="Guid?" Value="@((Guid?)unit.Id)">@unit.Name</MudSelectItem>
+                }
+            </MudSelect>
+
+            <MudText Typo="Typo.subtitle1" Class="mt-6 mb-2">قدرت موتور</MudText>
+            <MudNumericField T="decimal?" @bind-Value="enginePowerValue" Label="مقدار قدرت موتور" Min="0" />
+            <MudSelect T="Guid?" @bind-Value="enginePowerUnitOfMeasurementId" Label="واحد قدرت موتور" Class="mt-2">
+                @foreach (var unit in powerUnits)
+                {
+                    <MudSelectItem T="Guid?" Value="@((Guid?)unit.Id)">@unit.Name</MudSelectItem>
+                }
+            </MudSelect>
+
+            <MudText Typo="Typo.subtitle1" Class="mt-6 mb-2">وزن موتور</MudText>
+            <MudNumericField T="decimal?" @bind-Value="weightValue" Label="مقدار وزن موتور" Min="0" />
+            <MudSelect T="Guid?" @bind-Value="weightUnitOfMeasurementId" Label="واحد وزن موتور" Class="mt-2">
+                @foreach (var unit in weightUnits)
+                {
+                    <MudSelectItem T="Guid?" Value="@((Guid?)unit.Id)">@unit.Name</MudSelectItem>
+                }
+            </MudSelect>
+
+            <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="SubmitAsync"
+                       Disabled="@(!isValid || isSubmitting)" Class="mt-6">
+                @if (isSubmitting)
+                {
+                    <MudProgressCircular Size="Size.Small" Indeterminate="true" />
+                }
+                else
+                {
+                    <span>ثبت</span>
+                }
+            </MudButton>
+
+            <MudButton Variant="Variant.Outlined" OnClick="@(() => Navigation.NavigateTo("/admin/engine-models"))"
+                       Class="mt-6 mr-2">
+                بازگشت
+            </MudButton>
+        </MudForm>
+    </MudPaper>
 }
 
-<MudPaper Class="pa-4" Style="max-width:500px;">
-    <MudForm @ref="form" @bind-IsValid="@isValid">
-        <MudTextField @bind-Value="name" Label="نام مدل" Required="true" RequiredError="نام الزامی است." MaxLength="200" />
-        <MudTextField @bind-Value="manufacturer" Label="سازنده" Required="true" RequiredError="سازنده الزامی است." MaxLength="200" Class="mt-2" />
-
-        <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="SubmitAsync"
-                   Disabled="@(!isValid || isSubmitting)" Class="mt-4">
-            @if (isSubmitting)
-            {
-                <MudProgressCircular Size="Size.Small" Indeterminate="true" />
-            }
-            else
-            {
-                <span>ثبت</span>
-            }
-        </MudButton>
-
-        <MudButton Variant="Variant.Outlined" OnClick="@(() => Navigation.NavigateTo("/admin/engine-models"))" Class="mt-4 mr-2">
-            بازگشت
-        </MudButton>
-    </MudForm>
-</MudPaper>
-
 @code {
+    /// <summary>Gets or sets the identifier of the Holding this Engine Model will belong to, supplied via the query string.</summary>
     [SupplyParameterFromQuery]
     public Guid HoldingId { get; set; }
 
+    /// <summary>Represents a Unit of Measurement option in a selection dropdown.</summary>
+    private sealed class UnitOfMeasurementItem
+    {
+        /// <summary>Gets or sets the unit's unique identifier.</summary>
+        public Guid Id { get; set; }
+
+        /// <summary>Gets or sets the unit's display name.</summary>
+        public string Name { get; set; } = string.Empty;
+
+        /// <summary>Gets or sets the physical-quantity kind of the unit.</summary>
+        public PhysicalQuantityKind Kind { get; set; }
+    }
+
     private MudForm? form;
     private bool isValid;
+    private bool isLoading = true;
     private bool isSubmitting;
     private string name = string.Empty;
-    private string manufacturer = string.Empty;
+    private int? cylinderCount;
+    private decimal? engineDisplacementValue;
+    private Guid? engineDisplacementUnitOfMeasurementId;
+    private decimal? enginePowerValue;
+    private Guid? enginePowerUnitOfMeasurementId;
+    private decimal? weightValue;
+    private Guid? weightUnitOfMeasurementId;
     private string? errorMessage;
+
+    private List<UnitOfMeasurementItem> volumeUnits = [];
+    private List<UnitOfMeasurementItem> powerUnits = [];
+    private List<UnitOfMeasurementItem> weightUnits = [];
+
+    private sealed class CompanyItem
+    {
+        /// <summary>Gets or sets the Company identifier.</summary>
+        public Guid Id { get; set; }
+
+        /// <summary>Gets or sets the Company display name.</summary>
+        public string Name { get; set; } = string.Empty;
+    }
+
+    private Guid? companyId;
+
+    private List<CompanyItem> companies = [];
+
+    /// <summary>Loads the Holding's Units of Measurement, split by physical-quantity kind, and its Companies, for the form's dropdowns.</summary>
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            var client = HttpClientFactory.CreateClient("InternalApi");
+            var response = await client.GetAsync($"/api/v1/units-of-measurement?holdingId={HoldingId}");
+            var content = await response.Content.ReadAsStringAsync();
+            var companyResponse = await client.GetAsync($"/api/v1/companies?holdingId={HoldingId}");
+
+            var companyContent = await companyResponse.Content.ReadAsStringAsync();
+
+            if (companyResponse.IsSuccessStatusCode)
+            {
+                companies = JsonSerializer.Deserialize<List<CompanyItem>>(
+                    companyContent,
+                    new JsonSerializerOptions { PropertyNameCaseInsensitive = true }) ?? [];
+            }
+            else
+            {
+                errorMessage = $"خطا در دریافت شرکت‌ها: {companyContent}";
+            }
+
+            if (response.IsSuccessStatusCode)
+            {
+                var units = JsonSerializer.Deserialize<List<UnitOfMeasurementItem>>(
+                    content, new JsonSerializerOptions { PropertyNameCaseInsensitive = true }) ?? [];
+
+                volumeUnits = units
+                    .Where(u => u.Kind == PhysicalQuantityKind.Dimension)
+                    .ToList();
+
+                powerUnits = units
+                    .Where(u => u.Kind == PhysicalQuantityKind.Force)
+                    .ToList();
+
+                weightUnits = units
+                    .Where(u => u.Kind == PhysicalQuantityKind.Weight)
+                    .ToList();
+            }
+            else
+            {
+                errorMessage = $"خطا در دریافت واحدهای اندازه‌گیری: {content}";
+            }
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"خطا: {ex.Message}";
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
 
     private async Task SubmitAsync()
     {
@@ -60,7 +203,19 @@
             var client = HttpClientFactory.CreateClient("InternalApi");
             var response = await client.PostAsJsonAsync(
                 "/api/v1/engine-models",
-                new { HoldingId, Name = name, Manufacturer = manufacturer });
+                new
+                {
+                    HoldingId,
+                    Name = name,
+                    CompanyId = companyId,
+                    CylinderCount = cylinderCount,
+                    EngineDisplacementValue = engineDisplacementValue,
+                    EngineDisplacementUnitOfMeasurementId = engineDisplacementUnitOfMeasurementId,
+                    EnginePowerValue = enginePowerValue,
+                    EnginePowerUnitOfMeasurementId = enginePowerUnitOfMeasurementId,
+                    WeightValue = weightValue,
+                    WeightUnitOfMeasurementId = weightUnitOfMeasurementId
+                });
 
             if (response.IsSuccessStatusCode)
             {

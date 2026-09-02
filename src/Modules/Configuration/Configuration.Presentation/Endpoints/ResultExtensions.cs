@@ -4,26 +4,16 @@ using Microsoft.AspNetCore.Http;
 namespace MachineryManager.Configuration.Presentation.Endpoints;
 
 /// <summary>
-/// Translates a failed <see cref="Result"/> from a Configuration-module
-/// handler into the standard error response shape defined in
-/// 07-api-conventions.md, Section 8.7 ("Error Response Structure").
+/// Translates a failed <see cref="Result"/> into the standard error response shape.
 /// </summary>
 /// <remarks>
-/// This class is intentionally duplicated per module (also present in
-/// Organization.Presentation, Administration.Presentation, and
-/// Asset.Presentation) rather than extracted into BuildingBlocks —
-/// extracting it would be a structural change requiring separate
-/// architectural approval per the AI Engineering Contract.
+/// Mirrors Organization.Presentation's, Administration.Presentation's,
+/// and Asset.Presentation's copies of this class — duplicated per
+/// module by existing project convention.
 /// </remarks>
 internal static class ResultExtensions
 {
-    /// <summary>
-    /// Maps a failed <see cref="Result"/> to an <see cref="IResult"/>
-    /// carrying the appropriate HTTP status code and a JSON error body.
-    /// </summary>
-    /// <param name="result">The failed result to translate. Behavior is undefined if the result represents success.</param>
-    /// <param name="httpContext">The current request's HTTP context, used to populate the response's correlation id.</param>
-    /// <returns>An <see cref="IResult"/> that, when executed, writes the standard error JSON body with the mapped status code.</returns>
+    /// <summary>Builds the standard problem response for a failed result.</summary>
     public static IResult ToProblemResult(this Result result, HttpContext httpContext)
     {
         var statusCode = result.Error.Type switch
@@ -31,6 +21,16 @@ internal static class ResultExtensions
             ErrorType.Validation => StatusCodes.Status400BadRequest,
             ErrorType.NotFound => StatusCodes.Status404NotFound,
             ErrorType.Conflict => StatusCodes.Status409Conflict,
+
+            // Added (chat, 2026-08-30 — bug fix, applied identically
+            // across every module's copy of this class): ErrorType.Failure
+            // had no explicit case and fell into the catch-all 500 branch,
+            // even for legitimate authorization denials (every
+            // "*.NotAuthorized" error across the codebase uses
+            // Error.Failure). An authorization denial is a client error,
+            // not a server fault — it must map to 403, not 500.
+            ErrorType.Failure => StatusCodes.Status403Forbidden,
+
             _ => StatusCodes.Status500InternalServerError,
         };
 
@@ -39,6 +39,7 @@ internal static class ResultExtensions
             ErrorType.Validation => "Validation Error",
             ErrorType.NotFound => "Resource Not Found",
             ErrorType.Conflict => "Business Rule Violation",
+            ErrorType.Failure => "Not Authorized",
             _ => "Unexpected Error",
         };
 

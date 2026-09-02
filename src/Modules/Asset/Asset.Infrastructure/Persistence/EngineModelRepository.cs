@@ -57,7 +57,18 @@ public sealed class EngineModelRepository : IEngineModelRepository
             .ToListAsync(cancellationToken);
 
         var items = entities
-            .Select(em => new EngineModelDto(em.Id.Value, em.Name, em.Manufacturer))
+            .Select(em => new EngineModelDto(
+                em.Id.Value,
+                em.Name,
+                em.CompanyId,
+                em.CylinderCount,
+                em.EngineDisplacementValue,
+                em.EngineDisplacementUnitOfMeasurementId,
+                em.EnginePowerValue,
+                em.EnginePowerUnitOfMeasurementId,
+                em.WeightValue,
+                em.WeightUnitOfMeasurementId,
+                em.HoldingId))
             .ToList();
 
         var totalPages = totalItems == 0 ? 0 : (int)Math.Ceiling(totalItems / (double)pageSize);
