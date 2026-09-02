@@ -30,6 +30,7 @@ public static class PermissionCatalog
         new PermissionSection("Color", "رنگ‌ها"),
         new PermissionSection("UnitOfMeasurement", "واحدهای اندازه‌گیری"),
         new PermissionSection("Company", "شرکت‌های سازنده"),
+        new PermissionSection("FuelType", "انواع سوخت"),
     ];
 
     /// <summary>Builds the canonical permission string for a section/action pair (e.g. "Organization.Create").</summary>

@@ -135,6 +135,7 @@ try
     app.MapColorEndpoints();
     app.MapUnitOfMeasurementEndpoints();
     app.MapCompanyEndpoints();
+    app.MapFuelTypeEndpoints();
 
     app.Run();
 }

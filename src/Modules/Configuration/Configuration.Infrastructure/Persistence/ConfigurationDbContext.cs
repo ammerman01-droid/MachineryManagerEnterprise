@@ -35,6 +35,9 @@ public sealed class ConfigurationDbContext : DbContext, IConfigurationUnitOfWork
     public DbSet<global::Configuration.Domain.Company> Companies =>
         Set<global::Configuration.Domain.Company>();
 
+    /// <summary>Gets the set of FuelTypes aggregates.</summary>
+    public DbSet<global::Configuration.Domain.FuelType> FuelTypes => Set<global::Configuration.Domain.FuelType>();
+
     /// <inheritdoc />
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

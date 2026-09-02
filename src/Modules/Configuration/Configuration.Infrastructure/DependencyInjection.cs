@@ -31,6 +31,7 @@ public static class DependencyInjection
         services.AddScoped<IConfigurationLookupService, ConfigurationLookupService>();
         services.AddScoped<IConfigurationUnitOfWork>(sp => sp.GetRequiredService<ConfigurationDbContext>());
         services.AddScoped<IUnitOfMeasurementLookupService, UnitOfMeasurementLookupService>();
+                services.AddScoped<IFuelTypeRepository, FuelTypeRepository>();
 
         return services;
     }
