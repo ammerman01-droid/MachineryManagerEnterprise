@@ -30,6 +30,13 @@ else
                 }
             </MudSelect>
 
+            <MudSelect T="FuelKind" Label="نوع سوخت" @bind-Value="fuelKind" Required="true" RequiredError="نوع سوخت الزامی است." Class="mb-4">
+                @foreach (var kind in Enum.GetValues<FuelKind>())
+                {
+                    <MudSelectItem T="FuelKind" Value="@kind">@GetFuelKindDisplayName(kind)</MudSelectItem>
+                }
+            </MudSelect>
+
             <MudNumericField T="int?" @bind-Value="cylinderCount" Label="تعداد سیلندر" Min="1" Class="mb-4" />
 
             <MudGrid Class="mb-4">
@@ -122,6 +129,7 @@ else
         public string Name { get; set; } = string.Empty;
         public Guid HoldingId { get; set; }
         public Guid CompanyId { get; set; }
+        public FuelKind FuelKind { get; set; }
         public int? CylinderCount { get; set; }
         public decimal? EngineDisplacementValue { get; set; }
         public Guid? EngineDisplacementUnitOfMeasurementId { get; set; }
@@ -140,6 +148,7 @@ else
     private string name = string.Empty;
     private Guid holdingId;
     private Guid companyId;
+    private FuelKind fuelKind;
     private int? cylinderCount;
     private decimal? engineDisplacementValue;
     private Guid? engineDisplacementUnitOfMeasurementId;
@@ -197,6 +206,7 @@ else
         name = result.Name;
         holdingId = result.HoldingId;
         companyId = result.CompanyId;
+        fuelKind = result.FuelKind;
         cylinderCount = result.CylinderCount;
         engineDisplacementValue = result.EngineDisplacementValue;
         engineDisplacementUnitOfMeasurementId = result.EngineDisplacementUnitOfMeasurementId;
@@ -268,6 +278,7 @@ else
             var payload = new
             {
                 CompanyId = companyId,
+                FuelKind = fuelKind,
                 CylinderCount = cylinderCount,
                 EngineDisplacementValue = engineDisplacementValue,
                 EngineDisplacementUnitOfMeasurementId = engineDisplacementUnitOfMeasurementId,
@@ -296,4 +307,12 @@ else
             isSubmitting = false;
         }
     }
+
+    private string GetFuelKindDisplayName(FuelKind kind) => kind switch
+    {
+        FuelKind.Diesel => "گازوئیل",
+        FuelKind.Gasoline => "بنزین",
+        FuelKind.Gas => "گاز",
+        _ => kind.ToString()
+    };
 }

@@ -66,4 +66,12 @@ public static class EngineModelErrors
         Error.Conflict(
             "EngineModel.UnitOfMeasurementKindMismatch",
             $"{fieldName} requires a unit of measurement of kind '{expectedKind}'.");
+
+    /// <summary>
+    /// Creates an error indicating the supplied <see cref="FuelKind"/> value is not one of the defined enum members.
+    /// </summary>
+    /// <returns>A validation <see cref="Error"/>.</returns>
+    public static Error InvalidFuelKind() => Error.Validation(
+        "EngineModel.InvalidFuelKind",
+        "The supplied fuel kind is not valid.");
 }

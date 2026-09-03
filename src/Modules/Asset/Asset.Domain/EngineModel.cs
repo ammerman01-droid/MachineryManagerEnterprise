@@ -35,6 +35,14 @@ public sealed class EngineModel : AggregateRoot<EngineModelId>
     /// </summary>
     public Guid CompanyId { get; private set; }
 
+    /// <summary>
+    /// Gets the fuel kind this engine consumes. Required (chat,
+    /// 2026-09-02) — unlike the other technical specification fields,
+    /// FuelKind has no "not specified" state; every Engine Model must
+    /// declare one.
+    /// </summary>
+    public FuelKind FuelKind { get; private set; }
+
     /// <summary>Gets the number of cylinders, or <see langword="null"/> if not specified (chat, 2026-08-30).</summary>
     public int? CylinderCount { get; private set; }
 
@@ -80,6 +88,7 @@ public sealed class EngineModel : AggregateRoot<EngineModelId>
         Guid holdingId,
         string name,
         Guid companyId,
+        FuelKind fuelKind,
         int? cylinderCount,
         decimal? engineDisplacementValue,
         Guid? engineDisplacementUnitOfMeasurementId,
@@ -92,6 +101,7 @@ public sealed class EngineModel : AggregateRoot<EngineModelId>
         HoldingId = holdingId;
         Name = name;
         CompanyId = companyId;
+        FuelKind = fuelKind;
         CylinderCount = cylinderCount;
         EngineDisplacementValue = engineDisplacementValue;
         EngineDisplacementUnitOfMeasurementId = engineDisplacementUnitOfMeasurementId;
@@ -105,6 +115,7 @@ public sealed class EngineModel : AggregateRoot<EngineModelId>
     /// <param name="holdingId">The owning Holding.</param>
     /// <param name="name">The display name.</param>
     /// <param name="companyId">The manufacturer company.</param>
+    /// <param name="fuelKind">The fuel kind this engine consumes (chat, 2026-09-02 — required).</param>
     /// <param name="dateTimeProvider">Provides the current UTC time for the raised domain event.</param>
     /// <param name="cylinderCount">Optional number of cylinders (chat, 2026-08-30).</param>
     /// <param name="engineDisplacementValue">Optional engine displacement value.</param>
@@ -118,6 +129,7 @@ public sealed class EngineModel : AggregateRoot<EngineModelId>
         Guid holdingId,
         string name,
         Guid companyId,
+        FuelKind fuelKind,
         IDateTimeProvider dateTimeProvider,
         int? cylinderCount = null,
         decimal? engineDisplacementValue = null,
@@ -135,6 +147,11 @@ public sealed class EngineModel : AggregateRoot<EngineModelId>
         if (name.Length > MaxNameLength)
         {
             return Result.Failure<EngineModel>(EngineModelErrors.NameTooLong(MaxNameLength));
+        }
+
+        if (!Enum.IsDefined(fuelKind))
+        {
+            return Result.Failure<EngineModel>(EngineModelErrors.InvalidFuelKind());
         }
 
         if (cylinderCount is <= 0)
@@ -169,6 +186,7 @@ public sealed class EngineModel : AggregateRoot<EngineModelId>
             holdingId,
             name.Trim(),
             companyId,
+            fuelKind,
             cylinderCount,
             engineDisplacementValue,
             engineDisplacementUnitOfMeasurementId,
@@ -210,12 +228,11 @@ public sealed class EngineModel : AggregateRoot<EngineModelId>
     /// Updates this Engine Model's technical specifications — the same
     /// fields accepted by <see cref="Register"/> apart from Holding and
     /// Name (chat, 2026-09-01: the Edit page previously exposed only
-    /// Name; this closes that gap). Existence/Holding-membership checks
-    /// for CompanyId and the UnitOfMeasurement ids are the caller's
-    /// responsibility (see UpdateEngineModelSpecificationsCommandHandler),
-    /// mirroring how Register is used.
+    /// Name; this closes that gap. Chat, 2026-09-02: FuelKind added,
+    /// also required here).
     /// </summary>
     /// <param name="companyId">The manufacturer company.</param>
+    /// <param name="fuelKind">The fuel kind this engine consumes.</param>
     /// <param name="cylinderCount">Optional number of cylinders.</param>
     /// <param name="engineDisplacementValue">Optional engine displacement value.</param>
     /// <param name="engineDisplacementUnitOfMeasurementId">Optional unit of measurement for the displacement value.</param>
@@ -226,6 +243,7 @@ public sealed class EngineModel : AggregateRoot<EngineModelId>
     /// <returns>A <see cref="Result"/> indicating success or a validation error.</returns>
     public Result UpdateSpecifications(
         Guid companyId,
+        FuelKind fuelKind,
         int? cylinderCount,
         decimal? engineDisplacementValue,
         Guid? engineDisplacementUnitOfMeasurementId,
@@ -234,6 +252,11 @@ public sealed class EngineModel : AggregateRoot<EngineModelId>
         decimal? weightValue,
         Guid? weightUnitOfMeasurementId)
     {
+        if (!Enum.IsDefined(fuelKind))
+        {
+            return Result.Failure(EngineModelErrors.InvalidFuelKind());
+        }
+
         if (cylinderCount is <= 0)
         {
             return Result.Failure(EngineModelErrors.InvalidCylinderCount());
@@ -262,6 +285,7 @@ public sealed class EngineModel : AggregateRoot<EngineModelId>
         }
 
         CompanyId = companyId;
+        FuelKind = fuelKind;
         CylinderCount = cylinderCount;
         EngineDisplacementValue = engineDisplacementValue;
         EngineDisplacementUnitOfMeasurementId = engineDisplacementUnitOfMeasurementId;

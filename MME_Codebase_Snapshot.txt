@@ -1,7 +1,7 @@
 ﻿
 ================================================================================
   MACHINERYMANAGERENTERPRISE - CODEBASE SNAPSHOT
-  Generated: 2026-09-02 09:44:44
+  Generated: 2026-09-03 08:22:17
   Source: C:\Users\i\source\repos\MachineryManagerEnterprise
   Purpose: Complete source code reference for AI-assisted development
   Excludes: .md, .gitignore, this script, build artifacts, binaries, IDE,
@@ -20,6 +20,7 @@ MachineryManagerEnterprise
 |   |   |   |-- Entity.cs
 |   |   |   |-- Error.cs
 |   |   |   |-- ErrorType.cs
+|   |   |   |-- FuelKind.cs
 |   |   |   |-- IDomainEvent.cs
 |   |   |   |-- IHasDomainEvents.cs
 |   |   |   |-- MachineryManager.SharedKernel.csproj
@@ -370,7 +371,8 @@ MachineryManagerEnterprise
 |   |   |       |   |-- RegisterAssetRequest.cs
 |   |   |       |   |-- RegisterEngineModelRequest.cs
 |   |   |       |   |-- RenameAssetModelRequest.cs
-|   |   |       |   +-- RenameEngineModelRequest.cs
+|   |   |       |   |-- RenameEngineModelRequest.cs
+|   |   |       |   +-- UpdateEngineModelSpecificationsRequest.cs
 |   |   |       |-- Endpoints
 |   |   |       |   |-- AssetEndpoints.cs
 |   |   |       |   |-- AssetModelEndpoints.cs
@@ -383,6 +385,7 @@ MachineryManagerEnterprise
 |   |   |   |   |   |-- IColorRepository.cs
 |   |   |   |   |   |-- ICompanyRepository.cs
 |   |   |   |   |   |-- IConfigurationUnitOfWork.cs
+|   |   |   |   |   |-- IFuelTypeRepository.cs
 |   |   |   |   |   +-- IUnitOfMeasurementRepository.cs
 |   |   |   |   |-- Behaviors
 |   |   |   |   |   +-- ValidationBehavior.cs
@@ -411,6 +414,18 @@ MachineryManagerEnterprise
 |   |   |   |   |   |       +-- GetCompaniesByHolding
 |   |   |   |   |   |           |-- GetCompaniesByHoldingQuery.cs
 |   |   |   |   |   |           +-- GetCompaniesByHoldingQueryHandler.cs
+|   |   |   |   |   |-- FuelTypes
+|   |   |   |   |   |   |-- Commands
+|   |   |   |   |   |   |   +-- RegisterFuelType
+|   |   |   |   |   |   |       |-- RegisterFuelTypeCommand.cs
+|   |   |   |   |   |   |       |-- RegisterFuelTypeCommandHandler.cs
+|   |   |   |   |   |   |       +-- RegisterFuelTypeCommandValidator.cs
+|   |   |   |   |   |   |-- Dtos
+|   |   |   |   |   |   |   +-- FuelTypeDto.cs
+|   |   |   |   |   |   +-- Queries
+|   |   |   |   |   |       +-- GetFuelTypesByHolding
+|   |   |   |   |   |           |-- GetFuelTypesByHoldingQuery.cs
+|   |   |   |   |   |           +-- GetFuelTypesByHoldingQueryHandler.cs
 |   |   |   |   |   +-- UnitsOfMeasurement
 |   |   |   |   |       |-- Commands
 |   |   |   |   |       |   +-- RegisterUnitOfMeasurement
@@ -431,6 +446,7 @@ MachineryManagerEnterprise
 |   |   |   |   |-- Events
 |   |   |   |   |   |-- ColorRegistered.cs
 |   |   |   |   |   |-- CompanyRegistered.cs
+|   |   |   |   |   |-- FuelTypeRegistered.cs
 |   |   |   |   |   +-- UnitOfMeasurementRegistered.cs
 |   |   |   |   |-- Color.cs
 |   |   |   |   |-- ColorErrors.cs
@@ -439,6 +455,9 @@ MachineryManagerEnterprise
 |   |   |   |   |-- CompanyErrors.cs
 |   |   |   |   |-- CompanyId.cs
 |   |   |   |   |-- Configuration.Domain.csproj
+|   |   |   |   |-- FuelType.cs
+|   |   |   |   |-- FuelTypeErrors.cs
+|   |   |   |   |-- FuelTypeId.cs
 |   |   |   |   |-- UnitOfMeasurement.cs
 |   |   |   |   |-- UnitOfMeasurementErrors.cs
 |   |   |   |   +-- UnitOfMeasurementId.cs
@@ -450,15 +469,19 @@ MachineryManagerEnterprise
 |   |   |   |   |   |-- 20260901071405_RemoveUnitCategoryAndAddKindToUnitOfMeasurement.Designer.cs
 |   |   |   |   |   |-- 20260902042734_AddCompanyAggregate.cs
 |   |   |   |   |   |-- 20260902042734_AddCompanyAggregate.Designer.cs
+|   |   |   |   |   |-- 20260902115654_AddFuelType.cs
+|   |   |   |   |   |-- 20260902115654_AddFuelType.Designer.cs
 |   |   |   |   |   +-- ConfigurationDbContextModelSnapshot.cs
 |   |   |   |   |-- Persistence
 |   |   |   |   |   |-- Configurations
 |   |   |   |   |   |   |-- ColorConfiguration.cs
 |   |   |   |   |   |   |-- CompanyConfiguration.cs
+|   |   |   |   |   |   |-- FuelTypeConfiguration.cs
 |   |   |   |   |   |   +-- UnitOfMeasurementConfiguration.cs
 |   |   |   |   |   |-- ColorRepository.cs
 |   |   |   |   |   |-- CompanyRepository.cs
 |   |   |   |   |   |-- ConfigurationDbContext.cs
+|   |   |   |   |   |-- FuelTypeRepository.cs
 |   |   |   |   |   +-- UnitOfMeasurementRepository.cs
 |   |   |   |   |-- Configuration.Infrastructure.csproj
 |   |   |   |   |-- ConfigurationLookupService.cs
@@ -471,16 +494,20 @@ MachineryManagerEnterprise
 |   |   |       |   |   |-- CompaniesList.razor
 |   |   |       |   |   |-- CreateColor.razor
 |   |   |       |   |   |-- CreateCompany.razor
+|   |   |       |   |   |-- CreateFuelType.razor
 |   |   |       |   |   |-- CreateUnitOfMeasurement.razor
+|   |   |       |   |   |-- FuelTypesList.razor
 |   |   |       |   |   +-- UnitsOfMeasurementList.razor
 |   |   |       |   +-- _Imports.razor
 |   |   |       |-- Contracts
 |   |   |       |   |-- RegisterColorRequest.cs
 |   |   |       |   |-- RegisterCompanyRequest.cs
+|   |   |       |   |-- RegisterFuelTypeRequest.cs
 |   |   |       |   +-- RegisterUnitOfMeasurementRequest.cs
 |   |   |       |-- Endpoints
 |   |   |       |   |-- ColorEndpoints.cs
 |   |   |       |   |-- CompanyEndpoints.cs
+|   |   |       |   |-- FuelTypeEndpoints.cs
 |   |   |       |   |-- ResultExtensions.cs
 |   |   |       |   +-- UnitOfMeasurementEndpoints.cs
 |   |   |       +-- Configuration.Presentation.csproj
@@ -1619,6 +1646,36 @@ public enum ErrorType
 
 
 ================================================================================
+FILE: src\BuildingBlocks\MachineryManager.SharedKernel\FuelKind.cs
+SIZE: 0.88 KB
+================================================================================
+namespace MachineryManager.SharedKernel;
+
+/// <summary>
+/// A fixed, cross-module classification of the fundamental kind of
+/// fuel a Configuration-module FuelType represents. Lives in
+/// SharedKernel — mirroring <see cref="PhysicalQuantityKind"/> — so
+/// other modules' Domain layers can reference it without violating
+/// the Modular Monolith rule that a module's Domain layer may depend
+/// only on SharedKernel (chat, 2026-09-02).
+/// </summary>
+/// <remarks>
+/// Extend this deliberately — adding a member here is a cross-module
+/// contract change, not a Configuration-module-only decision.
+/// </remarks>
+public enum FuelKind
+{
+    /// <summary>Diesel fuel (گازوئیل).</summary>
+    Diesel = 0,
+
+    /// <summary>Gasoline/petrol (بنزین).</summary>
+    Gasoline = 1,
+
+    /// <summary>Gaseous fuel, e.g. CNG/LPG (گاز).</summary>
+    Gas = 2,
+}
+
+================================================================================
 FILE: src\BuildingBlocks\MachineryManager.SharedKernel\IDomainEvent.cs
 SIZE: 0.49 KB
 ================================================================================
@@ -2032,7 +2089,7 @@ SIZE: 0.84 KB
 
 ================================================================================
 FILE: src\Host\MachineryManager.Web\Components\Layout\NavMenu.razor
-SIZE: 3.29 KB
+SIZE: 3.53 KB
 ================================================================================
 <div class="top-row ps-3 navbar navbar-dark">
     <div class="container-fluid">
@@ -2083,6 +2140,12 @@ SIZE: 3.29 KB
         <div class="nav-item px-3">
             <NavLink class="nav-link" href="admin/companies">
                 <span class="bi bi-buildings-nav-menu" aria-hidden="true"></span> شرکت‌های سازنده
+            </NavLink>
+        </div>
+
+        <div class="nav-item px-3">
+            <NavLink class="nav-link" href="admin/fuel-types">
+                <span class="bi bi-buildings-nav-menu" aria-hidden="true"></span> انواع سوخت
             </NavLink>
         </div>
 
@@ -2336,7 +2399,7 @@ SIZE: 2.65 KB
 
 ================================================================================
 FILE: src\Host\MachineryManager.Web\Program.cs
-SIZE: 5.27 KB
+SIZE: 5.3 KB
 ================================================================================
 using MachineryManager.Identity.Infrastructure;
 using MachineryManager.Identity.Presentation.Endpoints;
@@ -2475,6 +2538,7 @@ try
     app.MapColorEndpoints();
     app.MapUnitOfMeasurementEndpoints();
     app.MapCompanyEndpoints();
+    app.MapFuelTypeEndpoints();
 
     app.Run();
 }
@@ -4422,7 +4486,7 @@ public sealed class UserProfileAssignmentDeactivated : IDomainEvent
 
 ================================================================================
 FILE: src\Modules\Administration\Administration.Domain\PermissionCatalog.cs
-SIZE: 2.43 KB
+SIZE: 2.5 KB
 ================================================================================
 namespace Administration.Domain;
 
@@ -4456,6 +4520,7 @@ public static class PermissionCatalog
         new PermissionSection("Color", "رنگ‌ها"),
         new PermissionSection("UnitOfMeasurement", "واحدهای اندازه‌گیری"),
         new PermissionSection("Company", "شرکت‌های سازنده"),
+        new PermissionSection("FuelType", "انواع سوخت"),
     ];
 
     /// <summary>Builds the canonical permission string for a section/action pair (e.g. "Organization.Create").</summary>
@@ -10783,7 +10848,7 @@ public sealed class UpdateEngineModelSpecificationsCommandValidator
 
 ================================================================================
 FILE: src\Modules\Asset\Asset.Application\Features\EngineModels\Dtos\EngineModelDto.cs
-SIZE: 0.47 KB
+SIZE: 0.49 KB
 ================================================================================
 namespace MachineryManager.Asset.Application.Features.EngineModels.Dtos;
 
@@ -10798,8 +10863,8 @@ public sealed record EngineModelDto(
     decimal? EnginePowerValue,
     Guid? EnginePowerUnitOfMeasurementId,
     decimal? WeightValue,
-    Guid? WeightUnitOfMeasurementId);
-
+    Guid? WeightUnitOfMeasurementId,
+    Guid HoldingId);
 
 ================================================================================
 FILE: src\Modules\Asset\Asset.Application\Features\EngineModels\Queries\GetEngineModelById\GetEngineModelByIdQuery.cs
@@ -10816,7 +10881,7 @@ public sealed record GetEngineModelByIdQuery(Guid EngineModelId) : IRequest<Resu
 
 ================================================================================
 FILE: src\Modules\Asset\Asset.Application\Features\EngineModels\Queries\GetEngineModelById\GetEngineModelByIdQueryHandler.cs
-SIZE: 3.04 KB
+SIZE: 3.08 KB
 ================================================================================
 using MachineryManager.Asset.Application.Abstractions;
 using MachineryManager.Asset.Application.Features.EngineModels.Dtos;
@@ -10889,7 +10954,8 @@ public sealed class GetEngineModelByIdQueryHandler
             engineModel.EnginePowerValue,
             engineModel.EnginePowerUnitOfMeasurementId,
             engineModel.WeightValue,
-            engineModel.WeightUnitOfMeasurementId);
+            engineModel.WeightUnitOfMeasurementId,
+            engineModel.HoldingId);
 
         return Result.Success(dto);
     }
@@ -15740,7 +15806,7 @@ public sealed class EngineModelConfiguration : IEntityTypeConfiguration<EngineMo
 
 ================================================================================
 FILE: src\Modules\Asset\Asset.Infrastructure\Persistence\EngineModelRepository.cs
-SIZE: 2.97 KB
+SIZE: 3 KB
 ================================================================================
 using Asset.Domain;
 using MachineryManager.Asset.Application.Abstractions;
@@ -15811,7 +15877,8 @@ public sealed class EngineModelRepository : IEngineModelRepository
                 em.EnginePowerValue,
                 em.EnginePowerUnitOfMeasurementId,
                 em.WeightValue,
-                em.WeightUnitOfMeasurementId))
+                em.WeightUnitOfMeasurementId,
+                em.HoldingId))
             .ToList();
 
         var totalPages = totalItems == 0 ? 0 : (int)Math.Ceiling(totalItems / (double)pageSize);
@@ -17615,11 +17682,13 @@ System.Text.Json.JsonSerializerOptions { PropertyNameCaseInsensitive = true });
 
 ================================================================================
 FILE: src\Modules\Asset\Asset.Presentation\Components\Pages\EditEngineModel.razor
-SIZE: 3.62 KB
+SIZE: 11.39 KB
 ================================================================================
 @page "/admin/engine-models/{EngineModelId:guid}/edit"
 @inject IHttpClientFactory HttpClientFactory
 @inject NavigationManager Navigation
+@using System.Text.Json
+@using MachineryManager.SharedKernel
 
 <PageTitle>ویرایش مدل موتور</PageTitle>
 
@@ -17636,9 +17705,63 @@ SIZE: 3.62 KB
 }
 else
 {
-    <MudPaper Class="pa-4" Style="max-width:500px;">
+    <MudPaper Class="pa-4" Style="max-width:700px;">
         <MudForm @ref="form" @bind-IsValid="@isValid">
-            <MudTextField @bind-Value="name" Label="نام مدل" Required="true" RequiredError="نام الزامی است." MaxLength="200" />
+            <MudTextField @bind-Value="name" Label="نام مدل" Required="true" RequiredError="نام الزامی است." MaxLength="200" Disabled="true" Class="mb-4" />
+
+            <MudSelect T="Guid" Label="شرکت سازنده" @bind-Value="companyId" Required="true" RequiredError="شرکت سازنده الزامی است." Class="mb-4">
+                @foreach (var company in companies)
+                {
+                    <MudSelectItem T="Guid" Value="@company.Id">@company.Name</MudSelectItem>
+                }
+            </MudSelect>
+
+            <MudNumericField T="int?" @bind-Value="cylinderCount" Label="تعداد سیلندر" Min="1" Class="mb-4" />
+
+            <MudGrid Class="mb-4">
+                <MudItem xs="6">
+                    <MudNumericField T="decimal?" @bind-Value="engineDisplacementValue" Label="حجم موتور" Min="0.0001M" />
+                </MudItem>
+                <MudItem xs="6">
+                    <MudSelect T="Guid?" Label="واحد حجم" @bind-Value="engineDisplacementUnitOfMeasurementId">
+                        <MudSelectItem T="Guid?" Value="@((Guid?)null)">—</MudSelectItem>
+                        @foreach (var unit in dimensionUnits)
+                        {
+                            <MudSelectItem T="Guid?" Value="@((Guid?)unit.Id)">@unit.Name</MudSelectItem>
+                        }
+                    </MudSelect>
+                </MudItem>
+            </MudGrid>
+
+            <MudGrid Class="mb-4">
+                <MudItem xs="6">
+                    <MudNumericField T="decimal?" @bind-Value="enginePowerValue" Label="قدرت موتور" Min="0.0001M" />
+                </MudItem>
+                <MudItem xs="6">
+                    <MudSelect T="Guid?" Label="واحد قدرت" @bind-Value="enginePowerUnitOfMeasurementId">
+                        <MudSelectItem T="Guid?" Value="@((Guid?)null)">—</MudSelectItem>
+                        @foreach (var unit in forceUnits)
+                        {
+                            <MudSelectItem T="Guid?" Value="@((Guid?)unit.Id)">@unit.Name</MudSelectItem>
+                        }
+                    </MudSelect>
+                </MudItem>
+            </MudGrid>
+
+            <MudGrid Class="mb-4">
+                <MudItem xs="6">
+                    <MudNumericField T="decimal?" @bind-Value="weightValue" Label="وزن" Min="0.0001M" />
+                </MudItem>
+                <MudItem xs="6">
+                    <MudSelect T="Guid?" Label="واحد وزن" @bind-Value="weightUnitOfMeasurementId">
+                        <MudSelectItem T="Guid?" Value="@((Guid?)null)">—</MudSelectItem>
+                        @foreach (var unit in weightUnits)
+                        {
+                            <MudSelectItem T="Guid?" Value="@((Guid?)unit.Id)">@unit.Name</MudSelectItem>
+                        }
+                    </MudSelect>
+                </MudItem>
+            </MudGrid>
 
             <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="SubmitAsync"
                        Disabled="@(!isValid || isSubmitting)" Class="mt-4">
@@ -17663,37 +17786,70 @@ else
     [Parameter]
     public Guid EngineModelId { get; set; }
 
+    /// <summary>Represents a Company option in the dropdown.</summary>
+    private sealed class CompanyItem
+    {
+        public Guid Id { get; set; }
+        public string Name { get; set; } = string.Empty;
+    }
+
+    /// <summary>Represents a Unit of Measurement option in the dropdown.</summary>
+    private sealed class UnitItem
+    {
+        public Guid Id { get; set; }
+        public string Name { get; set; } = string.Empty;
+        public PhysicalQuantityKind Kind { get; set; }
+    }
+
+    /// <summary>Represents the full Engine Model details returned by the API.</summary>
     private sealed class EngineModelDetails
     {
         public Guid Id { get; set; }
         public string Name { get; set; } = string.Empty;
+        public Guid HoldingId { get; set; }
+        public Guid CompanyId { get; set; }
+        public int? CylinderCount { get; set; }
+        public decimal? EngineDisplacementValue { get; set; }
+        public Guid? EngineDisplacementUnitOfMeasurementId { get; set; }
+        public decimal? EnginePowerValue { get; set; }
+        public Guid? EnginePowerUnitOfMeasurementId { get; set; }
+        public decimal? WeightValue { get; set; }
+        public Guid? WeightUnitOfMeasurementId { get; set; }
     }
 
     private MudForm? form;
     private bool isValid;
     private bool isSubmitting;
     private bool isLoading = true;
-    private string name = string.Empty;
     private string? errorMessage;
+
+    private string name = string.Empty;
+    private Guid holdingId;
+    private Guid companyId;
+    private int? cylinderCount;
+    private decimal? engineDisplacementValue;
+    private Guid? engineDisplacementUnitOfMeasurementId;
+    private decimal? enginePowerValue;
+    private Guid? enginePowerUnitOfMeasurementId;
+    private decimal? weightValue;
+    private Guid? weightUnitOfMeasurementId;
+
+    private List<CompanyItem> companies = [];
+    private List<UnitItem> allUnits = [];
+    private List<UnitItem> dimensionUnits => allUnits.Where(u => u.Kind == PhysicalQuantityKind.Dimension).ToList();
+    private List<UnitItem> forceUnits => allUnits.Where(u => u.Kind == PhysicalQuantityKind.Force).ToList();
+    private List<UnitItem> weightUnits => allUnits.Where(u => u.Kind == PhysicalQuantityKind.Weight).ToList();
 
     protected override async Task OnInitializedAsync()
     {
         try
         {
-            var client = HttpClientFactory.CreateClient("InternalApi");
-            var response = await client.GetAsync($"/api/v1/engine-models/{EngineModelId}");
-            var content = await response.Content.ReadAsStringAsync();
-
-            if (!response.IsSuccessStatusCode)
+            await LoadEngineModelAsync();
+            if (holdingId != Guid.Empty)
             {
-                errorMessage = $"خطا در دریافت مدل: {content}";
-                return;
+                await LoadCompaniesAsync();
+                await LoadUnitsAsync();
             }
-
-            var result = System.Text.Json.JsonSerializer.Deserialize<EngineModelDetails>(content, new
-System.Text.Json.JsonSerializerOptions { PropertyNameCaseInsensitive = true });
-
-            name = result?.Name ?? string.Empty;
         }
         catch (Exception ex)
         {
@@ -17702,6 +17858,83 @@ System.Text.Json.JsonSerializerOptions { PropertyNameCaseInsensitive = true });
         finally
         {
             isLoading = false;
+        }
+    }
+
+    private async Task LoadEngineModelAsync()
+    {
+        var client = HttpClientFactory.CreateClient("InternalApi");
+        var response = await client.GetAsync($"/api/v1/engine-models/{EngineModelId}");
+        var content = await response.Content.ReadAsStringAsync();
+
+        if (!response.IsSuccessStatusCode)
+        {
+            errorMessage = $"خطا در دریافت مدل موتور: {content}";
+            return;
+        }
+
+        var result = JsonSerializer.Deserialize<EngineModelDetails>(content, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+        if (result is null)
+        {
+            errorMessage = "داده‌ای دریافت نشد.";
+            return;
+        }
+
+        name = result.Name;
+        holdingId = result.HoldingId;
+        companyId = result.CompanyId;
+        cylinderCount = result.CylinderCount;
+        engineDisplacementValue = result.EngineDisplacementValue;
+        engineDisplacementUnitOfMeasurementId = result.EngineDisplacementUnitOfMeasurementId;
+        enginePowerValue = result.EnginePowerValue;
+        enginePowerUnitOfMeasurementId = result.EnginePowerUnitOfMeasurementId;
+        weightValue = result.WeightValue;
+        weightUnitOfMeasurementId = result.WeightUnitOfMeasurementId;
+    }
+
+    private async Task LoadCompaniesAsync()
+    {
+        try
+        {
+            var client = HttpClientFactory.CreateClient("InternalApi");
+            var response = await client.GetAsync($"/api/v1/companies?holdingId={holdingId}");
+            var content = await response.Content.ReadAsStringAsync();
+
+            if (response.IsSuccessStatusCode)
+            {
+                companies = JsonSerializer.Deserialize<List<CompanyItem>>(content, new JsonSerializerOptions { PropertyNameCaseInsensitive = true }) ?? [];
+            }
+            else
+            {
+                errorMessage = $"خطا در دریافت شرکت‌ها: {content}";
+            }
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"خطا در دریافت شرکت‌ها: {ex.Message}";
+        }
+    }
+
+    private async Task LoadUnitsAsync()
+    {
+        try
+        {
+            var client = HttpClientFactory.CreateClient("InternalApi");
+            var response = await client.GetAsync($"/api/v1/units-of-measurement?holdingId={holdingId}");
+            var content = await response.Content.ReadAsStringAsync();
+
+            if (response.IsSuccessStatusCode)
+            {
+                allUnits = JsonSerializer.Deserialize<List<UnitItem>>(content, new JsonSerializerOptions { PropertyNameCaseInsensitive = true }) ?? [];
+            }
+            else
+            {
+                errorMessage = $"خطا در دریافت واحدها: {content}";
+            }
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"خطا در دریافت واحدها: {ex.Message}";
         }
     }
 
@@ -17718,7 +17951,19 @@ System.Text.Json.JsonSerializerOptions { PropertyNameCaseInsensitive = true });
         try
         {
             var client = HttpClientFactory.CreateClient("InternalApi");
-            var response = await client.PutAsJsonAsync($"/api/v1/engine-models/{EngineModelId}", new { Name = name });
+            var payload = new
+            {
+                CompanyId = companyId,
+                CylinderCount = cylinderCount,
+                EngineDisplacementValue = engineDisplacementValue,
+                EngineDisplacementUnitOfMeasurementId = engineDisplacementUnitOfMeasurementId,
+                EnginePowerValue = enginePowerValue,
+                EnginePowerUnitOfMeasurementId = enginePowerUnitOfMeasurementId,
+                WeightValue = weightValue,
+                WeightUnitOfMeasurementId = weightUnitOfMeasurementId
+            };
+
+            var response = await client.PutAsJsonAsync($"/api/v1/engine-models/{EngineModelId}/specifications", payload);
 
             if (response.IsSuccessStatusCode)
             {
@@ -17726,7 +17971,7 @@ System.Text.Json.JsonSerializerOptions { PropertyNameCaseInsensitive = true });
                 return;
             }
 
-            errorMessage = $"خطا در ویرایش مدل: {await response.Content.ReadAsStringAsync()}";
+            errorMessage = $"خطا در ویرایش مدل موتور: {await response.Content.ReadAsStringAsync()}";
         }
         catch (Exception ex)
         {
@@ -18120,6 +18365,31 @@ namespace MachineryManager.Asset.Presentation.Contracts;
 public sealed record RenameEngineModelRequest(string Name);
 
 ================================================================================
+FILE: src\Modules\Asset\Asset.Presentation\Contracts\UpdateEngineModelSpecificationsRequest.cs
+SIZE: 1.08 KB
+================================================================================
+namespace MachineryManager.Asset.Presentation.Contracts;
+
+/// <summary>Request body for updating an Engine Model's technical specifications.</summary>
+/// <param name="CompanyId">The manufacturer company.</param>
+/// <param name="CylinderCount">Optional number of cylinders.</param>
+/// <param name="EngineDisplacementValue">Optional engine displacement value.</param>
+/// <param name="EngineDisplacementUnitOfMeasurementId">Optional unit for displacement.</param>
+/// <param name="EnginePowerValue">Optional engine power value.</param>
+/// <param name="EnginePowerUnitOfMeasurementId">Optional unit for power.</param>
+/// <param name="WeightValue">Optional weight value.</param>
+/// <param name="WeightUnitOfMeasurementId">Optional unit for weight.</param>
+public sealed record UpdateEngineModelSpecificationsRequest(
+    Guid CompanyId,
+    int? CylinderCount,
+    decimal? EngineDisplacementValue,
+    Guid? EngineDisplacementUnitOfMeasurementId,
+    decimal? EnginePowerValue,
+    Guid? EnginePowerUnitOfMeasurementId,
+    decimal? WeightValue,
+    Guid? WeightUnitOfMeasurementId);
+
+================================================================================
 FILE: src\Modules\Asset\Asset.Presentation\Endpoints\AssetEndpoints.cs
 SIZE: 6.94 KB
 ================================================================================
@@ -18473,10 +18743,11 @@ public static class AssetModelEndpoints
 
 ================================================================================
 FILE: src\Modules\Asset\Asset.Presentation\Endpoints\EngineModelEndpoints.cs
-SIZE: 4.63 KB
+SIZE: 5.91 KB
 ================================================================================
 using MachineryManager.Asset.Application.Features.EngineModels.Commands.RegisterEngineModel;
 using MachineryManager.Asset.Application.Features.EngineModels.Commands.RenameEngineModel;
+using MachineryManager.Asset.Application.Features.EngineModels.Commands.UpdateEngineModelSpecifications;
 using MachineryManager.Asset.Application.Features.EngineModels.Queries.GetEngineModelById;
 using MachineryManager.Asset.Application.Features.EngineModels.Queries.SearchEngineModels;
 using MachineryManager.Asset.Presentation.Contracts;
@@ -18511,6 +18782,10 @@ public static class EngineModelEndpoints
         group.MapPut("/{engineModelId:guid}", RenameEngineModelAsync)
             .WithName("RenameEngineModel")
             .WithSummary("Renames an existing Engine Model.");
+
+        group.MapPut("/{engineModelId:guid}/specifications", UpdateEngineModelSpecificationsAsync)
+            .WithName("UpdateEngineModelSpecifications")
+            .WithSummary("Updates the technical specifications of an existing Engine Model.");
 
         group.MapGet("/{engineModelId:guid}", GetEngineModelByIdAsync)
             .WithName("GetEngineModelById")
@@ -18557,6 +18832,31 @@ public static class EngineModelEndpoints
     {
         var result = await sender.Send(
             new RenameEngineModelCommand(engineModelId, request.Name),
+            cancellationToken);
+
+        return result.IsSuccess
+            ? Results.NoContent()
+            : result.ToProblemResult(httpContext);
+    }
+
+    private static async Task<IResult> UpdateEngineModelSpecificationsAsync(
+        Guid engineModelId,
+        UpdateEngineModelSpecificationsRequest request,
+        ISender sender,
+        HttpContext httpContext,
+        CancellationToken cancellationToken)
+    {
+        var result = await sender.Send(
+            new UpdateEngineModelSpecificationsCommand(
+                engineModelId,
+                request.CompanyId,
+                request.CylinderCount,
+                request.EngineDisplacementValue,
+                request.EngineDisplacementUnitOfMeasurementId,
+                request.EnginePowerValue,
+                request.EnginePowerUnitOfMeasurementId,
+                request.WeightValue,
+                request.WeightUnitOfMeasurementId),
             cancellationToken);
 
         return result.IsSuccess
@@ -18735,6 +19035,26 @@ namespace MachineryManager.Configuration.Application.Abstractions;
 /// </summary>
 public interface IConfigurationUnitOfWork : IUnitOfWork
 {
+}
+
+================================================================================
+FILE: src\Modules\Configuration\Configuration.Application\Abstractions\IFuelTypeRepository.cs
+SIZE: 0.89 KB
+================================================================================
+using MachineryManager.SharedKernel.Abstractions;
+
+namespace MachineryManager.Configuration.Application.Abstractions;
+
+/// <summary>Repository contract for the <see cref="global::Configuration.Domain.FuelType"/> aggregate.</summary>
+public interface IFuelTypeRepository
+    : IRepository<global::Configuration.Domain.FuelType, global::Configuration.Domain.FuelTypeId>
+{
+    /// <summary>Retrieves every Fuel Type registered for the given Holding.</summary>
+    /// <param name="holdingId">The Holding whose fuel type catalog should be returned.</param>
+    /// <param name="cancellationToken">Token to cancel the asynchronous operation.</param>
+    /// <returns>The list of fuel types belonging to the given Holding, ordered by name.</returns>
+    Task<IReadOnlyList<Features.FuelTypes.Dtos.FuelTypeDto>> GetByHoldingAsync(
+        Guid holdingId, CancellationToken cancellationToken = default);
 }
 
 ================================================================================
@@ -19398,6 +19718,223 @@ public sealed class GetCompaniesByHoldingQueryHandler
 }
 
 ================================================================================
+FILE: src\Modules\Configuration\Configuration.Application\Features\FuelTypes\Commands\RegisterFuelType\RegisterFuelTypeCommand.cs
+SIZE: 0.36 KB
+================================================================================
+using MachineryManager.SharedKernel;
+using MediatR;
+
+namespace MachineryManager.Configuration.Application.Features.FuelTypes.Commands.RegisterFuelType;
+
+/// <summary>Command to register a new FuelType within a Holding.</summary>
+public sealed record RegisterFuelTypeCommand(Guid HoldingId, string Name, long Price, FuelKind Kind)
+    : IRequest<Result<Guid>>;
+
+================================================================================
+FILE: src\Modules\Configuration\Configuration.Application\Features\FuelTypes\Commands\RegisterFuelType\RegisterFuelTypeCommandHandler.cs
+SIZE: 4.12 KB
+================================================================================
+using MachineryManager.Configuration.Application.Abstractions;
+using MachineryManager.SharedKernel;
+using MachineryManager.SharedKernel.Abstractions;
+using MediatR;
+
+namespace MachineryManager.Configuration.Application.Features.FuelTypes.Commands.RegisterFuelType;
+
+/// <summary>
+/// Handles the registration of a new Fuel Type. FuelType is
+/// Holding-scoped, mirroring UnitCategory (chat, 2026-09-02).
+/// </summary>
+public sealed class RegisterFuelTypeCommandHandler
+    : IRequestHandler<RegisterFuelTypeCommand, Result<Guid>>
+{
+    private const string RequiredPermission = "FuelType.Create";
+
+    private readonly IFuelTypeRepository _fuelTypeRepository;
+    private readonly IConfigurationUnitOfWork _unitOfWork;
+    private readonly IDateTimeProvider _dateTimeProvider;
+    private readonly ICurrentUserService _currentUserService;
+    private readonly IPermissionEvaluator _permissionEvaluator;
+    private readonly IHoldingLookupService _holdingLookupService;
+
+    /// <summary>Initializes a new instance of the <see cref="RegisterFuelTypeCommandHandler"/> class.</summary>
+    /// <param name="fuelTypeRepository">The Fuel Type repository.</param>
+    /// <param name="unitOfWork">The Configuration module's Unit of Work.</param>
+    /// <param name="dateTimeProvider">Provides the current UTC time for the raised domain event.</param>
+    /// <param name="currentUserService">Provides the authenticated user context.</param>
+    /// <param name="permissionEvaluator">Evaluates the current user's permissions at request time.</param>
+    /// <param name="holdingLookupService">Cross-module, read-only lookup into the Organization module, used to verify the target Holding exists.</param>
+    public RegisterFuelTypeCommandHandler(
+        IFuelTypeRepository fuelTypeRepository,
+        IConfigurationUnitOfWork unitOfWork,
+        IDateTimeProvider dateTimeProvider,
+        ICurrentUserService currentUserService,
+        IPermissionEvaluator permissionEvaluator,
+        IHoldingLookupService holdingLookupService)
+    {
+        _fuelTypeRepository = fuelTypeRepository;
+        _unitOfWork = unitOfWork;
+        _dateTimeProvider = dateTimeProvider;
+        _currentUserService = currentUserService;
+        _permissionEvaluator = permissionEvaluator;
+        _holdingLookupService = holdingLookupService;
+    }
+
+    /// <summary>Handles the Fuel Type registration request.</summary>
+    /// <param name="request">The registration command.</param>
+    /// <param name="cancellationToken">Token to cancel the asynchronous operation.</param>
+    /// <returns>A <see cref="Result{Guid}"/> containing the new fuel type's identifier on success; otherwise a validation, not-found, or authorization error.</returns>
+    public async Task<Result<Guid>> Handle(RegisterFuelTypeCommand request, CancellationToken cancellationToken)
+    {
+        if (_currentUserService.UserId is not { } userId)
+        {
+            return Result.Failure<Guid>(global::Configuration.Domain.FuelTypeErrors.NotAuthorized());
+        }
+
+        var scope = new ResourceScope(request.HoldingId, null, null);
+
+        var isAuthorized = await _permissionEvaluator.HasPermissionAsync(userId, RequiredPermission, scope, cancellationToken);
+
+        if (!isAuthorized)
+        {
+            return Result.Failure<Guid>(global::Configuration.Domain.FuelTypeErrors.NotAuthorized());
+        }
+
+        var holdingExists = await _holdingLookupService.ExistsAsync(request.HoldingId, cancellationToken);
+
+        if (!holdingExists)
+        {
+            return Result.Failure<Guid>(
+                Error.NotFound("FuelType.HoldingNotFound", $"Holding with id {request.HoldingId} was not found."));
+        }
+
+        var result = global::Configuration.Domain.FuelType.Register(
+            request.HoldingId, request.Name, request.Price, request.Kind, _dateTimeProvider);
+
+        if (result.IsFailure)
+        {
+            return Result.Failure<Guid>(result.Error);
+        }
+
+        _fuelTypeRepository.Add(result.Value);
+        await _unitOfWork.SaveChangesAsync(cancellationToken);
+
+        return Result.Success(result.Value.Id.Value);
+    }
+}
+
+================================================================================
+FILE: src\Modules\Configuration\Configuration.Application\Features\FuelTypes\Commands\RegisterFuelType\RegisterFuelTypeCommandValidator.cs
+SIZE: 0.7 KB
+================================================================================
+using FluentValidation;
+
+namespace MachineryManager.Configuration.Application.Features.FuelTypes.Commands.RegisterFuelType;
+
+/// <summary>Validates <see cref="RegisterFuelTypeCommand"/> per ADR-0036.</summary>
+public sealed class RegisterFuelTypeCommandValidator : AbstractValidator<RegisterFuelTypeCommand>
+{
+    /// <summary>Initializes validation rules for the register fuel type command.</summary>
+    public RegisterFuelTypeCommandValidator()
+    {
+        RuleFor(x => x.HoldingId).NotEmpty();
+        RuleFor(x => x.Name).NotEmpty().MaximumLength(global::Configuration.Domain.FuelType.MaxNameLength);
+        RuleFor(x => x.Price).GreaterThan(0);
+        RuleFor(x => x.Kind).IsInEnum();
+    }
+}
+
+================================================================================
+FILE: src\Modules\Configuration\Configuration.Application\Features\FuelTypes\Dtos\FuelTypeDto.cs
+SIZE: 0.28 KB
+================================================================================
+using MachineryManager.SharedKernel;
+
+namespace MachineryManager.Configuration.Application.Features.FuelTypes.Dtos;
+
+/// <summary>Read-only projection of a FuelType for API/UI consumption.</summary>
+public sealed record FuelTypeDto(Guid Id, string Name, long Price, FuelKind Kind);
+
+================================================================================
+FILE: src\Modules\Configuration\Configuration.Application\Features\FuelTypes\Queries\GetFuelTypesByHolding\GetFuelTypesByHoldingQuery.cs
+SIZE: 0.42 KB
+================================================================================
+using MachineryManager.Configuration.Application.Features.FuelTypes.Dtos;
+using MachineryManager.SharedKernel;
+using MediatR;
+
+namespace MachineryManager.Configuration.Application.Features.FuelTypes.Queries.GetFuelTypesByHolding;
+
+/// <summary>Query to retrieve every Fuel Type registered for a Holding.</summary>
+public sealed record GetFuelTypesByHoldingQuery(Guid HoldingId) : IRequest<Result<IReadOnlyList<FuelTypeDto>>>;
+
+================================================================================
+FILE: src\Modules\Configuration\Configuration.Application\Features\FuelTypes\Queries\GetFuelTypesByHolding\GetFuelTypesByHoldingQueryHandler.cs
+SIZE: 2.95 KB
+================================================================================
+using MachineryManager.Configuration.Application.Abstractions;
+using MachineryManager.Configuration.Application.Features.FuelTypes.Dtos;
+using MachineryManager.SharedKernel;
+using MachineryManager.SharedKernel.Abstractions;
+using MediatR;
+
+namespace MachineryManager.Configuration.Application.Features.FuelTypes.Queries.GetFuelTypesByHolding;
+
+/// <summary>
+/// Handles <see cref="GetFuelTypesByHoldingQuery"/> by verifying the
+/// caller holds FuelType.View, then returning the Holding's full
+/// fuel type catalog.
+/// </summary>
+public sealed class GetFuelTypesByHoldingQueryHandler
+    : IRequestHandler<GetFuelTypesByHoldingQuery, Result<IReadOnlyList<FuelTypeDto>>>
+{
+    private const string RequiredPermission = "FuelType.View";
+
+    private readonly IFuelTypeRepository _fuelTypeRepository;
+    private readonly ICurrentUserService _currentUserService;
+    private readonly IPermissionEvaluator _permissionEvaluator;
+
+    /// <summary>Initializes a new instance of the <see cref="GetFuelTypesByHoldingQueryHandler"/> class.</summary>
+    /// <param name="fuelTypeRepository">The Fuel Type repository.</param>
+    /// <param name="currentUserService">Provides the authenticated user context.</param>
+    /// <param name="permissionEvaluator">Evaluates the current user's permissions at request time.</param>
+    public GetFuelTypesByHoldingQueryHandler(
+        IFuelTypeRepository fuelTypeRepository,
+        ICurrentUserService currentUserService,
+        IPermissionEvaluator permissionEvaluator)
+    {
+        _fuelTypeRepository = fuelTypeRepository;
+        _currentUserService = currentUserService;
+        _permissionEvaluator = permissionEvaluator;
+    }
+
+    /// <summary>Executes the lookup use case.</summary>
+    /// <param name="request">The query, containing the Holding whose fuel type catalog should be returned.</param>
+    /// <param name="cancellationToken">Token to cancel the asynchronous operation.</param>
+    /// <returns>A <see cref="Result{T}"/> containing the Holding's Fuel Type catalog on success; otherwise an authorization error.</returns>
+    public async Task<Result<IReadOnlyList<FuelTypeDto>>> Handle(
+        GetFuelTypesByHoldingQuery request, CancellationToken cancellationToken)
+    {
+        if (_currentUserService.UserId is not { } userId)
+        {
+            return Result.Failure<IReadOnlyList<FuelTypeDto>>(global::Configuration.Domain.FuelTypeErrors.NotAuthorized());
+        }
+
+        var scope = new ResourceScope(request.HoldingId, null, null);
+        var isAuthorized = await _permissionEvaluator.HasPermissionAsync(userId, RequiredPermission, scope, cancellationToken);
+
+        if (!isAuthorized)
+        {
+            return Result.Failure<IReadOnlyList<FuelTypeDto>>(global::Configuration.Domain.FuelTypeErrors.NotAuthorized());
+        }
+
+        var fuelTypes = await _fuelTypeRepository.GetByHoldingAsync(request.HoldingId, cancellationToken);
+
+        return Result.Success(fuelTypes);
+    }
+}
+
+================================================================================
 FILE: src\Modules\Configuration\Configuration.Application\Features\UnitsOfMeasurement\Commands\RegisterUnitOfMeasurement\RegisterUnitOfMeasurementCommand.cs
 SIZE: 0.63 KB
 ================================================================================
@@ -20019,6 +20556,54 @@ public sealed class CompanyRegistered : IDomainEvent
 }
 
 ================================================================================
+FILE: src\Modules\Configuration\Configuration.Domain\Events\FuelTypeRegistered.cs
+SIZE: 1.79 KB
+================================================================================
+using MachineryManager.SharedKernel;
+
+namespace Configuration.Domain.Events;
+
+/// <summary>Raised when a new Fuel Type is registered.</summary>
+public sealed class FuelTypeRegistered : IDomainEvent
+{
+    /// <summary>Gets the identifier of the registered fuel type.</summary>
+    public FuelTypeId FuelTypeId { get; }
+
+    /// <summary>Gets the identifier of the owning Holding.</summary>
+    public Guid HoldingId { get; }
+
+    /// <summary>Gets the display name of the fuel type.</summary>
+    public string Name { get; }
+
+    /// <summary>Gets the price at the time of registration.</summary>
+    public long Price { get; }
+
+    /// <summary>Gets the fixed fuel-kind classification of the registered fuel type.</summary>
+    public FuelKind Kind { get; }
+
+    /// <summary>Gets the UTC timestamp when the event occurred.</summary>
+    public DateTimeOffset OccurredOn { get; }
+
+    /// <summary>Initializes a new instance of the <see cref="FuelTypeRegistered"/> class.</summary>
+    /// <param name="fuelTypeId">The identifier of the registered fuel type.</param>
+    /// <param name="holdingId">The identifier of the owning Holding.</param>
+    /// <param name="name">The display name of the fuel type.</param>
+    /// <param name="price">The price at the time of registration.</param>
+    /// <param name="kind">The fixed fuel-kind classification of the registered fuel type.</param>
+    /// <param name="occurredOn">The UTC timestamp when the event occurred.</param>
+    public FuelTypeRegistered(
+        FuelTypeId fuelTypeId, Guid holdingId, string name, long price, FuelKind kind, DateTimeOffset occurredOn)
+    {
+        FuelTypeId = fuelTypeId;
+        HoldingId = holdingId;
+        Name = name;
+        Price = price;
+        Kind = kind;
+        OccurredOn = occurredOn;
+    }
+}
+
+================================================================================
 FILE: src\Modules\Configuration\Configuration.Domain\Events\UnitOfMeasurementRegistered.cs
 SIZE: 1.2 KB
 ================================================================================
@@ -20058,6 +20643,163 @@ public sealed class UnitOfMeasurementRegistered : IDomainEvent
         Kind = kind;
         OccurredOn = occurredOn;
     }
+}
+
+================================================================================
+FILE: src\Modules\Configuration\Configuration.Domain\FuelType.cs
+SIZE: 3.19 KB
+================================================================================
+using Configuration.Domain.Events;
+using MachineryManager.SharedKernel;
+using MachineryManager.SharedKernel.Abstractions;
+
+namespace Configuration.Domain;
+
+/// <summary>
+/// Aggregate Root representing a specific, priced fuel type (e.g.
+/// "بنزین سوپر"), classified under a fixed <see cref="FuelKind"/>
+/// (e.g. Gasoline). Scoped per-Holding (chat, 2026-09-02) — mirrors
+/// UnitCategory's shape exactly (freely-named Name + fixed Kind), with
+/// an added Price field.
+/// </summary>
+public sealed class FuelType : AggregateRoot<FuelTypeId>
+{
+    /// <summary>The maximum allowed length for the fuel type's name.</summary>
+    public const int MaxNameLength = 50;
+
+    /// <summary>Gets the identifier of the owning Holding.</summary>
+    public Guid HoldingId { get; private set; }
+
+    /// <summary>Gets the display name of the fuel type (e.g. "بنزین سوپر"), freely chosen by the Holding.</summary>
+    public string Name { get; private set; } = string.Empty;
+
+    /// <summary>Gets the current price, as a non-negative whole number (e.g. Toman/Rial).</summary>
+    public long Price { get; private set; }
+
+    /// <summary>Gets the fixed fuel-kind classification of this fuel type.</summary>
+    public FuelKind Kind { get; private set; }
+
+    // Reserved for ORM materialization only. Never used by application code.
+    private FuelType()
+    {
+    }
+
+    private FuelType(FuelTypeId id, Guid holdingId, string name, long price, FuelKind kind)
+        : base(id)
+    {
+        HoldingId = holdingId;
+        Name = name;
+        Price = price;
+        Kind = kind;
+    }
+
+    /// <summary>Registers a new Fuel Type within a Holding.</summary>
+    /// <param name="holdingId">The owning Holding.</param>
+    /// <param name="name">The display name (required, max 50 characters).</param>
+    /// <param name="price">The price, as a whole number greater than zero.</param>
+    /// <param name="kind">The fixed fuel-kind classification for this fuel type.</param>
+    /// <param name="dateTimeProvider">Provides the current UTC time for the raised domain event.</param>
+    /// <returns>A <see cref="Result{FuelType}"/> containing the new aggregate, or a validation error.</returns>
+    public static Result<FuelType> Register(
+        Guid holdingId, string name, long price, FuelKind kind, IDateTimeProvider dateTimeProvider)
+    {
+        if (string.IsNullOrWhiteSpace(name))
+        {
+            return Result.Failure<FuelType>(FuelTypeErrors.NameRequired());
+        }
+
+        if (name.Length > MaxNameLength)
+        {
+            return Result.Failure<FuelType>(FuelTypeErrors.NameTooLong(MaxNameLength));
+        }
+
+        if (price <= 0)
+        {
+            return Result.Failure<FuelType>(FuelTypeErrors.PriceMustBePositive());
+        }
+
+        if (!Enum.IsDefined(kind))
+        {
+            return Result.Failure<FuelType>(FuelTypeErrors.InvalidKind());
+        }
+
+        var fuelType = new FuelType(FuelTypeId.New(), holdingId, name.Trim(), price, kind);
+
+        fuelType.RaiseDomainEvent(
+            new FuelTypeRegistered(fuelType.Id, holdingId, fuelType.Name, price, kind, dateTimeProvider.UtcNow));
+
+        return fuelType;
+    }
+}
+
+================================================================================
+FILE: src\Modules\Configuration\Configuration.Domain\FuelTypeErrors.cs
+SIZE: 1.83 KB
+================================================================================
+using MachineryManager.SharedKernel;
+
+namespace Configuration.Domain;
+
+/// <summary>Business Errors for the <see cref="FuelType"/> aggregate.</summary>
+public static class FuelTypeErrors
+{
+    /// <summary>Creates an error indicating the fuel type's name was not provided.</summary>
+    /// <returns>A validation <see cref="Error"/>.</returns>
+    public static Error NameRequired() => Error.Validation(
+        "FuelType.NameRequired", "Fuel type name is required.");
+
+    /// <summary>Creates an error indicating the fuel type's name exceeds the maximum allowed length.</summary>
+    /// <param name="maxLength">The maximum number of characters allowed.</param>
+    /// <returns>A validation <see cref="Error"/>.</returns>
+    public static Error NameTooLong(int maxLength) => Error.Validation(
+        "FuelType.NameTooLong", $"Fuel type name shall not exceed {maxLength} characters.");
+
+    /// <summary>Creates an error indicating the price was not a positive value.</summary>
+    /// <returns>A validation <see cref="Error"/>.</returns>
+    public static Error PriceMustBePositive() => Error.Validation(
+        "FuelType.PriceMustBePositive", "Fuel type price must be greater than zero.");
+
+    /// <summary>Creates an error indicating the supplied <see cref="FuelKind"/> value is not one of the defined enum members.</summary>
+    /// <returns>A validation <see cref="Error"/>.</returns>
+    public static Error InvalidKind() => Error.Validation(
+        "FuelType.InvalidKind", "The supplied fuel kind is not valid.");
+
+    /// <summary>Creates an error indicating the current user lacks permission for this action.</summary>
+    /// <returns>A failure-type <see cref="Error"/>.</returns>
+    public static Error NotAuthorized() => Error.Failure(
+        "FuelType.NotAuthorized", "You do not have permission to perform this action.");
+}
+
+================================================================================
+FILE: src\Modules\Configuration\Configuration.Domain\FuelTypeId.cs
+SIZE: 0.84 KB
+================================================================================
+using MachineryManager.SharedKernel;
+
+namespace Configuration.Domain;
+
+/// <summary>Strongly-typed identifier for a <see cref="FuelType"/>.</summary>
+public sealed class FuelTypeId : ValueObject
+{
+    /// <summary>Gets the underlying GUID value.</summary>
+    public Guid Value { get; }
+
+    private FuelTypeId(Guid value) => Value = value;
+
+    /// <summary>Creates a new, unique FuelTypeId.</summary>
+    public static FuelTypeId New() => new(Guid.NewGuid());
+
+    /// <summary>Wraps an existing identifier value (e.g. read from persistence).</summary>
+    public static FuelTypeId From(Guid value) => new(value);
+
+    /// <inheritdoc />
+    protected override IEnumerable<object?> GetEqualityComponents()
+    {
+        yield return Value;
+    }
+
+    /// <inheritdoc />
+    public override string ToString() => Value.ToString();
 }
 
 ================================================================================
@@ -20250,7 +20992,7 @@ public sealed class ConfigurationLookupService : IConfigurationLookupService
 
 ================================================================================
 FILE: src\Modules\Configuration\Configuration.Infrastructure\DependencyInjection.cs
-SIZE: 1.84 KB
+SIZE: 1.92 KB
 ================================================================================
 using MachineryManager.Configuration.Application.Abstractions;
 using MachineryManager.Configuration.Infrastructure.Persistence;
@@ -20285,6 +21027,7 @@ public static class DependencyInjection
         services.AddScoped<IConfigurationLookupService, ConfigurationLookupService>();
         services.AddScoped<IConfigurationUnitOfWork>(sp => sp.GetRequiredService<ConfigurationDbContext>());
         services.AddScoped<IUnitOfMeasurementLookupService, UnitOfMeasurementLookupService>();
+                services.AddScoped<IFuelTypeRepository, FuelTypeRepository>();
 
         return services;
     }
@@ -20895,8 +21638,194 @@ namespace Configuration.Infrastructure.Migrations
 
 
 ================================================================================
+FILE: src\Modules\Configuration\Configuration.Infrastructure\Migrations\20260902115654_AddFuelType.cs
+SIZE: 1.59 KB
+================================================================================
+using System;
+using Microsoft.EntityFrameworkCore.Migrations;
+
+#nullable disable
+
+namespace Configuration.Infrastructure.Migrations
+{
+    /// <inheritdoc />
+    public partial class AddFuelType : Migration
+    {
+        /// <inheritdoc />
+        protected override void Up(MigrationBuilder migrationBuilder)
+        {
+            migrationBuilder.CreateTable(
+                name: "FuelType",
+                schema: "configuration",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    HoldingId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    Name = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
+                    Price = table.Column<long>(type: "bigint", nullable: false),
+                    Kind = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_FuelType", x => x.Id);
+                });
+
+            migrationBuilder.CreateIndex(
+                name: "IX_FuelType_HoldingId",
+                schema: "configuration",
+                table: "FuelType",
+                column: "HoldingId");
+        }
+
+        /// <inheritdoc />
+        protected override void Down(MigrationBuilder migrationBuilder)
+        {
+            migrationBuilder.DropTable(
+                name: "FuelType",
+                schema: "configuration");
+        }
+    }
+}
+
+
+================================================================================
+FILE: src\Modules\Configuration\Configuration.Infrastructure\Migrations\20260902115654_AddFuelType.Designer.cs
+SIZE: 4.28 KB
+================================================================================
+// <auto-generated />
+using System;
+using MachineryManager.Configuration.Infrastructure.Persistence;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
+using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
+
+#nullable disable
+
+namespace Configuration.Infrastructure.Migrations
+{
+    [DbContext(typeof(ConfigurationDbContext))]
+    [Migration("20260902115654_AddFuelType")]
+    partial class AddFuelType
+    {
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
+        {
+#pragma warning disable 612, 618
+            modelBuilder
+                .HasDefaultSchema("configuration")
+                .HasAnnotation("ProductVersion", "10.0.10")
+                .HasAnnotation("Relational:MaxIdentifierLength", 128);
+
+            SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
+
+            modelBuilder.Entity("Configuration.Domain.Color", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("HoldingId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("HoldingId");
+
+                    b.ToTable("Color", "configuration");
+                });
+
+            modelBuilder.Entity("Configuration.Domain.Company", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("HoldingId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("HoldingId");
+
+                    b.HasIndex("HoldingId", "Name")
+                        .IsUnique();
+
+                    b.ToTable("Company", "configuration");
+                });
+
+            modelBuilder.Entity("Configuration.Domain.FuelType", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("HoldingId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Kind")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<long>("Price")
+                        .HasColumnType("bigint");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("HoldingId");
+
+                    b.ToTable("FuelType", "configuration");
+                });
+
+            modelBuilder.Entity("Configuration.Domain.UnitOfMeasurement", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("HoldingId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Kind")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("HoldingId");
+
+                    b.HasIndex("HoldingId", "Kind");
+
+                    b.ToTable("UnitOfMeasurement", "configuration");
+                });
+#pragma warning restore 612, 618
+        }
+    }
+}
+
+
+================================================================================
 FILE: src\Modules\Configuration\Configuration.Infrastructure\Migrations\ConfigurationDbContextModelSnapshot.cs
-SIZE: 3.26 KB
+SIZE: 4.2 KB
 ================================================================================
 // <auto-generated />
 using System;
@@ -20964,6 +21893,34 @@ namespace Configuration.Infrastructure.Migrations
                         .IsUnique();
 
                     b.ToTable("Company", "configuration");
+                });
+
+            modelBuilder.Entity("Configuration.Domain.FuelType", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("HoldingId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Kind")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<long>("Price")
+                        .HasColumnType("bigint");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("HoldingId");
+
+                    b.ToTable("FuelType", "configuration");
                 });
 
             modelBuilder.Entity("Configuration.Domain.UnitOfMeasurement", b =>
@@ -21101,7 +22058,7 @@ public sealed class CompanyRepository : ICompanyRepository
 
 ================================================================================
 FILE: src\Modules\Configuration\Configuration.Infrastructure\Persistence\ConfigurationDbContext.cs
-SIZE: 2.91 KB
+SIZE: 3.08 KB
 ================================================================================
 using MachineryManager.SharedKernel;
 using MachineryManager.SharedKernel.Abstractions;
@@ -21139,6 +22096,9 @@ public sealed class ConfigurationDbContext : DbContext, IConfigurationUnitOfWork
     /// <summary>Gets the set of Company aggregates.</summary>
     public DbSet<global::Configuration.Domain.Company> Companies =>
         Set<global::Configuration.Domain.Company>();
+
+    /// <summary>Gets the set of FuelTypes aggregates.</summary>
+    public DbSet<global::Configuration.Domain.FuelType> FuelTypes => Set<global::Configuration.Domain.FuelType>();
 
     /// <inheritdoc />
     protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -21252,6 +22212,49 @@ public sealed class CompanyConfiguration
 }
 
 ================================================================================
+FILE: src\Modules\Configuration\Configuration.Infrastructure\Persistence\Configurations\FuelTypeConfiguration.cs
+SIZE: 1.31 KB
+================================================================================
+using Configuration.Domain;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata.Builders;
+
+namespace MachineryManager.Configuration.Infrastructure.Persistence.Configurations;
+
+/// <summary>EF Core mapping for the <see cref="FuelType"/> aggregate.</summary>
+public sealed class FuelTypeConfiguration : IEntityTypeConfiguration<FuelType>
+{
+    /// <inheritdoc />
+    public void Configure(EntityTypeBuilder<FuelType> builder)
+    {
+        builder.ToTable("FuelType");
+        builder.HasKey(f => f.Id);
+
+        builder.Property(f => f.Id)
+            .HasConversion(id => id.Value, value => FuelTypeId.From(value))
+            .ValueGeneratedNever();
+
+        builder.Property(f => f.HoldingId).IsRequired();
+
+        builder.Property(f => f.Name)
+            .HasMaxLength(FuelType.MaxNameLength)
+            .IsRequired();
+
+        builder.Property(f => f.Price).IsRequired();
+
+        // Stored as string, not int, so the raw database value stays
+        // readable and resilient to future enum-member reordering —
+        // same rationale as UnitCategory.Kind (chat, 2026-09-02).
+        builder.Property(f => f.Kind)
+            .HasConversion<string>()
+            .HasMaxLength(20)
+            .IsRequired();
+
+        builder.HasIndex(f => f.HoldingId);
+    }
+}
+
+================================================================================
 FILE: src\Modules\Configuration\Configuration.Infrastructure\Persistence\Configurations\UnitOfMeasurementConfiguration.cs
 SIZE: 1.17 KB
 ================================================================================
@@ -21287,6 +22290,52 @@ public sealed class UnitOfMeasurementConfiguration : IEntityTypeConfiguration<Un
 
         builder.HasIndex(u => u.HoldingId);
         builder.HasIndex(u => new { u.HoldingId, u.Kind });
+    }
+}
+
+================================================================================
+FILE: src\Modules\Configuration\Configuration.Infrastructure\Persistence\FuelTypeRepository.cs
+SIZE: 1.77 KB
+================================================================================
+using Configuration.Domain;
+using MachineryManager.Configuration.Application.Abstractions;
+using MachineryManager.Configuration.Application.Features.FuelTypes.Dtos;
+using Microsoft.EntityFrameworkCore;
+
+namespace MachineryManager.Configuration.Infrastructure.Persistence;
+
+/// <summary>EF Core implementation of <see cref="IFuelTypeRepository"/>.</summary>
+public sealed class FuelTypeRepository : IFuelTypeRepository
+{
+    private readonly ConfigurationDbContext _dbContext;
+
+    /// <summary>Initializes a new instance of the <see cref="FuelTypeRepository"/> class.</summary>
+    /// <param name="dbContext">The Configuration module's persistence context.</param>
+    public FuelTypeRepository(ConfigurationDbContext dbContext) => _dbContext = dbContext;
+
+    /// <inheritdoc />
+    public Task<FuelType?> GetByIdAsync(FuelTypeId id, CancellationToken cancellationToken = default) =>
+        _dbContext.FuelTypes.FirstOrDefaultAsync(f => f.Id == id, cancellationToken);
+
+    /// <inheritdoc />
+    public void Add(FuelType aggregate) => _dbContext.FuelTypes.Add(aggregate);
+
+    /// <inheritdoc />
+    public void Update(FuelType aggregate) => _dbContext.FuelTypes.Update(aggregate);
+
+    /// <inheritdoc />
+    public void Remove(FuelType aggregate) => _dbContext.FuelTypes.Remove(aggregate);
+
+    /// <inheritdoc />
+    public async Task<IReadOnlyList<FuelTypeDto>> GetByHoldingAsync(Guid holdingId, CancellationToken cancellationToken = default)
+    {
+        var entities = await _dbContext.FuelTypes
+            .AsNoTracking()
+            .Where(f => f.HoldingId == holdingId)
+            .OrderBy(f => f.Name)
+            .ToListAsync(cancellationToken);
+
+        return entities.Select(f => new FuelTypeDto(f.Id.Value, f.Name, f.Price, f.Kind)).ToList();
     }
 }
 
@@ -21863,6 +22912,95 @@ SIZE: 2.33 KB
 }
 
 ================================================================================
+FILE: src\Modules\Configuration\Configuration.Presentation\Components\Pages\CreateFuelType.razor
+SIZE: 3.01 KB
+================================================================================
+@page "/admin/fuel-types/create"
+@using MachineryManager.SharedKernel
+@inject IHttpClientFactory HttpClientFactory
+@inject NavigationManager Navigation
+
+<PageTitle>نوع سوخت جدید</PageTitle>
+
+<MudText Typo="Typo.h4" Class="mb-4">ثبت نوع سوخت جدید</MudText>
+
+@if (errorMessage is not null)
+{
+    <MudAlert Severity="Severity.Error" Class="my-4">@errorMessage</MudAlert>
+}
+
+<MudPaper Class="pa-4" Style="max-width:500px;">
+    <MudForm @ref="form">
+        <MudTextField T="string" Label="نام" @bind-Value="name" Required="true" RequiredError="نام الزامی است" MaxLength="50" />
+
+        <MudSelect T="FuelKind" Label="دسته‌بندی سوخت" @bind-Value="kind" Class="mt-2">
+            <MudSelectItem T="FuelKind" Value="FuelKind.Diesel">گازوئیل</MudSelectItem>
+            <MudSelectItem T="FuelKind" Value="FuelKind.Gasoline">بنزین</MudSelectItem>
+            <MudSelectItem T="FuelKind" Value="FuelKind.Gas">گاز</MudSelectItem>
+        </MudSelect>
+
+        <MudNumericField T="long" Label="قیمت" @bind-Value="price" Required="true" RequiredError="قیمت الزامی است" Min="1" Class="mt-2" />
+
+        <MudButton Variant="Variant.Filled" Color="Color.Primary" Class="mt-4" OnClick="SubmitAsync" Disabled="isSubmitting">
+            @(isSubmitting ? "در حال ثبت..." : "ثبت")
+        </MudButton>
+        <MudButton Variant="Variant.Outlined" Color="Color.Secondary" Class="mt-4 ml-2"
+                   OnClick="@(() => Navigation.NavigateTo("/admin/fuel-types"))">
+            انصراف
+        </MudButton>
+    </MudForm>
+</MudPaper>
+
+@code {
+    /// <summary>Gets or sets the identifier of the Holding this Fuel Type will belong to, supplied via the query string.</summary>
+    [SupplyParameterFromQuery]
+    public Guid HoldingId { get; set; }
+
+    private MudForm form = null!;
+    private string name = string.Empty;
+    private long price;
+    private FuelKind kind = FuelKind.Gasoline;
+    private bool isSubmitting;
+    private string? errorMessage;
+
+    private async Task SubmitAsync()
+    {
+        await form.Validate();
+        if (!form.IsValid)
+        {
+            return;
+        }
+
+        isSubmitting = true;
+        errorMessage = null;
+
+        try
+        {
+            var client = HttpClientFactory.CreateClient("InternalApi");
+            var response = await client.PostAsJsonAsync("/api/v1/fuel-types", new { HoldingId, Name = name, Price = price, Kind = kind });
+            var content = await response.Content.ReadAsStringAsync();
+
+            if (response.IsSuccessStatusCode)
+            {
+                Navigation.NavigateTo("/admin/fuel-types");
+            }
+            else
+            {
+                errorMessage = $"خطا در ثبت نوع سوخت: {content}";
+            }
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"خطا: {ex.Message}";
+        }
+        finally
+        {
+            isSubmitting = false;
+        }
+    }
+}
+
+================================================================================
 FILE: src\Modules\Configuration\Configuration.Presentation\Components\Pages\CreateUnitOfMeasurement.razor
 SIZE: 3.48 KB
 ================================================================================
@@ -21942,6 +23080,187 @@ SIZE: 3.48 KB
             isSubmitting = false;
         }
     }
+}
+
+================================================================================
+FILE: src\Modules\Configuration\Configuration.Presentation\Components\Pages\FuelTypesList.razor
+SIZE: 6.14 KB
+================================================================================
+@page "/admin/fuel-types"
+@using MachineryManager.SharedKernel
+@inject IHttpClientFactory HttpClientFactory
+@inject NavigationManager Navigation
+
+<PageTitle>انواع سوخت</PageTitle>
+
+<MudText Typo="Typo.h4" Class="mb-4">مدیریت انواع سوخت</MudText>
+
+<MudSelect T="Guid" Label="Holding" @bind-Value="selectedHoldingId" @bind-Value:after="OnHoldingChangedAsync" Class="mb-4">
+    @foreach (var holding in holdings)
+    {
+        <MudSelectItem T="Guid" Value="@holding.Id">@holding.Name</MudSelectItem>
+    }
+</MudSelect>
+
+@if (errorMessage is not null)
+{
+    <MudAlert Severity="Severity.Error" Class="my-4">@errorMessage</MudAlert>
+}
+
+@if (selectedHoldingId != Guid.Empty)
+{
+    <MudButton Variant="Variant.Filled" Color="Color.Primary" Class="mb-4"
+               OnClick="@(() => Navigation.NavigateTo($"/admin/fuel-types/create?holdingId={selectedHoldingId}"))">
+        نوع سوخت جدید
+    </MudButton>
+}
+
+@if (isLoading)
+{
+    <MudProgressLinear Indeterminate="true" Class="my-4" />
+}
+else if (selectedHoldingId != Guid.Empty && fuelTypes.Count == 0)
+{
+    <MudText Typo="Typo.body2" Class="mud-text-secondary">هیچ نوع سوختی برای این Holding ثبت نشده است.</MudText>
+}
+else if (fuelTypes.Count > 0)
+{
+    <MudTable Items="@fuelTypes" Hover="true" Breakpoint="Breakpoint.Sm">
+        <HeaderContent>
+            <MudTh>نام</MudTh>
+            <MudTh>نوع</MudTh>
+            <MudTh>قیمت</MudTh>
+        </HeaderContent>
+        <RowTemplate>
+            <MudTd DataLabel="نام">@context.Name</MudTd>
+            <MudTd DataLabel="نوع">@TranslateKind(context.Kind)</MudTd>
+            <MudTd DataLabel="قیمت">@context.Price.ToString("N0")</MudTd>
+        </RowTemplate>
+    </MudTable>
+}
+
+@code {
+    /// <summary>Represents a Holding option in the selection dropdown.</summary>
+    private sealed class HoldingItem
+    {
+        /// <summary>Gets or sets the Holding's unique identifier.</summary>
+        public Guid Id { get; set; }
+
+        /// <summary>Gets or sets the Holding's display name.</summary>
+        public string Name { get; set; } = string.Empty;
+    }
+
+    /// <summary>Represents a single Fuel Type row in the current Holding's list.</summary>
+    private sealed class FuelTypeItem
+    {
+        /// <summary>Gets or sets the Fuel Type's unique identifier.</summary>
+        public Guid Id { get; set; }
+
+        /// <summary>Gets or sets the Fuel Type's display name.</summary>
+        public string Name { get; set; } = string.Empty;
+
+        /// <summary>Gets or sets the price.</summary>
+        public long Price { get; set; }
+
+        /// <summary>
+        /// Gets or sets the fuel category. Must match the server's
+        /// actual JSON representation of <c>FuelKind</c> — the enum
+        /// itself, not a string (chat, 2026-09-03; System.Text.Json
+        /// serializes enums as their underlying integer by default,
+        /// unless a JsonStringEnumConverter is configured).
+        /// </summary>
+        public FuelKind Kind { get; set; }
+    }
+
+    private sealed class SearchHoldingsResult
+    {
+        public List<HoldingItem> Items { get; set; } = [];
+    }
+
+    private List<HoldingItem> holdings = [];
+    private List<FuelTypeItem> fuelTypes = [];
+    private Guid selectedHoldingId;
+    private bool isLoading = true;
+    private string? errorMessage;
+
+    /// <summary>Loads the list of Holdings when the page is first rendered.</summary>
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadHoldingsAsync();
+        isLoading = false;
+    }
+
+    private async Task LoadHoldingsAsync()
+    {
+        try
+        {
+            var client = HttpClientFactory.CreateClient("InternalApi");
+            var response = await client.GetAsync("/api/v1/holdings?pageSize=200");
+            var content = await response.Content.ReadAsStringAsync();
+
+            if (response.IsSuccessStatusCode)
+            {
+                var result = System.Text.Json.JsonSerializer.Deserialize<SearchHoldingsResult>(content, new System.Text.Json.JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+                holdings = result?.Items ?? [];
+            }
+            else
+            {
+                errorMessage = $"خطا در دریافت Holding ها: {content}";
+            }
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"خطا: {ex.Message}";
+        }
+    }
+
+    /// <summary>Reloads the fuel type list whenever the selected Holding changes.</summary>
+    private async Task OnHoldingChangedAsync()
+    {
+        if (selectedHoldingId == Guid.Empty)
+        {
+            fuelTypes = [];
+            return;
+        }
+
+        isLoading = true;
+        errorMessage = null;
+
+        try
+        {
+            var client = HttpClientFactory.CreateClient("InternalApi");
+            var response = await client.GetAsync($"/api/v1/fuel-types?holdingId={selectedHoldingId}");
+            var content = await response.Content.ReadAsStringAsync();
+
+            if (response.IsSuccessStatusCode)
+            {
+                fuelTypes = System.Text.Json.JsonSerializer.Deserialize<List<FuelTypeItem>>(content, new System.Text.Json.JsonSerializerOptions { PropertyNameCaseInsensitive = true }) ?? [];
+            }
+            else
+            {
+                errorMessage = $"خطا در دریافت انواع سوخت: {content}";
+            }
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"خطا: {ex.Message}";
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+
+    /// <summary>Translates a <see cref="FuelKind"/> value into its Persian display label.</summary>
+    /// <param name="kind">The fuel category to translate.</param>
+    /// <returns>The Persian display label for the given fuel category.</returns>
+    private static string TranslateKind(FuelKind kind) => kind switch
+    {
+        FuelKind.Diesel => "گازوئیل",
+        FuelKind.Gasoline => "بنزین",
+        FuelKind.Gas => "گاز",
+        _ => kind.ToString(),
+    };
 }
 
 ================================================================================
@@ -22159,6 +23478,19 @@ namespace MachineryManager.Configuration.Presentation.Contracts;
 public sealed record RegisterCompanyRequest(Guid HoldingId, string Name);
 
 ================================================================================
+FILE: src\Modules\Configuration\Configuration.Presentation\Contracts\RegisterFuelTypeRequest.cs
+SIZE: 0.61 KB
+================================================================================
+namespace MachineryManager.Configuration.Presentation.Contracts;
+
+/// <summary>Request body for registering a new Fuel Type.</summary>
+/// <param name="HoldingId">The identifier of the Holding that will own this fuel type.</param>
+/// <param name="Name">The display name (e.g. "بنزین سوپر"), required, max 50 characters.</param>
+/// <param name="Price">The price, as a whole number greater than zero.</param>
+/// <param name="Kind">The fixed fuel-kind classification.</param>
+public sealed record RegisterFuelTypeRequest(Guid HoldingId, string Name, long Price, MachineryManager.SharedKernel.FuelKind Kind);
+
+================================================================================
 FILE: src\Modules\Configuration\Configuration.Presentation\Contracts\RegisterUnitOfMeasurementRequest.cs
 SIZE: 0.58 KB
 ================================================================================
@@ -22327,6 +23659,85 @@ public static class CompanyEndpoints
         return result.IsSuccess
             ? Results.Ok(result.Value)
             : result.ToProblemResult(httpContext);
+    }
+}
+
+================================================================================
+FILE: src\Modules\Configuration\Configuration.Presentation\Endpoints\FuelTypeEndpoints.cs
+SIZE: 3.88 KB
+================================================================================
+using MachineryManager.Configuration.Application.Features.FuelTypes.Commands.RegisterFuelType;
+using MachineryManager.Configuration.Application.Features.FuelTypes.Queries.GetFuelTypesByHolding;
+using MachineryManager.Configuration.Presentation.Contracts;
+using MediatR;
+using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Routing;
+using OpenIddict.Validation.AspNetCore;
+
+namespace MachineryManager.Configuration.Presentation.Endpoints;
+
+/// <summary>Maps the Configuration module's Fuel Type REST endpoints: base path <c>/api/v1/fuel-types</c>.</summary>
+public static class FuelTypeEndpoints
+{
+    /// <summary>Registers the Fuel Type endpoints on the application's route builder.</summary>
+    /// <param name="endpoints">The endpoint route builder.</param>
+    /// <returns>The same <see cref="IEndpointRouteBuilder"/> for chaining.</returns>
+    public static IEndpointRouteBuilder MapFuelTypeEndpoints(this IEndpointRouteBuilder endpoints)
+    {
+        var group = endpoints
+            .MapGroup("/api/v1/fuel-types")
+            .WithTags("FuelTypes")
+            .RequireAuthorization(policy => policy
+                .AddAuthenticationSchemes(OpenIddictValidationAspNetCoreDefaults.AuthenticationScheme)
+                .RequireAuthenticatedUser());
+
+        group.MapPost("/", RegisterFuelTypeAsync)
+            .WithName("RegisterFuelType")
+            .WithSummary("Registers a new Fuel Type within a Holding.");
+
+        group.MapGet("/", GetFuelTypesByHoldingAsync)
+            .WithName("GetFuelTypesByHolding")
+            .WithSummary("Retrieves every Fuel Type registered for a Holding.");
+
+        return endpoints;
+    }
+
+    /// <summary>Handles <c>POST /api/v1/fuel-types</c>.</summary>
+    /// <param name="request">The registration payload.</param>
+    /// <param name="sender">MediatR sender used to dispatch the <see cref="RegisterFuelTypeCommand"/>.</param>
+    /// <param name="httpContext">The current request's HTTP context, used for error correlation ids.</param>
+    /// <param name="cancellationToken">Token to cancel the asynchronous operation if the client disconnects.</param>
+    /// <returns><c>201 Created</c> with the new fuel type's id on success; otherwise a standard error body.</returns>
+    private static async Task<IResult> RegisterFuelTypeAsync(
+        RegisterFuelTypeRequest request,
+        ISender sender,
+        HttpContext httpContext,
+        CancellationToken cancellationToken)
+    {
+        var result = await sender.Send(
+            new RegisterFuelTypeCommand(request.HoldingId, request.Name, request.Price, request.Kind), cancellationToken);
+
+        return result.IsSuccess
+            ? Results.Created($"/api/v1/fuel-types/{result.Value}", new { id = result.Value })
+            : result.ToProblemResult(httpContext);
+    }
+
+    /// <summary>Handles <c>GET /api/v1/fuel-types?holdingId=...</c>.</summary>
+    /// <param name="holdingId">The Holding whose fuel type list should be returned (required query parameter).</param>
+    /// <param name="sender">MediatR sender used to dispatch the <see cref="GetFuelTypesByHoldingQuery"/>.</param>
+    /// <param name="httpContext">The current request's HTTP context, used for error correlation ids.</param>
+    /// <param name="cancellationToken">Token to cancel the asynchronous operation if the client disconnects.</param>
+    /// <returns><c>200 OK</c> with the list of fuel types on success; otherwise a standard error body.</returns>
+    private static async Task<IResult> GetFuelTypesByHoldingAsync(
+        Guid holdingId,
+        ISender sender,
+        HttpContext httpContext,
+        CancellationToken cancellationToken)
+    {
+        var result = await sender.Send(new GetFuelTypesByHoldingQuery(holdingId), cancellationToken);
+
+        return result.IsSuccess ? Results.Ok(result.Value) : result.ToProblemResult(httpContext);
     }
 }
 
@@ -32523,12 +33934,12 @@ SIZE: 0.53 KB
 # SECTION 3: SNAPSHOT SUMMARY
 ================================================================================
 
-Generation Time     : 00:03:03.1956501
-Total Files Scanned : 491
-Files Included      : 491
+Generation Time     : 00:04:16.6412622
+Total Files Scanned : 512
+Files Included      : 512
 Files Skipped       : 0
-Total Source Size   : 1.09 MB
-Snapshot File Size  : 1.26 MB
+Total Source Size   : 1.15 MB
+Snapshot File Size  : 1.32 MB
 Output Path         : C:\Users\i\source\repos\MachineryManagerEnterprise\MME_Codebase_Snapshot.txt
 
 Excluded Directories: .git, .github, .vs, .vscode, .idea, .azure, .devcontainer, bin, obj, packages, publish, out, release, releases, debug, x64, x86, arm64, artifacts, .artifacts, node_modules, dist, build, bower_components, jspm_packages, docs-english, docs-farsi, docs, tools, test-results, coverage, .coverage, TestResults, lib, .angular, .next, .nuxt, .svelte-kit, .cache, .temp, tmp

@@ -8,6 +8,7 @@ public sealed record RegisterEngineModelCommand(
     Guid HoldingId,
     string Name,
     Guid CompanyId,
+    FuelKind FuelKind,
     int? CylinderCount = null,
     decimal? EngineDisplacementValue = null,
     Guid? EngineDisplacementUnitOfMeasurementId = null,

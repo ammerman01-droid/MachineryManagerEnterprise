@@ -1,6 +1,7 @@
 @page "/admin/engine-models"
 @inject IHttpClientFactory HttpClientFactory
 @inject NavigationManager Navigation
+@using MachineryManager.SharedKernel
 @using System.Text.Json
 
 <PageTitle>مدل‌های موتور</PageTitle>
@@ -41,6 +42,7 @@
             <HeaderContent>
                 <MudTh>نام</MudTh>
                 <MudTh>شرکت سازنده</MudTh>
+                <MudTh>نوع سوخت</MudTh>
                 <MudTh>تعداد سیلندر</MudTh>
                 <MudTh>حجم موتور</MudTh>
                 <MudTh>قدرت موتور</MudTh>
@@ -50,20 +52,23 @@
             <RowTemplate>
                 <MudTd DataLabel="نام">@context.Name</MudTd>
                 <MudTd DataLabel="شرکت سازنده">@ResolveCompanyName(context.CompanyId)</MudTd>
+                <MudTd DataLabel="نوع سوخت">@GetFuelKindDisplayName(context.FuelKind)</MudTd>
                 <MudTd DataLabel="تعداد سیلندر">@(context.CylinderCount?.ToString() ?? "-")</MudTd>
-                <MudTd DataLabel="حجم موتور">@FormatSpecification(context.EngineDisplacementValue, context.EngineDisplacementUnitOfMeasurementId)</MudTd>
-                <MudTd DataLabel="قدرت موتور">@FormatSpecification(context.EnginePowerValue, context.EnginePowerUnitOfMeasurementId)</MudTd>
-                <MudTd DataLabel="وزن">@FormatSpecification(context.WeightValue, context.WeightUnitOfMeasurementId)</MudTd>
-                <MudTd DataLabel="عملیات">
-                    <MudButton Size="Size.Small" Variant="Variant.Text" Color="Color.Primary"
-                               OnClick="@(() => Navigation.NavigateTo($"/admin/engine-models/{context.Id}/edit"))">
-                        ویرایش
-                    </MudButton>
-                </MudTd>
-            </RowTemplate>
-        </MudTable>
-    }
-}
+                <MudTd DataLabel="حجم موتور">@FormatSpecification(context.EngineDisplacementValue,
+                                context.EngineDisplacementUnitOfMeasurementId)</MudTd>
+                    <MudTd DataLabel="قدرت موتور">@FormatSpecification(context.EnginePowerValue,
+                                    context.EnginePowerUnitOfMeasurementId)</MudTd>
+                        <MudTd DataLabel="وزن">@FormatSpecification(context.WeightValue, context.WeightUnitOfMeasurementId)</MudTd>
+                        <MudTd DataLabel="عملیات">
+                            <MudButton Size="Size.Small" Variant="Variant.Text" Color="Color.Primary"
+                                       OnClick="@(() => Navigation.NavigateTo($"/admin/engine-models/{context.Id}/edit"))">
+                                ویرایش
+                            </MudButton>
+                        </MudTd>
+                    </RowTemplate>
+                </MudTable>
+            }
+        }
 
 @code {
     /// <summary>Represents a Holding option in the selection dropdown.</summary>
@@ -97,6 +102,7 @@
 
         /// <summary>Gets or sets the identifier of the manufacturer Company.</summary>
         public Guid CompanyId { get; set; }
+        public FuelKind FuelKind { get; set; }
 
         /// <summary>Gets or sets the number of cylinders, if specified.</summary>
         public int? CylinderCount { get; set; }
@@ -119,7 +125,6 @@
         /// <summary>Gets or sets the identifier of the unit of measurement for the weight value, if specified.</summary>
         public Guid? WeightUnitOfMeasurementId { get; set; }
     }
-
     private sealed class SearchEngineModelsResult
     {
         public List<EngineModelItem> Items { get; set; } = [];
@@ -182,13 +187,9 @@
         await LoadUnitOfMeasurementNamesAsync();
         await LoadEngineModelsAsync();
     }
-
     private async Task LoadCompaniesAsync()
     {
-        if (selectedHoldingId is null)
-        {
-            return;
-        }
+        if (selectedHoldingId is null) return;
 
         try
         {
@@ -212,10 +213,7 @@
 
     private async Task LoadUnitOfMeasurementNamesAsync()
     {
-        if (selectedHoldingId is null)
-        {
-            return;
-        }
+        if (selectedHoldingId is null) return;
 
         try
         {
@@ -239,10 +237,7 @@
 
     private async Task LoadEngineModelsAsync()
     {
-        if (selectedHoldingId is null)
-        {
-            return;
-        }
+        if (selectedHoldingId is null) return;
 
         isLoading = true;
         errorMessage = null;
@@ -295,6 +290,16 @@
             ? name
             : unitOfMeasurementId?.ToString() ?? string.Empty;
 
-        return $"{actualValue} {unitName}".Trim();
+        // G29 صفرهای انتهایی غیرضروری را حذف می‌کند
+        var valueText = actualValue.ToString("G29", System.Globalization.CultureInfo.InvariantCulture);
+        return $"{valueText} {unitName}".Trim();
     }
+
+    private string GetFuelKindDisplayName(FuelKind kind) => kind switch
+    {
+        FuelKind.Diesel => "گازوئیل",
+        FuelKind.Gasoline => "بنزین",
+        FuelKind.Gas => "گاز",
+        _ => kind.ToString()
+    };
 }

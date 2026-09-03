@@ -7,11 +7,8 @@ namespace MachineryManager.Asset.Application.Features.EngineModels.Commands.Upda
 
 /// <summary>
 /// Handles <see cref="UpdateEngineModelSpecificationsCommand"/> by
-/// loading the aggregate, verifying the caller is authorized, verifying
-/// the Company and any referenced Units of Measurement belong to the
-/// same Holding, invoking the domain update, and committing the unit of
-/// work. Mirrors <c>RegisterEngineModelCommandHandler</c>'s validation
-/// chain exactly (chat, 2026-09-01).
+/// loading the aggregate, authorizing the caller, validating units,
+/// applying the domain update, and committing the unit of work.
 /// </summary>
 public sealed class UpdateEngineModelSpecificationsCommandHandler
     : IRequestHandler<UpdateEngineModelSpecificationsCommand, Result>
@@ -20,7 +17,6 @@ public sealed class UpdateEngineModelSpecificationsCommandHandler
 
     private readonly IEngineModelRepository _engineModelRepository;
     private readonly IUnitOfMeasurementLookupService _unitOfMeasurementLookupService;
-    private readonly IConfigurationLookupService _configurationLookupService;
     private readonly IAssetUnitOfWork _unitOfWork;
     private readonly ICurrentUserService _currentUserService;
     private readonly IPermissionEvaluator _permissionEvaluator;
@@ -29,22 +25,25 @@ public sealed class UpdateEngineModelSpecificationsCommandHandler
     public UpdateEngineModelSpecificationsCommandHandler(
         IEngineModelRepository engineModelRepository,
         IUnitOfMeasurementLookupService unitOfMeasurementLookupService,
-        IConfigurationLookupService configurationLookupService,
         IAssetUnitOfWork unitOfWork,
         ICurrentUserService currentUserService,
         IPermissionEvaluator permissionEvaluator)
     {
         _engineModelRepository = engineModelRepository;
         _unitOfMeasurementLookupService = unitOfMeasurementLookupService;
-        _configurationLookupService = configurationLookupService;
         _unitOfWork = unitOfWork;
         _currentUserService = currentUserService;
         _permissionEvaluator = permissionEvaluator;
     }
 
-    /// <summary>Executes the specification-update use case.</summary>
+    /// <summary>Executes the update use case.</summary>
     public async Task<Result> Handle(UpdateEngineModelSpecificationsCommand request, CancellationToken cancellationToken)
     {
+        if (_currentUserService.UserId is not { } userId)
+        {
+            return Result.Failure(global::Asset.Domain.EngineModelErrors.NotAuthorized());
+        }
+
         var id = global::Asset.Domain.EngineModelId.From(request.EngineModelId);
         var engineModel = await _engineModelRepository.GetByIdAsync(id, cancellationToken);
 
@@ -52,11 +51,6 @@ public sealed class UpdateEngineModelSpecificationsCommandHandler
         {
             return Result.Failure(
                 Error.NotFound("EngineModel.NotFound", $"Engine model with id {request.EngineModelId} was not found."));
-        }
-
-        if (_currentUserService.UserId is not { } userId)
-        {
-            return Result.Failure(global::Asset.Domain.EngineModelErrors.NotAuthorized());
         }
 
         var isAuthorized = await _permissionEvaluator.HasPermissionAsync(
@@ -70,14 +64,6 @@ public sealed class UpdateEngineModelSpecificationsCommandHandler
             return Result.Failure(global::Asset.Domain.EngineModelErrors.NotAuthorized());
         }
 
-        var companyExists = await _configurationLookupService.CompanyExistsInHoldingAsync(
-            request.CompanyId, engineModel.HoldingId, cancellationToken);
-
-        if (!companyExists)
-        {
-            return Result.Failure(global::Asset.Domain.EngineModelErrors.CompanyNotFound(request.CompanyId));
-        }
-
         var specifications = new (string FieldName, Guid? UnitOfMeasurementId, PhysicalQuantityKind ExpectedKind)[]
         {
             ("Engine displacement", request.EngineDisplacementUnitOfMeasurementId, PhysicalQuantityKind.Dimension),
@@ -87,21 +73,21 @@ public sealed class UpdateEngineModelSpecificationsCommandHandler
 
         foreach (var (fieldName, unitOfMeasurementId, expectedKind) in specifications)
         {
-            if (unitOfMeasurementId is not { } unitId)
+            if (unitOfMeasurementId is not { } uid)
             {
                 continue;
             }
 
             var existsInHolding = await _unitOfMeasurementLookupService.ExistsInHoldingAsync(
-                unitId, engineModel.HoldingId, cancellationToken);
+                uid, engineModel.HoldingId, cancellationToken);
 
             if (!existsInHolding)
             {
-                return Result.Failure(global::Asset.Domain.EngineModelErrors.UnitOfMeasurementNotFound(unitId));
+                return Result.Failure(global::Asset.Domain.EngineModelErrors.UnitOfMeasurementNotFound(uid));
             }
 
             var matchesKind = await _unitOfMeasurementLookupService.ExistsInHoldingWithKindAsync(
-                unitId, engineModel.HoldingId, expectedKind, cancellationToken);
+                uid, engineModel.HoldingId, expectedKind, cancellationToken);
 
             if (!matchesKind)
             {
@@ -110,8 +96,9 @@ public sealed class UpdateEngineModelSpecificationsCommandHandler
             }
         }
 
-        var result = engineModel.UpdateSpecifications(
+        var updateResult = engineModel.UpdateSpecifications(
             request.CompanyId,
+            request.FuelKind,
             request.CylinderCount,
             request.EngineDisplacementValue,
             request.EngineDisplacementUnitOfMeasurementId,
@@ -120,9 +107,9 @@ public sealed class UpdateEngineModelSpecificationsCommandHandler
             request.WeightValue,
             request.WeightUnitOfMeasurementId);
 
-        if (result.IsFailure)
+        if (updateResult.IsFailure)
         {
-            return result;
+            return Result.Failure(updateResult.Error);
         }
 
         _engineModelRepository.Update(engineModel);

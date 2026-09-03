@@ -37,6 +37,14 @@ public sealed class EngineModelConfiguration : IEntityTypeConfiguration<EngineMo
 
         builder.HasIndex(em => em.CompanyId);
 
+        // Stored as its string name for readability in the database
+        // (chat, 2026-09-02), matching the convention already used for
+        // Asset.Status. Required — FuelKind has no "not specified" state.
+        builder.Property(em => em.FuelKind)
+            .HasConversion<string>()
+            .HasMaxLength(20)
+            .IsRequired();
+
         builder.Property(em => em.CylinderCount);
 
         builder.Property(em => em.EngineDisplacementValue)

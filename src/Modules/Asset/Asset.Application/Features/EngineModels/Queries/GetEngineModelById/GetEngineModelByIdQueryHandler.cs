@@ -63,6 +63,7 @@ public sealed class GetEngineModelByIdQueryHandler
             engineModel.Id.Value,
             engineModel.Name,
             engineModel.CompanyId,
+            engineModel.FuelKind,
             engineModel.CylinderCount,
             engineModel.EngineDisplacementValue,
             engineModel.EngineDisplacementUnitOfMeasurementId,

@@ -16,6 +16,10 @@ public sealed class RegisterEngineModelCommandValidator : AbstractValidator<Regi
 
         RuleFor(x => x.CompanyId).NotEmpty();
 
+        RuleFor(x => x.FuelKind)
+            .IsInEnum()
+            .WithMessage("نوع سوخت انتخاب‌شده معتبر نیست.");
+
         RuleFor(x => x.CylinderCount)
             .GreaterThan(0)
             .When(x => x.CylinderCount.HasValue);

@@ -112,10 +112,11 @@ public sealed class RegisterEngineModelCommandHandler
             }
         }
 
-        var result = global::Asset.Domain.EngineModel.Register(
+            var result = global::Asset.Domain.EngineModel.Register(
             request.HoldingId,
             request.Name,
             request.CompanyId,
+            request.FuelKind,
             _dateTimeProvider,
             request.CylinderCount,
             request.EngineDisplacementValue,

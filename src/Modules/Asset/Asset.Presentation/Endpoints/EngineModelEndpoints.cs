@@ -51,7 +51,7 @@ public static class EngineModelEndpoints
         return endpoints;
     }
 
-    private static async Task<IResult> RegisterEngineModelAsync(
+        private static async Task<IResult> RegisterEngineModelAsync(
         RegisterEngineModelRequest request,
         ISender sender,
         HttpContext httpContext,
@@ -62,6 +62,7 @@ public static class EngineModelEndpoints
                 request.HoldingId,
                 request.Name,
                 request.CompanyId,
+                request.FuelKind,
                 request.CylinderCount,
                 request.EngineDisplacementValue,
                 request.EngineDisplacementUnitOfMeasurementId,
@@ -103,6 +104,7 @@ public static class EngineModelEndpoints
             new UpdateEngineModelSpecificationsCommand(
                 engineModelId,
                 request.CompanyId,
+                request.FuelKind,
                 request.CylinderCount,
                 request.EngineDisplacementValue,
                 request.EngineDisplacementUnitOfMeasurementId,
@@ -116,7 +118,7 @@ public static class EngineModelEndpoints
             ? Results.NoContent()
             : result.ToProblemResult(httpContext);
     }
-
+    
     private static async Task<IResult> GetEngineModelByIdAsync(
         Guid engineModelId,
         ISender sender,

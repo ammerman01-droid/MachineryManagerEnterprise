@@ -61,6 +61,7 @@ public sealed class EngineModelRepository : IEngineModelRepository
                 em.Id.Value,
                 em.Name,
                 em.CompanyId,
+                em.FuelKind,
                 em.CylinderCount,
                 em.EngineDisplacementValue,
                 em.EngineDisplacementUnitOfMeasurementId,

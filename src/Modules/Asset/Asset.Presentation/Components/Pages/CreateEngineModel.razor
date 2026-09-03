@@ -8,7 +8,6 @@
 
 <MudText Typo="Typo.h4" Class="mb-4">ثبت مدل موتور جدید</MudText>
 
-
 @if (isLoading)
 {
     <MudProgressLinear Indeterminate="true" Class="my-4" />
@@ -24,17 +23,23 @@ else
         <MudForm @ref="form" @bind-IsValid="@isValid">
             <MudTextField @bind-Value="name" Label="نام مدل" Required="true" RequiredError="نام الزامی است."
                           MaxLength="200" />
+
             <MudSelect T="Guid?" @bind-Value="companyId" Label="شرکت سازنده" Required="true"
                        RequiredError="انتخاب شرکت سازنده الزامی است." Class="mt-2">
-
                 @foreach (var company in companies)
                 {
-                    <MudSelectItem T="Guid?" Value="@((Guid?)company.Id)">
-                        @company.Name
-                    </MudSelectItem>
+                    <MudSelectItem T="Guid?" Value="@((Guid?)company.Id)">@company.Name</MudSelectItem>
                 }
-
             </MudSelect>
+
+            <MudSelect T="FuelKind?" @bind-Value="fuelKind" Label="نوع سوخت" Required="true"
+                       RequiredError="انتخاب نوع سوخت الزامی است." Class="mt-2">
+                @foreach (var kind in Enum.GetValues<FuelKind>())
+                {
+                    <MudSelectItem T="FuelKind?" Value="@((FuelKind?)kind)">@GetFuelKindDisplayName(kind)</MudSelectItem>
+                }
+            </MudSelect>
+
             <MudNumericField T="int?" @bind-Value="cylinderCount" Label="تعداد سیلندر" Min="1" Class="mt-4" />
 
             <MudText Typo="Typo.subtitle1" Class="mt-6 mb-2">حجم موتور</MudText>
@@ -114,6 +119,7 @@ else
     private Guid? enginePowerUnitOfMeasurementId;
     private decimal? weightValue;
     private Guid? weightUnitOfMeasurementId;
+    private FuelKind? fuelKind;
     private string? errorMessage;
 
     private List<UnitOfMeasurementItem> volumeUnits = [];
@@ -130,10 +136,17 @@ else
     }
 
     private Guid? companyId;
-
     private List<CompanyItem> companies = [];
 
     /// <summary>Loads the Holding's Units of Measurement, split by physical-quantity kind, and its Companies, for the form's dropdowns.</summary>
+    private string GetFuelKindDisplayName(FuelKind kind) => kind switch
+    {
+        FuelKind.Diesel => "گازوئیل",
+        FuelKind.Gasoline => "بنزین",
+        FuelKind.Gas => "گاز",
+        _ => kind.ToString()
+    };
+
     protected override async Task OnInitializedAsync()
     {
         try
@@ -142,7 +155,6 @@ else
             var response = await client.GetAsync($"/api/v1/units-of-measurement?holdingId={HoldingId}");
             var content = await response.Content.ReadAsStringAsync();
             var companyResponse = await client.GetAsync($"/api/v1/companies?holdingId={HoldingId}");
-
             var companyContent = await companyResponse.Content.ReadAsStringAsync();
 
             if (companyResponse.IsSuccessStatusCode)
@@ -161,17 +173,9 @@ else
                 var units = JsonSerializer.Deserialize<List<UnitOfMeasurementItem>>(
                     content, new JsonSerializerOptions { PropertyNameCaseInsensitive = true }) ?? [];
 
-                volumeUnits = units
-                    .Where(u => u.Kind == PhysicalQuantityKind.Dimension)
-                    .ToList();
-
-                powerUnits = units
-                    .Where(u => u.Kind == PhysicalQuantityKind.Force)
-                    .ToList();
-
-                weightUnits = units
-                    .Where(u => u.Kind == PhysicalQuantityKind.Weight)
-                    .ToList();
+                volumeUnits = units.Where(u => u.Kind == PhysicalQuantityKind.Dimension).ToList();
+                powerUnits = units.Where(u => u.Kind == PhysicalQuantityKind.Force).ToList();
+                weightUnits = units.Where(u => u.Kind == PhysicalQuantityKind.Weight).ToList();
             }
             else
             {
@@ -190,7 +194,7 @@ else
 
     private async Task SubmitAsync()
     {
-        if (form is null || !isValid)
+        if (form is null || !isValid || fuelKind is null)
         {
             return;
         }
@@ -208,6 +212,7 @@ else
                     HoldingId,
                     Name = name,
                     CompanyId = companyId,
+                    FuelKind = fuelKind.Value,
                     CylinderCount = cylinderCount,
                     EngineDisplacementValue = engineDisplacementValue,
                     EngineDisplacementUnitOfMeasurementId = engineDisplacementUnitOfMeasurementId,
