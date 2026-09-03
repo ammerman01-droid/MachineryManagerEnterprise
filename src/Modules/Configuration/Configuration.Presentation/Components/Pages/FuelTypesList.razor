@@ -1,4 +1,5 @@
 @page "/admin/fuel-types"
+@using MachineryManager.SharedKernel
 @inject IHttpClientFactory HttpClientFactory
 @inject NavigationManager Navigation
 
@@ -44,25 +45,43 @@ else if (fuelTypes.Count > 0)
         </HeaderContent>
         <RowTemplate>
             <MudTd DataLabel="نام">@context.Name</MudTd>
-            <MudTd DataLabel="نوع">@context.Kind</MudTd>
+            <MudTd DataLabel="نوع">@TranslateKind(context.Kind)</MudTd>
             <MudTd DataLabel="قیمت">@context.Price.ToString("N0")</MudTd>
         </RowTemplate>
     </MudTable>
 }
 
 @code {
+    /// <summary>Represents a Holding option in the selection dropdown.</summary>
     private sealed class HoldingItem
     {
+        /// <summary>Gets or sets the Holding's unique identifier.</summary>
         public Guid Id { get; set; }
+
+        /// <summary>Gets or sets the Holding's display name.</summary>
         public string Name { get; set; } = string.Empty;
     }
 
+    /// <summary>Represents a single Fuel Type row in the current Holding's list.</summary>
     private sealed class FuelTypeItem
     {
+        /// <summary>Gets or sets the Fuel Type's unique identifier.</summary>
         public Guid Id { get; set; }
+
+        /// <summary>Gets or sets the Fuel Type's display name.</summary>
         public string Name { get; set; } = string.Empty;
+
+        /// <summary>Gets or sets the price.</summary>
         public long Price { get; set; }
-        public string Kind { get; set; } = string.Empty;
+
+        /// <summary>
+        /// Gets or sets the fuel category. Must match the server's
+        /// actual JSON representation of <c>FuelKind</c> — the enum
+        /// itself, not a string (chat, 2026-09-03; System.Text.Json
+        /// serializes enums as their underlying integer by default,
+        /// unless a JsonStringEnumConverter is configured).
+        /// </summary>
+        public FuelKind Kind { get; set; }
     }
 
     private sealed class SearchHoldingsResult
@@ -76,6 +95,7 @@ else if (fuelTypes.Count > 0)
     private bool isLoading = true;
     private string? errorMessage;
 
+    /// <summary>Loads the list of Holdings when the page is first rendered.</summary>
     protected override async Task OnInitializedAsync()
     {
         await LoadHoldingsAsync();
@@ -92,7 +112,7 @@ else if (fuelTypes.Count > 0)
 
             if (response.IsSuccessStatusCode)
             {
-                var result = JsonSerializer.Deserialize<SearchHoldingsResult>(content, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+                var result = System.Text.Json.JsonSerializer.Deserialize<SearchHoldingsResult>(content, new System.Text.Json.JsonSerializerOptions { PropertyNameCaseInsensitive = true });
                 holdings = result?.Items ?? [];
             }
             else
@@ -106,6 +126,7 @@ else if (fuelTypes.Count > 0)
         }
     }
 
+    /// <summary>Reloads the fuel type list whenever the selected Holding changes.</summary>
     private async Task OnHoldingChangedAsync()
     {
         if (selectedHoldingId == Guid.Empty)
@@ -125,7 +146,7 @@ else if (fuelTypes.Count > 0)
 
             if (response.IsSuccessStatusCode)
             {
-                fuelTypes = JsonSerializer.Deserialize<List<FuelTypeItem>>(content, new JsonSerializerOptions { PropertyNameCaseInsensitive = true }) ?? [];
+                fuelTypes = System.Text.Json.JsonSerializer.Deserialize<List<FuelTypeItem>>(content, new System.Text.Json.JsonSerializerOptions { PropertyNameCaseInsensitive = true }) ?? [];
             }
             else
             {
@@ -141,4 +162,15 @@ else if (fuelTypes.Count > 0)
             isLoading = false;
         }
     }
+
+    /// <summary>Translates a <see cref="FuelKind"/> value into its Persian display label.</summary>
+    /// <param name="kind">The fuel category to translate.</param>
+    /// <returns>The Persian display label for the given fuel category.</returns>
+    private static string TranslateKind(FuelKind kind) => kind switch
+    {
+        FuelKind.Diesel => "گازوئیل",
+        FuelKind.Gasoline => "بنزین",
+        FuelKind.Gas => "گاز",
+        _ => kind.ToString(),
+    };
 }
