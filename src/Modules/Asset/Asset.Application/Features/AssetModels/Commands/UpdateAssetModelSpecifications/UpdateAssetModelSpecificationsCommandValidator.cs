@@ -1,19 +1,15 @@
 using FluentValidation;
 
-namespace MachineryManager.Asset.Application.Features.AssetModels.Commands.RegisterAssetModel;
+namespace MachineryManager.Asset.Application.Features.AssetModels.Commands.UpdateAssetModelSpecifications;
 
-/// <summary>Validates <see cref="RegisterAssetModelCommand"/> per ADR-0036.</summary>
-public sealed class RegisterAssetModelCommandValidator : AbstractValidator<RegisterAssetModelCommand>
+/// <summary>Validates <see cref="UpdateAssetModelSpecificationsCommand"/> per ADR-0036.</summary>
+public sealed class UpdateAssetModelSpecificationsCommandValidator
+    : AbstractValidator<UpdateAssetModelSpecificationsCommand>
 {
-    /// <summary>Initializes validation rules for the register asset model command.</summary>
-    public RegisterAssetModelCommandValidator()
+    /// <summary>Initializes validation rules for the update asset model specifications command.</summary>
+    public UpdateAssetModelSpecificationsCommandValidator()
     {
-        RuleFor(x => x.HoldingId).NotEmpty();
-
-        RuleFor(x => x.Name)
-            .NotEmpty()
-            .MaximumLength(global::Asset.Domain.AssetModel.MaxNameLength);
-
+        RuleFor(x => x.AssetModelId).NotEmpty();
         RuleFor(x => x.CompanyId).NotEmpty();
 
         RuleFor(x => x.LengthValue).GreaterThan(0).When(x => x.LengthValue.HasValue);

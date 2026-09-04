@@ -1,6 +1,8 @@
 @page "/admin/asset-models/{AssetModelId:guid}/edit"
 @inject IHttpClientFactory HttpClientFactory
 @inject NavigationManager Navigation
+@using MachineryManager.SharedKernel
+@using System.Text.Json
 
 <PageTitle>ویرایش مدل دارایی</PageTitle>
 
@@ -17,46 +19,222 @@
 }
 else
 {
-    <MudPaper Class="pa-4" Style="max-width:500px;">
-        <MudForm @ref="form" @bind-IsValid="@isValid">
+    <MudPaper Class="pa-4" Style="max-width:600px;">
+        <MudForm @ref="nameForm" @bind-IsValid="@isNameValid">
             <MudTextField @bind-Value="name" Label="نام مدل" Required="true" RequiredError="نام الزامی است." MaxLength="200" />
 
-            <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="SubmitAsync"
-                       Disabled="@(!isValid || isSubmitting)" Class="mt-4">
-                @if (isSubmitting)
-                {
-                    <MudProgressCircular Size="Size.Small" Indeterminate="true" />
-                }
-                else
-                {
-                    <span>ذخیره</span>
-                }
-            </MudButton>
-
-            <MudButton Variant="Variant.Outlined" OnClick="@(() => Navigation.NavigateTo("/admin/asset-models"))" Class="mt-4 mr-2">
-                بازگشت
+            <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="SubmitNameAsync"
+                       Disabled="@(!isNameValid || isSubmittingName)" Class="mt-4">
+                @(isSubmittingName ? "..." : "ذخیره نام")
             </MudButton>
         </MudForm>
     </MudPaper>
+
+    <MudPaper Class="pa-4 mt-6" Style="max-width:600px;">
+        <MudForm @ref="specForm" @bind-IsValid="@isSpecValid">
+            <div class="d-flex align-center gap-2">
+                <MudSelect T="Guid?" @bind-Value="companyId" Label="شرکت سازنده" Required="true"
+                           RequiredError="انتخاب شرکت سازنده الزامی است.">
+                    @foreach (var company in companies)
+                    {
+                        <MudSelectItem T="Guid?" Value="@((Guid?)company.Id)">@company.Name</MudSelectItem>
+                    }
+                </MudSelect>
+                <MudButton Variant="Variant.Outlined" Size="Size.Small" OnClick="@(() => showAddCompany = !showAddCompany)">
+                    افزودن شرکت جدید
+                </MudButton>
+            </div>
+
+            @if (showAddCompany)
+            {
+                <div class="d-flex align-center gap-2 mt-2">
+                    <MudTextField T="string" Label="نام شرکت جدید" @bind-Value="newCompanyName" MaxLength="200" />
+                    <MudButton Variant="Variant.Filled" Color="Color.Primary" Size="Size.Small"
+                               OnClick="AddCompanyAsync" Disabled="isAddingCompany">
+                        @(isAddingCompany ? "..." : "ثبت شرکت")
+                    </MudButton>
+                </div>
+            }
+
+            <MudText Typo="Typo.subtitle1" Class="mt-6 mb-2">طول</MudText>
+            <MudNumericField T="decimal?" @bind-Value="lengthValue" Label="مقدار طول" Min="0" />
+            <MudSelect T="Guid?" @bind-Value="lengthUnitOfMeasurementId" Label="واحد طول" Class="mt-2">
+                @foreach (var unit in dimensionUnits)
+                {
+                    <MudSelectItem T="Guid?" Value="@((Guid?)unit.Id)">@unit.Name</MudSelectItem>
+                }
+            </MudSelect>
+
+            <MudText Typo="Typo.subtitle1" Class="mt-6 mb-2">عرض</MudText>
+            <MudNumericField T="decimal?" @bind-Value="widthValue" Label="مقدار عرض" Min="0" />
+            <MudSelect T="Guid?" @bind-Value="widthUnitOfMeasurementId" Label="واحد عرض" Class="mt-2">
+                @foreach (var unit in dimensionUnits)
+                {
+                    <MudSelectItem T="Guid?" Value="@((Guid?)unit.Id)">@unit.Name</MudSelectItem>
+                }
+            </MudSelect>
+
+            <MudText Typo="Typo.subtitle1" Class="mt-6 mb-2">ارتفاع</MudText>
+            <MudNumericField T="decimal?" @bind-Value="heightValue" Label="مقدار ارتفاع" Min="0" />
+            <MudSelect T="Guid?" @bind-Value="heightUnitOfMeasurementId" Label="واحد ارتفاع" Class="mt-2">
+                @foreach (var unit in dimensionUnits)
+                {
+                    <MudSelectItem T="Guid?" Value="@((Guid?)unit.Id)">@unit.Name</MudSelectItem>
+                }
+            </MudSelect>
+
+            <MudText Typo="Typo.subtitle1" Class="mt-6 mb-2">وزن</MudText>
+            <MudNumericField T="decimal?" @bind-Value="weightValue" Label="مقدار وزن" Min="0" />
+            <MudSelect T="Guid?" @bind-Value="weightUnitOfMeasurementId" Label="واحد وزن" Class="mt-2">
+                @foreach (var unit in weightUnits)
+                {
+                    <MudSelectItem T="Guid?" Value="@((Guid?)unit.Id)">@unit.Name</MudSelectItem>
+                }
+            </MudSelect>
+
+            <MudText Typo="Typo.subtitle1" Class="mt-6 mb-2">ظرفیت کاری (حجمی)</MudText>
+            <MudNumericField T="decimal?" @bind-Value="workingCapacityVolumeValue" Label="مقدار ظرفیت (حجمی)" Min="0" />
+            <MudSelect T="Guid?" @bind-Value="workingCapacityVolumeUnitOfMeasurementId" Label="واحد ظرفیت (حجمی)" Class="mt-2">
+                @foreach (var unit in dimensionUnits)
+                {
+                    <MudSelectItem T="Guid?" Value="@((Guid?)unit.Id)">@unit.Name</MudSelectItem>
+                }
+            </MudSelect>
+
+            <MudText Typo="Typo.subtitle1" Class="mt-6 mb-2">ظرفیت کاری (وزنی)</MudText>
+            <MudNumericField T="decimal?" @bind-Value="workingCapacityWeightValue" Label="مقدار ظرفیت (وزنی)" Min="0" />
+            <MudSelect T="Guid?" @bind-Value="workingCapacityWeightUnitOfMeasurementId" Label="واحد ظرفیت (وزنی)" Class="mt-2">
+                @foreach (var unit in weightUnits)
+                {
+                    <MudSelectItem T="Guid?" Value="@((Guid?)unit.Id)">@unit.Name</MudSelectItem>
+                }
+            </MudSelect>
+
+            <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="SubmitSpecificationsAsync"
+                       Disabled="@(!isSpecValid || isSubmittingSpec)" Class="mt-6">
+                @(isSubmittingSpec ? "..." : "ذخیره مشخصات فنی")
+            </MudButton>
+        </MudForm>
+    </MudPaper>
+
+    <MudButton Variant="Variant.Outlined" OnClick="@(() => Navigation.NavigateTo("/admin/asset-models"))" Class="mt-6">
+        بازگشت
+    </MudButton>
 }
 
 @code {
+    /// <summary>Gets or sets the identifier of the Asset Model being edited, supplied via the route.</summary>
     [Parameter]
     public Guid AssetModelId { get; set; }
 
+    /// <summary>Represents the full detail of an Asset Model, as returned by GetAssetModelById.</summary>
     private sealed class AssetModelDetails
     {
+        /// <summary>Gets or sets the Asset Model's unique identifier.</summary>
         public Guid Id { get; set; }
+
+        /// <summary>Gets or sets the Asset Model's display name.</summary>
+        public string Name { get; set; } = string.Empty;
+
+        /// <summary>Gets or sets the identifier of the manufacturer Company.</summary>
+        public Guid CompanyId { get; set; }
+
+        /// <summary>Gets or sets the identifier of the owning Holding.</summary>
+        public Guid HoldingId { get; set; }
+
+        /// <summary>Gets or sets the length value, if specified.</summary>
+        public decimal? LengthValue { get; set; }
+
+        /// <summary>Gets or sets the identifier of the unit of measurement for the length value, if specified.</summary>
+        public Guid? LengthUnitOfMeasurementId { get; set; }
+
+        /// <summary>Gets or sets the width value, if specified.</summary>
+        public decimal? WidthValue { get; set; }
+
+        /// <summary>Gets or sets the identifier of the unit of measurement for the width value, if specified.</summary>
+        public Guid? WidthUnitOfMeasurementId { get; set; }
+
+        /// <summary>Gets or sets the height value, if specified.</summary>
+        public decimal? HeightValue { get; set; }
+
+        /// <summary>Gets or sets the identifier of the unit of measurement for the height value, if specified.</summary>
+        public Guid? HeightUnitOfMeasurementId { get; set; }
+
+        /// <summary>Gets or sets the weight value, if specified.</summary>
+        public decimal? WeightValue { get; set; }
+
+        /// <summary>Gets or sets the identifier of the unit of measurement for the weight value, if specified.</summary>
+        public Guid? WeightUnitOfMeasurementId { get; set; }
+
+        /// <summary>Gets or sets the volume-based working capacity value, if specified.</summary>
+        public decimal? WorkingCapacityVolumeValue { get; set; }
+
+        /// <summary>Gets or sets the identifier of the unit of measurement for the volume-based working capacity value, if specified.</summary>
+        public Guid? WorkingCapacityVolumeUnitOfMeasurementId { get; set; }
+
+        /// <summary>Gets or sets the weight-based working capacity value, if specified.</summary>
+        public decimal? WorkingCapacityWeightValue { get; set; }
+
+        /// <summary>Gets or sets the identifier of the unit of measurement for the weight-based working capacity value, if specified.</summary>
+        public Guid? WorkingCapacityWeightUnitOfMeasurementId { get; set; }
+    }
+
+    /// <summary>Represents a Company option in the manufacturer selection dropdown.</summary>
+    private sealed class CompanyItem
+    {
+        /// <summary>Gets or sets the Company's unique identifier.</summary>
+        public Guid Id { get; set; }
+
+        /// <summary>Gets or sets the Company's display name.</summary>
         public string Name { get; set; } = string.Empty;
     }
 
-    private MudForm? form;
-    private bool isValid;
-    private bool isSubmitting;
+    /// <summary>Represents a Unit of Measurement option in a selection dropdown.</summary>
+    private sealed class UnitOfMeasurementItem
+    {
+        /// <summary>Gets or sets the unit's unique identifier.</summary>
+        public Guid Id { get; set; }
+
+        /// <summary>Gets or sets the unit's display name.</summary>
+        public string Name { get; set; } = string.Empty;
+
+        /// <summary>Gets or sets the physical-quantity kind of the unit.</summary>
+        public PhysicalQuantityKind Kind { get; set; }
+    }
+
+    private MudForm? nameForm;
+    private MudForm? specForm;
+    private bool isNameValid;
+    private bool isSpecValid;
+    private bool isSubmittingName;
+    private bool isSubmittingSpec;
     private bool isLoading = true;
+    private bool showAddCompany;
+    private bool isAddingCompany;
     private string name = string.Empty;
+    private string newCompanyName = string.Empty;
     private string? errorMessage;
 
+    private Guid holdingId;
+    private Guid? companyId;
+    private decimal? lengthValue;
+    private Guid? lengthUnitOfMeasurementId;
+    private decimal? widthValue;
+    private Guid? widthUnitOfMeasurementId;
+    private decimal? heightValue;
+    private Guid? heightUnitOfMeasurementId;
+    private decimal? weightValue;
+    private Guid? weightUnitOfMeasurementId;
+    private decimal? workingCapacityVolumeValue;
+    private Guid? workingCapacityVolumeUnitOfMeasurementId;
+    private decimal? workingCapacityWeightValue;
+    private Guid? workingCapacityWeightUnitOfMeasurementId;
+
+    private List<CompanyItem> companies = [];
+    private List<UnitOfMeasurementItem> dimensionUnits = [];
+    private List<UnitOfMeasurementItem> weightUnits = [];
+
+    /// <summary>Loads the Asset Model's current details, then its Holding's Companies and Units of Measurement for the dropdowns.</summary>
     protected override async Task OnInitializedAsync()
     {
         try
@@ -71,10 +249,51 @@ else
                 return;
             }
 
-            var result = System.Text.Json.JsonSerializer.Deserialize<AssetModelDetails>(content, new
-System.Text.Json.JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+            var result = JsonSerializer.Deserialize<AssetModelDetails>(
+                content, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
 
-            name = result?.Name ?? string.Empty;
+            if (result is null)
+            {
+                errorMessage = "پاسخ نامعتبر از سرور.";
+                return;
+            }
+
+            name = result.Name;
+            holdingId = result.HoldingId;
+            companyId = result.CompanyId;
+            lengthValue = result.LengthValue;
+            lengthUnitOfMeasurementId = result.LengthUnitOfMeasurementId;
+            widthValue = result.WidthValue;
+            widthUnitOfMeasurementId = result.WidthUnitOfMeasurementId;
+            heightValue = result.HeightValue;
+            heightUnitOfMeasurementId = result.HeightUnitOfMeasurementId;
+            weightValue = result.WeightValue;
+            weightUnitOfMeasurementId = result.WeightUnitOfMeasurementId;
+            workingCapacityVolumeValue = result.WorkingCapacityVolumeValue;
+            workingCapacityVolumeUnitOfMeasurementId = result.WorkingCapacityVolumeUnitOfMeasurementId;
+            workingCapacityWeightValue = result.WorkingCapacityWeightValue;
+            workingCapacityWeightUnitOfMeasurementId = result.WorkingCapacityWeightUnitOfMeasurementId;
+
+            var companyResponse = await client.GetAsync($"/api/v1/companies?holdingId={holdingId}");
+            var companyContent = await companyResponse.Content.ReadAsStringAsync();
+
+            if (companyResponse.IsSuccessStatusCode)
+            {
+                companies = JsonSerializer.Deserialize<List<CompanyItem>>(
+                    companyContent, new JsonSerializerOptions { PropertyNameCaseInsensitive = true }) ?? [];
+            }
+
+            var unitResponse = await client.GetAsync($"/api/v1/units-of-measurement?holdingId={holdingId}");
+            var unitContent = await unitResponse.Content.ReadAsStringAsync();
+
+            if (unitResponse.IsSuccessStatusCode)
+            {
+                var units = JsonSerializer.Deserialize<List<UnitOfMeasurementItem>>(
+                    unitContent, new JsonSerializerOptions { PropertyNameCaseInsensitive = true }) ?? [];
+
+                dimensionUnits = units.Where(u => u.Kind == PhysicalQuantityKind.Dimension).ToList();
+                weightUnits = units.Where(u => u.Kind == PhysicalQuantityKind.Weight).ToList();
+            }
         }
         catch (Exception ex)
         {
@@ -86,28 +305,41 @@ System.Text.Json.JsonSerializerOptions { PropertyNameCaseInsensitive = true });
         }
     }
 
-    private async Task SubmitAsync()
+    /// <summary>Registers a new Company inline, without leaving this page.</summary>
+    private async Task AddCompanyAsync()
     {
-        if (form is null || !isValid)
+        if (string.IsNullOrWhiteSpace(newCompanyName))
         {
             return;
         }
 
-        isSubmitting = true;
-        errorMessage = null;
+        isAddingCompany = true;
 
         try
         {
             var client = HttpClientFactory.CreateClient("InternalApi");
-            var response = await client.PutAsJsonAsync($"/api/v1/asset-models/{AssetModelId}", new { Name = name });
+            var response = await client.PostAsJsonAsync(
+                "/api/v1/companies", new { HoldingId = holdingId, Name = newCompanyName });
+            var content = await response.Content.ReadAsStringAsync();
 
             if (response.IsSuccessStatusCode)
             {
-                Navigation.NavigateTo("/admin/asset-models");
-                return;
-            }
+                newCompanyName = string.Empty;
+                showAddCompany = false;
 
-            errorMessage = $"خطا در ویرایش مدل: {await response.Content.ReadAsStringAsync()}";
+                var companyResponse = await client.GetAsync($"/api/v1/companies?holdingId={holdingId}");
+                var companyContent = await companyResponse.Content.ReadAsStringAsync();
+
+                if (companyResponse.IsSuccessStatusCode)
+                {
+                    companies = JsonSerializer.Deserialize<List<CompanyItem>>(
+                        companyContent, new JsonSerializerOptions { PropertyNameCaseInsensitive = true }) ?? [];
+                }
+            }
+            else
+            {
+                errorMessage = $"خطا در ثبت شرکت: {content}";
+            }
         }
         catch (Exception ex)
         {
@@ -115,7 +347,86 @@ System.Text.Json.JsonSerializerOptions { PropertyNameCaseInsensitive = true });
         }
         finally
         {
-            isSubmitting = false;
+            isAddingCompany = false;
+        }
+    }
+
+    /// <summary>Saves only the name change, via the dedicated Rename endpoint.</summary>
+    private async Task SubmitNameAsync()
+    {
+        if (nameForm is null || !isNameValid)
+        {
+            return;
+        }
+
+        isSubmittingName = true;
+        errorMessage = null;
+
+        try
+        {
+            var client = HttpClientFactory.CreateClient("InternalApi");
+            var response = await client.PutAsJsonAsync($"/api/v1/asset-models/{AssetModelId}", new { Name = name });
+
+            if (!response.IsSuccessStatusCode)
+            {
+                errorMessage = $"خطا در ویرایش نام: {await response.Content.ReadAsStringAsync()}";
+            }
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"خطا: {ex.Message}";
+        }
+        finally
+        {
+            isSubmittingName = false;
+        }
+    }
+
+    /// <summary>Saves the technical specifications, via the dedicated UpdateSpecifications endpoint.</summary>
+    private async Task SubmitSpecificationsAsync()
+    {
+        if (specForm is null || !isSpecValid)
+        {
+            return;
+        }
+
+        isSubmittingSpec = true;
+        errorMessage = null;
+
+        try
+        {
+            var client = HttpClientFactory.CreateClient("InternalApi");
+            var response = await client.PutAsJsonAsync(
+                $"/api/v1/asset-models/{AssetModelId}/specifications",
+                new
+                {
+                    CompanyId = companyId,
+                    LengthValue = lengthValue,
+                    LengthUnitOfMeasurementId = lengthUnitOfMeasurementId,
+                    WidthValue = widthValue,
+                    WidthUnitOfMeasurementId = widthUnitOfMeasurementId,
+                    HeightValue = heightValue,
+                    HeightUnitOfMeasurementId = heightUnitOfMeasurementId,
+                    WeightValue = weightValue,
+                    WeightUnitOfMeasurementId = weightUnitOfMeasurementId,
+                    WorkingCapacityVolumeValue = workingCapacityVolumeValue,
+                    WorkingCapacityVolumeUnitOfMeasurementId = workingCapacityVolumeUnitOfMeasurementId,
+                    WorkingCapacityWeightValue = workingCapacityWeightValue,
+                    WorkingCapacityWeightUnitOfMeasurementId = workingCapacityWeightUnitOfMeasurementId
+                });
+
+            if (!response.IsSuccessStatusCode)
+            {
+                errorMessage = $"خطا در ویرایش مشخصات فنی: {await response.Content.ReadAsStringAsync()}";
+            }
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"خطا: {ex.Message}";
+        }
+        finally
+        {
+            isSubmittingSpec = false;
         }
     }
 }

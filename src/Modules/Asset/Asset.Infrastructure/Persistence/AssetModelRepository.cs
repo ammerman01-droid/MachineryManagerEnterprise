@@ -64,6 +64,19 @@ public sealed class AssetModelRepository : IAssetModelRepository
                 am.Id.Value,
                 am.Name,
                 am.CompanyId,
+                am.HoldingId,
+                am.LengthValue,
+                am.LengthUnitOfMeasurementId,
+                am.WidthValue,
+                am.WidthUnitOfMeasurementId,
+                am.HeightValue,
+                am.HeightUnitOfMeasurementId,
+                am.WeightValue,
+                am.WeightUnitOfMeasurementId,
+                am.WorkingCapacityVolumeValue,
+                am.WorkingCapacityVolumeUnitOfMeasurementId,
+                am.WorkingCapacityWeightValue,
+                am.WorkingCapacityWeightUnitOfMeasurementId,
                 am.CompatibleEngineModelIds.Select(x => x.Value).ToList()))
             .ToList();
 

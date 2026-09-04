@@ -1,9 +1,7 @@
 namespace MachineryManager.Asset.Presentation.Contracts;
 
-/// <summary>Request body for registering a new Asset Model.</summary>
-public sealed record RegisterAssetModelRequest(
-    Guid HoldingId,
-    string Name,
+/// <summary>Request body for updating an existing Asset Model's technical specifications.</summary>
+public sealed record UpdateAssetModelSpecificationsRequest(
     Guid CompanyId,
     decimal? LengthValue,
     Guid? LengthUnitOfMeasurementId,

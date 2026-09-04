@@ -7,9 +7,9 @@ using MediatR;
 namespace MachineryManager.Asset.Application.Features.AssetModels.Queries.GetAssetModelById;
 
 /// <summary>
-/// Handles <see cref="GetAssetModelByIdQuery"/> by loading the aggregate,
-/// verifying the caller is authorized for its Holding, and mapping it
-/// to a DTO.
+/// Handles <see cref="GetAssetModelByIdQuery"/> by loading the
+/// aggregate, verifying the caller is authorized for its Holding, and
+/// mapping it to a DTO.
 /// </summary>
 public sealed class GetAssetModelByIdQueryHandler
     : IRequestHandler<GetAssetModelByIdQuery, Result<AssetModelDto>>
@@ -63,6 +63,19 @@ public sealed class GetAssetModelByIdQueryHandler
             assetModel.Id.Value,
             assetModel.Name,
             assetModel.CompanyId,
+            assetModel.HoldingId,
+            assetModel.LengthValue,
+            assetModel.LengthUnitOfMeasurementId,
+            assetModel.WidthValue,
+            assetModel.WidthUnitOfMeasurementId,
+            assetModel.HeightValue,
+            assetModel.HeightUnitOfMeasurementId,
+            assetModel.WeightValue,
+            assetModel.WeightUnitOfMeasurementId,
+            assetModel.WorkingCapacityVolumeValue,
+            assetModel.WorkingCapacityVolumeUnitOfMeasurementId,
+            assetModel.WorkingCapacityWeightValue,
+            assetModel.WorkingCapacityWeightUnitOfMeasurementId,
             assetModel.CompatibleEngineModelIds.Select(x => x.Value).ToList());
 
         return Result.Success(dto);

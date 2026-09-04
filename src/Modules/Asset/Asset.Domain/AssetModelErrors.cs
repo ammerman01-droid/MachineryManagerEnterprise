@@ -61,7 +61,7 @@ public static class AssetModelErrors
         "AssetModel.EngineModelBelongsToDifferentHolding",
         "This engine model belongs to a different Holding and cannot be marked compatible with this asset model.");
 
-        /// <summary>
+    /// <summary>
     /// Creates an error indicating that the given CompanyId does not
     /// correspond to an existing Company within this Asset Model's
     /// Holding (chat, 2026-09-01).
@@ -69,4 +69,41 @@ public static class AssetModelErrors
     public static Error CompanyNotFound(Guid companyId) => Error.NotFound(
         "AssetModel.CompanyNotFound",
         $"Company with id {companyId} was not found.");
+
+    /// <summary>
+    /// Creates an error indicating a dimension/technical specification
+    /// value is not a positive number (chat, 2026-09-04).
+    /// </summary>
+    public static Error InvalidSpecificationValue(string fieldName) => Error.Validation(
+        "AssetModel.InvalidSpecificationValue",
+        $"{fieldName} must be greater than zero.");
+
+    /// <summary>
+    /// Creates an error indicating a technical specification's value was
+    /// supplied without its corresponding unit of measurement, or vice
+    /// versa — both must be present together, or both absent
+    /// (chat, 2026-09-04).
+    /// </summary>
+    public static Error SpecificationValueUnitMismatch(string fieldName) => Error.Validation(
+        "AssetModel.SpecificationValueUnitMismatch",
+        $"{fieldName} requires both a value and a unit of measurement — provide both or neither.");
+
+    /// <summary>
+    /// Creates an error indicating the referenced Unit of Measurement
+    /// does not exist, or does not belong to this Asset Model's
+    /// Holding (chat, 2026-09-04).
+    /// </summary>
+    public static Error UnitOfMeasurementNotFound(Guid unitOfMeasurementId) => Error.NotFound(
+        "AssetModel.UnitOfMeasurementNotFound",
+        $"Unit of measurement with id {unitOfMeasurementId} was not found in this holding.");
+
+    /// <summary>
+    /// Creates an error indicating the Unit of Measurement selected for
+    /// a technical specification field belongs to the wrong physical
+    /// quantity category (chat, 2026-09-04).
+    /// </summary>
+    public static Error UnitOfMeasurementKindMismatch(string fieldName, global::MachineryManager.SharedKernel.PhysicalQuantityKind expectedKind) =>
+        Error.Conflict(
+            "AssetModel.UnitOfMeasurementKindMismatch",
+            $"{fieldName} requires a unit of measurement of kind '{expectedKind}'.");
 }

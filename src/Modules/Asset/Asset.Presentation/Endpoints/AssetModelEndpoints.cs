@@ -2,6 +2,7 @@ using MachineryManager.Asset.Application.Features.AssetModels.Commands.AssignCom
 using MachineryManager.Asset.Application.Features.AssetModels.Commands.RegisterAssetModel;
 using MachineryManager.Asset.Application.Features.AssetModels.Commands.RemoveCompatibleEngineModel;
 using MachineryManager.Asset.Application.Features.AssetModels.Commands.RenameAssetModel;
+using MachineryManager.Asset.Application.Features.AssetModels.Commands.UpdateAssetModelSpecifications;
 using MachineryManager.Asset.Application.Features.AssetModels.Queries.GetAssetModelById;
 using MachineryManager.Asset.Application.Features.AssetModels.Queries.SearchAssetModels;
 using MachineryManager.Asset.Presentation.Contracts;
@@ -37,6 +38,10 @@ public static class AssetModelEndpoints
             .WithName("RenameAssetModel")
             .WithSummary("Renames an existing Asset Model.");
 
+        group.MapPut("/{assetModelId:guid}/specifications", UpdateAssetModelSpecificationsAsync)
+            .WithName("UpdateAssetModelSpecifications")
+            .WithSummary("Updates the technical specifications of an existing Asset Model.");
+
         group.MapGet("/{assetModelId:guid}", GetAssetModelByIdAsync)
             .WithName("GetAssetModelById")
             .WithSummary("Retrieves a single Asset Model by its identifier.");
@@ -63,7 +68,22 @@ public static class AssetModelEndpoints
         CancellationToken cancellationToken)
     {
         var result = await sender.Send(
-            new RegisterAssetModelCommand(request.HoldingId, request.Name, request.CompanyId),
+            new RegisterAssetModelCommand(
+                request.HoldingId,
+                request.Name,
+                request.CompanyId,
+                request.LengthValue,
+                request.LengthUnitOfMeasurementId,
+                request.WidthValue,
+                request.WidthUnitOfMeasurementId,
+                request.HeightValue,
+                request.HeightUnitOfMeasurementId,
+                request.WeightValue,
+                request.WeightUnitOfMeasurementId,
+                request.WorkingCapacityVolumeValue,
+                request.WorkingCapacityVolumeUnitOfMeasurementId,
+                request.WorkingCapacityWeightValue,
+                request.WorkingCapacityWeightUnitOfMeasurementId),
             cancellationToken);
 
         return result.IsSuccess
@@ -80,6 +100,36 @@ public static class AssetModelEndpoints
     {
         var result = await sender.Send(
             new RenameAssetModelCommand(assetModelId, request.Name),
+            cancellationToken);
+
+        return result.IsSuccess
+            ? Results.NoContent()
+            : result.ToProblemResult(httpContext);
+    }
+
+    private static async Task<IResult> UpdateAssetModelSpecificationsAsync(
+        Guid assetModelId,
+        UpdateAssetModelSpecificationsRequest request,
+        ISender sender,
+        HttpContext httpContext,
+        CancellationToken cancellationToken)
+    {
+        var result = await sender.Send(
+            new UpdateAssetModelSpecificationsCommand(
+                assetModelId,
+                request.CompanyId,
+                request.LengthValue,
+                request.LengthUnitOfMeasurementId,
+                request.WidthValue,
+                request.WidthUnitOfMeasurementId,
+                request.HeightValue,
+                request.HeightUnitOfMeasurementId,
+                request.WeightValue,
+                request.WeightUnitOfMeasurementId,
+                request.WorkingCapacityVolumeValue,
+                request.WorkingCapacityVolumeUnitOfMeasurementId,
+                request.WorkingCapacityWeightValue,
+                request.WorkingCapacityWeightUnitOfMeasurementId),
             cancellationToken);
 
         return result.IsSuccess

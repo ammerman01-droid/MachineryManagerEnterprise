@@ -7,4 +7,17 @@ namespace MachineryManager.Asset.Application.Features.AssetModels.Commands.Regis
 public sealed record RegisterAssetModelCommand(
     Guid HoldingId,
     string Name,
-    Guid CompanyId) : IRequest<Result<Guid>>;
+    Guid CompanyId,
+    decimal? LengthValue = null,
+    Guid? LengthUnitOfMeasurementId = null,
+    decimal? WidthValue = null,
+    Guid? WidthUnitOfMeasurementId = null,
+    decimal? HeightValue = null,
+    Guid? HeightUnitOfMeasurementId = null,
+    decimal? WeightValue = null,
+    Guid? WeightUnitOfMeasurementId = null,
+    decimal? WorkingCapacityVolumeValue = null,
+    Guid? WorkingCapacityVolumeUnitOfMeasurementId = null,
+    decimal? WorkingCapacityWeightValue = null,
+    Guid? WorkingCapacityWeightUnitOfMeasurementId = null)
+    : IRequest<Result<Guid>>;

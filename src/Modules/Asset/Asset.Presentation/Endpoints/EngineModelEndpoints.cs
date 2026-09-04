@@ -32,10 +32,6 @@ public static class EngineModelEndpoints
             .WithName("RegisterEngineModel")
             .WithSummary("Registers a new Engine Model within a Holding.");
 
-        group.MapPut("/{engineModelId:guid}", RenameEngineModelAsync)
-            .WithName("RenameEngineModel")
-            .WithSummary("Renames an existing Engine Model.");
-
         group.MapPut("/{engineModelId:guid}/specifications", UpdateEngineModelSpecificationsAsync)
             .WithName("UpdateEngineModelSpecifications")
             .WithSummary("Updates the technical specifications of an existing Engine Model.");
@@ -77,23 +73,7 @@ public static class EngineModelEndpoints
             : result.ToProblemResult(httpContext);
     }
 
-    private static async Task<IResult> RenameEngineModelAsync(
-        Guid engineModelId,
-        RenameEngineModelRequest request,
-        ISender sender,
-        HttpContext httpContext,
-        CancellationToken cancellationToken)
-    {
-        var result = await sender.Send(
-            new RenameEngineModelCommand(engineModelId, request.Name),
-            cancellationToken);
-
-        return result.IsSuccess
-            ? Results.NoContent()
-            : result.ToProblemResult(httpContext);
-    }
-
-    private static async Task<IResult> UpdateEngineModelSpecificationsAsync(
+        private static async Task<IResult> UpdateEngineModelSpecificationsAsync(
         Guid engineModelId,
         UpdateEngineModelSpecificationsRequest request,
         ISender sender,

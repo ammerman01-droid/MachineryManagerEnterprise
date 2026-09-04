@@ -3,98 +3,88 @@ using MachineryManager.SharedKernel;
 using MachineryManager.SharedKernel.Abstractions;
 using MediatR;
 
-namespace MachineryManager.Asset.Application.Features.AssetModels.Commands.RegisterAssetModel;
+namespace MachineryManager.Asset.Application.Features.AssetModels.Commands.UpdateAssetModelSpecifications;
 
 /// <summary>
-/// Handles <see cref="RegisterAssetModelCommand"/> by verifying the
-/// Holding, Company, and every technical specification's Unit of
-/// Measurement, invoking domain registration, persisting the
-/// aggregate, and committing the unit of work.
+/// Handles <see cref="UpdateAssetModelSpecificationsCommand"/> by
+/// loading the aggregate, re-validating the Company and every Unit of
+/// Measurement against its Holding, invoking the domain update, and
+/// committing the unit of work.
 /// </summary>
-public sealed class RegisterAssetModelCommandHandler
-    : IRequestHandler<RegisterAssetModelCommand, Result<Guid>>
+public sealed class UpdateAssetModelSpecificationsCommandHandler
+    : IRequestHandler<UpdateAssetModelSpecificationsCommand, Result>
 {
-    private const string RequiredPermission = "Asset.Create";
+    private const string RequiredPermission = "Asset.Edit";
 
     private readonly IAssetModelRepository _assetModelRepository;
-    private readonly IHoldingLookupService _holdingLookupService;
     private readonly IConfigurationLookupService _configurationLookupService;
     private readonly IUnitOfMeasurementLookupService _unitOfMeasurementLookupService;
     private readonly IAssetUnitOfWork _unitOfWork;
-    private readonly IDateTimeProvider _dateTimeProvider;
     private readonly ICurrentUserService _currentUserService;
     private readonly IPermissionEvaluator _permissionEvaluator;
 
-    /// <summary>Initializes a new instance of the <see cref="RegisterAssetModelCommandHandler"/> class.</summary>
+    /// <summary>Initializes a new instance of the <see cref="UpdateAssetModelSpecificationsCommandHandler"/> class.</summary>
     /// <param name="assetModelRepository">The Asset Model repository.</param>
-    /// <param name="holdingLookupService">Cross-module lookup for Holding existence.</param>
     /// <param name="configurationLookupService">Cross-module lookup for Configuration-module master data (Company, in this handler).</param>
     /// <param name="unitOfMeasurementLookupService">Cross-module lookup for Unit of Measurement existence, Holding membership, and physical-quantity kind.</param>
     /// <param name="unitOfWork">The unit of work for atomic persistence.</param>
-    /// <param name="dateTimeProvider">Provider for deterministic UTC timestamps.</param>
     /// <param name="currentUserService">Provides the authenticated user context.</param>
     /// <param name="permissionEvaluator">Evaluates the current user's permissions at request time.</param>
-    public RegisterAssetModelCommandHandler(
+    public UpdateAssetModelSpecificationsCommandHandler(
         IAssetModelRepository assetModelRepository,
-        IHoldingLookupService holdingLookupService,
         IConfigurationLookupService configurationLookupService,
         IUnitOfMeasurementLookupService unitOfMeasurementLookupService,
         IAssetUnitOfWork unitOfWork,
-        IDateTimeProvider dateTimeProvider,
         ICurrentUserService currentUserService,
         IPermissionEvaluator permissionEvaluator)
     {
         _assetModelRepository = assetModelRepository;
-        _holdingLookupService = holdingLookupService;
         _configurationLookupService = configurationLookupService;
         _unitOfMeasurementLookupService = unitOfMeasurementLookupService;
         _unitOfWork = unitOfWork;
-        _dateTimeProvider = dateTimeProvider;
         _currentUserService = currentUserService;
         _permissionEvaluator = permissionEvaluator;
     }
 
-    /// <summary>Executes the registration use case.</summary>
-    /// <param name="request">The registration command.</param>
+    /// <summary>Executes the update use case.</summary>
+    /// <param name="request">The update command.</param>
     /// <param name="cancellationToken">Token to cancel the asynchronous operation.</param>
-    /// <returns>A result containing the new Asset Model's identifier, or a business error.</returns>
-    public async Task<Result<Guid>> Handle(RegisterAssetModelCommand request, CancellationToken cancellationToken)
+    /// <returns>A result indicating success or a business error.</returns>
+    public async Task<Result> Handle(UpdateAssetModelSpecificationsCommand request, CancellationToken cancellationToken)
     {
+        var id = global::Asset.Domain.AssetModelId.From(request.AssetModelId);
+        var assetModel = await _assetModelRepository.GetByIdAsync(id, cancellationToken);
+
+        if (assetModel is null)
+        {
+            return Result.Failure(
+                Error.NotFound("AssetModel.NotFound", $"Asset model with id {request.AssetModelId} was not found."));
+        }
+
         if (_currentUserService.UserId is not { } userId)
         {
-            return Result.Failure<Guid>(global::Asset.Domain.AssetModelErrors.NotAuthorized());
+            return Result.Failure(global::Asset.Domain.AssetModelErrors.NotAuthorized());
         }
 
         var isAuthorized = await _permissionEvaluator.HasPermissionAsync(
             userId,
             RequiredPermission,
-            new ResourceScope(request.HoldingId, null, null),
+            new ResourceScope(assetModel.HoldingId, null, null),
             cancellationToken);
 
         if (!isAuthorized)
         {
-            return Result.Failure<Guid>(global::Asset.Domain.AssetModelErrors.NotAuthorized());
-        }
-
-        var holdingExists = await _holdingLookupService.ExistsAsync(request.HoldingId, cancellationToken);
-
-        if (!holdingExists)
-        {
-            return Result.Failure<Guid>(global::Asset.Domain.AssetModelErrors.HoldingNotFound(request.HoldingId));
+            return Result.Failure(global::Asset.Domain.AssetModelErrors.NotAuthorized());
         }
 
         var companyExists = await _configurationLookupService.CompanyExistsInHoldingAsync(
-            request.CompanyId, request.HoldingId, cancellationToken);
+            request.CompanyId, assetModel.HoldingId, cancellationToken);
 
         if (!companyExists)
         {
-            return Result.Failure<Guid>(global::Asset.Domain.AssetModelErrors.CompanyNotFound(request.CompanyId));
+            return Result.Failure(global::Asset.Domain.AssetModelErrors.CompanyNotFound(request.CompanyId));
         }
 
-        // Validate every provided technical specification's Unit of
-        // Measurement exists, belongs to this Holding, AND belongs to
-        // the physically correct category (chat, 2026-09-04 — mirrors
-        // the equivalent check in RegisterEngineModelCommandHandler).
         var specifications = new (string FieldName, Guid? UnitOfMeasurementId, PhysicalQuantityKind ExpectedKind)[]
         {
             ("Length", request.LengthUnitOfMeasurementId, PhysicalQuantityKind.Dimension),
@@ -107,34 +97,31 @@ public sealed class RegisterAssetModelCommandHandler
 
         foreach (var (fieldName, unitOfMeasurementId, expectedKind) in specifications)
         {
-            if (unitOfMeasurementId is not { } id)
+            if (unitOfMeasurementId is not { } uomId)
             {
                 continue;
             }
 
             var existsInHolding = await _unitOfMeasurementLookupService.ExistsInHoldingAsync(
-                id, request.HoldingId, cancellationToken);
+                uomId, assetModel.HoldingId, cancellationToken);
 
             if (!existsInHolding)
             {
-                return Result.Failure<Guid>(global::Asset.Domain.AssetModelErrors.UnitOfMeasurementNotFound(id));
+                return Result.Failure(global::Asset.Domain.AssetModelErrors.UnitOfMeasurementNotFound(uomId));
             }
 
             var matchesKind = await _unitOfMeasurementLookupService.ExistsInHoldingWithKindAsync(
-                id, request.HoldingId, expectedKind, cancellationToken);
+                uomId, assetModel.HoldingId, expectedKind, cancellationToken);
 
             if (!matchesKind)
             {
-                return Result.Failure<Guid>(
+                return Result.Failure(
                     global::Asset.Domain.AssetModelErrors.UnitOfMeasurementKindMismatch(fieldName, expectedKind));
             }
         }
 
-        var result = global::Asset.Domain.AssetModel.Register(
-            request.HoldingId,
-            request.Name,
+        var result = assetModel.UpdateSpecifications(
             request.CompanyId,
-            _dateTimeProvider,
             request.LengthValue,
             request.LengthUnitOfMeasurementId,
             request.WidthValue,
@@ -150,12 +137,12 @@ public sealed class RegisterAssetModelCommandHandler
 
         if (result.IsFailure)
         {
-            return Result.Failure<Guid>(result.Error);
+            return result;
         }
 
-        _assetModelRepository.Add(result.Value);
+        _assetModelRepository.Update(assetModel);
         await _unitOfWork.SaveChangesAsync(cancellationToken);
 
-        return Result.Success(result.Value.Id.Value);
+        return Result.Success();
     }
 }
