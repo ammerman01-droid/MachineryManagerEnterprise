@@ -2,6 +2,7 @@ using MachineryManager.Asset.Application.Abstractions;
 using MachineryManager.SharedKernel;
 using MachineryManager.SharedKernel.Abstractions;
 using Microsoft.EntityFrameworkCore;
+using MachineryManager.SharedKernel.Infrastructure;
 
 namespace MachineryManager.Asset.Infrastructure.Persistence;
 
@@ -40,11 +41,23 @@ public sealed class AssetDbContext : DbContext, IAssetUnitOfWork
     /// <summary>Gets the set of Engine Model aggregates.</summary>
     public DbSet<global::Asset.Domain.EngineModel> EngineModels => Set<global::Asset.Domain.EngineModel>();
 
+    /// <summary>
+    /// Gets the set of audit records captured for this module's schema.
+    /// This module does NOT own the physical table — Administration does
+    /// (chat, 2026-09-05, gam 3).
+    /// </summary>
+    public DbSet<AuditEntry> AuditEntries => Set<AuditEntry>();
+
     /// <inheritdoc />
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.HasDefaultSchema("asset");
         modelBuilder.ApplyConfigurationsFromAssembly(typeof(AssetDbContext).Assembly);
+
+        // Shared audit table (chat, 2026-09-05, gam 3): mapped for the
+        // AuditSaveChangesInterceptor to write into, but excluded from
+        // this module's migrations — the table is owned by Administration.
+        modelBuilder.ApplyAuditEntryMapping(ownsTable: false);
 
         base.OnModelCreating(modelBuilder);
     }

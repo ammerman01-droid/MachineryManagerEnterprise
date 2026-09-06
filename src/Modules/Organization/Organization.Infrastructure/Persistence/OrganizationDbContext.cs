@@ -2,6 +2,7 @@ using MachineryManager.Organization.Application.Abstractions;
 using MachineryManager.SharedKernel;
 using MachineryManager.SharedKernel.Abstractions;
 using Microsoft.EntityFrameworkCore;
+using MachineryManager.SharedKernel.Infrastructure;
 
 namespace MachineryManager.Organization.Infrastructure.Persistence;
 
@@ -45,11 +46,26 @@ public sealed class OrganizationDbContext : DbContext, IOrganizationUnitOfWork
     public DbSet<global::Organization.Domain.Project> Projects =>
         Set<global::Organization.Domain.Project>();
 
+    /// <summary>
+    /// Gets the set of audit records captured for this module's schema.
+    /// This module does NOT own the physical table — Administration does.
+    /// </summary>
+    public DbSet<MachineryManager.SharedKernel.AuditEntry> AuditEntries =>
+        Set<MachineryManager.SharedKernel.AuditEntry>();
+
     /// <inheritdoc />
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.HasDefaultSchema("organization");
         modelBuilder.ApplyConfigurationsFromAssembly(typeof(OrganizationDbContext).Assembly);
+
+        // Shared audit table (chat, 2026-09-05, gam 3): this context only
+        // reads/writes rows. The physical table is created exclusively by
+        // AdministrationDbContext's migration — the ONLY owner. With
+        // ownsTable: false, ExcludeFromMigrations ensures `dotnet ef
+        // migrations add` for this module never emits CreateTable/
+        // AlterTable for AuditEntry.
+        modelBuilder.ApplyAuditEntryMapping(ownsTable: false);
 
         base.OnModelCreating(modelBuilder);
     }

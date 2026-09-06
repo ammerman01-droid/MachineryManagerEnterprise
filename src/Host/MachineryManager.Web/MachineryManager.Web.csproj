@@ -22,6 +22,9 @@
     <ProjectReference Include="..\..\Modules\Asset\Asset.Presentation\Asset.Presentation.csproj" />
     <ProjectReference Include="..\..\Modules\Configuration\Configuration.Infrastructure\Configuration.Infrastructure.csproj" />
     <ProjectReference Include="..\..\Modules\Configuration\Configuration.Presentation\Configuration.Presentation.csproj" />
+    <ProjectReference Include="..\..\Modules\AuditLog\AuditLog.Application\AuditLog.Application.csproj" />
+    <ProjectReference Include="..\..\Modules\AuditLog\AuditLog.Infrastructure\AuditLog.Infrastructure.csproj" />
+    <ProjectReference Include="..\..\Modules\AuditLog\AuditLog.Presentation\AuditLog.Presentation.csproj" />
   </ItemGroup>
 
   <ItemGroup>

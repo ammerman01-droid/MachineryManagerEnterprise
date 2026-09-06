@@ -1,0 +1,499 @@
+@page "/admin/audit-log"
+@inject IHttpClientFactory HttpClientFactory
+@using MachineryManager.SharedKernel
+
+<PageTitle>گزارش رخدادها</PageTitle>
+
+<MudText Typo="Typo.h4" Class="mb-4">گزارش رخدادها (Audit Log)</MudText>
+
+<MudPaper Class="pa-4 mb-4">
+    <MudGrid>
+        <MudItem xs="12" sm="6" md="3">
+            <MudDatePicker Label="از تاریخ" @bind-Date="fromDate" />
+        </MudItem>
+        <MudItem xs="12" sm="6" md="3">
+            <MudDatePicker Label="تا تاریخ" @bind-Date="toDate" />
+        </MudItem>
+        <MudItem xs="12" sm="6" md="3">
+            <MudSelect T="AuditOperationType?" Label="نوع عملیات" @bind-Value="selectedOperationType" Clearable="true">
+                <MudSelectItem T="AuditOperationType?" Value="@((AuditOperationType?)AuditOperationType.Created)">ایجاد</MudSelectItem>
+                <MudSelectItem T="AuditOperationType?" Value="@((AuditOperationType?)AuditOperationType.Updated)">ویرایش</MudSelectItem>
+                <MudSelectItem T="AuditOperationType?" Value="@((AuditOperationType?)AuditOperationType.Deleted)">حذف</MudSelectItem>
+            </MudSelect>
+        </MudItem>
+        <MudItem xs="12" sm="6" md="3">
+            <MudTextField T="string" Label="نام Schema" @bind-Value="schemaName" />
+        </MudItem>
+        <MudItem xs="12" sm="6" md="3">
+            <MudTextField T="string" Label="نام جدول" @bind-Value="tableName" />
+        </MudItem>
+        <MudItem xs="12" sm="6" md="3">
+            <MudTextField T="string" Label="شناسه کاربر" @bind-Value="userIdText" HelperText="اختیاری — GUID کاربر" />
+        </MudItem>
+        <MudItem xs="12" sm="6" md="3" Class="d-flex align-end">
+            <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="@(() => LoadPageAsync(1))" FullWidth="true">
+                اعمال فیلتر
+            </MudButton>
+        </MudItem>
+        <MudItem xs="12" sm="6" md="3" Class="d-flex align-end">
+            <MudButton Variant="Variant.Outlined" OnClick="ClearFiltersAsync" FullWidth="true">
+                پاک‌کردن فیلترها
+            </MudButton>
+        </MudItem>
+    </MudGrid>
+</MudPaper>
+
+@if (errorMessage is not null)
+{
+    <MudAlert Severity="Severity.Error" Class="my-4">@errorMessage</MudAlert>
+}
+
+@if (isLoading)
+{
+    <MudProgressLinear Indeterminate="true" Class="my-4" />
+}
+else if (items.Count == 0)
+{
+    <MudText Typo="Typo.body2" Class="mud-text-secondary">هیچ رخدادی با این فیلترها یافت نشد.</MudText>
+}
+else
+{
+    <MudTable Items="@items" Hover="true" Breakpoint="Breakpoint.Sm">
+        <HeaderContent>
+            <MudTh>زمان</MudTh>
+            <MudTh>کاربر</MudTh>
+            <MudTh>نوع عملیات</MudTh>
+            <MudTh>Schema</MudTh>
+            <MudTh>جدول</MudTh>
+            <MudTh>شناسه رکورد</MudTh>
+            <MudTh></MudTh>
+        </HeaderContent>
+        <RowTemplate>
+            <MudTd DataLabel="زمان">@context.OccurredAt.ToLocalTime().ToString("yyyy/MM/dd HH:mm:ss")</MudTd>
+            <MudTd DataLabel="کاربر">
+                @if (context.UserId is { } userId)
+                {
+                    <MudTooltip Text="@userId.ToString()">
+                        <span>@DisplayUserName(userId)</span>
+                    </MudTooltip>
+                }
+                else
+                {
+                    <span>—</span>
+                }
+            </MudTd>
+            <MudTd DataLabel="نوع عملیات">
+                <MudChip T="string" Color="@GetOperationColor(context.OperationType)" Size="Size.Small">
+                    @TranslateOperationType(context.OperationType)
+                </MudChip>
+            </MudTd>
+            <MudTd DataLabel="Schema">@context.SchemaName</MudTd>
+            <MudTd DataLabel="جدول">@context.TableName</MudTd>
+            <MudTd DataLabel="شناسه رکورد">@context.RecordId</MudTd>
+                        <MudTd>
+                <MudIconButton Icon="@Icons.Material.Filled.ExpandMore"
+                               Size="Size.Small"
+                               Color="@(expandedEntryId == context.Id ? Color.Primary : Color.Default)"
+                               OnClick="@(() => ToggleDetailAsync(context.Id))" />
+            </MudTd>
+        </RowTemplate>
+                <ChildRowContent>
+            @if (expandedEntryId == context.Id)
+            {
+                <MudTr>
+                    <td colspan="7">
+                        @if (details.TryGetValue(context.Id, out var detail))
+                        {
+                            @if (detail.Changes.Count == 0)
+                            {
+                                <MudText Typo="Typo.body2" Class="mud-text-secondary">تغییرات فیلدی برای این رخداد ثبت نشده است.</MudText>
+                            }
+                            else
+                            {
+                                <MudSimpleTable Dense="true" Hover="true" Elevation="0">
+                                    <thead>
+                                        <tr>
+                                            <th>فیلد</th>
+                                            <th>مقدار قبلی</th>
+                                            <th>مقدار جدید</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach (var change in detail.Changes)
+                                        {
+                                            <tr>
+                                                <td>@change.Field</td>
+                                                <td>@(change.OldValue ?? "—")</td>
+                                                <td>@(change.NewValue ?? "—")</td>
+                                            </tr>
+                                        }
+                                    </tbody>
+                                </MudSimpleTable>
+                            }
+                        }
+                        else if (detailErrors.TryGetValue(context.Id, out var detailError))
+                        {
+                            <MudAlert Severity="Severity.Error">@detailError</MudAlert>
+                        }
+                        else
+                        {
+                            <MudProgressLinear Indeterminate="true" />
+                        }
+                    </td>
+                </MudTr>
+            }
+        </ChildRowContent>
+    </MudTable>
+
+    <div class="d-flex justify-space-between align-center mt-4">
+        <MudButton Disabled="@(!hasPreviousPage)" OnClick="@(() => LoadPageAsync(currentPage - 1))">قبلی</MudButton>
+        <MudText Typo="Typo.body2">صفحه @currentPage — مجموع @totalCount رخداد</MudText>
+        <MudButton Disabled="@(!hasNextPage)" OnClick="@(() => LoadPageAsync(currentPage + 1))">بعدی</MudButton>
+    </div>
+}
+
+@code {
+    /// <summary>Represents a single Audit Entry row, matching the server's <c>AuditEntryDto</c> shape exactly.</summary>
+    private sealed class AuditEntryItem
+    {
+        /// <summary>Gets or sets the audit record's unique identifier.</summary>
+        public Guid Id { get; set; }
+
+        /// <summary>Gets or sets the identifier of the user who made the change, if attributable.</summary>
+        public Guid? UserId { get; set; }
+
+        /// <summary>Gets or sets the UTC timestamp when the change was committed.</summary>
+        public DateTimeOffset OccurredAt { get; set; }
+
+        /// <summary>Gets or sets the database schema of the changed table.</summary>
+        public string SchemaName { get; set; } = string.Empty;
+
+        /// <summary>Gets or sets the name of the changed table.</summary>
+        public string TableName { get; set; } = string.Empty;
+
+        /// <summary>Gets or sets the primary key of the changed record, as a string.</summary>
+        public string RecordId { get; set; } = string.Empty;
+
+        /// <summary>
+        /// Gets or sets the kind of change. Must match the server's
+        /// actual JSON representation of <c>AuditOperationType</c> — the
+        /// enum itself, not a string (System.Text.Json serializes enums
+        /// as their underlying integer by default; a prior page in this
+        /// project broke twice from typing an enum field as <c>string</c>
+        /// here instead).
+        /// </summary>
+        public AuditOperationType OperationType { get; set; }
+
+        /// <summary>Gets or sets the owning Holding's identifier, if resolvable.</summary>
+        public Guid? HoldingId { get; set; }
+
+        /// <summary>Gets or sets the owning Organization's identifier, if resolvable.</summary>
+        public Guid? OrganizationId { get; set; }
+    }
+
+    private sealed class AuditEntrySearchResult
+    {
+        public List<AuditEntryItem> Items { get; set; } = [];
+        public int Page { get; set; }
+        public int PageSize { get; set; }
+        public int TotalCount { get; set; }
+    }
+
+    private List<AuditEntryItem> items = [];
+    private bool isLoading = true;
+    private string? errorMessage;
+
+    private int currentPage = 1;
+    private const int PageSize = 25;
+    private int totalCount;
+    private bool hasNextPage;
+    private bool hasPreviousPage;
+
+    private DateTime? fromDate;
+    private DateTime? toDate;
+    private AuditOperationType? selectedOperationType;
+    private string? schemaName;
+    private string? tableName;
+    private string? userIdText;
+
+    /// <summary>Loads the first page of audit entries when the page is first rendered.</summary>
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadPageAsync(1);
+    }
+
+    /// <summary>Resets every filter field and reloads the first page.</summary>
+    private async Task ClearFiltersAsync()
+    {
+        fromDate = null;
+        toDate = null;
+        selectedOperationType = null;
+        schemaName = null;
+        tableName = null;
+        userIdText = null;
+
+        await LoadPageAsync(1);
+    }
+
+    /// <summary>Loads a specific page of audit entries from the API, applying the current filters.</summary>
+    /// <param name="targetPage">The one-based page number to load.</param>
+    private async Task LoadPageAsync(int targetPage)
+    {
+        isLoading = true;
+        errorMessage = null;
+
+        try
+        {
+            Guid? userId = null;
+
+            if (!string.IsNullOrWhiteSpace(userIdText))
+            {
+                if (!Guid.TryParse(userIdText, out var parsedUserId))
+                {
+                    errorMessage = "شناسه کاربر معتبر نیست.";
+                    isLoading = false;
+                    return;
+                }
+
+                userId = parsedUserId;
+            }
+
+            var query = new List<string> { $"page={targetPage}", $"pageSize={PageSize}" };
+
+            if (fromDate is { } from)
+            {
+                query.Add($"from={Uri.EscapeDataString(new DateTimeOffset(from).ToString("O"))}");
+            }
+
+            if (toDate is { } to)
+            {
+                query.Add($"to={Uri.EscapeDataString(new DateTimeOffset(to.AddDays(1).AddTicks(-1)).ToString("O"))}");
+            }
+
+            if (selectedOperationType is { } operationType)
+            {
+                query.Add($"operationType={(int)operationType}");
+            }
+
+            if (!string.IsNullOrWhiteSpace(schemaName))
+            {
+                query.Add($"schemaName={Uri.EscapeDataString(schemaName)}");
+            }
+
+            if (!string.IsNullOrWhiteSpace(tableName))
+            {
+                query.Add($"tableName={Uri.EscapeDataString(tableName)}");
+            }
+
+            if (userId is { } id)
+            {
+                query.Add($"userId={id}");
+            }
+
+            var client = HttpClientFactory.CreateClient("InternalApi");
+            var response = await client.GetAsync($"/api/v1/audit-logs?{string.Join('&', query)}");
+            var content = await response.Content.ReadAsStringAsync();
+
+            if (!response.IsSuccessStatusCode)
+            {
+                errorMessage = $"خطا در دریافت رخدادها: {content}";
+                return;
+            }
+
+            var result = System.Text.Json.JsonSerializer.Deserialize<AuditEntrySearchResult>(
+                content, new System.Text.Json.JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+
+            if (result is null)
+            {
+                errorMessage = "پاسخ نامعتبر از سرور.";
+                return;
+            }
+
+            items = result.Items;
+            currentPage = result.Page;
+            totalCount = result.TotalCount;
+            hasNextPage = (long)currentPage * PageSize < totalCount;
+            hasPreviousPage = currentPage > 1;
+            await ResolveUserNamesAsync();
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"خطا: {ex.Message}";
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+
+    /// <summary>Translates an <see cref="AuditOperationType"/> value into its Persian display label.</summary>
+    /// <param name="operationType">The operation type to translate.</param>
+    /// <returns>The Persian display label for the given operation type.</returns>
+    private static string TranslateOperationType(AuditOperationType operationType) => operationType switch
+    {
+        AuditOperationType.Created => "ایجاد",
+        AuditOperationType.Updated => "ویرایش",
+        AuditOperationType.Deleted => "حذف",
+        _ => operationType.ToString(),
+    };
+
+    /// <summary>Chooses a chip color that visually distinguishes the three operation types.</summary>
+    /// <param name="operationType">The operation type.</param>
+    /// <returns>The MudBlazor color to use for this operation type's chip.</returns>
+    private static Color GetOperationColor(AuditOperationType operationType) => operationType switch
+    {
+        AuditOperationType.Created => Color.Success,
+        AuditOperationType.Updated => Color.Info,
+        AuditOperationType.Deleted => Color.Error,
+        _ => Color.Default,
+    };
+
+        /// <summary>Detail payload returned by GET /api/v1/audit-logs/{id}.</summary>
+    private sealed class AuditEntryDetailItem
+    {
+        public Guid Id { get; set; }
+        public Guid? UserId { get; set; }
+        public DateTimeOffset OccurredAt { get; set; }
+        public string SchemaName { get; set; } = string.Empty;
+        public string TableName { get; set; } = string.Empty;
+        public string RecordId { get; set; } = string.Empty;
+        public AuditOperationType OperationType { get; set; }
+        public Guid? HoldingId { get; set; }
+        public Guid? OrganizationId { get; set; }
+        public List<AuditFieldChangeItem> Changes { get; set; } = [];
+    }
+
+    /// <summary>One parsed field-level change.</summary>
+    private sealed class AuditFieldChangeItem
+    {
+        public string Field { get; set; } = string.Empty;
+        public string? OldValue { get; set; }
+        public string? NewValue { get; set; }
+    }
+
+    private Guid? expandedEntryId;
+    private readonly Dictionary<Guid, AuditEntryDetailItem> details = [];
+    private readonly Dictionary<Guid, string> detailErrors = [];
+
+    /// <summary>Toggles the change-detail row for the given audit record, fetching it on first expansion.</summary>
+    private async Task ToggleDetailAsync(Guid auditEntryId)
+    {
+        if (expandedEntryId == auditEntryId)
+        {
+            expandedEntryId = null;
+            return;
+        }
+
+        expandedEntryId = auditEntryId;
+
+        if (details.ContainsKey(auditEntryId) || detailErrors.ContainsKey(auditEntryId))
+        {
+            return;
+        }
+
+        try
+        {
+            var client = HttpClientFactory.CreateClient("InternalApi");
+            var response = await client.GetAsync($"/api/v1/audit-logs/{auditEntryId}");
+            var content = await response.Content.ReadAsStringAsync();
+
+            if (!response.IsSuccessStatusCode)
+            {
+                detailErrors[auditEntryId] = $"خطا در دریافت جزئیات: {content}";
+                return;
+            }
+
+            var detail = System.Text.Json.JsonSerializer.Deserialize<AuditEntryDetailItem>(
+                content, new System.Text.Json.JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+
+            if (detail is null)
+            {
+                detailErrors[auditEntryId] = "پاسخ نامعتبر از سرور.";
+                return;
+            }
+
+            details[auditEntryId] = detail;
+        }
+        catch (Exception ex)
+        {
+            detailErrors[auditEntryId] = $"خطا: {ex.Message}";
+        }
+    }
+
+        /// <summary>Shape of Identity's UserDto returned by GET /api/v1/users/{id}.</summary>
+    private sealed class UserNameItem
+    {
+        public Guid Id { get; set; }
+        public string UserName { get; set; } = string.Empty;
+    }
+
+    /// <summary>Cache of resolved userId → username; survives paging within the page session.</summary>
+    private readonly Dictionary<Guid, string> userNames = [];
+
+    /// <summary>UserIds that resolved to no user (deleted/invalid); fetched once, never retried.</summary>
+    private readonly HashSet<Guid> unresolvableUserIds = [];
+
+    /// <summary>
+    /// Resolves the display name of one user from the cache, falling
+    /// back to the raw GUID when the user no longer exists or has not
+    /// been resolved yet (chat, 2026-09-06, gam 6 — username display).
+    /// </summary>
+    private string DisplayUserName(Guid userId) =>
+        userNames.TryGetValue(userId, out var userName) ? userName : userId.ToString();
+
+    /// <summary>
+    /// Resolves the distinct, not-yet-cached userIds of the current
+    /// page in parallel via Identity's GET /api/v1/users/{id}. Failures
+    /// are swallowed per-user: the GUID fallback keeps the list usable.
+    /// </summary>
+    private async Task ResolveUserNamesAsync()
+    {
+        var missingUserIds = items
+            .Select(item => item.UserId)
+            .Where(id => id.HasValue && !userNames.ContainsKey(id.Value) && !unresolvableUserIds.Contains(id.Value))
+            .Select(id => id!.Value)
+            .Distinct()
+            .ToList();
+
+        if (missingUserIds.Count == 0)
+        {
+            return;
+        }
+
+        var client = HttpClientFactory.CreateClient("InternalApi");
+
+        var tasks = missingUserIds.Select(async userId =>
+        {
+            try
+            {
+                var response = await client.GetAsync($"/api/v1/users/{userId}");
+
+                if (!response.IsSuccessStatusCode)
+                {
+                    unresolvableUserIds.Add(userId);
+                    return;
+                }
+
+                var content = await response.Content.ReadAsStringAsync();
+                var user = System.Text.Json.JsonSerializer.Deserialize<UserNameItem>(
+                    content, new System.Text.Json.JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+
+                if (user is null || string.IsNullOrWhiteSpace(user.UserName))
+                {
+                    unresolvableUserIds.Add(userId);
+                    return;
+                }
+
+                userNames[userId] = user.UserName;
+            }
+            catch
+            {
+                // Transient failure (network, serialization) — leave the
+                // user unresolved; the GUID fallback is shown instead and
+                // the id is retried on the next page load.
+            }
+        });
+
+        await Task.WhenAll(tasks);
+    }
+}

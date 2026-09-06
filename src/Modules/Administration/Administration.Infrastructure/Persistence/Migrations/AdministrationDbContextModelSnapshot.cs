@@ -99,6 +99,57 @@ namespace Administration.Infrastructure.Persistence.Migrations
                     b.ToTable("UserProfileAssignment", "administration");
                 });
 
+            modelBuilder.Entity("MachineryManager.SharedKernel.AuditEntry", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("ChangesJson")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<Guid?>("HoldingId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTimeOffset>("OccurredAt")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<int>("OperationType")
+                        .HasColumnType("int");
+
+                    b.Property<Guid?>("OrganizationId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("RecordId")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<string>("SchemaName")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<string>("TableName")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<Guid?>("UserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("HoldingId");
+
+                    b.HasIndex("OccurredAt");
+
+                    b.HasIndex("OrganizationId");
+
+                    b.ToTable("AuditEntry", "audit");
+                });
+
             modelBuilder.Entity("Administration.Domain.UserProfileAssignment", b =>
                 {
                     b.HasOne("Administration.Domain.Profile", null)

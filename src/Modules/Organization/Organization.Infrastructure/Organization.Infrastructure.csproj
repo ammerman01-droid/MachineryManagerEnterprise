@@ -2,6 +2,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Organization.Application\Organization.Application.csproj" />
+    <ProjectReference Include="..\..\..\BuildingBlocks\MachineryManager.SharedKernel.Infrastructure\MachineryManager.SharedKernel.Infrastructure.csproj" />
   </ItemGroup>
 
   <ItemGroup>

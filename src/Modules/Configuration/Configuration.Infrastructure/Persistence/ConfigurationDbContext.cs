@@ -2,6 +2,7 @@ using MachineryManager.SharedKernel;
 using MachineryManager.SharedKernel.Abstractions;
 using Microsoft.EntityFrameworkCore;
 using MachineryManager.Configuration.Application.Abstractions;
+using MachineryManager.SharedKernel.Infrastructure;
 
 namespace MachineryManager.Configuration.Infrastructure.Persistence;
 
@@ -38,11 +39,24 @@ public sealed class ConfigurationDbContext : DbContext, IConfigurationUnitOfWork
     /// <summary>Gets the set of FuelTypes aggregates.</summary>
     public DbSet<global::Configuration.Domain.FuelType> FuelTypes => Set<global::Configuration.Domain.FuelType>();
 
+    /// <summary>
+    /// Gets the set of audit records captured for this module's schema.
+    /// This module does NOT own the physical table — Administration does
+    /// (chat, 2026-09-05, gam 3).
+    /// </summary>
+    public DbSet<AuditEntry> AuditEntries => Set<AuditEntry>();
+
     /// <inheritdoc />
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.HasDefaultSchema("configuration");
         modelBuilder.ApplyConfigurationsFromAssembly(typeof(ConfigurationDbContext).Assembly);
+
+        // Shared audit table (chat, 2026-09-05, gam 3): mapped for the
+        // AuditSaveChangesInterceptor to write into, but excluded from
+        // this module's migrations — the table is owned by Administration.
+        modelBuilder.ApplyAuditEntryMapping(ownsTable: false);
+
         base.OnModelCreating(modelBuilder);
     }
 

@@ -33,12 +33,13 @@ public static class DependencyInjection
         this IServiceCollection services,
         IConfiguration configuration)
     {
-        services.AddDbContext<AssetDbContext>(options => options
-            .UseSqlServer(
-                configuration.GetConnectionString("MachineryManagerDatabase"),
-                sqlServerOptions => sqlServerOptions.MigrationsHistoryTable(
-                    "__EFMigrationsHistory",
-                    schema: "asset")));
+        services.AddDbContext<AssetDbContext>((serviceProvider, options) => options
+    .UseSqlServer(
+        configuration.GetConnectionString("MachineryManagerDatabase"),
+        sqlServerOptions => sqlServerOptions.MigrationsHistoryTable(
+            "__EFMigrationsHistory",
+            schema: "asset"))
+    .AddInterceptors(serviceProvider.GetRequiredService<MachineryManager.SharedKernel.Infrastructure.AuditSaveChangesInterceptor>()));
 
         services.AddScoped<IAssetRepository, AssetRepository>();
         services.AddScoped<IAssetModelRepository, AssetModelRepository>();

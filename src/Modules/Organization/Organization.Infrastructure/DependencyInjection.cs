@@ -34,8 +34,9 @@ public static class DependencyInjection
         this IServiceCollection services,
         IConfiguration configuration)
     {
-        services.AddDbContext<OrganizationDbContext>(options => options
-            .UseSqlServer(configuration.GetConnectionString("MachineryManagerDatabase")));
+        services.AddDbContext<OrganizationDbContext>((serviceProvider, options) => options
+            .UseSqlServer(configuration.GetConnectionString("MachineryManagerDatabase"))
+            .AddInterceptors(serviceProvider.GetRequiredService<MachineryManager.SharedKernel.Infrastructure.AuditSaveChangesInterceptor>()));
 
         services.AddScoped<IOrganizationRepository, OrganizationRepository>();
         services.AddScoped<IHoldingRepository, HoldingRepository>();

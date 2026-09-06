@@ -21,6 +21,9 @@ using MachineryManager.Asset.Presentation.Endpoints;
 using MachineryManager.Configuration.Infrastructure;
 using MachineryManager.Configuration.Presentation.Endpoints;
 using MachineryManager.Configuration.Application;
+using MachineryManager.AuditLog.Application;
+using MachineryManager.AuditLog.Infrastructure;
+using MachineryManager.AuditLog.Presentation.Endpoints;
 
 Log.Logger = new LoggerConfiguration()
     .WriteTo.Console()
@@ -74,6 +77,10 @@ try
     builder.Services.AddConfigurationApplication();
     builder.Services.AddConfigurationInfrastructure(builder.Configuration);
 
+    // AuditLog module (read-only)
+    builder.Services.AddAuditLogApplication();
+    builder.Services.AddAuditLogInfrastructure(builder.Configuration);
+
     var app = builder.Build();
 
     if (!app.Environment.IsDevelopment())
@@ -102,14 +109,15 @@ try
     app.UseAntiforgery();
 
     app.MapStaticAssets();
-    app.MapRazorComponents<App>()
+        app.MapRazorComponents<App>()
     .AddInteractiveServerRenderMode()
     .AddAdditionalAssemblies(
         typeof(MachineryManager.Identity.Presentation.Components.Pages.Login).Assembly,
         typeof(MachineryManager.Administration.Presentation.Components.Pages.ProfilesList).Assembly,
         typeof(MachineryManager.Organization.Presentation.Components.Pages.OrganizationsList).Assembly,
         typeof(MachineryManager.Asset.Presentation.Components.Pages.AssetModelsList).Assembly,
-        typeof(MachineryManager.Configuration.Presentation.Components.Pages.ColorsList).Assembly);
+        typeof(MachineryManager.Configuration.Presentation.Components.Pages.ColorsList).Assembly,
+        typeof(MachineryManager.AuditLog.Presentation.Components.Pages.AuditLogList).Assembly);
 
     // Identity endpoints
     app.MapIdentityConnectEndpoints();
@@ -136,6 +144,10 @@ try
     app.MapUnitOfMeasurementEndpoints();
     app.MapCompanyEndpoints();
     app.MapFuelTypeEndpoints();
+
+    // AuditLog endpoints
+    app.MapAuditLogEndpoints();
+    
 
     app.Run();
 }

@@ -22,8 +22,9 @@ public static class DependencyInjection
         this IServiceCollection services,
         IConfiguration configuration)
     {
-        services.AddDbContext<ConfigurationDbContext>(options => options
-            .UseSqlServer(configuration.GetConnectionString("MachineryManagerDatabase")));
+        services.AddDbContext<ConfigurationDbContext>((serviceProvider, options) => options
+    .UseSqlServer(configuration.GetConnectionString("MachineryManagerDatabase"))
+    .AddInterceptors(serviceProvider.GetRequiredService<MachineryManager.SharedKernel.Infrastructure.AuditSaveChangesInterceptor>()));
 
         services.AddScoped<IColorRepository, ColorRepository>();
         services.AddScoped<IUnitOfMeasurementRepository, UnitOfMeasurementRepository>();
@@ -31,7 +32,7 @@ public static class DependencyInjection
         services.AddScoped<IConfigurationLookupService, ConfigurationLookupService>();
         services.AddScoped<IConfigurationUnitOfWork>(sp => sp.GetRequiredService<ConfigurationDbContext>());
         services.AddScoped<IUnitOfMeasurementLookupService, UnitOfMeasurementLookupService>();
-                services.AddScoped<IFuelTypeRepository, FuelTypeRepository>();
+        services.AddScoped<IFuelTypeRepository, FuelTypeRepository>();
 
         return services;
     }
