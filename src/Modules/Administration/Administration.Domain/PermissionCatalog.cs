@@ -7,7 +7,7 @@ namespace Administration.Domain;
 /// <remarks>
 /// This is presentation-support data only (which checkboxes to show),
 /// not an enforcement mechanism — actual authorization still happens
-/// via <see cref="MachineryManager.SharedKernel.Abstractions.IPermissionEvaluator"/>
+/// via <see cref="MachineryManagerEnterprise.SharedKernel.Abstractions.IPermissionEvaluator"/>
 /// checking plain permission strings. Adding a section here does NOT
 /// automatically enforce anything in the owning module; each module's
 /// Command Handlers must independently check for the permission string

@@ -1,6 +1,6 @@
-using MachineryManager.SharedKernel.Abstractions;
+using MachineryManagerEnterprise.SharedKernel.Abstractions;
 
-namespace MachineryManager.Configuration.Application.Abstractions;
+namespace MachineryManagerEnterprise.Configuration.Application.Abstractions;
 
 /// <summary>
 /// Module-specific Unit of Work for Configuration (per the mandatory

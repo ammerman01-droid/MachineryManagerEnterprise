@@ -1,10 +1,10 @@
-using MachineryManager.Administration.Application.Abstractions;
-using MachineryManager.Administration.Infrastructure.Persistence;
+using MachineryManagerEnterprise.Administration.Application.Abstractions;
+using MachineryManagerEnterprise.Administration.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace MachineryManager.Administration.Infrastructure;
+namespace MachineryManagerEnterprise.Administration.Infrastructure;
 
 /// <summary>
 /// Registers the Administration module's Infrastructure layer services
@@ -29,13 +29,13 @@ public static class DependencyInjection
                 sqlServerOptions => sqlServerOptions.MigrationsHistoryTable(
                     "__EFMigrationsHistory",
                     schema: "administration"))
-            .AddInterceptors(serviceProvider.GetRequiredService<MachineryManager.SharedKernel.Infrastructure.AuditSaveChangesInterceptor>()));
+            .AddInterceptors(serviceProvider.GetRequiredService<MachineryManagerEnterprise.SharedKernel.Infrastructure.AuditSaveChangesInterceptor>()));
 
         services.AddScoped<IProfileRepository, ProfileRepository>();
         services.AddScoped<IUserProfileAssignmentRepository, UserProfileAssignmentRepository>();
         services.AddScoped<IAdministrationUnitOfWork>(serviceProvider =>
             serviceProvider.GetRequiredService<AdministrationDbContext>());
-        services.AddScoped<MachineryManager.SharedKernel.Abstractions.IPermissionEvaluator, PermissionEvaluator>();
+        services.AddScoped<MachineryManagerEnterprise.SharedKernel.Abstractions.IPermissionEvaluator, PermissionEvaluator>();
 
         return services;
     }

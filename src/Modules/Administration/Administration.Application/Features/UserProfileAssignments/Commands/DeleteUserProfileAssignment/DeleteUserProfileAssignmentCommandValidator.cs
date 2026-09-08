@@ -1,6 +1,6 @@
 using FluentValidation;
 
-namespace MachineryManager.Administration.Application.Features.UserProfileAssignments.Commands.DeleteUserProfileAssignment;
+namespace MachineryManagerEnterprise.Administration.Application.Features.UserProfileAssignments.Commands.DeleteUserProfileAssignment;
 
 /// <summary>
 /// Validates <see cref="DeleteUserProfileAssignmentCommand"/> per ADR-0036.

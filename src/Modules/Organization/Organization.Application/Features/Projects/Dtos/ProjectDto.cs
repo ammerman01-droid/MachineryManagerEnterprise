@@ -1,4 +1,4 @@
-namespace MachineryManager.Organization.Application.Features.Projects.Dtos;
+namespace MachineryManagerEnterprise.Organization.Application.Features.Projects.Dtos;
 
 /// <summary>Read-only view of a Project.</summary>
 public sealed record ProjectDto(

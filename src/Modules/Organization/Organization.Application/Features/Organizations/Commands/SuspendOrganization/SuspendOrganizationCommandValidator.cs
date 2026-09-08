@@ -1,6 +1,6 @@
 using FluentValidation;
 
-namespace MachineryManager.Organization.Application.Features.Organizations.Commands.SuspendOrganization;
+namespace MachineryManagerEnterprise.Organization.Application.Features.Organizations.Commands.SuspendOrganization;
 
 /// <summary>Validates <see cref="SuspendOrganizationCommand"/> per ADR-0036.</summary>
 public sealed class SuspendOrganizationCommandValidator : AbstractValidator<SuspendOrganizationCommand>

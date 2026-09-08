@@ -1,6 +1,6 @@
 using Microsoft.AspNetCore.Identity;
 
-namespace MachineryManager.Identity.Domain;
+namespace MachineryManagerEnterprise.Identity.Domain;
 
 /// <summary>
 /// The platform's authenticated principal. Per ADR-0030, Identity is a

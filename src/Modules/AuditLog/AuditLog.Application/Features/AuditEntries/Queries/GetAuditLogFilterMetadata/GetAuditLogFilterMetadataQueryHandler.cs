@@ -1,9 +1,9 @@
-using MachineryManager.AuditLog.Application.Abstractions;
-using MachineryManager.SharedKernel;
-using MachineryManager.SharedKernel.Abstractions;
+using MachineryManagerEnterprise.AuditLog.Application.Abstractions;
+using MachineryManagerEnterprise.SharedKernel;
+using MachineryManagerEnterprise.SharedKernel.Abstractions;
 using MediatR;
 
-namespace MachineryManager.AuditLog.Application.Features.AuditEntries.Queries.GetAuditLogFilterMetadata;
+namespace MachineryManagerEnterprise.AuditLog.Application.Features.AuditEntries.Queries.GetAuditLogFilterMetadata;
 
 /// <summary>
 /// Handles <see cref="GetAuditLogFilterMetadataQuery"/> by retrieving

@@ -1,7 +1,7 @@
-using MachineryManager.Identity.Domain;
+using MachineryManagerEnterprise.Identity.Domain;
 using Microsoft.EntityFrameworkCore;
 
-namespace MachineryManager.Identity.Infrastructure.Persistence;
+namespace MachineryManagerEnterprise.Identity.Infrastructure.Persistence;
 
 /// <summary>
 /// EF Core persistence context for the Identity platform module

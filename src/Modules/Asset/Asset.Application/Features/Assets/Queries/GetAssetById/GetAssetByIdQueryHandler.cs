@@ -1,10 +1,10 @@
-using MachineryManager.Asset.Application.Abstractions;
-using MachineryManager.Asset.Application.Features.Assets.Dtos;
-using MachineryManager.SharedKernel;
-using MachineryManager.SharedKernel.Abstractions;
+using MachineryManagerEnterprise.Asset.Application.Abstractions;
+using MachineryManagerEnterprise.Asset.Application.Features.Assets.Dtos;
+using MachineryManagerEnterprise.SharedKernel;
+using MachineryManagerEnterprise.SharedKernel.Abstractions;
 using MediatR;
 
-namespace MachineryManager.Asset.Application.Features.Assets.Queries.GetAssetById;
+namespace MachineryManagerEnterprise.Asset.Application.Features.Assets.Queries.GetAssetById;
 
 /// <summary>
 /// Handles <see cref="GetAssetByIdQuery"/> by loading the aggregate,

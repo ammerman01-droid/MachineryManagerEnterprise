@@ -1,9 +1,9 @@
-using MachineryManager.Asset.Application.Abstractions;
-using MachineryManager.SharedKernel;
-using MachineryManager.SharedKernel.Abstractions;
+using MachineryManagerEnterprise.Asset.Application.Abstractions;
+using MachineryManagerEnterprise.SharedKernel;
+using MachineryManagerEnterprise.SharedKernel.Abstractions;
 using MediatR;
 
-namespace MachineryManager.Asset.Application.Features.Assets.Commands.CommissionAsset;
+namespace MachineryManagerEnterprise.Asset.Application.Features.Assets.Commands.CommissionAsset;
 
 /// <summary>
 /// Handles <see cref="CommissionAssetCommand"/> by loading the

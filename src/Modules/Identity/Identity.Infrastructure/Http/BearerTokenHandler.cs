@@ -1,7 +1,7 @@
 using System.Net.Http.Headers;
-using MachineryManager.Identity.Domain;
+using MachineryManagerEnterprise.Identity.Domain;
 
-namespace MachineryManager.Identity.Infrastructure.Http;
+namespace MachineryManagerEnterprise.Identity.Infrastructure.Http;
 
 /// <summary>
 /// Attaches the current user's cached access token (via

@@ -1,4 +1,4 @@
-namespace MachineryManager.Asset.Application.Features.Assets.Dtos;
+namespace MachineryManagerEnterprise.Asset.Application.Features.Assets.Dtos;
 
 /// <summary>Read-only projection of an Asset for API/UI consumption.</summary>
 public sealed record AssetDto(

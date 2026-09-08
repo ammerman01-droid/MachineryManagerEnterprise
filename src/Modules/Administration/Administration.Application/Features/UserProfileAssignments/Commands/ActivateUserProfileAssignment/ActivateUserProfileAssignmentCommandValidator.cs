@@ -1,6 +1,6 @@
 using FluentValidation;
 
-namespace MachineryManager.Administration.Application.Features.UserProfileAssignments.Commands.ActivateUserProfileAssignment;
+namespace MachineryManagerEnterprise.Administration.Application.Features.UserProfileAssignments.Commands.ActivateUserProfileAssignment;
 
 /// <summary>
 /// Validates <see cref="ActivateUserProfileAssignmentCommand"/> per ADR-0036.

@@ -1,4 +1,4 @@
-namespace MachineryManager.AuditLog.Application.Features.AuditEntries.Dtos;
+namespace MachineryManagerEnterprise.AuditLog.Application.Features.AuditEntries.Dtos;
 
 /// <summary>
 /// The distinct filter values currently present in the audit trail,

@@ -1,4 +1,4 @@
-namespace MachineryManager.Administration.Presentation.Contracts;
+namespace MachineryManagerEnterprise.Administration.Presentation.Contracts;
 
 /// <summary>
 /// Request body for creating a new Profile.

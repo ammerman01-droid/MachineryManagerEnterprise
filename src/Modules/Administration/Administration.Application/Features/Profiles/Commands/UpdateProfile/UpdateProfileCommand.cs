@@ -1,7 +1,7 @@
-using MachineryManager.SharedKernel;
+using MachineryManagerEnterprise.SharedKernel;
 using MediatR;
 
-namespace MachineryManager.Administration.Application.Features.Profiles.Commands.UpdateProfile;
+namespace MachineryManagerEnterprise.Administration.Application.Features.Profiles.Commands.UpdateProfile;
 
 /// <summary>
 /// Command to update an existing Profile's name and permission set.

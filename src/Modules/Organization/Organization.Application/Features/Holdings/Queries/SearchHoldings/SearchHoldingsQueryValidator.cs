@@ -1,6 +1,6 @@
 using FluentValidation;
 
-namespace MachineryManager.Organization.Application.Features.Holdings.Queries.SearchHoldings;
+namespace MachineryManagerEnterprise.Organization.Application.Features.Holdings.Queries.SearchHoldings;
 
 /// <summary>
 /// Validates <see cref="SearchHoldingsQuery"/> per ADR-0036 and API conventions.

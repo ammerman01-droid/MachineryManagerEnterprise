@@ -1,8 +1,8 @@
-using MachineryManager.Administration.Application.Features.Profiles.Dtos;
-using MachineryManager.SharedKernel;
+using MachineryManagerEnterprise.Administration.Application.Features.Profiles.Dtos;
+using MachineryManagerEnterprise.SharedKernel;
 using MediatR;
 
-namespace MachineryManager.Administration.Application.Features.Profiles.Queries.SearchProfiles;
+namespace MachineryManagerEnterprise.Administration.Application.Features.Profiles.Queries.SearchProfiles;
 
 /// <summary>Query to perform a paginated search over profiles.</summary>
 public sealed record SearchProfilesQuery(

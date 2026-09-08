@@ -1,9 +1,9 @@
-using MachineryManager.Organization.Infrastructure.Persistence;
-using MachineryManager.SharedKernel.Abstractions;
+using MachineryManagerEnterprise.Organization.Infrastructure.Persistence;
+using MachineryManagerEnterprise.SharedKernel.Abstractions;
 using Microsoft.EntityFrameworkCore;
 using Organization.Domain;
 
-namespace MachineryManager.Organization.Infrastructure;
+namespace MachineryManagerEnterprise.Organization.Infrastructure;
 
 /// <inheritdoc cref="IOrganizationLookupService" />
 public sealed class OrganizationLookupService : IOrganizationLookupService

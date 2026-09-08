@@ -1,6 +1,6 @@
 using FluentValidation;
 
-namespace MachineryManager.Organization.Application.Features.Organizations.Queries.SearchOrganizations;
+namespace MachineryManagerEnterprise.Organization.Application.Features.Organizations.Queries.SearchOrganizations;
 
 /// <summary>
 /// Validates <see cref="SearchOrganizationsQuery"/> per ADR-0036 and API conventions.

@@ -1,11 +1,11 @@
-using MachineryManager.Configuration.Application.Abstractions;
-using MachineryManager.Configuration.Infrastructure.Persistence;
-using MachineryManager.SharedKernel.Abstractions;
+using MachineryManagerEnterprise.Configuration.Application.Abstractions;
+using MachineryManagerEnterprise.Configuration.Infrastructure.Persistence;
+using MachineryManagerEnterprise.SharedKernel.Abstractions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace MachineryManager.Configuration.Infrastructure;
+namespace MachineryManagerEnterprise.Configuration.Infrastructure;
 
 /// <summary>Registers the Configuration module's Infrastructure-layer services.</summary>
 public static class DependencyInjection
@@ -24,7 +24,7 @@ public static class DependencyInjection
     {
         services.AddDbContext<ConfigurationDbContext>((serviceProvider, options) => options
     .UseSqlServer(configuration.GetConnectionString("MachineryManagerDatabase"))
-    .AddInterceptors(serviceProvider.GetRequiredService<MachineryManager.SharedKernel.Infrastructure.AuditSaveChangesInterceptor>()));
+    .AddInterceptors(serviceProvider.GetRequiredService<MachineryManagerEnterprise.SharedKernel.Infrastructure.AuditSaveChangesInterceptor>()));
 
         services.AddScoped<IColorRepository, ColorRepository>();
         services.AddScoped<IUnitOfMeasurementRepository, UnitOfMeasurementRepository>();

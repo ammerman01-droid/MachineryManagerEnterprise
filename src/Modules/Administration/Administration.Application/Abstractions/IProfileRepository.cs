@@ -1,7 +1,7 @@
-using MachineryManager.Administration.Application.Features.Profiles.Queries.SearchProfiles;
-using MachineryManager.SharedKernel.Abstractions;
+using MachineryManagerEnterprise.Administration.Application.Features.Profiles.Queries.SearchProfiles;
+using MachineryManagerEnterprise.SharedKernel.Abstractions;
 
-namespace MachineryManager.Administration.Application.Abstractions;
+namespace MachineryManagerEnterprise.Administration.Application.Abstractions;
 
 /// <summary>Repository contract for the <see cref="global::Administration.Domain.Profile"/> aggregate.</summary>
 public interface IProfileRepository : IRepository<global::Administration.Domain.Profile, global::Administration.Domain.ProfileId>

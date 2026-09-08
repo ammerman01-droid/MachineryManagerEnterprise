@@ -1,10 +1,10 @@
-using MachineryManager.Administration.Application.Abstractions;
-using MachineryManager.SharedKernel;
-using MachineryManager.SharedKernel.Abstractions;
+using MachineryManagerEnterprise.Administration.Application.Abstractions;
+using MachineryManagerEnterprise.SharedKernel;
+using MachineryManagerEnterprise.SharedKernel.Abstractions;
 using Microsoft.EntityFrameworkCore;
-using MachineryManager.SharedKernel.Infrastructure;
+using MachineryManagerEnterprise.SharedKernel.Infrastructure;
 
-namespace MachineryManager.Administration.Infrastructure.Persistence;
+namespace MachineryManagerEnterprise.Administration.Infrastructure.Persistence;
 
 /// <summary>
 /// EF Core persistence context for the Administration module (ADR-0006).

@@ -1,8 +1,8 @@
-using MachineryManager.Administration.Application.Abstractions;
-using MachineryManager.SharedKernel;
+using MachineryManagerEnterprise.Administration.Application.Abstractions;
+using MachineryManagerEnterprise.SharedKernel;
 using MediatR;
 
-namespace MachineryManager.Administration.Application.Features.Profiles.Commands.DeactivateProfile;
+namespace MachineryManagerEnterprise.Administration.Application.Features.Profiles.Commands.DeactivateProfile;
 
 /// <summary>
 /// Handles <see cref="DeactivateProfileCommand"/> by loading the aggregate,

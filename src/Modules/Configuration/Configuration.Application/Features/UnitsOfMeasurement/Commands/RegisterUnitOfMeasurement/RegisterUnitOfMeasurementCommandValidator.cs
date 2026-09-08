@@ -1,6 +1,6 @@
 using FluentValidation;
 
-namespace MachineryManager.Configuration.Application.Features.UnitsOfMeasurement.Commands.RegisterUnitOfMeasurement;
+namespace MachineryManagerEnterprise.Configuration.Application.Features.UnitsOfMeasurement.Commands.RegisterUnitOfMeasurement;
 
 /// <summary>Validates <see cref="RegisterUnitOfMeasurementCommand"/>.</summary>
 public sealed class RegisterUnitOfMeasurementCommandValidator : AbstractValidator<RegisterUnitOfMeasurementCommand>

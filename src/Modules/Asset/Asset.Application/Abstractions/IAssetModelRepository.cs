@@ -1,6 +1,6 @@
-using MachineryManager.SharedKernel.Abstractions;
+using MachineryManagerEnterprise.SharedKernel.Abstractions;
 
-namespace MachineryManager.Asset.Application.Abstractions;
+namespace MachineryManagerEnterprise.Asset.Application.Abstractions;
 
 /// <summary>Repository contract for the <see cref="global::Asset.Domain.AssetModel"/> aggregate.</summary>
 public interface IAssetModelRepository : IRepository<global::Asset.Domain.AssetModel, global::Asset.Domain.AssetModelId>

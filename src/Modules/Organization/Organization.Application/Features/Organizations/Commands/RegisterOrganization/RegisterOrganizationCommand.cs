@@ -1,8 +1,8 @@
-using MachineryManager.SharedKernel;
+using MachineryManagerEnterprise.SharedKernel;
 using MediatR;
 using Organization.Domain;
 
-namespace MachineryManager.Organization.Application.Features.Organizations.Commands.RegisterOrganization;
+namespace MachineryManagerEnterprise.Organization.Application.Features.Organizations.Commands.RegisterOrganization;
 
 /// <summary>
 /// Command to register a new Organization (UC-1301 / CMD-950).

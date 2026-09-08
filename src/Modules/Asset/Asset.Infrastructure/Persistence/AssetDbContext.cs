@@ -1,10 +1,10 @@
-using MachineryManager.Asset.Application.Abstractions;
-using MachineryManager.SharedKernel;
-using MachineryManager.SharedKernel.Abstractions;
+using MachineryManagerEnterprise.Asset.Application.Abstractions;
+using MachineryManagerEnterprise.SharedKernel;
+using MachineryManagerEnterprise.SharedKernel.Abstractions;
 using Microsoft.EntityFrameworkCore;
-using MachineryManager.SharedKernel.Infrastructure;
+using MachineryManagerEnterprise.SharedKernel.Infrastructure;
 
-namespace MachineryManager.Asset.Infrastructure.Persistence;
+namespace MachineryManagerEnterprise.Asset.Infrastructure.Persistence;
 
 /// <summary>
 /// EF Core persistence context for the Asset module (Modular Monolith —

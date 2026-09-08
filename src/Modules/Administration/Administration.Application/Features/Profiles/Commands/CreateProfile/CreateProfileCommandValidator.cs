@@ -1,6 +1,6 @@
 using FluentValidation;
 
-namespace MachineryManager.Administration.Application.Features.Profiles.Commands.CreateProfile;
+namespace MachineryManagerEnterprise.Administration.Application.Features.Profiles.Commands.CreateProfile;
 
 /// <summary>
 /// Validates <see cref="CreateProfileCommand"/> per ADR-0036.

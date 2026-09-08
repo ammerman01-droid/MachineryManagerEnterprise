@@ -1,7 +1,7 @@
-using MachineryManager.SharedKernel;
+using MachineryManagerEnterprise.SharedKernel;
 using MediatR;
 
-namespace MachineryManager.Organization.Application.Features.Holdings.Commands.RenameHolding;
+namespace MachineryManagerEnterprise.Organization.Application.Features.Holdings.Commands.RenameHolding;
 
 /// <summary>Command to rename an existing Holding.</summary>
 /// <param name="HoldingId">The identifier of the holding to rename.</param>

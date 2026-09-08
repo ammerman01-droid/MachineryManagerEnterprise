@@ -1,10 +1,10 @@
-using MachineryManager.AuditLog.Application.Abstractions;
-using MachineryManager.AuditLog.Infrastructure.Persistence;
+using MachineryManagerEnterprise.AuditLog.Application.Abstractions;
+using MachineryManagerEnterprise.AuditLog.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace MachineryManager.AuditLog.Infrastructure;
+namespace MachineryManagerEnterprise.AuditLog.Infrastructure;
 
 /// <summary>Registers the AuditLog module's Infrastructure-layer services (chat, 2026-09-05, gam 4).</summary>
 public static class DependencyInjection

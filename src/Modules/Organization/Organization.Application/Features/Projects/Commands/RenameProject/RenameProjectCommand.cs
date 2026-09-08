@@ -1,7 +1,7 @@
-using MachineryManager.SharedKernel;
+using MachineryManagerEnterprise.SharedKernel;
 using MediatR;
 
-namespace MachineryManager.Organization.Application.Features.Projects.Commands.RenameProject;
+namespace MachineryManagerEnterprise.Organization.Application.Features.Projects.Commands.RenameProject;
 
 /// <summary>Command to rename an existing Project.</summary>
 /// <param name="ProjectId">The identifier of the project to rename.</param>

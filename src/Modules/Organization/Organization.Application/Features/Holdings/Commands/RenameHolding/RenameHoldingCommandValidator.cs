@@ -1,6 +1,6 @@
 using FluentValidation;
 
-namespace MachineryManager.Organization.Application.Features.Holdings.Commands.RenameHolding;
+namespace MachineryManagerEnterprise.Organization.Application.Features.Holdings.Commands.RenameHolding;
 
 /// <summary>Validates <see cref="RenameHoldingCommand"/> per ADR-0036.</summary>
 public sealed class RenameHoldingCommandValidator : AbstractValidator<RenameHoldingCommand>

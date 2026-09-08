@@ -1,12 +1,12 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <RootNamespace>MachineryManager.Configuration.Application</RootNamespace>
+    <RootNamespace>MachineryManagerEnterprise.Configuration.Application</RootNamespace>
   </PropertyGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\Configuration.Domain\Configuration.Domain.csproj" />
-    <ProjectReference Include="..\..\..\BuildingBlocks\MachineryManager.SharedKernel.Abstractions\MachineryManager.SharedKernel.Abstractions.csproj" />
+    <ProjectReference Include="..\..\..\BuildingBlocks\MachineryManagerEnterprise.SharedKernel.Abstractions\MachineryManagerEnterprise.SharedKernel.Abstractions.csproj" />
   </ItemGroup>
 
   <ItemGroup>

@@ -1,4 +1,4 @@
-namespace MachineryManager.AuditLog.Application.Abstractions;
+namespace MachineryManagerEnterprise.AuditLog.Application.Abstractions;
 
 /// <summary>
 /// The permission strings enforced by the AuditLog module

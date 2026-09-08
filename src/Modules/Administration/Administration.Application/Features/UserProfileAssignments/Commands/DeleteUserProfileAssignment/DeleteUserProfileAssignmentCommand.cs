@@ -1,7 +1,7 @@
-using MachineryManager.SharedKernel;
+using MachineryManagerEnterprise.SharedKernel;
 using MediatR;
 
-namespace MachineryManager.Administration.Application.Features.UserProfileAssignments.Commands.DeleteUserProfileAssignment;
+namespace MachineryManagerEnterprise.Administration.Application.Features.UserProfileAssignments.Commands.DeleteUserProfileAssignment;
 
 /// <summary>
 /// Command to permanently remove a UserProfileAssignment from a user's

@@ -1,6 +1,6 @@
 using FluentValidation;
 
-namespace MachineryManager.Organization.Application.Features.Projects.Queries.GetProjectById;
+namespace MachineryManagerEnterprise.Organization.Application.Features.Projects.Queries.GetProjectById;
 
 /// <summary>
 /// Validates <see cref="GetProjectByIdQuery"/> per ADR-0036.

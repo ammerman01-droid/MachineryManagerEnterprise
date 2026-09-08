@@ -1,6 +1,6 @@
 using FluentValidation;
 
-namespace MachineryManager.Organization.Application.Features.Organizations.Commands.RenameOrganization;
+namespace MachineryManagerEnterprise.Organization.Application.Features.Organizations.Commands.RenameOrganization;
 
 /// <summary>Validates <see cref="RenameOrganizationCommand"/> per ADR-0036.</summary>
 public sealed class RenameOrganizationCommandValidator : AbstractValidator<RenameOrganizationCommand>

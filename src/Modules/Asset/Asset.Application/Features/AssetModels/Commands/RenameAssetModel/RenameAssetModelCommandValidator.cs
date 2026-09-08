@@ -1,6 +1,6 @@
 using FluentValidation;
 
-namespace MachineryManager.Asset.Application.Features.AssetModels.Commands.RenameAssetModel;
+namespace MachineryManagerEnterprise.Asset.Application.Features.AssetModels.Commands.RenameAssetModel;
 
 /// <summary>Validates <see cref="RenameAssetModelCommand"/> per ADR-0036.</summary>
 public sealed class RenameAssetModelCommandValidator : AbstractValidator<RenameAssetModelCommand>

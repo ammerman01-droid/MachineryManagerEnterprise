@@ -1,13 +1,13 @@
-using MachineryManager.Configuration.Application.Features.Companies.Commands.RegisterCompany;
-using MachineryManager.Configuration.Application.Features.Companies.Queries.GetCompaniesByHolding;
-using MachineryManager.Configuration.Presentation.Contracts;
+using MachineryManagerEnterprise.Configuration.Application.Features.Companies.Commands.RegisterCompany;
+using MachineryManagerEnterprise.Configuration.Application.Features.Companies.Queries.GetCompaniesByHolding;
+using MachineryManagerEnterprise.Configuration.Presentation.Contracts;
 using MediatR;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Routing;
 using OpenIddict.Validation.AspNetCore;
 
-namespace MachineryManager.Configuration.Presentation.Endpoints;
+namespace MachineryManagerEnterprise.Configuration.Presentation.Endpoints;
 
 /// <summary>Maps the Configuration module's Company REST endpoints: base path <c>/api/v1/companies</c>.</summary>
 public static class CompanyEndpoints

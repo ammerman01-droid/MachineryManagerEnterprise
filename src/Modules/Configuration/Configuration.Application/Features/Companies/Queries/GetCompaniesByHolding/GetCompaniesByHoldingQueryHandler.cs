@@ -1,10 +1,10 @@
-using MachineryManager.Configuration.Application.Abstractions;
-using MachineryManager.Configuration.Application.Features.Companies.Dtos;
-using MachineryManager.SharedKernel;
-using MachineryManager.SharedKernel.Abstractions;
+using MachineryManagerEnterprise.Configuration.Application.Abstractions;
+using MachineryManagerEnterprise.Configuration.Application.Features.Companies.Dtos;
+using MachineryManagerEnterprise.SharedKernel;
+using MachineryManagerEnterprise.SharedKernel.Abstractions;
 using MediatR;
 
-namespace MachineryManager.Configuration.Application.Features.Companies.Queries.GetCompaniesByHolding;
+namespace MachineryManagerEnterprise.Configuration.Application.Features.Companies.Queries.GetCompaniesByHolding;
 
 /// <summary>
 /// Handles <see cref="GetCompaniesByHoldingQuery"/> by verifying the

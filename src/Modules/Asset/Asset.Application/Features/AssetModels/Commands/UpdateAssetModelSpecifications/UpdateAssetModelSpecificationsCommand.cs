@@ -1,7 +1,7 @@
-using MachineryManager.SharedKernel;
+using MachineryManagerEnterprise.SharedKernel;
 using MediatR;
 
-namespace MachineryManager.Asset.Application.Features.AssetModels.Commands.UpdateAssetModelSpecifications;
+namespace MachineryManagerEnterprise.Asset.Application.Features.AssetModels.Commands.UpdateAssetModelSpecifications;
 
 /// <summary>Command to update the technical specifications of an existing Asset Model.</summary>
 public sealed record UpdateAssetModelSpecificationsCommand(

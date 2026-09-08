@@ -1,7 +1,7 @@
-using MachineryManager.SharedKernel.Abstractions;
+using MachineryManagerEnterprise.SharedKernel.Abstractions;
 using Microsoft.EntityFrameworkCore;
 
-namespace MachineryManager.Administration.Infrastructure;
+namespace MachineryManagerEnterprise.Administration.Infrastructure;
 
 /// <summary>
 /// EF Core-backed implementation of <see cref="IPermissionEvaluator"/>.

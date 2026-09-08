@@ -117,15 +117,15 @@ Host
 ```text
 BuildingBlocks
 
-MachineryManager.SharedKernel
+MachineryManagerEnterprise.SharedKernel
 
-MachineryManager.SharedKernel.Contracts
+MachineryManagerEnterprise.SharedKernel.Contracts
 
-MachineryManager.SharedKernel.Abstractions
+MachineryManagerEnterprise.SharedKernel.Abstractions
 
-MachineryManager.SharedKernel.Infrastructure
+MachineryManagerEnterprise.SharedKernel.Infrastructure
 
-MachineryManager.UI
+MachineryManagerEnterprise.UI
 ```
 
 لایه BuildingBlocks شامل مؤلفه‌های با قابلیت استفاده مجدد است که میان تمامی ماژول‌ها به اشتراک گذاشته شده‌اند.
@@ -163,9 +163,9 @@ AssetManagement.Presentation
 ```text
 Host
 
-MachineryManager.Server
+MachineryManagerEnterprise.Server
 
-MachineryManager.Client
+MachineryManagerEnterprise.Client
 ```
 
 لایه Host کل برنامه را ترکیب کرده و تزریق وابستگی، میان‌افزارها (Middleware) و راه‌اندازی برنامه را پیکربندی می‌نماید.
@@ -365,4 +365,4 @@ Identity.Tests
 | 3.1.0 | 2026-07-26 | معمار راهکار | هوش مصنوعی + تیم پروژه \| به‌روزرسانی راه‌اندازی راهکار برای NET 10.0.302.، پیکربندی متمرکز MSBuild و مدیریت متمرکز بسته‌ها (CPM). |
 | 4.0.0 | 2026-07-28 | معمار راهکار | ارتقا به استاندارد مستندسازی نسخه ۴.۰.۰ |
 | 4.1.0 | 2026-08-12 | معمار راهکار | اصلاح مراجع نادرست DOC-MOD-001 و DOC-DOM-002 به اسناد واقعی MOD-000 و DOM-003 |
-| 4.2.0 | 2026-08-12 | معمار راهکار | تصحیح نام‌های پروژه‌های BuildingBlocks برای تطابق با راهکار واقعی (MachineryManager.SharedKernel.Contracts / .Abstractions / .Infrastructure) و افزودن زیرپروژه مفقود Infrastructure |
+| 4.2.0 | 2026-08-12 | معمار راهکار | تصحیح نام‌های پروژه‌های BuildingBlocks برای تطابق با راهکار واقعی (MachineryManagerEnterprise.SharedKernel.Contracts / .Abstractions / .Infrastructure) و افزودن زیرپروژه مفقود Infrastructure |

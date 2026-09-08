@@ -1,8 +1,8 @@
-using MachineryManager.SharedKernel;
-using MachineryManager.SharedKernel.Infrastructure;
+using MachineryManagerEnterprise.SharedKernel;
+using MachineryManagerEnterprise.SharedKernel.Infrastructure;
 using Microsoft.EntityFrameworkCore;
 
-namespace MachineryManager.AuditLog.Infrastructure.Persistence;
+namespace MachineryManagerEnterprise.AuditLog.Infrastructure.Persistence;
 
 /// <summary>
 /// EF Core read context over the shared <c>audit.AuditEntry</c> table

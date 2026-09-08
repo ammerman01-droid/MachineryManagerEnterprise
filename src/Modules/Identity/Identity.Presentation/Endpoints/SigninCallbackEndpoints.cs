@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Routing;
 using OpenIddict.Client.AspNetCore;
 
-namespace MachineryManager.Identity.Presentation.Endpoints;
+namespace MachineryManagerEnterprise.Identity.Presentation.Endpoints;
 
 /// <summary>
 /// Handles the redirection back from this application's own OpenIddict

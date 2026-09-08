@@ -1,8 +1,8 @@
-using MachineryManager.Organization.Application.Features.Holdings.Dtos;
-using MachineryManager.SharedKernel;
+using MachineryManagerEnterprise.Organization.Application.Features.Holdings.Dtos;
+using MachineryManagerEnterprise.SharedKernel;
 using MediatR;
 
-namespace MachineryManager.Organization.Application.Features.Holdings.Queries.SearchHoldings;
+namespace MachineryManagerEnterprise.Organization.Application.Features.Holdings.Queries.SearchHoldings;
 
 /// <summary>
 /// Query to perform a paginated search over holdings.

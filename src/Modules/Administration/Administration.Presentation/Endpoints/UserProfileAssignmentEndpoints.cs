@@ -1,10 +1,10 @@
 using Administration.Domain;
-using MachineryManager.Administration.Application.Features.UserProfileAssignments.Commands.ActivateUserProfileAssignment;
-using MachineryManager.Administration.Application.Features.UserProfileAssignments.Commands.AssignUserToProfile;
-using MachineryManager.Administration.Application.Features.UserProfileAssignments.Commands.DeactivateUserProfileAssignment;
-using MachineryManager.Administration.Application.Features.UserProfileAssignments.Commands.DeleteUserProfileAssignment;
-using MachineryManager.Administration.Application.Features.UserProfileAssignments.Queries.GetUserProfileAssignmentsByUserId;
-using MachineryManager.Administration.Presentation.Contracts;
+using MachineryManagerEnterprise.Administration.Application.Features.UserProfileAssignments.Commands.ActivateUserProfileAssignment;
+using MachineryManagerEnterprise.Administration.Application.Features.UserProfileAssignments.Commands.AssignUserToProfile;
+using MachineryManagerEnterprise.Administration.Application.Features.UserProfileAssignments.Commands.DeactivateUserProfileAssignment;
+using MachineryManagerEnterprise.Administration.Application.Features.UserProfileAssignments.Commands.DeleteUserProfileAssignment;
+using MachineryManagerEnterprise.Administration.Application.Features.UserProfileAssignments.Queries.GetUserProfileAssignmentsByUserId;
+using MachineryManagerEnterprise.Administration.Presentation.Contracts;
 using MediatR;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
@@ -14,7 +14,7 @@ using OpenIddict.Validation.AspNetCore;
 
 using static OpenIddict.Abstractions.OpenIddictConstants;
 
-namespace MachineryManager.Administration.Presentation.Endpoints;
+namespace MachineryManagerEnterprise.Administration.Presentation.Endpoints;
 
 /// <summary>Maps the UserProfileAssignment module's REST endpoints.</summary>
 public static class UserProfileAssignmentEndpoints

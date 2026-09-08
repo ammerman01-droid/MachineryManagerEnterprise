@@ -1,6 +1,6 @@
 using FluentValidation;
 
-namespace MachineryManager.Organization.Application.Features.Organizations.Commands.AssignOrganizationToHolding;
+namespace MachineryManagerEnterprise.Organization.Application.Features.Organizations.Commands.AssignOrganizationToHolding;
 
 /// <summary>
 /// Validates <see cref="AssignOrganizationToHoldingCommand"/> per ADR-0036.

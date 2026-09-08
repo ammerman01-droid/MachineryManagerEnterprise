@@ -1,6 +1,6 @@
 using FluentValidation;
 
-namespace MachineryManager.Configuration.Application.Features.FuelTypes.Commands.RegisterFuelType;
+namespace MachineryManagerEnterprise.Configuration.Application.Features.FuelTypes.Commands.RegisterFuelType;
 
 /// <summary>Validates <see cref="RegisterFuelTypeCommand"/> per ADR-0036.</summary>
 public sealed class RegisterFuelTypeCommandValidator : AbstractValidator<RegisterFuelTypeCommand>

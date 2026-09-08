@@ -1,6 +1,6 @@
-using MachineryManager.SharedKernel.Abstractions;
+using MachineryManagerEnterprise.SharedKernel.Abstractions;
 
-namespace MachineryManager.Asset.Application.Abstractions;
+namespace MachineryManagerEnterprise.Asset.Application.Abstractions;
 
 /// <summary>
 /// Unit of work for the Asset module. Distinct from every other

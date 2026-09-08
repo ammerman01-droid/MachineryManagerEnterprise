@@ -1,5 +1,5 @@
 using System.Security.Claims;
-using MachineryManager.Identity.Domain;
+using MachineryManagerEnterprise.Identity.Domain;
 using ClaimTypesLong = System.Security.Claims.ClaimTypes;
 using Microsoft.AspNetCore;
 using Microsoft.AspNetCore.Authentication;
@@ -12,7 +12,7 @@ using OpenIddict.Server.AspNetCore;
 
 using static OpenIddict.Abstractions.OpenIddictConstants;
 
-namespace MachineryManager.Identity.Presentation.Endpoints;
+namespace MachineryManagerEnterprise.Identity.Presentation.Endpoints;
 
 /// <summary>
 /// Maps the OpenIddict protocol endpoints (Authorization Code + PKCE

@@ -1,8 +1,8 @@
-using MachineryManager.Configuration.Application.Features.Companies.Dtos;
-using MachineryManager.SharedKernel;
+using MachineryManagerEnterprise.Configuration.Application.Features.Companies.Dtos;
+using MachineryManagerEnterprise.SharedKernel;
 using MediatR;
 
-namespace MachineryManager.Configuration.Application.Features.Companies.Queries.GetCompaniesByHolding;
+namespace MachineryManagerEnterprise.Configuration.Application.Features.Companies.Queries.GetCompaniesByHolding;
 
 /// <summary>
 /// Query to retrieve every Company registered for a Holding (used to

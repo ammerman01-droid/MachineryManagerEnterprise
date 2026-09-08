@@ -1,8 +1,8 @@
-using MachineryManager.Administration.Application.Abstractions;
-using MachineryManager.SharedKernel;
+using MachineryManagerEnterprise.Administration.Application.Abstractions;
+using MachineryManagerEnterprise.SharedKernel;
 using MediatR;
 
-namespace MachineryManager.Administration.Application.Features.UserProfileAssignments.Queries.GetUserProfileAssignmentsByUserId;
+namespace MachineryManagerEnterprise.Administration.Application.Features.UserProfileAssignments.Queries.GetUserProfileAssignmentsByUserId;
 
 /// <summary>Handles <see cref="GetUserProfileAssignmentsByUserIdQuery"/>.</summary>
 public sealed class GetUserProfileAssignmentsByUserIdQueryHandler

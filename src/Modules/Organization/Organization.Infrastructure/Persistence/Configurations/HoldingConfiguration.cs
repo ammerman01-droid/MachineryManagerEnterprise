@@ -2,7 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using Organization.Domain;
 
-namespace MachineryManager.Organization.Infrastructure.Persistence.Configurations;
+namespace MachineryManagerEnterprise.Organization.Infrastructure.Persistence.Configurations;
 
 /// <summary>EF Core mapping for the <see cref="Holding"/> aggregate.</summary>
 public sealed class HoldingConfiguration : IEntityTypeConfiguration<Holding>

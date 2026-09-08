@@ -1,14 +1,14 @@
-using MachineryManager.AuditLog.Application.Features.AuditEntries.Queries.SearchAuditEntries;
-using MachineryManager.SharedKernel;
+using MachineryManagerEnterprise.AuditLog.Application.Features.AuditEntries.Queries.SearchAuditEntries;
+using MachineryManagerEnterprise.SharedKernel;
 using MediatR;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Routing;
 using OpenIddict.Validation.AspNetCore;
-using MachineryManager.AuditLog.Application.Features.AuditEntries.Queries.GetAuditEntryById;
-using MachineryManager.AuditLog.Application.Features.AuditEntries.Queries.GetAuditLogFilterMetadata;
+using MachineryManagerEnterprise.AuditLog.Application.Features.AuditEntries.Queries.GetAuditEntryById;
+using MachineryManagerEnterprise.AuditLog.Application.Features.AuditEntries.Queries.GetAuditLogFilterMetadata;
 
-namespace MachineryManager.AuditLog.Presentation.Endpoints;
+namespace MachineryManagerEnterprise.AuditLog.Presentation.Endpoints;
 
 /// <summary>
 /// Maps the AuditLog module's REST endpoints per 07-api conventions

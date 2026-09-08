@@ -45,11 +45,11 @@ reassignment" rule (Section 10.16).
 ├── docs/
 ├── src/
 │   ├── BuildingBlocks/
-│   │   ├── MachineryManager.SharedKernel
-│   │   ├── MachineryManager.SharedKernel.Contracts
-│   │   ├── MachineryManager.SharedKernel.Abstractions
-│   │   ├── MachineryManager.SharedKernel.Infrastructure
-│   │   └── MachineryManager.UI
+│   │   ├── MachineryManagerEnterprise.SharedKernel
+│   │   ├── MachineryManagerEnterprise.SharedKernel.Contracts
+│   │   ├── MachineryManagerEnterprise.SharedKernel.Abstractions
+│   │   ├── MachineryManagerEnterprise.SharedKernel.Infrastructure
+│   │   └── MachineryManagerEnterprise.UI
 │   ├── Modules/
 │   │   └── [ModuleName]/
 │   │       ├── [ModuleName].Domain
@@ -57,8 +57,8 @@ reassignment" rule (Section 10.16).
 │   │       ├── [ModuleName].Infrastructure
 │   │       └── [ModuleName].Presentation
 │   └── Host/
-│       ├── MachineryManager.Server
-│       └── MachineryManager.Client
+│       ├── MachineryManagerEnterprise.Server
+│       └── MachineryManagerEnterprise.Client
 ├── tests/
 ├── tools/
 ├── global.json

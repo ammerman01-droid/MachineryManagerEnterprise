@@ -119,15 +119,15 @@ Each project has a single well-defined responsibility.
 ```text
 BuildingBlocks
 
-MachineryManager.SharedKernel
+MachineryManagerEnterprise.SharedKernel
 
-MachineryManager.SharedKernel.Contracts
+MachineryManagerEnterprise.SharedKernel.Contracts
 
-MachineryManager.SharedKernel.Abstractions
+MachineryManagerEnterprise.SharedKernel.Abstractions
 
-MachineryManager.SharedKernel.Infrastructure
+MachineryManagerEnterprise.SharedKernel.Infrastructure
 
-MachineryManager.UI
+MachineryManagerEnterprise.UI
 ```
 
 The BuildingBlocks layer contains reusable components shared by all modules.
@@ -165,9 +165,9 @@ The same structure shall be followed for every business module.
 ```text
 Host
 
-MachineryManager.Server
+MachineryManagerEnterprise.Server
 
-MachineryManager.Client
+MachineryManagerEnterprise.Client
 ```
 
 The Host layer composes the application and configures dependency injection, middleware and application startup.
@@ -363,4 +363,4 @@ Architectural deviations require an approved ADR.
 | 3.1.0   | 2026-07-26 | Solution Architect | AI + Project Team | Updated solution bootstrap for .NET 10.0.302, centralized MSBuild configuration and Central Package Management.|
 | 4.0.0   | 2026-07-28 | Solution Architect | Upgraded to Documentation Standard v4.0.0             |
 | 4.1.0   | 2026-08-12 | Solution Architect | Fixed malformed references DOC-MOD-001 and DOC-DOM-002 (wrong prefix and wrong number) to the real MOD-000 and DOM-003 |
-| 4.2.0   | 2026-08-12 | Solution Architect | Corrected the BuildingBlocks project names to match the actual scaffolded solution (MachineryManager.SharedKernel.Contracts / .Abstractions / .Infrastructure, not the previously documented MachineryManager.Contracts / .Abstractions without the SharedKernel prefix); added the missing Infrastructure sub-project |
+| 4.2.0   | 2026-08-12 | Solution Architect | Corrected the BuildingBlocks project names to match the actual scaffolded solution (MachineryManagerEnterprise.SharedKernel.Contracts / .Abstractions / .Infrastructure, not the previously documented MachineryManagerEnterprise.Contracts / .Abstractions without the SharedKernel prefix); added the missing Infrastructure sub-project |

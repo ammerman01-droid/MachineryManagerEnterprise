@@ -1,13 +1,13 @@
-using MachineryManager.Configuration.Application.Features.FuelTypes.Commands.RegisterFuelType;
-using MachineryManager.Configuration.Application.Features.FuelTypes.Queries.GetFuelTypesByHolding;
-using MachineryManager.Configuration.Presentation.Contracts;
+using MachineryManagerEnterprise.Configuration.Application.Features.FuelTypes.Commands.RegisterFuelType;
+using MachineryManagerEnterprise.Configuration.Application.Features.FuelTypes.Queries.GetFuelTypesByHolding;
+using MachineryManagerEnterprise.Configuration.Presentation.Contracts;
 using MediatR;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Routing;
 using OpenIddict.Validation.AspNetCore;
 
-namespace MachineryManager.Configuration.Presentation.Endpoints;
+namespace MachineryManagerEnterprise.Configuration.Presentation.Endpoints;
 
 /// <summary>Maps the Configuration module's Fuel Type REST endpoints: base path <c>/api/v1/fuel-types</c>.</summary>
 public static class FuelTypeEndpoints

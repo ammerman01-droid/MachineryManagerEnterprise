@@ -1,6 +1,6 @@
 using FluentValidation;
 
-namespace MachineryManager.Asset.Application.Features.EngineModels.Commands.UpdateEngineModelSpecifications;
+namespace MachineryManagerEnterprise.Asset.Application.Features.EngineModels.Commands.UpdateEngineModelSpecifications;
 
 /// <summary>Validates <see cref="UpdateEngineModelSpecificationsCommand"/> per ADR-0036.</summary>
 public sealed class UpdateEngineModelSpecificationsCommandValidator : AbstractValidator<UpdateEngineModelSpecificationsCommand>

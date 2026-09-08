@@ -1,8 +1,8 @@
-using MachineryManager.Asset.Application.Features.EngineModels.Dtos;
-using MachineryManager.SharedKernel;
+using MachineryManagerEnterprise.Asset.Application.Features.EngineModels.Dtos;
+using MachineryManagerEnterprise.SharedKernel;
 using MediatR;
 
-namespace MachineryManager.Asset.Application.Features.EngineModels.Queries.SearchEngineModels;
+namespace MachineryManagerEnterprise.Asset.Application.Features.EngineModels.Queries.SearchEngineModels;
 
 /// <summary>Query to search Engine Models within a Holding.</summary>
 public sealed record SearchEngineModelsQuery(Guid HoldingId, string? SearchTerm, int Page = 1, int PageSize = 20)

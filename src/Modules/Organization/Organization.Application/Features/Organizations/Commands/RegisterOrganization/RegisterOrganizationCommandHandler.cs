@@ -1,10 +1,10 @@
-using MachineryManager.SharedKernel;
-using MachineryManager.SharedKernel.Abstractions;
+using MachineryManagerEnterprise.SharedKernel;
+using MachineryManagerEnterprise.SharedKernel.Abstractions;
 using MediatR;
 using Organization.Domain;
-using MachineryManager.Organization.Application.Abstractions;
+using MachineryManagerEnterprise.Organization.Application.Abstractions;
 
-namespace MachineryManager.Organization.Application.Features.Organizations.Commands.RegisterOrganization;
+namespace MachineryManagerEnterprise.Organization.Application.Features.Organizations.Commands.RegisterOrganization;
 
 /// <summary>Handles <see cref="RegisterOrganizationCommand"/>.</summary>
 public sealed class RegisterOrganizationCommandHandler

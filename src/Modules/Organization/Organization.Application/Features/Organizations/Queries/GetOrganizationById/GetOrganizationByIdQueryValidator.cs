@@ -1,6 +1,6 @@
 using FluentValidation;
 
-namespace MachineryManager.Organization.Application.Features.Organizations.Queries.GetOrganizationById;
+namespace MachineryManagerEnterprise.Organization.Application.Features.Organizations.Queries.GetOrganizationById;
 
 /// <summary>
 /// Validates <see cref="GetOrganizationByIdQuery"/> per ADR-0036.

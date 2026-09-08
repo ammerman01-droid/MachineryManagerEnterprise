@@ -1,7 +1,7 @@
-using MachineryManager.SharedKernel;
-using MachineryManager.SharedKernel.Abstractions;
+using MachineryManagerEnterprise.SharedKernel;
+using MachineryManagerEnterprise.SharedKernel.Abstractions;
 
-namespace MachineryManager.AuditLog.Application.Abstractions;
+namespace MachineryManagerEnterprise.AuditLog.Application.Abstractions;
 
 /// <summary>
 /// Immutable filter describing one page of audit records to retrieve

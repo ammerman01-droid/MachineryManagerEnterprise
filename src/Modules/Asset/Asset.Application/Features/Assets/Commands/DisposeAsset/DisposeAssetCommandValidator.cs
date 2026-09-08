@@ -1,6 +1,6 @@
 using FluentValidation;
 
-namespace MachineryManager.Asset.Application.Features.Assets.Commands.DisposeAsset;
+namespace MachineryManagerEnterprise.Asset.Application.Features.Assets.Commands.DisposeAsset;
 
 /// <summary>Validates <see cref="DisposeAssetCommand"/> per ADR-0036.</summary>
 public sealed class DisposeAssetCommandValidator : AbstractValidator<DisposeAssetCommand>

@@ -1,4 +1,4 @@
-namespace MachineryManager.Configuration.Application.Features.Colors.Dtos;
+namespace MachineryManagerEnterprise.Configuration.Application.Features.Colors.Dtos;
 
 /// <summary>Represents the ColorDto data contract.</summary>
 /// <param name="Id">The value supplied for Id.</param>

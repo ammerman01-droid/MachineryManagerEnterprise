@@ -1,6 +1,6 @@
-using MachineryManager.SharedKernel;
+using MachineryManagerEnterprise.SharedKernel;
 
-namespace MachineryManager.Asset.Application.Features.EngineModels.Dtos;
+namespace MachineryManagerEnterprise.Asset.Application.Features.EngineModels.Dtos;
 
 /// <summary>Read-only view of an Engine Model.</summary>
 public sealed record EngineModelDto(

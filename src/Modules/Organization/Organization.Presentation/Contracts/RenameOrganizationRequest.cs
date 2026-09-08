@@ -1,4 +1,4 @@
-namespace MachineryManager.Organization.Presentation.Contracts;
+namespace MachineryManagerEnterprise.Organization.Presentation.Contracts;
 
 /// <summary>Request body for renaming an Organization.</summary>
 /// <param name="Name">The new name.</param>

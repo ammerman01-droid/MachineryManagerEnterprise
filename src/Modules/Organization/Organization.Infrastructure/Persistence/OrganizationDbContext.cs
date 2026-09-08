@@ -1,10 +1,10 @@
-using MachineryManager.Organization.Application.Abstractions;
-using MachineryManager.SharedKernel;
-using MachineryManager.SharedKernel.Abstractions;
+using MachineryManagerEnterprise.Organization.Application.Abstractions;
+using MachineryManagerEnterprise.SharedKernel;
+using MachineryManagerEnterprise.SharedKernel.Abstractions;
 using Microsoft.EntityFrameworkCore;
-using MachineryManager.SharedKernel.Infrastructure;
+using MachineryManagerEnterprise.SharedKernel.Infrastructure;
 
-namespace MachineryManager.Organization.Infrastructure.Persistence;
+namespace MachineryManagerEnterprise.Organization.Infrastructure.Persistence;
 
 /// <summary>
 /// EF Core persistence context for the Organization module (ADR-0006,
@@ -50,8 +50,8 @@ public sealed class OrganizationDbContext : DbContext, IOrganizationUnitOfWork
     /// Gets the set of audit records captured for this module's schema.
     /// This module does NOT own the physical table — Administration does.
     /// </summary>
-    public DbSet<MachineryManager.SharedKernel.AuditEntry> AuditEntries =>
-        Set<MachineryManager.SharedKernel.AuditEntry>();
+    public DbSet<MachineryManagerEnterprise.SharedKernel.AuditEntry> AuditEntries =>
+        Set<MachineryManagerEnterprise.SharedKernel.AuditEntry>();
 
     /// <inheritdoc />
     protected override void OnModelCreating(ModelBuilder modelBuilder)

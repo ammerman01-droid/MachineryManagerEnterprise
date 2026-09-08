@@ -1,19 +1,19 @@
-using MachineryManager.Asset.Application.Features.Assets.Commands.ActivateAsset;
-using MachineryManager.Asset.Application.Features.Assets.Commands.CommissionAsset;
-using MachineryManager.Asset.Application.Features.Assets.Commands.DeactivateAsset;
-using MachineryManager.Asset.Application.Features.Assets.Commands.DisposeAsset;
-using MachineryManager.Asset.Application.Features.Assets.Commands.RegisterAsset;
-using MachineryManager.Asset.Application.Features.Assets.Commands.RetireAsset;
-using MachineryManager.Asset.Application.Features.Assets.Queries.GetAssetById;
-using MachineryManager.Asset.Application.Features.Assets.Queries.SearchAssets;
-using MachineryManager.Asset.Presentation.Contracts;
+using MachineryManagerEnterprise.Asset.Application.Features.Assets.Commands.ActivateAsset;
+using MachineryManagerEnterprise.Asset.Application.Features.Assets.Commands.CommissionAsset;
+using MachineryManagerEnterprise.Asset.Application.Features.Assets.Commands.DeactivateAsset;
+using MachineryManagerEnterprise.Asset.Application.Features.Assets.Commands.DisposeAsset;
+using MachineryManagerEnterprise.Asset.Application.Features.Assets.Commands.RegisterAsset;
+using MachineryManagerEnterprise.Asset.Application.Features.Assets.Commands.RetireAsset;
+using MachineryManagerEnterprise.Asset.Application.Features.Assets.Queries.GetAssetById;
+using MachineryManagerEnterprise.Asset.Application.Features.Assets.Queries.SearchAssets;
+using MachineryManagerEnterprise.Asset.Presentation.Contracts;
 using MediatR;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Routing;
 using OpenIddict.Validation.AspNetCore;
 
-namespace MachineryManager.Asset.Presentation.Endpoints;
+namespace MachineryManagerEnterprise.Asset.Presentation.Endpoints;
 
 /// <summary>
 /// Maps the Asset module's Asset REST endpoints per 07-api conventions

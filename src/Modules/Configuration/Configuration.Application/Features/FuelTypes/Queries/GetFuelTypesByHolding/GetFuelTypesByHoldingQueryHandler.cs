@@ -1,10 +1,10 @@
-using MachineryManager.Configuration.Application.Abstractions;
-using MachineryManager.Configuration.Application.Features.FuelTypes.Dtos;
-using MachineryManager.SharedKernel;
-using MachineryManager.SharedKernel.Abstractions;
+using MachineryManagerEnterprise.Configuration.Application.Abstractions;
+using MachineryManagerEnterprise.Configuration.Application.Features.FuelTypes.Dtos;
+using MachineryManagerEnterprise.SharedKernel;
+using MachineryManagerEnterprise.SharedKernel.Abstractions;
 using MediatR;
 
-namespace MachineryManager.Configuration.Application.Features.FuelTypes.Queries.GetFuelTypesByHolding;
+namespace MachineryManagerEnterprise.Configuration.Application.Features.FuelTypes.Queries.GetFuelTypesByHolding;
 
 /// <summary>
 /// Handles <see cref="GetFuelTypesByHoldingQuery"/> by verifying the

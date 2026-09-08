@@ -1,8 +1,8 @@
-using MachineryManager.AuditLog.Application.Features.AuditEntries.Dtos;
-using MachineryManager.SharedKernel;
+using MachineryManagerEnterprise.AuditLog.Application.Features.AuditEntries.Dtos;
+using MachineryManagerEnterprise.SharedKernel;
 using MediatR;
 
-namespace MachineryManager.AuditLog.Application.Features.AuditEntries.Queries.GetAuditEntryById;
+namespace MachineryManagerEnterprise.AuditLog.Application.Features.AuditEntries.Queries.GetAuditEntryById;
 
 /// <summary>
 /// Retrieves a single audit record with its field-level changes

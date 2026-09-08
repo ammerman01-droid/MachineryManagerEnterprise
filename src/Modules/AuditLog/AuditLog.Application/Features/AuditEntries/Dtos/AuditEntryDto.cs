@@ -1,6 +1,6 @@
-using MachineryManager.SharedKernel;
+using MachineryManagerEnterprise.SharedKernel;
 
-namespace MachineryManager.AuditLog.Application.Features.AuditEntries.Dtos;
+namespace MachineryManagerEnterprise.AuditLog.Application.Features.AuditEntries.Dtos;
 
 /// <summary>
 /// Flat list-item projection of a single <see cref="AuditEntry"/>

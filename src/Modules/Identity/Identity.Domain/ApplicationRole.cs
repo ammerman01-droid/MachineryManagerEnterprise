@@ -1,6 +1,6 @@
 using Microsoft.AspNetCore.Identity;
 
-namespace MachineryManager.Identity.Domain;
+namespace MachineryManagerEnterprise.Identity.Domain;
 
 /// <summary>
 /// A platform Role, per the Authorization Model (05-application,

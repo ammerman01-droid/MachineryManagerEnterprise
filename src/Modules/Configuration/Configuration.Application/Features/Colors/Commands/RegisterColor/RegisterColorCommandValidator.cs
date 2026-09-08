@@ -1,6 +1,6 @@
 using FluentValidation;
 
-namespace MachineryManager.Configuration.Application.Features.Colors.Commands.RegisterColor;
+namespace MachineryManagerEnterprise.Configuration.Application.Features.Colors.Commands.RegisterColor;
 
 /// <summary>Validates <see cref="RegisterColorCommand"/>.</summary>
 public sealed class RegisterColorCommandValidator : AbstractValidator<RegisterColorCommand>

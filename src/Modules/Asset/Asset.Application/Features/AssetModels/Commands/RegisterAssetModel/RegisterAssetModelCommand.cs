@@ -1,7 +1,7 @@
-using MachineryManager.SharedKernel;
+using MachineryManagerEnterprise.SharedKernel;
 using MediatR;
 
-namespace MachineryManager.Asset.Application.Features.AssetModels.Commands.RegisterAssetModel;
+namespace MachineryManagerEnterprise.Asset.Application.Features.AssetModels.Commands.RegisterAssetModel;
 
 /// <summary>Command to register a new Asset Model within a Holding.</summary>
 public sealed record RegisterAssetModelCommand(

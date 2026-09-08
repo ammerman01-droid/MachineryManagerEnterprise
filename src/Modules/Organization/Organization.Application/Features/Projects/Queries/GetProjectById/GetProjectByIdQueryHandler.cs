@@ -1,10 +1,10 @@
-using MachineryManager.Organization.Application.Abstractions;
-using MachineryManager.Organization.Application.Features.Projects.Dtos;
-using MachineryManager.SharedKernel;
+using MachineryManagerEnterprise.Organization.Application.Abstractions;
+using MachineryManagerEnterprise.Organization.Application.Features.Projects.Dtos;
+using MachineryManagerEnterprise.SharedKernel;
 using MediatR;
 using Organization.Domain;
 
-namespace MachineryManager.Organization.Application.Features.Projects.Queries.GetProjectById;
+namespace MachineryManagerEnterprise.Organization.Application.Features.Projects.Queries.GetProjectById;
 
 /// <summary>
 /// Handles <see cref="GetProjectByIdQuery"/> by loading the aggregate

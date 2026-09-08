@@ -1,15 +1,15 @@
-using MachineryManager.Organization.Application.Features.Projects.Commands.RegisterProject;
-using MachineryManager.Organization.Application.Features.Projects.Queries.GetProjectById;
-using MachineryManager.Organization.Application.Features.Projects.Queries.SearchProjects;
-using MachineryManager.Organization.Presentation.Contracts;
+using MachineryManagerEnterprise.Organization.Application.Features.Projects.Commands.RegisterProject;
+using MachineryManagerEnterprise.Organization.Application.Features.Projects.Queries.GetProjectById;
+using MachineryManagerEnterprise.Organization.Application.Features.Projects.Queries.SearchProjects;
+using MachineryManagerEnterprise.Organization.Presentation.Contracts;
 using MediatR;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Routing;
 using OpenIddict.Validation.AspNetCore;
-using MachineryManager.Organization.Application.Features.Projects.Commands.RenameProject;
+using MachineryManagerEnterprise.Organization.Application.Features.Projects.Commands.RenameProject;
 
-namespace MachineryManager.Organization.Presentation.Endpoints;
+namespace MachineryManagerEnterprise.Organization.Presentation.Endpoints;
 
 /// <summary>
 /// Maps the Project module's REST endpoints per 07-api conventions.

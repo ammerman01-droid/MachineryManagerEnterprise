@@ -1,9 +1,9 @@
 using FluentValidation;
-using MachineryManager.SharedKernel.Abstractions;
+using MachineryManagerEnterprise.SharedKernel.Abstractions;
 using MediatR;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace MachineryManager.Organization.Application;
+namespace MachineryManagerEnterprise.Organization.Application;
 
 /// <summary>
 /// Provides extension methods for registering Organization Application layer

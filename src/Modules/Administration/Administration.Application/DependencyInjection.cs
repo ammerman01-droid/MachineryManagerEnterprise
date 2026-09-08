@@ -1,10 +1,10 @@
 using FluentValidation;
-using MachineryManager.Administration.Application.Abstractions;
-using MachineryManager.SharedKernel.Abstractions;
+using MachineryManagerEnterprise.Administration.Application.Abstractions;
+using MachineryManagerEnterprise.SharedKernel.Abstractions;
 using MediatR;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace MachineryManager.Administration.Application;
+namespace MachineryManagerEnterprise.Administration.Application;
 
 /// <summary>
 /// Provides extension methods for registering Administration Application layer services.

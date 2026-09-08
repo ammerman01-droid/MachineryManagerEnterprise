@@ -1,4 +1,4 @@
-namespace MachineryManager.Identity.Domain;
+namespace MachineryManagerEnterprise.Identity.Domain;
 
 /// <summary>
 /// Reads and caches the current user's access token once (typically

@@ -1,9 +1,9 @@
-using MachineryManager.Asset.Application.Abstractions;
-using MachineryManager.SharedKernel;
-using MachineryManager.SharedKernel.Abstractions;
+using MachineryManagerEnterprise.Asset.Application.Abstractions;
+using MachineryManagerEnterprise.SharedKernel;
+using MachineryManagerEnterprise.SharedKernel.Abstractions;
 using MediatR;
 
-namespace MachineryManager.Asset.Application.Features.Assets.Commands.DeactivateAsset;
+namespace MachineryManagerEnterprise.Asset.Application.Features.Assets.Commands.DeactivateAsset;
 
 /// <summary>
 /// Handles <see cref="DeactivateAssetCommand"/> by loading the

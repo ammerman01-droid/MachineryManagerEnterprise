@@ -1,6 +1,6 @@
 using FluentValidation;
 
-namespace MachineryManager.Asset.Application.Features.EngineModels.Commands.RegisterEngineModel;
+namespace MachineryManagerEnterprise.Asset.Application.Features.EngineModels.Commands.RegisterEngineModel;
 
 /// <summary>Validates <see cref="RegisterEngineModelCommand"/> per ADR-0036.</summary>
 public sealed class RegisterEngineModelCommandValidator : AbstractValidator<RegisterEngineModelCommand>

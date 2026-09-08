@@ -1,7 +1,7 @@
-using MachineryManager.SharedKernel;
+using MachineryManagerEnterprise.SharedKernel;
 using Microsoft.AspNetCore.Http;
 
-namespace MachineryManager.AuditLog.Presentation.Endpoints;
+namespace MachineryManagerEnterprise.AuditLog.Presentation.Endpoints;
 
 /// <summary>
 /// Translates a failed <see cref="Result"/> into the error response

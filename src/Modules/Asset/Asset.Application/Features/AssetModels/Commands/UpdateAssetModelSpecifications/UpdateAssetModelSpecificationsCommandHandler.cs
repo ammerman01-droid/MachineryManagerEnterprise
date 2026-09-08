@@ -1,9 +1,9 @@
-using MachineryManager.Asset.Application.Abstractions;
-using MachineryManager.SharedKernel;
-using MachineryManager.SharedKernel.Abstractions;
+using MachineryManagerEnterprise.Asset.Application.Abstractions;
+using MachineryManagerEnterprise.SharedKernel;
+using MachineryManagerEnterprise.SharedKernel.Abstractions;
 using MediatR;
 
-namespace MachineryManager.Asset.Application.Features.AssetModels.Commands.UpdateAssetModelSpecifications;
+namespace MachineryManagerEnterprise.Asset.Application.Features.AssetModels.Commands.UpdateAssetModelSpecifications;
 
 /// <summary>
 /// Handles <see cref="UpdateAssetModelSpecificationsCommand"/> by

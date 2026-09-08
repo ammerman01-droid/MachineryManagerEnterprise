@@ -1,6 +1,6 @@
-using MachineryManager.SharedKernel.Abstractions;
+using MachineryManagerEnterprise.SharedKernel.Abstractions;
 
-namespace MachineryManager.Configuration.Application.Abstractions;
+namespace MachineryManagerEnterprise.Configuration.Application.Abstractions;
 
 /// <summary>Represents the IUnitOfMeasurementRepository type.</summary>
 public interface IUnitOfMeasurementRepository

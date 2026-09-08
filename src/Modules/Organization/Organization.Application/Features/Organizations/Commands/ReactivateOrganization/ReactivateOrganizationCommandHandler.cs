@@ -1,10 +1,10 @@
-using MachineryManager.Organization.Application.Abstractions;
-using MachineryManager.SharedKernel;
-using MachineryManager.SharedKernel.Abstractions;
+using MachineryManagerEnterprise.Organization.Application.Abstractions;
+using MachineryManagerEnterprise.SharedKernel;
+using MachineryManagerEnterprise.SharedKernel.Abstractions;
 using MediatR;
 using Organization.Domain;
 
-namespace MachineryManager.Organization.Application.Features.Organizations.Commands.ReactivateOrganization;
+namespace MachineryManagerEnterprise.Organization.Application.Features.Organizations.Commands.ReactivateOrganization;
 
 /// <summary>
 /// Handles <see cref="ReactivateOrganizationCommand"/> by loading the

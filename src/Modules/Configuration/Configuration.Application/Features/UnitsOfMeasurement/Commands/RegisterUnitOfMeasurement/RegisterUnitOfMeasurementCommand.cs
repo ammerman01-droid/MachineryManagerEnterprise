@@ -1,7 +1,7 @@
-using MachineryManager.SharedKernel;
+using MachineryManagerEnterprise.SharedKernel;
 using MediatR;
 
-namespace MachineryManager.Configuration.Application.Features.UnitsOfMeasurement.Commands.RegisterUnitOfMeasurement;
+namespace MachineryManagerEnterprise.Configuration.Application.Features.UnitsOfMeasurement.Commands.RegisterUnitOfMeasurement;
 
 /// <summary>Registers a new Unit of Measurement (e.g. "kW", "HP") within a Holding.</summary>
 /// <param name="HoldingId">The identifier of the owning Holding.</param>

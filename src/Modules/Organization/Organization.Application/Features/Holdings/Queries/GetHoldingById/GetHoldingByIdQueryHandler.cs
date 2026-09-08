@@ -1,10 +1,10 @@
-using MachineryManager.Organization.Application.Abstractions;
-using MachineryManager.Organization.Application.Features.Holdings.Dtos;
-using MachineryManager.SharedKernel;
+using MachineryManagerEnterprise.Organization.Application.Abstractions;
+using MachineryManagerEnterprise.Organization.Application.Features.Holdings.Dtos;
+using MachineryManagerEnterprise.SharedKernel;
 using MediatR;
 using Organization.Domain;
 
-namespace MachineryManager.Organization.Application.Features.Holdings.Queries.GetHoldingById;
+namespace MachineryManagerEnterprise.Organization.Application.Features.Holdings.Queries.GetHoldingById;
 
 /// <summary>
 /// Handles <see cref="GetHoldingByIdQuery"/> by loading the aggregate

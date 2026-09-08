@@ -1,9 +1,9 @@
 using Configuration.Domain;
-using MachineryManager.Configuration.Application.Abstractions;
-using MachineryManager.Configuration.Application.Features.Colors.Dtos;
+using MachineryManagerEnterprise.Configuration.Application.Abstractions;
+using MachineryManagerEnterprise.Configuration.Application.Features.Colors.Dtos;
 using Microsoft.EntityFrameworkCore;
 
-namespace MachineryManager.Configuration.Infrastructure.Persistence;
+namespace MachineryManagerEnterprise.Configuration.Infrastructure.Persistence;
 
 /// <summary>EF Core implementation of <see cref="IColorRepository"/>.</summary>
 public sealed class ColorRepository : IColorRepository

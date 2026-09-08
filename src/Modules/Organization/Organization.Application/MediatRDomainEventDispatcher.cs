@@ -1,9 +1,9 @@
 using System.Reflection;
 using MediatR;
-using MachineryManager.SharedKernel;
-using MachineryManager.SharedKernel.Abstractions;
+using MachineryManagerEnterprise.SharedKernel;
+using MachineryManagerEnterprise.SharedKernel.Abstractions;
 
-namespace MachineryManager.Organization.Application;
+namespace MachineryManagerEnterprise.Organization.Application;
 
 /// <summary>
 /// Dispatches domain events through MediatR as <see cref="INotification"/>

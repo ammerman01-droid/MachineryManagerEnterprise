@@ -1,7 +1,7 @@
-using MachineryManager.SharedKernel;
+using MachineryManagerEnterprise.SharedKernel;
 using MediatR;
 
-namespace MachineryManager.Organization.Application.Features.Organizations.Commands.AssignOrganizationToHolding;
+namespace MachineryManagerEnterprise.Organization.Application.Features.Organizations.Commands.AssignOrganizationToHolding;
 
 /// <summary>
 /// Command to assign an existing Organization to a Holding.

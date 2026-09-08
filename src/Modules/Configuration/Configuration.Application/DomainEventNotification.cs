@@ -1,7 +1,7 @@
 using MediatR;
-using MachineryManager.SharedKernel;
+using MachineryManagerEnterprise.SharedKernel;
 
-namespace MachineryManager.Configuration.Application;
+namespace MachineryManagerEnterprise.Configuration.Application;
 
 /// <summary>
 /// Wraps a domain event as a MediatR <see cref="INotification"/> so

@@ -1,4 +1,4 @@
-namespace MachineryManager.Identity.Domain;
+namespace MachineryManagerEnterprise.Identity.Domain;
 
 /// <summary>
 /// The closed catalog of Standard Roles defined in 05-application,

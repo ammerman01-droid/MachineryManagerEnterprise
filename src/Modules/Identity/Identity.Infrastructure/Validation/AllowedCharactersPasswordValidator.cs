@@ -1,7 +1,7 @@
-using MachineryManager.Identity.Domain;
+using MachineryManagerEnterprise.Identity.Domain;
 using Microsoft.AspNetCore.Identity;
 
-namespace MachineryManager.Identity.Infrastructure.Validation;
+namespace MachineryManagerEnterprise.Identity.Infrastructure.Validation;
 
 /// <summary>
 /// Enforces the password character-set restriction specified by the

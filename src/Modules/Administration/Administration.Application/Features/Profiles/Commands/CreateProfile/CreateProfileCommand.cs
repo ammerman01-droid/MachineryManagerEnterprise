@@ -1,7 +1,7 @@
-using MachineryManager.SharedKernel;
+using MachineryManagerEnterprise.SharedKernel;
 using MediatR;
 
-namespace MachineryManager.Administration.Application.Features.Profiles.Commands.CreateProfile;
+namespace MachineryManagerEnterprise.Administration.Application.Features.Profiles.Commands.CreateProfile;
 
 /// <summary>
 /// Command to create a new Profile (named permission bundle).

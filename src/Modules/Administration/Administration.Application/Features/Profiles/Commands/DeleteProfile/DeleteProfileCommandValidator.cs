@@ -1,6 +1,6 @@
 using FluentValidation;
 
-namespace MachineryManager.Administration.Application.Features.Profiles.Commands.DeleteProfile;
+namespace MachineryManagerEnterprise.Administration.Application.Features.Profiles.Commands.DeleteProfile;
 
 /// <summary>
 /// Validates <see cref="DeleteProfileCommand"/> per ADR-0036.

@@ -1,5 +1,5 @@
-using MachineryManager.SharedKernel;
-using MachineryManager.SharedKernel.Abstractions;
+using MachineryManagerEnterprise.SharedKernel;
+using MachineryManagerEnterprise.SharedKernel.Abstractions;
 using Organization.Domain.Events;
 
 namespace Organization.Domain;

@@ -1,10 +1,10 @@
-using MachineryManager.Organization.Application.Abstractions;
-using MachineryManager.Organization.Application.Features.Organizations.Dtos;
-using MachineryManager.SharedKernel;
+using MachineryManagerEnterprise.Organization.Application.Abstractions;
+using MachineryManagerEnterprise.Organization.Application.Features.Organizations.Dtos;
+using MachineryManagerEnterprise.SharedKernel;
 using MediatR;
 using Organization.Domain;
 
-namespace MachineryManager.Organization.Application.Features.Organizations.Queries.GetOrganizationById;
+namespace MachineryManagerEnterprise.Organization.Application.Features.Organizations.Queries.GetOrganizationById;
 
 /// <summary>
 /// Handles <see cref="GetOrganizationByIdQuery"/> by loading the aggregate

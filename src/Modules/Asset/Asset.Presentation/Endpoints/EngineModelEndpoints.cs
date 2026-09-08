@@ -1,16 +1,16 @@
-using MachineryManager.Asset.Application.Features.EngineModels.Commands.RegisterEngineModel;
-using MachineryManager.Asset.Application.Features.EngineModels.Commands.RenameEngineModel;
-using MachineryManager.Asset.Application.Features.EngineModels.Commands.UpdateEngineModelSpecifications;
-using MachineryManager.Asset.Application.Features.EngineModels.Queries.GetEngineModelById;
-using MachineryManager.Asset.Application.Features.EngineModels.Queries.SearchEngineModels;
-using MachineryManager.Asset.Presentation.Contracts;
+using MachineryManagerEnterprise.Asset.Application.Features.EngineModels.Commands.RegisterEngineModel;
+using MachineryManagerEnterprise.Asset.Application.Features.EngineModels.Commands.RenameEngineModel;
+using MachineryManagerEnterprise.Asset.Application.Features.EngineModels.Commands.UpdateEngineModelSpecifications;
+using MachineryManagerEnterprise.Asset.Application.Features.EngineModels.Queries.GetEngineModelById;
+using MachineryManagerEnterprise.Asset.Application.Features.EngineModels.Queries.SearchEngineModels;
+using MachineryManagerEnterprise.Asset.Presentation.Contracts;
 using MediatR;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Routing;
 using OpenIddict.Validation.AspNetCore;
 
-namespace MachineryManager.Asset.Presentation.Endpoints;
+namespace MachineryManagerEnterprise.Asset.Presentation.Endpoints;
 
 /// <summary>
 /// Maps the Asset module's Engine Model REST endpoints per 07-api

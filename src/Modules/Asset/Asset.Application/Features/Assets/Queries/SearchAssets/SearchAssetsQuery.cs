@@ -1,8 +1,8 @@
-using MachineryManager.Asset.Application.Features.Assets.Dtos;
-using MachineryManager.SharedKernel;
+using MachineryManagerEnterprise.Asset.Application.Features.Assets.Dtos;
+using MachineryManagerEnterprise.SharedKernel;
 using MediatR;
 
-namespace MachineryManager.Asset.Application.Features.Assets.Queries.SearchAssets;
+namespace MachineryManagerEnterprise.Asset.Application.Features.Assets.Queries.SearchAssets;
 
 /// <summary>
 /// Query to search Assets within an Organization. <see cref="SearchTerm"/>,

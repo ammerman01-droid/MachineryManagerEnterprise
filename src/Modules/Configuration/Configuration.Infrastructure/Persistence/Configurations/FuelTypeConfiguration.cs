@@ -2,7 +2,7 @@ using Configuration.Domain;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
-namespace MachineryManager.Configuration.Infrastructure.Persistence.Configurations;
+namespace MachineryManagerEnterprise.Configuration.Infrastructure.Persistence.Configurations;
 
 /// <summary>EF Core mapping for the <see cref="FuelType"/> aggregate.</summary>
 public sealed class FuelTypeConfiguration : IEntityTypeConfiguration<FuelType>

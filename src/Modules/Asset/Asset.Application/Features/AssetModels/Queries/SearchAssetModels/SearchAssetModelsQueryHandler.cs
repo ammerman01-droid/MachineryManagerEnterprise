@@ -1,9 +1,9 @@
-using MachineryManager.Asset.Application.Abstractions;
-using MachineryManager.SharedKernel;
-using MachineryManager.SharedKernel.Abstractions;
+using MachineryManagerEnterprise.Asset.Application.Abstractions;
+using MachineryManagerEnterprise.SharedKernel;
+using MachineryManagerEnterprise.SharedKernel.Abstractions;
 using MediatR;
 
-namespace MachineryManager.Asset.Application.Features.AssetModels.Queries.SearchAssetModels;
+namespace MachineryManagerEnterprise.Asset.Application.Features.AssetModels.Queries.SearchAssetModels;
 
 /// <summary>
 /// Handles <see cref="SearchAssetModelsQuery"/> by verifying the caller

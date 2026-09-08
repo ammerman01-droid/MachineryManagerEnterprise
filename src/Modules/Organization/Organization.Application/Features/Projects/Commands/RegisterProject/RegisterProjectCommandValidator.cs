@@ -1,6 +1,6 @@
 using FluentValidation;
 
-namespace MachineryManager.Organization.Application.Features.Projects.Commands.RegisterProject;
+namespace MachineryManagerEnterprise.Organization.Application.Features.Projects.Commands.RegisterProject;
 
 /// <summary>
 /// Validates <see cref="RegisterProjectCommand"/> per ADR-0036.

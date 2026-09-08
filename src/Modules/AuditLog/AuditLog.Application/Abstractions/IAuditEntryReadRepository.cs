@@ -1,7 +1,7 @@
-using MachineryManager.SharedKernel;
-using MachineryManager.SharedKernel.Abstractions;
+using MachineryManagerEnterprise.SharedKernel;
+using MachineryManagerEnterprise.SharedKernel.Abstractions;
 
-namespace MachineryManager.AuditLog.Application.Abstractions;
+namespace MachineryManagerEnterprise.AuditLog.Application.Abstractions;
 
 /// <summary>
 /// Read-only access to the shared <c>audit.AuditEntry</c> table

@@ -1,10 +1,10 @@
-using MachineryManager.SharedKernel;
-using MachineryManager.SharedKernel.Abstractions;
+using MachineryManagerEnterprise.SharedKernel;
+using MachineryManagerEnterprise.SharedKernel.Abstractions;
 using Microsoft.EntityFrameworkCore;
-using MachineryManager.Configuration.Application.Abstractions;
-using MachineryManager.SharedKernel.Infrastructure;
+using MachineryManagerEnterprise.Configuration.Application.Abstractions;
+using MachineryManagerEnterprise.SharedKernel.Infrastructure;
 
-namespace MachineryManager.Configuration.Infrastructure.Persistence;
+namespace MachineryManagerEnterprise.Configuration.Infrastructure.Persistence;
 
 /// <summary>
 /// EF Core persistence context for the Configuration module (Color,

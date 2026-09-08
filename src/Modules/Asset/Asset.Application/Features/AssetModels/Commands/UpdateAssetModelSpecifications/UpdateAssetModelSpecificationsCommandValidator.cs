@@ -1,6 +1,6 @@
 using FluentValidation;
 
-namespace MachineryManager.Asset.Application.Features.AssetModels.Commands.UpdateAssetModelSpecifications;
+namespace MachineryManagerEnterprise.Asset.Application.Features.AssetModels.Commands.UpdateAssetModelSpecifications;
 
 /// <summary>Validates <see cref="UpdateAssetModelSpecificationsCommand"/> per ADR-0036.</summary>
 public sealed class UpdateAssetModelSpecificationsCommandValidator

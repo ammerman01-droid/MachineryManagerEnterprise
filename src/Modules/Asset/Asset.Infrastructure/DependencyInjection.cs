@@ -1,11 +1,11 @@
-using MachineryManager.Asset.Application.Abstractions;
-using MachineryManager.Asset.Infrastructure.Persistence;
-using MachineryManager.SharedKernel.Abstractions;
+using MachineryManagerEnterprise.Asset.Application.Abstractions;
+using MachineryManagerEnterprise.Asset.Infrastructure.Persistence;
+using MachineryManagerEnterprise.SharedKernel.Abstractions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace MachineryManager.Asset.Infrastructure;
+namespace MachineryManagerEnterprise.Asset.Infrastructure;
 
 /// <summary>Registers the Asset module's Infrastructure-layer services.</summary>
 public static class DependencyInjection
@@ -39,7 +39,7 @@ public static class DependencyInjection
         sqlServerOptions => sqlServerOptions.MigrationsHistoryTable(
             "__EFMigrationsHistory",
             schema: "asset"))
-    .AddInterceptors(serviceProvider.GetRequiredService<MachineryManager.SharedKernel.Infrastructure.AuditSaveChangesInterceptor>()));
+    .AddInterceptors(serviceProvider.GetRequiredService<MachineryManagerEnterprise.SharedKernel.Infrastructure.AuditSaveChangesInterceptor>()));
 
         services.AddScoped<IAssetRepository, AssetRepository>();
         services.AddScoped<IAssetModelRepository, AssetModelRepository>();

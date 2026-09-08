@@ -1,6 +1,6 @@
-using MachineryManager.SharedKernel.Abstractions;
+using MachineryManagerEnterprise.SharedKernel.Abstractions;
 
-namespace MachineryManager.Administration.Application.Abstractions;
+namespace MachineryManagerEnterprise.Administration.Application.Abstractions;
 
 /// <summary>
 /// Unit of work for the Administration module. Distinct from the

@@ -1,6 +1,6 @@
-using MachineryManager.SharedKernel;
+using MachineryManagerEnterprise.SharedKernel;
 
-namespace MachineryManager.Configuration.Presentation.Contracts;
+namespace MachineryManagerEnterprise.Configuration.Presentation.Contracts;
 
 /// <summary>
 /// Represents a request to register a Unit of Measurement within a Holding.

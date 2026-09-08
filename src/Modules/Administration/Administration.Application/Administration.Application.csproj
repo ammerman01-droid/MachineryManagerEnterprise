@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <RootNamespace>MachineryManager.Administration.Application</RootNamespace>
+    <RootNamespace>MachineryManagerEnterprise.Administration.Application</RootNamespace>
   </PropertyGroup>
 
   <ItemGroup>

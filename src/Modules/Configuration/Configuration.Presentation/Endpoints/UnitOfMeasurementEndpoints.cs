@@ -1,13 +1,13 @@
-using MachineryManager.Configuration.Application.Features.UnitsOfMeasurement.Commands.RegisterUnitOfMeasurement;
-using MachineryManager.Configuration.Application.Features.UnitsOfMeasurement.Queries.GetUnitsOfMeasurementByHolding;
-using MachineryManager.Configuration.Presentation.Contracts;
+using MachineryManagerEnterprise.Configuration.Application.Features.UnitsOfMeasurement.Commands.RegisterUnitOfMeasurement;
+using MachineryManagerEnterprise.Configuration.Application.Features.UnitsOfMeasurement.Queries.GetUnitsOfMeasurementByHolding;
+using MachineryManagerEnterprise.Configuration.Presentation.Contracts;
 using MediatR;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Routing;
 using OpenIddict.Validation.AspNetCore;
 
-namespace MachineryManager.Configuration.Presentation.Endpoints;
+namespace MachineryManagerEnterprise.Configuration.Presentation.Endpoints;
 
 /// <summary>Maps the Configuration module's Unit of Measurement REST endpoints: base path <c>/api/v1/units-of-measurement</c>.</summary>
 public static class UnitOfMeasurementEndpoints

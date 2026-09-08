@@ -1,12 +1,12 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <RootNamespace>MachineryManager.Asset.Application</RootNamespace>
+    <RootNamespace>MachineryManagerEnterprise.Asset.Application</RootNamespace>
   </PropertyGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\Asset.Domain\Asset.Domain.csproj" />
-    <ProjectReference Include="..\..\..\BuildingBlocks\MachineryManager.SharedKernel.Abstractions\MachineryManager.SharedKernel.Abstractions.csproj" />
+    <ProjectReference Include="..\..\..\BuildingBlocks\MachineryManagerEnterprise.SharedKernel.Abstractions\MachineryManagerEnterprise.SharedKernel.Abstractions.csproj" />
   </ItemGroup>
 
   <ItemGroup>

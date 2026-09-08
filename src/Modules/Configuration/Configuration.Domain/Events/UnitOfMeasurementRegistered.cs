@@ -1,4 +1,4 @@
-using MachineryManager.SharedKernel;
+using MachineryManagerEnterprise.SharedKernel;
 
 namespace Configuration.Domain.Events;
 

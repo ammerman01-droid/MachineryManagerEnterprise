@@ -1,5 +1,5 @@
-using MachineryManager.Identity.Domain;
-using MachineryManager.Identity.Infrastructure.Persistence;
+using MachineryManagerEnterprise.Identity.Domain;
+using MachineryManagerEnterprise.Identity.Infrastructure.Persistence;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -11,7 +11,7 @@ using OpenIddict.Client.AspNetCore;
 
 using static OpenIddict.Abstractions.OpenIddictConstants;
 
-namespace MachineryManager.Identity.Infrastructure;
+namespace MachineryManagerEnterprise.Identity.Infrastructure;
 
 /// <summary>
 /// Registers the Identity platform module's Infrastructure layer
@@ -279,7 +279,7 @@ public static class DependencyInjection
         this IServiceCollection services,
         IConfiguration configuration)
     {
-        services.AddScoped<MachineryManager.Identity.Domain.ICurrentAccessTokenAccessor, Http.CurrentAccessTokenAccessor>();
+        services.AddScoped<MachineryManagerEnterprise.Identity.Domain.ICurrentAccessTokenAccessor, Http.CurrentAccessTokenAccessor>();
         services.AddTransient<Http.BearerTokenHandler>();
 
         var baseAddress = configuration["OpenIddict:Issuer"]

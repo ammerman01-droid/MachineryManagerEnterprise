@@ -1,6 +1,6 @@
 using FluentValidation;
 
-namespace MachineryManager.Administration.Application.Features.UserProfileAssignments.Commands.DeactivateUserProfileAssignment;
+namespace MachineryManagerEnterprise.Administration.Application.Features.UserProfileAssignments.Commands.DeactivateUserProfileAssignment;
 
 /// <summary>
 /// Validates <see cref="DeactivateUserProfileAssignmentCommand"/> per ADR-0036.

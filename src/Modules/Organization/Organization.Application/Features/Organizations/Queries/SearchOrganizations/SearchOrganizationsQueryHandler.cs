@@ -1,10 +1,10 @@
-using MachineryManager.Organization.Application.Abstractions;
-using MachineryManager.SharedKernel;
-using MachineryManager.SharedKernel.Abstractions;
+using MachineryManagerEnterprise.Organization.Application.Abstractions;
+using MachineryManagerEnterprise.SharedKernel;
+using MachineryManagerEnterprise.SharedKernel.Abstractions;
 using MediatR;
 using Organization.Domain;
 
-namespace MachineryManager.Organization.Application.Features.Organizations.Queries.SearchOrganizations;
+namespace MachineryManagerEnterprise.Organization.Application.Features.Organizations.Queries.SearchOrganizations;
 
 /// <summary>
 /// Handles <see cref="SearchOrganizationsQuery"/> by resolving the current

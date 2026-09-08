@@ -1,4 +1,4 @@
-using MachineryManager.SharedKernel;
+using MachineryManagerEnterprise.SharedKernel;
 
 namespace Asset.Domain;
 
@@ -102,7 +102,7 @@ public static class AssetModelErrors
     /// a technical specification field belongs to the wrong physical
     /// quantity category (chat, 2026-09-04).
     /// </summary>
-    public static Error UnitOfMeasurementKindMismatch(string fieldName, global::MachineryManager.SharedKernel.PhysicalQuantityKind expectedKind) =>
+    public static Error UnitOfMeasurementKindMismatch(string fieldName, global::MachineryManagerEnterprise.SharedKernel.PhysicalQuantityKind expectedKind) =>
         Error.Conflict(
             "AssetModel.UnitOfMeasurementKindMismatch",
             $"{fieldName} requires a unit of measurement of kind '{expectedKind}'.");

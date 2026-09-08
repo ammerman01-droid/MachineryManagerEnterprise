@@ -1,8 +1,8 @@
 using Configuration.Domain;
-using MachineryManager.SharedKernel.Abstractions;
+using MachineryManagerEnterprise.SharedKernel.Abstractions;
 using Microsoft.EntityFrameworkCore;
 
-namespace MachineryManager.Configuration.Infrastructure;
+namespace MachineryManagerEnterprise.Configuration.Infrastructure;
 
 /// <inheritdoc cref="IConfigurationLookupService" />
 public sealed class ConfigurationLookupService : IConfigurationLookupService

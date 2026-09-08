@@ -1,7 +1,7 @@
-using MachineryManager.SharedKernel;
+using MachineryManagerEnterprise.SharedKernel;
 using MediatR;
 
-namespace MachineryManager.Administration.Application.Features.UserProfileAssignments.Commands.ActivateUserProfileAssignment;
+namespace MachineryManagerEnterprise.Administration.Application.Features.UserProfileAssignments.Commands.ActivateUserProfileAssignment;
 
 /// <summary>
 /// Command to (re)activate a UserProfileAssignment that is currently

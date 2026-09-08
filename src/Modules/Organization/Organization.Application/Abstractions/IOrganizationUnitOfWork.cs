@@ -1,6 +1,6 @@
-using MachineryManager.SharedKernel.Abstractions;
+using MachineryManagerEnterprise.SharedKernel.Abstractions;
 
-namespace MachineryManager.Organization.Application.Abstractions;
+namespace MachineryManagerEnterprise.Organization.Application.Abstractions;
 
 /// <summary>
 /// Unit of work for the Organization module. Distinct from every other

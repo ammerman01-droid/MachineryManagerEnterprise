@@ -1,4 +1,4 @@
-namespace MachineryManager.Asset.Presentation.Contracts;
+namespace MachineryManagerEnterprise.Asset.Presentation.Contracts;
 
 /// <summary>Request body for updating an existing Asset Model's technical specifications.</summary>
 public sealed record UpdateAssetModelSpecificationsRequest(

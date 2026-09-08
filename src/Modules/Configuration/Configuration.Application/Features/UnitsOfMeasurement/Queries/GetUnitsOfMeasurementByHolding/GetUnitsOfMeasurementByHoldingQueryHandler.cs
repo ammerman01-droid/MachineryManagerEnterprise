@@ -1,10 +1,10 @@
-using MachineryManager.Configuration.Application.Abstractions;
-using MachineryManager.Configuration.Application.Features.UnitsOfMeasurement.Dtos;
-using MachineryManager.SharedKernel;
-using MachineryManager.SharedKernel.Abstractions;
+using MachineryManagerEnterprise.Configuration.Application.Abstractions;
+using MachineryManagerEnterprise.Configuration.Application.Features.UnitsOfMeasurement.Dtos;
+using MachineryManagerEnterprise.SharedKernel;
+using MachineryManagerEnterprise.SharedKernel.Abstractions;
 using MediatR;
 
-namespace MachineryManager.Configuration.Application.Features.UnitsOfMeasurement.Queries.GetUnitsOfMeasurementByHolding;
+namespace MachineryManagerEnterprise.Configuration.Application.Features.UnitsOfMeasurement.Queries.GetUnitsOfMeasurementByHolding;
 
 /// <summary>Handles <see cref="GetUnitsOfMeasurementByHoldingQuery"/>.</summary>
 public sealed class GetUnitsOfMeasurementByHoldingQueryHandler

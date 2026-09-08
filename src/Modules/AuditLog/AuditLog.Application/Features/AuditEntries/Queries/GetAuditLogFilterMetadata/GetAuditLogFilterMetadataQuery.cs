@@ -1,7 +1,7 @@
-using MachineryManager.SharedKernel;
+using MachineryManagerEnterprise.SharedKernel;
 using MediatR;
 
-namespace MachineryManager.AuditLog.Application.Features.AuditEntries.Queries.GetAuditLogFilterMetadata;
+namespace MachineryManagerEnterprise.AuditLog.Application.Features.AuditEntries.Queries.GetAuditLogFilterMetadata;
 
 /// <summary>
 /// Retrieves the distinct schema and table names visible to the current user

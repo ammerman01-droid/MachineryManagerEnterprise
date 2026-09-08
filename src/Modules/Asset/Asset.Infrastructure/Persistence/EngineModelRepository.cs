@@ -1,10 +1,10 @@
 using Asset.Domain;
-using MachineryManager.Asset.Application.Abstractions;
-using MachineryManager.Asset.Application.Features.EngineModels.Dtos;
-using MachineryManager.Asset.Application.Features.EngineModels.Queries.SearchEngineModels;
+using MachineryManagerEnterprise.Asset.Application.Abstractions;
+using MachineryManagerEnterprise.Asset.Application.Features.EngineModels.Dtos;
+using MachineryManagerEnterprise.Asset.Application.Features.EngineModels.Queries.SearchEngineModels;
 using Microsoft.EntityFrameworkCore;
 
-namespace MachineryManager.Asset.Infrastructure.Persistence;
+namespace MachineryManagerEnterprise.Asset.Infrastructure.Persistence;
 
 /// <summary>EF Core implementation of <see cref="IEngineModelRepository"/>.</summary>
 public sealed class EngineModelRepository : IEngineModelRepository

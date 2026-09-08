@@ -1,8 +1,8 @@
 using Administration.Domain;
-using MachineryManager.SharedKernel;
+using MachineryManagerEnterprise.SharedKernel;
 using MediatR;
 
-namespace MachineryManager.Administration.Application.Features.UserProfileAssignments.Commands.AssignUserToProfile;
+namespace MachineryManagerEnterprise.Administration.Application.Features.UserProfileAssignments.Commands.AssignUserToProfile;
 
 /// <summary>
 /// Command to assign a User to a Profile at a specific authorization scope.

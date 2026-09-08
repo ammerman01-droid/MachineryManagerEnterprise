@@ -1,0 +1,40 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <BlazorDisableThrowNavigationException>true</BlazorDisableThrowNavigationException>
+    <UserSecretsId>MachineryManagerEnterprise.Web-Development</UserSecretsId>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\BuildingBlocks\MachineryManagerEnterprise.SharedKernel\MachineryManagerEnterprise.SharedKernel.csproj" />
+    <ProjectReference Include="..\..\BuildingBlocks\MachineryManagerEnterprise.SharedKernel.Abstractions\MachineryManagerEnterprise.SharedKernel.Abstractions.csproj" />
+    <ProjectReference Include="..\..\BuildingBlocks\MachineryManagerEnterprise.SharedKernel.Infrastructure\MachineryManagerEnterprise.SharedKernel.Infrastructure.csproj" />
+    <ProjectReference Include="..\..\BuildingBlocks\MachineryManagerEnterprise.UI\MachineryManagerEnterprise.UI.csproj" />
+    <ProjectReference Include="..\..\Modules\Organization\Organization.Application\Organization.Application.csproj" />
+    <ProjectReference Include="..\..\Modules\Organization\Organization.Infrastructure\Organization.Infrastructure.csproj" />
+    <ProjectReference Include="..\..\Modules\Organization\Organization.Presentation\Organization.Presentation.csproj" />
+    <ProjectReference Include="..\..\Modules\Identity\Identity.Infrastructure\Identity.Infrastructure.csproj" />
+    <ProjectReference Include="..\..\Modules\Identity\Identity.Presentation\Identity.Presentation.csproj" />
+    <ProjectReference Include="..\..\Modules\Administration\Administration.Application\Administration.Application.csproj" />
+    <ProjectReference Include="..\..\Modules\Administration\Administration.Infrastructure\Administration.Infrastructure.csproj" />
+    <ProjectReference Include="..\..\Modules\Administration\Administration.Presentation\Administration.Presentation.csproj" />
+    <ProjectReference Include="..\..\Modules\Asset\Asset.Infrastructure\Asset.Infrastructure.csproj" />
+    <ProjectReference Include="..\..\Modules\Asset\Asset.Presentation\Asset.Presentation.csproj" />
+    <ProjectReference Include="..\..\Modules\Configuration\Configuration.Infrastructure\Configuration.Infrastructure.csproj" />
+    <ProjectReference Include="..\..\Modules\Configuration\Configuration.Presentation\Configuration.Presentation.csproj" />
+    <ProjectReference Include="..\..\Modules\AuditLog\AuditLog.Application\AuditLog.Application.csproj" />
+    <ProjectReference Include="..\..\Modules\AuditLog\AuditLog.Infrastructure\AuditLog.Infrastructure.csproj" />
+    <ProjectReference Include="..\..\Modules\AuditLog\AuditLog.Presentation\AuditLog.Presentation.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="MudBlazor" />
+    <PackageReference Include="Microsoft.AspNetCore.OpenApi" />
+    <PackageReference Include="Scalar.AspNetCore" />
+    <PackageReference Include="Serilog.AspNetCore" />
+    <PackageReference Include="Serilog.Sinks.Console" />
+    <PackageReference Include="OpenTelemetry.Extensions.Hosting" />
+    <PackageReference Include="OpenTelemetry.Instrumentation.AspNetCore" />
+  </ItemGroup>
+
+</Project>

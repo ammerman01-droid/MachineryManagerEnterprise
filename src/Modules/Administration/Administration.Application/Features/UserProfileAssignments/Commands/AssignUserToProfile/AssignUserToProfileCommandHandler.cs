@@ -1,10 +1,10 @@
 using Administration.Domain;
-using MachineryManager.Administration.Application.Abstractions;
-using MachineryManager.SharedKernel;
-using MachineryManager.SharedKernel.Abstractions;
+using MachineryManagerEnterprise.Administration.Application.Abstractions;
+using MachineryManagerEnterprise.SharedKernel;
+using MachineryManagerEnterprise.SharedKernel.Abstractions;
 using MediatR;
 
-namespace MachineryManager.Administration.Application.Features.UserProfileAssignments.Commands.AssignUserToProfile;
+namespace MachineryManagerEnterprise.Administration.Application.Features.UserProfileAssignments.Commands.AssignUserToProfile;
 
 /// <summary>
 /// Handles <see cref="AssignUserToProfileCommand"/> by deactivating the

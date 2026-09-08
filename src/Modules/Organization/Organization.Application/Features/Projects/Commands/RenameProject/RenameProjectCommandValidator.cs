@@ -1,6 +1,6 @@
 using FluentValidation;
 
-namespace MachineryManager.Organization.Application.Features.Projects.Commands.RenameProject;
+namespace MachineryManagerEnterprise.Organization.Application.Features.Projects.Commands.RenameProject;
 
 /// <summary>Validates <see cref="RenameProjectCommand"/> per ADR-0036.</summary>
 public sealed class RenameProjectCommandValidator : AbstractValidator<RenameProjectCommand>

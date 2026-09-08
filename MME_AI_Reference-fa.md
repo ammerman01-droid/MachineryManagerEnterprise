@@ -787,7 +787,7 @@ MessageCreated, MessageSent, MessageDelivered, MessageRead, MessageArchived, Mes
 ## ۶.۱ ساختار سلوشن (Solution Structure)
 - پیکربندی مرکزی: `Directory.Build.props` (پروپرتی‌های مشترک MSBuild)، `Directory.Packages.props` (مدیریت متمرکز پکیج‌های NuGet - CPM).
 - ساختار دایرکتوری‌ها:
-  - `src/BuildingBlocks/`: هسته اشتراکی بدون منطق تجاری (MachineryManager.SharedKernel و زیرمجموعه‌ها)
+  - `src/BuildingBlocks/`: هسته اشتراکی بدون منطق تجاری (MachineryManagerEnterprise.SharedKernel و زیرمجموعه‌ها)
   - `src/Modules/[ModuleName]/`: ماژول‌های مستقل (شامل لایه‌های Domain, Application, Infrastructure, Presentation)
   - `src/Host/`: پروژه‌های اجرایی سرور و کلاینت
   - `tests/`, `tools/`, `docs/`

@@ -1,9 +1,9 @@
-using MachineryManager.Asset.Application.Abstractions;
-using MachineryManager.SharedKernel;
-using MachineryManager.SharedKernel.Abstractions;
+using MachineryManagerEnterprise.Asset.Application.Abstractions;
+using MachineryManagerEnterprise.SharedKernel;
+using MachineryManagerEnterprise.SharedKernel.Abstractions;
 using MediatR;
 
-namespace MachineryManager.Asset.Application.Features.Assets.Commands.DisposeAsset;
+namespace MachineryManagerEnterprise.Asset.Application.Features.Assets.Commands.DisposeAsset;
 
 /// <summary>
 /// Handles <see cref="DisposeAssetCommand"/> by loading the aggregate,

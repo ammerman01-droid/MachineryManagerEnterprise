@@ -1,4 +1,4 @@
-namespace MachineryManager.Asset.Presentation.Contracts;
+namespace MachineryManagerEnterprise.Asset.Presentation.Contracts;
 
 /// <summary>Request body for registering a new Asset.</summary>
 public sealed record RegisterAssetRequest(

@@ -1,8 +1,8 @@
-using MachineryManager.Organization.Application.Features.Holdings.Dtos;
-using MachineryManager.SharedKernel;
+using MachineryManagerEnterprise.Organization.Application.Features.Holdings.Dtos;
+using MachineryManagerEnterprise.SharedKernel;
 using MediatR;
 
-namespace MachineryManager.Organization.Application.Features.Holdings.Queries.GetHoldingById;
+namespace MachineryManagerEnterprise.Organization.Application.Features.Holdings.Queries.GetHoldingById;
 
 /// <summary>
 /// Query to retrieve a single holding by its unique identifier.

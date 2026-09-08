@@ -1,5 +1,5 @@
-using MachineryManager.Identity.Domain;
-using MachineryManager.Identity.Infrastructure.Options;
+using MachineryManagerEnterprise.Identity.Domain;
+using MachineryManagerEnterprise.Identity.Infrastructure.Options;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -9,7 +9,7 @@ using OpenIddict.Abstractions;
 
 using static OpenIddict.Abstractions.OpenIddictConstants;
 
-namespace MachineryManager.Identity.Infrastructure.Persistence;
+namespace MachineryManagerEnterprise.Identity.Infrastructure.Persistence;
 
 /// <summary>
 /// Seeds the Identity module's infrastructure data: OpenIddict
@@ -133,7 +133,7 @@ public static class IdentityDataSeeder
             ClientSecret = client.ClientSecret,
             ClientType = ClientTypes.Confidential,
             ConsentType = ConsentTypes.Explicit,
-            DisplayName = "MachineryManager Web",
+            DisplayName = "MachineryManagerEnterprise Web",
         };
 
         foreach (var redirectUri in client.RedirectUris)
@@ -181,7 +181,7 @@ public static class IdentityDataSeeder
             ClientId = client.ClientId,
             ClientType = ClientTypes.Public,
             ConsentType = ConsentTypes.Explicit,
-            DisplayName = "MachineryManager MAUI",
+            DisplayName = "MachineryManagerEnterprise MAUI",
         };
 
         foreach (var redirectUri in client.RedirectUris)
@@ -238,7 +238,7 @@ public static class IdentityDataSeeder
             ClientSecret = client.ClientSecret,
             ClientType = ClientTypes.Confidential,
             ConsentType = ConsentTypes.Explicit,
-            DisplayName = "MachineryManager Service",
+            DisplayName = "MachineryManagerEnterprise Service",
         };
 
         descriptor.Permissions.Add(Permissions.Endpoints.Token);

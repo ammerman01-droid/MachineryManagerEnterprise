@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk.Razor">
 
   <PropertyGroup>
-    <RootNamespace>MachineryManager.AuditLog.Presentation</RootNamespace>
+    <RootNamespace>MachineryManagerEnterprise.AuditLog.Presentation</RootNamespace>
   </PropertyGroup>
 
   <ItemGroup>

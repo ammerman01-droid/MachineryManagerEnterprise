@@ -1,7 +1,7 @@
-using MachineryManager.SharedKernel;
+using MachineryManagerEnterprise.SharedKernel;
 using MediatR;
 
-namespace MachineryManager.Administration.Application.Features.Profiles.Commands.DeactivateProfile;
+namespace MachineryManagerEnterprise.Administration.Application.Features.Profiles.Commands.DeactivateProfile;
 
 /// <summary>
 /// Command to deactivate a Profile, preventing new assignments.

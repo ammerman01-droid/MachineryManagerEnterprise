@@ -1,10 +1,10 @@
 using Configuration.Domain;
-using MachineryManager.Configuration.Infrastructure.Persistence;
-using MachineryManager.SharedKernel;
-using MachineryManager.SharedKernel.Abstractions;
+using MachineryManagerEnterprise.Configuration.Infrastructure.Persistence;
+using MachineryManagerEnterprise.SharedKernel;
+using MachineryManagerEnterprise.SharedKernel.Abstractions;
 using Microsoft.EntityFrameworkCore;
 
-namespace MachineryManager.Configuration.Infrastructure;
+namespace MachineryManagerEnterprise.Configuration.Infrastructure;
 
 /// <inheritdoc cref="IUnitOfMeasurementLookupService" />
 public sealed class UnitOfMeasurementLookupService : IUnitOfMeasurementLookupService

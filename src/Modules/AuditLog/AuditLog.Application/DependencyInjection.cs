@@ -1,9 +1,9 @@
 using FluentValidation;
-using MachineryManager.AuditLog.Application.Behaviors;
+using MachineryManagerEnterprise.AuditLog.Application.Behaviors;
 using MediatR;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace MachineryManager.AuditLog.Application;
+namespace MachineryManagerEnterprise.AuditLog.Application;
 
 /// <summary>Registers the AuditLog module's Application-layer services (chat, 2026-09-05, gam 4).</summary>
 public static class DependencyInjection

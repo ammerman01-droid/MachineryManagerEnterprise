@@ -1,6 +1,6 @@
 using FluentValidation;
 
-namespace MachineryManager.Administration.Application.Features.Profiles.Queries.SearchProfiles;
+namespace MachineryManagerEnterprise.Administration.Application.Features.Profiles.Queries.SearchProfiles;
 
 /// <summary>Validates <see cref="SearchProfilesQuery"/> per ADR-0036.</summary>
 public sealed class SearchProfilesQueryValidator : AbstractValidator<SearchProfilesQuery>

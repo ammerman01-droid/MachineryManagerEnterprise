@@ -1,5 +1,5 @@
-using MachineryManager.Identity.Domain;
-using MachineryManager.Identity.Presentation.Contracts;
+using MachineryManagerEnterprise.Identity.Domain;
+using MachineryManagerEnterprise.Identity.Presentation.Contracts;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
@@ -8,7 +8,7 @@ using OpenIddict.Validation.AspNetCore;
 
 using static OpenIddict.Abstractions.OpenIddictConstants;
 
-namespace MachineryManager.Identity.Presentation.Endpoints;
+namespace MachineryManagerEnterprise.Identity.Presentation.Endpoints;
 
 /// <summary>Maps user management endpoints for the Identity module.</summary>
 public static class UserEndpoints

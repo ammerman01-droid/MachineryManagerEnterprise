@@ -1,10 +1,10 @@
-using MachineryManager.Configuration.Application.Abstractions;
-using MachineryManager.Configuration.Application.Features.Colors.Dtos;
-using MachineryManager.SharedKernel;
-using MachineryManager.SharedKernel.Abstractions;
+using MachineryManagerEnterprise.Configuration.Application.Abstractions;
+using MachineryManagerEnterprise.Configuration.Application.Features.Colors.Dtos;
+using MachineryManagerEnterprise.SharedKernel;
+using MachineryManagerEnterprise.SharedKernel.Abstractions;
 using MediatR;
 
-namespace MachineryManager.Configuration.Application.Features.Colors.Queries.GetColorsByHolding;
+namespace MachineryManagerEnterprise.Configuration.Application.Features.Colors.Queries.GetColorsByHolding;
 
 /// <summary>Handles <see cref="GetColorsByHoldingQuery"/>.</summary>
 public sealed class GetColorsByHoldingQueryHandler

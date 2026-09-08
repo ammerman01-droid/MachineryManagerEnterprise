@@ -1,6 +1,6 @@
 using FluentValidation;
 
-namespace MachineryManager.Organization.Application.Features.Organizations.Commands.ReactivateOrganization;
+namespace MachineryManagerEnterprise.Organization.Application.Features.Organizations.Commands.ReactivateOrganization;
 
 /// <summary>Validates <see cref="ReactivateOrganizationCommand"/> per ADR-0036.</summary>
 public sealed class ReactivateOrganizationCommandValidator : AbstractValidator<ReactivateOrganizationCommand>

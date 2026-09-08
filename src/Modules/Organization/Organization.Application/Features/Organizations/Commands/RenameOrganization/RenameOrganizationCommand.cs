@@ -1,7 +1,7 @@
-using MachineryManager.SharedKernel;
+using MachineryManagerEnterprise.SharedKernel;
 using MediatR;
 
-namespace MachineryManager.Organization.Application.Features.Organizations.Commands.RenameOrganization;
+namespace MachineryManagerEnterprise.Organization.Application.Features.Organizations.Commands.RenameOrganization;
 
 /// <summary>Command to rename an existing Organization.</summary>
 /// <param name="OrganizationId">The identifier of the organization to rename.</param>

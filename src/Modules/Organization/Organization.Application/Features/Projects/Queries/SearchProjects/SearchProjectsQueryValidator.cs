@@ -1,6 +1,6 @@
 using FluentValidation;
 
-namespace MachineryManager.Organization.Application.Features.Projects.Queries.SearchProjects;
+namespace MachineryManagerEnterprise.Organization.Application.Features.Projects.Queries.SearchProjects;
 
 /// <summary>
 /// Validates <see cref="SearchProjectsQuery"/> per ADR-0036 and API conventions.

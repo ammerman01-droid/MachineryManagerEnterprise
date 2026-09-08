@@ -2,7 +2,7 @@ using Asset.Domain;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
-namespace MachineryManager.Asset.Infrastructure.Persistence.Configurations;
+namespace MachineryManagerEnterprise.Asset.Infrastructure.Persistence.Configurations;
 
 /// <summary>EF Core mapping for the <see cref="EngineModel"/> aggregate.</summary>
 public sealed class EngineModelConfiguration : IEntityTypeConfiguration<EngineModel>

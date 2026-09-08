@@ -1,8 +1,8 @@
-using MachineryManager.Administration.Application.Features.Profiles.Dtos;
-using MachineryManager.SharedKernel;
+using MachineryManagerEnterprise.Administration.Application.Features.Profiles.Dtos;
+using MachineryManagerEnterprise.SharedKernel;
 using MediatR;
 
-namespace MachineryManager.Administration.Application.Features.Profiles.Queries.GetProfileById;
+namespace MachineryManagerEnterprise.Administration.Application.Features.Profiles.Queries.GetProfileById;
 
 /// <summary>
 /// Query to retrieve a single profile by its unique identifier.

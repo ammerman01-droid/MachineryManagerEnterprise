@@ -1,10 +1,10 @@
-using MachineryManager.Asset.Application.Abstractions;
-using MachineryManager.Asset.Application.Features.EngineModels.Dtos;
-using MachineryManager.SharedKernel;
-using MachineryManager.SharedKernel.Abstractions;
+using MachineryManagerEnterprise.Asset.Application.Abstractions;
+using MachineryManagerEnterprise.Asset.Application.Features.EngineModels.Dtos;
+using MachineryManagerEnterprise.SharedKernel;
+using MachineryManagerEnterprise.SharedKernel.Abstractions;
 using MediatR;
 
-namespace MachineryManager.Asset.Application.Features.EngineModels.Queries.GetEngineModelById;
+namespace MachineryManagerEnterprise.Asset.Application.Features.EngineModels.Queries.GetEngineModelById;
 
 /// <summary>
 /// Handles <see cref="GetEngineModelByIdQuery"/> by loading the

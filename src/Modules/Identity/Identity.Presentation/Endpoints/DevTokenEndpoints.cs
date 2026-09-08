@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.Hosting;
 
-namespace MachineryManager.Identity.Presentation.Endpoints;
+namespace MachineryManagerEnterprise.Identity.Presentation.Endpoints;
 
 /// <summary>
 /// Development-only diagnostic endpoint that returns the current

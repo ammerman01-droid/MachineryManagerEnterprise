@@ -1,6 +1,6 @@
 using FluentValidation;
 
-namespace MachineryManager.Administration.Application.Features.Profiles.Queries.GetProfileById;
+namespace MachineryManagerEnterprise.Administration.Application.Features.Profiles.Queries.GetProfileById;
 
 /// <summary>
 /// Validates <see cref="GetProfileByIdQuery"/> per ADR-0036.

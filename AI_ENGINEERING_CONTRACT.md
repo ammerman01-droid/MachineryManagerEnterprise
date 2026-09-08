@@ -628,7 +628,7 @@ Preferred examples:
 
 ```text
 Repository:
-src/BuildingBlocks/MachineryManager.SharedKernel
+src/BuildingBlocks/MachineryManagerEnterprise.SharedKernel
 
 File:
 Entity.cs

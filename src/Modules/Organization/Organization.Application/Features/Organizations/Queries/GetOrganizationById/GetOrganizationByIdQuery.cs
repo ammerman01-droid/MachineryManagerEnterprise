@@ -1,8 +1,8 @@
-using MachineryManager.Organization.Application.Features.Organizations.Dtos;
-using MachineryManager.SharedKernel;
+using MachineryManagerEnterprise.Organization.Application.Features.Organizations.Dtos;
+using MachineryManagerEnterprise.SharedKernel;
 using MediatR;
 
-namespace MachineryManager.Organization.Application.Features.Organizations.Queries.GetOrganizationById;
+namespace MachineryManagerEnterprise.Organization.Application.Features.Organizations.Queries.GetOrganizationById;
 
 /// <summary>
 /// Query to retrieve a single organization by its unique identifier.

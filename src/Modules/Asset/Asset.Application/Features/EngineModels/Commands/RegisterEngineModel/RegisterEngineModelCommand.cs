@@ -1,7 +1,7 @@
-using MachineryManager.SharedKernel;
+using MachineryManagerEnterprise.SharedKernel;
 using MediatR;
 
-namespace MachineryManager.Asset.Application.Features.EngineModels.Commands.RegisterEngineModel;
+namespace MachineryManagerEnterprise.Asset.Application.Features.EngineModels.Commands.RegisterEngineModel;
 
 /// <summary>Command to register a new Engine Model within a Holding.</summary>
 public sealed record RegisterEngineModelCommand(

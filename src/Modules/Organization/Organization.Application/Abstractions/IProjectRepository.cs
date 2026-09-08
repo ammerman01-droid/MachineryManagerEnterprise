@@ -1,7 +1,7 @@
-using MachineryManager.SharedKernel.Abstractions;
+using MachineryManagerEnterprise.SharedKernel.Abstractions;
 using Organization.Domain;
 
-namespace MachineryManager.Organization.Application.Abstractions;
+namespace MachineryManagerEnterprise.Organization.Application.Abstractions;
 
 /// <summary>Repository contract for the <see cref="Project"/> aggregate.</summary>
 public interface IProjectRepository : IRepository<Project, ProjectId>

@@ -1,8 +1,8 @@
-using MachineryManager.Organization.Application.Features.Projects.Dtos;
-using MachineryManager.SharedKernel;
+using MachineryManagerEnterprise.Organization.Application.Features.Projects.Dtos;
+using MachineryManagerEnterprise.SharedKernel;
 using MediatR;
 
-namespace MachineryManager.Organization.Application.Features.Projects.Queries.GetProjectById;
+namespace MachineryManagerEnterprise.Organization.Application.Features.Projects.Queries.GetProjectById;
 
 /// <summary>
 /// Query to retrieve a single project by its unique identifier.

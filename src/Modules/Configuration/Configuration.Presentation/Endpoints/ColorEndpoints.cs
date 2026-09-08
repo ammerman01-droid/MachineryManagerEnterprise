@@ -1,13 +1,13 @@
-using MachineryManager.Configuration.Application.Features.Colors.Commands.RegisterColor;
-using MachineryManager.Configuration.Application.Features.Colors.Queries.GetColorsByHolding;
-using MachineryManager.Configuration.Presentation.Contracts;
+using MachineryManagerEnterprise.Configuration.Application.Features.Colors.Commands.RegisterColor;
+using MachineryManagerEnterprise.Configuration.Application.Features.Colors.Queries.GetColorsByHolding;
+using MachineryManagerEnterprise.Configuration.Presentation.Contracts;
 using MediatR;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Routing;
 using OpenIddict.Validation.AspNetCore;
 
-namespace MachineryManager.Configuration.Presentation.Endpoints;
+namespace MachineryManagerEnterprise.Configuration.Presentation.Endpoints;
 
 /// <summary>
 /// Maps the Configuration module's Color REST endpoints per

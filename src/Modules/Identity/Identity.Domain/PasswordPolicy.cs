@@ -1,6 +1,6 @@
 using System.Text.RegularExpressions;
 
-namespace MachineryManager.Identity.Domain;
+namespace MachineryManagerEnterprise.Identity.Domain;
 
 /// <summary>
 /// The password policy as explicitly specified by the product owner

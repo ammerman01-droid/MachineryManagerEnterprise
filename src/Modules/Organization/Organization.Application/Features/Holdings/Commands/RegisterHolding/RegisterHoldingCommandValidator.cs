@@ -1,6 +1,6 @@
 using FluentValidation;
 
-namespace MachineryManager.Organization.Application.Features.Holdings.Commands.RegisterHolding;
+namespace MachineryManagerEnterprise.Organization.Application.Features.Holdings.Commands.RegisterHolding;
 
 /// <summary>
 /// Validates <see cref="RegisterHoldingCommand"/> per ADR-0036.

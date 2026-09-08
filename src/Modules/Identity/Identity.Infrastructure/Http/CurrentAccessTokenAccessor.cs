@@ -1,10 +1,10 @@
-using MachineryManager.Identity.Domain;
+using MachineryManagerEnterprise.Identity.Domain;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 
-namespace MachineryManager.Identity.Infrastructure.Http;
+namespace MachineryManagerEnterprise.Identity.Infrastructure.Http;
 
 /// <inheritdoc cref="ICurrentAccessTokenAccessor" />
 /// <remarks>
@@ -25,7 +25,7 @@ namespace MachineryManager.Identity.Infrastructure.Http;
 /// </remarks>
 public sealed class CurrentAccessTokenAccessor : ICurrentAccessTokenAccessor, IDisposable
 {
-    private const string PersistenceKey = "MachineryManager.Identity.AccessToken";
+    private const string PersistenceKey = "MachineryManagerEnterprise.Identity.AccessToken";
 
     private readonly IHttpContextAccessor _httpContextAccessor;
     private readonly PersistentComponentState _persistentState;

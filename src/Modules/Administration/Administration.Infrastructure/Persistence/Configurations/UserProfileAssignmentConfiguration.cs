@@ -1,7 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
-namespace MachineryManager.Administration.Infrastructure.Persistence.Configurations;
+namespace MachineryManagerEnterprise.Administration.Infrastructure.Persistence.Configurations;
 
 /// <summary>EF Core mapping for the <see cref="global::Administration.Domain.UserProfileAssignment"/> aggregate.</summary>
 public sealed class UserProfileAssignmentConfiguration : IEntityTypeConfiguration<global::Administration.Domain.UserProfileAssignment>

@@ -1,9 +1,9 @@
-using MachineryManager.Configuration.Application.Abstractions;
-using MachineryManager.SharedKernel;
-using MachineryManager.SharedKernel.Abstractions;
+using MachineryManagerEnterprise.Configuration.Application.Abstractions;
+using MachineryManagerEnterprise.SharedKernel;
+using MachineryManagerEnterprise.SharedKernel.Abstractions;
 using MediatR;
 
-namespace MachineryManager.Configuration.Application.Features.FuelTypes.Commands.RegisterFuelType;
+namespace MachineryManagerEnterprise.Configuration.Application.Features.FuelTypes.Commands.RegisterFuelType;
 
 /// <summary>
 /// Handles the registration of a new Fuel Type. FuelType is

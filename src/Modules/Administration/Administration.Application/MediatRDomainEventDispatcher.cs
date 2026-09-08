@@ -1,9 +1,9 @@
 using System.Reflection;
 using MediatR;
-using MachineryManager.SharedKernel;
-using MachineryManager.SharedKernel.Abstractions;
+using MachineryManagerEnterprise.SharedKernel;
+using MachineryManagerEnterprise.SharedKernel.Abstractions;
 
-namespace MachineryManager.Administration.Application;
+namespace MachineryManagerEnterprise.Administration.Application;
 
 /// <summary>
 /// Dispatches domain events through MediatR (ADR-0011).

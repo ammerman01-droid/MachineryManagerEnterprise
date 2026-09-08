@@ -1,7 +1,7 @@
-using MachineryManager.SharedKernel;
+using MachineryManagerEnterprise.SharedKernel;
 using MediatR;
 
-namespace MachineryManager.Configuration.Application.Features.Companies.Commands.RegisterCompany;
+namespace MachineryManagerEnterprise.Configuration.Application.Features.Companies.Commands.RegisterCompany;
 
 /// <summary>
 /// Command to register a new Company within a Holding.

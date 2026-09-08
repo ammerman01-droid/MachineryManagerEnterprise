@@ -1,4 +1,4 @@
-namespace MachineryManager.Organization.Application.Features.Organizations.Dtos;
+namespace MachineryManagerEnterprise.Organization.Application.Features.Organizations.Dtos;
 
 /// <summary>
 /// Data transfer object representing a read-only view of an Organization.

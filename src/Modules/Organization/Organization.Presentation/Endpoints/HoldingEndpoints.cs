@@ -1,15 +1,15 @@
-using MachineryManager.Organization.Application.Features.Holdings.Commands.RegisterHolding;
-using MachineryManager.Organization.Application.Features.Holdings.Queries.GetHoldingById;
-using MachineryManager.Organization.Application.Features.Holdings.Queries.SearchHoldings;
-using MachineryManager.Organization.Presentation.Contracts;
+using MachineryManagerEnterprise.Organization.Application.Features.Holdings.Commands.RegisterHolding;
+using MachineryManagerEnterprise.Organization.Application.Features.Holdings.Queries.GetHoldingById;
+using MachineryManagerEnterprise.Organization.Application.Features.Holdings.Queries.SearchHoldings;
+using MachineryManagerEnterprise.Organization.Presentation.Contracts;
 using MediatR;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Routing;
 using OpenIddict.Validation.AspNetCore;
-using MachineryManager.Organization.Application.Features.Holdings.Commands.RenameHolding;
+using MachineryManagerEnterprise.Organization.Application.Features.Holdings.Commands.RenameHolding;
 
-namespace MachineryManager.Organization.Presentation.Endpoints;
+namespace MachineryManagerEnterprise.Organization.Presentation.Endpoints;
 
 /// <summary>
 /// Maps the Holding module's REST endpoints per 07-api conventions.

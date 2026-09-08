@@ -1,7 +1,7 @@
-using MachineryManager.SharedKernel;
+using MachineryManagerEnterprise.SharedKernel;
 using MediatR;
 
-namespace MachineryManager.Administration.Application.Features.Profiles.Commands.DeleteProfile;
+namespace MachineryManagerEnterprise.Administration.Application.Features.Profiles.Commands.DeleteProfile;
 
 /// <summary>
 /// Command to permanently delete a Profile. Blocked while the profile

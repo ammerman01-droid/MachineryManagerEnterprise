@@ -1,8 +1,8 @@
-using MachineryManager.SharedKernel;
-using MachineryManager.SharedKernel.Abstractions;
+using MachineryManagerEnterprise.SharedKernel;
+using MachineryManagerEnterprise.SharedKernel.Abstractions;
 using MediatR;
 
-namespace MachineryManager.Configuration.Application;
+namespace MachineryManagerEnterprise.Configuration.Application;
 
 /// <summary>
 /// Dispatches domain events by publishing each one, wrapped in a

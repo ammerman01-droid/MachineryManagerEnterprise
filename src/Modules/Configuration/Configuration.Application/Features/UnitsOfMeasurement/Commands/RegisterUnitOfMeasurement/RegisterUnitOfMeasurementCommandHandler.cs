@@ -1,9 +1,9 @@
-using MachineryManager.Configuration.Application.Abstractions;
-using MachineryManager.SharedKernel;
-using MachineryManager.SharedKernel.Abstractions;
+using MachineryManagerEnterprise.Configuration.Application.Abstractions;
+using MachineryManagerEnterprise.SharedKernel;
+using MachineryManagerEnterprise.SharedKernel.Abstractions;
 using MediatR;
 
-namespace MachineryManager.Configuration.Application.Features.UnitsOfMeasurement.Commands.RegisterUnitOfMeasurement;
+namespace MachineryManagerEnterprise.Configuration.Application.Features.UnitsOfMeasurement.Commands.RegisterUnitOfMeasurement;
 
 /// <summary>Handles <see cref="RegisterUnitOfMeasurementCommand"/>.</summary>
 public sealed class RegisterUnitOfMeasurementCommandHandler : IRequestHandler<RegisterUnitOfMeasurementCommand, Result<Guid>>

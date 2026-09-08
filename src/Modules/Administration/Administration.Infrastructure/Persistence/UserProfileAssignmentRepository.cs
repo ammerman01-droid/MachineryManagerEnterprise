@@ -1,8 +1,8 @@
-using MachineryManager.Administration.Application.Abstractions;
+using MachineryManagerEnterprise.Administration.Application.Abstractions;
 using Microsoft.EntityFrameworkCore;
 using Administration.Domain;
 
-namespace MachineryManager.Administration.Infrastructure.Persistence;
+namespace MachineryManagerEnterprise.Administration.Infrastructure.Persistence;
 
 /// <summary>EF Core implementation of <see cref="IUserProfileAssignmentRepository"/>.</summary>
 public sealed class UserProfileAssignmentRepository : IUserProfileAssignmentRepository

@@ -1,8 +1,8 @@
-using MachineryManager.Administration.Application.Abstractions;
-using MachineryManager.SharedKernel;
+using MachineryManagerEnterprise.Administration.Application.Abstractions;
+using MachineryManagerEnterprise.SharedKernel;
 using MediatR;
 
-namespace MachineryManager.Administration.Application.Features.Profiles.Queries.SearchProfiles;
+namespace MachineryManagerEnterprise.Administration.Application.Features.Profiles.Queries.SearchProfiles;
 
 /// <summary>Handles <see cref="SearchProfilesQuery"/> by delegating to the repository.</summary>
 public sealed class SearchProfilesQueryHandler

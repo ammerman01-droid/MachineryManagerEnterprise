@@ -1,11 +1,11 @@
-using MachineryManager.Administration.Application.Features.Profiles.Commands.ActivateProfile;
-using MachineryManager.Administration.Application.Features.Profiles.Commands.CreateProfile;
-using MachineryManager.Administration.Application.Features.Profiles.Commands.DeactivateProfile;
-using MachineryManager.Administration.Application.Features.Profiles.Commands.DeleteProfile;
-using MachineryManager.Administration.Application.Features.Profiles.Commands.UpdateProfile;
-using MachineryManager.Administration.Application.Features.Profiles.Queries.GetProfileById;
-using MachineryManager.Administration.Application.Features.Profiles.Queries.SearchProfiles;
-using MachineryManager.Administration.Presentation.Contracts;
+using MachineryManagerEnterprise.Administration.Application.Features.Profiles.Commands.ActivateProfile;
+using MachineryManagerEnterprise.Administration.Application.Features.Profiles.Commands.CreateProfile;
+using MachineryManagerEnterprise.Administration.Application.Features.Profiles.Commands.DeactivateProfile;
+using MachineryManagerEnterprise.Administration.Application.Features.Profiles.Commands.DeleteProfile;
+using MachineryManagerEnterprise.Administration.Application.Features.Profiles.Commands.UpdateProfile;
+using MachineryManagerEnterprise.Administration.Application.Features.Profiles.Queries.GetProfileById;
+using MachineryManagerEnterprise.Administration.Application.Features.Profiles.Queries.SearchProfiles;
+using MachineryManagerEnterprise.Administration.Presentation.Contracts;
 using MediatR;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
@@ -14,7 +14,7 @@ using OpenIddict.Validation.AspNetCore;
 
 using static OpenIddict.Abstractions.OpenIddictConstants;
 
-namespace MachineryManager.Administration.Presentation.Endpoints;
+namespace MachineryManagerEnterprise.Administration.Presentation.Endpoints;
 
 /// <summary>Maps the Profile module's REST endpoints.</summary>
 public static class ProfileEndpoints

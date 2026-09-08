@@ -1,4 +1,4 @@
-namespace MachineryManager.Identity.Domain;
+namespace MachineryManagerEnterprise.Identity.Domain;
 
 /// <summary>
 /// The username policy as explicitly specified by the product owner

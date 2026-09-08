@@ -1,9 +1,9 @@
-using MachineryManager.Administration.Application.Abstractions;
-using MachineryManager.Administration.Application.Features.Profiles.Dtos;
-using MachineryManager.SharedKernel;
+using MachineryManagerEnterprise.Administration.Application.Abstractions;
+using MachineryManagerEnterprise.Administration.Application.Features.Profiles.Dtos;
+using MachineryManagerEnterprise.SharedKernel;
 using MediatR;
 
-namespace MachineryManager.Administration.Application.Features.Profiles.Queries.GetProfileById;
+namespace MachineryManagerEnterprise.Administration.Application.Features.Profiles.Queries.GetProfileById;
 
 /// <summary>
 /// Handles <see cref="GetProfileByIdQuery"/> by loading the aggregate

@@ -1,6 +1,6 @@
-using MachineryManager.SharedKernel;
+using MachineryManagerEnterprise.SharedKernel;
 
-namespace MachineryManager.Asset.Presentation.Contracts;
+namespace MachineryManagerEnterprise.Asset.Presentation.Contracts;
 
 /// <summary>Request body for updating an Engine Model's technical specifications.</summary>
 /// <param name="CompanyId">The manufacturer company.</param>

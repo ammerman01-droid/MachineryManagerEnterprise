@@ -1,10 +1,10 @@
 using Asset.Domain;
-using MachineryManager.Asset.Application.Abstractions;
-using MachineryManager.Asset.Application.Features.AssetModels.Dtos;
-using MachineryManager.Asset.Application.Features.AssetModels.Queries.SearchAssetModels;
+using MachineryManagerEnterprise.Asset.Application.Abstractions;
+using MachineryManagerEnterprise.Asset.Application.Features.AssetModels.Dtos;
+using MachineryManagerEnterprise.Asset.Application.Features.AssetModels.Queries.SearchAssetModels;
 using Microsoft.EntityFrameworkCore;
 
-namespace MachineryManager.Asset.Infrastructure.Persistence;
+namespace MachineryManagerEnterprise.Asset.Infrastructure.Persistence;
 
 /// <summary>EF Core implementation of <see cref="IAssetModelRepository"/>.</summary>
 public sealed class AssetModelRepository : IAssetModelRepository

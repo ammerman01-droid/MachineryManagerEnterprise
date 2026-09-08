@@ -1,9 +1,9 @@
-using MachineryManager.Asset.Application.Abstractions;
-using MachineryManager.SharedKernel;
-using MachineryManager.SharedKernel.Abstractions;
+using MachineryManagerEnterprise.Asset.Application.Abstractions;
+using MachineryManagerEnterprise.SharedKernel;
+using MachineryManagerEnterprise.SharedKernel.Abstractions;
 using MediatR;
 
-namespace MachineryManager.Asset.Application.Features.Assets.Commands.RetireAsset;
+namespace MachineryManagerEnterprise.Asset.Application.Features.Assets.Commands.RetireAsset;
 
 /// <summary>
 /// Handles <see cref="RetireAssetCommand"/> by loading the aggregate,

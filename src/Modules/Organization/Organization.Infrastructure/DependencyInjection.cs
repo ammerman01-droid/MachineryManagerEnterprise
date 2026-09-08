@@ -1,11 +1,11 @@
-using MachineryManager.Organization.Application.Abstractions;
-using MachineryManager.Organization.Infrastructure.Persistence;
-using MachineryManager.SharedKernel.Abstractions;
+using MachineryManagerEnterprise.Organization.Application.Abstractions;
+using MachineryManagerEnterprise.Organization.Infrastructure.Persistence;
+using MachineryManagerEnterprise.SharedKernel.Abstractions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace MachineryManager.Organization.Infrastructure;
+namespace MachineryManagerEnterprise.Organization.Infrastructure;
 
 /// <summary>
 /// Registers the Organization module's Infrastructure layer services
@@ -36,7 +36,7 @@ public static class DependencyInjection
     {
         services.AddDbContext<OrganizationDbContext>((serviceProvider, options) => options
             .UseSqlServer(configuration.GetConnectionString("MachineryManagerDatabase"))
-            .AddInterceptors(serviceProvider.GetRequiredService<MachineryManager.SharedKernel.Infrastructure.AuditSaveChangesInterceptor>()));
+            .AddInterceptors(serviceProvider.GetRequiredService<MachineryManagerEnterprise.SharedKernel.Infrastructure.AuditSaveChangesInterceptor>()));
 
         services.AddScoped<IOrganizationRepository, OrganizationRepository>();
         services.AddScoped<IHoldingRepository, HoldingRepository>();

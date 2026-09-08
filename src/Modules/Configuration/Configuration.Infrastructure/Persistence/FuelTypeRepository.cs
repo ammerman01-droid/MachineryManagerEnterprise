@@ -1,9 +1,9 @@
 using Configuration.Domain;
-using MachineryManager.Configuration.Application.Abstractions;
-using MachineryManager.Configuration.Application.Features.FuelTypes.Dtos;
+using MachineryManagerEnterprise.Configuration.Application.Abstractions;
+using MachineryManagerEnterprise.Configuration.Application.Features.FuelTypes.Dtos;
 using Microsoft.EntityFrameworkCore;
 
-namespace MachineryManager.Configuration.Infrastructure.Persistence;
+namespace MachineryManagerEnterprise.Configuration.Infrastructure.Persistence;
 
 /// <summary>EF Core implementation of <see cref="IFuelTypeRepository"/>.</summary>
 public sealed class FuelTypeRepository : IFuelTypeRepository

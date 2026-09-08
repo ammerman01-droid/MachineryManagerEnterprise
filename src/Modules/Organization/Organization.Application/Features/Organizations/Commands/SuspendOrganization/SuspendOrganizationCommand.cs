@@ -1,7 +1,7 @@
-using MachineryManager.SharedKernel;
+using MachineryManagerEnterprise.SharedKernel;
 using MediatR;
 
-namespace MachineryManager.Organization.Application.Features.Organizations.Commands.SuspendOrganization;
+namespace MachineryManagerEnterprise.Organization.Application.Features.Organizations.Commands.SuspendOrganization;
 
 /// <summary>
 /// Command to suspend an Organization (BR-017, Section 10.16,

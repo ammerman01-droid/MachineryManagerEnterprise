@@ -1,4 +1,4 @@
-namespace MachineryManager.AuditLog.Application.Features.AuditEntries.Dtos;
+namespace MachineryManagerEnterprise.AuditLog.Application.Features.AuditEntries.Dtos;
 
 /// <summary>
 /// One field-level change of an audit record, parsed from the

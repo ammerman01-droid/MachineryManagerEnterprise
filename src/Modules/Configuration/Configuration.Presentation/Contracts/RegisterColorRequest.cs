@@ -1,6 +1,6 @@
-using MachineryManager.SharedKernel;
+using MachineryManagerEnterprise.SharedKernel;
 
-namespace MachineryManager.Configuration.Presentation.Contracts;
+namespace MachineryManagerEnterprise.Configuration.Presentation.Contracts;
 
 /// <summary>Request body for registering a new Color within a Holding.</summary>
 /// <param name="HoldingId">The identifier of the Holding that will own this Color.</param>

@@ -1,9 +1,9 @@
-using MachineryManager.AuditLog.Application.Abstractions;
-using MachineryManager.SharedKernel;
-using MachineryManager.SharedKernel.Abstractions;
+using MachineryManagerEnterprise.AuditLog.Application.Abstractions;
+using MachineryManagerEnterprise.SharedKernel;
+using MachineryManagerEnterprise.SharedKernel.Abstractions;
 using Microsoft.EntityFrameworkCore;
 
-namespace MachineryManager.AuditLog.Infrastructure.Persistence;
+namespace MachineryManagerEnterprise.AuditLog.Infrastructure.Persistence;
 
 /// <inheritdoc cref="IAuditEntryReadRepository" />
 public sealed class AuditEntryReadRepository : IAuditEntryReadRepository

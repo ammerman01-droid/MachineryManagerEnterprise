@@ -1,6 +1,6 @@
 using FluentValidation;
 
-namespace MachineryManager.Organization.Application.Features.Organizations.Commands.RegisterOrganization;
+namespace MachineryManagerEnterprise.Organization.Application.Features.Organizations.Commands.RegisterOrganization;
 
 /// <summary>
 /// Validates <see cref="RegisterOrganizationCommand"/> per ADR-0036.

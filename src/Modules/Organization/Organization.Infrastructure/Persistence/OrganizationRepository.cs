@@ -1,11 +1,11 @@
-using MachineryManager.Organization.Application.Abstractions;
-using MachineryManager.Organization.Application.Features.Organizations.Dtos;
-using MachineryManager.Organization.Application.Features.Organizations.Queries.SearchOrganizations;
+using MachineryManagerEnterprise.Organization.Application.Abstractions;
+using MachineryManagerEnterprise.Organization.Application.Features.Organizations.Dtos;
+using MachineryManagerEnterprise.Organization.Application.Features.Organizations.Queries.SearchOrganizations;
 using Microsoft.EntityFrameworkCore;
 using Organization.Domain;
-using MachineryManager.SharedKernel.Abstractions;
+using MachineryManagerEnterprise.SharedKernel.Abstractions;
 
-namespace MachineryManager.Organization.Infrastructure.Persistence;
+namespace MachineryManagerEnterprise.Organization.Infrastructure.Persistence;
 
 /// <summary>
 /// EF Core implementation of <see cref="IOrganizationRepository"/>.

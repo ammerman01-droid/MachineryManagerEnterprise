@@ -1,6 +1,6 @@
 using FluentValidation;
 
-namespace MachineryManager.Administration.Application.Features.Profiles.Commands.UpdateProfile;
+namespace MachineryManagerEnterprise.Administration.Application.Features.Profiles.Commands.UpdateProfile;
 
 /// <summary>
 /// Validates <see cref="UpdateProfileCommand"/> per ADR-0036.

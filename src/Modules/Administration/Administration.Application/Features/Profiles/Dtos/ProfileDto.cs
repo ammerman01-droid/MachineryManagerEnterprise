@@ -1,4 +1,4 @@
-namespace MachineryManager.Administration.Application.Features.Profiles.Dtos;
+namespace MachineryManagerEnterprise.Administration.Application.Features.Profiles.Dtos;
 
 /// <summary>Read-only view of a Profile.</summary>
 /// <param name="Id">The unique identifier of the profile.</param>

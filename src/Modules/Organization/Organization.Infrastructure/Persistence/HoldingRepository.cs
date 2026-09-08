@@ -1,11 +1,11 @@
-using MachineryManager.Organization.Application.Abstractions;
-using MachineryManager.Organization.Application.Features.Holdings.Dtos;
-using MachineryManager.Organization.Application.Features.Holdings.Queries.SearchHoldings;
+using MachineryManagerEnterprise.Organization.Application.Abstractions;
+using MachineryManagerEnterprise.Organization.Application.Features.Holdings.Dtos;
+using MachineryManagerEnterprise.Organization.Application.Features.Holdings.Queries.SearchHoldings;
 using Microsoft.EntityFrameworkCore;
 using Organization.Domain;
-using MachineryManager.SharedKernel.Abstractions;
+using MachineryManagerEnterprise.SharedKernel.Abstractions;
 
-namespace MachineryManager.Organization.Infrastructure.Persistence;
+namespace MachineryManagerEnterprise.Organization.Infrastructure.Persistence;
 
 /// <summary>
 /// EF Core implementation of <see cref="IHoldingRepository"/>.

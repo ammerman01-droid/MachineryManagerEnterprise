@@ -1,8 +1,8 @@
 using FluentValidation;
-using MachineryManager.SharedKernel;
+using MachineryManagerEnterprise.SharedKernel;
 using MediatR;
 
-namespace MachineryManager.Administration.Application.Behaviors;
+namespace MachineryManagerEnterprise.Administration.Application.Behaviors;
 
 /// <summary>
 /// MediatR pipeline behavior that executes FluentValidation validators

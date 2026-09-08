@@ -1,9 +1,9 @@
 using Administration.Domain;
-using MachineryManager.Administration.Application.Abstractions;
-using MachineryManager.SharedKernel;
+using MachineryManagerEnterprise.Administration.Application.Abstractions;
+using MachineryManagerEnterprise.SharedKernel;
 using MediatR;
 
-namespace MachineryManager.Administration.Application.Features.Profiles.Commands.DeleteProfile;
+namespace MachineryManagerEnterprise.Administration.Application.Features.Profiles.Commands.DeleteProfile;
 
 /// <summary>
 /// Handles <see cref="DeleteProfileCommand"/> by verifying the profile

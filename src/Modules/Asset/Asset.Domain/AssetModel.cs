@@ -1,6 +1,6 @@
 using Asset.Domain.Events;
-using MachineryManager.SharedKernel;
-using MachineryManager.SharedKernel.Abstractions;
+using MachineryManagerEnterprise.SharedKernel;
+using MachineryManagerEnterprise.SharedKernel.Abstractions;
 
 namespace Asset.Domain;
 

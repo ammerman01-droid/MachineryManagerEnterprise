@@ -1,18 +1,18 @@
-using MachineryManager.Asset.Application.Features.AssetModels.Commands.AssignCompatibleEngineModel;
-using MachineryManager.Asset.Application.Features.AssetModels.Commands.RegisterAssetModel;
-using MachineryManager.Asset.Application.Features.AssetModels.Commands.RemoveCompatibleEngineModel;
-using MachineryManager.Asset.Application.Features.AssetModels.Commands.RenameAssetModel;
-using MachineryManager.Asset.Application.Features.AssetModels.Commands.UpdateAssetModelSpecifications;
-using MachineryManager.Asset.Application.Features.AssetModels.Queries.GetAssetModelById;
-using MachineryManager.Asset.Application.Features.AssetModels.Queries.SearchAssetModels;
-using MachineryManager.Asset.Presentation.Contracts;
+using MachineryManagerEnterprise.Asset.Application.Features.AssetModels.Commands.AssignCompatibleEngineModel;
+using MachineryManagerEnterprise.Asset.Application.Features.AssetModels.Commands.RegisterAssetModel;
+using MachineryManagerEnterprise.Asset.Application.Features.AssetModels.Commands.RemoveCompatibleEngineModel;
+using MachineryManagerEnterprise.Asset.Application.Features.AssetModels.Commands.RenameAssetModel;
+using MachineryManagerEnterprise.Asset.Application.Features.AssetModels.Commands.UpdateAssetModelSpecifications;
+using MachineryManagerEnterprise.Asset.Application.Features.AssetModels.Queries.GetAssetModelById;
+using MachineryManagerEnterprise.Asset.Application.Features.AssetModels.Queries.SearchAssetModels;
+using MachineryManagerEnterprise.Asset.Presentation.Contracts;
 using MediatR;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Routing;
 using OpenIddict.Validation.AspNetCore;
 
-namespace MachineryManager.Asset.Presentation.Endpoints;
+namespace MachineryManagerEnterprise.Asset.Presentation.Endpoints;
 
 /// <summary>
 /// Maps the Asset module's Asset Model REST endpoints per 07-api

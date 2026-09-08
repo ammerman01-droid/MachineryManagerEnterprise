@@ -1,4 +1,4 @@
-namespace MachineryManager.Identity.Infrastructure.Options;
+namespace MachineryManagerEnterprise.Identity.Infrastructure.Options;
 
 /// <summary>
 /// Represents the OpenIddict client configuration used by the Identity infrastructure.

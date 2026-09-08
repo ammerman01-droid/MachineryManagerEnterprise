@@ -1,18 +1,18 @@
-using MachineryManager.Organization.Application.Features.Organizations.Commands.AssignOrganizationToHolding;
-using MachineryManager.Organization.Application.Features.Organizations.Commands.ReactivateOrganization;
-using MachineryManager.Organization.Application.Features.Organizations.Commands.RegisterOrganization;
-using MachineryManager.Organization.Application.Features.Organizations.Commands.SuspendOrganization;
-using MachineryManager.Organization.Application.Features.Organizations.Queries.GetOrganizationById;
-using MachineryManager.Organization.Application.Features.Organizations.Queries.SearchOrganizations;
-using MachineryManager.Organization.Presentation.Contracts;
+using MachineryManagerEnterprise.Organization.Application.Features.Organizations.Commands.AssignOrganizationToHolding;
+using MachineryManagerEnterprise.Organization.Application.Features.Organizations.Commands.ReactivateOrganization;
+using MachineryManagerEnterprise.Organization.Application.Features.Organizations.Commands.RegisterOrganization;
+using MachineryManagerEnterprise.Organization.Application.Features.Organizations.Commands.SuspendOrganization;
+using MachineryManagerEnterprise.Organization.Application.Features.Organizations.Queries.GetOrganizationById;
+using MachineryManagerEnterprise.Organization.Application.Features.Organizations.Queries.SearchOrganizations;
+using MachineryManagerEnterprise.Organization.Presentation.Contracts;
 using MediatR;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Routing;
 using OpenIddict.Validation.AspNetCore;
-using MachineryManager.Organization.Application.Features.Organizations.Commands.RenameOrganization;
+using MachineryManagerEnterprise.Organization.Application.Features.Organizations.Commands.RenameOrganization;
 
-namespace MachineryManager.Organization.Presentation.Endpoints;
+namespace MachineryManagerEnterprise.Organization.Presentation.Endpoints;
 
 /// <summary>
 /// Maps the Organization module's REST endpoints per 07-api conventions

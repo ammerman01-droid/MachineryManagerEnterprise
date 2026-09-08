@@ -1,6 +1,6 @@
 using FluentValidation;
 
-namespace MachineryManager.Asset.Application.Features.Assets.Commands.DeactivateAsset;
+namespace MachineryManagerEnterprise.Asset.Application.Features.Assets.Commands.DeactivateAsset;
 
 /// <summary>Validates <see cref="DeactivateAssetCommand"/> per ADR-0036.</summary>
 public sealed class DeactivateAssetCommandValidator : AbstractValidator<DeactivateAssetCommand>

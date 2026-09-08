@@ -1,7 +1,7 @@
-using MachineryManager.SharedKernel;
+using MachineryManagerEnterprise.SharedKernel;
 using Microsoft.AspNetCore.Http;
 
-namespace MachineryManager.Asset.Presentation.Endpoints;
+namespace MachineryManagerEnterprise.Asset.Presentation.Endpoints;
 
 /// <summary>
 /// Translates a failed <see cref="Result"/> into the error response

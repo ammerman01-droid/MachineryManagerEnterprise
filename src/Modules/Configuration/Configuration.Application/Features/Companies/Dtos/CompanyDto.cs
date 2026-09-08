@@ -1,4 +1,4 @@
-namespace MachineryManager.Configuration.Application.Features.Companies.Dtos;
+namespace MachineryManagerEnterprise.Configuration.Application.Features.Companies.Dtos;
 
 /// <summary>
 /// Represents a Company option returned by the Configuration module.

@@ -1,11 +1,11 @@
 using System.Text.Json;
-using MachineryManager.AuditLog.Application.Abstractions;
-using MachineryManager.AuditLog.Application.Features.AuditEntries.Dtos;
-using MachineryManager.SharedKernel;
-using MachineryManager.SharedKernel.Abstractions;
+using MachineryManagerEnterprise.AuditLog.Application.Abstractions;
+using MachineryManagerEnterprise.AuditLog.Application.Features.AuditEntries.Dtos;
+using MachineryManagerEnterprise.SharedKernel;
+using MachineryManagerEnterprise.SharedKernel.Abstractions;
 using MediatR;
 
-namespace MachineryManager.AuditLog.Application.Features.AuditEntries.Queries.GetAuditEntryById;
+namespace MachineryManagerEnterprise.AuditLog.Application.Features.AuditEntries.Queries.GetAuditEntryById;
 
 /// <summary>
 /// Handles <see cref="GetAuditEntryByIdQuery"/>: resolves the caller's

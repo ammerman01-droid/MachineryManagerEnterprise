@@ -1,6 +1,6 @@
 using FluentValidation;
 
-namespace MachineryManager.Configuration.Application.Features.Companies.Commands.RegisterCompany;
+namespace MachineryManagerEnterprise.Configuration.Application.Features.Companies.Commands.RegisterCompany;
 
 /// <summary>
 /// Validates <see cref="RegisterCompanyCommand"/>.

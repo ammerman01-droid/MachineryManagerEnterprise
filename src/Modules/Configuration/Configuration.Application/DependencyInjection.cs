@@ -1,9 +1,9 @@
 using FluentValidation;
-using MachineryManager.SharedKernel.Abstractions;
+using MachineryManagerEnterprise.SharedKernel.Abstractions;
 using MediatR;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace MachineryManager.Configuration.Application;
+namespace MachineryManagerEnterprise.Configuration.Application;
 
 /// <summary>
 /// Provides extension methods for registering Configuration Application

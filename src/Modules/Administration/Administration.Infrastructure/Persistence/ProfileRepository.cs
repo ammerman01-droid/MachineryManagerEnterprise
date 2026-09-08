@@ -1,10 +1,10 @@
-using MachineryManager.Administration.Application.Abstractions;
-using MachineryManager.Administration.Application.Features.Profiles.Dtos;
-using MachineryManager.Administration.Application.Features.Profiles.Queries.SearchProfiles;
+using MachineryManagerEnterprise.Administration.Application.Abstractions;
+using MachineryManagerEnterprise.Administration.Application.Features.Profiles.Dtos;
+using MachineryManagerEnterprise.Administration.Application.Features.Profiles.Queries.SearchProfiles;
 using Microsoft.EntityFrameworkCore;
 using Administration.Domain;
 
-namespace MachineryManager.Administration.Infrastructure.Persistence;
+namespace MachineryManagerEnterprise.Administration.Infrastructure.Persistence;
 
 /// <summary>EF Core implementation of <see cref="IProfileRepository"/>.</summary>
 public sealed class ProfileRepository : IProfileRepository

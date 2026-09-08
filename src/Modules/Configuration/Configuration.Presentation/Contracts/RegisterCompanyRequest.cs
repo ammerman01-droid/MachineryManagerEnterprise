@@ -1,4 +1,4 @@
-namespace MachineryManager.Configuration.Presentation.Contracts;
+namespace MachineryManagerEnterprise.Configuration.Presentation.Contracts;
 
 /// <summary>Request body for registering a new Company (manufacturer).</summary>
 /// <param name="HoldingId">The identifier of the owning Holding.</param>

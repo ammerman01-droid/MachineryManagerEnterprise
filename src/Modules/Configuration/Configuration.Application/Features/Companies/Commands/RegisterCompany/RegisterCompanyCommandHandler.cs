@@ -1,9 +1,9 @@
-using MachineryManager.Configuration.Application.Abstractions;
-using MachineryManager.SharedKernel;
-using MachineryManager.SharedKernel.Abstractions;
+using MachineryManagerEnterprise.Configuration.Application.Abstractions;
+using MachineryManagerEnterprise.SharedKernel;
+using MachineryManagerEnterprise.SharedKernel.Abstractions;
 using MediatR;
 
-namespace MachineryManager.Configuration.Application.Features.Companies.Commands.RegisterCompany;
+namespace MachineryManagerEnterprise.Configuration.Application.Features.Companies.Commands.RegisterCompany;
 
 /// <summary>
 /// Handles <see cref="RegisterCompanyCommand"/> by verifying the target

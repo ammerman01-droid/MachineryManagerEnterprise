@@ -1,9 +1,9 @@
 using Configuration.Domain;
-using MachineryManager.Configuration.Application.Abstractions;
-using MachineryManager.Configuration.Application.Features.UnitsOfMeasurement.Dtos;
+using MachineryManagerEnterprise.Configuration.Application.Abstractions;
+using MachineryManagerEnterprise.Configuration.Application.Features.UnitsOfMeasurement.Dtos;
 using Microsoft.EntityFrameworkCore;
 
-namespace MachineryManager.Configuration.Infrastructure.Persistence;
+namespace MachineryManagerEnterprise.Configuration.Infrastructure.Persistence;
 
 /// <summary>EF Core implementation of <see cref="IUnitOfMeasurementRepository"/>.</summary>
 public sealed class UnitOfMeasurementRepository : IUnitOfMeasurementRepository

@@ -1,4 +1,4 @@
-namespace MachineryManager.AuditLog.Application.Features.AuditEntries.Dtos;
+namespace MachineryManagerEnterprise.AuditLog.Application.Features.AuditEntries.Dtos;
 
 /// <summary>
 /// One page of audit records plus pagination metadata

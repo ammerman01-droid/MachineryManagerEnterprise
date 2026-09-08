@@ -1,6 +1,6 @@
-using MachineryManager.SharedKernel.Abstractions;
+using MachineryManagerEnterprise.SharedKernel.Abstractions;
 
-namespace MachineryManager.Configuration.Application.Abstractions;
+namespace MachineryManagerEnterprise.Configuration.Application.Abstractions;
 
 /// <summary>Repository contract for the <see cref="global::Configuration.Domain.FuelType"/> aggregate.</summary>
 public interface IFuelTypeRepository

@@ -1,6 +1,6 @@
 using FluentValidation;
 
-namespace MachineryManager.Asset.Application.Features.AssetModels.Commands.RegisterAssetModel;
+namespace MachineryManagerEnterprise.Asset.Application.Features.AssetModels.Commands.RegisterAssetModel;
 
 /// <summary>Validates <see cref="RegisterAssetModelCommand"/> per ADR-0036.</summary>
 public sealed class RegisterAssetModelCommandValidator : AbstractValidator<RegisterAssetModelCommand>

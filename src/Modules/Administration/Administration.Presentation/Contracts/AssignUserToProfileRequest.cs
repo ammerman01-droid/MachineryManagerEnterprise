@@ -1,6 +1,6 @@
 using Administration.Domain;
 
-namespace MachineryManager.Administration.Presentation.Contracts;
+namespace MachineryManagerEnterprise.Administration.Presentation.Contracts;
 
 /// <summary>
 /// Request body for assigning a User to a Profile at a specific scope.

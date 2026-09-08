@@ -1,6 +1,6 @@
 using FluentValidation;
 
-namespace MachineryManager.Asset.Application.Features.Assets.Commands.RetireAsset;
+namespace MachineryManagerEnterprise.Asset.Application.Features.Assets.Commands.RetireAsset;
 
 /// <summary>Validates <see cref="RetireAssetCommand"/> per ADR-0036.</summary>
 public sealed class RetireAssetCommandValidator : AbstractValidator<RetireAssetCommand>

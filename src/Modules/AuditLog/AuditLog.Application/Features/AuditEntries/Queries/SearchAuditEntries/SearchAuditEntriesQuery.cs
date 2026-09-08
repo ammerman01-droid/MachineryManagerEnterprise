@@ -1,8 +1,8 @@
-using MachineryManager.AuditLog.Application.Features.AuditEntries.Dtos;
-using MachineryManager.SharedKernel;
+using MachineryManagerEnterprise.AuditLog.Application.Features.AuditEntries.Dtos;
+using MachineryManagerEnterprise.SharedKernel;
 using MediatR;
 
-namespace MachineryManager.AuditLog.Application.Features.AuditEntries.Queries.SearchAuditEntries;
+namespace MachineryManagerEnterprise.AuditLog.Application.Features.AuditEntries.Queries.SearchAuditEntries;
 
 /// <summary>
 /// Searches the platform-wide audit trail with optional filters on

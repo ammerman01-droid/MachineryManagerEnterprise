@@ -3,8 +3,8 @@
 @inject IHttpClientFactory HttpClientFactory
 @inject NavigationManager Navigation
 
-@using MachineryManager.Administration.Application.Features.Profiles.Dtos
-@using MachineryManager.Administration.Application.Features.Profiles.Queries.SearchProfiles
+@using MachineryManagerEnterprise.Administration.Application.Features.Profiles.Dtos
+@using MachineryManagerEnterprise.Administration.Application.Features.Profiles.Queries.SearchProfiles
 @using global::Administration.Domain
 
 <PageTitle>تخصیص پروفایل</PageTitle>
@@ -337,7 +337,7 @@ System.Text.Json.JsonSerializerOptions
             Guid? projectId = ParseScopeId(scopeProjectId, "Project");
 
             var request =
-                new MachineryManager.Administration.Presentation.Contracts
+                new MachineryManagerEnterprise.Administration.Presentation.Contracts
                     .AssignUserToProfileRequest(
                         UserId,
                         selectedProfileId,

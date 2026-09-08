@@ -1,6 +1,6 @@
 using FluentValidation;
 
-namespace MachineryManager.AuditLog.Application.Features.AuditEntries.Queries.SearchAuditEntries;
+namespace MachineryManagerEnterprise.AuditLog.Application.Features.AuditEntries.Queries.SearchAuditEntries;
 
 /// <summary>
 /// Validates <see cref="SearchAuditEntriesQuery"/> per the module's

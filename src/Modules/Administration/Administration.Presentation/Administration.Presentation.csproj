@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk.Razor">
 
   <PropertyGroup>
-    <RootNamespace>MachineryManager.Administration.Presentation</RootNamespace>
+    <RootNamespace>MachineryManagerEnterprise.Administration.Presentation</RootNamespace>
   </PropertyGroup>
 
   <ItemGroup>
