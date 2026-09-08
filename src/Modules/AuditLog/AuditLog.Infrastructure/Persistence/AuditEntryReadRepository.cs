@@ -80,6 +80,8 @@ public sealed class AuditEntryReadRepository : IAuditEntryReadRepository
             .ToListAsync(cancellationToken);
 
         return (items, totalCount);
+
+        
     }
 
     /// <inheritdoc />
@@ -89,4 +91,46 @@ public sealed class AuditEntryReadRepository : IAuditEntryReadRepository
         _dbContext.AuditEntries
             .AsNoTracking()
             .FirstOrDefaultAsync(entry => entry.Id == id, cancellationToken);
+
+        /// <summary>
+    /// gam 5/6 shared scope predicate: keeps only rows whose HoldingId
+    /// OR OrganizationId is inside the caller's authorized scopes.
+    /// </summary>
+    private static IQueryable<AuditEntry> ApplyScope(
+        IQueryable<AuditEntry> query,
+        AuthorizedScopeSet? authorizedScope)
+    {
+        if (authorizedScope is { IsUnrestricted: false } scope)
+        {
+            var holdingIds = scope.HoldingIds;
+            var organizationIds = scope.OrganizationIds;
+
+            query = query.Where(entry =>
+                (entry.HoldingId.HasValue && holdingIds.Contains(entry.HoldingId.Value)) ||
+                (entry.OrganizationId.HasValue && organizationIds.Contains(entry.OrganizationId.Value)));
+        }
+
+        return query;
+    }
+
+        /// <inheritdoc />
+    public async Task<IReadOnlyList<string>> GetDistinctSchemaNamesAsync(
+        AuthorizedScopeSet? authorizedScope,
+        CancellationToken cancellationToken = default) =>
+        await ApplyScope(_dbContext.AuditEntries.AsNoTracking(), authorizedScope)
+            .Select(entry => entry.SchemaName)
+            .Distinct()
+            .OrderBy(name => name)
+            .ToListAsync(cancellationToken);
+
+    /// <inheritdoc />
+    public async Task<IReadOnlyList<string>> GetDistinctTableNamesAsync(
+        AuthorizedScopeSet? authorizedScope,
+        CancellationToken cancellationToken = default) =>
+        await ApplyScope(_dbContext.AuditEntries.AsNoTracking(), authorizedScope)
+            .Select(entry => entry.TableName)
+            .Distinct()
+            .OrderBy(name => name)
+            .ToListAsync(cancellationToken);
 }
+

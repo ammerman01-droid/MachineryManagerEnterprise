@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Routing;
 using OpenIddict.Validation.AspNetCore;
 using MachineryManager.AuditLog.Application.Features.AuditEntries.Queries.GetAuditEntryById;
+using MachineryManager.AuditLog.Application.Features.AuditEntries.Queries.GetAuditLogFilterMetadata;
 
 namespace MachineryManager.AuditLog.Presentation.Endpoints;
 
@@ -38,6 +39,10 @@ public static class AuditLogEndpoints
         group.MapGet("/", SearchAuditEntriesAsync)
             .WithName("SearchAuditEntries")
             .WithSummary("Searches the platform-wide audit trail, with optional filters on date range, user, operation type, and source table.");
+
+        group.MapGet("/filters/metadata", GetFilterMetadataAsync)
+            .WithName("GetAuditLogFilterMetadata")
+            .WithSummary("Returns the distinct schema and table names visible to the caller, for populating the search filters.");
 
         group.MapGet("/{auditEntryId:guid}", GetAuditEntryByIdAsync)
             .WithName("GetAuditEntryById")
@@ -75,6 +80,18 @@ public static class AuditLogEndpoints
         CancellationToken cancellationToken)
     {
         var result = await sender.Send(new GetAuditEntryByIdQuery(auditEntryId), cancellationToken);
+
+        return result.IsSuccess
+            ? Results.Ok(result.Value)
+            : result.ToProblemResult(httpContext);
+    }
+
+        private static async Task<IResult> GetFilterMetadataAsync(
+        ISender sender,
+        HttpContext httpContext,
+        CancellationToken cancellationToken)
+    {
+        var result = await sender.Send(new GetAuditLogFilterMetadataQuery(), cancellationToken);
 
         return result.IsSuccess
             ? Results.Ok(result.Value)

@@ -1,4 +1,5 @@
 using MachineryManager.SharedKernel;
+using MachineryManager.SharedKernel.Abstractions;
 
 namespace MachineryManager.AuditLog.Application.Abstractions;
 
@@ -23,5 +24,21 @@ public interface IAuditEntryReadRepository
     /// <summary>rieves a single audit record by its identifier, or <c>null</c> when no such record exists.</summary>
     Task<AuditEntry?> GetByIdAsync(
         Guid id,
+        CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Returns the distinct schema names of the audit records visible
+    /// under the given scope (ordered alphabetically).
+    /// </summary>
+    Task<IReadOnlyList<string>> GetDistinctSchemaNamesAsync(
+        AuthorizedScopeSet? authorizedScope,
+        CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Returns the distinct table names of the audit records visible
+    /// under the given scope (ordered alphabetically).
+    /// </summary>
+    Task<IReadOnlyList<string>> GetDistinctTableNamesAsync(
+        AuthorizedScopeSet? authorizedScope,
         CancellationToken cancellationToken = default);
 }
