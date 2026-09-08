@@ -17,7 +17,7 @@ public sealed class ReactivateOrganizationCommandHandler
     private const string RequiredPermission = "Organization.Edit";
 
     private readonly IOrganizationRepository _organizationRepository;
-    private readonly IUnitOfWork _unitOfWork;
+    private readonly IOrganizationUnitOfWork _unitOfWork;
     private readonly IDateTimeProvider _dateTimeProvider;
     private readonly ICurrentUserService _currentUserService;
     private readonly IPermissionEvaluator _permissionEvaluator;
@@ -30,7 +30,7 @@ public sealed class ReactivateOrganizationCommandHandler
     /// <param name="permissionEvaluator">Evaluates the current user's permissions at request time.</param>
     public ReactivateOrganizationCommandHandler(
         IOrganizationRepository organizationRepository,
-        IUnitOfWork unitOfWork,
+        IOrganizationUnitOfWork unitOfWork,
         IDateTimeProvider dateTimeProvider,
         ICurrentUserService currentUserService,
         IPermissionEvaluator permissionEvaluator)

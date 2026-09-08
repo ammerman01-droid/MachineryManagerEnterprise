@@ -17,7 +17,7 @@ public sealed class RenameOrganizationCommandHandler
     private const string RequiredPermission = "Organization.Edit";
 
     private readonly IOrganizationRepository _organizationRepository;
-    private readonly IUnitOfWork _unitOfWork;
+    private readonly IOrganizationUnitOfWork _unitOfWork;
     private readonly IDateTimeProvider _dateTimeProvider;
     private readonly ICurrentUserService _currentUserService;
     private readonly IPermissionEvaluator _permissionEvaluator;
@@ -25,7 +25,7 @@ public sealed class RenameOrganizationCommandHandler
     /// <summary>Initializes a new instance of the <see cref="RenameOrganizationCommandHandler"/> class.</summary>
     public RenameOrganizationCommandHandler(
         IOrganizationRepository organizationRepository,
-        IUnitOfWork unitOfWork,
+        IOrganizationUnitOfWork unitOfWork,
         IDateTimeProvider dateTimeProvider,
         ICurrentUserService currentUserService,
         IPermissionEvaluator permissionEvaluator)

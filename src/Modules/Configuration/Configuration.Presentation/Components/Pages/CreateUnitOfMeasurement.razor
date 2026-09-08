@@ -1,0 +1,77 @@
+@page "/admin/units-of-measurement/create"
+@inject IHttpClientFactory HttpClientFactory
+@inject NavigationManager Navigation
+
+<PageTitle>واحد اندازه‌گیری جدید</PageTitle>
+
+<MudText Typo="Typo.h4" Class="mb-4">ثبت واحد اندازه‌گیری جدید</MudText>
+
+@if (errorMessage is not null)
+{
+    <MudAlert Severity="Severity.Error" Class="my-4">@errorMessage</MudAlert>
+}
+
+<MudPaper Class="pa-4" Style="max-width:500px;">
+    <MudForm @ref="form">
+        <MudTextField T="string" Label="نام واحد" @bind-Value="name" Required="true" RequiredError="نام الزامی است" MaxLength="50" />
+
+        <MudSelect T="PhysicalQuantityKind" Label="نوع کمیت فیزیکی" @bind-Value="kind" Required="true" Class="mt-4">
+            <MudSelectItem T="PhysicalQuantityKind" Value="PhysicalQuantityKind.Force">نیرو (توان، قدرت، فشار، گشتاور)</MudSelectItem>
+            <MudSelectItem T="PhysicalQuantityKind" Value="PhysicalQuantityKind.Dimension">ابعاد (طول، مساحت، حجم)</MudSelectItem>
+            <MudSelectItem T="PhysicalQuantityKind" Value="PhysicalQuantityKind.Weight">وزن (جرم)</MudSelectItem>
+            <MudSelectItem T="PhysicalQuantityKind" Value="PhysicalQuantityKind.Temperature">دما</MudSelectItem>
+            <MudSelectItem T="PhysicalQuantityKind" Value="PhysicalQuantityKind.Electrical">الکتریکی (آمپر، ولت و ...)</MudSelectItem>
+            <MudSelectItem T="PhysicalQuantityKind" Value="PhysicalQuantityKind.FlowRate">دبی (شدت جریان سیالات)</MudSelectItem>
+            <MudSelectItem T="PhysicalQuantityKind" Value="PhysicalQuantityKind.Other">سایر</MudSelectItem>
+        </MudSelect>
+
+        <MudButton Variant="Variant.Filled" Color="Color.Primary" Class="mt-4" OnClick="SubmitAsync" Disabled="isSubmitting">
+            @(isSubmitting ? "در حال ثبت..." : "ثبت")
+        </MudButton>
+        <MudButton Variant="Variant.Outlined" Color="Color.Secondary" Class="mt-4 ml-2"
+                   OnClick="@(() => Navigation.NavigateTo("/admin/units-of-measurement"))">
+            انصراف
+        </MudButton>
+    </MudForm>
+</MudPaper>
+
+@code {
+    /// <summary>Gets or sets the identifier of the Holding this unit will belong to, supplied via the query string.</summary>
+    [SupplyParameterFromQuery]
+    public Guid HoldingId { get; set; }
+
+    private MudForm form = null!;
+    private string name = string.Empty;
+    private PhysicalQuantityKind kind = PhysicalQuantityKind.Other;
+    private bool isSubmitting;
+    private string? errorMessage;
+
+    private async Task SubmitAsync()
+    {
+        await form.Validate();
+        if (!form.IsValid) return;
+
+        isSubmitting = true;
+        errorMessage = null;
+
+        try
+        {
+            var client = HttpClientFactory.CreateClient("InternalApi");
+            var response = await client.PostAsJsonAsync("/api/v1/units-of-measurement", new { HoldingId, Name = name, Kind = kind });
+            var content = await response.Content.ReadAsStringAsync();
+
+            if (response.IsSuccessStatusCode)
+                Navigation.NavigateTo("/admin/units-of-measurement");
+            else
+                errorMessage = $"خطا در ثبت واحد: {content}";
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"خطا: {ex.Message}";
+        }
+        finally
+        {
+            isSubmitting = false;
+        }
+    }
+}

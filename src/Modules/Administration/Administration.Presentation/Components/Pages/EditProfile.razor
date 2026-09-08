@@ -41,15 +41,22 @@
                         {
                             <tr>
                                 <td>@section.DisplayName</td>
-                                @foreach (var action in PermissionCatalog.Actions)
-                                {
-                                    var permission = PermissionCatalog.BuildPermission(section.Key, action);
-                                    <td style="text-align:center">
-                                        <MudCheckBox T="bool"
-                                                     Value="@selectedPermissions.Contains(permission)"
-                                                     ValueChanged="@((bool isChecked) => TogglePermission(permission, isChecked))" />
-                                    </td>
-                                }
+                                                                    @foreach (var action in PermissionCatalog.Actions)
+                                    {
+                                        var permission = PermissionCatalog.BuildPermission(section.Key, action);
+                                        <td style="text-align:center">
+                                            @if (section.EffectiveActions.Contains(action))
+                                            {
+                                                <MudCheckBox T="bool"
+                                                             Value="@selectedPermissions.Contains(permission)"
+                                                             ValueChanged="@((bool isChecked) => TogglePermission(permission, isChecked))" />
+                                            }
+                                            else
+                                            {
+                                                <MudCheckBox T="bool" Value="false" Disabled="true" />
+                                            }
+                                        </td>
+                                    }
                             </tr>
                         }
                     </tbody>
@@ -124,6 +131,20 @@
             selectedPermissions.Clear();
             foreach (var permission in result.Permissions)
             {
+                // gam 6: drop permissions whose action the section no longer
+                // offers (e.g. AuditLog.Create/Edit/Delete granted before
+                // the section became read-only), so saving does not silently
+                // keep dead permissions. Wildcard "*" has no section prefix
+                // and is always kept.
+                var parts = permission.Split('.');
+
+                if (parts.Length == 2 &&
+                    PermissionCatalog.Sections.FirstOrDefault(s => s.Key == parts[0]) is { } section &&
+                    !section.EffectiveActions.Contains(parts[1]))
+                {
+                    continue;
+                }
+
                 selectedPermissions.Add(permission);
             }
         }

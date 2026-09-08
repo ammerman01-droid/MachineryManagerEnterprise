@@ -10,7 +10,7 @@
 ## 1.1 Project Identity
 - **Name:** MachineryManagerEnterprise
 - **Type:** Enterprise Asset Lifecycle Management (EALM) / EAM
-- **Status:** Phase 3 — Core Platform Modules. Identity & Access Management (ASP.NET Core Identity + OpenIddict Authorization Server/Client, Authorization Code+PKCE and Client Credentials flows, end-to-end verified) is functionally complete. Organization module's initial vertical slice (Organization aggregate, CQRS, EF Core) is complete; the Holding/Project tenant hierarchy (BR-017) is complete end-to-end (Domain, Infrastructure/EF, Presentation REST endpoints), including Organization Suspension (BR-017, Section 10.16). The Administration module (Profiles, scoped Role/Permission assignment, Assignment Revocation per BR-017) is also complete end-to-end. Remaining: Blazor Presentation UI for Holding/Organization/Project management (currently REST-only).
+- **Status:** Phase 3 — Core Platform Modules. Identity & Access Management (ASP.NET Core Identity + OpenIddict Authorization Server/Client, Authorization Code+PKCE and Client Credentials flows, end-to-end verified) is functionally complete. Organization module's initial vertical slice (Organization aggregate, CQRS, EF Core) is complete; the Holding/Project tenant hierarchy (BR-017) is complete end-to-end (Domain, Infrastructure/EF, Presentation REST endpoints), including Organization Suspension (BR-017, Section 10.16). The Administration module (Profiles, scoped Role/Permission assignment, Assignment Revocation per BR-017) is also complete end-to-end. Remaining: Blazor Presentation UI for Holding/Organization/Project management (currently REST-only).  The Asset module's catalog slice (AssetModel and EngineModel — Holding-scoped master data, including Engine-compatibility management) is now also complete end-to-end: Domain, Application, Infrastructure (EF Core, migration applied), REST API, and Blazor UI (chat, 2026-08-27). The Asset aggregate itself (the physical machine/equipment record — identity fields, lifecycle) is not yet implemented.
 - **Branch:** feature/project-bootstrap
 - **License:** Private — All Rights Reserved
 
@@ -376,7 +376,7 @@ Asset Models / Component Models → Knowledge
 - **Finance owns:** Transactions, Cost Calculations, Depreciation, Valuation
 - **Documents own:** Expiration, Version History, File Metadata
 
-## 4.5 Aggregate Design (6 Aggregates)
+## 4.5 Aggregate Design (9 Aggregates)
 
 ### Rules
 - One transaction = one aggregate ONLY (strong consistency inside, eventual consistency between)
@@ -394,6 +394,26 @@ Asset Models / Component Models → Knowledge
   - Zero or one installed primary Engine
   - Only one active primary Meter Device per measurement type
 - **Lifecycle:** Draft → Registered → Commissioned → Operational → Inactive → Retired → Disposed
+> Note (chat, 2026-08-27): the Commissioned→Operational transition
+> raises AssetActivated; the later Inactive→Operational transition
+> raises the distinct AssetReactivated event, preserving an accurate
+> audit trail of first activation vs. reactivation.
+
+### AssetModel Aggregate
+- **Root:** AssetModel
+- **Scope:** Per-Holding — shared across every Organization under that
+  Holding; only Asset identity records (not yet implemented) are
+  per-Organization (correction, chat, 2026-08-26 — supersedes the
+  2026-08-25 per-Organization note)
+- **Contains:** Name, Manufacturer, list of compatible EngineModelIds
+- **Invariants:**
+  - An Asset references exactly one AssetModel (BR-002); identity-specific
+    data (serial number, license plate, manufacture year, color, ...)
+    lives on the Asset itself, NEVER on the AssetModel
+  - Engine compatibility is a simple collection of EngineModelId held
+    directly on AssetModel — no dedicated compatibility entity
+    (chat, 2026-08-25)
+- Engine-compatibility must never cross a Holding boundary: AssignCompatibleEngineModel verifies that the AssetModel and the EngineModel belong to the same Holding before allowing the assignment (chat, 2026-08-27).
 
 ### Engine Aggregate
 - **Root:** Engine
@@ -404,6 +424,18 @@ Asset Models / Component Models → Knowledge
   - Every installation/removal generates historical record (never modified/removed)
   - Manufacturer, Serial Number, Manufacturing Year are immutable
 - **Lifecycle:** Stored → Installed → Removed → Under Repair → Rebuilt → Stored → ... → Retired
+
+### EngineModel Aggregate
+- **Root:** EngineModel
+- **Scope:** Per-Holding — shared across every Organization under that
+  Holding, mirroring AssetModel's scope (correction, chat, 2026-08-26 —
+  supersedes the 2026-08-25 per-Organization note)
+- **Contains:** Name, Manufacturer
+- **Invariants:**
+  - Mirrors AssetModel's pattern: an Engine (separate aggregate, not yet
+    implemented) references exactly one EngineModel and inherits its
+    shared specs; identity-specific data (serial number, install
+    history) lives on the Engine instance itself
 
 ### Maintenance Aggregate
 - **Root:** Maintenance Record
@@ -440,6 +472,21 @@ Asset Models / Component Models → Knowledge
 - **Root:** Technical Library Item
 - **Contains:** Manual, Repair Guide, Parts Catalogue, Service Bulletin, Technical Drawing
 - **Invariants:** Documents belong to Models whenever possible; same doc may serve many Assets
+
+### UnitCategory Aggregate
+- **Root:** UnitCategory
+- **Scope:** Per-Organization (chat, 2026-08-29)
+- **Contains:** Name
+- **Rationale:** A separate table, not an enum — so new categories
+  (e.g. "Pressure") can be added at runtime without a code deployment.
+
+### UnitOfMeasurement Aggregate
+- **Root:** UnitOfMeasurement
+- **Scope:** Per-Organization (chat, 2026-08-29)
+- **Contains:** Name, CategoryId (reference to UnitCategory)
+- **Invariant:** CategoryId must reference a UnitCategory belonging to
+  the same Organization (checked at Application layer, not a DB FK —
+  aggregates stay independent, same pattern as Asset→AssetModel).
 
 ## 4.6 Domain Services (by Category)
 
@@ -486,6 +533,29 @@ Asset Models / Component Models → Knowledge
 - **FinancialValidationService:** Transaction consistency, currency rules, depreciation inputs
 - **DocumentValidationService:** Mandatory metadata, expiration dates, document type, ownership relationships
 
+### Cross-Module Read-Only Lookup Pattern (chat, 2026-08-27)
+When one module needs a simple, read-only fact owned by another module
+(e.g., Asset needing to know which Holding an Organization belongs to)
+without violating the Modular Monolith boundary, a small interface is
+defined in `SharedKernel.Abstractions` (e.g. `IOrganizationLookupService`,
+`IHoldingLookupService`). The real implementation stays in the owning
+module's Infrastructure layer; the consuming module depends only on
+the contract. This generalizes the same decoupling pattern already
+used for `IPermissionEvaluator`.
+
+ ### Module-Specific Unit of Work (chat, 2026-08-27)
+ Every module MUST define and register its own Unit-of-Work interface
+ (e.g. IOrganizationUnitOfWork, IAssetUnitOfWork, IAdministrationUnitOfWork)
+ that extends the shared IUnitOfWork — never register the shared
+ IUnitOfWork directly from more than one module. Registering the
+ shared interface from multiple modules causes a DI collision: the
+ last module registered in Program.cs silently wins for the entire
+ application, so other modules' SaveChangesAsync calls resolve to the
+ wrong DbContext and silently discard their changes (no exception is
+ thrown). This exact bug affected Organization and Asset until fixed
+ on this date; Administration was unaffected because it already
+ followed this pattern.
+
 ## 4.7 Domain Events (Complete Catalog)
 
 ### Event Structure (Required Fields)
@@ -494,7 +564,7 @@ EventId, EventType, OccurredAt, AggregateId, AggregateType, EventVersion, Correl
 ### Naming Convention: `BusinessObject + PastTenseVerb` (e.g., AssetRegistered, EngineInstalled)
 
 ### Asset Events
-AssetRegistered, AssetActivated, AssetTransferred, AssetRetired, AssetDisposed
+AssetRegistered, AssetCommissioned, AssetActivated, AssetDeactivated, AssetReactivated, AssetTransferred, AssetRetired, AssetDisposed
 
 ### Component Events
 EngineInstalled, EngineRemoved, EngineRebuilt, ComponentInstalled, ComponentRemoved, ComponentReplaced
@@ -1008,7 +1078,8 @@ Examples:
 - Document.Upload, Document.Replace, Document.Archive
 - Forecast.Generate, Forecast.View, Forecast.Compare
 - User.Create, User.Disable, Role.Assign, Permission.Assign, Organization.Manage, Holding.Manage, Project.Manage
-- Organization.View, Holding.View, Project.View (Phase 3 — Scope-based Filtering; consumed by GetAuthorizedScopesAsync, see 07-api or ADR referencing IPermissionEvaluator)
+- Organization.View, Holding.View, Project.View , Asset.Create, Asset.Edit, Asset.View
+(chat, 2026-08-27 — required by GetAssetModelById/SearchAssetModels/GetEngineModelById/SearchEngineModels; previously these queries had no authorization check at all — gap identified and fixed)
 
 ### Profiles (RESOLVED, chat 2026-08-19)
 A **Profile** is a named, reusable bundle of Permissions (e.g. "Maintenance Technician — Project X") that a SuperUser (or higher-level SuperUser) can define once and assign to multiple Users, rather than assigning individual Permissions one by one. A Profile bundles Permissions only — it does NOT itself carry a scope (which Organizations/Projects); scope is assigned separately per User, so the same Profile can be reused for different Users across different scopes.
@@ -1042,6 +1113,21 @@ reassignment" rule (Section 10.16).
   DeleteProfileCommandHandler and via a database-level
   ON DELETE CASCADE foreign key (UserProfileAssignment.ProfileId →
   Profile.Id), so no orphaned assignment rows can remain.
+
+> **Note (chat, 2026-08-27):** AssetModel and EngineModel do not have
+> their own Permission section in the Section×Action matrix. Both use
+> the existing `Asset` section (`Asset.Create` / `Asset.Edit` /
+> `Asset.View` / `Asset.Delete`). Whether the future Asset aggregate
+> itself needs a separate Permission section will be decided when that
+> aggregate is implemented.
+
+> **Note (chat, 2026-08-29):** Color now has its own dedicated
+> Permission section (`Color.Create/Edit/View/Delete`) — it no longer
+> piggybacks on `Asset.*`. UnitCategory and UnitOfMeasurement share a
+> single Permission section, `UnitOfMeasurement` (both use
+> `UnitOfMeasurement.Create/Edit/View`), since category management is
+> a supporting concern of unit management, not a separate business
+> capability.
 
 ---
 
@@ -1103,6 +1189,15 @@ Infrastructure supports higher layers but NEVER the center
 - Each module = independent bounded context with Clean Architecture internally
 - Modules communicate only through contracts and application boundaries
 - Future extraction to microservices requires NO architectural restructuring
+
+## 6.1a Checklist — Adding a New Blazor-Enabled Module
+Every module that adds Blazor pages must register its assembly in
+**both** of the following places, or its pages will render once
+during prerender and immediately flip to Not Found once the
+interactive circuit connects (the interactive Router uses a fully
+separate assembly list from the one used during prerendering):
+1. `Program.cs` → `MapRazorComponents<App>().AddAdditionalAssemblies(...)`
+2. `Routes.razor` → `<Router AdditionalAssemblies="...">`
 
 ## 6.2 Project Internal Structure
 
@@ -1231,6 +1326,28 @@ MachineryManagerEnterprise.[Layer/Module].[Feature].[Subcategory]
 - Warnings treated as defects
 - Roslyn Analyzers + .NET SDK Analyzers
 - New warnings NOT introduced
+
+## 6.5a EF Core 10 — Mapping a Collection of a Custom Value Object
+Never map a public property whose type is `List<TValueObject>` (e.g.
+`List<EngineModelId>`) directly to its backing field as an EF Core
+primitive collection. EF Core 10's query-shaping compiler throws a
+`NullReferenceException` in this exact configuration (first observed
+with `Profile.Permissions`, reproduced again with
+`AssetModel.CompatibleEngineModelIds`). Required pattern:
+
+1. The backing field must be a plain, EF-native collection type
+   (`List<Guid>`), never a collection of a custom value object.
+2. The public property computes the value-object view on read (e.g.
+   `_field.Select(EngineModelId.From)`), not a converted wrapper.
+3. In `IEntityTypeConfiguration`: call `builder.Ignore(x => x.PublicProperty)`,
+   then map the backing field independently as a shadow property:
+   `builder.Property<List<Guid>>("_backingField")` — never configure
+   it via a lambda expression pointing at the public property.
+4. In repositories, for any Search/List query that projects into a
+   different DTO type, always call `ToListAsync()` first to fully
+   materialize the entities, then `.Select(...)` into the DTO in
+   memory. Never project a computed collection property directly
+   inside the LINQ query's `.Select()`.
 
 ## 6.6 Naming Conventions
 
@@ -1626,6 +1743,10 @@ See Section 3.7 for full tech stack. Key packages:
 - Version lifecycle: New → Preview → Supported → Deprecated → Sunset → Retired
 - Clients must explicitly request version; server never silently redirects
 - Each version has independent OpenAPI spec
+- `/api/v1/asset-models` — CRUD + search (search requires `holdingId` query parameter) + Engine-compatibility management (`/compatible-engine-models` sub-route)
+- `/api/v1/engine-models` — CRUD + search (search requires `holdingId` query parameter)
+- `/api/v1/unit-categories` — CRUD + list (Organization-scoped)
+- `/api/v1/units-of-measurement` — CRUD + list (Organization-scoped, each unit references a UnitCategory in the same Organization)
 
 ## 8.3 URI Design Rules
 - Plural nouns, lowercase, hyphen (`-`) separator
@@ -1635,6 +1756,7 @@ See Section 3.7 for full tech stack. Key packages:
 - Bulk operations explicit: `POST /assets/bulk-import`
 - Search via query params: `GET /assets?serialNumber=...` (avoid `/search` endpoints unless complex)
 - NEVER: `/GetAssets`, `/AssetList`, `/CreateAsset`
+
 
 ## 8.4 HTTP Methods
 
@@ -1745,6 +1867,9 @@ See Section 3.7 for full tech stack. Key packages:
 ### Audit Logging
 - Log: successful/failed auth, authZ failures, permission changes, user lockout, admin access
 - NEVER log: passwords, tokens, secrets, connection strings, PII, payment info
+
+### sign-out mechanism
+- Sign-out is performed via a plain HTML link to `/connect/logout` (a full server-side navigation), deliberately not a Blazor button routed through the interactive circuit (chat, 2026-08-27).
 
 ## 8.9 OpenAPI Specification
 
@@ -1981,6 +2106,11 @@ Released → Supported → Maintenance → Deprecated → End of Support → Arc
   - Asset hierarchy (parent/child) permitted; cycles prohibited
   - Asset relationships never transfer Asset identity
   - Historical relationships preserved; never overwritten
+
+  > **Note (chat, 2026-08-25):** AssetModel and EngineModel catalogs are
+  > scoped Per-Holding — shared across every Organization under that, 
+  > not shared platform-wide. only Asset identity records are per-Organization.
+  > Each Holding> maintains and manages its own model catalog independently.
 
 ## 10.3 BR-004 — Tracked Components
 - **Purpose:** Manage components with independent lifecycle (Engine, Transmission, Tire, Battery, Hydraulic Attachment)

@@ -85,6 +85,7 @@ public static class IdentityDataSeeder
         var user = new ApplicationUser
         {
             UserName = TestUserName,
+            LockoutEnabled = true,
         };
 
         var result = await userManager.CreateAsync(user, TestUserPassword);

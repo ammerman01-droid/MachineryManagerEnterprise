@@ -1,0 +1,94 @@
+using MachineryManager.Asset.Application.Abstractions;
+using MachineryManager.Asset.Application.Features.Assets.Dtos;
+using MachineryManager.SharedKernel;
+using MachineryManager.SharedKernel.Abstractions;
+using MediatR;
+
+namespace MachineryManager.Asset.Application.Features.Assets.Queries.GetAssetById;
+
+/// <summary>
+/// Handles <see cref="GetAssetByIdQuery"/> by loading the aggregate,
+/// verifying the caller is authorized for its owning Organization, and
+/// mapping it to a DTO.
+/// </summary>
+public sealed class GetAssetByIdQueryHandler
+    : IRequestHandler<GetAssetByIdQuery, Result<AssetDto>>
+{
+    private const string RequiredPermission = "Asset.View";
+
+    private readonly IAssetRepository _assetRepository;
+    private readonly ICurrentUserService _currentUserService;
+    private readonly IPermissionEvaluator _permissionEvaluator;
+    private readonly IOrganizationLookupService _organizationLookupService;
+
+    /// <summary>Initializes a new instance of the <see cref="GetAssetByIdQueryHandler"/> class.</summary>
+    /// <param name="assetRepository">The Asset repository.</param>
+    /// <param name="currentUserService">Provides the authenticated user context.</param>
+    /// <param name="permissionEvaluator">Evaluates the current user's permissions at request time.</param>
+    /// <param name="organizationLookupService">Cross-module, read-only lookup into the Organization module, used to resolve the owning Organization's Holding for scope evaluation.</param>
+    public GetAssetByIdQueryHandler(
+        IAssetRepository assetRepository,
+        ICurrentUserService currentUserService,
+        IPermissionEvaluator permissionEvaluator,
+        IOrganizationLookupService organizationLookupService)
+    {
+        _assetRepository = assetRepository;
+        _currentUserService = currentUserService;
+        _permissionEvaluator = permissionEvaluator;
+        _organizationLookupService = organizationLookupService;
+    }
+
+    /// <summary>Executes the lookup use case.</summary>
+    /// <param name="request">The query, containing the identifier of the Asset to retrieve.</param>
+    /// <param name="cancellationToken">Token to cancel the asynchronous operation.</param>
+    /// <returns>
+    /// A <see cref="Result{AssetDto}"/> containing the Asset's details on success; a not-found error if no
+    /// Asset with the given identifier exists; otherwise an authorization error.
+    /// </returns>
+    public async Task<Result<AssetDto>> Handle(GetAssetByIdQuery request, CancellationToken cancellationToken)
+    {
+        var id = global::Asset.Domain.AssetId.From(request.AssetId);
+        var asset = await _assetRepository.GetByIdAsync(id, cancellationToken);
+
+        if (asset is null)
+        {
+            return Result.Failure<AssetDto>(
+                Error.NotFound("Asset.NotFound", $"Asset with id {request.AssetId} was not found."));
+        }
+
+        if (_currentUserService.UserId is not { } userId)
+        {
+            return Result.Failure<AssetDto>(global::Asset.Domain.AssetErrors.NotAuthorized());
+        }
+
+        var holdingId = await _organizationLookupService.GetHoldingIdAsync(asset.OrganizationId, cancellationToken);
+
+        var isAuthorized = await _permissionEvaluator.HasPermissionAsync(
+            userId,
+            RequiredPermission,
+            new ResourceScope(holdingId, asset.OrganizationId, null),
+            cancellationToken);
+
+        if (!isAuthorized)
+        {
+            return Result.Failure<AssetDto>(global::Asset.Domain.AssetErrors.NotAuthorized());
+        }
+
+        var dto = new AssetDto(
+            asset.Id.Value,
+            asset.OrganizationId,
+            asset.Code,
+            asset.Name,
+            asset.AssetModelId.Value,
+            asset.ColorId,
+            asset.SerialNumber,
+            asset.ChassisNumber,
+            asset.BodyNumber,
+            asset.Vin,
+            asset.LicensePlate,
+            asset.ManufactureYear,
+            asset.Status.ToString());
+
+        return Result.Success(dto);
+    }
+}

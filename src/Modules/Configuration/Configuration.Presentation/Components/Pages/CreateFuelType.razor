@@ -1,0 +1,84 @@
+@page "/admin/fuel-types/create"
+@using MachineryManager.SharedKernel
+@inject IHttpClientFactory HttpClientFactory
+@inject NavigationManager Navigation
+
+<PageTitle>نوع سوخت جدید</PageTitle>
+
+<MudText Typo="Typo.h4" Class="mb-4">ثبت نوع سوخت جدید</MudText>
+
+@if (errorMessage is not null)
+{
+    <MudAlert Severity="Severity.Error" Class="my-4">@errorMessage</MudAlert>
+}
+
+<MudPaper Class="pa-4" Style="max-width:500px;">
+    <MudForm @ref="form">
+        <MudTextField T="string" Label="نام" @bind-Value="name" Required="true" RequiredError="نام الزامی است" MaxLength="50" />
+
+        <MudSelect T="FuelKind" Label="دسته‌بندی سوخت" @bind-Value="kind" Class="mt-2">
+            <MudSelectItem T="FuelKind" Value="FuelKind.Diesel">گازوئیل</MudSelectItem>
+            <MudSelectItem T="FuelKind" Value="FuelKind.Gasoline">بنزین</MudSelectItem>
+            <MudSelectItem T="FuelKind" Value="FuelKind.Gas">گاز</MudSelectItem>
+        </MudSelect>
+
+        <MudNumericField T="long" Label="قیمت" @bind-Value="price" Required="true" RequiredError="قیمت الزامی است" Min="1" Class="mt-2" />
+
+        <MudButton Variant="Variant.Filled" Color="Color.Primary" Class="mt-4" OnClick="SubmitAsync" Disabled="isSubmitting">
+            @(isSubmitting ? "در حال ثبت..." : "ثبت")
+        </MudButton>
+        <MudButton Variant="Variant.Outlined" Color="Color.Secondary" Class="mt-4 ml-2"
+                   OnClick="@(() => Navigation.NavigateTo("/admin/fuel-types"))">
+            انصراف
+        </MudButton>
+    </MudForm>
+</MudPaper>
+
+@code {
+    /// <summary>Gets or sets the identifier of the Holding this Fuel Type will belong to, supplied via the query string.</summary>
+    [SupplyParameterFromQuery]
+    public Guid HoldingId { get; set; }
+
+    private MudForm form = null!;
+    private string name = string.Empty;
+    private long price;
+    private FuelKind kind = FuelKind.Gasoline;
+    private bool isSubmitting;
+    private string? errorMessage;
+
+    private async Task SubmitAsync()
+    {
+        await form.Validate();
+        if (!form.IsValid)
+        {
+            return;
+        }
+
+        isSubmitting = true;
+        errorMessage = null;
+
+        try
+        {
+            var client = HttpClientFactory.CreateClient("InternalApi");
+            var response = await client.PostAsJsonAsync("/api/v1/fuel-types", new { HoldingId, Name = name, Price = price, Kind = kind });
+            var content = await response.Content.ReadAsStringAsync();
+
+            if (response.IsSuccessStatusCode)
+            {
+                Navigation.NavigateTo("/admin/fuel-types");
+            }
+            else
+            {
+                errorMessage = $"خطا در ثبت نوع سوخت: {content}";
+            }
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"خطا: {ex.Message}";
+        }
+        finally
+        {
+            isSubmitting = false;
+        }
+    }
+}

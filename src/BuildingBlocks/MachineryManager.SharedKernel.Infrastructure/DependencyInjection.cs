@@ -17,6 +17,7 @@ public static class DependencyInjection
     public static IServiceCollection AddSharedKernelInfrastructure(this IServiceCollection services)
     {
         services.AddSingleton<IDateTimeProvider, SystemDateTimeProvider>();
+        services.AddScoped<AuditSaveChangesInterceptor>();
 
         return services;
     }

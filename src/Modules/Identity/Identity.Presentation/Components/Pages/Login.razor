@@ -8,30 +8,121 @@
 
 <PageTitle>ورود به سامانه</PageTitle>
 
-<h1>ورود به سامانه</h1>
+<div class="login-card">
+    <h1 class="login-title">ورود به سامانه</h1>
+    <p class="login-subtitle">برای ادامه، وارد حساب کاربری خود شوید</p>
 
-@if (errorMessage is not null)
-{
-    <p style="color:red">@errorMessage</p>
-}
+    @if (errorMessage is not null)
+    {
+        <div class="login-error">@errorMessage</div>
+    }
 
-<EditForm Model="Input" method="post" OnValidSubmit="LoginUserAsync" FormName="login">
-    <DataAnnotationsValidator />
+    <EditForm Model="Input" method="post" OnValidSubmit="LoginUserAsync" FormName="login">
+        <DataAnnotationsValidator />
 
-    <div>
-        <label for="username">نام کاربری</label>
-        <InputText id="username" @bind-Value="Input.UserName" autocomplete="username" />
-        <ValidationMessage For="() => Input.UserName" />
-    </div>
+        <div class="login-field">
+            <label for="username">نام کاربری</label>
+            <InputText id="username" class="login-input" @bind-Value="Input.UserName" autocomplete="username" placeholder="نام کاربری خود را وارد کنید" />
+            <ValidationMessage For="() => Input.UserName" class="login-validation" />
+        </div>
 
-    <div>
-        <label for="password">رمز عبور</label>
-        <InputText id="password" type="password" @bind-Value="Input.Password" autocomplete="current-password" />
-        <ValidationMessage For="() => Input.Password" />
-    </div>
+        <div class="login-field">
+            <label for="password">رمز عبور</label>
+            <div class="login-password-wrapper">
+                <InputText id="password" type="password" class="login-input" @bind-Value="Input.Password" autocomplete="current-password" placeholder="رمز عبور خود را وارد کنید" />
+                <button type="button" class="login-password-toggle" onclick="mmeTogglePasswordVisibility('password', this)" aria-label="نمایش یا مخفی‌کردن رمز عبور">
+                    <svg class="login-eye-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round" />
+                        <circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="1.6" />
+                    </svg>
+                </button>
+            </div>
+            <ValidationMessage For="() => Input.Password" class="login-validation" />
+        </div>
 
-    <button type="submit">ورود</button>
-</EditForm>
+        <div class="login-remember-row">
+            <label class="login-remember-label">
+                <InputCheckbox @bind-Value="Input.RememberMe" />
+                <span>مرا به خاطر بسپار</span>
+            </label>
+        </div>
+
+        <button type="submit" class="login-submit">ورود</button>
+    </EditForm>
+</div>
+
+<style>
+    .login-title { font-size: 1.75rem; font-weight: 700; margin-bottom: .25rem; color: #1f2430; }
+    .login-subtitle { color: #8a8f9a; margin-bottom: 1.75rem; font-size: .9rem; }
+    .login-error { background: #fdecec; color: #c0392b; padding: .65rem 1rem; border-radius: 12px; margin-bottom: 1rem; font-size: .85rem; }
+    .login-field { margin-bottom: 1.1rem; }
+    .login-field label { display: block; font-size: .85rem; color: #5b6070; margin-bottom: .4rem; }
+
+    .login-input {
+        width: 100%;
+        box-sizing: border-box;
+        padding: .85rem 1.1rem;
+        border-radius: 14px;
+        border: 1px solid #e4e6eb;
+        background: #f7f8fa;
+        font-size: .95rem;
+        outline: none;
+        transition: border-color .15s, box-shadow .15s;
+    }
+
+    .login-input:focus {
+        border-color: #f5b800;
+        box-shadow: 0 0 0 3px rgba(245, 184, 0, .15);
+        background: #fff;
+    }
+
+    .login-password-wrapper { position: relative; }
+    .login-password-wrapper .login-input { padding-left: 2.75rem; }
+
+    .login-password-toggle {
+        position: absolute;
+        left: .65rem;
+        top: 50%;
+        transform: translateY(-50%);
+        background: none;
+        border: none;
+        cursor: pointer;
+        color: #9ba0ab;
+        padding: .25rem;
+        display: flex;
+    }
+
+    .login-password-toggle:hover { color: #5b6070; }
+    .login-eye-icon { width: 20px; height: 20px; }
+    .login-validation { color: #c0392b; font-size: .78rem; margin-top: .3rem; display: block; }
+    .login-remember-row { margin-bottom: 1.4rem; }
+    .login-remember-label { display: flex; align-items: center; gap: .5rem; font-size: .85rem; color: #5b6070; cursor: pointer; }
+
+    .login-submit {
+        width: 100%;
+        padding: .9rem;
+        border: none;
+        border-radius: 14px;
+        background: #f5b800;
+        color: #1f2430;
+        font-weight: 700;
+        font-size: 1rem;
+        cursor: pointer;
+        transition: background .15s;
+    }
+
+    .login-submit:hover { background: #e0a800; }
+</style>
+
+<script>
+    function mmeTogglePasswordVisibility(inputId, buttonEl) {
+        const input = document.getElementById(inputId);
+        if (!input) return;
+        const isHidden = input.type === "password";
+        input.type = isHidden ? "text" : "password";
+        buttonEl.classList.toggle("is-visible", isHidden);
+    }
+</script>
 
 @code {
     private string? errorMessage;
@@ -52,7 +143,7 @@
         var result = await SignInManager.PasswordSignInAsync(
             Input.UserName,
             Input.Password,
-            isPersistent: false,
+            isPersistent: Input.RememberMe,
             lockoutOnFailure: true);
 
         if (result.Succeeded)
@@ -77,5 +168,8 @@
 
         [Required(ErrorMessage = "رمز عبور الزامی است.")]
         public string Password { get; set; } = string.Empty;
+
+        /// <summary>Whether the sign-in cookie should persist across browser sessions.</summary>
+        public bool RememberMe { get; set; }
     }
 }

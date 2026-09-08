@@ -15,6 +15,15 @@ using OpenTelemetry.Metrics;
 using OpenTelemetry.Trace;
 using Scalar.AspNetCore;
 using Serilog;
+using MachineryManager.Asset.Application;
+using MachineryManager.Asset.Infrastructure;
+using MachineryManager.Asset.Presentation.Endpoints;
+using MachineryManager.Configuration.Infrastructure;
+using MachineryManager.Configuration.Presentation.Endpoints;
+using MachineryManager.Configuration.Application;
+using MachineryManager.AuditLog.Application;
+using MachineryManager.AuditLog.Infrastructure;
+using MachineryManager.AuditLog.Presentation.Endpoints;
 
 Log.Logger = new LoggerConfiguration()
     .WriteTo.Console()
@@ -54,11 +63,23 @@ try
     builder.Services.AddAdministrationApplication();
     builder.Services.AddAdministrationInfrastructure(builder.Configuration);
 
+    // Asset module
+    builder.Services.AddAssetApplication();
+    builder.Services.AddAssetInfrastructure(builder.Configuration);
+
     // Identity platform module
     builder.Services.AddIdentityInfrastructure(builder.Configuration);
     builder.Services.AddIdentityOpenIddictServer(builder.Environment);
     builder.Services.AddIdentityOpenIddictClient(builder.Configuration, builder.Environment);
     builder.Services.AddIdentityInternalApiClient(builder.Configuration);
+
+    // Configuration module
+    builder.Services.AddConfigurationApplication();
+    builder.Services.AddConfigurationInfrastructure(builder.Configuration);
+
+    // AuditLog module (read-only)
+    builder.Services.AddAuditLogApplication();
+    builder.Services.AddAuditLogInfrastructure(builder.Configuration);
 
     var app = builder.Build();
 
@@ -79,21 +100,24 @@ try
     }
 
     app.UseSerilogRequestLogging();
-        app.UseWhen(
-        context => !context.Request.Path.StartsWithSegments("/api"),
-        branch => branch.UseStatusCodePagesWithReExecute("/not-found", createScopeForStatusCodePages: true));
+    app.UseWhen(
+    context => !context.Request.Path.StartsWithSegments("/api"),
+    branch => branch.UseStatusCodePagesWithReExecute("/not-found", createScopeForStatusCodePages: true));
     app.UseHttpsRedirection();
     app.UseAuthentication();
     app.UseAuthorization();
     app.UseAntiforgery();
 
     app.MapStaticAssets();
-    app.MapRazorComponents<App>()
-        .AddInteractiveServerRenderMode()
-        .AddAdditionalAssemblies(
-            typeof(MachineryManager.Identity.Presentation.Components.Pages.Login).Assembly,
-            typeof(MachineryManager.Administration.Presentation.Components.Pages.ProfilesList).Assembly,
-            typeof(MachineryManager.Organization.Presentation.Components.Pages.OrganizationsList).Assembly);
+        app.MapRazorComponents<App>()
+    .AddInteractiveServerRenderMode()
+    .AddAdditionalAssemblies(
+        typeof(MachineryManager.Identity.Presentation.Components.Pages.Login).Assembly,
+        typeof(MachineryManager.Administration.Presentation.Components.Pages.ProfilesList).Assembly,
+        typeof(MachineryManager.Organization.Presentation.Components.Pages.OrganizationsList).Assembly,
+        typeof(MachineryManager.Asset.Presentation.Components.Pages.AssetModelsList).Assembly,
+        typeof(MachineryManager.Configuration.Presentation.Components.Pages.ColorsList).Assembly,
+        typeof(MachineryManager.AuditLog.Presentation.Components.Pages.AuditLogList).Assembly);
 
     // Identity endpoints
     app.MapIdentityConnectEndpoints();
@@ -109,6 +133,21 @@ try
     // Administration endpoints
     app.MapProfileEndpoints();
     app.MapUserProfileAssignmentEndpoints();
+
+    // Asset endpoints
+    app.MapAssetModelEndpoints();
+    app.MapEngineModelEndpoints();
+    app.MapAssetEndpoints();
+
+    //Configuration endpoints
+    app.MapColorEndpoints();
+    app.MapUnitOfMeasurementEndpoints();
+    app.MapCompanyEndpoints();
+    app.MapFuelTypeEndpoints();
+
+    // AuditLog endpoints
+    app.MapAuditLogEndpoints();
+    
 
     app.Run();
 }

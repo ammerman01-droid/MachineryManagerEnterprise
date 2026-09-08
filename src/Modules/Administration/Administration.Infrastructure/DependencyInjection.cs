@@ -23,12 +23,13 @@ public static class DependencyInjection
         this IServiceCollection services,
         IConfiguration configuration)
     {
-        services.AddDbContext<AdministrationDbContext>(options => options
+        services.AddDbContext<AdministrationDbContext>((serviceProvider, options) => options
             .UseSqlServer(
                 configuration.GetConnectionString("MachineryManagerDatabase"),
                 sqlServerOptions => sqlServerOptions.MigrationsHistoryTable(
                     "__EFMigrationsHistory",
-                    schema: "administration")));
+                    schema: "administration"))
+            .AddInterceptors(serviceProvider.GetRequiredService<MachineryManager.SharedKernel.Infrastructure.AuditSaveChangesInterceptor>()));
 
         services.AddScoped<IProfileRepository, ProfileRepository>();
         services.AddScoped<IUserProfileAssignmentRepository, UserProfileAssignmentRepository>();

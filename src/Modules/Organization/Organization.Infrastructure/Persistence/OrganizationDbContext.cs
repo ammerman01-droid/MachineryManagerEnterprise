@@ -1,6 +1,8 @@
+using MachineryManager.Organization.Application.Abstractions;
 using MachineryManager.SharedKernel;
 using MachineryManager.SharedKernel.Abstractions;
 using Microsoft.EntityFrameworkCore;
+using MachineryManager.SharedKernel.Infrastructure;
 
 namespace MachineryManager.Organization.Infrastructure.Persistence;
 
@@ -9,9 +11,12 @@ namespace MachineryManager.Organization.Infrastructure.Persistence;
 /// ADR-0019 Hybrid Persistence Strategy). Owns the "organization" schema
 /// exclusively; per the Modular Monolith Rules (06-development, Section
 /// 6.1) no other module may reference these tables directly. Also
-/// serves as this module's <see cref="IUnitOfWork"/> implementation.
+/// serves as this module's <see cref="IOrganizationUnitOfWork"/>
+/// implementation (chat, 2026-08-27 — was the shared
+/// <see cref="IUnitOfWork"/> directly, which caused a DI registration
+/// collision with other modules' DbContexts).
 /// </summary>
-public sealed class OrganizationDbContext : DbContext, IUnitOfWork
+public sealed class OrganizationDbContext : DbContext, IOrganizationUnitOfWork
 {
     private readonly IDomainEventDispatcher? _domainEventDispatcher;
 
@@ -41,11 +46,26 @@ public sealed class OrganizationDbContext : DbContext, IUnitOfWork
     public DbSet<global::Organization.Domain.Project> Projects =>
         Set<global::Organization.Domain.Project>();
 
+    /// <summary>
+    /// Gets the set of audit records captured for this module's schema.
+    /// This module does NOT own the physical table — Administration does.
+    /// </summary>
+    public DbSet<MachineryManager.SharedKernel.AuditEntry> AuditEntries =>
+        Set<MachineryManager.SharedKernel.AuditEntry>();
+
     /// <inheritdoc />
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.HasDefaultSchema("organization");
         modelBuilder.ApplyConfigurationsFromAssembly(typeof(OrganizationDbContext).Assembly);
+
+        // Shared audit table (chat, 2026-09-05, gam 3): this context only
+        // reads/writes rows. The physical table is created exclusively by
+        // AdministrationDbContext's migration — the ONLY owner. With
+        // ownsTable: false, ExcludeFromMigrations ensures `dotnet ef
+        // migrations add` for this module never emits CreateTable/
+        // AlterTable for AuditEntry.
+        modelBuilder.ApplyAuditEntryMapping(ownsTable: false);
 
         base.OnModelCreating(modelBuilder);
     }

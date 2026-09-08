@@ -17,7 +17,7 @@ public sealed class AssignOrganizationToHoldingCommandHandler
     private const string RequiredPermission = "Organization.Edit";
 
     private readonly IOrganizationRepository _organizationRepository;
-    private readonly IUnitOfWork _unitOfWork;
+    private readonly IOrganizationUnitOfWork _unitOfWork;
     private readonly IDateTimeProvider _dateTimeProvider;
     private readonly ICurrentUserService _currentUserService;
     private readonly IPermissionEvaluator _permissionEvaluator;
@@ -32,7 +32,7 @@ public sealed class AssignOrganizationToHoldingCommandHandler
     /// <param name="permissionEvaluator">Evaluates the current user's permissions at request time.</param>
     public AssignOrganizationToHoldingCommandHandler(
         IOrganizationRepository organizationRepository,
-        IUnitOfWork unitOfWork,
+        IOrganizationUnitOfWork unitOfWork,
         IDateTimeProvider dateTimeProvider,
         ICurrentUserService currentUserService,
         IPermissionEvaluator permissionEvaluator)

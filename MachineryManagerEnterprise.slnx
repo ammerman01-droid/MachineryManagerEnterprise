@@ -11,6 +11,12 @@
     <Project Path="src/Host/MachineryManager.Web/MachineryManager.Web.csproj" />
   </Folder>
   <Folder Name="/src/Modules/" />
+  <Folder Name="/src/Modules/Asset/">
+    <Project Path="src/Modules/Asset/Asset.Application/Asset.Application.csproj" />
+    <Project Path="src/Modules/Asset/Asset.Domain/Asset.Domain.csproj" />
+    <Project Path="src/Modules/Asset/Asset.Infrastructure/Asset.Infrastructure.csproj" />
+    <Project Path="src/Modules/Asset/Asset.Presentation/Asset.Presentation.csproj" />
+  </Folder>
   <Folder Name="/src/Modules/Identity/">
     <Project Path="src/Modules/Identity/Identity.Domain/Identity.Domain.csproj" />
     <Project Path="src/Modules/Identity/Identity.Application/Identity.Application.csproj" />
@@ -28,5 +34,16 @@
     <Project Path="src/Modules/Administration/Administration.Application/Administration.Application.csproj" />
     <Project Path="src/Modules/Administration/Administration.Infrastructure/Administration.Infrastructure.csproj" />
     <Project Path="src/Modules/Administration/Administration.Presentation/Administration.Presentation.csproj" />
+  </Folder>
+  <Folder Name="/src/Modules/AuditLog/">
+    <Project Path="src/Modules/AuditLog/AuditLog.Application/AuditLog.Application.csproj" />
+    <Project Path="src/Modules/AuditLog/AuditLog.Infrastructure/AuditLog.Infrastructure.csproj" />
+    <Project Path="src/Modules/AuditLog/AuditLog.Presentation/AuditLog.Presentation.csproj" />
+  </Folder>
+  <Folder Name="/src/Modules/Configuration/">
+    <Project Path="src/Modules/Configuration/Configuration.Application/Configuration.Application.csproj" />
+    <Project Path="src/Modules/Configuration/Configuration.Domain/Configuration.Domain.csproj" />
+    <Project Path="src/Modules/Configuration/Configuration.Infrastructure/Configuration.Infrastructure.csproj" />
+    <Project Path="src/Modules/Configuration/Configuration.Presentation/Configuration.Presentation.csproj" />
   </Folder>
 </Solution>

@@ -25,12 +25,12 @@ public static class DependencyInjection
     /// ASP.NET Core Identity (local user/role store, ADR-0030).
     /// </summary>
     /// <remarks>
-    /// The password and lockout policy values set here are NOT sourced
-    /// from approved documentation — no numeric password policy exists
-    /// anywhere in 02-architecture (ADR-0026) or 03-domain. These are
-    /// provisional, OWASP-aligned defaults, flagged explicitly here as
-    /// an open item pending approval, not a silently assumed business
-    /// rule.
+    /// The password policy values are still provisional (OWASP-aligned
+    /// defaults, not sourced from approved documentation — no numeric
+    /// password policy exists anywhere in 02-architecture (ADR-0026) or
+    /// 03-domain). The lockout policy, however, IS now confirmed by the
+    /// product owner (chat, 2026-09-07): 5 failed attempts → 15-minute
+    /// lockout.
     /// </remarks>
     /// <param name="services">The service collection to configure.</param>
     /// <param name="configuration">The application configuration, used to resolve the connection string.</param>
@@ -65,9 +65,9 @@ public static class DependencyInjection
                 options.Password.RequireUppercase = true;
                 options.Password.RequireNonAlphanumeric = true;
 
-                // Lockout policy: still provisional (OWASP-aligned
-                // default) — not yet explicitly confirmed by the
-                // product owner. Flagged as a remaining open item.
+                // Lockout policy — explicitly confirmed by the product
+                // owner (chat, 2026-09-07): after 5 failed sign-in
+                // attempts, lock the account for 15 minutes.
                 options.Lockout.MaxFailedAccessAttempts = 5;
                 options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(15);
                 options.Lockout.AllowedForNewUsers = true;
