@@ -1,6 +1,7 @@
 using Configuration.Domain;
 using MachineryManagerEnterprise.Configuration.Application.Abstractions;
 using MachineryManagerEnterprise.Configuration.Application.Features.FuelTypes.Dtos;
+using MapsterMapper;
 using Microsoft.EntityFrameworkCore;
 
 namespace MachineryManagerEnterprise.Configuration.Infrastructure.Persistence;
@@ -9,10 +10,16 @@ namespace MachineryManagerEnterprise.Configuration.Infrastructure.Persistence;
 public sealed class FuelTypeRepository : IFuelTypeRepository
 {
     private readonly ConfigurationDbContext _dbContext;
+    private readonly IMapper _mapper;
 
     /// <summary>Initializes a new instance of the <see cref="FuelTypeRepository"/> class.</summary>
     /// <param name="dbContext">The Configuration module's persistence context.</param>
-    public FuelTypeRepository(ConfigurationDbContext dbContext) => _dbContext = dbContext;
+    /// <param name="mapper">The Mapster-backed mapper used to project entities to DTOs.</param>
+    public FuelTypeRepository(ConfigurationDbContext dbContext, IMapper mapper)
+    {
+        _dbContext = dbContext;
+        _mapper = mapper;
+    }
 
     /// <inheritdoc />
     public Task<FuelType?> GetByIdAsync(FuelTypeId id, CancellationToken cancellationToken = default) =>
@@ -36,6 +43,6 @@ public sealed class FuelTypeRepository : IFuelTypeRepository
             .OrderBy(f => f.Name)
             .ToListAsync(cancellationToken);
 
-        return entities.Select(f => new FuelTypeDto(f.Id.Value, f.Name, f.Price, f.Kind)).ToList();
+        return _mapper.Map<List<FuelTypeDto>>(entities);
     }
 }

@@ -2,6 +2,7 @@ using Asset.Domain;
 using MachineryManagerEnterprise.Asset.Application.Abstractions;
 using MachineryManagerEnterprise.Asset.Application.Features.Assets.Dtos;
 using MachineryManagerEnterprise.Asset.Application.Features.Assets.Queries.SearchAssets;
+using MapsterMapper;
 using Microsoft.EntityFrameworkCore;
 
 namespace MachineryManagerEnterprise.Asset.Infrastructure.Persistence;
@@ -10,12 +11,15 @@ namespace MachineryManagerEnterprise.Asset.Infrastructure.Persistence;
 public sealed class AssetRepository : IAssetRepository
 {
     private readonly AssetDbContext _dbContext;
+    private readonly IMapper _mapper;
 
     /// <summary>Initializes a new instance of the <see cref="AssetRepository"/> class.</summary>
     /// <param name="dbContext">The Asset module's persistence context.</param>
-    public AssetRepository(AssetDbContext dbContext)
+    /// <param name="mapper">The Mapster-backed mapper used to project entities to DTOs.</param>
+    public AssetRepository(AssetDbContext dbContext, IMapper mapper)
     {
         _dbContext = dbContext;
+        _mapper = mapper;
     }
 
     /// <inheritdoc />
@@ -60,32 +64,17 @@ public sealed class AssetRepository : IAssetRepository
 
         var totalItems = await query.CountAsync(cancellationToken);
 
-        // Materialize entities first, map to DTO in memory afterward —
-        // avoids the EF Core 10 Select-projection translation issue
-        // documented for field-backed collection/value-object
-        // properties (chat, 2026-08-25).
+        // Materialize entities first, map to DTO in memory via Mapster's
+        // IMapper afterward — avoids the EF Core 10 Select-projection
+        // translation issue documented for field-backed collection/
+        // value-object properties (chat, 2026-08-25).
         var entities = await query
             .OrderBy(a => a.Code)
             .Skip((page - 1) * pageSize)
             .Take(pageSize)
             .ToListAsync(cancellationToken);
 
-        var items = entities
-            .Select(a => new AssetDto(
-                a.Id.Value,
-                a.OrganizationId,
-                a.Code,
-                a.Name,
-                a.AssetModelId.Value,
-                a.ColorId,
-                a.SerialNumber,
-                a.ChassisNumber,
-                a.BodyNumber,
-                a.Vin,
-                a.LicensePlate,
-                a.ManufactureYear,
-                a.Status.ToString()))
-            .ToList();
+        var items = _mapper.Map<List<AssetDto>>(entities);
 
         var totalPages = totalItems == 0 ? 0 : (int)Math.Ceiling(totalItems / (double)pageSize);
 

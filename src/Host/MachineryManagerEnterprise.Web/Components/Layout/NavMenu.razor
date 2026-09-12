@@ -1,96 +1,111 @@
-﻿<div class="top-row ps-3 navbar navbar-dark">
-    <div class="container-fluid">
-        <a class="navbar-brand" href="">MachineryManagerEnterprise.Web</a>
-    </div>
-</div>
+﻿@inject NavigationManager Navigation
+@implements IDisposable
 
-<input type="checkbox" title="Navigation menu" class="navbar-toggler" />
+<MudNavMenu>
+    <MudNavLink Href="" Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.Home">
+        خانه
+    </MudNavLink>
 
-<div class="nav-scrollable" onclick="document.querySelector('.navbar-toggler').click()">
-    <nav class="nav flex-column">
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="" Match="NavLinkMatch.All">
-                <span class="bi bi-house-door-fill-nav-menu" aria-hidden="true"></span> Home
-            </NavLink>
-        </div>
+    @foreach (var category in categories)
+    {
+        <MudNavGroup Title="@category.Title" Icon="@category.Icon"
+                     Expanded="@(expandedCategoryKey == category.Key)"
+                     ExpandedChanged="@((bool isExpanded) => OnGroupExpandedChanged(category.Key, isExpanded))">
+            @foreach (var link in category.Links)
+            {
+                <MudNavLink Href="@link.Href" Icon="@link.Icon">@link.Title</MudNavLink>
+            }
+        </MudNavGroup>
+    }
+</MudNavMenu>
 
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="admin/holdings">
-                <span class="bi bi-diagram-3-nav-menu" aria-hidden="true"></span> هلدینگ ها
-            </NavLink>
-        </div>
+@code {
+    /// <summary>
+    /// The key of the currently expanded category, or <see langword="null"/>
+    /// when all are collapsed. Because each <see cref="MudNavGroup"/>'s
+    /// <c>Expanded</c> is bound one-way to "does this key match", setting
+    /// this field to a new key automatically collapses whichever group was
+    /// previously open — no manual bookkeeping needed beyond this field.
+    /// </summary>
+    private string? expandedCategoryKey;
 
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="admin/organizations">
-                <span class="bi bi-building-nav-menu" aria-hidden="true"></span> سازمان‌ها
-            </NavLink>
-        </div>
+    /// <summary>
+    /// The fixed set of nav categories shown in the drawer, grouped per
+    /// the approved menu structure (chat, 2026-09-10).
+    /// </summary>
+    private readonly List<NavMenuCategory> categories = new()
+    {
+        new NavMenuCategory("structure", "ساختار سازمانی", Icons.Material.Filled.AccountTree, new List<NavMenuLink>
+        {
+            new("هلدینگ‌ها", "admin/holdings", Icons.Material.Filled.Domain),
+            new("سازمان‌ها", "admin/organizations", Icons.Material.Filled.Business),
+            new("پروژه‌ها", "admin/projects", Icons.Material.Filled.FolderSpecial),
+        }),
+        new NavMenuCategory("base-data", "اطلاعات پایه", Icons.Material.Filled.Tune, new List<NavMenuLink>
+        {
+            new("رنگ‌ها", "admin/colors", Icons.Material.Filled.Palette),
+            new("واحدهای اندازه‌گیری", "admin/units-of-measurement", Icons.Material.Filled.Straighten),
+            new("شرکت‌های سازنده", "admin/companies", Icons.Material.Filled.Apartment),
+            new("انواع سوخت", "admin/fuel-types", Icons.Material.Filled.LocalGasStation),
+        }),
+        new NavMenuCategory("assets", "دارایی‌ها", Icons.Material.Filled.PrecisionManufacturing, new List<NavMenuLink>
+        {
+            new("مدل‌های دارایی", "admin/asset-models", Icons.Material.Filled.Construction),
+            new("مدل‌های موتور", "admin/engine-models", Icons.Material.Filled.Settings),
+            new("دارایی‌ها", "admin/assets", Icons.Material.Filled.LocalShipping),
+        }),
+        new NavMenuCategory("access", "دسترسی کاربران", Icons.Material.Filled.AdminPanelSettings, new List<NavMenuLink>
+        {
+            new("پروفایل‌ها", "admin/profiles", Icons.Material.Filled.Security),
+            new("کاربران", "admin/users", Icons.Material.Filled.People),
+        }),
+        new NavMenuCategory("reports", "گزارش‌ها", Icons.Material.Filled.Assessment, new List<NavMenuLink>
+        {
+            new("گزارش رخدادها", "admin/audit-log", Icons.Material.Filled.EventNote),
+        }),
+    };
 
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="admin/projects">
-                <span class="bi bi-kanban-nav-menu" aria-hidden="true"></span> پروژه‌ها
-            </NavLink>
-        </div>
+    protected override void OnInitialized()
+    {
+        SetExpandedCategoryFromCurrentUri();
+        Navigation.LocationChanged += OnLocationChanged;
+    }
 
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="admin/colors">
-                <span class="bi bi-palette-nav-menu" aria-hidden="true"></span> رنگ‌ها
-            </NavLink>
-        </div>
+    private void OnLocationChanged(object? sender, Microsoft.AspNetCore.Components.Routing.LocationChangedEventArgs e)
+    {
+        SetExpandedCategoryFromCurrentUri();
+        StateHasChanged();
+    }
 
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="admin/units-of-measurement">
-                <span class="bi bi-rulers-nav-menu" aria-hidden="true"></span> واحدهای اندازه‌گیری
-            </NavLink>
-        </div>
+    private void SetExpandedCategoryFromCurrentUri()
+    {
+        var relativePath = Navigation.ToBaseRelativePath(Navigation.Uri).TrimEnd('/');
 
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="admin/companies">
-                <span class="bi bi-buildings-nav-menu" aria-hidden="true"></span> شرکت‌های سازنده
-            </NavLink>
-        </div>
+        var matchedCategory = categories.FirstOrDefault(category =>
+            category.Links.Any(link => MatchesCurrentPath(relativePath, link.Href)));
 
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="admin/fuel-types">
-                <span class="bi bi-buildings-nav-menu" aria-hidden="true"></span> انواع سوخت
-            </NavLink>
-        </div>
+        if (matchedCategory is not null)
+        {
+            expandedCategoryKey = matchedCategory.Key;
+        }
+    }
 
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="admin/asset-models">
-                <span class="bi bi-truck-front-nav-menu" aria-hidden="true"></span> مدل‌های دارایی
-            </NavLink>
-        </div>
+    private static bool MatchesCurrentPath(string relativePath, string href) =>
+        relativePath.Equals(href, StringComparison.OrdinalIgnoreCase) ||
+        relativePath.StartsWith(href + "/", StringComparison.OrdinalIgnoreCase);
 
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="admin/engine-models">
-                <span class="bi bi-gear-wide-connected-nav-menu" aria-hidden="true"></span> مدل‌های موتور
-            </NavLink>
-        </div>
+    /// <summary>
+    /// Handles a group's expand/collapse toggle. Expanding sets this as
+    /// the sole open category (collapsing whichever other was open);
+    /// collapsing the currently-open one clears it entirely.
+    /// </summary>
+    private void OnGroupExpandedChanged(string key, bool isExpanded) =>
+        expandedCategoryKey = isExpanded ? key : null;
 
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="admin/assets">
-                <span class="bi bi-truck-nav-menu" aria-hidden="true"></span> دارایی‌ها
-            </NavLink>
-        </div>
+    /// <inheritdoc />
+    public void Dispose() => Navigation.LocationChanged -= OnLocationChanged;
 
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="admin/profiles">
-                <span class="bi bi-shield-lock-nav-menu" aria-hidden="true"></span> پروفایل‌ها
-            </NavLink>
-        </div>
+    private sealed record NavMenuLink(string Title, string Href, string Icon);
 
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="admin/users">
-                <span class="bi bi-people-nav-menu" aria-hidden="true"></span> کاربران
-            </NavLink>
-        </div>
-
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="admin/audit-log">
-                <span class="bi bi-journal-text-nav-menu" aria-hidden="true"></span> گزارش رخدادها
-            </NavLink>
-        </div>
-
-    </nav>
-</div>
+    private sealed record NavMenuCategory(string Key, string Title, string Icon, IReadOnlyList<NavMenuLink> Links);
+}

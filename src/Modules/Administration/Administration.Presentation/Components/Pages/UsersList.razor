@@ -32,9 +32,18 @@
                     <MudButton Variant="Variant.Text" Color="Color.Primary" OnClick="@(() => Navigation.NavigateTo($"/admin/users/{context.Id}/assign-profile"))">
                         تخصیص پروفایل
                     </MudButton>
-                    <MudButton Variant="Variant.Text" Color="Color.Warning" OnClick="@(() => DeactivateUserAsync(context.Id))">
-                        غیرفعال‌سازی
-                    </MudButton>
+                    @if (context.IsActive)
+    {
+        <MudButton Variant="Variant.Text" Color="Color.Warning" OnClick="@(() => DeactivateUserAsync(context.Id))">
+            غیرفعال‌سازی
+        </MudButton>
+    }
+    else
+    {
+        <MudButton Variant="Variant.Text" Color="Color.Success" OnClick="@(() => ActivateUserAsync(context.Id))">
+            فعال‌سازی
+        </MudButton>
+    }
                 </MudTd>
             </RowTemplate>
         </MudTable>
@@ -79,28 +88,51 @@
     }
 
     private async Task DeactivateUserAsync(Guid id)
+{
+    errorMessage = null;
+    try
     {
-        errorMessage = null;
-        try
+        var client = HttpClientFactory.CreateClient("InternalApi");
+        var response = await client.PostAsync($"/api/v1/users/{id}/deactivate", null);
+        if (!response.IsSuccessStatusCode)
         {
-            var client = HttpClientFactory.CreateClient("InternalApi");
-            var response = await client.PostAsync($"/api/v1/users/{id}/deactivate", null);
-            if (!response.IsSuccessStatusCode)
-            {
-                errorMessage = $"خطا در غیرفعال‌سازی کاربر: {await response.Content.ReadAsStringAsync()}";
-            }
+            errorMessage = $"خطا در غیرفعال‌سازی کاربر: {await response.Content.ReadAsStringAsync()}";
+            return;
         }
-        catch (Exception ex)
-        {
-            errorMessage = $"خطا: {ex.Message}";
-        }
+        await LoadUsersAsync();
     }
+    catch (Exception ex)
+    {
+        errorMessage = $"خطا: {ex.Message}";
+    }
+}
+
+private async Task ActivateUserAsync(Guid id)
+{
+    errorMessage = null;
+    try
+    {
+        var client = HttpClientFactory.CreateClient("InternalApi");
+        var response = await client.PostAsync($"/api/v1/users/{id}/activate", null);
+        if (!response.IsSuccessStatusCode)
+        {
+            errorMessage = $"خطا در فعال‌سازی کاربر: {await response.Content.ReadAsStringAsync()}";
+            return;
+        }
+        await LoadUsersAsync();
+    }
+    catch (Exception ex)
+    {
+        errorMessage = $"خطا: {ex.Message}";
+    }
+}
 
     private sealed class UserItem
-    {
-        public Guid Id { get; set; }
-        public string UserName { get; set; } = string.Empty;
-    }
+{
+    public Guid Id { get; set; }
+    public string UserName { get; set; } = string.Empty;
+    public bool IsActive { get; set; }
+}
 
     private sealed class UsersResponse
     {

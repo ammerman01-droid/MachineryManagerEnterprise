@@ -1,14 +1,14 @@
 using FluentValidation;
 using MachineryManagerEnterprise.Administration.Application.Abstractions;
 using MachineryManagerEnterprise.SharedKernel.Abstractions;
+using Mapster;
+using MapsterMapper;
 using MediatR;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace MachineryManagerEnterprise.Administration.Application;
 
-/// <summary>
-/// Provides extension methods for registering Administration Application layer services.
-/// </summary>
+/// <summary>Provides extension methods for registering Administration Application layer services.</summary>
 public static class DependencyInjection
 {
     /// <summary>
@@ -33,6 +33,11 @@ public static class DependencyInjection
             typeof(Behaviors.ValidationBehavior<,>));
 
         services.AddScoped<IDomainEventDispatcher, MediatRDomainEventDispatcher>();
+
+        var mapperConfig = new TypeAdapterConfig();
+        mapperConfig.Scan(assembly);
+        services.AddSingleton(mapperConfig);
+        services.AddScoped<IMapper, ServiceMapper>();
 
         return services;
     }

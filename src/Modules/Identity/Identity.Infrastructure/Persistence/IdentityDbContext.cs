@@ -37,5 +37,13 @@ public sealed class IdentityDbContext
         // OpenIddict entities keyed by Guid, consistent with
         // ApplicationUser/ApplicationRole (ADR-0030).
         modelBuilder.UseOpenIddict<Guid>();
+
+        // Theme preference columns: short enum-name strings, so 20 chars is
+        // a generous ceiling (longest current value is "Colorful", 8 chars).
+        modelBuilder.Entity<ApplicationUser>(builder =>
+        {
+            builder.Property(u => u.ThemeMode).HasMaxLength(20);
+            builder.Property(u => u.ThemeCornerStyle).HasMaxLength(20);
+        });
     }
 }

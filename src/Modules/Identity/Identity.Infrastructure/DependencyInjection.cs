@@ -8,6 +8,8 @@ using Microsoft.Extensions.Hosting;
 using OpenIddict.Abstractions;
 using OpenIddict.Client;
 using OpenIddict.Client.AspNetCore;
+using MachineryManagerEnterprise.SharedKernel.Abstractions;
+using MachineryManagerEnterprise.SharedKernel.Infrastructure;
 
 using static OpenIddict.Abstractions.OpenIddictConstants;
 
@@ -46,7 +48,7 @@ public static class DependencyInjection
                 sqlServerOptions => sqlServerOptions.MigrationsHistoryTable(
                     "__EFMigrationsHistory",
                     schema: "identity"));
-                    
+
             // Required by OpenIddict.EntityFrameworkCore so its stores
             // (Applications, Authorizations, Scopes, Tokens) are
             // recognized by this DbContext's model.
@@ -95,6 +97,9 @@ public static class DependencyInjection
             // SignInManager (unlike the full AddIdentity()). Required
             // for the interactive Login page (cookie-based sign-in).
             .AddSignInManager();
+
+        services.AddScoped<IUserThemePreferenceRepository, UserThemePreferenceRepository>();
+        services.AddScoped<IThemePreferenceStore, CompositeThemePreferenceStore>();
 
         services
             .AddOptions<Options.OpenIddictClientOptions>()
@@ -195,7 +200,7 @@ public static class DependencyInjection
         return services;
     }
 
-        /// <summary>
+    /// <summary>
     /// Registers this application as an OpenIddict Client of its own
     /// Authorization Server (self-referencing monolith pattern), so
     /// Blazor Server can complete the Authorization Code + PKCE flow
@@ -266,7 +271,7 @@ public static class DependencyInjection
         return services;
     }
 
-        /// <summary>
+    /// <summary>
     /// Registers a named HttpClient ("InternalApi") that automatically
     /// attaches the current user's Bearer access token to every
     /// request, for Blazor Server pages calling this monolith's own

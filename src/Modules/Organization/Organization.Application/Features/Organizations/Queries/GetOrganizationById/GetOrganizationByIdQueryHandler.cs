@@ -1,6 +1,7 @@
 using MachineryManagerEnterprise.Organization.Application.Abstractions;
 using MachineryManagerEnterprise.Organization.Application.Features.Organizations.Dtos;
 using MachineryManagerEnterprise.SharedKernel;
+using MapsterMapper;
 using MediatR;
 using Organization.Domain;
 
@@ -14,14 +15,17 @@ public sealed class GetOrganizationByIdQueryHandler
     : IRequestHandler<GetOrganizationByIdQuery, Result<OrganizationDto>>
 {
     private readonly IOrganizationRepository _organizationRepository;
+    private readonly IMapper _mapper;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="GetOrganizationByIdQueryHandler"/> class.
     /// </summary>
     /// <param name="organizationRepository">The organization repository.</param>
-    public GetOrganizationByIdQueryHandler(IOrganizationRepository organizationRepository)
+    /// <param name="mapper">The Mapster-backed mapper used to project the entity to a DTO.</param>
+    public GetOrganizationByIdQueryHandler(IOrganizationRepository organizationRepository, IMapper mapper)
     {
         _organizationRepository = organizationRepository;
+        _mapper = mapper;
     }
 
     /// <summary>
@@ -47,12 +51,6 @@ public sealed class GetOrganizationByIdQueryHandler
                     $"Organization with id {request.OrganizationId} was not found."));
         }
 
-        var dto = new OrganizationDto(
-            organization.Id.Value,
-            organization.Name,
-            organization.IsSuspended,
-            organization.HoldingId == null ? (Guid?)null : organization.HoldingId.Value);
-
-        return Result.Success(dto);
+        return Result.Success(_mapper.Map<OrganizationDto>(organization));
     }
 }

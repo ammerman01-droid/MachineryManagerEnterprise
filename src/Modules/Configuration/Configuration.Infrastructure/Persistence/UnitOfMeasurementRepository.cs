@@ -1,6 +1,7 @@
 using Configuration.Domain;
 using MachineryManagerEnterprise.Configuration.Application.Abstractions;
 using MachineryManagerEnterprise.Configuration.Application.Features.UnitsOfMeasurement.Dtos;
+using MapsterMapper;
 using Microsoft.EntityFrameworkCore;
 
 namespace MachineryManagerEnterprise.Configuration.Infrastructure.Persistence;
@@ -9,9 +10,16 @@ namespace MachineryManagerEnterprise.Configuration.Infrastructure.Persistence;
 public sealed class UnitOfMeasurementRepository : IUnitOfMeasurementRepository
 {
     private readonly ConfigurationDbContext _dbContext;
+    private readonly IMapper _mapper;
 
     /// <summary>Initializes a new instance of the <see cref="UnitOfMeasurementRepository"/> class.</summary>
-    public UnitOfMeasurementRepository(ConfigurationDbContext dbContext) => _dbContext = dbContext;
+    /// <param name="dbContext">The Configuration module's persistence context.</param>
+    /// <param name="mapper">The Mapster-backed mapper used to project entities to DTOs.</param>
+    public UnitOfMeasurementRepository(ConfigurationDbContext dbContext, IMapper mapper)
+    {
+        _dbContext = dbContext;
+        _mapper = mapper;
+    }
 
     /// <inheritdoc />
     public Task<UnitOfMeasurement?> GetByIdAsync(UnitOfMeasurementId id, CancellationToken cancellationToken = default) =>
@@ -37,6 +45,6 @@ public sealed class UnitOfMeasurementRepository : IUnitOfMeasurementRepository
             .ThenBy(u => u.Name)
             .ToListAsync(cancellationToken);
 
-        return entities.Select(u => new UnitOfMeasurementDto(u.Id.Value, u.Name, u.Kind)).ToList();
+        return _mapper.Map<List<UnitOfMeasurementDto>>(entities);
     }
 }

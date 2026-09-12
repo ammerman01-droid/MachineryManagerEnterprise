@@ -1,9 +1,10 @@
+using Mapster;
 using MachineryManagerEnterprise.Organization.Application.Abstractions;
 using MachineryManagerEnterprise.Organization.Application.Features.Organizations.Dtos;
 using MachineryManagerEnterprise.Organization.Application.Features.Organizations.Queries.SearchOrganizations;
+using MachineryManagerEnterprise.SharedKernel.Abstractions;
 using Microsoft.EntityFrameworkCore;
 using Organization.Domain;
-using MachineryManagerEnterprise.SharedKernel.Abstractions;
 
 namespace MachineryManagerEnterprise.Organization.Infrastructure.Persistence;
 
@@ -16,12 +17,15 @@ namespace MachineryManagerEnterprise.Organization.Infrastructure.Persistence;
 public sealed class OrganizationRepository : IOrganizationRepository
 {
     private readonly OrganizationDbContext _dbContext;
+    private readonly TypeAdapterConfig _mapperConfig;
 
     /// <summary>Initializes a new instance of the <see cref="OrganizationRepository"/> class.</summary>
     /// <param name="dbContext">The Organization module's persistence context.</param>
-    public OrganizationRepository(OrganizationDbContext dbContext)
+    /// <param name="mapperConfig">The Mapster configuration used to project queries directly to DTOs.</param>
+    public OrganizationRepository(OrganizationDbContext dbContext, TypeAdapterConfig mapperConfig)
     {
         _dbContext = dbContext;
+        _mapperConfig = mapperConfig;
     }
 
     /// <inheritdoc />
@@ -82,11 +86,7 @@ public sealed class OrganizationRepository : IOrganizationRepository
             .OrderBy(organization => organization.Name)
             .Skip((page - 1) * pageSize)
             .Take(pageSize)
-            .Select(organization => new OrganizationDto(
-                organization.Id.Value,
-                organization.Name,
-                organization.IsSuspended,
-                organization.HoldingId == null ? (Guid?)null : organization.HoldingId.Value))
+            .ProjectToType<OrganizationDto>(_mapperConfig)
             .ToListAsync(cancellationToken);
 
         var totalPages = totalItems == 0

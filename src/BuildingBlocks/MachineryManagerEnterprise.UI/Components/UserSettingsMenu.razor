@@ -1,0 +1,66 @@
+@using MachineryManagerEnterprise.UI.Theming
+@inject ThemeService ThemeService
+
+<MudMenu Icon="@Icons.Material.Filled.Settings" Color="Color.Inherit"
+         AnchorOrigin="Origin.BottomLeft" TransformOrigin="Origin.TopLeft">
+    <MudText Typo="Typo.subtitle2" Class="px-4 pt-2 pb-1">رنگ تم</MudText>
+    <MudMenuItem OnClick="@(() => SelectModeAsync(AppThemeMode.Light))">
+        <MudIcon Icon="@Icons.Material.Filled.LightMode" Class="me-2" /> روشن
+    </MudMenuItem>
+    <MudMenuItem OnClick="@(() => SelectModeAsync(AppThemeMode.Dark))">
+        <MudIcon Icon="@Icons.Material.Filled.DarkMode" Class="me-2" /> تاریک
+    </MudMenuItem>
+    <MudMenuItem OnClick="@(() => SelectModeAsync(AppThemeMode.Colorful))">
+        <MudIcon Icon="@Icons.Material.Filled.AutoAwesome" Class="me-2" /> رنگی
+    </MudMenuItem>
+
+    <MudDivider Class="my-1" />
+
+    <MudText Typo="Typo.subtitle2" Class="px-4 pt-1 pb-1">شکل لبه‌ها</MudText>
+    <MudMenuItem OnClick="@(() => SelectCornerStyleAsync(AppCornerStyle.Sharp))">
+        لبه تیز
+    </MudMenuItem>
+    <MudMenuItem OnClick="@(() => SelectCornerStyleAsync(AppCornerStyle.Rounded))">
+        لبه خمیده
+    </MudMenuItem>
+
+    @if (LogoutHref is not null)
+    {
+        <MudDivider Class="my-1" />
+        <MudMenuItem Href="@LogoutHref">
+            <MudIcon Icon="@Icons.Material.Filled.Logout" Class="me-2" /> @LogoutText
+        </MudMenuItem>
+    }
+</MudMenu>
+
+@code {
+    /// <summary>
+    /// URL for the logout link shown at the bottom of the menu. When
+    /// <see langword="null"/>, no logout item is rendered — this keeps the
+    /// component usable in contexts that don't have a sign-out route.
+    /// </summary>
+    [Parameter]
+    public string? LogoutHref { get; set; }
+
+    /// <summary>
+    /// Label shown next to the logout icon. Only relevant when
+    /// <see cref="LogoutHref"/> is set.
+    /// </summary>
+    [Parameter]
+    public string LogoutText { get; set; } = "خروج از حساب کاربری";
+
+    /// <summary>
+    /// Applies the chosen colour scheme via <see cref="ThemeService"/>.
+    /// The host's main layout is expected to subscribe to
+    /// <c>ThemeService.ThemeChanged</c> and re-render itself, so no local
+    /// re-render call is needed here.
+    /// </summary>
+    /// <param name="mode">The colour scheme selected from the menu.</param>
+    private Task SelectModeAsync(AppThemeMode mode) => ThemeService.SetModeAsync(mode);
+
+    /// <summary>
+    /// Applies the chosen corner treatment via <see cref="ThemeService"/>.
+    /// </summary>
+    /// <param name="cornerStyle">The corner treatment selected from the menu.</param>
+    private Task SelectCornerStyleAsync(AppCornerStyle cornerStyle) => ThemeService.SetCornerStyleAsync(cornerStyle);
+}

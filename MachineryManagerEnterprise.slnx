@@ -46,4 +46,5 @@
     <Project Path="src/Modules/Configuration/Configuration.Infrastructure/Configuration.Infrastructure.csproj" />
     <Project Path="src/Modules/Configuration/Configuration.Presentation/Configuration.Presentation.csproj" />
   </Folder>
+  
 </Solution>

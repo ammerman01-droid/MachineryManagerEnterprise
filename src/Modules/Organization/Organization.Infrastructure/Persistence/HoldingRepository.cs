@@ -1,9 +1,10 @@
+using Mapster;
 using MachineryManagerEnterprise.Organization.Application.Abstractions;
 using MachineryManagerEnterprise.Organization.Application.Features.Holdings.Dtos;
 using MachineryManagerEnterprise.Organization.Application.Features.Holdings.Queries.SearchHoldings;
+using MachineryManagerEnterprise.SharedKernel.Abstractions;
 using Microsoft.EntityFrameworkCore;
 using Organization.Domain;
-using MachineryManagerEnterprise.SharedKernel.Abstractions;
 
 namespace MachineryManagerEnterprise.Organization.Infrastructure.Persistence;
 
@@ -13,14 +14,17 @@ namespace MachineryManagerEnterprise.Organization.Infrastructure.Persistence;
 public sealed class HoldingRepository : IHoldingRepository
 {
     private readonly OrganizationDbContext _dbContext;
+    private readonly TypeAdapterConfig _mapperConfig;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="HoldingRepository"/> class.
     /// </summary>
     /// <param name="dbContext">The Organization module's persistence context.</param>
-    public HoldingRepository(OrganizationDbContext dbContext)
+    /// <param name="mapperConfig">The Mapster configuration used to project queries directly to DTOs.</param>
+    public HoldingRepository(OrganizationDbContext dbContext, TypeAdapterConfig mapperConfig)
     {
         _dbContext = dbContext;
+        _mapperConfig = mapperConfig;
     }
 
     /// <inheritdoc />
@@ -69,7 +73,7 @@ public sealed class HoldingRepository : IHoldingRepository
             .OrderBy(h => h.Name)
             .Skip((page - 1) * pageSize)
             .Take(pageSize)
-            .Select(h => new HoldingDto(h.Id.Value, h.Name))
+            .ProjectToType<HoldingDto>(_mapperConfig)
             .ToListAsync(cancellationToken);
 
         var totalPages = totalItems == 0 ? 0 : (int)Math.Ceiling(totalItems / (double)pageSize);

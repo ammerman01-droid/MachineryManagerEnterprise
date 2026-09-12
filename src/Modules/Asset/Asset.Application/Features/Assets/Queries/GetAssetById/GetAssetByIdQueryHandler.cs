@@ -2,6 +2,7 @@ using MachineryManagerEnterprise.Asset.Application.Abstractions;
 using MachineryManagerEnterprise.Asset.Application.Features.Assets.Dtos;
 using MachineryManagerEnterprise.SharedKernel;
 using MachineryManagerEnterprise.SharedKernel.Abstractions;
+using MapsterMapper;
 using MediatR;
 
 namespace MachineryManagerEnterprise.Asset.Application.Features.Assets.Queries.GetAssetById;
@@ -20,22 +21,26 @@ public sealed class GetAssetByIdQueryHandler
     private readonly ICurrentUserService _currentUserService;
     private readonly IPermissionEvaluator _permissionEvaluator;
     private readonly IOrganizationLookupService _organizationLookupService;
+    private readonly IMapper _mapper;
 
     /// <summary>Initializes a new instance of the <see cref="GetAssetByIdQueryHandler"/> class.</summary>
     /// <param name="assetRepository">The Asset repository.</param>
     /// <param name="currentUserService">Provides the authenticated user context.</param>
     /// <param name="permissionEvaluator">Evaluates the current user's permissions at request time.</param>
     /// <param name="organizationLookupService">Cross-module, read-only lookup into the Organization module, used to resolve the owning Organization's Holding for scope evaluation.</param>
+    /// <param name="mapper">The Mapster-backed mapper used to project the entity to a DTO.</param>
     public GetAssetByIdQueryHandler(
         IAssetRepository assetRepository,
         ICurrentUserService currentUserService,
         IPermissionEvaluator permissionEvaluator,
-        IOrganizationLookupService organizationLookupService)
+        IOrganizationLookupService organizationLookupService,
+        IMapper mapper)
     {
         _assetRepository = assetRepository;
         _currentUserService = currentUserService;
         _permissionEvaluator = permissionEvaluator;
         _organizationLookupService = organizationLookupService;
+        _mapper = mapper;
     }
 
     /// <summary>Executes the lookup use case.</summary>
@@ -74,21 +79,6 @@ public sealed class GetAssetByIdQueryHandler
             return Result.Failure<AssetDto>(global::Asset.Domain.AssetErrors.NotAuthorized());
         }
 
-        var dto = new AssetDto(
-            asset.Id.Value,
-            asset.OrganizationId,
-            asset.Code,
-            asset.Name,
-            asset.AssetModelId.Value,
-            asset.ColorId,
-            asset.SerialNumber,
-            asset.ChassisNumber,
-            asset.BodyNumber,
-            asset.Vin,
-            asset.LicensePlate,
-            asset.ManufactureYear,
-            asset.Status.ToString());
-
-        return Result.Success(dto);
+        return Result.Success(_mapper.Map<AssetDto>(asset));
     }
 }

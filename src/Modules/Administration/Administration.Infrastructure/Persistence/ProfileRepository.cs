@@ -1,6 +1,7 @@
 using MachineryManagerEnterprise.Administration.Application.Abstractions;
 using MachineryManagerEnterprise.Administration.Application.Features.Profiles.Dtos;
 using MachineryManagerEnterprise.Administration.Application.Features.Profiles.Queries.SearchProfiles;
+using MapsterMapper;
 using Microsoft.EntityFrameworkCore;
 using Administration.Domain;
 
@@ -10,12 +11,15 @@ namespace MachineryManagerEnterprise.Administration.Infrastructure.Persistence;
 public sealed class ProfileRepository : IProfileRepository
 {
     private readonly AdministrationDbContext _dbContext;
+    private readonly IMapper _mapper;
 
     /// <summary>Initializes a new instance of the <see cref="ProfileRepository"/> class.</summary>
     /// <param name="dbContext">The Administration module's persistence context.</param>
-    public ProfileRepository(AdministrationDbContext dbContext)
+    /// <param name="mapper">The Mapster-backed mapper used to project entities to DTOs.</param>
+    public ProfileRepository(AdministrationDbContext dbContext, IMapper mapper)
     {
         _dbContext = dbContext;
+        _mapper = mapper;
     }
 
     /// <inheritdoc />
@@ -49,25 +53,18 @@ public sealed class ProfileRepository : IProfileRepository
 
         // Materialize the Profile entities first (pagination still runs
         // in SQL via OrderBy/Skip/Take), then map to ProfileDto in
-        // memory. EF Core 10's query translator hits a NullReferenceException
-        // when a primitive-collection, field-backed property
-        // (Profile.Permissions) is projected directly into another
-        // type's constructor inside .Select() — this sidesteps that
-        // translation-layer issue entirely (chat, 2026-08-24).
+        // memory via Mapster's IMapper — NOT .ProjectToType() on the
+        // IQueryable, which would regenerate the same Select()
+        // expression that triggers EF Core 10's NullReferenceException
+        // on the field-backed primitive collection Profile.Permissions
+        // (chat, 2026-08-24).
         var entities = await query
             .OrderBy(p => p.Name)
             .Skip((page - 1) * pageSize)
             .Take(pageSize)
             .ToListAsync(cancellationToken);
 
-        var items = entities
-            .Select(p => new ProfileDto(
-                p.Id.Value,
-                p.Name,
-                p.Permissions.ToList(),
-                p.IsActive,
-                p.CreatedAt))
-            .ToList();
+        var items = _mapper.Map<List<ProfileDto>>(entities);
 
         var totalPages = totalItems == 0 ? 0 : (int)Math.Ceiling(totalItems / (double)pageSize);
 

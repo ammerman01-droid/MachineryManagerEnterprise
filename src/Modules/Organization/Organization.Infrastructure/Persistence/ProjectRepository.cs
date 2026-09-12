@@ -1,9 +1,10 @@
+using Mapster;
 using MachineryManagerEnterprise.Organization.Application.Abstractions;
 using MachineryManagerEnterprise.Organization.Application.Features.Projects.Dtos;
 using MachineryManagerEnterprise.Organization.Application.Features.Projects.Queries.SearchProjects;
+using MachineryManagerEnterprise.SharedKernel.Abstractions;
 using Microsoft.EntityFrameworkCore;
 using Organization.Domain;
-using MachineryManagerEnterprise.SharedKernel.Abstractions;
 
 namespace MachineryManagerEnterprise.Organization.Infrastructure.Persistence;
 
@@ -13,14 +14,17 @@ namespace MachineryManagerEnterprise.Organization.Infrastructure.Persistence;
 public sealed class ProjectRepository : IProjectRepository
 {
     private readonly OrganizationDbContext _dbContext;
+    private readonly TypeAdapterConfig _mapperConfig;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="ProjectRepository"/> class.
     /// </summary>
     /// <param name="dbContext">The Organization module's persistence context.</param>
-    public ProjectRepository(OrganizationDbContext dbContext)
+    /// <param name="mapperConfig">The Mapster configuration used to project queries directly to DTOs.</param>
+    public ProjectRepository(OrganizationDbContext dbContext, TypeAdapterConfig mapperConfig)
     {
         _dbContext = dbContext;
+        _mapperConfig = mapperConfig;
     }
 
     /// <inheritdoc />
@@ -80,11 +84,16 @@ public sealed class ProjectRepository : IProjectRepository
 
         var totalItems = await query.CountAsync(cancellationToken);
 
+        // The join's anonymous projection type can't be registered with
+        // Mapster, so we narrow back down to IQueryable<Project> (the
+        // Organization join was only needed for the scope filter above)
+        // before handing off to ProjectToType.
         var items = await query
             .OrderBy(x => x.Project.Name)
             .Skip((page - 1) * pageSize)
             .Take(pageSize)
-            .Select(x => new ProjectDto(x.Project.Id.Value, x.Project.Name, x.Project.OrganizationId.Value))
+            .Select(x => x.Project)
+            .ProjectToType<ProjectDto>(_mapperConfig)
             .ToListAsync(cancellationToken);
 
         var totalPages = totalItems == 0 ? 0 : (int)Math.Ceiling(totalItems / (double)pageSize);

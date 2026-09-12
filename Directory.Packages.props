@@ -40,8 +40,8 @@
     <!-- Validation & Object Mapping [TE-0005 & TE-0022 (FluentValidation / ADR-0007, ADR-0036), TE-0006 & TE-0023 (Mapster / ADR-0008)] -->
     <PackageVersion Include="FluentValidation" Version="11.11.0" />
     <PackageVersion Include="FluentValidation.DependencyInjectionExtensions" Version="11.11.0" />
-    <PackageVersion Include="Mapster" Version="7.4.0" />
-    <PackageVersion Include="Mapster.DependencyInjection" Version="7.4.0" />
+    <PackageVersion Include="Mapster" Version="10.0.12" />
+    <PackageVersion Include="Mapster.DependencyInjection" Version="10.0.12" />
 
     <!-- Enterprise Messaging & Background Processing [TE-0012 (MassTransit & RabbitMQ / ADR-0016; also backs External Integration Connector Framework, ADR-0018), TE-0014 & TE-0019 (Quartz.NET / ADR-0032)] -->
     <PackageVersion Include="MediatR" Version="12.5.0" />

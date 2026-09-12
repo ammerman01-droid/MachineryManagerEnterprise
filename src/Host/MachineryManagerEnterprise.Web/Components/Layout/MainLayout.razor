@@ -1,31 +1,74 @@
 ﻿@inherits LayoutComponentBase
+@implements IDisposable
+@inject ThemeService ThemeService
 
-<MudThemeProvider />
-<MudPopoverProvider />
-<MudDialogProvider />
-<MudSnackbarProvider />
+<MudRTLProvider RightToLeft="true">
+    <MudThemeProvider Theme="ThemeService.CurrentTheme" IsDarkMode="ThemeService.IsDarkMode" />
+    <MudPopoverProvider />
+    <MudDialogProvider />
+    <MudSnackbarProvider />
 
-<RequireAuthentication>
-    <div class="page">
-        <div class="sidebar">
-            <NavMenu />
-        </div>
+    <RequireAuthentication>
+        <MudLayout>
+            <MudAppBar Elevation="1">
+                <MudSpacer />
+                <UserSettingsMenu LogoutHref="/connect/logout" />
+            </MudAppBar>
 
-        <main>
-            <div class="top-row px-4 d-flex justify-space-between">
-                <a href="/connect/logout">خروج از حساب کاربری</a>
-                <a href="https://learn.microsoft.com/aspnet/core/" target="_blank">About</a>
-            </div>
+            <MudDrawer @bind-Open="drawerOpen" Elevation="2" Variant="DrawerVariant.Mini" OpenMiniOnHover="false"
+                       Anchor="Anchor.Start">
+                <MudDrawerHeader Class="d-flex align-center gap-2 px-2">
+                    <MudIconButton Icon="@Icons.Material.Filled.Menu" Color="Color.Inherit" Size="Size.Small"
+                                   OnClick="@DrawerToggle" />
+                    @if (drawerOpen)
+                    {
+                        <MudText Typo="Typo.subtitle1">MachineryManagerEnterprise</MudText>
+                    }
+                </MudDrawerHeader>
+                <NavMenu />
+            </MudDrawer>
 
-            <article class="content px-4">
-                @Body
-            </article>
-        </main>
-    </div>
-</RequireAuthentication>
+            <MudMainContent>
+                <MudContainer MaxWidth="MaxWidth.False" Class="pa-4">
+                    @Body
+                </MudContainer>
+            </MudMainContent>
+        </MudLayout>
+    </RequireAuthentication>
+</MudRTLProvider>
 
 <div id="blazor-error-ui" data-nosnippet>
-    An unhandled error has occurred.
-    <a href="." class="reload">Reload</a>
+    خطای پیش‌بینی‌نشده‌ای رخ داده است.
+    <a href="." class="reload">بارگذاری مجدد</a>
     <span class="dismiss">🗙</span>
 </div>
+
+@code {
+    /// <summary>
+    /// Whether the navigation drawer is currently expanded. Bound two-way to
+    /// <see cref="MudDrawer"/>; with <c>DrawerVariant.Mini</c>, setting this
+    /// to <see langword="false"/> collapses the drawer to an icon-only rail
+    /// rather than hiding it entirely, so the toggle button inside its
+    /// header always remains reachable.
+    /// </summary>
+    private bool drawerOpen = true;
+
+    private void DrawerToggle() => drawerOpen = !drawerOpen;
+
+    /// <inheritdoc />
+    protected override async Task OnInitializedAsync()
+    {
+        await ThemeService.InitializeAsync();
+        ThemeService.ThemeChanged += OnThemeChanged;
+    }
+
+    /// <summary>
+    /// Re-renders the layout whenever <see cref="ThemeService"/> raises
+    /// <c>ThemeChanged</c>, so <c>MudThemeProvider</c> picks up the newly
+    /// built <see cref="MudTheme"/> and dark-mode flag immediately.
+    /// </summary>
+    private void OnThemeChanged() => InvokeAsync(StateHasChanged);
+
+    /// <inheritdoc />
+    public void Dispose() => ThemeService.ThemeChanged -= OnThemeChanged;
+}

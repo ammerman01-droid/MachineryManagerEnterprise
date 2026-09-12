@@ -24,6 +24,8 @@ using MachineryManagerEnterprise.Configuration.Application;
 using MachineryManagerEnterprise.AuditLog.Application;
 using MachineryManagerEnterprise.AuditLog.Infrastructure;
 using MachineryManagerEnterprise.AuditLog.Presentation.Endpoints;
+using MachineryManagerEnterprise.UI;
+//using MachineryManagerEnterprise.WorkCalendar.Application;
 
 Log.Logger = new LoggerConfiguration()
     .WriteTo.Console()
@@ -51,6 +53,7 @@ try
     builder.Services.AddMudServices();
     builder.Services.AddOpenApi();
     builder.Services.AddSharedKernelInfrastructure();
+    builder.Services.AddMachineryManagerUiTheming();
 
     builder.Services.AddHttpContextAccessor();
     builder.Services.AddScoped<MachineryManagerEnterprise.SharedKernel.Abstractions.ICurrentUserService, MachineryManagerEnterprise.SharedKernel.Infrastructure.CurrentUserService>();
@@ -80,6 +83,10 @@ try
     // AuditLog module (read-only)
     builder.Services.AddAuditLogApplication();
     builder.Services.AddAuditLogInfrastructure(builder.Configuration);
+
+    // WorkCalendar module
+    //builder.Services.AddWorkCalendarApplication();
+
 
     var app = builder.Build();
 

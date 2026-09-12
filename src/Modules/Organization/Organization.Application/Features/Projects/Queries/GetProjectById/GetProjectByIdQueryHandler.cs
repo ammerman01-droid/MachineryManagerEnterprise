@@ -1,6 +1,7 @@
 using MachineryManagerEnterprise.Organization.Application.Abstractions;
 using MachineryManagerEnterprise.Organization.Application.Features.Projects.Dtos;
 using MachineryManagerEnterprise.SharedKernel;
+using MapsterMapper;
 using MediatR;
 using Organization.Domain;
 
@@ -14,14 +15,17 @@ public sealed class GetProjectByIdQueryHandler
     : IRequestHandler<GetProjectByIdQuery, Result<ProjectDto>>
 {
     private readonly IProjectRepository _projectRepository;
+    private readonly IMapper _mapper;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="GetProjectByIdQueryHandler"/> class.
     /// </summary>
     /// <param name="projectRepository">The project repository.</param>
-    public GetProjectByIdQueryHandler(IProjectRepository projectRepository)
+    /// <param name="mapper">The Mapster-backed mapper used to project the entity to a DTO.</param>
+    public GetProjectByIdQueryHandler(IProjectRepository projectRepository, IMapper mapper)
     {
         _projectRepository = projectRepository;
+        _mapper = mapper;
     }
 
     /// <summary>
@@ -45,11 +49,6 @@ public sealed class GetProjectByIdQueryHandler
                     $"Project with id {request.ProjectId} was not found."));
         }
 
-        var dto = new ProjectDto(
-            project.Id.Value,
-            project.Name,
-            project.OrganizationId.Value);
-
-        return Result.Success(dto);
+        return Result.Success(_mapper.Map<ProjectDto>(project));
     }
 }

@@ -1,6 +1,7 @@
 using MachineryManagerEnterprise.Administration.Application.Abstractions;
 using MachineryManagerEnterprise.Administration.Application.Features.Profiles.Dtos;
 using MachineryManagerEnterprise.SharedKernel;
+using MapsterMapper;
 using MediatR;
 
 namespace MachineryManagerEnterprise.Administration.Application.Features.Profiles.Queries.GetProfileById;
@@ -13,14 +14,17 @@ public sealed class GetProfileByIdQueryHandler
     : IRequestHandler<GetProfileByIdQuery, Result<ProfileDto>>
 {
     private readonly IProfileRepository _profileRepository;
+    private readonly IMapper _mapper;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="GetProfileByIdQueryHandler"/> class.
     /// </summary>
     /// <param name="profileRepository">The profile repository.</param>
-    public GetProfileByIdQueryHandler(IProfileRepository profileRepository)
+    /// <param name="mapper">The Mapster-backed mapper used to project the entity to a DTO.</param>
+    public GetProfileByIdQueryHandler(IProfileRepository profileRepository, IMapper mapper)
     {
         _profileRepository = profileRepository;
+        _mapper = mapper;
     }
 
     /// <summary>
@@ -44,13 +48,6 @@ public sealed class GetProfileByIdQueryHandler
                     $"Profile with id {request.ProfileId} was not found."));
         }
 
-        var dto = new ProfileDto(
-            profile.Id.Value,
-            profile.Name,
-            profile.Permissions.ToList(),
-            profile.IsActive,
-            profile.CreatedAt);
-
-        return Result.Success(dto);
+        return Result.Success(_mapper.Map<ProfileDto>(profile));
     }
 }

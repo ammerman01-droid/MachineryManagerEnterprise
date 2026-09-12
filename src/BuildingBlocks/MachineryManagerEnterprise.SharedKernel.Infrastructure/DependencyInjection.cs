@@ -18,6 +18,8 @@ public static class DependencyInjection
     {
         services.AddSingleton<IDateTimeProvider, SystemDateTimeProvider>();
         services.AddScoped<AuditSaveChangesInterceptor>();
+        services.AddHttpContextAccessor(); // از قبل در Program.cs هست
+        services.AddScoped<IThemePreferenceStore, CookieThemePreferenceStore>();
 
         return services;
     }

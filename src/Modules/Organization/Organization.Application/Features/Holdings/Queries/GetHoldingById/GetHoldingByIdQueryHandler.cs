@@ -1,6 +1,7 @@
 using MachineryManagerEnterprise.Organization.Application.Abstractions;
 using MachineryManagerEnterprise.Organization.Application.Features.Holdings.Dtos;
 using MachineryManagerEnterprise.SharedKernel;
+using MapsterMapper;
 using MediatR;
 using Organization.Domain;
 
@@ -14,14 +15,17 @@ public sealed class GetHoldingByIdQueryHandler
     : IRequestHandler<GetHoldingByIdQuery, Result<HoldingDto>>
 {
     private readonly IHoldingRepository _holdingRepository;
+    private readonly IMapper _mapper;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="GetHoldingByIdQueryHandler"/> class.
     /// </summary>
     /// <param name="holdingRepository">The holding repository.</param>
-    public GetHoldingByIdQueryHandler(IHoldingRepository holdingRepository)
+    /// <param name="mapper">The Mapster-backed mapper used to project the entity to a DTO.</param>
+    public GetHoldingByIdQueryHandler(IHoldingRepository holdingRepository, IMapper mapper)
     {
         _holdingRepository = holdingRepository;
+        _mapper = mapper;
     }
 
     /// <summary>
@@ -45,7 +49,6 @@ public sealed class GetHoldingByIdQueryHandler
                     $"Holding with id {request.HoldingId} was not found."));
         }
 
-        var dto = new HoldingDto(holding.Id.Value, holding.Name);
-        return Result.Success(dto);
+        return Result.Success(_mapper.Map<HoldingDto>(holding));
     }
 }

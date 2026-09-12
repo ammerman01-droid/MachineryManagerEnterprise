@@ -1,6 +1,7 @@
 using Configuration.Domain;
 using MachineryManagerEnterprise.Configuration.Application.Abstractions;
 using MachineryManagerEnterprise.Configuration.Application.Features.Companies.Dtos;
+using MapsterMapper;
 using Microsoft.EntityFrameworkCore;
 
 namespace MachineryManagerEnterprise.Configuration.Infrastructure.Persistence;
@@ -9,12 +10,15 @@ namespace MachineryManagerEnterprise.Configuration.Infrastructure.Persistence;
 public sealed class CompanyRepository : ICompanyRepository
 {
     private readonly ConfigurationDbContext _dbContext;
+    private readonly IMapper _mapper;
 
     /// <summary>Initializes a new instance of the <see cref="CompanyRepository"/> class.</summary>
     /// <param name="dbContext">The Configuration module's persistence context.</param>
-    public CompanyRepository(ConfigurationDbContext dbContext)
+    /// <param name="mapper">The Mapster-backed mapper used to project entities to DTOs.</param>
+    public CompanyRepository(ConfigurationDbContext dbContext, IMapper mapper)
     {
         _dbContext = dbContext;
+        _mapper = mapper;
     }
 
     /// <inheritdoc />
@@ -40,7 +44,7 @@ public sealed class CompanyRepository : ICompanyRepository
             .OrderBy(c => c.Name)
             .ToListAsync(cancellationToken);
 
-        return entities.Select(c => new CompanyDto(c.Id.Value, c.Name)).ToList();
+        return _mapper.Map<List<CompanyDto>>(entities);
     }
 
     /// <inheritdoc />

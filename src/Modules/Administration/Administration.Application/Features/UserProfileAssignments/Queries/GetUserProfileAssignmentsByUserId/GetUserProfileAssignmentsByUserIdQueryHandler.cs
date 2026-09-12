@@ -1,5 +1,6 @@
 using MachineryManagerEnterprise.Administration.Application.Abstractions;
 using MachineryManagerEnterprise.SharedKernel;
+using MapsterMapper;
 using MediatR;
 
 namespace MachineryManagerEnterprise.Administration.Application.Features.UserProfileAssignments.Queries.GetUserProfileAssignmentsByUserId;
@@ -9,12 +10,17 @@ public sealed class GetUserProfileAssignmentsByUserIdQueryHandler
     : IRequestHandler<GetUserProfileAssignmentsByUserIdQuery, Result<IReadOnlyList<UserProfileAssignmentDto>>>
 {
     private readonly IUserProfileAssignmentRepository _assignmentRepository;
+    private readonly IMapper _mapper;
 
     /// <summary>Initializes a new instance of the <see cref="GetUserProfileAssignmentsByUserIdQueryHandler"/> class.</summary>
     /// <param name="assignmentRepository">The user-profile assignment repository.</param>
-    public GetUserProfileAssignmentsByUserIdQueryHandler(IUserProfileAssignmentRepository assignmentRepository)
+    /// <param name="mapper">The Mapster-backed mapper used to project entities to DTOs.</param>
+    public GetUserProfileAssignmentsByUserIdQueryHandler(
+        IUserProfileAssignmentRepository assignmentRepository,
+        IMapper mapper)
     {
         _assignmentRepository = assignmentRepository;
+        _mapper = mapper;
     }
 
     /// <summary>Executes the query and returns the user's profile assignments.</summary>
@@ -27,17 +33,7 @@ public sealed class GetUserProfileAssignmentsByUserIdQueryHandler
     {
         var assignments = await _assignmentRepository.GetByUserIdAsync(request.UserId, cancellationToken);
 
-        var dtos = assignments.Select(a => new UserProfileAssignmentDto(
-            a.Id.Value,
-            a.UserId,
-            a.ProfileId.Value,
-            a.Scope.Level.ToString(),
-            a.Scope.HoldingId,
-            a.Scope.OrganizationId,
-            a.Scope.ProjectId,
-            a.AssignedAt,
-            a.IsActive,
-            a.LastChangedAt)).ToList();
+        var dtos = _mapper.Map<List<UserProfileAssignmentDto>>(assignments);
 
         return Result.Success<IReadOnlyList<UserProfileAssignmentDto>>(dtos);
     }

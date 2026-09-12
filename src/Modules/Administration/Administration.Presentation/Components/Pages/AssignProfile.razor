@@ -24,11 +24,11 @@
     {
         <MudPaper Class="pa-4" Style="max-width:600px;">
             <MudForm @ref="form" @bind-IsValid="@isValid">
-                <MudSelect T="Guid" @bind-Value="selectedProfileId" Label="پروفایل" Required="true"
+                <MudSelect T="Guid?" @bind-Value="selectedProfileId" Label="پروفایل" Required="true"
                            RequiredError="انتخاب پروفایل الزامی است.">
                     @foreach (var profile in profiles)
                     {
-                        <MudSelectItem T="Guid" Value="@profile.Id">@profile.Name</MudSelectItem>
+                        <MudSelectItem T="Guid?" Value="@((Guid?)profile.Id)">@profile.Name</MudSelectItem>
                     }
                 </MudSelect>
 
@@ -41,20 +41,27 @@
 
                 @if (selectedScopeLevel == "Holding")
                 {
-                    <MudSelect T="Guid?" @bind-Value="selectedHoldingId" Label="Holding" Required="true" Class="mt-4">
-                        @foreach (var holding in holdings)
-                        {
-                            <MudSelectItem T="Guid?" Value="@((Guid?)holding.Id)">@holding.Name</MudSelectItem>
-                        }
-                    </MudSelect>
+                    <MudAutocomplete T="LookupItem" @bind-Value="selectedHolding" Label="Holding" Required="true"
+                                     RequiredError="انتخاب Holding الزامی است." Class="mt-4"
+                                     SearchFunc="@SearchHoldingsAsync" ToStringFunc="@(item => item?.Name)"
+                                     ResetValueOnEmptyText="true" MinCharacters="0" DebounceInterval="300"
+                                     CoerceText="true" Clearable="true" />
                 }
                 else if (selectedScopeLevel == "Organization")
                 {
-                    <MudTextField @bind-Value="scopeOrganizationId" Label="شناسه Organization" Required="true" Class="mt-4" />
+                    <MudAutocomplete T="LookupItem" @bind-Value="selectedOrganization" Label="Organization" Required="true"
+                                     RequiredError="انتخاب Organization الزامی است." Class="mt-4"
+                                     SearchFunc="@SearchOrganizationsAsync" ToStringFunc="@(item => item?.Name)"
+                                     ResetValueOnEmptyText="true" MinCharacters="0" DebounceInterval="300"
+                                     CoerceText="true" Clearable="true" />
                 }
                 else if (selectedScopeLevel == "Project")
                 {
-                    <MudTextField @bind-Value="scopeProjectId" Label="شناسه Project" Required="true" Class="mt-4" />
+                    <MudAutocomplete T="LookupItem" @bind-Value="selectedProject" Label="Project" Required="true"
+                                     RequiredError="انتخاب Project الزامی است." Class="mt-4"
+                                     SearchFunc="@SearchProjectsAsync" ToStringFunc="@(item => item?.Name)"
+                                     ResetValueOnEmptyText="true" MinCharacters="0" DebounceInterval="300"
+                                     CoerceText="true" Clearable="true" />
                 }
 
                 <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="SubmitAsync"
@@ -172,55 +179,103 @@
     private string? errorMessage;
 
     private List<ProfileItem> profiles = new();
-    private Guid selectedProfileId;
+    private Guid? selectedProfileId;
     private string selectedScopeLevel = "Platform";
-    private string? scopeOrganizationId;
-    private string? scopeProjectId;
+
+    private LookupItem? selectedHolding;
+    private LookupItem? selectedOrganization;
+    private LookupItem? selectedProject;
 
     private List<AssignmentItem> assignments = new();
     private bool isLoadingAssignments = true;
     private string? assignmentsErrorMessage;
     private Guid? busyAssignmentId;
 
+    private static readonly System.Text.Json.JsonSerializerOptions JsonOptions = new()
+    {
+        PropertyNameCaseInsensitive = true
+    };
+
     /// <summary>
     /// Initializes the component and loads the available profiles and
     /// the user's current assignments.
     /// </summary>
-        protected override async Task OnInitializedAsync()
+    protected override async Task OnInitializedAsync()
     {
         await LoadProfilesAsync();
-        await LoadHoldingsAsync();
         await LoadAssignmentsAsync();
     }
 
-    private async Task LoadHoldingsAsync()
+    /// <summary>
+    /// Searches Holdings by name for the Holding scope Autocomplete
+    /// (server-side filtering via GET /api/v1/holdings?search=...).
+    /// </summary>
+    private async Task<IEnumerable<LookupItem>> SearchHoldingsAsync(string? value, CancellationToken cancellationToken)
+    {
+        return await SearchLookupAsync("holdings", value, cancellationToken);
+    }
+
+    /// <summary>
+    /// Searches Organizations by name for the Organization scope Autocomplete
+    /// (server-side filtering via GET /api/v1/organizations?search=...).
+    /// </summary>
+    private async Task<IEnumerable<LookupItem>> SearchOrganizationsAsync(string? value, CancellationToken cancellationToken)
+    {
+        return await SearchLookupAsync("organizations", value, cancellationToken);
+    }
+
+    /// <summary>
+    /// Searches Projects by name for the Project scope Autocomplete
+    /// (server-side filtering via GET /api/v1/projects?search=...).
+    /// </summary>
+    private async Task<IEnumerable<LookupItem>> SearchProjectsAsync(string? value, CancellationToken cancellationToken)
+    {
+        return await SearchLookupAsync("projects", value, cancellationToken);
+    }
+
+    /// <summary>
+    /// Shared search call for the Holding/Organization/Project Autocompletes.
+    /// All three REST endpoints expose the same paginated search contract
+    /// (<c>?search=&amp;page=&amp;pageSize=</c> → <c>{ items: [{ id, name, ... }], ... }</c>),
+    /// so a single generic caller covers all of them.
+    /// </summary>
+    /// <param name="resourceSegment">The plural resource segment, e.g. "holdings".</param>
+    /// <param name="searchTerm">The text typed by the user, or null/empty for the initial page.</param>
+    /// <param name="cancellationToken">Token to cancel the request if the user keeps typing.</param>
+    private async Task<IEnumerable<LookupItem>> SearchLookupAsync(
+        string resourceSegment,
+        string? searchTerm,
+        CancellationToken cancellationToken)
     {
         try
         {
             var client = HttpClientFactory.CreateClient("InternalApi");
-            var response = await client.GetAsync("/api/v1/holdings?pageSize=200");
-            var content = await response.Content.ReadAsStringAsync();
+
+            var url = string.IsNullOrWhiteSpace(searchTerm)
+                ? $"/api/v1/{resourceSegment}?pageSize=25"
+                : $"/api/v1/{resourceSegment}?search={Uri.EscapeDataString(searchTerm)}&pageSize=25";
+
+            var response = await client.GetAsync(url, cancellationToken);
 
             if (!response.IsSuccessStatusCode)
             {
-                errorMessage = $"خطا در دریافت هلدینگ‌ها: {content}";
-                return;
+                return Array.Empty<LookupItem>();
             }
 
-            var result = System.Text.Json.JsonSerializer.Deserialize<SearchHoldingsResultDto>(content, new
-System.Text.Json.JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+            var content = await response.Content.ReadAsStringAsync(cancellationToken);
+            var result = System.Text.Json.JsonSerializer.Deserialize<LookupSearchResponse>(content, JsonOptions);
 
-            holdings = result?.Items ?? new List<HoldingItem>();
+            return result?.Items ?? Enumerable.Empty<LookupItem>();
+        }
+        catch (OperationCanceledException)
+        {
+            return Array.Empty<LookupItem>();
         }
         catch (Exception ex)
         {
-            errorMessage = $"خطا: {ex.Message}";
+            errorMessage = $"خطا در جستجو: {ex.Message}";
+            return Array.Empty<LookupItem>();
         }
-    }
-
-    private sealed class SearchHoldingsResultDto
-    {
-        public List<HoldingItem> Items { get; set; } = new();
     }
 
     /// <summary>
@@ -243,9 +298,7 @@ System.Text.Json.JsonSerializerOptions { PropertyNameCaseInsensitive = true });
                 return;
             }
 
-            var result = System.Text.Json.JsonSerializer.Deserialize<SearchProfilesResponse>(content, new
-System.Text.Json.JsonSerializerOptions
-            { PropertyNameCaseInsensitive = true });
+            var result = System.Text.Json.JsonSerializer.Deserialize<SearchProfilesResponse>(content, JsonOptions);
 
             if (result is null)
             {
@@ -288,9 +341,7 @@ System.Text.Json.JsonSerializerOptions
                 return;
             }
 
-            var result = System.Text.Json.JsonSerializer.Deserialize<List<AssignmentItem>>(content, new
-System.Text.Json.JsonSerializerOptions
-            { PropertyNameCaseInsensitive = true });
+            var result = System.Text.Json.JsonSerializer.Deserialize<List<AssignmentItem>>(content, JsonOptions);
 
             assignments = result ?? new List<AssignmentItem>();
         }
@@ -312,7 +363,7 @@ System.Text.Json.JsonSerializerOptions
     /// </summary>
     private async Task SubmitAsync()
     {
-        if (form is null || !isValid)
+        if (form is null || !isValid || selectedProfileId is null)
         {
             return;
         }
@@ -332,15 +383,15 @@ System.Text.Json.JsonSerializerOptions
                     $"Unsupported authorization scope level: {selectedScopeLevel}.")
             };
 
-            Guid? holdingId = selectedHoldingId;
-            Guid? organizationId = ParseScopeId(scopeOrganizationId, "Organization");
-            Guid? projectId = ParseScopeId(scopeProjectId, "Project");
+            Guid? holdingId = selectedScopeLevel == "Holding" ? selectedHolding?.Id : null;
+            Guid? organizationId = selectedScopeLevel == "Organization" ? selectedOrganization?.Id : null;
+            Guid? projectId = selectedScopeLevel == "Project" ? selectedProject?.Id : null;
 
             var request =
                 new MachineryManagerEnterprise.Administration.Presentation.Contracts
                     .AssignUserToProfileRequest(
                         UserId,
-                        selectedProfileId,
+                        selectedProfileId.Value,
                         scopeLevel,
                         holdingId,
                         organizationId,
@@ -459,28 +510,6 @@ System.Text.Json.JsonSerializerOptions
         profiles.FirstOrDefault(p => p.Id == profileId)?.Name ?? profileId.ToString();
 
     /// <summary>
-    /// Parses an optional authorization scope identifier.
-    /// </summary>
-    /// <param name="value">The text representation of the identifier.</param>
-    /// <param name="scopeName">The name of the authorization scope.</param>
-    /// <returns>The parsed identifier, or <see langword="null"/> when not applicable.</returns>
-    private Guid? ParseScopeId(string? value, string scopeName)
-    {
-        if (selectedScopeLevel != scopeName)
-        {
-            return null;
-        }
-
-        if (Guid.TryParse(value, out var id))
-        {
-            return id;
-        }
-
-        throw new InvalidOperationException(
-            $"شناسه {scopeName} معتبر نیست.");
-    }
-
-    /// <summary>
     /// Represents a profile available for assignment in the user interface.
     /// </summary>
     private sealed class ProfileItem
@@ -513,12 +542,22 @@ System.Text.Json.JsonSerializerOptions
         public DateTimeOffset? LastChangedAt { get; set; }
     }
 
-    private sealed class HoldingItem
-    {
-        public Guid Id { get; set; }
-        public string Name { get; set; } = string.Empty;
-    }
+    /// <summary>
+    /// A minimal (Id, Name) projection shared by the Holding, Organization
+    /// and Project Autocomplete fields — each backed by its own module's
+    /// search endpoint, but all three expose the same shape for this
+    /// purpose.
+    /// </summary>
+    private sealed record LookupItem(Guid Id, string Name);
 
-    private List<HoldingItem> holdings = new();
-    private Guid? selectedHoldingId;
+    /// <summary>
+    /// Deserialization target for the Holding/Organization/Project search
+    /// endpoints' paginated response — only the fields needed here are
+    /// mapped; the endpoints also return paging metadata that this page
+    /// does not use.
+    /// </summary>
+    private sealed class LookupSearchResponse
+    {
+        public List<LookupItem> Items { get; set; } = new();
+    }
 }

@@ -43,8 +43,8 @@ public static class DependencyInjection
         services.AddScoped<IProjectRepository, ProjectRepository>();
         services.AddScoped<IOrganizationLookupService, OrganizationLookupService>();
         services.AddScoped<IHoldingLookupService, HoldingLookupService>();
-        services.AddScoped<IOrganizationUnitOfWork>(serviceProvider =>
-            serviceProvider.GetRequiredService<OrganizationDbContext>());
+        services.AddScoped<IOrganizationUnitOfWork>(serviceProvider =>serviceProvider.GetRequiredService<OrganizationDbContext>());
+        //services.AddScoped<IProjectLookupService, ProjectLookupService>();
 
         return services;
     }

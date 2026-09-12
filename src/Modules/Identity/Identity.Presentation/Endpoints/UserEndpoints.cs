@@ -51,6 +51,13 @@ public static class UserEndpoints
                 .AddAuthenticationSchemes(OpenIddictValidationAspNetCoreDefaults.AuthenticationScheme)
                 .RequireClaim(Claims.Role, "System Administrator"));
 
+        group.MapPost("/{userId:guid}/activate", ActivateUserAsync)
+            .WithName("ActivateUser")
+            .WithSummary("Reactivates a locked-out user account.")
+            .RequireAuthorization(policy => policy
+                .AddAuthenticationSchemes(OpenIddictValidationAspNetCoreDefaults.AuthenticationScheme)
+                .RequireClaim(Claims.Role, "System Administrator"));
+
         return endpoints;
     }
 
@@ -62,17 +69,18 @@ public static class UserEndpoints
     {
         var allUsers = userManager.Users.ToList();
 
+        var items = allUsers
+            .Skip((page - 1) * pageSize)
+            .Take(pageSize)
+            .Select(u => new UserDto(u.Id, u.UserName ?? string.Empty, IsUserActive(u)))
+            .ToList();
+
         if (!string.IsNullOrWhiteSpace(search))
         {
             allUsers = allUsers.Where(u => u.UserName != null && u.UserName.Contains(search, StringComparison.OrdinalIgnoreCase)).ToList();
         }
 
         var totalItems = allUsers.Count;
-        var items = allUsers
-            .Skip((page - 1) * pageSize)
-            .Take(pageSize)
-            .Select(u => new UserDto(u.Id, u.UserName ?? string.Empty))
-            .ToList();
 
         var totalPages = totalItems == 0 ? 0 : (int)Math.Ceiling(totalItems / (double)pageSize);
 
@@ -110,7 +118,7 @@ public static class UserEndpoints
             }
         }
 
-        return Results.Created($"/api/v1/users/{user.Id}", new UserDto(user.Id, user.UserName ?? string.Empty));
+        return Results.Created($"/api/v1/users/{user.Id}", new UserDto(user.Id, user.UserName ?? string.Empty, IsUserActive(user)));
     }
 
     private static async Task<IResult> GetUserByIdAsync(
@@ -123,7 +131,7 @@ public static class UserEndpoints
             return Results.NotFound(new { error = "User.NotFound", message = $"User with id {userId} was not found." });
         }
 
-        return Results.Ok(new UserDto(user.Id, user.UserName ?? string.Empty));
+        return Results.Ok(new UserDto(user.Id, user.UserName ?? string.Empty, IsUserActive(user)));
     }
 
     private static async Task<IResult> GetUserRolesAsync(
@@ -141,13 +149,30 @@ public static class UserEndpoints
     }
 
     private static async Task<IResult> DeactivateUserAsync(
-        Guid userId,
-        UserManager<ApplicationUser> userManager)
+    Guid userId,
+    UserManager<ApplicationUser> userManager)
     {
         var user = await userManager.FindByIdAsync(userId.ToString());
         if (user is null)
         {
             return Results.NotFound(new { error = "User.NotFound", message = $"User with id {userId} was not found." });
+        }
+
+        // Users created before the Lockout policy was added (chat,
+        // 2026-08-18) may still have LockoutEnabled=false, which makes
+        // SetLockoutEndDateAsync reject the call below. Deactivation is
+        // an explicit administrative action, independent of the
+        // failed-login-attempt lockout feature, so it should always be
+        // possible regardless of when the user was created
+        // (chat, 2026-09-07).
+        if (!user.LockoutEnabled)
+        {
+            var enableResult = await userManager.SetLockoutEnabledAsync(user, true);
+            if (!enableResult.Succeeded)
+            {
+                var enableErrors = string.Join("; ", enableResult.Errors.Select(e => e.Description));
+                return Results.BadRequest(new { error = "User.DeactivateFailed", message = enableErrors });
+            }
         }
 
         var result = await userManager.SetLockoutEndDateAsync(user, DateTimeOffset.UtcNow.AddYears(100));
@@ -159,4 +184,39 @@ public static class UserEndpoints
 
         return Results.NoContent();
     }
+
+    private static async Task<IResult> ActivateUserAsync(
+    Guid userId,
+    UserManager<ApplicationUser> userManager)
+    {
+        var user = await userManager.FindByIdAsync(userId.ToString());
+        if (user is null)
+        {
+            return Results.NotFound(new { error = "User.NotFound", message = $"User with id {userId} was not found." });
+        }
+
+        if (!user.LockoutEnabled)
+        {
+            var enableResult = await userManager.SetLockoutEnabledAsync(user, true);
+            if (!enableResult.Succeeded)
+            {
+                var enableErrors = string.Join("; ", enableResult.Errors.Select(e => e.Description));
+                return Results.BadRequest(new { error = "User.ActivateFailed", message = enableErrors });
+            }
+        }
+
+        var result = await userManager.SetLockoutEndDateAsync(user, null);
+        if (!result.Succeeded)
+        {
+            var errors = string.Join("; ", result.Errors.Select(e => e.Description));
+            return Results.BadRequest(new { error = "User.ActivateFailed", message = errors });
+        }
+
+        await userManager.ResetAccessFailedCountAsync(user);
+
+        return Results.NoContent();
+    }
+
+    private static bool IsUserActive(ApplicationUser user) =>
+    !user.LockoutEnabled || user.LockoutEnd is null || user.LockoutEnd <= DateTimeOffset.UtcNow;
 }

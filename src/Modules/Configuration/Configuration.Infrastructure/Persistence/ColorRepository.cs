@@ -1,6 +1,7 @@
 using Configuration.Domain;
 using MachineryManagerEnterprise.Configuration.Application.Abstractions;
 using MachineryManagerEnterprise.Configuration.Application.Features.Colors.Dtos;
+using MapsterMapper;
 using Microsoft.EntityFrameworkCore;
 
 namespace MachineryManagerEnterprise.Configuration.Infrastructure.Persistence;
@@ -9,9 +10,16 @@ namespace MachineryManagerEnterprise.Configuration.Infrastructure.Persistence;
 public sealed class ColorRepository : IColorRepository
 {
     private readonly ConfigurationDbContext _dbContext;
+    private readonly IMapper _mapper;
 
     /// <summary>Initializes a new instance of the <see cref="ColorRepository"/> class.</summary>
-    public ColorRepository(ConfigurationDbContext dbContext) => _dbContext = dbContext;
+    /// <param name="dbContext">The Configuration module's persistence context.</param>
+    /// <param name="mapper">The Mapster-backed mapper used to project entities to DTOs.</param>
+    public ColorRepository(ConfigurationDbContext dbContext, IMapper mapper)
+    {
+        _dbContext = dbContext;
+        _mapper = mapper;
+    }
 
     /// <inheritdoc />
     public Task<Color?> GetByIdAsync(ColorId id, CancellationToken cancellationToken = default) =>
@@ -35,6 +43,6 @@ public sealed class ColorRepository : IColorRepository
             .OrderBy(c => c.Name)
             .ToListAsync(cancellationToken);
 
-        return entities.Select(c => new ColorDto(c.Id.Value, c.Name)).ToList();
+        return _mapper.Map<List<ColorDto>>(entities);
     }
 }

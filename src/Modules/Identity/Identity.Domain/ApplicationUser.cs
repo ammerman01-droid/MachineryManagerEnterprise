@@ -18,4 +18,18 @@ namespace MachineryManagerEnterprise.Identity.Domain;
 /// </remarks>
 public sealed class ApplicationUser : IdentityUser<Guid>
 {
+    /// <summary>
+    /// The user's saved UI theme colour scheme — the string name of an
+    /// <c>AppThemeMode</c> value (e.g. <c>"Light"</c>, <c>"Dark"</c>,
+    /// <c>"Colorful"</c>), or <see langword="null"/> if the user has never
+    /// saved a preference.
+    /// </summary>
+    public string? ThemeMode { get; set; }
+
+    /// <summary>
+    /// The user's saved UI corner treatment — the string name of an
+    /// <c>AppCornerStyle</c> value (e.g. <c>"Sharp"</c>, <c>"Rounded"</c>),
+    /// or <see langword="null"/> if the user has never saved a preference.
+    /// </summary>
+    public string? ThemeCornerStyle { get; set; }
 }

@@ -2,6 +2,7 @@ using Asset.Domain;
 using MachineryManagerEnterprise.Asset.Application.Abstractions;
 using MachineryManagerEnterprise.Asset.Application.Features.EngineModels.Dtos;
 using MachineryManagerEnterprise.Asset.Application.Features.EngineModels.Queries.SearchEngineModels;
+using MapsterMapper;
 using Microsoft.EntityFrameworkCore;
 
 namespace MachineryManagerEnterprise.Asset.Infrastructure.Persistence;
@@ -10,12 +11,15 @@ namespace MachineryManagerEnterprise.Asset.Infrastructure.Persistence;
 public sealed class EngineModelRepository : IEngineModelRepository
 {
     private readonly AssetDbContext _dbContext;
+    private readonly IMapper _mapper;
 
     /// <summary>Initializes a new instance of the <see cref="EngineModelRepository"/> class.</summary>
     /// <param name="dbContext">The Asset module's persistence context.</param>
-    public EngineModelRepository(AssetDbContext dbContext)
+    /// <param name="mapper">The Mapster-backed mapper used to project entities to DTOs.</param>
+    public EngineModelRepository(AssetDbContext dbContext, IMapper mapper)
     {
         _dbContext = dbContext;
+        _mapper = mapper;
     }
 
     /// <inheritdoc />
@@ -56,21 +60,7 @@ public sealed class EngineModelRepository : IEngineModelRepository
             .Take(pageSize)
             .ToListAsync(cancellationToken);
 
-        var items = entities
-            .Select(em => new EngineModelDto(
-                em.Id.Value,
-                em.Name,
-                em.CompanyId,
-                em.FuelKind,
-                em.CylinderCount,
-                em.EngineDisplacementValue,
-                em.EngineDisplacementUnitOfMeasurementId,
-                em.EnginePowerValue,
-                em.EnginePowerUnitOfMeasurementId,
-                em.WeightValue,
-                em.WeightUnitOfMeasurementId,
-                em.HoldingId))
-            .ToList();
+        var items = _mapper.Map<List<EngineModelDto>>(entities);
 
         var totalPages = totalItems == 0 ? 0 : (int)Math.Ceiling(totalItems / (double)pageSize);
 
