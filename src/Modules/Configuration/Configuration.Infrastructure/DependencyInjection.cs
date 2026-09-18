@@ -33,6 +33,8 @@ public static class DependencyInjection
         services.AddScoped<IConfigurationUnitOfWork>(sp => sp.GetRequiredService<ConfigurationDbContext>());
         services.AddScoped<IUnitOfMeasurementLookupService, UnitOfMeasurementLookupService>();
         services.AddScoped<IFuelTypeRepository, FuelTypeRepository>();
+        services.AddScoped<IDrivingLicenseTypeRepository, DrivingLicenseTypeRepository>();
+        services.AddScoped<IJobTitleRepository, JobTitleRepository>();
 
         return services;
     }

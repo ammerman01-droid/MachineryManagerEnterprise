@@ -10,6 +10,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\AuditLog.Application\AuditLog.Application.csproj" />
+    <ProjectReference Include="..\..\..\BuildingBlocks\MachineryManagerEnterprise.UI\MachineryManagerEnterprise.UI.csproj" />
   </ItemGroup>
 
   <ItemGroup>

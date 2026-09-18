@@ -3,6 +3,7 @@
 @inject IHttpClientFactory HttpClientFactory
 
 @using MachineryManagerEnterprise.SharedKernel
+@using MachineryManagerEnterprise.UI.Calendar
 
 <PageTitle>گزارش رخدادها</PageTitle>
 
@@ -14,13 +15,13 @@
     <MudGrid>
 
         <MudItem xs="12" sm="6" md="3">
-            <MudDatePicker Label="از تاریخ"
-                           @bind-Date="fromDate" />
+            <JalaliDatePicker Label="از تاریخ"
+                              @bind-Date="fromDate" />
         </MudItem>
 
         <MudItem xs="12" sm="6" md="3">
-            <MudDatePicker Label="تا تاریخ"
-                           @bind-Date="toDate" />
+            <JalaliDatePicker Label="تا تاریخ"
+                              @bind-Date="toDate" />
         </MudItem>
 
         <MudItem xs="12" sm="6" md="3">
@@ -132,9 +133,7 @@ else
 
         <RowTemplate>
             <MudTd DataLabel="زمان">
-                @context.OccurredAt
-                    .ToLocalTime()
-                    .ToString("yyyy/MM/dd HH:mm:ss")
+                @JalaliCalendarConverter.FormatDateTime(context.OccurredAt)
             </MudTd>
 
             <MudTd DataLabel="کاربر">

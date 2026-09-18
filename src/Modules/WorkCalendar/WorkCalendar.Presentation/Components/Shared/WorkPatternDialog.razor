@@ -1,0 +1,186 @@
+@namespace MachineryManagerEnterprise.WorkCalendar.Presentation.Components.Shared
+@inject IHttpClientFactory HttpClientFactory
+
+<MudDialog>
+    <TitleContent>
+        @(mode switch
+        {
+            DialogMode.Edit => "ویرایش الگوی کاری",
+            DialogMode.Supersede => "جایگزینی الگوی کاری",
+            _ => "افزودن الگوی کاری جدید",
+        })
+    </TitleContent>
+    <DialogContent>
+        @if (errorMessage is not null)
+        {
+            <MudAlert Severity="Severity.Error" Class="mb-3">@errorMessage</MudAlert>
+        }
+
+        <MudStack Row="true" Spacing="3" Class="mb-3">
+            <JalaliDatePicker Label="تاریخ شروع" @bind-Date="startDate" Editable="true" />
+            <JalaliDatePicker Label="تاریخ پایان" @bind-Date="endDate" Editable="true" />
+        </MudStack>
+
+        @foreach (var day in daysOfWeek)
+        {
+            <DayScheduleEditor Label="@PersianDayName(day)" Value="@weeklySchedule[day]"
+                                ValueChanged="@(updated => weeklySchedule[day] = updated)" />
+        }
+    </DialogContent>
+    <DialogActions>
+        <MudButton OnClick="Cancel">انصراف</MudButton>
+        <MudButton Color="Color.Primary" Variant="Variant.Filled" OnClick="SubmitAsync" Disabled="@isSubmitting">
+            @if (isSubmitting)
+            {
+                <MudProgressCircular Size="Size.Small" Indeterminate="true" />
+            }
+            else
+            {
+                <span>ذخیره</span>
+            }
+        </MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+    private enum DialogMode { Add, Supersede, Edit }
+
+    private static readonly DayOfWeek[] daysOfWeek =
+    [
+        DayOfWeek.Saturday, DayOfWeek.Sunday, DayOfWeek.Monday, DayOfWeek.Tuesday,
+        DayOfWeek.Wednesday, DayOfWeek.Thursday, DayOfWeek.Friday,
+    ];
+
+    /// <summary>Gets or sets the cascaded dialog instance used to close this dialog with a result.</summary>
+    [CascadingParameter]
+    public IMudDialogInstance MudDialog { get; set; } = default!;
+
+    /// <summary>Gets or sets the Work Calendar this Work Pattern belongs to.</summary>
+    [Parameter]
+    public Guid WorkCalendarId { get; set; }
+
+    /// <summary>Gets or sets the Work Pattern being superseded, if replacing an existing Active pattern.</summary>
+    [Parameter]
+    public Guid? PatternIdToSupersede { get; set; }
+
+    /// <summary>
+    /// Gets or sets the Work Pattern being edited, if still Draft. Since
+    /// no dedicated update Command exists on the backend, editing is
+    /// implemented as Remove-then-Add against the same identity
+    /// (chat, 2026-09-15).
+    /// </summary>
+    [Parameter]
+    public Guid? PatternIdToEdit { get; set; }
+
+    /// <summary>Gets or sets the pattern's current values, used to pre-fill the form when <see cref="PatternIdToEdit"/> is set.</summary>
+    [Parameter]
+    public WorkPatternItem? InitialValues { get; set; }
+
+    private DialogMode mode => PatternIdToEdit is not null
+        ? DialogMode.Edit
+        : PatternIdToSupersede is not null ? DialogMode.Supersede : DialogMode.Add;
+
+    private DateTime? startDate = DateTime.Today;
+    private DateTime? endDate = DateTime.Today.AddMonths(6);
+    private Dictionary<DayOfWeek, DayScheduleItem> weeklySchedule =
+        daysOfWeek.ToDictionary(d => d, _ => new DayScheduleItem());
+    private bool isSubmitting;
+    private string? errorMessage;
+
+    /// <inheritdoc />
+    protected override void OnInitialized()
+    {
+        if (InitialValues is not null)
+        {
+            startDate = InitialValues.StartDate.ToDateTime(TimeOnly.MinValue);
+            endDate = InitialValues.EndDate.ToDateTime(TimeOnly.MinValue);
+            weeklySchedule = daysOfWeek.ToDictionary(
+                d => d,
+                d => InitialValues.WeeklySchedule.TryGetValue(d, out var value) ? value : new DayScheduleItem());
+        }
+    }
+
+    private static string PersianDayName(DayOfWeek day) => day switch
+    {
+        DayOfWeek.Saturday => "شنبه",
+        DayOfWeek.Sunday => "یک‌شنبه",
+        DayOfWeek.Monday => "دوشنبه",
+        DayOfWeek.Tuesday => "سه‌شنبه",
+        DayOfWeek.Wednesday => "چهارشنبه",
+        DayOfWeek.Thursday => "پنج‌شنبه",
+        DayOfWeek.Friday => "جمعه",
+        _ => day.ToString(),
+    };
+
+    private void Cancel() => MudDialog.Cancel();
+
+    private async Task SubmitAsync()
+    {
+        if (startDate is null || endDate is null)
+        {
+            errorMessage = "تاریخ شروع و پایان الزامی است.";
+            return;
+        }
+
+        errorMessage = null;
+        isSubmitting = true;
+
+        try
+        {
+            var client = HttpClientFactory.CreateClient("InternalApi");
+            var scheduleRequest = weeklySchedule.ToDictionary(
+                kvp => kvp.Key,
+                kvp => new DayScheduleRequest(kvp.Value.IsWorkingDay
+                    ? kvp.Value.Shifts.Select(s => new ShiftRequest(
+                        s.StartTime, s.EndTime, s.Breaks.Select(b => new BreakRequest(b.StartTime, b.EndTime)).ToList()))
+                        .ToList()
+                    : null));
+
+            var start = DateOnly.FromDateTime(startDate.Value);
+            var end = DateOnly.FromDateTime(endDate.Value);
+
+            if (mode == DialogMode.Edit)
+            {
+                var removeResponse = await client.DeleteAsync($"/api/v1/work-calendars/{WorkCalendarId}/work-patterns/{PatternIdToEdit}");
+
+                if (!removeResponse.IsSuccessStatusCode)
+                {
+                    errorMessage = await ReadErrorAsync(removeResponse);
+                    return;
+                }
+            }
+
+            HttpResponseMessage response = mode == DialogMode.Supersede
+                ? await client.PostAsJsonAsync(
+                    $"/api/v1/work-calendars/{WorkCalendarId}/work-patterns/{PatternIdToSupersede}/supersede",
+                    new SupersedeWorkPatternRequest(start, end, scheduleRequest))
+                : await client.PostAsJsonAsync(
+                    $"/api/v1/work-calendars/{WorkCalendarId}/work-patterns",
+                    new AddWorkPatternRequest(start, end, scheduleRequest));
+
+            if (response.IsSuccessStatusCode)
+            {
+                MudDialog.Close(DialogResult.Ok(true));
+                return;
+            }
+
+            errorMessage = await ReadErrorAsync(response);
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"خطا: {ex.Message}";
+        }
+        finally
+        {
+            isSubmitting = false;
+        }
+    }
+
+    private static async Task<string> ReadErrorAsync(HttpResponseMessage response)
+    {
+        var content = await response.Content.ReadAsStringAsync();
+        var problem = System.Text.Json.JsonSerializer.Deserialize<WorkCalendarApiError>(
+            content, new System.Text.Json.JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+        return problem?.Message ?? "خطای نامشخصی رخ داد.";
+    }
+}

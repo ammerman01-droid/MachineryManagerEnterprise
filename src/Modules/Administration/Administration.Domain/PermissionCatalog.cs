@@ -36,6 +36,10 @@ public static class PermissionCatalog
         new PermissionSection("Company", "شرکت‌های سازنده"),
         new PermissionSection("FuelType", "انواع سوخت"),
         new PermissionSection("AuditLog", "لاگ فعالیت‌ها", ["View"]),
+        new PermissionSection("Personnel", "پرسنل"),
+        new PermissionSection("DrivingLicenseType", "گواهینامه‌ها"),
+        new PermissionSection("JobTitle", "عناوین شغلی"),
+        new PermissionSection("WorkCalendar", "تقویم کاری"),
     ];
 
     /// <summary>Builds the canonical permission string for a section/action pair (e.g. "Organization.Create").</summary>

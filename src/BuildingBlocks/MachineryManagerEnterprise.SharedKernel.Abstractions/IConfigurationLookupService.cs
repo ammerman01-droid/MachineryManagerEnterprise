@@ -14,4 +14,10 @@ public interface IConfigurationLookupService
 
     /// <summary>Checks whether the given Company exists and belongs to the given Holding.</summary>
     Task<bool> CompanyExistsInHoldingAsync(Guid companyId, Guid holdingId, CancellationToken cancellationToken = default);
+
+     /// <summary>Checks whether the given Driving License Type exists and belongs to the given Holding.</summary>
+    Task<bool> DrivingLicenseTypeExistsInHoldingAsync(Guid drivingLicenseTypeId, Guid holdingId, CancellationToken cancellationToken = default);
+
+    /// <summary>Checks whether the given Job Title exists and belongs to the given Holding.</summary>
+    Task<bool> JobTitleExistsInHoldingAsync(Guid jobTitleId, Guid holdingId, CancellationToken cancellationToken = default);
 }

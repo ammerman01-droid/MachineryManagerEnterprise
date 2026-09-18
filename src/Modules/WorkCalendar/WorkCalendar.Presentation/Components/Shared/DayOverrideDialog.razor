@@ -1,0 +1,104 @@
+@namespace MachineryManagerEnterprise.WorkCalendar.Presentation.Components.Shared
+@inject IHttpClientFactory HttpClientFactory
+
+<MudDialog>
+    <TitleContent>افزودن استثنای روز</TitleContent>
+    <DialogContent>
+        @if (errorMessage is not null)
+        {
+            <MudAlert Severity="Severity.Error" Class="mb-3">@errorMessage</MudAlert>
+        }
+
+        <JalaliDatePicker Label="تاریخ" @bind-Date="date" Editable="true" Class="mb-3" />
+
+        <MudSelect T="string" @bind-Value="selectedType" Label="نوع استثنا" Class="mb-3">
+            <MudSelectItem T="string" Value="@("Holiday")">تعطیل</MudSelectItem>
+            <MudSelectItem T="string" Value="@("Working")">روز کاری اضافه</MudSelectItem>
+            <MudSelectItem T="string" Value="@("Modified")">ساعت‌کاری متفاوت</MudSelectItem>
+        </MudSelect>
+
+        @if (selectedType != "Holiday")
+        {
+            <DayScheduleEditor Label="برنامه‌ی این روز" Value="@customSchedule"
+                                ValueChanged="@(updated => customSchedule = updated)" />
+        }
+    </DialogContent>
+    <DialogActions>
+        <MudButton OnClick="Cancel">انصراف</MudButton>
+        <MudButton Color="Color.Primary" Variant="Variant.Filled" OnClick="SubmitAsync" Disabled="@isSubmitting">
+            @if (isSubmitting)
+            {
+                <MudProgressCircular Size="Size.Small" Indeterminate="true" />
+            }
+            else
+            {
+                <span>ذخیره</span>
+            }
+        </MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+    /// <summary>Gets or sets the cascaded dialog instance used to close this dialog with a result.</summary>
+    [CascadingParameter]
+    public IMudDialogInstance MudDialog { get; set; } = default!;
+
+    /// <summary>Gets or sets the Work Calendar this Day Override belongs to.</summary>
+    [Parameter]
+    public Guid WorkCalendarId { get; set; }
+
+    private DateTime? date = DateTime.Today;
+    private string selectedType = "Holiday";
+    private DayScheduleItem customSchedule = new() { IsWorkingDay = true, Shifts = [new ShiftItem { StartTime = new TimeOnly(8, 0), EndTime = new TimeOnly(17, 0) }] };
+    private bool isSubmitting;
+    private string? errorMessage;
+
+    private void Cancel() => MudDialog.Cancel();
+
+    private async Task SubmitAsync()
+    {
+        if (date is null)
+        {
+            errorMessage = "انتخاب تاریخ الزامی است.";
+            return;
+        }
+
+        errorMessage = null;
+        isSubmitting = true;
+
+        try
+        {
+            var type = Enum.Parse<global::WorkCalendar.Domain.DayOverrideType>(selectedType);
+
+            DayScheduleRequest? scheduleRequest = type == global::WorkCalendar.Domain.DayOverrideType.Holiday
+                ? null
+                : new DayScheduleRequest(customSchedule.Shifts
+                    .Select(s => new ShiftRequest(s.StartTime, s.EndTime, s.Breaks.Select(b => new BreakRequest(b.StartTime, b.EndTime)).ToList()))
+                    .ToList());
+
+            var client = HttpClientFactory.CreateClient("InternalApi");
+            var response = await client.PostAsJsonAsync(
+                $"/api/v1/work-calendars/{WorkCalendarId}/day-overrides",
+                new AddDayOverrideRequest(DateOnly.FromDateTime(date.Value), type, scheduleRequest));
+
+            if (response.IsSuccessStatusCode)
+            {
+                MudDialog.Close(DialogResult.Ok(true));
+                return;
+            }
+
+            var content = await response.Content.ReadAsStringAsync();
+            var problem = System.Text.Json.JsonSerializer.Deserialize<WorkCalendarApiError>(
+                content, new System.Text.Json.JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+            errorMessage = problem?.Message ?? "خطای نامشخصی رخ داد.";
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"خطا: {ex.Message}";
+        }
+        finally
+        {
+            isSubmitting = false;
+        }
+    }
+}

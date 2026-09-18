@@ -25,7 +25,12 @@ using MachineryManagerEnterprise.AuditLog.Application;
 using MachineryManagerEnterprise.AuditLog.Infrastructure;
 using MachineryManagerEnterprise.AuditLog.Presentation.Endpoints;
 using MachineryManagerEnterprise.UI;
-//using MachineryManagerEnterprise.WorkCalendar.Application;
+using MachineryManagerEnterprise.WorkCalendar.Infrastructure;
+using MachineryManagerEnterprise.WorkCalendar.Presentation.Endpoints;
+using MachineryManagerEnterprise.WorkCalendar.Application;
+//using MachineryManagerEnterprise.Personnel.Application;
+//using MachineryManagerEnterprise.Personnel.Infrastructure;
+//using MachineryManagerEnterprise.Personnel.Presentation.Endpoints;
 
 Log.Logger = new LoggerConfiguration()
     .WriteTo.Console()
@@ -85,7 +90,13 @@ try
     builder.Services.AddAuditLogInfrastructure(builder.Configuration);
 
     // WorkCalendar module
-    //builder.Services.AddWorkCalendarApplication();
+    builder.Services.AddWorkCalendarApplication();
+    builder.Services.AddWorkCalendarInfrastructure(builder.Configuration);
+
+    // Personnel module
+    //builder.Services.AddPersonnelApplication();
+    //builder.Services.AddPersonnelInfrastructure(builder.Configuration);
+
 
 
     var app = builder.Build();
@@ -124,7 +135,9 @@ try
         typeof(MachineryManagerEnterprise.Organization.Presentation.Components.Pages.OrganizationsList).Assembly,
         typeof(MachineryManagerEnterprise.Asset.Presentation.Components.Pages.AssetModelsList).Assembly,
         typeof(MachineryManagerEnterprise.Configuration.Presentation.Components.Pages.ColorsList).Assembly,
-        typeof(MachineryManagerEnterprise.AuditLog.Presentation.Components.Pages.AuditLogList).Assembly);
+        typeof(MachineryManagerEnterprise.AuditLog.Presentation.Components.Pages.AuditLogList).Assembly,
+        typeof(MachineryManagerEnterprise.WorkCalendar.Presentation.Components.Pages.WorkCalendarsList).Assembly);
+        //typeof(MachineryManagerEnterprise.Personnel.Presentation.Components.Pages.PersonnelList).Assembly,
 
     // Identity endpoints
     app.MapIdentityConnectEndpoints();
@@ -151,10 +164,17 @@ try
     app.MapUnitOfMeasurementEndpoints();
     app.MapCompanyEndpoints();
     app.MapFuelTypeEndpoints();
+    app.MapDrivingLicenseTypeEndpoints();
+    app.MapJobTitleEndpoints();
 
     // AuditLog endpoints
     app.MapAuditLogEndpoints();
-    
+
+    // WorkCalendar endpoints
+    app.MapWorkCalendarEndpoints();
+
+    // Personnel endpoints
+    //app.MapPersonnelEndpoints();
 
     app.Run();
 }

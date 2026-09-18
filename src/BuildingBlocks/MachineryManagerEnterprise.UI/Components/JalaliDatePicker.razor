@@ -1,0 +1,400 @@
+@namespace MachineryManagerEnterprise.UI.Components
+@using MudBlazor
+@using MachineryManagerEnterprise.UI.Calendar
+@inherits MudPicker<DateTime?>
+
+@Render
+
+@code {
+
+    /// <summary>
+    /// Gets or sets the currently selected date.
+    /// </summary>
+    /// <remarks>
+    /// This value is always a standard Gregorian <see cref="DateTime"/> —
+    /// exactly the same type/contract as MudBlazor's own <c>MudDatePicker.Date</c>.
+    /// Jalali is purely a display concern of this component (ADR-0038); nothing
+    /// Jalali-related is ever exposed to the code binding to this parameter.
+    /// </remarks>
+    [Parameter]
+    [Category(CategoryTypes.FormComponent.Data)]
+    public DateTime? Date { get; set; }
+
+    /// <summary>
+    /// Occurs when <see cref="Date"/> has changed.
+    /// </summary>
+    [Parameter]
+    public EventCallback<DateTime?> DateChanged { get; set; }
+
+    /// <summary>
+    /// The earliest selectable date (Gregorian).
+    /// </summary>
+    [Parameter]
+    [Category(CategoryTypes.FormComponent.Validation)]
+    public DateTime? MinDate { get; set; }
+
+    /// <summary>
+    /// The latest selectable date (Gregorian).
+    /// </summary>
+    [Parameter]
+    [Category(CategoryTypes.FormComponent.Validation)]
+    public DateTime? MaxDate { get; set; }
+
+    /// <summary>
+    /// The three drill levels of the calendar header, mirroring the
+    /// day/month/year navigation of a standard MudBlazor/.NET date picker.
+    /// </summary>
+    private enum PickerView
+    {
+        Date,
+        Month,
+        Year
+    }
+
+    private const int ClosingDelayMilliseconds = 100;
+    private const int DayCellCount = 42; // 6 fixed weeks, so the panel never resizes between months.
+    private const int YearsPerPage = 12;
+
+    private PickerView _view = PickerView.Date;
+
+    private int _displayedJalaliYear;
+    private int _displayedJalaliMonth;
+    private bool _displayedMonthInitialized;
+
+    private int _yearPageStart;
+
+    /// <summary>
+    /// Initializes a new instance, wiring a Jalali-aware text converter so
+    /// that typed input ("۱۴۰۴/۰۷/۲۳") and the displayed <c>Text</c> both
+    /// go through <see cref="JalaliCalendarConverter"/>.
+    /// </summary>
+    public JalaliDatePicker() : base(new MudBlazor.Converter<DateTime?, string>
+    {
+        SetFunc = JalaliCalendarConverter.Format,
+        GetFunc = JalaliCalendarConverter.Parse
+    })
+    {
+        AdornmentAriaLabel = "انتخاب تاریخ";
+    }
+
+    /// <summary>
+    /// Blazor assigns <see cref="Date"/> from the parent's bound value before
+    /// this runs. <see cref="Date"/> is intentionally a plain auto-property
+    /// (so the component analyzer's auto-property rule is satisfied); the
+    /// actual synchronization with the base class's internal value — and any
+    /// side effects (Text update, validation, <see cref="DateChanged"/>) —
+    /// happens here, only when the incoming value actually differs from what
+    /// we already have.
+    /// </summary>
+    protected override async Task OnParametersSetAsync()
+    {
+        await base.OnParametersSetAsync();
+
+        if (Date != _value)
+        {
+            await SetDateAsync(Date, true);
+        }
+
+        if (!_displayedMonthInitialized)
+        {
+            var reference = _value ?? DateTime.Today;
+            (_displayedJalaliYear, _displayedJalaliMonth, _) = JalaliCalendarConverter.ToJalali(reference);
+            _displayedMonthInitialized = true;
+        }
+    }
+    private async Task SetDateAsync(DateTime? date, bool updateText)
+    {
+        if (_value == date)
+        {
+            return;
+        }
+
+        Touched = true;
+        _value = date;
+        Date = date;
+
+        if (updateText)
+        {
+            Converter.GetError = false;
+            await SetTextAsync(Converter.Set(_value), false);
+        }
+
+        if (date is not null)
+        {
+            (_displayedJalaliYear, _displayedJalaliMonth, _) = JalaliCalendarConverter.ToJalali(date.Value);
+        }
+
+        await DateChanged.InvokeAsync(_value);
+        await BeginValidateAsync();
+        FieldChanged(_value);
+    }
+
+    protected override Task StringValueChangedAsync(string? value)
+    {
+        Touched = true;
+        return SetDateAsync(Converter.Get(value), false);
+    }
+
+    /// <inheritdoc />
+    public override async Task ClearAsync(bool close = true)
+    {
+        await SetDateAsync(null, true);
+        await base.ClearAsync(close);
+    }
+
+    /// <summary>
+    /// Handles the header's "previous" arrow, whose meaning depends on the
+    /// current drill level (previous month / previous year / previous
+    /// 12-year page).
+    /// </summary>
+    private void HandlePreviousClick()
+    {
+        switch (_view)
+        {
+            case PickerView.Date:
+                _displayedJalaliMonth--;
+                if (_displayedJalaliMonth < 1)
+                {
+                    _displayedJalaliMonth = 12;
+                    _displayedJalaliYear--;
+                }
+                break;
+
+            case PickerView.Month:
+                _displayedJalaliYear--;
+                break;
+
+            case PickerView.Year:
+                _yearPageStart -= YearsPerPage;
+                break;
+        }
+    }
+
+    /// <summary>
+    /// Handles the header's "next" arrow — the mirror of <see cref="HandlePreviousClick"/>.
+    /// </summary>
+    private void HandleNextClick()
+    {
+        switch (_view)
+        {
+            case PickerView.Date:
+                _displayedJalaliMonth++;
+                if (_displayedJalaliMonth > 12)
+                {
+                    _displayedJalaliMonth = 1;
+                    _displayedJalaliYear++;
+                }
+                break;
+
+            case PickerView.Month:
+                _displayedJalaliYear++;
+                break;
+
+            case PickerView.Year:
+                _yearPageStart += YearsPerPage;
+                break;
+        }
+    }
+
+    /// <summary>
+    /// Switches the header from the day grid to the month grid — clicking
+    /// the month name in the Date view (mirrors MudDatePicker's month drill-down).
+    /// </summary>
+    private void ShowMonthView() => _view = PickerView.Month;
+
+    /// <summary>
+    /// Switches the header to the year grid — clicking the year in either
+    /// the Date or Month view (mirrors MudDatePicker's year drill-down).
+    /// </summary>
+    private void ShowYearView()
+    {
+        _yearPageStart = _displayedJalaliYear - (_displayedJalaliYear % YearsPerPage);
+        _view = PickerView.Year;
+    }
+
+    private void SelectMonth(int month)
+    {
+        _displayedJalaliMonth = month;
+        _view = PickerView.Date;
+    }
+
+    private void SelectYear(int year)
+    {
+        _displayedJalaliYear = year;
+        _view = PickerView.Month;
+    }
+
+    private bool IsDayDisabled(int day)
+    {
+        var candidate = JalaliCalendarConverter.ToGregorian(_displayedJalaliYear, _displayedJalaliMonth, day);
+
+        return (MinDate is { } min && candidate < min.Date) ||
+               (MaxDate is { } max && candidate > max.Date);
+    }
+
+    private async Task SelectDayAsync(int day)
+    {
+        if (IsDayDisabled(day) || GetReadOnlyState() || GetDisabledState())
+        {
+            return;
+        }
+
+        var selected = JalaliCalendarConverter.ToGregorian(_displayedJalaliYear, _displayedJalaliMonth, day);
+        await SetDateAsync(selected, true);
+
+        if (PickerActions is null)
+        {
+            if (PickerVariant != PickerVariant.Static)
+            {
+                await Task.Delay(ClosingDelayMilliseconds);
+                await CloseAsync(false);
+            }
+        }
+    }
+
+    private bool IsSelectedDay(int day)
+    {
+        if (_value is not { } selected)
+        {
+            return false;
+        }
+
+        var (year, month, dayOfMonth) = JalaliCalendarConverter.ToJalali(selected);
+
+        return year == _displayedJalaliYear && month == _displayedJalaliMonth && dayOfMonth == day;
+    }
+
+    private bool IsToday(int day)
+    {
+        var (year, month, dayOfMonth) = JalaliCalendarConverter.ToJalali(DateTime.Today);
+
+        return year == _displayedJalaliYear && month == _displayedJalaliMonth && dayOfMonth == day;
+    }
+
+    /// <inheritdoc />
+    protected override RenderFragment PickerContent => @<div class="pa-4" style="width: 296px;">
+
+        <div class="d-flex align-center justify-space-between mb-2">
+            <MudIconButton Icon="@Icons.Material.Filled.ChevronRight" Size="Size.Small" OnClick="HandlePreviousClick"
+                           aria-label="قبلی" />
+
+            @if (_view == PickerView.Date)
+            {
+                <div class="d-flex" style="gap: 4px;">
+                    <MudButton Variant="Variant.Text" Size="Size.Small" OnClick="ShowMonthView">
+                        @JalaliCalendarConverter.MonthNames[_displayedJalaliMonth - 1]
+                    </MudButton>
+                    <MudButton Variant="Variant.Text" Size="Size.Small" OnClick="ShowYearView">
+                        @JalaliCalendarConverter.ToPersianDigits(_displayedJalaliYear.ToString())
+                    </MudButton>
+                </div>
+            }
+            else if (_view == PickerView.Month)
+            {
+                <MudButton Variant="Variant.Text" Size="Size.Small" OnClick="ShowYearView">
+                    @JalaliCalendarConverter.ToPersianDigits(_displayedJalaliYear.ToString())
+                </MudButton>
+            }
+            else
+            {
+                <MudText Typo="Typo.subtitle1">
+                    @JalaliCalendarConverter.ToPersianDigits(_yearPageStart.ToString())
+                    -
+                    @JalaliCalendarConverter.ToPersianDigits((_yearPageStart + YearsPerPage - 1).ToString())
+                </MudText>
+            }
+
+            <MudIconButton Icon="@Icons.Material.Filled.ChevronLeft" Size="Size.Small" OnClick="HandleNextClick"
+                           aria-label="بعدی" />
+        </div>
+
+        @if (_view == PickerView.Date)
+        {
+            <div class="d-flex" style="direction: rtl;">
+                @foreach (var name in JalaliCalendarConverter.WeekDayNamesShort)
+                {
+                    <div class="d-flex justify-center" style="width: 14.28%;">
+                        <MudText Typo="Typo.caption" Class="mud-text-secondary">@name</MudText>
+                    </div>
+                }
+            </div>
+
+            <div class="d-flex flex-wrap" style="direction: rtl;">
+
+                @{
+                    // A fixed 6-week (42-cell) grid, padded with blank leading/trailing
+                    // cells, keeps the panel exactly the same height every month —
+                    // whether the month spans 4, 5, or 6 calendar weeks.
+                }
+                @for (var cell = 0; cell < DayCellCount; cell++)
+                {
+                    var daysInMonth = JalaliCalendarConverter.DaysInMonth(
+                        _displayedJalaliYear,
+                        _displayedJalaliMonth);
+
+                    var firstDayOffset = JalaliCalendarConverter.ToIranianWeekdayIndex(
+                        JalaliCalendarConverter.GetGregorianDayOfWeek(
+                            _displayedJalaliYear,
+                            _displayedJalaliMonth,
+                            1));
+
+                    var day = cell - firstDayOffset + 1;
+
+                    if (day < 1 || day > daysInMonth)
+                    {
+                        <div style="width: 14.28%; height: 40px;"></div>
+                    }
+                    else
+                    {
+                        var capturedDay = day;
+
+                        <div class="d-flex align-center justify-center" style="width: 14.28%; height: 40px;">
+                            <MudButton OnClick="@(() => SelectDayAsync(capturedDay))" Disabled="@IsDayDisabled(capturedDay)"
+                                       Variant="@(IsSelectedDay(capturedDay) ? Variant.Filled : (IsToday(capturedDay) ? Variant.Outlined : Variant.Text))"
+                                       Color="@(IsSelectedDay(capturedDay) || IsToday(capturedDay) ? Color.Primary : Color.Default)"
+                                       Style="min-width: 36px; width: 36px; height: 36px; border-radius: 50%; padding: 0;">
+                                @JalaliCalendarConverter.ToPersianDigits(capturedDay.ToString())
+                            </MudButton>
+                        </div>
+                    }
+                }
+
+            </div>
+        }
+        else if (_view == PickerView.Month)
+        {
+            <div class="d-flex flex-wrap" style="direction: rtl;">
+                @for (var month = 1; month <= 12; month++)
+                {
+                    var capturedMonth = month;
+
+                    <div class="d-flex align-center justify-center pa-1" style="width: 33.33%; height: 56px;">
+                        <MudButton OnClick="@(() => SelectMonth(capturedMonth))" FullWidth="true"
+                                   Variant="@(capturedMonth == _displayedJalaliMonth ? Variant.Filled : Variant.Text)"
+                                   Color="@(capturedMonth == _displayedJalaliMonth ? Color.Primary : Color.Default)">
+                            @JalaliCalendarConverter.MonthNames[capturedMonth - 1]
+                        </MudButton>
+                    </div>
+                }
+            </div>
+        }
+        else
+        {
+            <div class="d-flex flex-wrap" style="direction: rtl;">
+                @for (var offset = 0; offset < YearsPerPage; offset++)
+                {
+                    var capturedYear = _yearPageStart + offset;
+
+                    <div class="d-flex align-center justify-center pa-1" style="width: 33.33%; height: 56px;">
+                        <MudButton OnClick="@(() => SelectYear(capturedYear))" FullWidth="true"
+                                   Variant="@(capturedYear == _displayedJalaliYear ? Variant.Filled : Variant.Text)"
+                                   Color="@(capturedYear == _displayedJalaliYear ? Color.Primary : Color.Default)">
+                            @JalaliCalendarConverter.ToPersianDigits(capturedYear.ToString())
+                        </MudButton>
+                    </div>
+                }
+            </div>
+        }
+
+    </div>;
+}

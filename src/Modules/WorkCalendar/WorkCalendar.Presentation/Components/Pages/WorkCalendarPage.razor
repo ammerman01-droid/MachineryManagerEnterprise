@@ -1,0 +1,52 @@
+@page "/admin/projects/{ProjectId:guid}/work-calendar"
+@rendermode @(new InteractiveServerRenderMode(prerender: false))
+@inject IHttpClientFactory HttpClientFactory
+@inject NavigationManager Navigation
+
+<PageTitle>تقویم کاری</PageTitle>
+
+@if (errorMessage is not null)
+{
+    <MudAlert Severity="Severity.Error" Class="my-4">@errorMessage</MudAlert>
+}
+else
+{
+    <MudProgressLinear Indeterminate="true" Class="my-4" />
+}
+
+@code {
+    /// <summary>Gets or sets the Project this Work Calendar page is for, bound from the route.</summary>
+    [Parameter]
+    public Guid ProjectId { get; set; }
+
+    private string? errorMessage;
+
+    /// <inheritdoc />
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            var client = HttpClientFactory.CreateClient("InternalApi");
+            var response = await client.GetAsync($"/api/v1/work-calendars/by-project/{ProjectId}");
+            var content = await response.Content.ReadAsStringAsync();
+
+            if (!response.IsSuccessStatusCode)
+            {
+                errorMessage = $"خطا در دریافت تقویم کاری: {content}";
+                return;
+            }
+
+            var calendar = System.Text.Json.JsonSerializer.Deserialize<Shared.WorkCalendarItem>(
+                content, new System.Text.Json.JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+
+            if (calendar is not null)
+            {
+                Navigation.NavigateTo($"/admin/work-calendars/{calendar.Id}", replace: true);
+            }
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"خطا: {ex.Message}";
+        }
+    }
+}

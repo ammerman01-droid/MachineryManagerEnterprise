@@ -1,0 +1,21 @@
+<Project Sdk="Microsoft.NET.Sdk.Razor">
+
+  <PropertyGroup>
+    <RootNamespace>MachineryManagerEnterprise.WorkCalendar.Presentation</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <FrameworkReference Include="Microsoft.AspNetCore.App" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\WorkCalendar.Application\WorkCalendar.Application.csproj" />
+    <ProjectReference Include="..\..\..\BuildingBlocks\MachineryManagerEnterprise.UI\MachineryManagerEnterprise.UI.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="MudBlazor" />
+    <PackageReference Include="OpenIddict.Validation.AspNetCore" />
+  </ItemGroup>
+
+</Project>

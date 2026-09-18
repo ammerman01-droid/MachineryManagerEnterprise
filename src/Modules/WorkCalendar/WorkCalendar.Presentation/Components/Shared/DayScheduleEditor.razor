@@ -1,0 +1,148 @@
+@namespace MachineryManagerEnterprise.WorkCalendar.Presentation.Components.Shared
+
+<MudPaper Class="pa-3 mb-2" Outlined="true">
+    <MudStack Row="true" AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween">
+        <MudText Typo="Typo.subtitle1">@Label</MudText>
+        <MudSwitch T="bool" Value="@Value.IsWorkingDay" ValueChanged="OnWorkingDayChanged"
+                   Color="Color.Primary" Label="روز کاری" />
+    </MudStack>
+
+    @if (Value.IsWorkingDay)
+    {
+        @foreach (var shift in Value.Shifts)
+        {
+            var currentShift = shift;
+
+            <MudPaper Class="pa-2 my-2" Style="background-color:var(--mud-palette-background-grey);">
+                <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="2">
+                    <MudTimePicker Label="شروع شیفت" Time="@currentShift.StartTime.ToTimeSpan()"
+                                   AnchorOrigin="Origin.TopCenter" TransformOrigin="Origin.BottomCenter"
+                                   TimeChanged="@(t => OnShiftStartChanged(currentShift, t))" Class="flex-grow-1" />
+                    <MudTimePicker Label="پایان شیفت" Time="@currentShift.EndTime.ToTimeSpan()"
+                                   AnchorOrigin="Origin.TopCenter" TransformOrigin="Origin.BottomCenter"
+                                   TimeChanged="@(t => OnShiftEndChanged(currentShift, t))" Class="flex-grow-1" />
+                    <MudIconButton Icon="@Icons.Material.Filled.Delete" Color="Color.Error"
+                                   OnClick="@(() => RemoveShift(currentShift))" />
+                </MudStack>
+
+                @foreach (var breakItem in currentShift.Breaks)
+                {
+                    var currentBreak = breakItem;
+
+                    <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="2" Class="mt-2 mr-6">
+                        <MudTimePicker Label="شروع استراحت" Time="@currentBreak.StartTime.ToTimeSpan()"
+                                       AnchorOrigin="Origin.TopCenter" TransformOrigin="Origin.BottomCenter"
+                                       TimeChanged="@(t => OnBreakStartChanged(currentBreak, t))" Class="flex-grow-1" />
+                        <MudTimePicker Label="پایان استراحت" Time="@currentBreak.EndTime.ToTimeSpan()"
+                                       AnchorOrigin="Origin.TopCenter" TransformOrigin="Origin.BottomCenter"
+                                       TimeChanged="@(t => OnBreakEndChanged(currentBreak, t))" Class="flex-grow-1" />
+                        <MudIconButton Icon="@Icons.Material.Filled.Close" Size="Size.Small"
+                                       OnClick="@(() => RemoveBreak(currentShift, currentBreak))" />
+                    </MudStack>
+                }
+
+                <MudButton Variant="Variant.Text" Size="Size.Small" StartIcon="@Icons.Material.Filled.Add"
+                           OnClick="@(() => AddBreak(currentShift))" Class="mt-1">
+                    افزودن استراحت
+                </MudButton>
+            </MudPaper>
+        }
+
+        <MudButton Variant="Variant.Outlined" Size="Size.Small" StartIcon="@Icons.Material.Filled.Add"
+                   OnClick="AddShift" Class="mt-1">
+            افزودن شیفت
+        </MudButton>
+    }
+</MudPaper>
+
+@code {
+    /// <summary>Gets or sets the label shown above the editor (typically the day of week's name).</summary>
+    [Parameter]
+    public string Label { get; set; } = string.Empty;
+
+    /// <summary>Gets or sets the day schedule being edited.</summary>
+    [Parameter]
+    public DayScheduleItem Value { get; set; } = new();
+
+    /// <summary>Raised whenever <see cref="Value"/> changes, for two-way binding from the parent.</summary>
+    [Parameter]
+    public EventCallback<DayScheduleItem> ValueChanged { get; set; }
+
+    private async Task NotifyChangedAsync() => await ValueChanged.InvokeAsync(Value);
+
+    private async Task OnWorkingDayChanged(bool isWorkingDay)
+    {
+        Value.IsWorkingDay = isWorkingDay;
+
+        if (isWorkingDay && Value.Shifts.Count == 0)
+        {
+            Value.Shifts.Add(new ShiftItem { StartTime = new TimeOnly(8, 0), EndTime = new TimeOnly(17, 0) });
+        }
+        else if (!isWorkingDay)
+        {
+            Value.Shifts.Clear();
+        }
+
+        await NotifyChangedAsync();
+    }
+
+    private async Task AddShift()
+    {
+        Value.Shifts.Add(new ShiftItem { StartTime = new TimeOnly(8, 0), EndTime = new TimeOnly(17, 0) });
+        await NotifyChangedAsync();
+    }
+
+    private async Task RemoveShift(ShiftItem shift)
+    {
+        Value.Shifts.Remove(shift);
+        await NotifyChangedAsync();
+    }
+
+    private async Task AddBreak(ShiftItem shift)
+    {
+        shift.Breaks.Add(new BreakItem { StartTime = new TimeOnly(12, 0), EndTime = new TimeOnly(13, 0) });
+        await NotifyChangedAsync();
+    }
+
+    private async Task RemoveBreak(ShiftItem shift, BreakItem breakItem)
+    {
+        shift.Breaks.Remove(breakItem);
+        await NotifyChangedAsync();
+    }
+
+    private async Task OnShiftStartChanged(ShiftItem shift, TimeSpan? time)
+    {
+        if (time is { } value)
+        {
+            shift.StartTime = TimeOnly.FromTimeSpan(value);
+            await NotifyChangedAsync();
+        }
+    }
+
+    private async Task OnShiftEndChanged(ShiftItem shift, TimeSpan? time)
+    {
+        if (time is { } value)
+        {
+            shift.EndTime = TimeOnly.FromTimeSpan(value);
+            await NotifyChangedAsync();
+        }
+    }
+
+    private async Task OnBreakStartChanged(BreakItem breakItem, TimeSpan? time)
+    {
+        if (time is { } value)
+        {
+            breakItem.StartTime = TimeOnly.FromTimeSpan(value);
+            await NotifyChangedAsync();
+        }
+    }
+
+    private async Task OnBreakEndChanged(BreakItem breakItem, TimeSpan? time)
+    {
+        if (time is { } value)
+        {
+            breakItem.EndTime = TimeOnly.FromTimeSpan(value);
+            await NotifyChangedAsync();
+        }
+    }
+}

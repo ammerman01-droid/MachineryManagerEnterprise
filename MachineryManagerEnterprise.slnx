@@ -46,5 +46,27 @@
     <Project Path="src/Modules/Configuration/Configuration.Infrastructure/Configuration.Infrastructure.csproj" />
     <Project Path="src/Modules/Configuration/Configuration.Presentation/Configuration.Presentation.csproj" />
   </Folder>
-  
+  <Folder Name="/src/Modules/WorkCalendar/">
+    <Project Path="src/Modules/WorkCalendar/WorkCalendar.Application/WorkCalendar.Application.csproj" />
+    <Project Path="src/Modules/WorkCalendar/WorkCalendar.Domain/WorkCalendar.Domain.csproj" />
+    <Project Path="src/Modules/WorkCalendar/WorkCalendar.Infrastructure/WorkCalendar.Infrastructure.csproj" />
+    <Project Path="src/Modules/WorkCalendar/WorkCalendar.Presentation/WorkCalendar.Presentation.csproj" />
+  </Folder>
+<!-- <Folder Name="/src/Modules/Personnel/">
+    <Project Path="src/Modules/Personnel/Personnel.Application/Personnel.Application.csproj" />
+    <Project Path="src/Modules/Personnel/Personnel.Domain/Personnel.Domain.csproj" />
+    <Project Path="src/Modules/Personnel/Personnel.Infrastructure/Personnel.Infrastructure.csproj" />
+    <Project Path="src/Modules/Personnel/Personnel.Presentation/Personnel.Presentation.csproj" />
+  </Folder>-->
+  <!-- <Folder Name="/tests/" />
+  <Folder Name="/tests/Shared/">
+    <Project Path="tests/Shared/MachineryManagerEnterprise.Testing.Common/MachineryManagerEnterprise.Testing.Common.csproj" />
+  </Folder>
+  <Folder Name="/tests/Modules/" />
+  <Folder Name="/tests/Modules/Configuration/">
+    <Project Path="tests/Modules/Configuration/Configuration.Domain.Tests/Configuration.Domain.Tests.csproj" />
+    <Project Path="tests/Modules/Configuration/Configuration.Application.Tests/Configuration.Application.Tests.csproj" />
+    <Project Path="tests/Modules/Configuration/Configuration.Infrastructure.Tests/Configuration.Infrastructure.Tests.csproj" />
+    <Project Path="tests/Modules/Configuration/Configuration.Presentation.Tests/Configuration.Presentation.Tests.csproj" />
+  </Folder>-->
 </Solution>

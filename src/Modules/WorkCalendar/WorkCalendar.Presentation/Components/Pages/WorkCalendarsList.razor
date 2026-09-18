@@ -1,0 +1,174 @@
+@page "/admin/work-calendar"
+@inject IHttpClientFactory HttpClientFactory
+@inject NavigationManager Navigation
+
+<PageTitle>تقویم کاری</PageTitle>
+
+<MudText Typo="Typo.h4" Class="mb-4">تقویم کاری پروژه‌ها</MudText>
+<MudText Typo="Typo.body2" Class="mud-text-secondary mb-4">
+    تقویم کاری متعلق به یک پروژه است؛ ابتدا Holding و سپس سازمان مربوطه را انتخاب کنید.
+</MudText>
+
+<MudStack Row="true" Spacing="3" Class="mb-4">
+    <MudSelect T="Guid" Label="Holding" @bind-Value="selectedHoldingId" @bind-Value:after="OnHoldingChangedAsync" Class="flex-grow-1">
+        @foreach (var holding in holdings)
+        {
+            <MudSelectItem T="Guid" Value="@holding.Id">@holding.Name</MudSelectItem>
+        }
+    </MudSelect>
+
+    <MudSelect T="Guid" Label="سازمان" @bind-Value="selectedOrganizationId" @bind-Value:after="OnOrganizationChangedAsync"
+               Disabled="@(selectedHoldingId == Guid.Empty)" Class="flex-grow-1">
+        @foreach (var organization in organizationsInSelectedHolding)
+        {
+            <MudSelectItem T="Guid" Value="@organization.Id">@organization.Name</MudSelectItem>
+        }
+    </MudSelect>
+</MudStack>
+
+@if (errorMessage is not null)
+{
+    <MudAlert Severity="Severity.Error" Class="my-4">@errorMessage</MudAlert>
+}
+
+@if (isLoading)
+{
+    <MudProgressLinear Indeterminate="true" Class="my-4" />
+}
+else if (selectedOrganizationId != Guid.Empty && projectsInSelectedOrganization.Count == 0)
+{
+    <MudText Typo="Typo.body2" Class="mud-text-secondary">هیچ پروژه‌ای برای این سازمان ثبت نشده است.</MudText>
+}
+else if (projectsInSelectedOrganization.Count > 0)
+{
+    <MudTable Items="@projectsInSelectedOrganization" Hover="true" Breakpoint="Breakpoint.Sm">
+        <HeaderContent>
+            <MudTh>نام پروژه</MudTh>
+            <MudTh>عملیات</MudTh>
+        </HeaderContent>
+        <RowTemplate>
+            <MudTd DataLabel="نام">@context.Name</MudTd>
+            <MudTd DataLabel="عملیات">
+                <MudButton Size="Size.Small" Variant="Variant.Filled" Color="Color.Primary"
+                           OnClick="@(() => Navigation.NavigateTo($"/admin/projects/{context.Id}/work-calendar"))">
+                    مدیریت تقویم کاری
+                </MudButton>
+            </MudTd>
+        </RowTemplate>
+    </MudTable>
+}
+
+@code {
+    private sealed class HoldingItem
+    {
+        public Guid Id { get; set; }
+        public string Name { get; set; } = string.Empty;
+    }
+
+    private sealed class OrganizationItem
+    {
+        public Guid Id { get; set; }
+        public string Name { get; set; } = string.Empty;
+        public Guid? HoldingId { get; set; }
+    }
+
+    private sealed class ProjectItem
+    {
+        public Guid Id { get; set; }
+        public string Name { get; set; } = string.Empty;
+        public Guid OrganizationId { get; set; }
+    }
+
+    private sealed class SearchHoldingsResponse
+    {
+        public List<HoldingItem> Items { get; set; } = [];
+    }
+
+    private sealed class SearchOrganizationsResponse
+    {
+        public List<OrganizationItem> Items { get; set; } = [];
+    }
+
+    private sealed class SearchProjectsResponse
+    {
+        public List<ProjectItem> Items { get; set; } = [];
+    }
+
+    private List<HoldingItem> holdings = [];
+    private List<OrganizationItem> allOrganizations = [];
+    private List<ProjectItem> allProjects = [];
+    private List<OrganizationItem> organizationsInSelectedHolding = [];
+    private List<ProjectItem> projectsInSelectedOrganization = [];
+    private Guid selectedHoldingId;
+    private Guid selectedOrganizationId;
+    private bool isLoading = true;
+    private string? errorMessage;
+
+    /// <summary>
+    /// Loads Holdings, Organizations, and Projects up front (chat,
+    /// 2026-09-14) — since neither <c>SearchOrganizationsQuery</c> nor
+    /// <c>SearchProjectsQuery</c> currently accept a Holding/Organization
+    /// filter, the Holding → Organization → Project cascade is done
+    /// entirely client-side, the same way <c>OrganizationsList.razor</c>
+    /// resolves each Organization's Holding.
+    /// </summary>
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadAllAsync();
+        isLoading = false;
+    }
+
+    private async Task LoadAllAsync()
+    {
+        try
+        {
+            var client = HttpClientFactory.CreateClient("InternalApi");
+
+            var holdingsResponse = await client.GetAsync("/api/v1/holdings?pageSize=200");
+            var organizationsResponse = await client.GetAsync("/api/v1/organizations?pageSize=200");
+            var projectsResponse = await client.GetAsync("/api/v1/projects?pageSize=200");
+
+            if (!holdingsResponse.IsSuccessStatusCode || !organizationsResponse.IsSuccessStatusCode || !projectsResponse.IsSuccessStatusCode)
+            {
+                errorMessage = "خطا در دریافت فهرست Holding/سازمان/پروژه.";
+                return;
+            }
+
+            var options = new System.Text.Json.JsonSerializerOptions { PropertyNameCaseInsensitive = true };
+
+            holdings = System.Text.Json.JsonSerializer.Deserialize<SearchHoldingsResponse>(
+                await holdingsResponse.Content.ReadAsStringAsync(), options)?.Items ?? [];
+
+            allOrganizations = System.Text.Json.JsonSerializer.Deserialize<SearchOrganizationsResponse>(
+                await organizationsResponse.Content.ReadAsStringAsync(), options)?.Items ?? [];
+
+            allProjects = System.Text.Json.JsonSerializer.Deserialize<SearchProjectsResponse>(
+                await projectsResponse.Content.ReadAsStringAsync(), options)?.Items ?? [];
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"خطا: {ex.Message}";
+        }
+    }
+
+    private Task OnHoldingChangedAsync()
+    {
+        selectedOrganizationId = Guid.Empty;
+        projectsInSelectedOrganization = [];
+
+        organizationsInSelectedHolding = selectedHoldingId == Guid.Empty
+            ? []
+            : allOrganizations.Where(o => o.HoldingId == selectedHoldingId).ToList();
+
+        return Task.CompletedTask;
+    }
+
+    private Task OnOrganizationChangedAsync()
+    {
+        projectsInSelectedOrganization = selectedOrganizationId == Guid.Empty
+            ? []
+            : allProjects.Where(p => p.OrganizationId == selectedOrganizationId).ToList();
+
+        return Task.CompletedTask;
+    }
+}

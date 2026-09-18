@@ -46,6 +46,12 @@ public sealed class ConfigurationDbContext : DbContext, IConfigurationUnitOfWork
     /// </summary>
     public DbSet<AuditEntry> AuditEntries => Set<AuditEntry>();
 
+    /// <summary>Gets the set of DrivingLicenseType aggregates.</summary>
+    public DbSet<global::Configuration.Domain.DrivingLicenseType> DrivingLicenseTypes => Set<global::Configuration.Domain.DrivingLicenseType>();
+
+    /// <summary>Gets the set of JobTitle aggregates.</summary>
+    public DbSet<global::Configuration.Domain.JobTitle> JobTitles => Set<global::Configuration.Domain.JobTitle>();
+    
     /// <inheritdoc />
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

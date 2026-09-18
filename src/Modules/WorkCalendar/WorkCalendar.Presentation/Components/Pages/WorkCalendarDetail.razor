@@ -1,0 +1,299 @@
+@page "/admin/work-calendars/{WorkCalendarId:guid}"
+@rendermode @(new InteractiveServerRenderMode(prerender: false))
+@inject IHttpClientFactory HttpClientFactory
+@inject IDialogService DialogService
+@using MachineryManagerEnterprise.WorkCalendar.Presentation.Components.Shared
+@using MachineryManagerEnterprise.UI.Calendar
+
+<PageTitle>تقویم کاری</PageTitle>
+
+@if (isLoading)
+{
+    <MudProgressLinear Indeterminate="true" Class="my-4" />
+}
+else if (errorMessage is not null)
+{
+    <MudAlert Severity="Severity.Error" Class="my-4">@errorMessage</MudAlert>
+}
+else if (calendar is not null)
+{
+    <MudStack Row="true" AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween" Class="mb-4">
+        <MudText Typo="Typo.h4" Class="mb-4">تقویم کاری</MudText>
+    </MudStack>
+
+    @if (actionError is not null)
+    {
+        <MudAlert Severity="Severity.Error" Class="mb-4">@actionError</MudAlert>
+    }
+
+    <MudTabs Elevation="1" Class="mt-4">
+        <MudTabPanel Text="الگوهای کاری">
+            <MudButton Variant="Variant.Filled" Color="Color.Primary" StartIcon="@Icons.Material.Filled.Add"
+                       OnClick="OpenAddWorkPatternDialogAsync" Class="my-3">
+                افزودن الگوی کاری
+            </MudButton>
+
+            <MudTable Items="@calendar.WorkPatterns" Hover="true" Breakpoint="Breakpoint.Sm">
+                <HeaderContent>
+                    <MudTh>تاریخ شروع</MudTh>
+                    <MudTh>تاریخ پایان</MudTh>
+                    <MudTh>وضعیت</MudTh>
+                    <MudTh>عملیات</MudTh>
+                </HeaderContent>
+                <RowTemplate>
+                    <MudTd DataLabel="شروع">@JalaliCalendarConverter.Format(context.StartDate.ToDateTime(TimeOnly.MinValue))
+                    </MudTd>
+                    <MudTd DataLabel="پایان">@JalaliCalendarConverter.Format(context.EndDate.ToDateTime(TimeOnly.MinValue))
+                    </MudTd>
+                    <MudTd DataLabel="وضعیت">
+                        <MudChip T="string" Color="@StatusColor(context.Status)" Size="Size.Small">
+                            @StatusLabel(context.Status)</MudChip>
+                        </MudTd>
+                        <MudTd>
+                                                    @if (context.Status == "Draft")
+                        {
+                            <MudButton Variant="Variant.Text" Color="Color.Error" Disabled="@isBusy"
+                                       OnClick="@(() => RemoveWorkPatternAsync(context.Id))">
+                                حذف
+                            </MudButton>
+                        }
+                        @if (context.Status == "Active")
+                        {
+                            <MudButton Variant="Variant.Text" Color="Color.Primary" Disabled="@isBusy"
+                                       OnClick="@(() => OpenSupersedeDialogAsync(context.Id))">
+                                جایگزینی
+                            </MudButton>
+                            <MudButton Variant="Variant.Text" Color="Color.Warning" Disabled="@isBusy"
+                                       OnClick="@(() => RetireWorkPatternAsync(context.Id))">
+                                بازنشسته کردن
+                            </MudButton>
+                        }
+                        </MudTd>
+                    </RowTemplate>
+                </MudTable>
+            </MudTabPanel>
+
+            <MudTabPanel Text="استثناهای روز">
+                <MudButton Variant="Variant.Filled" Color="Color.Primary" StartIcon="@Icons.Material.Filled.Add"
+                           OnClick="OpenAddDayOverrideDialogAsync" Class="my-3">
+                    افزودن استثنای روز
+                </MudButton>
+
+                <MudTable Items="@calendar.DayOverrides" Hover="true" Breakpoint="Breakpoint.Sm">
+                    <HeaderContent>
+                        <MudTh>تاریخ</MudTh>
+                        <MudTh>نوع</MudTh>
+                        <MudTh>وضعیت</MudTh>
+                        <MudTh>عملیات</MudTh>
+                    </HeaderContent>
+                    <RowTemplate>
+                        <MudTd DataLabel="تاریخ">@JalaliCalendarConverter.Format(context.Date.ToDateTime(TimeOnly.MinValue))
+                        </MudTd>
+                        <MudTd DataLabel="نوع">@DayOverrideTypeLabel(context.Type)</MudTd>
+                        <MudTd DataLabel="وضعیت">
+                            <MudChip T="string" Color="@(context.IsCancelled ? Color.Default : Color.Success)"
+                                     Size="Size.Small">
+                                @(context.IsCancelled ? "لغو شده" : "فعال")
+                            </MudChip>
+                        </MudTd>
+                        <MudTd>
+                                                    @if (!context.IsCancelled)
+                        {
+                            <MudButton Variant="Variant.Text" Color="Color.Error" Disabled="@isBusy"
+                                       OnClick="@(() => CancelDayOverrideAsync(context.Id))">
+                                لغو
+                            </MudButton>
+                        }
+                        </MudTd>
+                    </RowTemplate>
+                </MudTable>
+            </MudTabPanel>
+        </MudTabs>
+    }
+
+@code {
+    /// <summary>Gets or sets the Work Calendar being displayed, bound from the route.</summary>
+    [Parameter]
+    public Guid WorkCalendarId { get; set; }
+
+    private WorkCalendarItem? calendar;
+    private bool isLoading = true;
+    private bool isBusy;
+    private string? errorMessage;
+    private string? actionError;
+
+    /// <inheritdoc />
+    protected override async Task OnInitializedAsync() => await LoadAsync();
+
+    private async Task LoadAsync()
+    {
+        isLoading = true;
+        errorMessage = null;
+
+        try
+        {
+            var client = HttpClientFactory.CreateClient("InternalApi");
+            var response = await client.GetAsync($"/api/v1/work-calendars/{WorkCalendarId}");
+            var content = await response.Content.ReadAsStringAsync();
+
+            if (!response.IsSuccessStatusCode)
+            {
+                errorMessage = $"خطا در دریافت تقویم کاری: {content}";
+                return;
+            }
+
+            calendar = System.Text.Json.JsonSerializer.Deserialize<WorkCalendarItem>(
+                content, new System.Text.Json.JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"خطا: {ex.Message}";
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+
+    private async Task ActivateAsync() =>
+        await SendActionAsync(client => client.PostAsync($"/api/v1/work-calendars/{WorkCalendarId}/activate", null), "خطا در فعال‌سازی");
+
+    private async Task ArchiveAsync() =>
+        await SendActionAsync(client => client.PostAsync($"/api/v1/work-calendars/{WorkCalendarId}/archive", null), "خطا در آرشیو");
+
+    private async Task RemoveWorkPatternAsync(Guid workPatternId) =>
+        await SendActionAsync(
+            client => client.DeleteAsync($"/api/v1/work-calendars/{WorkCalendarId}/work-patterns/{workPatternId}"),
+            "خطا در حذف الگوی کاری");
+
+    private async Task CancelDayOverrideAsync(Guid dayOverrideId) =>
+        await SendActionAsync(
+            client => client.PostAsync($"/api/v1/work-calendars/{WorkCalendarId}/day-overrides/{dayOverrideId}/cancel", null),
+            "خطا در لغو استثنای روز");
+
+    /// <summary>
+    /// Shared plumbing for the simple (no request body) per-row/header
+    /// actions above: sets the busy state, calls the API, reloads the
+    /// calendar on success, and surfaces the server's error message.
+    /// </summary>
+    private async Task SendActionAsync(Func<HttpClient, Task<HttpResponseMessage>> sendRequest, string errorPrefix)
+    {
+        actionError = null;
+        isBusy = true;
+
+        try
+        {
+            var client = HttpClientFactory.CreateClient("InternalApi");
+            var response = await sendRequest(client);
+
+            if (response.IsSuccessStatusCode)
+            {
+                await LoadAsync();
+            }
+            else
+            {
+                actionError = $"{errorPrefix}: {await response.Content.ReadAsStringAsync()}";
+            }
+        }
+        catch (Exception ex)
+        {
+            actionError = $"خطا: {ex.Message}";
+        }
+        finally
+        {
+            isBusy = false;
+        }
+    }
+
+    private async Task OpenAddWorkPatternDialogAsync()
+    {
+        var parameters = new DialogParameters<WorkPatternDialog> { { x => x.WorkCalendarId, WorkCalendarId } };
+        var dialog = await DialogService.ShowAsync<WorkPatternDialog>("افزودن الگوی کاری", parameters);
+        var result = await dialog.Result;
+
+        if (result is { Canceled: false })
+        {
+            await LoadAsync();
+        }
+    }
+
+    private async Task OpenSupersedeDialogAsync(Guid patternId)
+    {
+        var parameters = new DialogParameters<WorkPatternDialog>
+        {
+            { x => x.WorkCalendarId, WorkCalendarId },
+            { x => x.PatternIdToSupersede, patternId },
+        };
+
+        var dialog = await DialogService.ShowAsync<WorkPatternDialog>("جایگزینی الگوی کاری", parameters);
+        var result = await dialog.Result;
+
+        if (result is { Canceled: false })
+        {
+            await LoadAsync();
+        }
+    }
+
+    private async Task OpenAddDayOverrideDialogAsync()
+    {
+        var parameters = new DialogParameters<DayOverrideDialog> { { x => x.WorkCalendarId, WorkCalendarId } };
+        var dialog = await DialogService.ShowAsync<DayOverrideDialog>("افزودن استثنای روز", parameters);
+        var result = await dialog.Result;
+
+        if (result is { Canceled: false })
+        {
+            await LoadAsync();
+        }
+    }
+
+    private static Color StatusColor(string status) => status switch
+    {
+        "Draft" => Color.Default,
+        "Active" => Color.Success,
+        "Archived" => Color.Dark,
+        "Superseded" => Color.Warning,
+        "Historical" => Color.Default,
+        _ => Color.Default,
+    };
+
+    private static string StatusLabel(string status) => status switch
+    {
+        "Draft" => "پیش‌نویس",
+        "Active" => "فعال",
+        "Archived" => "آرشیو شده",
+        "Superseded" => "جایگزین شده",
+        "Historical" => "تاریخی",
+        _ => status,
+    };
+
+    private static string DayOverrideTypeLabel(string type) => type switch
+    {
+        "Holiday" => "تعطیل",
+        "Working" => "روز کاری اضافه",
+        "Modified" => "ساعت‌کاری متفاوت",
+        _ => type,
+    };
+
+    private async Task OpenEditDialogAsync(WorkPatternItem pattern)
+    {
+        var parameters = new DialogParameters<WorkPatternDialog>
+    {
+        { x => x.WorkCalendarId, WorkCalendarId },
+        { x => x.PatternIdToEdit, pattern.Id },
+        { x => x.InitialValues, pattern },
+    };
+
+        var dialog = await DialogService.ShowAsync<WorkPatternDialog>("ویرایش الگوی کاری", parameters);
+        var result = await dialog.Result;
+
+        if (result is { Canceled: false })
+        {
+            await LoadAsync();
+        }
+    }
+
+    private async Task RetireWorkPatternAsync(Guid workPatternId) =>
+        await SendActionAsync(
+            client => client.PostAsync($"/api/v1/work-calendars/{WorkCalendarId}/work-patterns/{workPatternId}/retire", null),
+            "خطا در بازنشسته کردن الگوی کاری");
+}

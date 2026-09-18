@@ -48,6 +48,16 @@
             new("شرکت‌های سازنده", "admin/companies", Icons.Material.Filled.Apartment),
             new("انواع سوخت", "admin/fuel-types", Icons.Material.Filled.LocalGasStation),
         }),
+        new NavMenuCategory("work-calendar", "تقویم کاری", Icons.Material.Filled.CalendarToday, new List<NavMenuLink>
+        {
+            new("تقویم کاری", "admin/work-calendar", Icons.Material.Filled.CalendarToday),
+        }),
+        new NavMenuCategory("personnel", "پرسنل", Icons.Material.Filled.Person, new List<NavMenuLink>
+        {
+            new("پرسنل", "admin/personnel", Icons.Material.Filled.People),
+            new("سمت‌های شغلی", "admin/job-titles", Icons.Material.Filled.PhotoAlbum),
+            new("گواهی نامه", "admin/driving-license-types", Icons.Material.Filled.PhotoAlbum),
+        }),
         new NavMenuCategory("assets", "دارایی‌ها", Icons.Material.Filled.PrecisionManufacturing, new List<NavMenuLink>
         {
             new("مدل‌های دارایی", "admin/asset-models", Icons.Material.Filled.Construction),
@@ -78,17 +88,29 @@
     }
 
     private void SetExpandedCategoryFromCurrentUri()
+{
+    var relativePath = Navigation.ToBaseRelativePath(Navigation.Uri).TrimEnd('/');
+
+    // Fix (chat, 2026-09-15): a Project's Work Calendar lives under
+    // "admin/projects/{id}/work-calendar", which is also a prefix
+    // match for the "structure" category's own "admin/projects" link.
+    // Check this more specific case first so the "work-calendar"
+    // category wins whenever the path is actually about a calendar.
+    if (relativePath.Contains("/work-calendar", StringComparison.OrdinalIgnoreCase) ||
+        relativePath.StartsWith("admin/work-calendars/", StringComparison.OrdinalIgnoreCase))
     {
-        var relativePath = Navigation.ToBaseRelativePath(Navigation.Uri).TrimEnd('/');
-
-        var matchedCategory = categories.FirstOrDefault(category =>
-            category.Links.Any(link => MatchesCurrentPath(relativePath, link.Href)));
-
-        if (matchedCategory is not null)
-        {
-            expandedCategoryKey = matchedCategory.Key;
-        }
+        expandedCategoryKey = "work-calendar";
+        return;
     }
+
+    var matchedCategory = categories.FirstOrDefault(category =>
+        category.Links.Any(link => MatchesCurrentPath(relativePath, link.Href)));
+
+    if (matchedCategory is not null)
+    {
+        expandedCategoryKey = matchedCategory.Key;
+    }
+}
 
     private static bool MatchesCurrentPath(string relativePath, string href) =>
         relativePath.Equals(href, StringComparison.OrdinalIgnoreCase) ||
