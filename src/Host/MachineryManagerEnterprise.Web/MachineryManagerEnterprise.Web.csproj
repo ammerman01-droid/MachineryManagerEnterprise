@@ -28,8 +28,8 @@
     <ProjectReference Include="..\..\Modules\WorkCalendar\WorkCalendar.Application\WorkCalendar.Application.csproj" />
     <ProjectReference Include="..\..\Modules\WorkCalendar\WorkCalendar.Infrastructure\WorkCalendar.Infrastructure.csproj" />
     <ProjectReference Include="..\..\Modules\WorkCalendar\WorkCalendar.Presentation\WorkCalendar.Presentation.csproj" />
-    <!-- <ProjectReference Include="..\..\Modules\Personnel\Personnel.Infrastructure\Personnel.Infrastructure.csproj" />
-    <ProjectReference Include="..\..\Modules\Personnel\Personnel.Presentation\Personnel.Presentation.csproj" />-->
+    <ProjectReference Include="..\..\Modules\Personnel\Personnel.Infrastructure\Personnel.Infrastructure.csproj" />
+    <ProjectReference Include="..\..\Modules\Personnel\Personnel.Presentation\Personnel.Presentation.csproj" />
   </ItemGroup>
 
   <ItemGroup>

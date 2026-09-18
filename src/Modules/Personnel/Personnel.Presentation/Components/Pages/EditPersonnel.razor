@@ -1,0 +1,246 @@
+@page "/admin/personnel/edit/{Id:guid}"
+@inject IHttpClientFactory HttpClientFactory
+@inject NavigationManager Navigation
+
+<PageTitle>ویرایش پرسنل</PageTitle>
+
+<MudText Typo="Typo.h4" Class="mb-4">ویرایش پرسنل</MudText>
+
+@if (errorMessage is not null)
+{
+    <MudAlert Severity="Severity.Error" Class="my-4">@errorMessage</MudAlert>
+}
+
+@if (isLoading)
+{
+    <MudProgressLinear Indeterminate="true" Class="my-4" />
+}
+else
+{
+    <MudPaper Class="pa-4" Style="max-width:600px;">
+        <MudForm @ref="form">
+            <MudTextField T="string" Label="نام" @bind-Value="firstName" Required="true" RequiredError="نام الزامی است" MaxLength="100" Class="mb-2" />
+            <MudTextField T="string" Label="نام خانوادگی" @bind-Value="lastName" Required="true" RequiredError="نام خانوادگی الزامی است" MaxLength="100" Class="mb-2" />
+            <MudTextField T="string" Label="کد پرسنلی" @bind-Value="personnelCode" Required="true" RequiredError="کد پرسنلی الزامی است" MaxLength="30" Class="mb-2" />
+
+            <MudSelect T="Guid" Label="سمت شغلی" @bind-Value="selectedJobTitleId" Required="true" RequiredError="سمت شغلی الزامی است" Class="mb-4">
+                @foreach (var jobTitle in jobTitles)
+                {
+                    <MudSelectItem T="Guid" Value="@jobTitle.Id">@jobTitle.Name</MudSelectItem>
+                }
+            </MudSelect>
+
+            <MudText Typo="Typo.subtitle1" Class="mb-2">گواهی‌نامه‌های رانندگی</MudText>
+
+            @for (var i = 0; i < licenseRows.Count; i++)
+            {
+                var index = i;
+                <MudGrid Class="mb-2">
+                    <MudItem xs="5">
+                        <MudSelect T="Guid" Label="نوع گواهی‌نامه" @bind-Value="licenseRows[index].DrivingLicenseTypeId">
+                            @foreach (var type in drivingLicenseTypes)
+                            {
+                                <MudSelectItem T="Guid" Value="@type.Id">@type.Name</MudSelectItem>
+                            }
+                        </MudSelect>
+                    </MudItem>
+                    <MudItem xs="5">
+                        <JalaliDatePicker Label="تاریخ انقضا" @bind-Date="licenseRows[index].ExpiryDate" />
+                    </MudItem>
+                    <MudItem xs="2">
+                        <MudIconButton Icon="@Icons.Material.Filled.Delete" Color="Color.Error" OnClick="@(() => licenseRows.RemoveAt(index))" />
+                    </MudItem>
+                </MudGrid>
+            }
+
+            <MudButton Variant="Variant.Outlined" Class="mb-4" OnClick="@(() => licenseRows.Add(new LicenseRow()))">
+                افزودن گواهی‌نامه
+            </MudButton>
+
+            <br />
+
+            <MudButton Variant="Variant.Filled" Color="Color.Primary" Class="mt-2" OnClick="SubmitAsync" Disabled="isSubmitting">
+                @(isSubmitting ? "در حال ذخیره..." : "ذخیره")
+            </MudButton>
+            <MudButton Variant="Variant.Outlined" Color="Color.Secondary" Class="mt-2 ml-2"
+                       OnClick="@(() => Navigation.NavigateTo("/admin/personnel"))">
+                انصراف
+            </MudButton>
+        </MudForm>
+    </MudPaper>
+}
+
+@code {
+    private sealed class LicenseRow
+    {
+        public Guid DrivingLicenseTypeId { get; set; }
+        public DateTime? ExpiryDate { get; set; }
+    }
+
+    private sealed class JobTitleItem
+    {
+        public Guid Id { get; set; }
+        public string Name { get; set; } = string.Empty;
+    }
+
+    private sealed class DrivingLicenseTypeItem
+    {
+        public Guid Id { get; set; }
+        public string Name { get; set; } = string.Empty;
+    }
+
+    private sealed class PersonnelDrivingLicenseItem
+    {
+        public Guid DrivingLicenseTypeId { get; set; }
+        public DateOnly ExpiryDate { get; set; }
+    }
+
+    private sealed class PersonnelItem
+    {
+        public Guid Id { get; set; }
+        public Guid OrganizationId { get; set; }
+        public string FirstName { get; set; } = string.Empty;
+        public string LastName { get; set; } = string.Empty;
+        public string PersonnelCode { get; set; } = string.Empty;
+        public Guid JobTitleId { get; set; }
+        public List<PersonnelDrivingLicenseItem> DrivingLicenses { get; set; } = [];
+    }
+
+    private sealed class OrganizationDetails
+    {
+        public Guid? HoldingId { get; set; }
+    }
+
+    /// <summary>Gets or sets the identifier of the Personnel record being edited, supplied via the route.</summary>
+    [Parameter]
+    public Guid Id { get; set; }
+
+    private MudForm form = null!;
+    private string firstName = string.Empty;
+    private string lastName = string.Empty;
+    private string personnelCode = string.Empty;
+    private Guid selectedJobTitleId;
+    private readonly List<LicenseRow> licenseRows = [];
+    private List<JobTitleItem> jobTitles = [];
+    private List<DrivingLicenseTypeItem> drivingLicenseTypes = [];
+    private bool isLoading = true;
+    private bool isSubmitting;
+    private string? errorMessage;
+
+    /// <summary>Loads the current Personnel record and, via its Organization's Holding, the Job Title and Driving License Type catalogs.</summary>
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            var client = HttpClientFactory.CreateClient("InternalApi");
+
+            var personnelResponse = await client.GetAsync($"/api/v1/personnel/{Id}");
+            var personnelContent = await personnelResponse.Content.ReadAsStringAsync();
+
+            if (!personnelResponse.IsSuccessStatusCode)
+            {
+                errorMessage = $"خطا در دریافت اطلاعات پرسنل: {personnelContent}";
+                return;
+            }
+
+            var personnel = JsonSerializer.Deserialize<PersonnelItem>(personnelContent, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+
+            if (personnel is null)
+            {
+                errorMessage = "اطلاعات پرسنل یافت نشد.";
+                return;
+            }
+
+            firstName = personnel.FirstName;
+            lastName = personnel.LastName;
+            personnelCode = personnel.PersonnelCode;
+            selectedJobTitleId = personnel.JobTitleId;
+            licenseRows.Clear();
+            licenseRows.AddRange(personnel.DrivingLicenses.Select(l => new LicenseRow
+            {
+                DrivingLicenseTypeId = l.DrivingLicenseTypeId,
+                ExpiryDate = l.ExpiryDate.ToDateTime(TimeOnly.MinValue),
+            }));
+
+            var organizationResponse = await client.GetAsync($"/api/v1/organizations/{personnel.OrganizationId}");
+            var organizationContent = await organizationResponse.Content.ReadAsStringAsync();
+
+            if (organizationResponse.IsSuccessStatusCode)
+            {
+                var organization = JsonSerializer.Deserialize<OrganizationDetails>(organizationContent, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+
+                if (organization?.HoldingId is { } holdingId)
+                {
+                    var jobTitlesResponse = await client.GetAsync($"/api/v1/job-titles?holdingId={holdingId}");
+                    if (jobTitlesResponse.IsSuccessStatusCode)
+                    {
+                        jobTitles = JsonSerializer.Deserialize<List<JobTitleItem>>(await jobTitlesResponse.Content.ReadAsStringAsync(), new JsonSerializerOptions { PropertyNameCaseInsensitive = true }) ?? [];
+                    }
+
+                    var licenseTypesResponse = await client.GetAsync($"/api/v1/driving-license-types?holdingId={holdingId}");
+                    if (licenseTypesResponse.IsSuccessStatusCode)
+                    {
+                        drivingLicenseTypes = JsonSerializer.Deserialize<List<DrivingLicenseTypeItem>>(await licenseTypesResponse.Content.ReadAsStringAsync(), new JsonSerializerOptions { PropertyNameCaseInsensitive = true }) ?? [];
+                    }
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"خطا: {ex.Message}";
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+
+    private async Task SubmitAsync()
+    {
+        await form.Validate();
+        if (!form.IsValid)
+        {
+            return;
+        }
+
+        isSubmitting = true;
+        errorMessage = null;
+
+        try
+        {
+            var client = HttpClientFactory.CreateClient("InternalApi");
+
+            var payload = new
+            {
+                FirstName = firstName,
+                LastName = lastName,
+                PersonnelCode = personnelCode,
+                JobTitleId = selectedJobTitleId,
+                DrivingLicenses = licenseRows
+                    .Where(r => r.DrivingLicenseTypeId != Guid.Empty && r.ExpiryDate.HasValue)
+                    .Select(r => new { DrivingLicenseTypeId = r.DrivingLicenseTypeId, ExpiryDate = DateOnly.FromDateTime(r.ExpiryDate!.Value) })
+                    .ToList(),
+            };
+
+            var response = await client.PutAsJsonAsync($"/api/v1/personnel/{Id}", payload);
+            var content = await response.Content.ReadAsStringAsync();
+
+            if (response.IsSuccessStatusCode)
+            {
+                Navigation.NavigateTo("/admin/personnel");
+            }
+            else
+            {
+                errorMessage = $"خطا در ذخیره: {content}";
+            }
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"خطا: {ex.Message}";
+        }
+        finally
+        {
+            isSubmitting = false;
+        }
+    }
+}

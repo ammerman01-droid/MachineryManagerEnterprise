@@ -28,9 +28,9 @@ using MachineryManagerEnterprise.UI;
 using MachineryManagerEnterprise.WorkCalendar.Infrastructure;
 using MachineryManagerEnterprise.WorkCalendar.Presentation.Endpoints;
 using MachineryManagerEnterprise.WorkCalendar.Application;
-//using MachineryManagerEnterprise.Personnel.Application;
-//using MachineryManagerEnterprise.Personnel.Infrastructure;
-//using MachineryManagerEnterprise.Personnel.Presentation.Endpoints;
+using MachineryManagerEnterprise.Personnel.Application;
+using MachineryManagerEnterprise.Personnel.Infrastructure;
+using MachineryManagerEnterprise.Personnel.Presentation.Endpoints;
 
 Log.Logger = new LoggerConfiguration()
     .WriteTo.Console()
@@ -94,8 +94,8 @@ try
     builder.Services.AddWorkCalendarInfrastructure(builder.Configuration);
 
     // Personnel module
-    //builder.Services.AddPersonnelApplication();
-    //builder.Services.AddPersonnelInfrastructure(builder.Configuration);
+    builder.Services.AddPersonnelApplication();
+    builder.Services.AddPersonnelInfrastructure(builder.Configuration);
 
 
 
@@ -136,8 +136,8 @@ try
         typeof(MachineryManagerEnterprise.Asset.Presentation.Components.Pages.AssetModelsList).Assembly,
         typeof(MachineryManagerEnterprise.Configuration.Presentation.Components.Pages.ColorsList).Assembly,
         typeof(MachineryManagerEnterprise.AuditLog.Presentation.Components.Pages.AuditLogList).Assembly,
-        typeof(MachineryManagerEnterprise.WorkCalendar.Presentation.Components.Pages.WorkCalendarsList).Assembly);
-        //typeof(MachineryManagerEnterprise.Personnel.Presentation.Components.Pages.PersonnelList).Assembly,
+        typeof(MachineryManagerEnterprise.WorkCalendar.Presentation.Components.Pages.WorkCalendarsList).Assembly,
+        typeof(MachineryManagerEnterprise.Personnel.Presentation.Components.Pages.PersonnelList).Assembly);
 
     // Identity endpoints
     app.MapIdentityConnectEndpoints();
@@ -174,7 +174,7 @@ try
     app.MapWorkCalendarEndpoints();
 
     // Personnel endpoints
-    //app.MapPersonnelEndpoints();
+    app.MapPersonnelEndpoints();
 
     app.Run();
 }

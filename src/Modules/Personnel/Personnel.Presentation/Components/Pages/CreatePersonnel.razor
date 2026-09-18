@@ -1,0 +1,256 @@
+@page "/admin/personnel/create"
+@inject IHttpClientFactory HttpClientFactory
+@inject NavigationManager Navigation
+
+<PageTitle>ثبت پرسنل جدید</PageTitle>
+
+<MudText Typo="Typo.h4" Class="mb-4">ثبت پرسنل جدید</MudText>
+
+@if (errorMessage is not null)
+{
+    <MudAlert Severity="Severity.Error" Class="my-4">@errorMessage</MudAlert>
+}
+
+@if (isLoadingLookups)
+{
+    <MudProgressLinear Indeterminate="true" Class="my-4" />
+}
+else
+{
+    <MudPaper Class="pa-4" Style="max-width:600px;">
+        <MudForm @ref="form">
+            <MudTextField T="string" Label="نام" @bind-Value="firstName" Required="true" RequiredError="نام الزامی است" MaxLength="100" Class="mb-2" />
+            <MudTextField T="string" Label="نام خانوادگی" @bind-Value="lastName" Required="true" RequiredError="نام خانوادگی الزامی است" MaxLength="100" Class="mb-2" />
+            <MudTextField T="string" Label="کد پرسنلی" @bind-Value="personnelCode" Required="true" RequiredError="کد پرسنلی الزامی است" MaxLength="30" Class="mb-2" />
+
+            <MudSelect T="Guid" Label="سمت شغلی" @bind-Value="selectedJobTitleId" Required="true" RequiredError="سمت شغلی الزامی است" Class="mb-2">
+                @foreach (var jobTitle in jobTitles)
+                {
+                    <MudSelectItem T="Guid" Value="@jobTitle.Id">@jobTitle.Name</MudSelectItem>
+                }
+            </MudSelect>
+
+            <MudSelect T="Guid" Label="پروژه محل فعالیت" @bind-Value="selectedProjectId" Required="true" RequiredError="پروژه الزامی است" Class="mb-4">
+                @foreach (var project in projects)
+                {
+                    <MudSelectItem T="Guid" Value="@project.Id">@project.Name</MudSelectItem>
+                }
+            </MudSelect>
+
+            <MudText Typo="Typo.subtitle1" Class="mb-2">گواهی‌نامه‌های رانندگی</MudText>
+
+            @for (var i = 0; i < licenseRows.Count; i++)
+            {
+                var index = i;
+                <MudGrid Class="mb-2">
+                    <MudItem xs="5">
+                        <MudSelect T="Guid" Label="نوع گواهی‌نامه" @bind-Value="licenseRows[index].DrivingLicenseTypeId">
+                            @foreach (var type in drivingLicenseTypes)
+                            {
+                                <MudSelectItem T="Guid" Value="@type.Id">@type.Name</MudSelectItem>
+                            }
+                        </MudSelect>
+                    </MudItem>
+                    <MudItem xs="5">
+                        <JalaliDatePicker Label="تاریخ انقضا" @bind-Date="licenseRows[index].ExpiryDate" />
+                    </MudItem>
+                    <MudItem xs="2">
+                        <MudIconButton Icon="@Icons.Material.Filled.Delete" Color="Color.Error" OnClick="@(() => licenseRows.RemoveAt(index))" />
+                    </MudItem>
+                </MudGrid>
+            }
+
+            <MudButton Variant="Variant.Outlined" Class="mb-4" OnClick="@(() => licenseRows.Add(new LicenseRow()))">
+                افزودن گواهی‌نامه
+            </MudButton>
+
+            <br />
+
+            <MudButton Variant="Variant.Filled" Color="Color.Primary" Class="mt-2" OnClick="SubmitAsync" Disabled="isSubmitting">
+                @(isSubmitting ? "در حال ثبت..." : "ثبت")
+            </MudButton>
+            <MudButton Variant="Variant.Outlined" Color="Color.Secondary" Class="mt-2 ml-2"
+                       OnClick="@(() => Navigation.NavigateTo("/admin/personnel"))">
+                انصراف
+            </MudButton>
+        </MudForm>
+    </MudPaper>
+}
+
+@code {
+    /// <summary>Represents one driving-license row being edited on the form.</summary>
+    private sealed class LicenseRow
+    {
+        /// <summary>Gets or sets the selected Driving License Type identifier.</summary>
+        public Guid DrivingLicenseTypeId { get; set; }
+
+        /// <summary>Gets or sets the selected expiry date.</summary>
+        public DateTime? ExpiryDate { get; set; }
+    }
+
+    private sealed class JobTitleItem
+    {
+        public Guid Id { get; set; }
+        public string Name { get; set; } = string.Empty;
+    }
+
+    private sealed class DrivingLicenseTypeItem
+    {
+        public Guid Id { get; set; }
+        public string Name { get; set; } = string.Empty;
+    }
+
+    private sealed class ProjectItem
+    {
+        public Guid Id { get; set; }
+        public string Name { get; set; } = string.Empty;
+        public Guid OrganizationId { get; set; }
+    }
+
+    private sealed class SearchResult<TItem>
+    {
+        public List<TItem> Items { get; set; } = [];
+    }
+
+    private sealed class OrganizationDetails
+    {
+        public Guid? HoldingId { get; set; }
+    }
+
+    /// <summary>Gets or sets the identifier of the Organization this Personnel will belong to, supplied via the query string.</summary>
+    [SupplyParameterFromQuery]
+    public Guid OrganizationId { get; set; }
+
+    private MudForm form = null!;
+    private string firstName = string.Empty;
+    private string lastName = string.Empty;
+    private string personnelCode = string.Empty;
+    private Guid selectedJobTitleId;
+    private Guid selectedProjectId;
+    private readonly List<LicenseRow> licenseRows = [];
+    private List<JobTitleItem> jobTitles = [];
+    private List<DrivingLicenseTypeItem> drivingLicenseTypes = [];
+    private List<ProjectItem> projects = [];
+    private bool isLoadingLookups = true;
+    private bool isSubmitting;
+    private string? errorMessage;
+
+    /// <summary>
+    /// Loads the Projects for this Organization and, via the Organization's
+    /// Holding, the Job Title and Driving License Type catalogs.
+    /// </summary>
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            var client = HttpClientFactory.CreateClient("InternalApi");
+
+            var projectsResponse = await client.GetAsync("/api/v1/projects?pageSize=200");
+            var projectsContent = await projectsResponse.Content.ReadAsStringAsync();
+
+            if (projectsResponse.IsSuccessStatusCode)
+            {
+                var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
+                var wrapped = JsonSerializer.Deserialize<SearchResult<ProjectItem>>(projectsContent, options);
+                var allProjects = wrapped?.Items ?? [];
+
+                projects = allProjects.Where(p => p.OrganizationId == OrganizationId).ToList();
+
+            }
+            else
+            {
+                errorMessage = $"خطا در دریافت پروژه‌ها: {projectsContent}";
+            }
+
+            var organizationResponse = await client.GetAsync($"/api/v1/organizations/{OrganizationId}");
+            var organizationContent = await organizationResponse.Content.ReadAsStringAsync();
+
+            if (organizationResponse.IsSuccessStatusCode)
+            {
+                var organization = JsonSerializer.Deserialize<OrganizationDetails>(organizationContent, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+
+                if (organization?.HoldingId is { } holdingId)
+                {
+                    var jobTitlesResponse = await client.GetAsync($"/api/v1/job-titles?holdingId={holdingId}");
+                    if (jobTitlesResponse.IsSuccessStatusCode)
+                    {
+                        jobTitles = JsonSerializer.Deserialize<List<JobTitleItem>>(await jobTitlesResponse.Content.ReadAsStringAsync(), new JsonSerializerOptions { PropertyNameCaseInsensitive = true }) ?? [];
+                    }
+
+                    var licenseTypesResponse = await client.GetAsync($"/api/v1/driving-license-types?holdingId={holdingId}");
+                    if (licenseTypesResponse.IsSuccessStatusCode)
+                    {
+                        drivingLicenseTypes = JsonSerializer.Deserialize<List<DrivingLicenseTypeItem>>(await licenseTypesResponse.Content.ReadAsStringAsync(), new JsonSerializerOptions { PropertyNameCaseInsensitive = true }) ?? [];
+                    }
+                }
+                else
+                {
+                    errorMessage = "این Organization به هیچ Holding‌ای تعلق ندارد، بنابراین سمت شغلی/نوع گواهی‌نامه در دسترس نیست.";
+                }
+            }
+            else
+            {
+                errorMessage = $"خطا در دریافت اطلاعات Organization: {organizationContent}";
+            }
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"خطا: {ex.Message}";
+        }
+        finally
+        {
+            isLoadingLookups = false;
+        }
+    }
+
+    private async Task SubmitAsync()
+    {
+        await form.Validate();
+        if (!form.IsValid)
+        {
+            return;
+        }
+
+        isSubmitting = true;
+        errorMessage = null;
+
+        try
+        {
+            var client = HttpClientFactory.CreateClient("InternalApi");
+
+            var payload = new
+            {
+                OrganizationId,
+                ProjectId = selectedProjectId,
+                FirstName = firstName,
+                LastName = lastName,
+                PersonnelCode = personnelCode,
+                JobTitleId = selectedJobTitleId,
+                DrivingLicenses = licenseRows
+                    .Where(r => r.DrivingLicenseTypeId != Guid.Empty && r.ExpiryDate.HasValue)
+                    .Select(r => new { DrivingLicenseTypeId = r.DrivingLicenseTypeId, ExpiryDate = DateOnly.FromDateTime(r.ExpiryDate!.Value) })
+                    .ToList(),
+            };
+
+            var response = await client.PostAsJsonAsync("/api/v1/personnel", payload);
+            var content = await response.Content.ReadAsStringAsync();
+
+            if (response.IsSuccessStatusCode)
+            {
+                Navigation.NavigateTo($"/admin/personnel");
+            }
+            else
+            {
+                errorMessage = $"خطا در ثبت پرسنل: {content}";
+            }
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"خطا: {ex.Message}";
+        }
+        finally
+        {
+            isSubmitting = false;
+        }
+    }
+}

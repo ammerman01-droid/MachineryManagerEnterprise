@@ -52,12 +52,12 @@
     <Project Path="src/Modules/WorkCalendar/WorkCalendar.Infrastructure/WorkCalendar.Infrastructure.csproj" />
     <Project Path="src/Modules/WorkCalendar/WorkCalendar.Presentation/WorkCalendar.Presentation.csproj" />
   </Folder>
-<!-- <Folder Name="/src/Modules/Personnel/">
+  <Folder Name="/src/Modules/Personnel/">
     <Project Path="src/Modules/Personnel/Personnel.Application/Personnel.Application.csproj" />
     <Project Path="src/Modules/Personnel/Personnel.Domain/Personnel.Domain.csproj" />
     <Project Path="src/Modules/Personnel/Personnel.Infrastructure/Personnel.Infrastructure.csproj" />
     <Project Path="src/Modules/Personnel/Personnel.Presentation/Personnel.Presentation.csproj" />
-  </Folder>-->
+  </Folder>
   <!-- <Folder Name="/tests/" />
   <Folder Name="/tests/Shared/">
     <Project Path="tests/Shared/MachineryManagerEnterprise.Testing.Common/MachineryManagerEnterprise.Testing.Common.csproj" />
