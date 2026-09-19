@@ -87,6 +87,10 @@
         public List<HoldingItem> Items { get; set; } = [];
     }
 
+    /// <summary>Gets or sets the Holding to pre-select, supplied via the query string (used when returning from the edit page).</summary>
+    [SupplyParameterFromQuery(Name = "holdingId")]
+    public Guid? HoldingIdFromQuery { get; set; }
+
     private List<HoldingItem> holdings = [];
     private List<AssetModelItem> items = [];
     private Guid? selectedHoldingId;
@@ -117,7 +121,11 @@ System.Text.Json.JsonSerializerOptions { PropertyNameCaseInsensitive = true });
             // above already returns just that one (Phase 3 scope
             // filtering) — auto-select it instead of showing a picker
             // with a single option (chat, 2026-08-27).
-            if (holdings.Count == 1)
+            if (HoldingIdFromQuery is { } queryHoldingId && holdings.Any(h => h.Id == queryHoldingId))
+            {
+                await OnHoldingChangedAsync(queryHoldingId);
+            }
+            else if (holdings.Count == 1)
             {
                 await OnHoldingChangedAsync(holdings[0].Id);
             }

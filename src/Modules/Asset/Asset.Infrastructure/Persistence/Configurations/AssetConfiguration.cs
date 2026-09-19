@@ -64,6 +64,38 @@ public sealed class AssetConfiguration : IEntityTypeConfiguration<global::Asset.
 
         builder.Property(a => a.ManufactureYear);
 
+        // Project assignment (chat, 2026-09-14) — plain column, index
+        // only, no database-level FK, since Project lives in the
+        // separate Organization module DbContext (same pattern as
+        // ColorId above).
+        builder.Property(a => a.ProjectId).IsRequired();
+        builder.HasIndex(a => a.ProjectId);
+
+        // Fuel kinds and the counter/fuel units are all fixed enums
+        // (units changed from UnitOfMeasurement Guid references,
+        // chat, 2026-09-19). Stored as their string names for
+        // readability, matching the convention already used for
+        // Asset.Status and EngineModel.FuelKind.
+        builder.Property(a => a.MeterReadingUnit)
+            .HasConversion<string>()
+            .HasMaxLength(20);
+
+        builder.Property(a => a.PrimaryFuelKind)
+            .HasConversion<string>()
+            .HasMaxLength(20);
+
+        builder.Property(a => a.PrimaryFuelUnit)
+            .HasConversion<string>()
+            .HasMaxLength(20);
+
+        builder.Property(a => a.SecondaryFuelKind)
+            .HasConversion<string>()
+            .HasMaxLength(20);
+
+        builder.Property(a => a.SecondaryFuelUnit)
+            .HasConversion<string>()
+            .HasMaxLength(20);
+
         builder.Property(a => a.Status)
             .HasConversion<string>()
             .HasMaxLength(20)

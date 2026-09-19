@@ -15,4 +15,10 @@ public sealed record RegisterAssetCommand(
     string? BodyNumber,
     string? Vin,
     string? LicensePlate,
-    int? ManufactureYear) : IRequest<Result<Guid>>;
+    int? ManufactureYear,
+    Guid ProjectId,
+    MeterReadingUnit? MeterReadingUnit,
+    FuelKind? PrimaryFuelKind,
+    FuelUnit? PrimaryFuelUnit,
+    FuelKind? SecondaryFuelKind,
+    FuelUnit? SecondaryFuelUnit) : IRequest<Result<Guid>>;

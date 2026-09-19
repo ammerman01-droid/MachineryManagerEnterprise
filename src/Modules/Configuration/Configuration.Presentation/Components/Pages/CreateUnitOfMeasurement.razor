@@ -16,20 +16,17 @@
         <MudTextField T="string" Label="نام واحد" @bind-Value="name" Required="true" RequiredError="نام الزامی است" MaxLength="50" />
 
         <MudSelect T="PhysicalQuantityKind" Label="نوع کمیت فیزیکی" @bind-Value="kind" Required="true" Class="mt-4">
-            <MudSelectItem T="PhysicalQuantityKind" Value="PhysicalQuantityKind.Force">نیرو (توان، قدرت، فشار، گشتاور)</MudSelectItem>
-            <MudSelectItem T="PhysicalQuantityKind" Value="PhysicalQuantityKind.Dimension">ابعاد (طول، مساحت، حجم)</MudSelectItem>
-            <MudSelectItem T="PhysicalQuantityKind" Value="PhysicalQuantityKind.Weight">وزن (جرم)</MudSelectItem>
-            <MudSelectItem T="PhysicalQuantityKind" Value="PhysicalQuantityKind.Temperature">دما</MudSelectItem>
-            <MudSelectItem T="PhysicalQuantityKind" Value="PhysicalQuantityKind.Electrical">الکتریکی (آمپر، ولت و ...)</MudSelectItem>
-            <MudSelectItem T="PhysicalQuantityKind" Value="PhysicalQuantityKind.FlowRate">دبی (شدت جریان سیالات)</MudSelectItem>
-            <MudSelectItem T="PhysicalQuantityKind" Value="PhysicalQuantityKind.Other">سایر</MudSelectItem>
+            @foreach (var option in PhysicalQuantityKindNames.Ordered)
+            {
+                <MudSelectItem T="PhysicalQuantityKind" Value="option">@PhysicalQuantityKindNames.GetSelectLabel(option)</MudSelectItem>
+            }
         </MudSelect>
 
         <MudButton Variant="Variant.Filled" Color="Color.Primary" Class="mt-4" OnClick="SubmitAsync" Disabled="isSubmitting">
             @(isSubmitting ? "در حال ثبت..." : "ثبت")
         </MudButton>
         <MudButton Variant="Variant.Outlined" Color="Color.Secondary" Class="mt-4 ml-2"
-                   OnClick="@(() => Navigation.NavigateTo("/admin/units-of-measurement"))">
+                   OnClick="@(() => Navigation.NavigateTo($"/admin/units-of-measurement?holdingId={HoldingId}"))">
             انصراف
         </MudButton>
     </MudForm>
@@ -61,7 +58,7 @@
             var content = await response.Content.ReadAsStringAsync();
 
             if (response.IsSuccessStatusCode)
-                Navigation.NavigateTo("/admin/units-of-measurement");
+                Navigation.NavigateTo($"/admin/units-of-measurement?holdingId={HoldingId}");
             else
                 errorMessage = $"خطا در ثبت واحد: {content}";
         }

@@ -54,13 +54,39 @@ namespace Asset.Infrastructure.Migrations
                     b.Property<int?>("ManufactureYear")
                         .HasColumnType("int");
 
+                    b.Property<string>("MeterReadingUnit")
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
+
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(60)
                         .HasColumnType("nvarchar(60)");
 
+                    b.Property<Guid>("OperationalStatusId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.Property<Guid>("OrganizationId")
                         .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("PrimaryFuelKind")
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
+
+                    b.Property<string>("PrimaryFuelUnit")
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
+
+                    b.Property<Guid>("ProjectId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("SecondaryFuelKind")
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
+
+                    b.Property<string>("SecondaryFuelUnit")
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
 
                     b.Property<string>("SerialNumber")
                         .HasMaxLength(100)
@@ -80,6 +106,8 @@ namespace Asset.Infrastructure.Migrations
                     b.HasIndex("AssetModelId");
 
                     b.HasIndex("OrganizationId");
+
+                    b.HasIndex("ProjectId");
 
                     b.HasIndex("OrganizationId", "Code")
                         .IsUnique();
@@ -229,6 +257,60 @@ namespace Asset.Infrastructure.Migrations
                     b.HasIndex("WeightUnitOfMeasurementId");
 
                     b.ToTable("EngineModel", "asset");
+                });
+
+            modelBuilder.Entity("MachineryManagerEnterprise.SharedKernel.AuditEntry", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("ChangesJson")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<Guid?>("HoldingId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTimeOffset>("OccurredAt")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<int>("OperationType")
+                        .HasColumnType("int");
+
+                    b.Property<Guid?>("OrganizationId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("RecordId")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<string>("SchemaName")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<string>("TableName")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<Guid?>("UserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("HoldingId");
+
+                    b.HasIndex("OccurredAt");
+
+                    b.HasIndex("OrganizationId");
+
+                    b.ToTable("AuditEntry", "audit", t =>
+                        {
+                            t.ExcludeFromMigrations();
+                        });
                 });
 
             modelBuilder.Entity("Asset.Domain.Asset", b =>

@@ -1,6 +1,7 @@
 @page "/admin/assets/create"
 @inject IHttpClientFactory HttpClientFactory
 @inject NavigationManager Navigation
+@using MachineryManagerEnterprise.SharedKernel
 
 <PageTitle>ثبت دارایی جدید</PageTitle>
 
@@ -19,29 +20,42 @@ else
 {
     <MudPaper Class="pa-4">
         <MudForm @ref="form">
-            <MudSelect T="Guid" Label="سازمان" @bind-Value="model.OrganizationId" Required="true" RequiredError="سازمان الزامی است">
+            <MudSelect T="Guid?" Label="سازمان" Value="organizationId" ValueChanged="HandleOrganizationChangedAsync"
+                       Required="true" RequiredError="سازمان الزامی است">
                 @foreach (var org in organizations)
                 {
-                    <MudSelectItem T="Guid" Value="@org.Id">@org.Name</MudSelectItem>
+                    <MudSelectItem T="Guid?" Value="@((Guid?)org.Id)">@org.Name</MudSelectItem>
                 }
             </MudSelect>
 
-            <MudTextField T="string" Label="کد شناسایی" @bind-Value="model.Code" Required="true" RequiredError="کد شناسایی الزامی است" MaxLength="20" Class="mt-4" HelperText="حداکثر ۲۰ کاراکتر — باید در این سازمان یکتا باشد" />
+            <MudTextField T="string" Label="کد شناسایی" @bind-Value="code" Required="true"
+                          RequiredError="کد شناسایی الزامی است" MaxLength="20" Class="mt-4"
+                          HelperText="حداکثر ۲۰ کاراکتر — باید در این سازمان یکتا باشد" />
 
-            <MudTextField T="string" Label="نام" @bind-Value="model.Name" Required="true" RequiredError="نام الزامی است" MaxLength="60" Class="mt-4" />
+            <MudTextField T="string" Label="نام" @bind-Value="name" Required="true" RequiredError="نام الزامی است"
+                          MaxLength="60" Class="mt-4" />
 
-            <MudSelect T="Guid" Label="مدل دارایی" @bind-Value="model.AssetModelId" Required="true" RequiredError="مدل دارایی الزامی است" Class="mt-4">
+            <MudSelect T="Guid?" Label="مدل دارایی" @bind-Value="assetModelId" Required="true"
+                       RequiredError="مدل دارایی الزامی است" Class="mt-4">
                 @foreach (var am in assetModels)
                 {
-                    <MudSelectItem T="Guid" Value="@am.Id">@am.Name</MudSelectItem>
+                    <MudSelectItem T="Guid?" Value="@((Guid?)am.Id)">@am.Name</MudSelectItem>
+                }
+            </MudSelect>
+
+            <MudSelect T="Guid?" Label="پروژه" @bind-Value="projectId" Required="true" RequiredError="پروژه الزامی است"
+                       Class="mt-4" HelperText="تخصیص عملیاتی فعلی این دارایی">
+                @foreach (var p in projects)
+                {
+                    <MudSelectItem T="Guid?" Value="@((Guid?)p.Id)">@p.Name</MudSelectItem>
                 }
             </MudSelect>
 
             <div class="d-flex align-center gap-2 mt-4">
-                <MudSelect T="Guid" Label="رنگ" @bind-Value="model.ColorId" Required="true" RequiredError="رنگ الزامی است">
+                <MudSelect T="Guid?" Label="رنگ" @bind-Value="colorId" Required="true" RequiredError="رنگ الزامی است">
                     @foreach (var c in colors)
                     {
-                        <MudSelectItem T="Guid" Value="@c.Id">@c.Name</MudSelectItem>
+                        <MudSelectItem T="Guid?" Value="@((Guid?)c.Id)">@c.Name</MudSelectItem>
                     }
                 </MudSelect>
                 <MudButton Variant="Variant.Outlined" Size="Size.Small" OnClick="@(() => showAddColor = !showAddColor)">
@@ -53,24 +67,65 @@ else
             {
                 <div class="d-flex align-center gap-2 mt-2">
                     <MudTextField T="string" Label="نام رنگ جدید" @bind-Value="newColorName" MaxLength="50" />
-                    <MudButton Variant="Variant.Filled" Color="Color.Primary" Size="Size.Small"
-                               OnClick="AddColorAsync" Disabled="isAddingColor">
+                    <MudButton Variant="Variant.Filled" Color="Color.Primary" Size="Size.Small" OnClick="AddColorAsync"
+                               Disabled="isAddingColor">
                         @(isAddingColor ? "..." : "ثبت رنگ")
                     </MudButton>
                 </div>
             }
 
-            <MudTextField T="string" Label="شماره سریال" @bind-Value="model.SerialNumber" MaxLength="100" Class="mt-4" />
-            <MudTextField T="string" Label="شماره شاسی" @bind-Value="model.ChassisNumber" MaxLength="30" Class="mt-4" />
-            <MudTextField T="string" Label="شماره بدنه" @bind-Value="model.BodyNumber" MaxLength="30" Class="mt-4" />
-            <MudTextField T="string" Label="VIN" @bind-Value="model.Vin" MaxLength="30" Class="mt-4" />
-            <MudTextField T="string" Label="پلاک" @bind-Value="model.LicensePlate" MaxLength="50" Class="mt-4" />
-            <MudNumericField T="int?" Label="سال ساخت" @bind-Value="model.ManufactureYear" Min="1900" Max="2100" Class="mt-4" />
+            <MudTextField T="string" Label="شماره سریال" @bind-Value="serialNumber" MaxLength="100" Class="mt-4" />
+            <MudTextField T="string" Label="شماره شاسی" @bind-Value="chassisNumber" MaxLength="30" Class="mt-4" />
+            <MudTextField T="string" Label="شماره بدنه" @bind-Value="bodyNumber" MaxLength="30" Class="mt-4" />
+            <MudTextField T="string" Label="VIN" @bind-Value="vin" MaxLength="30" Class="mt-4" />
+            <MudTextField T="string" Label="پلاک" @bind-Value="licensePlate" MaxLength="50" Class="mt-4" />
+            <MudNumericField T="int?" Label="سال ساخت" @bind-Value="manufactureYear" Min="1900" Max="2100" Class="mt-4" />
 
-            <MudButton Variant="Variant.Filled" Color="Color.Primary" Class="mt-4" OnClick="SubmitAsync" Disabled="isSubmitting">
+            <MudText Typo="Typo.subtitle1" Class="mt-6 mb-2">واحد قرائت کنتر</MudText>
+            <MudSelect T="MeterReadingUnit?" @bind-Value="meterReadingUnit" Label="واحد کنتر (ساعت، کیلومتر، مایل)"
+                       Clearable="true">
+                @foreach (var unit in Enum.GetValues<MeterReadingUnit>())
+                {
+                    <MudSelectItem T="MeterReadingUnit?" Value="@((MeterReadingUnit?)unit)">@UnitDisplayNames.GetMeterReadingUnitName(unit)</MudSelectItem>
+                }
+            </MudSelect>
+
+            <MudText Typo="Typo.subtitle1" Class="mt-6 mb-2">سوخت اصلی</MudText>
+            <MudSelect T="FuelKind?" @bind-Value="primaryFuelKind" Label="نوع سوخت اصلی" Clearable="true">
+                @foreach (var kind in Enum.GetValues<FuelKind>())
+                {
+                    <MudSelectItem T="FuelKind?" Value="@((FuelKind?)kind)">@GetFuelKindDisplayName(kind)</MudSelectItem>
+                }
+            </MudSelect>
+            <MudSelect T="FuelUnit?" @bind-Value="primaryFuelUnit" Label="واحد شمارش سوخت اصلی" Clearable="true"
+                       Class="mt-2">
+                @foreach (var unit in Enum.GetValues<FuelUnit>())
+                {
+                    <MudSelectItem T="FuelUnit?" Value="@((FuelUnit?)unit)">@UnitDisplayNames.GetFuelUnitName(unit)</MudSelectItem>
+                }
+            </MudSelect>
+
+            <MudText Typo="Typo.subtitle1" Class="mt-6 mb-2">سوخت دوم (اختیاری — برای دوگانه‌سوز)</MudText>
+            <MudSelect T="FuelKind?" @bind-Value="secondaryFuelKind" Label="نوع سوخت دوم" Clearable="true">
+                @foreach (var kind in Enum.GetValues<FuelKind>())
+                {
+                    <MudSelectItem T="FuelKind?" Value="@((FuelKind?)kind)">@GetFuelKindDisplayName(kind)</MudSelectItem>
+                }
+            </MudSelect>
+            <MudSelect T="FuelUnit?" @bind-Value="secondaryFuelUnit" Label="واحد شمارش سوخت دوم" Clearable="true"
+                       Class="mt-2">
+                @foreach (var unit in Enum.GetValues<FuelUnit>())
+                {
+                    <MudSelectItem T="FuelUnit?" Value="@((FuelUnit?)unit)">@UnitDisplayNames.GetFuelUnitName(unit)</MudSelectItem>
+                }
+            </MudSelect>
+
+            <MudButton Variant="Variant.Filled" Color="Color.Primary" Class="mt-4" OnClick="SubmitAsync"
+                       Disabled="isSubmitting">
                 @(isSubmitting ? "در حال ثبت..." : "ثبت")
             </MudButton>
-            <MudButton Variant="Variant.Outlined" Color="Color.Secondary" Class="mt-4 ml-2" OnClick="@(() => Navigation.NavigateTo("/admin/assets"))">
+            <MudButton Variant="Variant.Outlined" Color="Color.Secondary" Class="mt-4 ml-2"
+                       OnClick="@(() => Navigation.NavigateTo("/admin/assets"))">
                 انصراف
             </MudButton>
         </MudForm>
@@ -82,12 +137,6 @@ else
     {
         public Guid Id { get; set; }
         public string Name { get; set; } = string.Empty;
-
-        // Fixed (chat, 2026-08-30): must be nullable — an Organization
-        // may not yet be assigned to any Holding (holdingId: null in
-        // the API response). A non-nullable Guid here throws
-        // "could not be converted to System.Guid" the moment such an
-        // organization appears in the list.
         public Guid? HoldingId { get; set; }
     }
 
@@ -103,46 +152,53 @@ else
         public string Name { get; set; } = string.Empty;
     }
 
-    private sealed class SearchOrganizationsResult
+    private sealed class ProjectItem
     {
-        public List<OrganizationItem> Items { get; set; } = [];
-    }
-
-    private sealed class SearchAssetModelsResult
-    {
-        public List<AssetModelItem> Items { get; set; } = [];
-    }
-
-    private sealed class RegisterAssetModel
-    {
-        public Guid OrganizationId { get; set; }
-        public string Code { get; set; } = string.Empty;
+        public Guid Id { get; set; }
         public string Name { get; set; } = string.Empty;
-        public Guid AssetModelId { get; set; }
-        public Guid ColorId { get; set; }
-        public string? SerialNumber { get; set; }
-        public string? ChassisNumber { get; set; }
-        public string? BodyNumber { get; set; }
-        public string? Vin { get; set; }
-        public string? LicensePlate { get; set; }
-        public int? ManufactureYear { get; set; }
+        public Guid OrganizationId { get; set; }
     }
+
+    private sealed class SearchOrganizationsResult { public List<OrganizationItem> Items { get; set; } = []; }
+    private sealed class SearchAssetModelsResult { public List<AssetModelItem> Items { get; set; } = []; }
+    private sealed class SearchProjectsResult { public List<ProjectItem> Items { get; set; } = []; }
 
     private MudForm form = null!;
-    private RegisterAssetModel model = new();
+
+    // Bound to the form's MudSelects as nullable, even for fields that
+    // are business-required — MudSelect<Guid> (non-nullable) shows the
+    // default Guid.Empty as raw text ("00000000-...") until a real
+    // value is picked, which is not something we want the user to see
+    // (chat, 2026-09-16). Converted to non-null only at submit time.
+    private Guid? organizationId;
+    private Guid? assetModelId;
+    private Guid? colorId;
+    private Guid? projectId;
+    private string code = string.Empty;
+    private string name = string.Empty;
+    private string? serialNumber;
+    private string? chassisNumber;
+    private string? bodyNumber;
+    private string? vin;
+    private string? licensePlate;
+    private int? manufactureYear;
+    private MeterReadingUnit? meterReadingUnit;
+    private FuelKind? primaryFuelKind;
+    private FuelUnit? primaryFuelUnit;
+    private FuelKind? secondaryFuelKind;
+    private FuelUnit? secondaryFuelUnit;
+
     private List<OrganizationItem> organizations = [];
     private List<AssetModelItem> assetModels = [];
     private List<ColorItem> colors = [];
+    private List<ProjectItem> allProjects = [];
+    private List<ProjectItem> projects = [];
     private bool isLoading = true;
     private bool isSubmitting;
     private bool showAddColor;
     private bool isAddingColor;
     private string newColorName = string.Empty;
     private string? errorMessage;
-
-    // Added (chat, 2026-08-30): Color is now Holding-scoped, not
-    // Organization-scoped — LoadColorsAsync and AddColorAsync both need
-    // the resolved HoldingId, not just the OrganizationId from the form.
     private Guid selectedHoldingId;
 
     [SupplyParameterFromQuery]
@@ -151,22 +207,50 @@ else
     [SupplyParameterFromQuery]
     public Guid? HoldingId { get; set; }
 
+    private static string GetFuelKindDisplayName(FuelKind kind) => kind switch
+    {
+        FuelKind.Diesel => "گازوئیل",
+        FuelKind.Gasoline => "بنزین",
+        FuelKind.Gas => "گاز",
+        _ => kind.ToString()
+    };
+
     protected override async Task OnInitializedAsync()
     {
         await LoadOrganizationsAsync();
+        await LoadProjectsAsync();
+
         if (OrganizationId.HasValue)
         {
-            model.OrganizationId = OrganizationId.Value;
-            var org = organizations.FirstOrDefault(o => o.Id == OrganizationId.Value);
-            selectedHoldingId = HoldingId ?? org?.HoldingId ?? Guid.Empty;
-            if (selectedHoldingId != Guid.Empty)
-            {
-                await LoadAssetModelsAsync(selectedHoldingId);
-                await LoadColorsAsync();
-            }
+            await OnOrganizationSelectedAsync(OrganizationId.Value, resolveHoldingFromQuery: true);
         }
+
         isLoading = false;
     }
+
+    private async Task OnOrganizationSelectedAsync(Guid? organizationIdValue, bool resolveHoldingFromQuery = false)
+    {
+        organizationId = organizationIdValue;
+        projects = allProjects.Where(p => p.OrganizationId == organizationIdValue).ToList();
+        projectId = null;
+
+        if (organizationIdValue is null)
+        {
+            return;
+        }
+
+        var org = organizations.FirstOrDefault(o => o.Id == organizationIdValue.Value);
+        selectedHoldingId = (resolveHoldingFromQuery ? HoldingId : null) ?? org?.HoldingId ?? Guid.Empty;
+
+        if (selectedHoldingId != Guid.Empty)
+        {
+            await LoadAssetModelsAsync(selectedHoldingId);
+            await LoadColorsAsync();
+        }
+    }
+
+    private Task HandleOrganizationChangedAsync(Guid? organizationIdValue)
+    => OnOrganizationSelectedAsync(organizationIdValue);
 
     private async Task LoadOrganizationsAsync()
     {
@@ -178,7 +262,9 @@ else
 
             if (response.IsSuccessStatusCode)
             {
-                var result = System.Text.Json.JsonSerializer.Deserialize<SearchOrganizationsResult>(content, new System.Text.Json.JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+                var result = System.Text.Json.JsonSerializer.Deserialize<SearchOrganizationsResult>(content, new
+System.Text.Json.JsonSerializerOptions
+                { PropertyNameCaseInsensitive = true });
                 organizations = result?.Items ?? [];
             }
             else
@@ -192,6 +278,28 @@ else
         }
     }
 
+    private async Task LoadProjectsAsync()
+    {
+        try
+        {
+            var client = HttpClientFactory.CreateClient("InternalApi");
+            var response = await client.GetAsync("/api/v1/projects?pageSize=200");
+            var content = await response.Content.ReadAsStringAsync();
+
+            if (response.IsSuccessStatusCode)
+            {
+                var result = System.Text.Json.JsonSerializer.Deserialize<SearchProjectsResult>(content, new
+System.Text.Json.JsonSerializerOptions
+                { PropertyNameCaseInsensitive = true });
+                allProjects = result?.Items ?? [];
+            }
+        }
+        catch
+        {
+            // Best effort
+        }
+    }
+
     private async Task LoadAssetModelsAsync(Guid holdingId)
     {
         try
@@ -202,7 +310,9 @@ else
 
             if (response.IsSuccessStatusCode)
             {
-                var result = System.Text.Json.JsonSerializer.Deserialize<SearchAssetModelsResult>(content, new System.Text.Json.JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+                var result = System.Text.Json.JsonSerializer.Deserialize<SearchAssetModelsResult>(content, new
+System.Text.Json.JsonSerializerOptions
+                { PropertyNameCaseInsensitive = true });
                 assetModels = result?.Items ?? [];
             }
         }
@@ -214,22 +324,19 @@ else
 
     private async Task LoadColorsAsync()
     {
-        if (selectedHoldingId == Guid.Empty)
-        {
-            return;
-        }
+        if (selectedHoldingId == Guid.Empty) return;
 
         try
         {
             var client = HttpClientFactory.CreateClient("InternalApi");
-            // Fixed (chat, 2026-08-30): Color moved to Holding scope —
-            // the endpoint now expects holdingId, not organizationId.
             var response = await client.GetAsync($"/api/v1/colors?holdingId={selectedHoldingId}");
             var content = await response.Content.ReadAsStringAsync();
 
             if (response.IsSuccessStatusCode)
             {
-                colors = System.Text.Json.JsonSerializer.Deserialize<List<ColorItem>>(content, new System.Text.Json.JsonSerializerOptions { PropertyNameCaseInsensitive = true }) ?? [];
+                colors = System.Text.Json.JsonSerializer.Deserialize<List<ColorItem>>(content, new
+System.Text.Json.JsonSerializerOptions
+                { PropertyNameCaseInsensitive = true }) ?? [];
             }
         }
         catch
@@ -240,19 +347,17 @@ else
 
     private async Task AddColorAsync()
     {
-        if (string.IsNullOrWhiteSpace(newColorName) || selectedHoldingId == Guid.Empty)
-        {
-            return;
-        }
+        if (string.IsNullOrWhiteSpace(newColorName) || selectedHoldingId == Guid.Empty) return;
 
         isAddingColor = true;
-
         try
         {
             var client = HttpClientFactory.CreateClient("InternalApi");
-            // Fixed (chat, 2026-08-30): Color registration now takes
-            // HoldingId, not OrganizationId.
-            var response = await client.PostAsJsonAsync("/api/v1/colors", new { HoldingId = selectedHoldingId, Name = newColorName });
+            var response = await client.PostAsJsonAsync("/api/v1/colors", new
+            {
+                HoldingId = selectedHoldingId,
+                Name = newColorName
+            });
             var content = await response.Content.ReadAsStringAsync();
 
             if (response.IsSuccessStatusCode)
@@ -279,7 +384,10 @@ else
     private async Task SubmitAsync()
     {
         await form.Validate();
-        if (!form.IsValid) return;
+        if (!form.IsValid || organizationId is null || assetModelId is null || colorId is null || projectId is null)
+        {
+            return;
+        }
 
         isSubmitting = true;
         errorMessage = null;
@@ -287,7 +395,26 @@ else
         try
         {
             var client = HttpClientFactory.CreateClient("InternalApi");
-            var response = await client.PostAsJsonAsync("/api/v1/assets", model);
+            var response = await client.PostAsJsonAsync("/api/v1/assets", new
+            {
+                OrganizationId = organizationId.Value,
+                Code = code,
+                Name = name,
+                AssetModelId = assetModelId.Value,
+                ColorId = colorId.Value,
+                SerialNumber = serialNumber,
+                ChassisNumber = chassisNumber,
+                BodyNumber = bodyNumber,
+                Vin = vin,
+                LicensePlate = licensePlate,
+                ManufactureYear = manufactureYear,
+                ProjectId = projectId.Value,
+                MeterReadingUnit = meterReadingUnit,
+                PrimaryFuelKind = primaryFuelKind,
+                PrimaryFuelUnit = primaryFuelUnit,
+                SecondaryFuelKind = secondaryFuelKind,
+                SecondaryFuelUnit = secondaryFuelUnit
+            });
             var content = await response.Content.ReadAsStringAsync();
 
             if (response.IsSuccessStatusCode)

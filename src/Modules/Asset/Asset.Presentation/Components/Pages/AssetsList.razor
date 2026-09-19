@@ -1,6 +1,7 @@
 @page "/admin/assets"
 @inject IHttpClientFactory HttpClientFactory
 @inject NavigationManager Navigation
+@using System.Text.Json
 
 <PageTitle>دارایی‌ها</PageTitle>
 
@@ -11,7 +12,28 @@
     <MudAlert Severity="Severity.Error" Class="my-4">@errorMessage</MudAlert>
 }
 
-@if (organizations.Count > 1)
+@if (isUnrestricted)
+{
+    <MudPaper Class="pa-4 mb-4">
+        <MudSelect T="Guid?" Label="هلدینگ" Value="selectedHoldingFilter" ValueChanged="OnHoldingFilterChangedAsync">
+            @foreach (var h in holdings)
+            {
+                <MudSelectItem T="Guid?" Value="@((Guid?)h.Id)">@h.Name</MudSelectItem>
+            }
+        </MudSelect>
+
+        @if (selectedHoldingFilter is not null)
+        {
+            <MudSelect T="Guid?" Label="سازمان" Value="selectedOrganizationId" ValueChanged="OnOrganizationChangedAsync" Class="mt-4">
+                @foreach (var org in organizations)
+                {
+                    <MudSelectItem T="Guid?" Value="@((Guid?)org.Id)">@org.Name</MudSelectItem>
+                }
+            </MudSelect>
+        }
+    </MudPaper>
+}
+else if (organizations.Count > 1)
 {
     <MudPaper Class="pa-4 mb-4">
         <MudSelect T="Guid?" Label="سازمان" Value="selectedOrganizationId" ValueChanged="OnOrganizationChangedAsync">
@@ -41,6 +63,7 @@
                 <MudTh>کد</MudTh>
                 <MudTh>نام</MudTh>
                 <MudTh>مدل</MudTh>
+                <MudTh>پروژه</MudTh>
                 <MudTh>شماره سریال</MudTh>
                 <MudTh>پلاک</MudTh>
                 <MudTh>سال ساخت</MudTh>
@@ -52,6 +75,7 @@
                 <MudTd DataLabel="کد">@context.Code</MudTd>
                 <MudTd DataLabel="نام">@context.Name</MudTd>
                 <MudTd DataLabel="مدل">@GetAssetModelName(context.AssetModelId)</MudTd>
+                <MudTd DataLabel="پروژه">@GetProjectName(context.ProjectId)</MudTd>
                 <MudTd DataLabel="شماره سریال">@(context.SerialNumber ?? "-")</MudTd>
                 <MudTd DataLabel="پلاک">@(context.LicensePlate ?? "-")</MudTd>
                 <MudTd DataLabel="سال ساخت">@(context.ManufactureYear?.ToString() ?? "-")</MudTd>
@@ -76,10 +100,23 @@
         public Guid? HoldingId { get; set; }
     }
 
+    private sealed class HoldingItem
+    {
+        public Guid Id { get; set; }
+        public string Name { get; set; } = string.Empty;
+    }
+
     private sealed class AssetModelItem
     {
         public Guid Id { get; set; }
         public string Name { get; set; } = string.Empty;
+    }
+
+    private sealed class ProjectItem
+    {
+        public Guid Id { get; set; }
+        public string Name { get; set; } = string.Empty;
+        public Guid OrganizationId { get; set; }
     }
 
     private sealed class AssetItem
@@ -94,6 +131,7 @@
         public string? LicensePlate { get; set; }
         public int? ManufactureYear { get; set; }
         public string Status { get; set; } = string.Empty;
+        public Guid? ProjectId { get; set; }
     }
 
     private sealed class SearchAssetsResult
@@ -106,44 +144,141 @@
         public List<OrganizationItem> Items { get; set; } = [];
     }
 
+    private sealed class SearchHoldingsResult
+    {
+        public List<HoldingItem> Items { get; set; } = [];
+    }
+
     private sealed class SearchAssetModelsResult
     {
         public List<AssetModelItem> Items { get; set; } = [];
     }
 
+    private sealed class SearchProjectsResult
+    {
+        public List<ProjectItem> Items { get; set; } = [];
+    }
+
+    private sealed class ColorLookupItem
+    {
+        public Guid Id { get; set; }
+        public string Name { get; set; } = string.Empty;
+    }
+
+    // Mirrors AuthorizedScopeSet (SharedKernel.Abstractions) as returned
+    // by GET /api/v1/assets/authorized-scope (chat, 2026-09-14).
+    private sealed class AuthorizedScopeDto
+    {
+        public bool IsUnrestricted { get; set; }
+        public List<Guid> HoldingIds { get; set; } = [];
+        public List<Guid> OrganizationIds { get; set; } = [];
+        public List<Guid> ProjectIds { get; set; } = [];
+    }
+
+    private static readonly JsonSerializerOptions JsonOptions = new() { PropertyNameCaseInsensitive = true };
+
+    private List<HoldingItem> holdings = [];
+    private List<OrganizationItem> allOrganizations = [];
     private List<OrganizationItem> organizations = [];
     private List<AssetItem> items = [];
     private Dictionary<Guid, string> assetModelNames = [];
     private Dictionary<Guid, string> colorNames = [];
-    private string GetColorName(Guid colorId) =>
-        colorNames.TryGetValue(colorId, out var name) ? name : colorId.ToString();
+    private Dictionary<Guid, string> projectNames = [];
+    private List<ProjectItem> allProjects = [];
+
+    private bool isUnrestricted;
+    private Guid? selectedHoldingFilter;
     private Guid? selectedOrganizationId;
     private Guid selectedHoldingId;
     private bool isLoading;
     private string? errorMessage;
+
+    private string GetColorName(Guid colorId) =>
+        colorNames.TryGetValue(colorId, out var name) ? name : colorId.ToString();
+
+    private string GetAssetModelName(Guid assetModelId) =>
+        assetModelNames.TryGetValue(assetModelId, out var name) ? name : assetModelId.ToString();
+
+    private string GetProjectName(Guid? projectId) =>
+        projectId is { } id
+            ? (projectNames.TryGetValue(id, out var name) ? name : id.ToString())
+            : "-";
 
     protected override async Task OnInitializedAsync()
     {
         try
         {
             var client = HttpClientFactory.CreateClient("InternalApi");
-            var response = await client.GetAsync("/api/v1/organizations?pageSize=200");
-            var content = await response.Content.ReadAsStringAsync();
 
-            if (!response.IsSuccessStatusCode)
+            var scopeResponse = await client.GetAsync("/api/v1/assets/authorized-scope");
+            var scopeContent = await scopeResponse.Content.ReadAsStringAsync();
+
+            if (!scopeResponse.IsSuccessStatusCode)
             {
-                errorMessage = $"خطا در دریافت سازمان‌ها: {content}";
+                errorMessage = $"خطا در دریافت سطح دسترسی: {scopeContent}";
                 return;
             }
 
-            var result = System.Text.Json.JsonSerializer.Deserialize<SearchOrganizationsResult>(content, new
-System.Text.Json.JsonSerializerOptions
-            { PropertyNameCaseInsensitive = true });
-            organizations = result?.Items ?? [];
+            var scope = JsonSerializer.Deserialize<AuthorizedScopeDto>(scopeContent, JsonOptions) ?? new AuthorizedScopeDto();
+            isUnrestricted = scope.IsUnrestricted;
 
-            if (organizations.Count == 1)
+            var orgResponse = await client.GetAsync("/api/v1/organizations?pageSize=200");
+            var orgContent = await orgResponse.Content.ReadAsStringAsync();
+
+            if (!orgResponse.IsSuccessStatusCode)
             {
-                await OnOrganizationChangedAsync(organizations[0].Id);
+                errorMessage = $"خطا در دریافت سازمان‌ها: {orgContent}";
+                return;
+            }
+
+            var orgResult = JsonSerializer.Deserialize<SearchOrganizationsResult>(orgContent, JsonOptions);
+            allOrganizations = orgResult?.Items ?? [];
+
+            var projectsResponse = await client.GetAsync("/api/v1/projects?pageSize=200");
+            var projectsContent = await projectsResponse.Content.ReadAsStringAsync();
+
+            if (projectsResponse.IsSuccessStatusCode)
+            {
+                var projectsResult = JsonSerializer.Deserialize<SearchProjectsResult>(projectsContent, JsonOptions);
+                allProjects = projectsResult?.Items ?? [];
+            }
+
+            if (isUnrestricted)
+            {
+                // Platform-level admin (chat, 2026-09-14): show the same
+                // Holding→Organization cascade used on the Personnel
+                // list page. The Organization dropdown itself is
+                // populated once a Holding is picked, in
+                // OnHoldingFilterChangedAsync.
+                var holdingResponse = await client.GetAsync("/api/v1/holdings?pageSize=200");
+                var holdingContent = await holdingResponse.Content.ReadAsStringAsync();
+
+                if (holdingResponse.IsSuccessStatusCode)
+                {
+                    var holdingResult = JsonSerializer.Deserialize<SearchHoldingsResult>(holdingContent, JsonOptions);
+                    holdings = holdingResult?.Items ?? [];
+                }
+            }
+            else
+            {
+                // Scoped user (chat, 2026-09-14): never show the Holding
+                // step. Restrict the Organization dropdown to exactly
+                // what the "Asset.View" permission grants — a
+                // Holding-level grant covers every Organization beneath
+                // it, a direct Organization-level grant covers just
+                // that one. This is stricter than simply trusting
+                // /api/v1/organizations' own result, since that
+                // endpoint is scoped by "Organization.View" — a
+                // different permission an Asset-only role may not hold.
+                organizations = allOrganizations
+                    .Where(o => scope.OrganizationIds.Contains(o.Id) ||
+                                (o.HoldingId.HasValue && scope.HoldingIds.Contains(o.HoldingId.Value)))
+                    .ToList();
+
+                if (organizations.Count == 1)
+                {
+                    await OnOrganizationChangedAsync(organizations[0].Id);
+                }
             }
         }
         catch (Exception ex)
@@ -152,10 +287,30 @@ System.Text.Json.JsonSerializerOptions
         }
     }
 
+    private Task OnHoldingFilterChangedAsync(Guid? holdingId)
+    {
+        selectedHoldingFilter = holdingId;
+        selectedOrganizationId = null;
+        items = [];
+
+        organizations = holdingId is { } h
+            ? allOrganizations.Where(o => o.HoldingId == h).ToList()
+            : [];
+
+        return Task.CompletedTask;
+    }
+
     private async Task OnOrganizationChangedAsync(Guid? organizationId)
     {
         selectedOrganizationId = organizationId;
-        selectedHoldingId = organizations.FirstOrDefault(o => o.Id == organizationId)?.HoldingId ?? Guid.Empty;
+        selectedHoldingId = organizations.FirstOrDefault(o => o.Id == organizationId)?.HoldingId
+            ?? allOrganizations.FirstOrDefault(o => o.Id == organizationId)?.HoldingId
+            ?? Guid.Empty;
+
+        projectNames = allProjects
+            .Where(p => p.OrganizationId == organizationId)
+            .ToDictionary(p => p.Id, p => p.Name);
+
         await LoadAssetsAsync();
         if (selectedHoldingId != Guid.Empty)
         {
@@ -183,9 +338,7 @@ System.Text.Json.JsonSerializerOptions
                 return;
             }
 
-            var result = System.Text.Json.JsonSerializer.Deserialize<SearchAssetsResult>(content, new
-System.Text.Json.JsonSerializerOptions
-            { PropertyNameCaseInsensitive = true });
+            var result = JsonSerializer.Deserialize<SearchAssetsResult>(content, JsonOptions);
             items = result?.Items ?? [];
         }
         catch (Exception ex)
@@ -208,9 +361,7 @@ System.Text.Json.JsonSerializerOptions
 
             if (response.IsSuccessStatusCode)
             {
-                var result = System.Text.Json.JsonSerializer.Deserialize<SearchAssetModelsResult>(content, new
-System.Text.Json.JsonSerializerOptions
-                { PropertyNameCaseInsensitive = true });
+                var result = JsonSerializer.Deserialize<SearchAssetModelsResult>(content, JsonOptions);
                 assetModelNames = (result?.Items ?? []).ToDictionary(a => a.Id, a => a.Name);
             }
         }
@@ -220,9 +371,24 @@ System.Text.Json.JsonSerializerOptions
         }
     }
 
-    private string GetAssetModelName(Guid assetModelId)
+    private async Task LoadColorsAsync()
     {
-        return assetModelNames.TryGetValue(assetModelId, out var name) ? name : assetModelId.ToString();
+        try
+        {
+            var client = HttpClientFactory.CreateClient("InternalApi");
+            var response = await client.GetAsync($"/api/v1/colors?holdingId={selectedHoldingId}");
+            var content = await response.Content.ReadAsStringAsync();
+
+            if (response.IsSuccessStatusCode)
+            {
+                var result = JsonSerializer.Deserialize<List<ColorLookupItem>>(content, JsonOptions) ?? [];
+                colorNames = result.ToDictionary(c => c.Id, c => c.Name);
+            }
+        }
+        catch
+        {
+            // Best effort
+        }
     }
 
     private static string TranslateStatus(string status) => status switch
@@ -235,30 +401,4 @@ System.Text.Json.JsonSerializerOptions
         "Disposed" => "اسقاط‌شده",
         _ => status
     };
-
-        private async Task LoadColorsAsync()
-    {
-        try
-        {
-            var client = HttpClientFactory.CreateClient("InternalApi");
-            var response = await client.GetAsync($"/api/v1/colors?holdingId={selectedHoldingId}");
-            var content = await response.Content.ReadAsStringAsync();
-
-            if (response.IsSuccessStatusCode)
-            {
-                var result = System.Text.Json.JsonSerializer.Deserialize<List<ColorLookupItem>>(content, new System.Text.Json.JsonSerializerOptions { PropertyNameCaseInsensitive = true }) ?? [];
-                colorNames = result.ToDictionary(c => c.Id, c => c.Name);
-            }
-        }
-        catch
-        {
-            // Best effort
-        }
-    }
-
-    private sealed class ColorLookupItem
-    {
-        public Guid Id { get; set; }
-        public string Name { get; set; } = string.Empty;
-    }
 }

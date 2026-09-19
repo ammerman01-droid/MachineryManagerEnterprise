@@ -6,20 +6,24 @@
 
 <MudText Typo="Typo.h4" Class="mb-4">مدیریت واحدهای اندازه‌گیری</MudText>
 
-<MudSelect T="Guid" Label="Holding" @bind-Value="selectedHoldingId" @bind-Value:after="OnHoldingChangedAsync"
-           Class="mb-4">
-    @foreach (var holding in holdings)
-    {
-        <MudSelectItem T="Guid" Value="@holding.Id">@holding.Name</MudSelectItem>
-    }
-</MudSelect>
+@* The selector is only needed when the user can see more than one Holding; a single one is auto-selected. *@
+@if (holdings.Count > 1)
+{
+    <MudSelect T="Guid?" Label="انتخاب Holding" Placeholder="یک Holding را انتخاب کنید"
+               @bind-Value="selectedHoldingId" @bind-Value:after="OnHoldingChangedAsync" Class="mb-4">
+        @foreach (var holding in holdings)
+        {
+            <MudSelectItem T="Guid?" Value="@((Guid?)holding.Id)">@holding.Name</MudSelectItem>
+        }
+    </MudSelect>
+}
 
 @if (errorMessage is not null)
 {
     <MudAlert Severity="Severity.Error" Class="my-4">@errorMessage</MudAlert>
 }
 
-@if (selectedHoldingId != Guid.Empty)
+@if (selectedHoldingId is not null)
 {
     <MudButton Variant="Variant.Filled" Color="Color.Primary" Class="mb-4"
                OnClick="@(() => Navigation.NavigateTo($"/admin/units-of-measurement/create?holdingId={selectedHoldingId}"))">
@@ -31,7 +35,7 @@
 {
     <MudProgressLinear Indeterminate="true" Class="my-4" />
 }
-else if (selectedHoldingId != Guid.Empty && units.Count == 0)
+else if (selectedHoldingId is not null && units.Count == 0)
 {
     <MudText Typo="Typo.body2" Class="mud-text-secondary">هیچ واحدی برای این Holding ثبت نشده است.</MudText>
 }
@@ -41,10 +45,17 @@ else if (units.Count > 0)
         <HeaderContent>
             <MudTh>نام</MudTh>
             <MudTh>نوع کمیت فیزیکی</MudTh>
+            <MudTh>عملیات</MudTh>
         </HeaderContent>
         <RowTemplate>
             <MudTd DataLabel="نام">@context.Name</MudTd>
-            <MudTd DataLabel="نوع کمیت فیزیکی">@context.Kind</MudTd>
+            <MudTd DataLabel="نوع کمیت فیزیکی">@PhysicalQuantityKindNames.GetName(context.Kind)</MudTd>
+            <MudTd DataLabel="عملیات">
+                <MudButton Size="Size.Small" Variant="Variant.Text" Color="Color.Primary"
+                           OnClick="@(() => Navigation.NavigateTo($"/admin/units-of-measurement/{context.Id}/edit?holdingId={selectedHoldingId}"))">
+                    ویرایش
+                </MudButton>
+            </MudTd>
         </RowTemplate>
     </MudTable>
 }
@@ -76,9 +87,13 @@ else if (units.Count > 0)
         public List<HoldingItem> Items { get; set; } = [];
     }
 
+    /// <summary>Gets or sets the Holding to pre-select, supplied via the query string (used when returning from the create/edit pages).</summary>
+    [SupplyParameterFromQuery(Name = "holdingId")]
+    public Guid? HoldingIdFromQuery { get; set; }
+
     private List<HoldingItem> holdings = [];
     private List<UnitOfMeasurementItem> units = [];
-    private Guid selectedHoldingId;
+    private Guid? selectedHoldingId;
     private bool isLoading = true;
     private string? errorMessage;
 
@@ -86,6 +101,23 @@ else if (units.Count > 0)
     protected override async Task OnInitializedAsync()
     {
         await LoadHoldingsAsync();
+
+        // Pre-select the Holding from the query string if it is one of the visible
+        // Holdings, otherwise auto-select when only one Holding is visible.
+        if (HoldingIdFromQuery is { } queryHoldingId && holdings.Any(h => h.Id == queryHoldingId))
+        {
+            selectedHoldingId = queryHoldingId;
+        }
+        else if (holdings.Count == 1)
+        {
+            selectedHoldingId = holdings[0].Id;
+        }
+
+        if (selectedHoldingId is not null)
+        {
+            await OnHoldingChangedAsync();
+        }
+
         isLoading = false;
     }
 
@@ -119,7 +151,7 @@ else if (units.Count > 0)
     /// <summary>Reloads the unit list whenever the selected Holding changes.</summary>
     private async Task OnHoldingChangedAsync()
     {
-        if (selectedHoldingId == Guid.Empty)
+        if (selectedHoldingId is null)
         {
             units = [];
             return;

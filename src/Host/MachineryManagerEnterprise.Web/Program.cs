@@ -166,6 +166,7 @@ try
     app.MapFuelTypeEndpoints();
     app.MapDrivingLicenseTypeEndpoints();
     app.MapJobTitleEndpoints();
+    app.MapAssetOperationalStatusEndpoints();
 
     // AuditLog endpoints
     app.MapAuditLogEndpoints();

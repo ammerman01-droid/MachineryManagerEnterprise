@@ -20,21 +20,13 @@
 else
 {
     <MudPaper Class="pa-4" Style="max-width:600px;">
-        <MudForm @ref="nameForm" @bind-IsValid="@isNameValid">
-            <MudTextField @bind-Value="name" Label="نام مدل" Required="true" RequiredError="نام الزامی است." MaxLength="200" />
+        <MudForm @ref="form" @bind-IsValid="@isValid">
+            <MudTextField @bind-Value="name" Label="نام مدل" Required="true" RequiredError="نام الزامی است." MaxLength="200" Class="mb-4" />
 
-            <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="SubmitNameAsync"
-                       Disabled="@(!isNameValid || isSubmittingName)" Class="mt-4">
-                @(isSubmittingName ? "..." : "ذخیره نام")
-            </MudButton>
-        </MudForm>
-    </MudPaper>
-
-    <MudPaper Class="pa-4 mt-6" Style="max-width:600px;">
-        <MudForm @ref="specForm" @bind-IsValid="@isSpecValid">
             <div class="d-flex align-center gap-2">
-                <MudSelect T="Guid?" @bind-Value="companyId" Label="شرکت سازنده" Required="true"
-                           RequiredError="انتخاب شرکت سازنده الزامی است.">
+                <MudSelect T="Guid?" @bind-Value="companyId" Label="شرکت سازنده" Placeholder="انتخاب شرکت سازنده"
+                           Required="true" RequiredError="انتخاب شرکت سازنده الزامی است."
+                           HelperText="@(companyId is null ? "برای این مدل هنوز شرکت سازنده ثبت نشده است؛ لطفاً یک شرکت انتخاب کنید." : null)">
                     @foreach (var company in companies)
                     {
                         <MudSelectItem T="Guid?" Value="@((Guid?)company.Id)">@company.Name</MudSelectItem>
@@ -95,7 +87,7 @@ else
             <MudText Typo="Typo.subtitle1" Class="mt-6 mb-2">ظرفیت کاری (حجمی)</MudText>
             <MudNumericField T="decimal?" @bind-Value="workingCapacityVolumeValue" Label="مقدار ظرفیت (حجمی)" Min="0" />
             <MudSelect T="Guid?" @bind-Value="workingCapacityVolumeUnitOfMeasurementId" Label="واحد ظرفیت (حجمی)" Class="mt-2">
-                @foreach (var unit in dimensionUnits)
+                @foreach (var unit in volumeUnits)
                 {
                     <MudSelectItem T="Guid?" Value="@((Guid?)unit.Id)">@unit.Name</MudSelectItem>
                 }
@@ -110,14 +102,14 @@ else
                 }
             </MudSelect>
 
-            <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="SubmitSpecificationsAsync"
-                       Disabled="@(!isSpecValid || isSubmittingSpec)" Class="mt-6">
-                @(isSubmittingSpec ? "..." : "ذخیره مشخصات فنی")
+            <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="SubmitAsync"
+                       Disabled="@(!isValid || isSubmitting)" Class="mt-6">
+                @(isSubmitting ? "..." : "ذخیره")
             </MudButton>
         </MudForm>
     </MudPaper>
 
-    <MudButton Variant="Variant.Outlined" OnClick="@(() => Navigation.NavigateTo("/admin/asset-models"))" Class="mt-6">
+    <MudButton Variant="Variant.Outlined" OnClick="@(() => Navigation.NavigateTo($"/admin/asset-models?holdingId={holdingId}"))" Class="mt-6">
         بازگشت
     </MudButton>
 }
@@ -202,16 +194,14 @@ else
         public PhysicalQuantityKind Kind { get; set; }
     }
 
-    private MudForm? nameForm;
-    private MudForm? specForm;
-    private bool isNameValid;
-    private bool isSpecValid;
-    private bool isSubmittingName;
-    private bool isSubmittingSpec;
+    private MudForm? form;
+    private bool isValid;
+    private bool isSubmitting;
     private bool isLoading = true;
     private bool showAddCompany;
     private bool isAddingCompany;
     private string name = string.Empty;
+    private string originalName = string.Empty;
     private string newCompanyName = string.Empty;
     private string? errorMessage;
 
@@ -232,6 +222,7 @@ else
 
     private List<CompanyItem> companies = [];
     private List<UnitOfMeasurementItem> dimensionUnits = [];
+    private List<UnitOfMeasurementItem> volumeUnits = [];
     private List<UnitOfMeasurementItem> weightUnits = [];
 
     /// <summary>Loads the Asset Model's current details, then its Holding's Companies and Units of Measurement for the dropdowns.</summary>
@@ -259,19 +250,26 @@ else
             }
 
             name = result.Name;
+            originalName = result.Name;
             holdingId = result.HoldingId;
-            companyId = result.CompanyId;
-            lengthValue = result.LengthValue;
+
+            // A model saved before Companies existed has an empty CompanyId; show it
+            // as "not selected" instead of a raw all-zero GUID, and make the user pick
+            // one — the server rejects an empty CompanyId (chat, 2026-09-19).
+            companyId = result.CompanyId == Guid.Empty ? null : result.CompanyId;
+
+            // The DB columns are decimal(18,4): trim the padding zeros (12.5000 -> 12.5).
+            lengthValue = NumberFormatting.TrimTrailingZeros(result.LengthValue);
             lengthUnitOfMeasurementId = result.LengthUnitOfMeasurementId;
-            widthValue = result.WidthValue;
+            widthValue = NumberFormatting.TrimTrailingZeros(result.WidthValue);
             widthUnitOfMeasurementId = result.WidthUnitOfMeasurementId;
-            heightValue = result.HeightValue;
+            heightValue = NumberFormatting.TrimTrailingZeros(result.HeightValue);
             heightUnitOfMeasurementId = result.HeightUnitOfMeasurementId;
-            weightValue = result.WeightValue;
+            weightValue = NumberFormatting.TrimTrailingZeros(result.WeightValue);
             weightUnitOfMeasurementId = result.WeightUnitOfMeasurementId;
-            workingCapacityVolumeValue = result.WorkingCapacityVolumeValue;
+            workingCapacityVolumeValue = NumberFormatting.TrimTrailingZeros(result.WorkingCapacityVolumeValue);
             workingCapacityVolumeUnitOfMeasurementId = result.WorkingCapacityVolumeUnitOfMeasurementId;
-            workingCapacityWeightValue = result.WorkingCapacityWeightValue;
+            workingCapacityWeightValue = NumberFormatting.TrimTrailingZeros(result.WorkingCapacityWeightValue);
             workingCapacityWeightUnitOfMeasurementId = result.WorkingCapacityWeightUnitOfMeasurementId;
 
             var companyResponse = await client.GetAsync($"/api/v1/companies?holdingId={holdingId}");
@@ -292,6 +290,7 @@ else
                     unitContent, new JsonSerializerOptions { PropertyNameCaseInsensitive = true }) ?? [];
 
                 dimensionUnits = units.Where(u => u.Kind == PhysicalQuantityKind.Dimension).ToList();
+                volumeUnits = units.Where(u => u.Kind == PhysicalQuantityKind.Volume).ToList();
                 weightUnits = units.Where(u => u.Kind == PhysicalQuantityKind.Weight).ToList();
             }
         }
@@ -351,51 +350,26 @@ else
         }
     }
 
-    /// <summary>Saves only the name change, via the dedicated Rename endpoint.</summary>
-    private async Task SubmitNameAsync()
+    /// <summary>
+    /// Saves the technical specifications and, if it changed, the name (each through
+    /// its own endpoint), then returns to the Asset Model list (chat, 2026-09-19).
+    /// </summary>
+    private async Task SubmitAsync()
     {
-        if (nameForm is null || !isNameValid)
+        if (form is null || !isValid)
         {
             return;
         }
 
-        isSubmittingName = true;
+        isSubmitting = true;
         errorMessage = null;
 
         try
         {
             var client = HttpClientFactory.CreateClient("InternalApi");
-            var response = await client.PutAsJsonAsync($"/api/v1/asset-models/{AssetModelId}", new { Name = name });
 
-            if (!response.IsSuccessStatusCode)
-            {
-                errorMessage = $"خطا در ویرایش نام: {await response.Content.ReadAsStringAsync()}";
-            }
-        }
-        catch (Exception ex)
-        {
-            errorMessage = $"خطا: {ex.Message}";
-        }
-        finally
-        {
-            isSubmittingName = false;
-        }
-    }
-
-    /// <summary>Saves the technical specifications, via the dedicated UpdateSpecifications endpoint.</summary>
-    private async Task SubmitSpecificationsAsync()
-    {
-        if (specForm is null || !isSpecValid)
-        {
-            return;
-        }
-
-        isSubmittingSpec = true;
-        errorMessage = null;
-
-        try
-        {
-            var client = HttpClientFactory.CreateClient("InternalApi");
+            // Specifications first: they are the step most likely to be rejected
+            // (company, unit kinds), so a failure leaves nothing half-saved.
             var response = await client.PutAsJsonAsync(
                 $"/api/v1/asset-models/{AssetModelId}/specifications",
                 new
@@ -418,7 +392,26 @@ else
             if (!response.IsSuccessStatusCode)
             {
                 errorMessage = $"خطا در ویرایش مشخصات فنی: {await response.Content.ReadAsStringAsync()}";
+                return;
             }
+
+            var trimmedName = name.Trim();
+
+            if (!string.Equals(trimmedName, originalName, StringComparison.Ordinal))
+            {
+                var renameResponse = await client.PutAsJsonAsync(
+                    $"/api/v1/asset-models/{AssetModelId}", new { Name = trimmedName });
+
+                if (!renameResponse.IsSuccessStatusCode)
+                {
+                    errorMessage = $"خطا در ویرایش نام: {await renameResponse.Content.ReadAsStringAsync()}";
+                    return;
+                }
+
+                originalName = trimmedName;
+            }
+
+            Navigation.NavigateTo($"/admin/asset-models?holdingId={holdingId}");
         }
         catch (Exception ex)
         {
@@ -426,7 +419,7 @@ else
         }
         finally
         {
-            isSubmittingSpec = false;
+            isSubmitting = false;
         }
     }
 }

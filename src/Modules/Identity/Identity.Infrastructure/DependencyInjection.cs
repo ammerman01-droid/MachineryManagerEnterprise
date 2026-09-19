@@ -134,12 +134,19 @@ public static class DependencyInjection
         // is no authentication scheme available for SignInManager to
         // issue a sign-in cookie against.
         services
-            .AddAuthentication(options =>
-            {
-                options.DefaultScheme = IdentityConstants.ApplicationScheme;
-                options.DefaultSignInScheme = IdentityConstants.ApplicationScheme;
-            })
-            .AddIdentityCookies();
+    .AddAuthentication(options =>
+    {
+        options.DefaultScheme = IdentityConstants.ApplicationScheme;
+        options.DefaultSignInScheme = IdentityConstants.ApplicationScheme;
+    })
+    .AddIdentityCookies();
+
+        services.ConfigureApplicationCookie(options =>
+        {
+            options.ExpireTimeSpan = TimeSpan.FromDays(7); // یا FromDays(1)
+            options.SlidingExpiration = true;
+            options.LoginPath = "/identity/login";
+        });
 
         services
             .AddOpenIddict()

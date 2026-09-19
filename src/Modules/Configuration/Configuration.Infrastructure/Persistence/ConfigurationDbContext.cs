@@ -51,6 +51,10 @@ public sealed class ConfigurationDbContext : DbContext, IConfigurationUnitOfWork
 
     /// <summary>Gets the set of JobTitle aggregates.</summary>
     public DbSet<global::Configuration.Domain.JobTitle> JobTitles => Set<global::Configuration.Domain.JobTitle>();
+
+    /// <summary>Gets the set of AssetOperationalStatus aggregates.</summary>
+public DbSet<global::Configuration.Domain.AssetOperationalStatus> AssetOperationalStatuses =>
+    Set<global::Configuration.Domain.AssetOperationalStatus>();
     
     /// <inheritdoc />
     protected override void OnModelCreating(ModelBuilder modelBuilder)

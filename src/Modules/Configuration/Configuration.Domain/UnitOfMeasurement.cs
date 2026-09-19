@@ -50,4 +50,27 @@ public sealed class UnitOfMeasurement : AggregateRoot<UnitOfMeasurementId>
 
         return unit;
     }
+
+    /// <summary>
+    /// Updates this unit's name and physical quantity kind (chat,
+    /// 2026-09-19). The owning Holding never changes. Changing the kind of a
+    /// unit that other modules already reference can make those
+    /// references fail their kind check the next time they are saved.
+    /// </summary>
+    public Result Update(string name, PhysicalQuantityKind kind)
+    {
+        if (string.IsNullOrWhiteSpace(name))
+            return Result.Failure(UnitOfMeasurementErrors.NameRequired());
+
+        if (name.Trim().Length > MaxNameLength)
+            return Result.Failure(UnitOfMeasurementErrors.NameTooLong(MaxNameLength));
+
+        if (!Enum.IsDefined(kind))
+            return Result.Failure(UnitOfMeasurementErrors.InvalidKind());
+
+        Name = name.Trim();
+        Kind = kind;
+
+        return Result.Success();
+    }
 }

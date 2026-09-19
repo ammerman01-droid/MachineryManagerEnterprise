@@ -1,8 +1,11 @@
 @page "/admin/assets/{AssetId:guid}"
 @inject IHttpClientFactory HttpClientFactory
 @inject NavigationManager Navigation
+@using System.Text.Json
 
 <PageTitle>جزئیات دارایی</PageTitle>
+
+<MudText Typo="Typo.h4" Class="mb-4">جزئیات دارایی</MudText>
 
 @if (errorMessage is not null)
 {
@@ -15,24 +18,25 @@
 }
 else if (asset is not null)
 {
-    <MudText Typo="Typo.h4" Class="mb-4">جزئیات دارایی</MudText>
-
-    <MudPaper Class="pa-4 mb-4">
+    <MudPaper Class="pa-4">
         <MudGrid>
             <MudItem xs="12" md="6">
-                <MudField Label="شناسه" Variant="Variant.Outlined">@asset.Id</MudField>
-            </MudItem>
-            <MudItem xs="12" md="6">
-                <MudField Label="کد" Variant="Variant.Outlined">@asset.Code</MudField>
+                <MudField Label="کد شناسایی" Variant="Variant.Outlined">@asset.Code</MudField>
             </MudItem>
             <MudItem xs="12" md="6">
                 <MudField Label="نام" Variant="Variant.Outlined">@asset.Name</MudField>
             </MudItem>
             <MudItem xs="12" md="6">
-                <MudField Label="سازمان" Variant="Variant.Outlined">@asset.OrganizationId</MudField>
+                <MudField Label="مدل دارایی" Variant="Variant.Outlined">@GetAssetModelName(asset.AssetModelId)</MudField>
             </MudItem>
             <MudItem xs="12" md="6">
-                <MudField Label="مدل دارایی" Variant="Variant.Outlined">@asset.AssetModelId</MudField>
+                <MudField Label="رنگ" Variant="Variant.Outlined">@GetColorName(asset.ColorId)</MudField>
+            </MudItem>
+            <MudItem xs="12" md="6">
+                <MudField Label="پروژه" Variant="Variant.Outlined">@GetProjectName(asset.ProjectId)</MudField>
+            </MudItem>
+            <MudItem xs="12" md="6">
+                <MudField Label="شماره سریال" Variant="Variant.Outlined">@(asset.SerialNumber ?? "-")</MudField>
             </MudItem>
             <MudItem xs="12" md="6">
                 <MudField Label="شماره شاسی" Variant="Variant.Outlined">@(asset.ChassisNumber ?? "-")</MudField>
@@ -44,64 +48,85 @@ else if (asset is not null)
                 <MudField Label="VIN" Variant="Variant.Outlined">@(asset.Vin ?? "-")</MudField>
             </MudItem>
             <MudItem xs="12" md="6">
-                <MudField Label="شماره سریال" Variant="Variant.Outlined">@(asset.SerialNumber ?? "-")</MudField>
-            </MudItem>
-            <MudItem xs="12" md="6">
                 <MudField Label="پلاک" Variant="Variant.Outlined">@(asset.LicensePlate ?? "-")</MudField>
             </MudItem>
             <MudItem xs="12" md="6">
                 <MudField Label="سال ساخت" Variant="Variant.Outlined">@(asset.ManufactureYear?.ToString() ?? "-")</MudField>
             </MudItem>
             <MudItem xs="12" md="6">
-                <MudField Label="رنگ" Variant="Variant.Outlined">@asset.ColorId</MudField>
+                <MudField Label="واحد قرائت کنتر" Variant="Variant.Outlined">@UnitDisplayNames.GetMeterReadingUnitName(asset.MeterReadingUnit)</MudField>
+            </MudItem>
+            <MudItem xs="12" md="6">
+                <MudField Label="سوخت اصلی" Variant="Variant.Outlined">@GetFuelKindDisplayName(asset.PrimaryFuelKind)</MudField>
+            </MudItem>
+            <MudItem xs="12" md="6">
+                <MudField Label="واحد شمارش سوخت اصلی" Variant="Variant.Outlined">@UnitDisplayNames.GetFuelUnitName(asset.PrimaryFuelUnit)</MudField>
+            </MudItem>
+            <MudItem xs="12" md="6">
+                <MudField Label="سوخت دوم" Variant="Variant.Outlined">@GetFuelKindDisplayName(asset.SecondaryFuelKind)</MudField>
+            </MudItem>
+            <MudItem xs="12" md="6">
+                <MudField Label="واحد شمارش سوخت دوم" Variant="Variant.Outlined">@UnitDisplayNames.GetFuelUnitName(asset.SecondaryFuelUnit)</MudField>
             </MudItem>
             <MudItem xs="12" md="6">
                 <MudField Label="وضعیت" Variant="Variant.Outlined">@TranslateStatus(asset.Status)</MudField>
             </MudItem>
         </MudGrid>
+
+        <MudDivider Class="my-4" />
+
+        <div class="d-flex gap-2 flex-wrap">
+            <MudButton Variant="Variant.Filled" Color="Color.Primary"
+                       OnClick="@(() => Navigation.NavigateTo($"/admin/assets/{asset.Id}/edit"))">
+                ویرایش
+            </MudButton>
+
+            @if (asset.Status == "Registered")
+            {
+                <MudButton Variant="Variant.Filled" Color="Color.Secondary" OnClick="@(() => TransitionAsync("commission"))">
+                    راه‌اندازی
+                </MudButton>
+            }
+
+            @if (asset.Status is "Commissioned" or "Inactive")
+            {
+                <MudButton Variant="Variant.Filled" Color="Color.Success" OnClick="@(() => TransitionAsync("activate"))">
+                    فعال‌سازی
+                </MudButton>
+            }
+
+            @if (asset.Status == "Operational")
+            {
+                <MudButton Variant="Variant.Outlined" Color="Color.Warning" OnClick="@(() => TransitionAsync("deactivate"))">
+                    غیرفعال‌سازی موقت
+                </MudButton>
+            }
+
+            @if (asset.Status is "Operational" or "Inactive")
+            {
+                <MudButton Variant="Variant.Outlined" Color="Color.Error" OnClick="@(() => TransitionAsync("retire"))">
+                    بازنشسته‌سازی
+                </MudButton>
+            }
+
+            @if (asset.Status == "Retired")
+            {
+                <MudButton Variant="Variant.Filled" Color="Color.Error" OnClick="@(() => TransitionAsync("dispose"))">
+                    اسقاط
+                </MudButton>
+            }
+
+            <MudButton Variant="Variant.Text" OnClick="@(() => Navigation.NavigateTo("/admin/assets"))">
+                بازگشت به لیست
+            </MudButton>
+        </div>
     </MudPaper>
-
-    <MudText Typo="Typo.h6" Class="mb-2">عملیات چرخه حیات</MudText>
-    <MudPaper Class="pa-4">
-        @if (asset.Status == "Registered")
-        {
-            <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick='() => ExecuteActionAsync("commission")'
-                       Disabled="isActing">راه‌اندازی</MudButton>
-        }
-        else if (asset.Status == "Commissioned" || asset.Status == "Inactive")
-        {
-            <MudButton Variant="Variant.Filled" Color="Color.Success" OnClick='() => ExecuteActionAsync("activate")'
-                       Disabled="isActing">فعال‌سازی</MudButton>
-        }
-
-        @if (asset.Status == "Operational")
-        {
-            <MudButton Variant="Variant.Filled" Color="Color.Warning" OnClick='() => ExecuteActionAsync("deactivate")'
-                       Disabled="isActing" Class="mx-2">غیرفعال‌سازی</MudButton>
-            <MudButton Variant="Variant.Filled" Color="Color.Error" OnClick='() => ExecuteActionAsync("retire")'
-                       Disabled="isActing">بازنشستگی</MudButton>
-        }
-
-        @if (asset.Status == "Inactive")
-        {
-            <MudButton Variant="Variant.Filled" Color="Color.Error" OnClick='() => ExecuteActionAsync("retire")'
-                       Disabled="isActing" Class="mx-2">بازنشستگی</MudButton>
-        }
-
-        @if (asset.Status == "Retired")
-        {
-            <MudButton Variant="Variant.Filled" Color="Color.Dark" OnClick='() => ExecuteActionAsync("dispose")'
-                       Disabled="isActing">اسقاط</MudButton>
-        }
-    </MudPaper>
-
-    <MudButton Variant="Variant.Outlined" Color="Color.Secondary" Class="mt-4"
-               OnClick="@(() => Navigation.NavigateTo("/admin/assets"))">
-        بازگشت به لیست
-    </MudButton>
 }
 
 @code {
+    [Parameter]
+    public Guid AssetId { get; set; }
+
     private sealed class AssetDetail
     {
         public Guid Id { get; set; }
@@ -117,26 +142,93 @@ else if (asset is not null)
         public string? LicensePlate { get; set; }
         public int? ManufactureYear { get; set; }
         public string Status { get; set; } = string.Empty;
+        public Guid ProjectId { get; set; }
+        public string? MeterReadingUnit { get; set; }
+        public string? PrimaryFuelKind { get; set; }
+        public string? PrimaryFuelUnit { get; set; }
+        public string? SecondaryFuelKind { get; set; }
+        public string? SecondaryFuelUnit { get; set; }
     }
 
-    [Parameter]
-    public Guid AssetId { get; set; }
+    private sealed class OrganizationItem
+    {
+        public Guid Id { get; set; }
+        public string Name { get; set; } = string.Empty;
+        public Guid? HoldingId { get; set; }
+    }
+
+    private sealed class NamedItem
+    {
+        public Guid Id { get; set; }
+        public string Name { get; set; } = string.Empty;
+    }
+
+    private sealed class ProjectItem
+    {
+        public Guid Id { get; set; }
+        public string Name { get; set; } = string.Empty;
+        public Guid OrganizationId { get; set; }
+    }
+
+    private sealed class SearchOrganizationsResult { public List<OrganizationItem> Items { get; set; } = []; }
+    private sealed class SearchNamedItemsResult { public List<NamedItem> Items { get; set; } = []; }
+    private sealed class SearchProjectsResult { public List<ProjectItem> Items { get; set; } = []; }
+
+    private static readonly JsonSerializerOptions JsonOptions = new() { PropertyNameCaseInsensitive = true };
 
     private AssetDetail? asset;
     private bool isLoading = true;
-    private bool isActing;
     private string? errorMessage;
+
+    private Dictionary<Guid, string> assetModelNames = [];
+    private Dictionary<Guid, string> colorNames = [];
+    private Dictionary<Guid, string> projectNames = [];
+
+    private string GetAssetModelName(Guid id) => assetModelNames.TryGetValue(id, out var n) ? n : id.ToString();
+    private string GetColorName(Guid id) => colorNames.TryGetValue(id, out var n) ? n : id.ToString();
+    private string GetProjectName(Guid id) => projectNames.TryGetValue(id, out var n) ? n : id.ToString();
+
+    private static string GetFuelKindDisplayName(string? kind) => kind switch
+    {
+        "Diesel" => "گازوئیل",
+        "Gasoline" => "بنزین",
+        "Gas" => "گاز",
+        null => "-",
+        _ => kind
+    };
+
+    private static string TranslateStatus(string status) => status switch
+    {
+        "Registered" => "ثبت‌شده",
+        "Commissioned" => "راه‌اندازی‌شده",
+        "Operational" => "در حال بهره‌برداری",
+        "Inactive" => "غیرفعال",
+        "Retired" => "بازنشسته",
+        "Disposed" => "اسقاط‌شده",
+        _ => status
+    };
 
     protected override async Task OnInitializedAsync()
     {
         await LoadAssetAsync();
+
+        if (asset is not null)
+        {
+            var org = await LoadOrganizationAsync(asset.OrganizationId);
+            await LoadProjectNamesAsync(asset.OrganizationId);
+
+            if (org?.HoldingId is { } holdingId)
+            {
+                await LoadAssetModelNamesAsync(holdingId);
+                await LoadColorNamesAsync(holdingId);
+            }
+        }
+
+        isLoading = false;
     }
 
     private async Task LoadAssetAsync()
     {
-        isLoading = true;
-        errorMessage = null;
-
         try
         {
             var client = HttpClientFactory.CreateClient("InternalApi");
@@ -145,10 +237,7 @@ else if (asset is not null)
 
             if (response.IsSuccessStatusCode)
             {
-                asset = System.Text.Json.JsonSerializer.Deserialize<AssetDetail>(content, new System.Text.Json.JsonSerializerOptions
-                {
-                    PropertyNameCaseInsensitive = true
-                });
+                asset = JsonSerializer.Deserialize<AssetDetail>(content, JsonOptions);
             }
             else
             {
@@ -159,15 +248,94 @@ else if (asset is not null)
         {
             errorMessage = $"خطا: {ex.Message}";
         }
-        finally
+    }
+
+    private async Task<OrganizationItem?> LoadOrganizationAsync(Guid organizationId)
+    {
+        try
         {
-            isLoading = false;
+            var client = HttpClientFactory.CreateClient("InternalApi");
+            var response = await client.GetAsync("/api/v1/organizations?pageSize=200");
+            var content = await response.Content.ReadAsStringAsync();
+
+            if (response.IsSuccessStatusCode)
+            {
+                var result = JsonSerializer.Deserialize<SearchOrganizationsResult>(content, JsonOptions);
+                return result?.Items.FirstOrDefault(o => o.Id == organizationId);
+            }
+        }
+        catch
+        {
+            // Best effort
+        }
+
+        return null;
+    }
+
+    private async Task LoadProjectNamesAsync(Guid organizationId)
+    {
+        try
+        {
+            var client = HttpClientFactory.CreateClient("InternalApi");
+            var response = await client.GetAsync("/api/v1/projects?pageSize=200");
+            var content = await response.Content.ReadAsStringAsync();
+
+            if (response.IsSuccessStatusCode)
+            {
+                var result = JsonSerializer.Deserialize<SearchProjectsResult>(content, JsonOptions);
+                projectNames = (result?.Items ?? [])
+                    .Where(p => p.OrganizationId == organizationId)
+                    .ToDictionary(p => p.Id, p => p.Name);
+            }
+        }
+        catch
+        {
+            // Best effort
         }
     }
 
-    private async Task ExecuteActionAsync(string action)
+    private async Task LoadAssetModelNamesAsync(Guid holdingId)
     {
-        isActing = true;
+        try
+        {
+            var client = HttpClientFactory.CreateClient("InternalApi");
+            var response = await client.GetAsync($"/api/v1/asset-models?holdingId={holdingId}&pageSize=200");
+            var content = await response.Content.ReadAsStringAsync();
+
+            if (response.IsSuccessStatusCode)
+            {
+                var result = JsonSerializer.Deserialize<SearchNamedItemsResult>(content, JsonOptions);
+                assetModelNames = (result?.Items ?? []).ToDictionary(a => a.Id, a => a.Name);
+            }
+        }
+        catch
+        {
+            // Best effort
+        }
+    }
+
+    private async Task LoadColorNamesAsync(Guid holdingId)
+    {
+        try
+        {
+            var client = HttpClientFactory.CreateClient("InternalApi");
+            var response = await client.GetAsync($"/api/v1/colors?holdingId={holdingId}");
+            var content = await response.Content.ReadAsStringAsync();
+
+            if (response.IsSuccessStatusCode)
+            {
+                var result = JsonSerializer.Deserialize<List<NamedItem>>(content, JsonOptions) ?? [];
+                colorNames = result.ToDictionary(c => c.Id, c => c.Name);
+            }
+        }
+        catch
+        {
+            // Best effort
+        }
+    }
+
+    private async Task TransitionAsync(string action)
+    {
         errorMessage = null;
 
         try
@@ -182,27 +350,12 @@ else if (asset is not null)
             }
             else
             {
-                errorMessage = $"خطا در عملیات: {content}";
+                errorMessage = $"خطا: {content}";
             }
         }
         catch (Exception ex)
         {
             errorMessage = $"خطا: {ex.Message}";
         }
-        finally
-        {
-            isActing = false;
-        }
     }
-
-    private static string TranslateStatus(string status) => status switch
-    {
-        "Registered" => "ثبت‌شده",
-        "Commissioned" => "راه‌اندازی‌شده",
-        "Operational" => "در حال بهره‌برداری",
-        "Inactive" => "غیرفعال",
-        "Retired" => "بازنشسته",
-        "Disposed" => "اسقاط‌شده",
-        _ => status
-    };
 }

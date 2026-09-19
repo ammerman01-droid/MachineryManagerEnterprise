@@ -66,7 +66,7 @@ public sealed class UpdateEngineModelSpecificationsCommandHandler
 
         var specifications = new (string FieldName, Guid? UnitOfMeasurementId, PhysicalQuantityKind ExpectedKind)[]
         {
-            ("Engine displacement", request.EngineDisplacementUnitOfMeasurementId, PhysicalQuantityKind.Dimension),
+            ("Engine displacement", request.EngineDisplacementUnitOfMeasurementId, PhysicalQuantityKind.Volume),
             ("Engine power", request.EnginePowerUnitOfMeasurementId, PhysicalQuantityKind.Force),
             ("Weight", request.WeightUnitOfMeasurementId, PhysicalQuantityKind.Weight),
         };

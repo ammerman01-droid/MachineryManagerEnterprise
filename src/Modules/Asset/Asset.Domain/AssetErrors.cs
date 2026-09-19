@@ -82,4 +82,51 @@ public static class AssetErrors
     public static Error ColorNotFoundInHolding(Guid colorId) => Error.NotFound(
         "Asset.ColorNotFoundInHolding",
         $"Color with id {colorId} was not found in the target Organization's Holding.");
+
+    /// <summary>Creates an error indicating the given ProjectId does not correspond to an existing Project (chat, 2026-09-14).</summary>
+    public static Error ProjectNotFound(Guid projectId) => Error.NotFound(
+        "Asset.ProjectNotFound",
+        $"Project with id {projectId} was not found.");
+
+    /// <summary>Creates an error indicating the selected Project belongs to a different Organization (chat, 2026-09-14).</summary>
+    public static Error ProjectOrganizationMismatch() => Error.Conflict(
+        "Asset.ProjectOrganizationMismatch",
+        "The selected Project does not belong to the target Organization.");
+
+    /// <summary>
+    /// Creates an error indicating a fuel Kind was specified without its
+    /// matching fuel unit, or vice versa (chat, 2026-09-14).
+    /// </summary>
+    public static Error FuelSpecificationMismatch(string fieldName) => Error.Validation(
+        "Asset.FuelSpecificationMismatch",
+        $"{fieldName} requires both a fuel kind and a fuel unit — provide both or neither.");
+
+    /// <summary>Creates an error indicating a secondary fuel was specified without a primary one (chat, 2026-09-14).</summary>
+    public static Error SecondaryFuelRequiresPrimary() => Error.Validation(
+        "Asset.SecondaryFuelRequiresPrimary",
+        "A secondary fuel kind cannot be set without a primary fuel kind.");
+
+    /// <summary>Creates an error indicating the primary and secondary fuel kinds are the same (chat, 2026-09-14).</summary>
+    public static Error DuplicateFuelKind() => Error.Validation(
+        "Asset.DuplicateFuelKind",
+        "Primary and secondary fuel kinds must be different.");
+
+    /// <summary>Gets an error indicating that a project is required for the asset.</summary>
+    public static Error ProjectRequired() => Error.Validation(
+    "Asset.ProjectRequired",
+    "Project assignment is required for every Asset.");
+
+/// <summary>Creates an error indicating no operational status was provided (chat, 2026-09-18).</summary>
+public static Error OperationalStatusRequired() => Error.Validation(
+    "Asset.OperationalStatusRequired",
+    "Operational status is required for every Asset.");
+
+/// <summary>
+/// Creates an error indicating the selected operational status does
+/// not exist, or does not belong to the target Organization's Holding
+/// (chat, 2026-09-18).
+/// </summary>
+public static Error OperationalStatusNotFoundInHolding(Guid operationalStatusId) => Error.NotFound(
+    "Asset.OperationalStatusNotFoundInHolding",
+    $"Operational status with id {operationalStatusId} was not found in the target Organization's Holding.");
 }

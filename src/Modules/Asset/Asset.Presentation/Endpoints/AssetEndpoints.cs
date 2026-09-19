@@ -4,6 +4,7 @@ using MachineryManagerEnterprise.Asset.Application.Features.Assets.Commands.Deac
 using MachineryManagerEnterprise.Asset.Application.Features.Assets.Commands.DisposeAsset;
 using MachineryManagerEnterprise.Asset.Application.Features.Assets.Commands.RegisterAsset;
 using MachineryManagerEnterprise.Asset.Application.Features.Assets.Commands.RetireAsset;
+using MachineryManagerEnterprise.Asset.Application.Features.Assets.Queries.GetAssetAuthorizedScope;
 using MachineryManagerEnterprise.Asset.Application.Features.Assets.Queries.GetAssetById;
 using MachineryManagerEnterprise.Asset.Application.Features.Assets.Queries.SearchAssets;
 using MachineryManagerEnterprise.Asset.Presentation.Contracts;
@@ -12,6 +13,7 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Routing;
 using OpenIddict.Validation.AspNetCore;
+using MachineryManagerEnterprise.Asset.Application.Features.Assets.Commands.UpdateAsset;
 
 namespace MachineryManagerEnterprise.Asset.Presentation.Endpoints;
 
@@ -34,6 +36,10 @@ public static class AssetEndpoints
         group.MapPost("/", RegisterAssetAsync)
             .WithName("RegisterAsset")
             .WithSummary("Registers a new Asset within an Organization.");
+
+        group.MapGet("/authorized-scope", GetAssetAuthorizedScopeAsync)
+            .WithName("GetAssetAuthorizedScope")
+            .WithSummary("Resolves the current user's authorized scope for the \"Asset.View\" permission.");
 
         group.MapGet("/{assetId:guid}", GetAssetByIdAsync)
             .WithName("GetAssetById")
@@ -62,6 +68,10 @@ public static class AssetEndpoints
         group.MapPost("/{assetId:guid}/dispose", DisposeAssetAsync)
             .WithName("DisposeAsset")
             .WithSummary("Marks a Retired Asset as physically disposed of (final state).");
+        
+        group.MapPut("/{assetId:guid}", UpdateAssetAsync)
+    .WithName("UpdateAsset")
+    .WithSummary("Updates an existing Asset's mutable details.");
 
         return endpoints;
     }
@@ -84,11 +94,29 @@ public static class AssetEndpoints
                 request.BodyNumber,
                 request.Vin,
                 request.LicensePlate,
-                request.ManufactureYear),
+                request.ManufactureYear,
+                request.ProjectId,
+                request.MeterReadingUnit,
+                request.PrimaryFuelKind,
+                request.PrimaryFuelUnit,
+                request.SecondaryFuelKind,
+                request.SecondaryFuelUnit),
             cancellationToken);
 
         return result.IsSuccess
             ? Results.Created($"/api/v1/assets/{result.Value}", new { id = result.Value })
+            : result.ToProblemResult(httpContext);
+    }
+
+    private static async Task<IResult> GetAssetAuthorizedScopeAsync(
+        ISender sender,
+        HttpContext httpContext,
+        CancellationToken cancellationToken)
+    {
+        var result = await sender.Send(new GetAssetAuthorizedScopeQuery(), cancellationToken);
+
+        return result.IsSuccess
+            ? Results.Ok(result.Value)
             : result.ToProblemResult(httpContext);
     }
 
@@ -187,4 +215,37 @@ public static class AssetEndpoints
             ? Results.NoContent()
             : result.ToProblemResult(httpContext);
     }
+
+    private static async Task<IResult> UpdateAssetAsync(
+    Guid assetId,
+    UpdateAssetRequest request,
+    ISender sender,
+    HttpContext httpContext,
+    CancellationToken cancellationToken)
+{
+    var result = await sender.Send(
+        new UpdateAssetCommand(
+            assetId,
+            request.Code,
+            request.Name,
+            request.AssetModelId,
+            request.ColorId,
+            request.ProjectId,
+            request.SerialNumber,
+            request.ChassisNumber,
+            request.BodyNumber,
+            request.Vin,
+            request.LicensePlate,
+            request.ManufactureYear,
+            request.MeterReadingUnit,
+            request.PrimaryFuelKind,
+            request.PrimaryFuelUnit,
+            request.SecondaryFuelKind,
+            request.SecondaryFuelUnit),
+        cancellationToken);
+
+    return result.IsSuccess
+        ? Results.NoContent()
+        : result.ToProblemResult(httpContext);
+}
 }

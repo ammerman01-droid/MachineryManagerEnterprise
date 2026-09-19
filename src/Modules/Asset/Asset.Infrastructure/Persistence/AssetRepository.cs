@@ -42,6 +42,16 @@ public sealed class AssetRepository : IAssetRepository
             cancellationToken);
 
     /// <inheritdoc />
+    public Task<bool> ExistsOtherWithCodeAsync(
+        Guid organizationId,
+        string code,
+        AssetId excludedAssetId,
+        CancellationToken cancellationToken = default) =>
+        _dbContext.Assets.AnyAsync(
+            a => a.OrganizationId == organizationId && a.Code == code && a.Id != excludedAssetId,
+            cancellationToken);
+
+    /// <inheritdoc />
     public async Task<SearchAssetsResponse> SearchAsync(
         Guid organizationId,
         string? searchTerm,

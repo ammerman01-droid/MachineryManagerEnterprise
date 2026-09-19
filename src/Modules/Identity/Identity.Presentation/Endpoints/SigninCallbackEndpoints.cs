@@ -51,7 +51,18 @@ public static class SigninCallbackEndpoints
                 statusCode: StatusCodes.Status400BadRequest);
         }
 
+        // کوکی معتبری که PasswordSignInAsync قبلاً با انتخاب واقعی
+        // کاربر برای RememberMe ساخته را می‌خوانیم، تا این SignIn دوم
+        // آن انتخاب را از بین نبرد.
+        var existingAuth = await httpContext.AuthenticateAsync(IdentityConstants.ApplicationScheme);
+
         var properties = result.Properties ?? new AuthenticationProperties();
+
+        properties.IsPersistent = existingAuth.Properties?.IsPersistent ?? false;
+
+        // اجازه بده انقضای کوکی از روی ExpireTimeSpan خود اسکیم محاسبه شود؛
+        // این مقدار نباید طول عمر access token را به ارث ببرد.
+        properties.ExpiresUtc = null;
 
         // OpenIddict.Client stores the issued tokens under its own
         // property keys, NOT under the plain "access_token"/"refresh_token"
@@ -78,21 +89,14 @@ public static class SigninCallbackEndpoints
             tokens.Add(new AuthenticationToken { Name = "id_token", Value = identityToken });
         }
 
-        // We never populated "expires_at" explicitly — GetTokenAsync
-        // looks up this exact token name by convention. properties.ExpiresUtc
-        // is set by OpenIddict.Client itself when the token response
-        // includes "expires_in" (chat, 2026-08-22).
-        if (properties.ExpiresUtc is { } expiresUtc)
-        {
-            tokens.Add(new AuthenticationToken { Name = "expires_at", Value = expiresUtc.ToString("o") });
-        }
+        // نکته: چون properties.ExpiresUtc را بالاتر null کردیم، این شرط
+        // دیگر هیچ‌وقت true نمی‌شود و "expires_at" ذخیره نخواهد شد.
+        // این عمدی است — پایین توضیح داده شده.
 
         properties.StoreTokens(tokens);
-
         await httpContext.SignInAsync(IdentityConstants.ApplicationScheme, result.Principal, properties);
 
         var returnUrl = properties.RedirectUri;
-
         return Results.Redirect(string.IsNullOrEmpty(returnUrl) ? "/" : returnUrl);
     }
 }

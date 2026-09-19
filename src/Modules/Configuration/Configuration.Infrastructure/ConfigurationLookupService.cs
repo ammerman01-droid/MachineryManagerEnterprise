@@ -61,4 +61,20 @@ public sealed class ConfigurationLookupService : IConfigurationLookupService
             .AsNoTracking()
             .AnyAsync(j => j.Id == id && j.HoldingId == holdingId, cancellationToken);
     }
+
+    /// <inheritdoc />
+public async Task<bool> AssetOperationalStatusExistsInHoldingAsync(
+    Guid operationalStatusId,
+    Guid holdingId,
+    CancellationToken cancellationToken = default)
+{
+    var id = AssetOperationalStatusId.From(operationalStatusId);
+
+    return await _dbContext.AssetOperationalStatuses
+        .AsNoTracking()
+        .AnyAsync(
+            x => x.Id == id &&
+                 x.HoldingId == holdingId,
+            cancellationToken);
+}
 }

@@ -1,0 +1,1141 @@
+﻿
+================================================================================
+  MACHINERYMANAGERENTERPRISE - CODEBASE SNAPSHOT
+  Generated: 2026-09-18 11:12:08
+  Source: C:\Users\i\source\repos\MachineryManagerEnterprise
+  Purpose: Complete source code reference for AI-assisted development
+  Excludes: .md, .gitignore, this script, build artifacts, binaries, IDE,
+            dependencies, client libs (wwwroot/lib), docs
+  
+================================================================================
+
+# SECTION 1: PROJECT STRUCTURE (Directory Tree)
+================================================================================
+
+MachineryManagerEnterprise
+|-- src
+|   |-- BuildingBlocks
+|   |   |-- MachineryManagerEnterprise.SharedKernel
+|   |   |   |-- AggregateRoot.cs
+|   |   |   |-- AuditEntry.cs
+|   |   |   |-- AuditOperationType.cs
+|   |   |   |-- Entity.cs
+|   |   |   |-- Error.cs
+|   |   |   |-- ErrorType.cs
+|   |   |   |-- FuelKind.cs
+|   |   |   |-- IDomainEvent.cs
+|   |   |   |-- IHasDomainEvents.cs
+|   |   |   |-- MachineryManagerEnterprise.SharedKernel.csproj
+|   |   |   |-- PhysicalQuantityKind.cs
+|   |   |   |-- Result.cs
+|   |   |   +-- ValueObject.cs
+|   |   |-- MachineryManagerEnterprise.SharedKernel.Abstractions
+|   |   |   |-- AuthorizedScopeSet.cs
+|   |   |   |-- IConfigurationLookupService.cs
+|   |   |   |-- ICurrentUserService.cs
+|   |   |   |-- IDateTimeProvider.cs
+|   |   |   |-- IDomainEventDispatcher.cs
+|   |   |   |-- IHoldingLookupService.cs
+|   |   |   |-- IOrganizationLookupService.cs
+|   |   |   |-- IPermissionEvaluator.cs
+|   |   |   |-- IPersonnelUsageLookupService.cs
+|   |   |   |-- IProjectLookupService.cs
+|   |   |   |-- IRepository.cs
+|   |   |   |-- IThemePreferenceStore.cs
+|   |   |   |-- IUnitOfMeasurementLookupService.cs
+|   |   |   |-- IUnitOfWork.cs
+|   |   |   |-- IUserThemePreferenceRepository.cs
+|   |   |   |-- MachineryManagerEnterprise.SharedKernel.Abstractions.csproj
+|   |   |   |-- ResourceScope.cs
+|   |   |   |-- ScopeLevel.cs
+|   |   |   +-- SystemDateTimeProvider.cs
+|   |   |-- MachineryManagerEnterprise.SharedKernel.Contracts
+|   |   |   +-- MachineryManagerEnterprise.SharedKernel.Contracts.csproj
+|   |   |-- MachineryManagerEnterprise.SharedKernel.Infrastructure
+|   |   |   |-- AuditEntryMapping.cs
+|   |   |   |-- AuditSaveChangesInterceptor.cs
+|   |   |   |-- CompositeThemePreferenceStore.cs
+|   |   |   |-- CookieThemePreferenceStore.cs
+|   |   |   |-- CurrentUserService.cs
+|   |   |   |-- DependencyInjection.cs
+|   |   |   |-- MachineryManagerEnterprise.SharedKernel.Infrastructure.csproj
+|   |   |   +-- ThemeCookieCodec.cs
+|   |   +-- MachineryManagerEnterprise.UI
+|   |       |-- Components
+|   |       |   |-- _Imports.razor
+|   |       |   |-- JalaliDatePicker.razor
+|   |       |   +-- UserSettingsMenu.razor
+|   |       |-- Theming
+|   |       |   |-- AppCornerStyle.cs
+|   |       |   |-- AppThemeMode.cs
+|   |       |   |-- ThemeCatalog.cs
+|   |       |   +-- ThemeService.cs
+|   |       |-- wwwroot
+|   |       |-- _Imports.razor
+|   |       |-- DependencyInjection.cs
+|   |       |-- JalaliCalendarConverter.cs
+|   |       +-- MachineryManagerEnterprise.UI.csproj
+|   |-- Host
+|   |   +-- MachineryManagerEnterprise.Web
+|   |       |-- Components
+|   |       |   |-- Layout
+|   |       |   |   |-- MainLayout.razor
+|   |       |   |   |-- NavMenu.razor
+|   |       |   |   |-- ReconnectModal.razor
+|   |       |   |   +-- RequireAuthentication.razor
+|   |       |   |-- Pages
+|   |       |   |   |-- Error.razor
+|   |       |   |   |-- Home.razor
+|   |       |   |   +-- NotFound.razor
+|   |       |   |-- _Imports.razor
+|   |       |   |-- App.razor
+|   |       |   +-- Routes.razor
+|   |       |-- Properties
+|   |       |   +-- launchSettings.json
+|   |       |-- wwwroot
+|   |       |   +-- images
+|   |       |-- appsettings.Development.json
+|   |       |-- appsettings.json
+|   |       |-- MachineryManagerEnterprise.Web.csproj
+|   |       +-- Program.cs
+|   |-- Modules
+|   |   |-- Administration
+|   |   |   |-- Administration.Application
+|   |   |   |   |-- Abstractions
+|   |   |   |   |   |-- IAdministrationUnitOfWork.cs
+|   |   |   |   |   |-- IProfileRepository.cs
+|   |   |   |   |   +-- IUserProfileAssignmentRepository.cs
+|   |   |   |   |-- Behaviors
+|   |   |   |   |   +-- ValidationBehavior.cs
+|   |   |   |   |-- Features
+|   |   |   |   |   |-- Profiles
+|   |   |   |   |   |   |-- Commands
+|   |   |   |   |   |   |   |-- ActivateProfile
+|   |   |   |   |   |   |   |   |-- ActivateProfileCommand.cs
+|   |   |   |   |   |   |   |   +-- ActivateProfileCommandHandler.cs
+|   |   |   |   |   |   |   |-- CreateProfile
+|   |   |   |   |   |   |   |   |-- CreateProfileCommand.cs
+|   |   |   |   |   |   |   |   |-- CreateProfileCommandHandler.cs
+|   |   |   |   |   |   |   |   +-- CreateProfileCommandValidator.cs
+|   |   |   |   |   |   |   |-- DeactivateProfile
+|   |   |   |   |   |   |   |   |-- DeactivateProfileCommand.cs
+|   |   |   |   |   |   |   |   +-- DeactivateProfileCommandHandler.cs
+|   |   |   |   |   |   |   |-- DeleteProfile
+|   |   |   |   |   |   |   |   |-- DeleteProfileCommand.cs
+|   |   |   |   |   |   |   |   |-- DeleteProfileCommandHandler.cs
+|   |   |   |   |   |   |   |   +-- DeleteProfileCommandValidator.cs
+|   |   |   |   |   |   |   +-- UpdateProfile
+|   |   |   |   |   |   |       |-- UpdateProfileCommand.cs
+|   |   |   |   |   |   |       |-- UpdateProfileCommandHandler.cs
+|   |   |   |   |   |   |       +-- UpdateProfileCommandValidator.cs
+|   |   |   |   |   |   |-- Dtos
+|   |   |   |   |   |   |   +-- ProfileDto.cs
+|   |   |   |   |   |   +-- Queries
+|   |   |   |   |   |       |-- GetProfileById
+|   |   |   |   |   |       |   |-- GetProfileByIdQuery.cs
+|   |   |   |   |   |       |   |-- GetProfileByIdQueryHandler.cs
+|   |   |   |   |   |       |   +-- GetProfileByIdQueryValidator.cs
+|   |   |   |   |   |       +-- SearchProfiles
+|   |   |   |   |   |           |-- SearchProfilesQuery.cs
+|   |   |   |   |   |           |-- SearchProfilesQueryHandler.cs
+|   |   |   |   |   |           +-- SearchProfilesQueryValidator.cs
+|   |   |   |   |   +-- UserProfileAssignments
+|   |   |   |   |       |-- Commands
+|   |   |   |   |       |   |-- ActivateUserProfileAssignment
+|   |   |   |   |       |   |   |-- ActivateUserProfileAssignmentCommand.cs
+|   |   |   |   |       |   |   |-- ActivateUserProfileAssignmentCommandHandler.cs
+|   |   |   |   |       |   |   +-- ActivateUserProfileAssignmentCommandValidator.cs
+|   |   |   |   |       |   |-- AssignUserToProfile
+|   |   |   |   |       |   |   |-- AssignUserToProfileCommand.cs
+|   |   |   |   |       |   |   |-- AssignUserToProfileCommandHandler.cs
+|   |   |   |   |       |   |   +-- AssignUserToProfileCommandValidator.cs
+|   |   |   |   |       |   |-- DeactivateUserProfileAssignment
+|   |   |   |   |       |   |   |-- DeactivateUserProfileAssignmentCommand.cs
+|   |   |   |   |       |   |   |-- DeactivateUserProfileAssignmentCommandHandler.cs
+|   |   |   |   |       |   |   +-- DeactivateUserProfileAssignmentCommandValidator.cs
+|   |   |   |   |       |   +-- DeleteUserProfileAssignment
+|   |   |   |   |       |       |-- DeleteUserProfileAssignmentCommand.cs
+|   |   |   |   |       |       |-- DeleteUserProfileAssignmentCommandHandler.cs
+|   |   |   |   |       |       +-- DeleteUserProfileAssignmentCommandValidator.cs
+|   |   |   |   |       +-- Queries
+|   |   |   |   |           +-- GetUserProfileAssignmentsByUserId
+|   |   |   |   |               |-- GetUserProfileAssignmentsByUserIdQuery.cs
+|   |   |   |   |               +-- GetUserProfileAssignmentsByUserIdQueryHandler.cs
+|   |   |   |   |-- Mappings
+|   |   |   |   |   +-- AdministrationMappingConfig.cs
+|   |   |   |   |-- Administration.Application.csproj
+|   |   |   |   |-- DependencyInjection.cs
+|   |   |   |   |-- DomainEventNotification.cs
+|   |   |   |   +-- MediatRDomainEventDispatcher.cs
+|   |   |   |-- Administration.Domain
+|   |   |   |   |-- Events
+|   |   |   |   |   |-- ProfileCreated.cs
+|   |   |   |   |   |-- UserAssignedToProfile.cs
+|   |   |   |   |   |-- UserProfileAssignmentActivated.cs
+|   |   |   |   |   +-- UserProfileAssignmentDeactivated.cs
+|   |   |   |   |-- Administration.Domain.csproj
+|   |   |   |   |-- AuthorizationScope.cs
+|   |   |   |   |-- AuthorizationScopeLevel.cs
+|   |   |   |   |-- PermissionCatalog.cs
+|   |   |   |   |-- Profile.cs
+|   |   |   |   |-- ProfileErrors.cs
+|   |   |   |   |-- ProfileId.cs
+|   |   |   |   |-- UserProfileAssignment.cs
+|   |   |   |   +-- UserProfileAssignmentId.cs
+|   |   |   |-- Administration.Infrastructure
+|   |   |   |   |-- Persistence
+|   |   |   |   |   |-- Configurations
+|   |   |   |   |   |   |-- ProfileConfiguration.cs
+|   |   |   |   |   |   +-- UserProfileAssignmentConfiguration.cs
+|   |   |   |   |   |-- Migrations
+|   |   |   |   |   |   |-- 20260820222811_InitialAdministrationSchema.cs
+|   |   |   |   |   |   |-- 20260820222811_InitialAdministrationSchema.Designer.cs
+|   |   |   |   |   |   |-- 20260823073337_AddUserProfileAssignmentRevocation.cs
+|   |   |   |   |   |   |-- 20260823073337_AddUserProfileAssignmentRevocation.Designer.cs
+|   |   |   |   |   |   |-- 20260825064921_AddUserProfileAssignmentProfileForeignKey.cs
+|   |   |   |   |   |   |-- 20260825064921_AddUserProfileAssignmentProfileForeignKey.Designer.cs
+|   |   |   |   |   |   |-- 20260825085206_ChangeUserProfileSystem.cs
+|   |   |   |   |   |   |-- 20260825085206_ChangeUserProfileSystem.Designer.cs
+|   |   |   |   |   |   |-- 20260905122505_CreateSharedAuditTable.cs
+|   |   |   |   |   |   |-- 20260905122505_CreateSharedAuditTable.Designer.cs
+|   |   |   |   |   |   +-- AdministrationDbContextModelSnapshot.cs
+|   |   |   |   |   |-- AdministrationDbContext.cs
+|   |   |   |   |   |-- ProfileRepository.cs
+|   |   |   |   |   +-- UserProfileAssignmentRepository.cs
+|   |   |   |   |-- Administration.Infrastructure.csproj
+|   |   |   |   |-- DependencyInjection.cs
+|   |   |   |   +-- PermissionEvaluator.cs
+|   |   |   +-- Administration.Presentation
+|   |   |       |-- Components
+|   |   |       |   |-- Pages
+|   |   |       |   |   |-- AssignProfile.razor
+|   |   |       |   |   |-- CreateProfile.razor
+|   |   |       |   |   |-- CreateUser.razor
+|   |   |       |   |   |-- EditProfile.razor
+|   |   |       |   |   |-- ProfilesList.razor
+|   |   |       |   |   +-- UsersList.razor
+|   |   |       |   |-- Shared
+|   |   |       |   |   +-- AdminOnly.razor
+|   |   |       |   +-- _Imports.razor
+|   |   |       |-- Contracts
+|   |   |       |   |-- AssignUserToProfileRequest.cs
+|   |   |       |   |-- CreateProfileRequest.cs
+|   |   |       |   +-- UpdateProfileRequest.cs
+|   |   |       |-- Endpoints
+|   |   |       |   |-- ProfileEndpoints.cs
+|   |   |       |   |-- ResultExtensions.cs
+|   |   |       |   +-- UserProfileAssignmentEndpoints.cs
+|   |   |       +-- Administration.Presentation.csproj
+|   |   |-- Asset
+|   |   |   |-- Asset.Application
+|   |   |   |   |-- Abstractions
+|   |   |   |   |   |-- IAssetModelRepository.cs
+|   |   |   |   |   |-- IAssetRepository.cs
+|   |   |   |   |   |-- IAssetUnitOfWork.cs
+|   |   |   |   |   +-- IEngineModelRepository.cs
+|   |   |   |   |-- Behaviors
+|   |   |   |   |   +-- ValidationBehavior.cs
+|   |   |   |   |-- Features
+|   |   |   |   |   |-- AssetModels
+|   |   |   |   |   |   |-- Commands
+|   |   |   |   |   |   |   |-- AssignCompatibleEngineModel
+|   |   |   |   |   |   |   |   |-- AssignCompatibleEngineModelCommand.cs
+|   |   |   |   |   |   |   |   +-- AssignCompatibleEngineModelCommandHandler.cs
+|   |   |   |   |   |   |   |-- RegisterAssetModel
+|   |   |   |   |   |   |   |   |-- RegisterAssetModelCommand.cs
+|   |   |   |   |   |   |   |   |-- RegisterAssetModelCommandHandler.cs
+|   |   |   |   |   |   |   |   +-- RegisterAssetModelCommandValidator.cs
+|   |   |   |   |   |   |   |-- RemoveCompatibleEngineModel
+|   |   |   |   |   |   |   |   |-- RemoveCompatibleEngineModelCommand.cs
+|   |   |   |   |   |   |   |   +-- RemoveCompatibleEngineModelCommandHandler.cs
+|   |   |   |   |   |   |   |-- RenameAssetModel
+|   |   |   |   |   |   |   |   |-- RenameAssetModelCommand.cs
+|   |   |   |   |   |   |   |   |-- RenameAssetModelCommandHandler.cs
+|   |   |   |   |   |   |   |   +-- RenameAssetModelCommandValidator.cs
+|   |   |   |   |   |   |   +-- UpdateAssetModelSpecifications
+|   |   |   |   |   |   |       |-- UpdateAssetModelSpecificationsCommand.cs
+|   |   |   |   |   |   |       |-- UpdateAssetModelSpecificationsCommandHandler.cs
+|   |   |   |   |   |   |       +-- UpdateAssetModelSpecificationsCommandValidator.cs
+|   |   |   |   |   |   |-- Dtos
+|   |   |   |   |   |   |   +-- AssetModelDto.cs
+|   |   |   |   |   |   +-- Queries
+|   |   |   |   |   |       |-- GetAssetModelById
+|   |   |   |   |   |       |   |-- GetAssetModelByIdQuery.cs
+|   |   |   |   |   |       |   +-- GetAssetModelByIdQueryHandler.cs
+|   |   |   |   |   |       +-- SearchAssetModels
+|   |   |   |   |   |           |-- SearchAssetModelsQuery.cs
+|   |   |   |   |   |           +-- SearchAssetModelsQueryHandler.cs
+|   |   |   |   |   |-- Assets
+|   |   |   |   |   |   |-- Commands
+|   |   |   |   |   |   |   |-- ActivateAsset
+|   |   |   |   |   |   |   |   |-- ActivateAssetCommand.cs
+|   |   |   |   |   |   |   |   |-- ActivateAssetCommandHandler.cs
+|   |   |   |   |   |   |   |   +-- ActivateAssetCommandValidator.cs
+|   |   |   |   |   |   |   |-- CommissionAsset
+|   |   |   |   |   |   |   |   |-- CommissionAssetCommand.cs
+|   |   |   |   |   |   |   |   |-- CommissionAssetCommandHandler.cs
+|   |   |   |   |   |   |   |   +-- CommissionAssetCommandValidator.cs
+|   |   |   |   |   |   |   |-- DeactivateAsset
+|   |   |   |   |   |   |   |   |-- DeactivateAssetCommand.cs
+|   |   |   |   |   |   |   |   |-- DeactivateAssetCommandHandler.cs
+|   |   |   |   |   |   |   |   +-- DeactivateAssetCommandValidator.cs
+|   |   |   |   |   |   |   |-- DisposeAsset
+|   |   |   |   |   |   |   |   |-- DisposeAssetCommand.cs
+|   |   |   |   |   |   |   |   |-- DisposeAssetCommandHandler.cs
+|   |   |   |   |   |   |   |   +-- DisposeAssetCommandValidator.cs
+|   |   |   |   |   |   |   |-- RegisterAsset
+|   |   |   |   |   |   |   |   |-- RegisterAssetCommand.cs
+|   |   |   |   |   |   |   |   |-- RegisterAssetCommandHandler.cs
+|   |   |   |   |   |   |   |   +-- RegisterAssetCommandValidator.cs
+|   |   |   |   |   |   |   +-- RetireAsset
+|   |   |   |   |   |   |       |-- RetireAssetCommand.cs
+|   |   |   |   |   |   |       |-- RetireAssetCommandHandler.cs
+|   |   |   |   |   |   |       +-- RetireAssetCommandValidator.cs
+|   |   |   |   |   |   |-- Dtos
+|   |   |   |   |   |   |   +-- AssetDto.cs
+|   |   |   |   |   |   +-- Queries
+|   |   |   |   |   |       |-- GetAssetById
+|   |   |   |   |   |       |   |-- GetAssetByIdQuery.cs
+|   |   |   |   |   |       |   +-- GetAssetByIdQueryHandler.cs
+|   |   |   |   |   |       +-- SearchAssets
+|   |   |   |   |   |           |-- SearchAssetsQuery.cs
+|   |   |   |   |   |           +-- SearchAssetsQueryHandler.cs
+|   |   |   |   |   +-- EngineModels
+|   |   |   |   |       |-- Commands
+|   |   |   |   |       |   |-- RegisterEngineModel
+|   |   |   |   |       |   |   |-- RegisterEngineModelCommand.cs
+|   |   |   |   |       |   |   |-- RegisterEngineModelCommandHandler.cs
+|   |   |   |   |       |   |   +-- RegisterEngineModelCommandValidator.cs
+|   |   |   |   |       |   |-- RenameEngineModel
+|   |   |   |   |       |   |   |-- RenameEngineModelCommand.cs
+|   |   |   |   |       |   |   |-- RenameEngineModelCommandHandler.cs
+|   |   |   |   |       |   |   +-- RenameEngineModelCommandValidator.cs
+|   |   |   |   |       |   +-- UpdateEngineModelSpecifications
+|   |   |   |   |       |       |-- Updateenginemodelspecificationscommand.cs
+|   |   |   |   |       |       |-- Updateenginemodelspecificationscommandhandler.cs
+|   |   |   |   |       |       +-- Updateenginemodelspecificationscommandvalidator.cs
+|   |   |   |   |       |-- Dtos
+|   |   |   |   |       |   +-- EngineModelDto.cs
+|   |   |   |   |       +-- Queries
+|   |   |   |   |           |-- GetEngineModelById
+|   |   |   |   |           |   |-- GetEngineModelByIdQuery.cs
+|   |   |   |   |           |   +-- GetEngineModelByIdQueryHandler.cs
+|   |   |   |   |           +-- SearchEngineModels
+|   |   |   |   |               |-- SearchEngineModelsQuery.cs
+|   |   |   |   |               +-- SearchEngineModelsQueryHandler.cs
+|   |   |   |   |-- Mappings
+|   |   |   |   |   +-- AssetMappingConfig.cs
+|   |   |   |   |-- Asset.Application.csproj
+|   |   |   |   |-- DependencyInjection.cs
+|   |   |   |   |-- DomainEventNotification.cs
+|   |   |   |   +-- MediatRDomainEventDispatcher.cs
+|   |   |   |-- Asset.Domain
+|   |   |   |   |-- Events
+|   |   |   |   |   |-- AssetActivated.cs
+|   |   |   |   |   |-- AssetCommissioned.cs
+|   |   |   |   |   |-- AssetDeactivated.cs
+|   |   |   |   |   |-- AssetDisposed.cs
+|   |   |   |   |   |-- AssetModelRegistered.cs
+|   |   |   |   |   |-- AssetReactivated.cs
+|   |   |   |   |   |-- AssetRegistered.cs
+|   |   |   |   |   |-- AssetRetired.cs
+|   |   |   |   |   |-- EngineModelAssignedToAssetModel.cs
+|   |   |   |   |   +-- EngineModelRegistered.cs
+|   |   |   |   |-- Asset.cs
+|   |   |   |   |-- Asset.Domain.csproj
+|   |   |   |   |-- AssetErrors.cs
+|   |   |   |   |-- AssetId.cs
+|   |   |   |   |-- AssetModel.cs
+|   |   |   |   |-- AssetModelErrors.cs
+|   |   |   |   |-- AssetModelId.cs
+|   |   |   |   |-- AssetStatus.cs
+|   |   |   |   |-- EngineModel.cs
+|   |   |   |   |-- EngineModelErrors.cs
+|   |   |   |   +-- EngineModelId.cs
+|   |   |   |-- Asset.Infrastructure
+|   |   |   |   |-- Migrations
+|   |   |   |   |   |-- 20260826113743_InitialAssetSchema.cs
+|   |   |   |   |   |-- 20260826113743_InitialAssetSchema.Designer.cs
+|   |   |   |   |   |-- 20260827080120_AddAssetAggregate.cs
+|   |   |   |   |   |-- 20260827080120_AddAssetAggregate.Designer.cs
+|   |   |   |   |   |-- 20260829073901_AddAssetCode.cs
+|   |   |   |   |   |-- 20260829073901_AddAssetCode.Designer.cs
+|   |   |   |   |   |-- 20260829082556_AddColorAndAssetFields.cs
+|   |   |   |   |   |-- 20260829082556_AddColorAndAssetFields.Designer.cs
+|   |   |   |   |   |-- 20260829102815_AddUnitOfMeasurementAndFixColorPermissions.cs
+|   |   |   |   |   |-- 20260829102815_AddUnitOfMeasurementAndFixColorPermissions.Designer.cs
+|   |   |   |   |   |-- 20260830052812_AddUnitCategoryAndFixUnitOfMeasurementCategoryReference.cs
+|   |   |   |   |   |-- 20260830052812_AddUnitCategoryAndFixUnitOfMeasurementCategoryReference.Designer.cs
+|   |   |   |   |   |-- 20260830172552_RemoveColorAndUnitTablesFromAssetModule.cs
+|   |   |   |   |   |-- 20260830172552_RemoveColorAndUnitTablesFromAssetModule.Designer.cs
+|   |   |   |   |   |-- 20260901072753_AddEngineModelTechnicalSpecifications.cs
+|   |   |   |   |   |-- 20260901072753_AddEngineModelTechnicalSpecifications.Designer.cs
+|   |   |   |   |   |-- 20260902042759_ReplaceAssetModelManufacturerWithCompanyId.cs
+|   |   |   |   |   |-- 20260902042759_ReplaceAssetModelManufacturerWithCompanyId.Designer.cs
+|   |   |   |   |   |-- 20260903170902_AddEngineModelFuelKind.cs
+|   |   |   |   |   |-- 20260903170902_AddEngineModelFuelKind.Designer.cs
+|   |   |   |   |   |-- 20260904073058_AddAssetModelDimensionsAndCapacity.cs
+|   |   |   |   |   |-- 20260904073058_AddAssetModelDimensionsAndCapacity.Designer.cs
+|   |   |   |   |   +-- AssetDbContextModelSnapshot.cs
+|   |   |   |   |-- Persistence
+|   |   |   |   |   |-- Configurations
+|   |   |   |   |   |   |-- AssetConfiguration.cs
+|   |   |   |   |   |   |-- AssetModelConfiguration.cs
+|   |   |   |   |   |   +-- EngineModelConfiguration.cs
+|   |   |   |   |   |-- AssetDbContext.cs
+|   |   |   |   |   |-- AssetModelRepository.cs
+|   |   |   |   |   |-- AssetRepository.cs
+|   |   |   |   |   +-- EngineModelRepository.cs
+|   |   |   |   |-- Asset.Infrastructure.csproj
+|   |   |   |   +-- DependencyInjection.cs
+|   |   |   +-- Asset.Presentation
+|   |   |       |-- Components
+|   |   |       |   |-- Pages
+|   |   |       |   |   |-- AssetDetails.razor
+|   |   |       |   |   |-- AssetModelCompatibility.razor
+|   |   |       |   |   |-- AssetModelsList.razor
+|   |   |       |   |   |-- AssetsList.razor
+|   |   |       |   |   |-- CreateAsset.razor
+|   |   |       |   |   |-- CreateAssetModel.razor
+|   |   |       |   |   |-- CreateEngineModel.razor
+|   |   |       |   |   |-- EditAssetModel.razor
+|   |   |       |   |   |-- EditEngineModel.razor
+|   |   |       |   |   +-- EngineModelsList.razor
+|   |   |       |   +-- _Imports.razor
+|   |   |       |-- Contracts
+|   |   |       |   |-- AssignCompatibleEngineModelRequest.cs
+|   |   |       |   |-- RegisterAssetModelRequest.cs
+|   |   |       |   |-- RegisterAssetRequest.cs
+|   |   |       |   |-- RegisterEngineModelRequest.cs
+|   |   |       |   |-- RenameAssetModelRequest.cs
+|   |   |       |   |-- UpdateAssetModelSpecificationsRequest.cs
+|   |   |       |   +-- UpdateEngineModelSpecificationsRequest.cs
+|   |   |       |-- Endpoints
+|   |   |       |   |-- AssetEndpoints.cs
+|   |   |       |   |-- AssetModelEndpoints.cs
+|   |   |       |   |-- EngineModelEndpoints.cs
+|   |   |       |   +-- ResultExtensions.cs
+|   |   |       +-- Asset.Presentation.csproj
+|   |   |-- AuditLog
+|   |   |   |-- AuditLog.Application
+|   |   |   |   |-- Abstractions
+|   |   |   |   |   |-- AuditEntrySearchFilter.cs
+|   |   |   |   |   |-- AuditLogPermissions.cs
+|   |   |   |   |   +-- IAuditEntryReadRepository.cs
+|   |   |   |   |-- Behaviors
+|   |   |   |   |   +-- ValidationBehavior.cs
+|   |   |   |   |-- Features
+|   |   |   |   |   +-- AuditEntries
+|   |   |   |   |       |-- Dtos
+|   |   |   |   |       |   |-- AuditEntryDetailDto.cs
+|   |   |   |   |       |   |-- AuditEntryDto.cs
+|   |   |   |   |       |   |-- AuditEntrySearchResponse.cs
+|   |   |   |   |       |   |-- AuditFieldChangeDto.cs
+|   |   |   |   |       |   +-- AuditLogFilterMetadataDto.cs
+|   |   |   |   |       +-- Queries
+|   |   |   |   |           |-- GetAuditEntryById
+|   |   |   |   |           |   |-- GetAuditEntryByIdQuery.cs
+|   |   |   |   |           |   +-- GetAuditEntryByIdQueryHandler.cs
+|   |   |   |   |           |-- GetAuditLogFilterMetadata
+|   |   |   |   |           |   |-- GetAuditLogFilterMetadataQuery.cs
+|   |   |   |   |           |   +-- GetAuditLogFilterMetadataQueryHandler.cs
+|   |   |   |   |           +-- SearchAuditEntries
+|   |   |   |   |               |-- SearchAuditEntriesQuery.cs
+|   |   |   |   |               |-- SearchAuditEntriesQueryHandler.cs
+|   |   |   |   |               +-- SearchAuditEntriesQueryValidator.cs
+|   |   |   |   |-- AuditLog.Application.csproj
+|   |   |   |   +-- DependencyInjection.cs
+|   |   |   |-- AuditLog.Infrastructure
+|   |   |   |   |-- Persistence
+|   |   |   |   |   |-- AuditEntryReadRepository.cs
+|   |   |   |   |   +-- AuditLogDbContext.cs
+|   |   |   |   |-- AuditLog.Infrastructure.csproj
+|   |   |   |   +-- DependencyInjection.cs
+|   |   |   +-- AuditLog.Presentation
+|   |   |       |-- Components
+|   |   |       |   |-- Pages
+|   |   |       |   |   +-- AuditLogList.razor
+|   |   |       |   +-- _Imports.razor
+|   |   |       |-- Endpoints
+|   |   |       |   |-- AuditLogEndpoints.cs
+|   |   |       |   +-- ResultExtensions.cs
+|   |   |       +-- AuditLog.Presentation.csproj
+|   |   |-- Configuration
+|   |   |   |-- Configuration.Application
+|   |   |   |   |-- Abstractions
+|   |   |   |   |   |-- IColorRepository.cs
+|   |   |   |   |   |-- ICompanyRepository.cs
+|   |   |   |   |   |-- IConfigurationUnitOfWork.cs
+|   |   |   |   |   |-- IDrivingLicenseTypeRepository.cs
+|   |   |   |   |   |-- IFuelTypeRepository.cs
+|   |   |   |   |   |-- IJobTitleRepository.cs
+|   |   |   |   |   +-- IUnitOfMeasurementRepository.cs
+|   |   |   |   |-- Behaviors
+|   |   |   |   |   +-- ValidationBehavior.cs
+|   |   |   |   |-- Features
+|   |   |   |   |   |-- Colors
+|   |   |   |   |   |   |-- Commands
+|   |   |   |   |   |   |   +-- RegisterColor
+|   |   |   |   |   |   |       |-- RegisterColorCommand.cs
+|   |   |   |   |   |   |       |-- RegisterColorCommandHandler.cs
+|   |   |   |   |   |   |       +-- RegisterColorCommandValidator.cs
+|   |   |   |   |   |   |-- Dtos
+|   |   |   |   |   |   |   +-- ColorDto.cs
+|   |   |   |   |   |   +-- Queries
+|   |   |   |   |   |       +-- GetColorsByHolding
+|   |   |   |   |   |           |-- GetColorsByHoldingQuery.cs
+|   |   |   |   |   |           +-- GetColorsByHoldingQueryHandler.cs
+|   |   |   |   |   |-- Companies
+|   |   |   |   |   |   |-- Commands
+|   |   |   |   |   |   |   +-- RegisterCompany
+|   |   |   |   |   |   |       |-- RegisterCompanyCommand.cs
+|   |   |   |   |   |   |       |-- RegisterCompanyCommandHandler.cs
+|   |   |   |   |   |   |       +-- RegisterCompanyCommandValidator.cs
+|   |   |   |   |   |   |-- Dtos
+|   |   |   |   |   |   |   +-- CompanyDto.cs
+|   |   |   |   |   |   +-- Queries
+|   |   |   |   |   |       +-- GetCompaniesByHolding
+|   |   |   |   |   |           |-- GetCompaniesByHoldingQuery.cs
+|   |   |   |   |   |           +-- GetCompaniesByHoldingQueryHandler.cs
+|   |   |   |   |   |-- DrivingLicenseTypes
+|   |   |   |   |   |   |-- Commands
+|   |   |   |   |   |   |   |-- DeleteDrivingLicenseType
+|   |   |   |   |   |   |   |   |-- DeleteDrivingLicenseTypeCommand.cs
+|   |   |   |   |   |   |   |   +-- DeleteDrivingLicenseTypeCommandHandler.cs
+|   |   |   |   |   |   |   |-- RegisterDrivingLicenseType
+|   |   |   |   |   |   |   |   |-- RegisterDrivingLicenseTypeCommand.cs
+|   |   |   |   |   |   |   |   |-- RegisterDrivingLicenseTypeCommandHandler.cs
+|   |   |   |   |   |   |   |   +-- RegisterDrivingLicenseTypeCommandValidator.cs
+|   |   |   |   |   |   |   +-- RenameDrivingLicenseType
+|   |   |   |   |   |   |       |-- RenameDrivingLicenseTypeCommand.cs
+|   |   |   |   |   |   |       |-- RenameDrivingLicenseTypeCommandHandler.cs
+|   |   |   |   |   |   |       +-- RenameDrivingLicenseTypeCommandValidator.cs
+|   |   |   |   |   |   |-- Dtos
+|   |   |   |   |   |   |   +-- DrivingLicenseTypeDto.cs
+|   |   |   |   |   |   |-- Mappings
+|   |   |   |   |   |   |   +-- DrivingLicenseTypeMappingConfig.cs
+|   |   |   |   |   |   +-- Queries
+|   |   |   |   |   |       |-- GetDrivingLicenseTypeById
+|   |   |   |   |   |       |   |-- GetDrivingLicenseTypeByIdQuery.cs
+|   |   |   |   |   |       |   +-- GetDrivingLicenseTypeByIdQueryHandler.cs
+|   |   |   |   |   |       +-- GetDrivingLicenseTypesByHolding
+|   |   |   |   |   |           |-- GetDrivingLicenseTypesByHoldingQuery.cs
+|   |   |   |   |   |           +-- GetDrivingLicenseTypesByHoldingQueryHandler.cs
+|   |   |   |   |   |-- FuelTypes
+|   |   |   |   |   |   |-- Commands
+|   |   |   |   |   |   |   +-- RegisterFuelType
+|   |   |   |   |   |   |       |-- RegisterFuelTypeCommand.cs
+|   |   |   |   |   |   |       |-- RegisterFuelTypeCommandHandler.cs
+|   |   |   |   |   |   |       +-- RegisterFuelTypeCommandValidator.cs
+|   |   |   |   |   |   |-- Dtos
+|   |   |   |   |   |   |   +-- FuelTypeDto.cs
+|   |   |   |   |   |   +-- Queries
+|   |   |   |   |   |       +-- GetFuelTypesByHolding
+|   |   |   |   |   |           |-- GetFuelTypesByHoldingQuery.cs
+|   |   |   |   |   |           +-- GetFuelTypesByHoldingQueryHandler.cs
+|   |   |   |   |   |-- JobTitles
+|   |   |   |   |   |   |-- Commands
+|   |   |   |   |   |   |   |-- DeleteJobTitle
+|   |   |   |   |   |   |   |   |-- DeleteJobTitleCommand.cs
+|   |   |   |   |   |   |   |   +-- DeleteJobTitleCommandHandler.cs
+|   |   |   |   |   |   |   |-- RegisterJobTitle
+|   |   |   |   |   |   |   |   |-- RegisterJobTitleCommand.cs
+|   |   |   |   |   |   |   |   |-- RegisterJobTitleCommandHandler.cs
+|   |   |   |   |   |   |   |   +-- RegisterJobTitleCommandValidator.cs
+|   |   |   |   |   |   |   +-- RenameJobTitle
+|   |   |   |   |   |   |       |-- RenameJobTitleCommand.cs
+|   |   |   |   |   |   |       |-- RenameJobTitleCommandHandler.cs
+|   |   |   |   |   |   |       +-- RenameJobTitleCommandValidator.cs
+|   |   |   |   |   |   |-- Dtos
+|   |   |   |   |   |   |   +-- JobTitleDto.cs
+|   |   |   |   |   |   |-- Mappings
+|   |   |   |   |   |   |   +-- JobTitleMappingConfig.cs
+|   |   |   |   |   |   +-- Queries
+|   |   |   |   |   |       |-- GetJobTitleById
+|   |   |   |   |   |       |   |-- GetJobTitleByIdQuery.cs
+|   |   |   |   |   |       |   +-- GetJobTitleByIdQueryHandler.cs
+|   |   |   |   |   |       +-- GetJobTitlesByHolding
+|   |   |   |   |   |           |-- GetJobTitlesByHoldingQuery.cs
+|   |   |   |   |   |           +-- GetJobTitlesByHoldingQueryHandler.cs
+|   |   |   |   |   +-- UnitsOfMeasurement
+|   |   |   |   |       |-- Commands
+|   |   |   |   |       |   +-- RegisterUnitOfMeasurement
+|   |   |   |   |       |       |-- RegisterUnitOfMeasurementCommand.cs
+|   |   |   |   |       |       |-- RegisterUnitOfMeasurementCommandHandler.cs
+|   |   |   |   |       |       +-- RegisterUnitOfMeasurementCommandValidator.cs
+|   |   |   |   |       |-- Dtos
+|   |   |   |   |       |   +-- UnitOfMeasurementDto.cs
+|   |   |   |   |       +-- Queries
+|   |   |   |   |           +-- GetUnitsOfMeasurementByHolding
+|   |   |   |   |               |-- GetUnitsOfMeasurementByHoldingQuery.cs
+|   |   |   |   |               +-- GetUnitsOfMeasurementByHoldingQueryHandler.cs
+|   |   |   |   |-- Mappings
+|   |   |   |   |   +-- ConfigurationMappingConfig.cs
+|   |   |   |   |-- Configuration.Application.csproj
+|   |   |   |   |-- DependencyInjection.cs
+|   |   |   |   |-- DomainEventNotification.cs
+|   |   |   |   +-- MediatRDomainEventDispatcher.cs
+|   |   |   |-- Configuration.Domain
+|   |   |   |   |-- Events
+|   |   |   |   |   |-- ColorRegistered.cs
+|   |   |   |   |   |-- CompanyRegistered.cs
+|   |   |   |   |   |-- DrivingLicenseTypeRegistered.cs
+|   |   |   |   |   |-- DrivingLicenseTypeRenamed.cs
+|   |   |   |   |   |-- FuelTypeRegistered.cs
+|   |   |   |   |   |-- JobTitleRegistered.cs
+|   |   |   |   |   |-- JobTitleRenamed.cs
+|   |   |   |   |   +-- UnitOfMeasurementRegistered.cs
+|   |   |   |   |-- Color.cs
+|   |   |   |   |-- ColorErrors.cs
+|   |   |   |   |-- ColorId.cs
+|   |   |   |   |-- Company.cs
+|   |   |   |   |-- CompanyErrors.cs
+|   |   |   |   |-- CompanyId.cs
+|   |   |   |   |-- Configuration.Domain.csproj
+|   |   |   |   |-- DrivingLicenseType.cs
+|   |   |   |   |-- DrivingLicenseTypeErrors.cs
+|   |   |   |   |-- DrivingLicenseTypeId.cs
+|   |   |   |   |-- FuelType.cs
+|   |   |   |   |-- FuelTypeErrors.cs
+|   |   |   |   |-- FuelTypeId.cs
+|   |   |   |   |-- JobTitle.cs
+|   |   |   |   |-- JobTitleErrors.cs
+|   |   |   |   |-- JobTitleId.cs
+|   |   |   |   |-- UnitOfMeasurement.cs
+|   |   |   |   |-- UnitOfMeasurementErrors.cs
+|   |   |   |   +-- UnitOfMeasurementId.cs
+|   |   |   |-- Configuration.Infrastructure
+|   |   |   |   |-- Migrations
+|   |   |   |   |   |-- 20260830175133_InitialConfigurationSchema.cs
+|   |   |   |   |   |-- 20260830175133_InitialConfigurationSchema.Designer.cs
+|   |   |   |   |   |-- 20260901071405_RemoveUnitCategoryAndAddKindToUnitOfMeasurement.cs
+|   |   |   |   |   |-- 20260901071405_RemoveUnitCategoryAndAddKindToUnitOfMeasurement.Designer.cs
+|   |   |   |   |   |-- 20260902042734_AddCompanyAggregate.cs
+|   |   |   |   |   |-- 20260902042734_AddCompanyAggregate.Designer.cs
+|   |   |   |   |   |-- 20260902115654_AddFuelType.cs
+|   |   |   |   |   |-- 20260902115654_AddFuelType.Designer.cs
+|   |   |   |   |   |-- 20260912213139_AddDrivingLicenseType.cs
+|   |   |   |   |   |-- 20260912213139_AddDrivingLicenseType.Designer.cs
+|   |   |   |   |   |-- 20260912213453_AddJobTitle.cs
+|   |   |   |   |   |-- 20260912213453_AddJobTitle.Designer.cs
+|   |   |   |   |   +-- ConfigurationDbContextModelSnapshot.cs
+|   |   |   |   |-- Persistence
+|   |   |   |   |   |-- Configurations
+|   |   |   |   |   |   |-- ColorConfiguration.cs
+|   |   |   |   |   |   |-- CompanyConfiguration.cs
+|   |   |   |   |   |   |-- DrivingLicenseTypeConfiguration.cs
+|   |   |   |   |   |   |-- FuelTypeConfiguration.cs
+|   |   |   |   |   |   |-- JobTitleConfiguration.cs
+|   |   |   |   |   |   +-- UnitOfMeasurementConfiguration.cs
+|   |   |   |   |   |-- ColorRepository.cs
+|   |   |   |   |   |-- CompanyRepository.cs
+|   |   |   |   |   |-- ConfigurationDbContext.cs
+|   |   |   |   |   |-- DrivingLicenseTypeRepository.cs
+|   |   |   |   |   |-- FuelTypeRepository.cs
+|   |   |   |   |   |-- JobTitleRepository.cs
+|   |   |   |   |   +-- UnitOfMeasurementRepository.cs
+|   |   |   |   |-- Configuration.Infrastructure.csproj
+|   |   |   |   |-- ConfigurationLookupService.cs
+|   |   |   |   |-- DependencyInjection.cs
+|   |   |   |   +-- UnitOfMeasurementLookupService.cs
+|   |   |   +-- Configuration.Presentation
+|   |   |       |-- Components
+|   |   |       |   |-- Pages
+|   |   |       |   |   |-- ColorsList.razor
+|   |   |       |   |   |-- CompaniesList.razor
+|   |   |       |   |   |-- CreateColor.razor
+|   |   |       |   |   |-- CreateCompany.razor
+|   |   |       |   |   |-- CreateDrivingLicenseType.razor
+|   |   |       |   |   |-- CreateFuelType.razor
+|   |   |       |   |   |-- CreateJobTitle.razor
+|   |   |       |   |   |-- CreateUnitOfMeasurement.razor
+|   |   |       |   |   |-- DrivingLicenseTypesList.razor
+|   |   |       |   |   |-- EditDrivingLicenseType.razor
+|   |   |       |   |   |-- EditJobTitle.razor
+|   |   |       |   |   |-- FuelTypesList.razor
+|   |   |       |   |   |-- JobTitlesList.razor
+|   |   |       |   |   +-- UnitsOfMeasurementList.razor
+|   |   |       |   +-- _Imports.razor
+|   |   |       |-- Contracts
+|   |   |       |   |-- RegisterColorRequest.cs
+|   |   |       |   |-- RegisterCompanyRequest.cs
+|   |   |       |   |-- RegisterDrivingLicenseTypeRequest.cs
+|   |   |       |   |-- RegisterFuelTypeRequest.cs
+|   |   |       |   |-- RegisterJobTitleRequest.cs
+|   |   |       |   +-- RegisterUnitOfMeasurementRequest.cs
+|   |   |       |-- Endpoints
+|   |   |       |   |-- ColorEndpoints.cs
+|   |   |       |   |-- CompanyEndpoints.cs
+|   |   |       |   |-- DrivingLicenseTypeEndpoints.cs
+|   |   |       |   |-- FuelTypeEndpoints.cs
+|   |   |       |   |-- JobTitleEndpoints.cs
+|   |   |       |   |-- ResultExtensions.cs
+|   |   |       |   +-- UnitOfMeasurementEndpoints.cs
+|   |   |       +-- Configuration.Presentation.csproj
+|   |   |-- Identity
+|   |   |   |-- Identity.Application
+|   |   |   |   +-- Identity.Application.csproj
+|   |   |   |-- Identity.Domain
+|   |   |   |   |-- ApplicationRole.cs
+|   |   |   |   |-- ApplicationUser.cs
+|   |   |   |   |-- ICurrentAccessTokenAccessor.cs
+|   |   |   |   |-- Identity.Domain.csproj
+|   |   |   |   |-- PasswordPolicy.cs
+|   |   |   |   |-- StandardRoles.cs
+|   |   |   |   +-- UsernamePolicy.cs
+|   |   |   |-- Identity.Infrastructure
+|   |   |   |   |-- Http
+|   |   |   |   |   |-- BearerTokenHandler.cs
+|   |   |   |   |   +-- CurrentAccessTokenAccessor.cs
+|   |   |   |   |-- Options
+|   |   |   |   |   +-- OpenIddictClientOptions.cs
+|   |   |   |   |-- Persistence
+|   |   |   |   |   |-- Migrations
+|   |   |   |   |   |   |-- 20260817105949_InitialIdentitySchema.cs
+|   |   |   |   |   |   |-- 20260817105949_InitialIdentitySchema.Designer.cs
+|   |   |   |   |   |   |-- 20260818041151_AddOpenIddictStores.cs
+|   |   |   |   |   |   |-- 20260818041151_AddOpenIddictStores.Designer.cs
+|   |   |   |   |   |   |-- 20260910082607_AddThemePreferenceToApplicationUser.cs
+|   |   |   |   |   |   |-- 20260910082607_AddThemePreferenceToApplicationUser.Designer.cs
+|   |   |   |   |   |   +-- IdentityDbContextModelSnapshot.cs
+|   |   |   |   |   |-- IdentityDataSeeder.cs
+|   |   |   |   |   +-- IdentityDbContext.cs
+|   |   |   |   |-- Validation
+|   |   |   |   |   |-- AllowedCharactersPasswordValidator.cs
+|   |   |   |   |   +-- UsernameLengthValidator.cs
+|   |   |   |   |-- DependencyInjection.cs
+|   |   |   |   |-- Identity.Infrastructure.csproj
+|   |   |   |   +-- UserThemePreferenceRepository.cs
+|   |   |   +-- Identity.Presentation
+|   |   |       |-- Components
+|   |   |       |   |-- Layout
+|   |   |       |   |   +-- AuthLayout.razor
+|   |   |       |   |-- Pages
+|   |   |       |   |   +-- Login.razor
+|   |   |       |   +-- _Imports.razor
+|   |   |       |-- Contracts
+|   |   |       |   |-- CreateUserRequest.cs
+|   |   |       |   +-- UserDto.cs
+|   |   |       |-- Endpoints
+|   |   |       |   |-- ConnectEndpoints.cs
+|   |   |       |   |-- DevTokenEndpoints.cs
+|   |   |       |   |-- SigninCallbackEndpoints.cs
+|   |   |       |   +-- UserEndpoints.cs
+|   |   |       +-- Identity.Presentation.csproj
+|   |   |-- Organization
+|   |   |   |-- Organization.Application
+|   |   |   |   |-- Abstractions
+|   |   |   |   |   |-- IHoldingRepository.cs
+|   |   |   |   |   |-- IOrganizationRepository.cs
+|   |   |   |   |   |-- IOrganizationUnitOfWork.cs
+|   |   |   |   |   +-- IProjectRepository.cs
+|   |   |   |   |-- Behaviors
+|   |   |   |   |   +-- ValidationBehavior.cs
+|   |   |   |   |-- Features
+|   |   |   |   |   |-- Holdings
+|   |   |   |   |   |   |-- Commands
+|   |   |   |   |   |   |   |-- RegisterHolding
+|   |   |   |   |   |   |   |   |-- RegisterHoldingCommand.cs
+|   |   |   |   |   |   |   |   |-- RegisterHoldingCommandHandler.cs
+|   |   |   |   |   |   |   |   +-- RegisterHoldingCommandValidator.cs
+|   |   |   |   |   |   |   +-- RenameHolding
+|   |   |   |   |   |   |       |-- RenameHoldingCommand.cs
+|   |   |   |   |   |   |       |-- RenameHoldingCommandHandler.cs
+|   |   |   |   |   |   |       +-- RenameHoldingCommandValidator.cs
+|   |   |   |   |   |   |-- Dtos
+|   |   |   |   |   |   |   +-- HoldingDto.cs
+|   |   |   |   |   |   +-- Queries
+|   |   |   |   |   |       |-- GetHoldingById
+|   |   |   |   |   |       |   |-- GetHoldingByIdQuery.cs
+|   |   |   |   |   |       |   |-- GetHoldingByIdQueryHandler.cs
+|   |   |   |   |   |       |   +-- GetHoldingByIdQueryValidator.cs
+|   |   |   |   |   |       +-- SearchHoldings
+|   |   |   |   |   |           |-- SearchHoldingsQuery.cs
+|   |   |   |   |   |           |-- SearchHoldingsQueryHandler.cs
+|   |   |   |   |   |           +-- SearchHoldingsQueryValidator.cs
+|   |   |   |   |   |-- Organizations
+|   |   |   |   |   |   |-- Commands
+|   |   |   |   |   |   |   |-- AssignOrganizationToHolding
+|   |   |   |   |   |   |   |   |-- AssignOrganizationToHoldingCommand.cs
+|   |   |   |   |   |   |   |   |-- AssignOrganizationToHoldingCommandHandler.cs
+|   |   |   |   |   |   |   |   +-- AssignOrganizationToHoldingCommandValidator.cs
+|   |   |   |   |   |   |   |-- ReactivateOrganization
+|   |   |   |   |   |   |   |   |-- ReactivateOrganizationCommand.cs
+|   |   |   |   |   |   |   |   |-- ReactivateOrganizationCommandHandler.cs
+|   |   |   |   |   |   |   |   +-- ReactivateOrganizationCommandValidator.cs
+|   |   |   |   |   |   |   |-- RegisterOrganization
+|   |   |   |   |   |   |   |   |-- RegisterOrganizationCommand.cs
+|   |   |   |   |   |   |   |   |-- RegisterOrganizationCommandHandler.cs
+|   |   |   |   |   |   |   |   +-- RegisterOrganizationCommandValidator.cs
+|   |   |   |   |   |   |   |-- RenameOrganization
+|   |   |   |   |   |   |   |   |-- RenameOrganizationCommand.cs
+|   |   |   |   |   |   |   |   |-- RenameOrganizationCommandHandler.cs
+|   |   |   |   |   |   |   |   +-- RenameOrganizationCommandValidator.cs
+|   |   |   |   |   |   |   +-- SuspendOrganization
+|   |   |   |   |   |   |       |-- SuspendOrganizationCommand.cs
+|   |   |   |   |   |   |       |-- SuspendOrganizationCommandHandler.cs
+|   |   |   |   |   |   |       +-- SuspendOrganizationCommandValidator.cs
+|   |   |   |   |   |   |-- Dtos
+|   |   |   |   |   |   |   +-- OrganizationDto.cs
+|   |   |   |   |   |   +-- Queries
+|   |   |   |   |   |       |-- GetOrganizationById
+|   |   |   |   |   |       |   |-- GetOrganizationByIdQuery.cs
+|   |   |   |   |   |       |   |-- GetOrganizationByIdQueryHandler.cs
+|   |   |   |   |   |       |   +-- GetOrganizationByIdQueryValidator.cs
+|   |   |   |   |   |       +-- SearchOrganizations
+|   |   |   |   |   |           |-- SearchOrganizationsQuery.cs
+|   |   |   |   |   |           |-- SearchOrganizationsQueryHandler.cs
+|   |   |   |   |   |           +-- SearchOrganizationsQueryValidator.cs
+|   |   |   |   |   +-- Projects
+|   |   |   |   |       |-- Commands
+|   |   |   |   |       |   |-- RegisterProject
+|   |   |   |   |       |   |   |-- RegisterProjectCommand.cs
+|   |   |   |   |       |   |   |-- RegisterProjectCommandHandler.cs
+|   |   |   |   |       |   |   +-- RegisterProjectCommandValidator.cs
+|   |   |   |   |       |   +-- RenameProject
+|   |   |   |   |       |       |-- RenameProjectCommand.cs
+|   |   |   |   |       |       |-- RenameProjectCommandHandler.cs
+|   |   |   |   |       |       +-- RenameProjectCommandValidator.cs
+|   |   |   |   |       |-- Dtos
+|   |   |   |   |       |   +-- ProjectDto.cs
+|   |   |   |   |       +-- Queries
+|   |   |   |   |           |-- GetProjectById
+|   |   |   |   |           |   |-- GetProjectByIdQuery.cs
+|   |   |   |   |           |   |-- GetProjectByIdQueryHandler.cs
+|   |   |   |   |           |   +-- GetProjectByIdQueryValidator.cs
+|   |   |   |   |           +-- SearchProjects
+|   |   |   |   |               |-- SearchProjectsQuery.cs
+|   |   |   |   |               |-- SearchProjectsQueryHandler.cs
+|   |   |   |   |               +-- SearchProjectsQueryValidator.cs
+|   |   |   |   |-- Mappings
+|   |   |   |   |   +-- OrganizationMappingConfig.cs
+|   |   |   |   |-- DependencyInjection.cs
+|   |   |   |   |-- DomainEventNotification.cs
+|   |   |   |   |-- MediatRDomainEventDispatcher.cs
+|   |   |   |   +-- Organization.Application.csproj
+|   |   |   |-- Organization.Domain
+|   |   |   |   |-- Events
+|   |   |   |   |   |-- HoldingRegistered.cs
+|   |   |   |   |   |-- HoldingRenamed.cs
+|   |   |   |   |   |-- OrganizationAssignedToHolding.cs
+|   |   |   |   |   |-- OrganizationReactivated.cs
+|   |   |   |   |   |-- OrganizationRegistered.cs
+|   |   |   |   |   |-- OrganizationRenamed.cs
+|   |   |   |   |   |-- OrganizationSuspended.cs
+|   |   |   |   |   |-- ProjectRegistered.cs
+|   |   |   |   |   +-- ProjectRenamed.cs
+|   |   |   |   |-- Holding.cs
+|   |   |   |   |-- HoldingErrors.cs
+|   |   |   |   |-- HoldingId.cs
+|   |   |   |   |-- Organization.cs
+|   |   |   |   |-- Organization.Domain.csproj
+|   |   |   |   |-- OrganizationErrors.cs
+|   |   |   |   |-- OrganizationId.cs
+|   |   |   |   |-- Project.cs
+|   |   |   |   |-- ProjectErrors.cs
+|   |   |   |   +-- ProjectId.cs
+|   |   |   |-- Organization.Infrastructure
+|   |   |   |   |-- Persistence
+|   |   |   |   |   |-- Configurations
+|   |   |   |   |   |   |-- HoldingConfiguration.cs
+|   |   |   |   |   |   |-- OrganizationConfiguration.cs
+|   |   |   |   |   |   +-- ProjectConfiguration.cs
+|   |   |   |   |   |-- Migrations
+|   |   |   |   |   |   |-- 20260820125650_AddHoldingAndProject.cs
+|   |   |   |   |   |   |-- 20260820125650_AddHoldingAndProject.Designer.cs
+|   |   |   |   |   |   |-- 20260824060503_AddOrganizationSuspension.cs
+|   |   |   |   |   |   |-- 20260824060503_AddOrganizationSuspension.Designer.cs
+|   |   |   |   |   |   +-- OrganizationDbContextModelSnapshot.cs
+|   |   |   |   |   |-- HoldingRepository.cs
+|   |   |   |   |   |-- OrganizationDbContext.cs
+|   |   |   |   |   |-- OrganizationRepository.cs
+|   |   |   |   |   +-- ProjectRepository.cs
+|   |   |   |   |-- DependencyInjection.cs
+|   |   |   |   |-- HoldingLookupService.cs
+|   |   |   |   |-- Organization.Infrastructure.csproj
+|   |   |   |   |-- OrganizationLookupService.cs
+|   |   |   |   +-- ProjectLookupService.cs
+|   |   |   +-- Organization.Presentation
+|   |   |       |-- Components
+|   |   |       |   |-- Pages
+|   |   |       |   |   |-- CreateHolding.razor
+|   |   |       |   |   |-- CreateOrganization.razor
+|   |   |       |   |   |-- CreateProject.razor
+|   |   |       |   |   |-- EditHolding.razor
+|   |   |       |   |   |-- EditOrganization.razor
+|   |   |       |   |   |-- EditProject.razor
+|   |   |       |   |   |-- HoldingsList.razor
+|   |   |       |   |   |-- OrganizationsList.razor
+|   |   |       |   |   +-- ProjectsList.razor
+|   |   |       |   +-- _Imports.razor
+|   |   |       |-- Contracts
+|   |   |       |   |-- AssignOrganizationToHoldingRequest.cs
+|   |   |       |   |-- RegisterHoldingRequest.cs
+|   |   |       |   |-- RegisterOrganizationRequest.cs
+|   |   |       |   |-- RegisterProjectRequest.cs
+|   |   |       |   |-- RenameHoldingRequest.cs
+|   |   |       |   |-- RenameOrganizationRequest.cs
+|   |   |       |   +-- RenameProjectRequest.cs
+|   |   |       |-- Endpoints
+|   |   |       |   |-- HoldingEndpoints.cs
+|   |   |       |   |-- OrganizationEndpoints.cs
+|   |   |       |   |-- ProjectEndpoints.cs
+|   |   |       |   +-- ResultExtensions.cs
+|   |   |       +-- Organization.Presentation.csproj
+|   |   |-- Personnel
+|   |   |   |-- Personnel.Application
+|   |   |   |   |-- Abstractions
+|   |   |   |   |   |-- IPersonnelRepository.cs
+|   |   |   |   |   +-- IPersonnelUnitOfWork.cs
+|   |   |   |   |-- Behaviors
+|   |   |   |   |   +-- ValidationBehavior.cs
+|   |   |   |   |-- Features
+|   |   |   |   |   |-- Commands
+|   |   |   |   |   |   |-- DeletePersonnel
+|   |   |   |   |   |   |   |-- DeletePersonnelCommand.cs
+|   |   |   |   |   |   |   +-- DeletePersonnelCommandHandler.cs
+|   |   |   |   |   |   |-- RegisterPersonnel
+|   |   |   |   |   |   |   |-- RegisterPersonnelCommand.cs
+|   |   |   |   |   |   |   |-- RegisterPersonnelCommandHandler.cs
+|   |   |   |   |   |   |   +-- RegisterPersonnelCommandValidator.cs
+|   |   |   |   |   |   +-- UpdatePersonnel
+|   |   |   |   |   |       |-- UpdatePersonnelCommand.cs
+|   |   |   |   |   |       |-- UpdatePersonnelCommandHandler.cs
+|   |   |   |   |   |       +-- UpdatePersonnelCommandValidator.cs
+|   |   |   |   |   |-- Dtos
+|   |   |   |   |   |   +-- PersonnelDto.cs
+|   |   |   |   |   |-- Mappings
+|   |   |   |   |   |   +-- PersonnelMappingConfig.cs
+|   |   |   |   |   +-- Queries
+|   |   |   |   |       |-- GetPersonnelById
+|   |   |   |   |       |   |-- GetPersonnelByIdQuery.cs
+|   |   |   |   |       |   +-- GetPersonnelByIdQueryHandler.cs
+|   |   |   |   |       +-- GetPersonnelByOrganization
+|   |   |   |   |           |-- GetPersonnelByOrganizationQuery.cs
+|   |   |   |   |           +-- GetPersonnelByOrganizationQueryHandler.cs
+|   |   |   |   |-- DependencyInjection.cs
+|   |   |   |   |-- DomainEventNotification.cs
+|   |   |   |   |-- MediatRDomainEventDispatcher.cs
+|   |   |   |   +-- Personnel.Application.csproj
+|   |   |   |-- Personnel.Domain
+|   |   |   |   |-- Events
+|   |   |   |   |   |-- PersonnelRegistered.cs
+|   |   |   |   |   +-- PersonnelUpdated.cs
+|   |   |   |   |-- Personnel.cs
+|   |   |   |   |-- Personnel.Domain.csproj
+|   |   |   |   |-- PersonnelDrivingLicense.cs
+|   |   |   |   |-- PersonnelDrivingLicenseId.cs
+|   |   |   |   |-- PersonnelErrors.cs
+|   |   |   |   +-- PersonnelId.cs
+|   |   |   |-- Personnel.Infrastructure
+|   |   |   |   |-- Migrations
+|   |   |   |   |   |-- 20260912214127_InitialPersonnelSchema.cs
+|   |   |   |   |   |-- 20260912214127_InitialPersonnelSchema.Designer.cs
+|   |   |   |   |   +-- PersonnelDbContextModelSnapshot.cs
+|   |   |   |   |-- Persistence
+|   |   |   |   |   |-- Configurations
+|   |   |   |   |   |   +-- PersonnelConfiguration.cs
+|   |   |   |   |   |-- PersonnelDbContext.cs
+|   |   |   |   |   +-- PersonnelRepository.cs
+|   |   |   |   |-- DependencyInjection.cs
+|   |   |   |   |-- Personnel.Infrastructure.csproj
+|   |   |   |   +-- PersonnelUsageLookupService.cs
+|   |   |   +-- Personnel.Presentation
+|   |   |       |-- Components
+|   |   |       |   |-- Pages
+|   |   |       |   |   |-- CreatePersonnel.razor
+|   |   |       |   |   |-- EditPersonnel.razor
+|   |   |       |   |   +-- PersonnelList.razor
+|   |   |       |   +-- _Imports.razor
+|   |   |       |-- Contracts
+|   |   |       |   |-- RegisterPersonnelRequest.cs
+|   |   |       |   +-- UpdatePersonnelRequest.cs
+|   |   |       |-- Endpoints
+|   |   |       |   |-- PersonnelEndpoints.cs
+|   |   |       |   +-- ResultExtensions.cs
+|   |   |       +-- Personnel.Presentation.csproj
+|   |   +-- WorkCalendar
+|   |       |-- WorkCalendar.Application
+|   |       |   |-- Abstractions
+|   |       |   |   |-- IWorkCalendarRepository.cs
+|   |       |   |   +-- IWorkCalendarUnitOfWork.cs
+|   |       |   |-- Behaviors
+|   |       |   |   +-- ValidationBehavior.cs
+|   |       |   |-- Features
+|   |       |   |   +-- WorkCalendars
+|   |       |   |       |-- Commands
+|   |       |   |       |   |-- AddDayOverride
+|   |       |   |       |   |   |-- AddDayOverrideCommand.cs
+|   |       |   |       |   |   |-- AddDayOverrideCommandHandler.cs
+|   |       |   |       |   |   +-- AddDayOverrideCommandValidator.cs
+|   |       |   |       |   |-- AddWorkPattern
+|   |       |   |       |   |   |-- AddWorkPatternCommand.cs
+|   |       |   |       |   |   |-- AddWorkPatternCommandHandler.cs
+|   |       |   |       |   |   +-- AddWorkPatternCommandValidator.cs
+|   |       |   |       |   |-- CancelDayOverride
+|   |       |   |       |   |   |-- CancelDayOverrideCommand.cs
+|   |       |   |       |   |   |-- CancelDayOverrideCommandHandler.cs
+|   |       |   |       |   |   +-- CancelDayOverrideCommandValidator.cs
+|   |       |   |       |   |-- RegisterWorkCalendar
+|   |       |   |       |   |   |-- RegisterWorkCalendarCommand.cs
+|   |       |   |       |   |   |-- RegisterWorkCalendarCommandHandler.cs
+|   |       |   |       |   |   +-- RegisterWorkCalendarCommandValidator.cs
+|   |       |   |       |   |-- RemoveWorkPattern
+|   |       |   |       |   |   |-- RemoveWorkPatternCommand.cs
+|   |       |   |       |   |   |-- RemoveWorkPatternCommandHandler.cs
+|   |       |   |       |   |   +-- RemoveWorkPatternCommandValidator.cs
+|   |       |   |       |   |-- RetireWorkPattern
+|   |       |   |       |   |   |-- RetireWorkPatternCommand.cs
+|   |       |   |       |   |   +-- RetireWorkPatternCommandHandler.cs
+|   |       |   |       |   +-- SupersedeWorkPattern
+|   |       |   |       |       |-- SupersedeWorkPatternCommand.cs
+|   |       |   |       |       |-- SupersedeWorkPatternCommandHandler.cs
+|   |       |   |       |       +-- SupersedeWorkPatternCommandValidator.cs
+|   |       |   |       |-- Dtos
+|   |       |   |       |   |-- BreakDto.cs
+|   |       |   |       |   |-- DayOverrideDto.cs
+|   |       |   |       |   |-- DayResolutionDto.cs
+|   |       |   |       |   |-- DayScheduleDto.cs
+|   |       |   |       |   |-- ShiftDto.cs
+|   |       |   |       |   |-- WorkCalendarDto.cs
+|   |       |   |       |   |-- WorkCalendarHistoryDto.cs
+|   |       |   |       |   |-- WorkingCapacityDto.cs
+|   |       |   |       |   +-- WorkPatternDto.cs
+|   |       |   |       +-- Queries
+|   |       |   |           |-- GetActiveWorkPatternForDate
+|   |       |   |           |   |-- GetActiveWorkPatternForDateQuery.cs
+|   |       |   |           |   +-- GetActiveWorkPatternForDateQueryHandler.cs
+|   |       |   |           |-- GetDayOverride
+|   |       |   |           |   |-- GetDayOverrideQuery.cs
+|   |       |   |           |   +-- GetDayOverrideQueryHandler.cs
+|   |       |   |           |-- GetWorkCalendarById
+|   |       |   |           |   |-- GetWorkCalendarByIdQuery.cs
+|   |       |   |           |   +-- GetWorkCalendarByIdQueryHandler.cs
+|   |       |   |           |-- GetWorkCalendarByProjectId
+|   |       |   |           |   |-- GetWorkCalendarByProjectIdQuery.cs
+|   |       |   |           |   +-- GetWorkCalendarByProjectIdQueryHandler.cs
+|   |       |   |           |-- GetWorkCalendarHistory
+|   |       |   |           |   |-- GetWorkCalendarHistoryQuery.cs
+|   |       |   |           |   +-- GetWorkCalendarHistoryQueryHandler.cs
+|   |       |   |           |-- GetWorkingCapacityForRange
+|   |       |   |           |   |-- GetWorkingCapacityForRangeQuery.cs
+|   |       |   |           |   +-- GetWorkingCapacityForRangeQueryHandler.cs
+|   |       |   |           |-- GetWorkPattern
+|   |       |   |           |   |-- GetWorkPatternQuery.cs
+|   |       |   |           |   +-- GetWorkPatternQueryHandler.cs
+|   |       |   |           +-- ResolveDaySchedule
+|   |       |   |               |-- ResolveDayScheduleQuery.cs
+|   |       |   |               +-- ResolveDayScheduleQueryHandler.cs
+|   |       |   |-- Mappings
+|   |       |   |   +-- WorkCalendarMappingConfig.cs
+|   |       |   |-- DependencyInjection.cs
+|   |       |   |-- DomainEventNotification.cs
+|   |       |   |-- MediatRDomainEventDispatcher.cs
+|   |       |   |-- WorkCalendar.Application.csproj
+|   |       |   +-- WorkCalendarApplicationService.cs
+|   |       |-- WorkCalendar.Domain
+|   |       |   |-- Events
+|   |       |   |   |-- DayOverrideAdded.cs
+|   |       |   |   |-- DayOverrideCancelled.cs
+|   |       |   |   |-- WorkCalendarRegistered.cs
+|   |       |   |   |-- WorkPatternAdded.cs
+|   |       |   |   |-- WorkPatternRetired.cs
+|   |       |   |   +-- WorkPatternSuperseded.cs
+|   |       |   |-- Break.cs
+|   |       |   |-- DayOverride.cs
+|   |       |   |-- DayOverrideId.cs
+|   |       |   |-- DayOverrideType.cs
+|   |       |   |-- DayResolution.cs
+|   |       |   |-- DaySchedule.cs
+|   |       |   |-- Shift.cs
+|   |       |   |-- WorkCalendar.cs
+|   |       |   |-- WorkCalendar.Domain.csproj
+|   |       |   |-- WorkCalendarCapacityService.cs
+|   |       |   |-- WorkCalendarErrors.cs
+|   |       |   |-- WorkCalendarId.cs
+|   |       |   |-- WorkCalendarResolutionService.cs
+|   |       |   |-- WorkCalendarValidationService.cs
+|   |       |   |-- WorkPattern.cs
+|   |       |   |-- WorkPatternId.cs
+|   |       |   +-- WorkPatternStatus.cs
+|   |       |-- WorkCalendar.Infrastructure
+|   |       |   |-- Migrations
+|   |       |   |   |-- 20260916054625_InitialCreate.cs
+|   |       |   |   |-- 20260916054625_InitialCreate.Designer.cs
+|   |       |   |   |-- 20260918062601_RemoveWorkCalendarStatus.cs
+|   |       |   |   |-- 20260918062601_RemoveWorkCalendarStatus.Designer.cs
+|   |       |   |   +-- WorkCalendarDbContextModelSnapshot.cs
+|   |       |   |-- Persistence
+|   |       |   |   |-- Configurations
+|   |       |   |   |   +-- WorkCalendarConfiguration.cs
+|   |       |   |   |-- WorkCalendarDbContext.cs
+|   |       |   |   +-- WorkCalendarRepository.cs
+|   |       |   |-- DependencyInjection.cs
+|   |       |   +-- WorkCalendar.Infrastructure.csproj
+|   |       +-- WorkCalendar.Presentation
+|   |           |-- Components
+|   |           |   |-- Pages
+|   |           |   |   |-- WorkCalendarDetail.razor
+|   |           |   |   |-- WorkCalendarPage.razor
+|   |           |   |   +-- WorkCalendarsList.razor
+|   |           |   |-- Shared
+|   |           |   |   |-- DayOverrideDialog.razor
+|   |           |   |   |-- DayScheduleEditor.razor
+|   |           |   |   |-- WorkCalendarModels.cs
+|   |           |   |   +-- WorkPatternDialog.razor
+|   |           |   +-- _Imports.razor
+|   |           |-- Contracts
+|   |           |   +-- WorkCalendarContracts.cs
+|   |           |-- Endpoints
+|   |           |   |-- ResultExtensions.cs
+|   |           |   +-- WorkCalendarEndpoints.cs
+|   |           +-- WorkCalendar.Presentation.csproj
+|   +-- Shared
+|-- tests
+|   |-- Modules
+|   |   +-- Configuration
+|   |       |-- Configuration.Application.Tests
+|   |       |   |-- Behaviors
+|   |       |   |   +-- ValidationBehaviorTests.cs
+|   |       |   |-- Features
+|   |       |   |   +-- Colors
+|   |       |   |       |-- Commands
+|   |       |   |       |   +-- RegisterColor
+|   |       |   |       |       |-- RegisterColorCommandHandlerTests.cs
+|   |       |   |       |       +-- RegisterColorCommandValidatorTests.cs
+|   |       |   |       +-- Queries
+|   |       |   |           +-- GetColorsByHolding
+|   |       |   |               +-- GetColorsByHoldingQueryHandlerTests.cs
+|   |       |   +-- Configuration.Application.Tests.csproj
+|   |       |-- Configuration.Domain.Tests
+|   |       |   |-- ColorTests.cs
+|   |       |   +-- Configuration.Domain.Tests.csproj
+|   |       |-- Configuration.Infrastructure.Tests
+|   |       |   |-- Persistence
+|   |       |   |   +-- ColorRepositoryTests.cs
+|   |       |   +-- Configuration.Infrastructure.Tests.csproj
+|   |       +-- Configuration.Presentation.Tests
+|   |           |-- Endpoints
+|   |           |   +-- ColorEndpointsTests.cs
+|   |           |-- Configuration.Presentation.Tests.csproj
+|   |           +-- ConfigurationApiFactory.cs
+|   |-- Shared
+|   |   +-- MachineryManagerEnterprise.Testing.Common
+|   |       |-- FakeCurrentUserService.cs
+|   |       |-- MachineryManagerEnterprise.Testing.Common.csproj
+|   |       |-- SqlServerContainerFixture.cs
+|   |       |-- SystemDateTimeProvider.cs
+|   |       +-- TestAuthHandler.cs
+|   +-- Directory.Build.props
+|-- .editorconfig
+|-- claims.json
+|-- Directory.Build.props
+|-- Directory.Packages.props
+|-- global.json
++-- MachineryManagerEnterprise.slnx
+
+================================================================================
+
+# SECTION 2: SOURCE FILE CONTENTS
+================================================================================
+

@@ -91,7 +91,7 @@ public sealed class UpdateAssetModelSpecificationsCommandHandler
             ("Width", request.WidthUnitOfMeasurementId, PhysicalQuantityKind.Dimension),
             ("Height", request.HeightUnitOfMeasurementId, PhysicalQuantityKind.Dimension),
             ("Weight", request.WeightUnitOfMeasurementId, PhysicalQuantityKind.Weight),
-            ("Working capacity (volume)", request.WorkingCapacityVolumeUnitOfMeasurementId, PhysicalQuantityKind.Dimension),
+            ("Working capacity (volume)", request.WorkingCapacityVolumeUnitOfMeasurementId, PhysicalQuantityKind.Volume),
             ("Working capacity (weight)", request.WorkingCapacityWeightUnitOfMeasurementId, PhysicalQuantityKind.Weight),
         };
 

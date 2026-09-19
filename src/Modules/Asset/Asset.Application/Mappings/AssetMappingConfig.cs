@@ -19,7 +19,12 @@ public sealed class AssetMappingConfig : IRegister
         config.NewConfig<global::Asset.Domain.Asset, AssetDto>()
             .Map(dest => dest.Id, src => src.Id.Value)
             .Map(dest => dest.AssetModelId, src => src.AssetModelId.Value)
-            .Map(dest => dest.Status, src => src.Status.ToString());
+            .Map(dest => dest.Status, src => src.Status.ToString())
+            .Map(dest => dest.PrimaryFuelKind, src => src.PrimaryFuelKind == null ? null : src.PrimaryFuelKind.ToString())
+            .Map(dest => dest.SecondaryFuelKind, src => src.SecondaryFuelKind == null ? null : src.SecondaryFuelKind.ToString())
+            .Map(dest => dest.MeterReadingUnit, src => src.MeterReadingUnit == null ? null : src.MeterReadingUnit.ToString())
+            .Map(dest => dest.PrimaryFuelUnit, src => src.PrimaryFuelUnit == null ? null : src.PrimaryFuelUnit.ToString())
+            .Map(dest => dest.SecondaryFuelUnit, src => src.SecondaryFuelUnit == null ? null : src.SecondaryFuelUnit.ToString());
 
         config.NewConfig<global::Asset.Domain.AssetModel, AssetModelDto>()
             .Map(dest => dest.Id, src => src.Id.Value)

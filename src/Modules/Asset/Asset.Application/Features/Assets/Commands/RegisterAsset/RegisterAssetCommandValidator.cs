@@ -35,5 +35,29 @@ public sealed class RegisterAssetCommandValidator : AbstractValidator<RegisterAs
 
         RuleFor(x => x.LicensePlate)
             .MaximumLength(global::Asset.Domain.Asset.MaxLicensePlateLength);
+
+        RuleFor(x => x.PrimaryFuelKind)
+            .IsInEnum()
+            .When(x => x.PrimaryFuelKind.HasValue);
+
+        RuleFor(x => x.SecondaryFuelKind)
+            .IsInEnum()
+            .When(x => x.SecondaryFuelKind.HasValue);
+
+        // Units are fixed enums (chat, 2026-09-19) — reject any value
+        // outside the defined members (e.g. a raw out-of-range number).
+        RuleFor(x => x.MeterReadingUnit)
+            .IsInEnum()
+            .When(x => x.MeterReadingUnit.HasValue);
+
+        RuleFor(x => x.PrimaryFuelUnit)
+            .IsInEnum()
+            .When(x => x.PrimaryFuelUnit.HasValue);
+
+        RuleFor(x => x.SecondaryFuelUnit)
+            .IsInEnum()
+            .When(x => x.SecondaryFuelUnit.HasValue);
+        
+        RuleFor(x => x.ProjectId).NotEmpty();
     }
 }

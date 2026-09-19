@@ -7,10 +7,11 @@ namespace MachineryManagerEnterprise.Asset.Application.Features.Assets.Commands.
 
 /// <summary>
 /// Handles <see cref="RegisterAssetCommand"/> by validating the
-/// referenced Organization, Asset Model, and Color exist and are
-/// consistent, ensuring the identification code is unique within the
-/// Organization, invoking domain registration, persisting the
-/// aggregate, and committing the unit of work.
+/// referenced Organization, Asset Model, Color, and Project exist and
+/// are consistent, ensuring the identification
+/// code is unique within the Organization, invoking domain
+/// registration, persisting the aggregate, and committing the unit of
+/// work.
 /// </summary>
 public sealed class RegisterAssetCommandHandler
     : IRequestHandler<RegisterAssetCommand, Result<Guid>>
@@ -20,6 +21,7 @@ public sealed class RegisterAssetCommandHandler
     private readonly IAssetRepository _assetRepository;
     private readonly IAssetModelRepository _assetModelRepository;
     private readonly IConfigurationLookupService _configurationLookupService;
+    private readonly IProjectLookupService _projectLookupService;
     private readonly IAssetUnitOfWork _unitOfWork;
     private readonly IDateTimeProvider _dateTimeProvider;
     private readonly ICurrentUserService _currentUserService;
@@ -30,6 +32,7 @@ public sealed class RegisterAssetCommandHandler
     /// <param name="assetRepository">The Asset repository.</param>
     /// <param name="assetModelRepository">The Asset Model repository, used to verify the referenced model exists and belongs to the correct Holding.</param>
     /// <param name="configurationLookupService">Cross-module, read-only lookup into the Configuration module, used to verify the referenced Color exists within the correct Holding.</param>
+    /// <param name="projectLookupService">Cross-module, read-only lookup into the Organization module, used to verify the referenced Project exists and belongs to the target Organization (chat, 2026-09-14).</param>
     /// <param name="unitOfWork">The Asset module's Unit of Work, used to commit the new aggregate.</param>
     /// <param name="dateTimeProvider">Provides the current UTC time for the raised domain event.</param>
     /// <param name="currentUserService">Provides the authenticated user context.</param>
@@ -39,6 +42,7 @@ public sealed class RegisterAssetCommandHandler
         IAssetRepository assetRepository,
         IAssetModelRepository assetModelRepository,
         IConfigurationLookupService configurationLookupService,
+        IProjectLookupService projectLookupService,
         IAssetUnitOfWork unitOfWork,
         IDateTimeProvider dateTimeProvider,
         ICurrentUserService currentUserService,
@@ -48,6 +52,7 @@ public sealed class RegisterAssetCommandHandler
         _assetRepository = assetRepository;
         _assetModelRepository = assetModelRepository;
         _configurationLookupService = configurationLookupService;
+        _projectLookupService = projectLookupService;
         _unitOfWork = unitOfWork;
         _dateTimeProvider = dateTimeProvider;
         _currentUserService = currentUserService;
@@ -56,7 +61,7 @@ public sealed class RegisterAssetCommandHandler
     }
 
     /// <summary>Executes the registration use case.</summary>
-    /// <param name="request">The registration command, containing the target Organization, Asset Model, Color, identification code, and optional identity fields.</param>
+    /// <param name="request">The registration command, containing the target Organization, Asset Model, Color, identification code, and optional identity/fuel/project fields.</param>
     /// <param name="cancellationToken">Token to cancel the asynchronous operation.</param>
     /// <returns>
     /// A <see cref="Result{Guid}"/> containing the new Asset's identifier on success; otherwise a
@@ -74,7 +79,7 @@ public sealed class RegisterAssetCommandHandler
         var isAuthorized = await _permissionEvaluator.HasPermissionAsync(
             userId,
             RequiredPermission,
-            new ResourceScope(holdingId, request.OrganizationId, null),
+            new ResourceScope(holdingId, request.OrganizationId, request.ProjectId),
             cancellationToken);
 
         if (!isAuthorized)
@@ -117,6 +122,23 @@ public sealed class RegisterAssetCommandHandler
             return Result.Failure<Guid>(global::Asset.Domain.AssetErrors.ColorNotFoundInHolding(request.ColorId));
         }
 
+        // Project assignment (chat, 2026-09-14) — optional. When
+        // provided, it must both exist and belong to the SAME
+        // Organization this Asset is being registered under (a Project
+        // belongs to exactly one Organization, unlike Color/AssetModel
+        // which are Holding-scoped).
+        var projectExists = await _projectLookupService.ExistsAsync(request.ProjectId, cancellationToken);
+        if (!projectExists)
+        {
+            return Result.Failure<Guid>(global::Asset.Domain.AssetErrors.ProjectNotFound(request.ProjectId));
+        }
+
+        var projectOrganizationId = await _projectLookupService.GetOrganizationIdAsync(request.ProjectId, cancellationToken);
+        if (projectOrganizationId != request.OrganizationId)
+        {
+            return Result.Failure<Guid>(global::Asset.Domain.AssetErrors.ProjectOrganizationMismatch());
+        }
+
         var codeAlreadyUsed = await _assetRepository.ExistsWithCodeAsync(
             request.OrganizationId,
             request.Code,
@@ -133,13 +155,19 @@ public sealed class RegisterAssetCommandHandler
             request.Name,
             assetModelId,
             request.ColorId,
+            request.ProjectId,
             request.SerialNumber,
             request.ChassisNumber,
             request.BodyNumber,
             request.Vin,
             request.LicensePlate,
             request.ManufactureYear,
-            _dateTimeProvider);
+            _dateTimeProvider,
+            request.MeterReadingUnit,
+            request.PrimaryFuelKind,
+            request.PrimaryFuelUnit,
+            request.SecondaryFuelKind,
+            request.SecondaryFuelUnit);
 
         if (result.IsFailure)
         {

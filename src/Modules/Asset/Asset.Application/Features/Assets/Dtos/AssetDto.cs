@@ -14,4 +14,10 @@ public sealed record AssetDto(
     string? Vin,
     string? LicensePlate,
     int? ManufactureYear,
-    string Status);
+    string Status,
+    Guid ProjectId,
+    string? MeterReadingUnit,
+    string? PrimaryFuelKind,
+    string? PrimaryFuelUnit,
+    string? SecondaryFuelKind,
+    string? SecondaryFuelUnit);

@@ -20,6 +20,11 @@ public static class UnitOfMeasurementErrors
         "UnitOfMeasurement.InvalidKind",
         "The provided physical quantity kind is not valid.");
 
+/// <summary>Creates an error indicating the unit of measurement does not exist (chat, 2026-09-19).</summary>
+    public static Error NotFound(Guid unitOfMeasurementId) => Error.NotFound(
+        "UnitOfMeasurement.NotFound",
+        $"Unit of measurement with id {unitOfMeasurementId} was not found.");
+
 /// <summary>Executes the NotAuthorized operation.</summary>
     public static Error NotAuthorized() => Error.Failure(
         "UnitOfMeasurement.NotAuthorized",

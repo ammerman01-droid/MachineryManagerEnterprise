@@ -1,6 +1,8 @@
+using MachineryManagerEnterprise.SharedKernel;
+
 namespace MachineryManagerEnterprise.Asset.Presentation.Contracts;
 
-/// <summary>Request body for registering a new Asset.</summary>
+/// <summary>HTTP request body for registering a new Asset.</summary>
 public sealed record RegisterAssetRequest(
     Guid OrganizationId,
     string Code,
@@ -12,4 +14,10 @@ public sealed record RegisterAssetRequest(
     string? BodyNumber,
     string? Vin,
     string? LicensePlate,
-    int? ManufactureYear);
+    int? ManufactureYear,
+    Guid ProjectId,
+    MeterReadingUnit? MeterReadingUnit,
+    FuelKind? PrimaryFuelKind,
+    FuelUnit? PrimaryFuelUnit,
+    FuelKind? SecondaryFuelKind,
+    FuelUnit? SecondaryFuelUnit);

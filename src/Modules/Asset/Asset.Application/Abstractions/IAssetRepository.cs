@@ -25,4 +25,16 @@ public interface IAssetRepository : IRepository<global::Asset.Domain.Asset, glob
         Guid organizationId,
         string code,
         CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Determines whether an Asset OTHER than
+    /// <paramref name="excludedAssetId"/> in the given Organization
+    /// already uses the given identification code (chat, 2026-09-19 —
+    /// used when an existing Asset's code is edited).
+    /// </summary>
+    Task<bool> ExistsOtherWithCodeAsync(
+        Guid organizationId,
+        string code,
+        global::Asset.Domain.AssetId excludedAssetId,
+        CancellationToken cancellationToken = default);
 }

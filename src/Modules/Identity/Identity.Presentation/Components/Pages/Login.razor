@@ -9,7 +9,7 @@
 <PageTitle>ورود به سامانه</PageTitle>
 
 <div class="login-card">
-    <h1 class="login-title">ورود به سامانه</h1>
+    <div class="login-title" role="heading" aria-level="1">ورود به سامانه</div>
     <p class="login-subtitle">برای ادامه، وارد حساب کاربری خود شوید</p>
 
     @if (errorMessage is not null)
@@ -22,7 +22,7 @@
 
         <div class="login-field">
             <label for="username">نام کاربری</label>
-            <InputText id="username" class="login-input" @bind-Value="Input.UserName" autocomplete="username" placeholder="نام کاربری خود را وارد کنید" />
+            <InputText id="username" autofocus="true" class="login-input" @bind-Value="Input.UserName" autocomplete="username" placeholder="نام کاربری خود را وارد کنید" />
             <ValidationMessage For="() => Input.UserName" class="login-validation" />
         </div>
 

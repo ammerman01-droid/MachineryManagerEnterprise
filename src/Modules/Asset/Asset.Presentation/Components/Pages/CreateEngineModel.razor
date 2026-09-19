@@ -173,7 +173,7 @@ else
                 var units = JsonSerializer.Deserialize<List<UnitOfMeasurementItem>>(
                     content, new JsonSerializerOptions { PropertyNameCaseInsensitive = true }) ?? [];
 
-                volumeUnits = units.Where(u => u.Kind == PhysicalQuantityKind.Dimension).ToList();
+                volumeUnits = units.Where(u => u.Kind == PhysicalQuantityKind.Volume).ToList();
                 powerUnits = units.Where(u => u.Kind == PhysicalQuantityKind.Force).ToList();
                 weightUnits = units.Where(u => u.Kind == PhysicalQuantityKind.Weight).ToList();
             }
