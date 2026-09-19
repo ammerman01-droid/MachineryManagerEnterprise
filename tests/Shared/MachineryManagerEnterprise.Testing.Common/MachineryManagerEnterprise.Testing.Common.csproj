@@ -1,0 +1,30 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <RootNamespace>MachineryManagerEnterprise.Testing.Common</RootNamespace>
+    <IsTestProject>false</IsTestProject>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- Gives access to Microsoft.AspNetCore.Authentication.*,
+         Microsoft.AspNetCore.Http, Microsoft.Extensions.Hosting, etc.
+         without pinning each one individually — this project isn't a
+         Microsoft.NET.Sdk.Web project (it's a plain library), so it
+         doesn't get the ASP.NET Core shared framework for free. -->
+    <FrameworkReference Include="Microsoft.AspNetCore.App" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Testcontainers.MsSql" />
+    <PackageReference Include="Azure.Core" /> <!-- Explicit ref: see note in Directory.Packages.props -->
+    <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" />
+    <PackageReference Include="Microsoft.AspNetCore.TestHost" />
+    <PackageReference Include="xunit" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\src\BuildingBlocks\MachineryManagerEnterprise.SharedKernel.Abstractions\MachineryManagerEnterprise.SharedKernel.Abstractions.csproj" />
+    <ProjectReference Include="..\..\..\src\BuildingBlocks\MachineryManagerEnterprise.SharedKernel.Infrastructure\MachineryManagerEnterprise.SharedKernel.Infrastructure.csproj" />
+  </ItemGroup>
+
+</Project>

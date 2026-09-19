@@ -1,0 +1,37 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <ItemGroup>
+    <!-- Needed for AuthenticationHandler/TestServer types used by the
+         module's test host wiring (ConfigurationApiFactory) — see the
+         same note in Testing.Common's .csproj. -->
+    <FrameworkReference Include="Microsoft.AspNetCore.App" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.NET.Test.Sdk" />
+    <PackageReference Include="xunit" />
+    <PackageReference Include="xunit.runner.visualstudio">
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+      <PrivateAssets>all</PrivateAssets>
+    </PackageReference>
+    <PackageReference Include="FluentAssertions" />
+    <PackageReference Include="NSubstitute" />
+    <PackageReference Include="Castle.Core" /> <!-- Explicit ref: see note in Directory.Packages.props -->
+    <PackageReference Include="Microsoft.AspNetCore.TestHost" />
+    <PackageReference Include="Testcontainers.MsSql" />
+    <PackageReference Include="Azure.Core" /> <!-- Explicit ref: see note in Directory.Packages.props -->
+    <!-- Only for the OpenIddictValidationAspNetCoreDefaults.AuthenticationScheme
+         constant, so the fake auth handler registers under the exact same
+         scheme name ColorEndpoints.cs requires — no real OpenIddict
+         server/validation is configured in this test host. -->
+    <PackageReference Include="OpenIddict.Validation.AspNetCore" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\..\src\Modules\Configuration\Configuration.Presentation\Configuration.Presentation.csproj" />
+    <ProjectReference Include="..\..\..\..\src\Modules\Configuration\Configuration.Infrastructure\Configuration.Infrastructure.csproj" />
+    <ProjectReference Include="..\..\..\..\src\BuildingBlocks\MachineryManagerEnterprise.SharedKernel.Infrastructure\MachineryManagerEnterprise.SharedKernel.Infrastructure.csproj" />
+    <ProjectReference Include="..\..\..\Shared\MachineryManagerEnterprise.Testing.Common\MachineryManagerEnterprise.Testing.Common.csproj" />
+  </ItemGroup>
+
+</Project>

@@ -1,0 +1,70 @@
+<Project>
+
+  <!--
+    Chains to the repository-root Directory.Build.props so every test
+    project inherits the same TargetFramework / Nullable / analyzer
+    settings as production code. MSBuild only auto-imports the NEAREST
+    Directory.Build.props it finds walking up from a project — without
+    this explicit Import, projects under /tests/ would silently lose
+    every setting defined at the repo root.
+  -->
+  <Import Project="$([MSBuild]::GetPathOfFileAbove('Directory.Build.props', '$(MSBuildThisFileDirectory)..\'))" />
+
+  <PropertyGroup>
+    <IsPackable>false</IsPackable>
+
+    <!--
+      Test code doesn't carry XML doc comments the way production code
+      does. The root sets GenerateDocumentationFile + TreatWarningsAsErrors,
+      which would otherwise fail the build on every undocumented [Fact].
+      Applies to Testing.Common too (it's still not a shipped package).
+    -->
+    <GenerateDocumentationFile>false</GenerateDocumentationFile>
+    <NoWarn>$(NoWarn);CS1591</NoWarn>
+
+    <!--
+      Without this, some NuGet-resolved dependencies (observed here with
+      Castle.Core via NSubstitute and Azure.Core via Testcontainers,
+      both promoted to top-level references by CentralPackageTransitivePinningEnabled)
+      are NOT copied into bin/<config>/<tfm>/ even though they're present
+      in the NuGet global-packages cache and restore succeeds. dotnet test
+      then fails at test-HOST-launch time — not build time — with
+      "assembly specified in the application dependencies manifest was
+      not found", because the isolated testhost process only looks in the
+      project's own output folder. Forcing every resolved assembly
+      (including transitive ones) to be copied avoids that class of
+      failure entirely, and is the standard fix for this symptom (chat,
+      2026-09-13).
+    -->
+    <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
+
+    <!--
+      CopyLocalLockFileAssemblies alone didn't fix the Castle.Core/
+      Azure.Core "not found at testhost launch" symptom (chat,
+      2026-09-13) — the repo-wide CentralPackageTransitivePinningEnabled
+      (set in the root Directory.Packages.props) appears to be the actual
+      cause: it "pins" transitive packages in a way that, for these two
+      specific packages on this SDK, doesn't end up copied to output even
+      with the flag above. Turning it off for /tests/ only lets NuGet
+      resolve transitive dependencies with its normal (non-pinned)
+      behavior instead. Production code under /src/ is untouched — this
+      property is scoped to this Directory.Build.props, which only
+      test projects import.
+    -->
+    <CentralPackageTransitivePinningEnabled>false</CentralPackageTransitivePinningEnabled>
+  </PropertyGroup>
+
+  <!--
+    Deliberately NOT adding xunit/FluentAssertions/NSubstitute here:
+    MachineryManagerEnterprise.Testing.Common lives under this same
+    /tests/ tree but is a plain support library with no [Fact]s of its
+    own, and Directory.Build.props content is merged in before a
+    project's own PropertyGroups are evaluated — so a per-project
+    "opt out" flag set inside that .csproj can't suppress an ItemGroup
+    declared here. Simplest correct fix: each actual test project adds
+    its own <PackageReference>s (xunit, xunit.runner.visualstudio,
+    FluentAssertions, NSubstitute as needed) — see any *.Tests.csproj
+    under this folder for the standard block to copy.
+  -->
+
+</Project>
