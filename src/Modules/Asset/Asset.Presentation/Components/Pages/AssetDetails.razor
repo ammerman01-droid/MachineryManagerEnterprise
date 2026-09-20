@@ -69,7 +69,7 @@ else if (asset is not null)
                 <MudField Label="واحد شمارش سوخت دوم" Variant="Variant.Outlined">@UnitDisplayNames.GetFuelUnitName(asset.SecondaryFuelUnit)</MudField>
             </MudItem>
             <MudItem xs="12" md="6">
-                <MudField Label="وضعیت" Variant="Variant.Outlined">@TranslateStatus(asset.Status)</MudField>
+                <MudField Label="وضعیت" Variant="Variant.Outlined">@AssetStatusDisplay.GetName(asset.Status)</MudField>
             </MudItem>
         </MudGrid>
 
@@ -81,38 +81,13 @@ else if (asset is not null)
                 ویرایش
             </MudButton>
 
-            @if (asset.Status == "Registered")
-            {
-                <MudButton Variant="Variant.Filled" Color="Color.Secondary" OnClick="@(() => TransitionAsync("commission"))">
-                    راه‌اندازی
-                </MudButton>
-            }
+            <MudText Typo="Typo.body2" Class="align-self-center mx-2">تغییر وضعیت به:</MudText>
 
-            @if (asset.Status is "Commissioned" or "Inactive")
+            @foreach (var status in AssetStatusDisplay.Values.Where(s => s != asset.Status))
             {
-                <MudButton Variant="Variant.Filled" Color="Color.Success" OnClick="@(() => TransitionAsync("activate"))">
-                    فعال‌سازی
-                </MudButton>
-            }
-
-            @if (asset.Status == "Operational")
-            {
-                <MudButton Variant="Variant.Outlined" Color="Color.Warning" OnClick="@(() => TransitionAsync("deactivate"))">
-                    غیرفعال‌سازی موقت
-                </MudButton>
-            }
-
-            @if (asset.Status is "Operational" or "Inactive")
-            {
-                <MudButton Variant="Variant.Outlined" Color="Color.Error" OnClick="@(() => TransitionAsync("retire"))">
-                    بازنشسته‌سازی
-                </MudButton>
-            }
-
-            @if (asset.Status == "Retired")
-            {
-                <MudButton Variant="Variant.Filled" Color="Color.Error" OnClick="@(() => TransitionAsync("dispose"))">
-                    اسقاط
+                <MudButton Variant="Variant.Outlined" Color="@GetStatusColor(status)" Disabled="isChangingStatus"
+                           OnClick="@(() => ChangeStatusAsync(status))">
+                    @AssetStatusDisplay.GetName(status)
                 </MudButton>
             }
 
@@ -178,6 +153,7 @@ else if (asset is not null)
 
     private AssetDetail? asset;
     private bool isLoading = true;
+    private bool isChangingStatus;
     private string? errorMessage;
 
     private Dictionary<Guid, string> assetModelNames = [];
@@ -197,15 +173,13 @@ else if (asset is not null)
         _ => kind
     };
 
-    private static string TranslateStatus(string status) => status switch
+    private static Color GetStatusColor(string status) => status switch
     {
-        "Registered" => "ثبت‌شده",
-        "Commissioned" => "راه‌اندازی‌شده",
-        "Operational" => "در حال بهره‌برداری",
-        "Inactive" => "غیرفعال",
-        "Retired" => "بازنشسته",
-        "Disposed" => "اسقاط‌شده",
-        _ => status
+        "Active" => Color.Success,
+        "Ready" => Color.Info,
+        "OutOfService" => Color.Warning,
+        "OutOfFleet" => Color.Error,
+        _ => Color.Default
     };
 
     protected override async Task OnInitializedAsync()
@@ -334,14 +308,16 @@ else if (asset is not null)
         }
     }
 
-    private async Task TransitionAsync(string action)
+    /// <summary>Moves the Asset to the given status (any status can be changed to any other, chat, 2026-09-20).</summary>
+    private async Task ChangeStatusAsync(string status)
     {
         errorMessage = null;
+        isChangingStatus = true;
 
         try
         {
             var client = HttpClientFactory.CreateClient("InternalApi");
-            var response = await client.PostAsync($"/api/v1/assets/{AssetId}/{action}", null);
+            var response = await client.PutAsJsonAsync($"/api/v1/assets/{AssetId}/status", new { Status = status });
             var content = await response.Content.ReadAsStringAsync();
 
             if (response.IsSuccessStatusCode)

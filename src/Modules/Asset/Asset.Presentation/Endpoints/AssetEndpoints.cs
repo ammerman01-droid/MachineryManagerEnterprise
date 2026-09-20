@@ -1,9 +1,5 @@
-using MachineryManagerEnterprise.Asset.Application.Features.Assets.Commands.ActivateAsset;
-using MachineryManagerEnterprise.Asset.Application.Features.Assets.Commands.CommissionAsset;
-using MachineryManagerEnterprise.Asset.Application.Features.Assets.Commands.DeactivateAsset;
-using MachineryManagerEnterprise.Asset.Application.Features.Assets.Commands.DisposeAsset;
+using MachineryManagerEnterprise.Asset.Application.Features.Assets.Commands.ChangeAssetStatus;
 using MachineryManagerEnterprise.Asset.Application.Features.Assets.Commands.RegisterAsset;
-using MachineryManagerEnterprise.Asset.Application.Features.Assets.Commands.RetireAsset;
 using MachineryManagerEnterprise.Asset.Application.Features.Assets.Queries.GetAssetAuthorizedScope;
 using MachineryManagerEnterprise.Asset.Application.Features.Assets.Queries.GetAssetById;
 using MachineryManagerEnterprise.Asset.Application.Features.Assets.Queries.SearchAssets;
@@ -49,25 +45,10 @@ public static class AssetEndpoints
             .WithName("SearchAssets")
             .WithSummary("Searches Assets within an Organization, with optional text filtering and pagination.");
 
-        group.MapPost("/{assetId:guid}/commission", CommissionAssetAsync)
-            .WithName("CommissionAsset")
-            .WithSummary("Completes commissioning of an Asset (Registered → Commissioned).");
+        group.MapPut("/{assetId:guid}/status", ChangeAssetStatusAsync)
+            .WithName("ChangeAssetStatus")
+            .WithSummary("Moves an Asset to any other status: Active, Ready, OutOfService, or OutOfFleet.");
 
-        group.MapPost("/{assetId:guid}/activate", ActivateAssetAsync)
-            .WithName("ActivateAsset")
-            .WithSummary("Places an Asset into operation (Commissioned or Inactive → Operational).");
-
-        group.MapPost("/{assetId:guid}/deactivate", DeactivateAssetAsync)
-            .WithName("DeactivateAsset")
-            .WithSummary("Temporarily takes an Asset out of use (Operational → Inactive).");
-
-        group.MapPost("/{assetId:guid}/retire", RetireAssetAsync)
-            .WithName("RetireAsset")
-            .WithSummary("Permanently withdraws an Asset from use (Operational or Inactive → Retired).");
-
-        group.MapPost("/{assetId:guid}/dispose", DisposeAssetAsync)
-            .WithName("DisposeAsset")
-            .WithSummary("Marks a Retired Asset as physically disposed of (final state).");
         
         group.MapPut("/{assetId:guid}", UpdateAssetAsync)
     .WithName("UpdateAsset")
@@ -151,65 +132,23 @@ public static class AssetEndpoints
             : result.ToProblemResult(httpContext);
     }
 
-    private static async Task<IResult> CommissionAssetAsync(
+    private static async Task<IResult> ChangeAssetStatusAsync(
         Guid assetId,
+        ChangeAssetStatusRequest request,
         ISender sender,
         HttpContext httpContext,
         CancellationToken cancellationToken)
     {
-        var result = await sender.Send(new CommissionAssetCommand(assetId), cancellationToken);
+        // The status is accepted by name (as the API returns it), not by its numeric value.
+        if (!Enum.TryParse<global::Asset.Domain.AssetStatus>(request.Status, ignoreCase: true, out var newStatus)
+            || !Enum.IsDefined(newStatus))
+        {
+            return global::MachineryManagerEnterprise.SharedKernel.Result
+                .Failure(global::Asset.Domain.AssetErrors.InvalidStatus(request.Status))
+                .ToProblemResult(httpContext);
+        }
 
-        return result.IsSuccess
-            ? Results.NoContent()
-            : result.ToProblemResult(httpContext);
-    }
-
-    private static async Task<IResult> ActivateAssetAsync(
-        Guid assetId,
-        ISender sender,
-        HttpContext httpContext,
-        CancellationToken cancellationToken)
-    {
-        var result = await sender.Send(new ActivateAssetCommand(assetId), cancellationToken);
-
-        return result.IsSuccess
-            ? Results.NoContent()
-            : result.ToProblemResult(httpContext);
-    }
-
-    private static async Task<IResult> DeactivateAssetAsync(
-        Guid assetId,
-        ISender sender,
-        HttpContext httpContext,
-        CancellationToken cancellationToken)
-    {
-        var result = await sender.Send(new DeactivateAssetCommand(assetId), cancellationToken);
-
-        return result.IsSuccess
-            ? Results.NoContent()
-            : result.ToProblemResult(httpContext);
-    }
-
-    private static async Task<IResult> RetireAssetAsync(
-        Guid assetId,
-        ISender sender,
-        HttpContext httpContext,
-        CancellationToken cancellationToken)
-    {
-        var result = await sender.Send(new RetireAssetCommand(assetId), cancellationToken);
-
-        return result.IsSuccess
-            ? Results.NoContent()
-            : result.ToProblemResult(httpContext);
-    }
-
-    private static async Task<IResult> DisposeAssetAsync(
-        Guid assetId,
-        ISender sender,
-        HttpContext httpContext,
-        CancellationToken cancellationToken)
-    {
-        var result = await sender.Send(new DisposeAssetCommand(assetId), cancellationToken);
+        var result = await sender.Send(new ChangeAssetStatusCommand(assetId, newStatus), cancellationToken);
 
         return result.IsSuccess
             ? Results.NoContent()

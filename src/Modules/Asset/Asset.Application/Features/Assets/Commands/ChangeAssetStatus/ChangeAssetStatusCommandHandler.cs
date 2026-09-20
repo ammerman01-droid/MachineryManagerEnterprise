@@ -3,15 +3,15 @@ using MachineryManagerEnterprise.SharedKernel;
 using MachineryManagerEnterprise.SharedKernel.Abstractions;
 using MediatR;
 
-namespace MachineryManagerEnterprise.Asset.Application.Features.Assets.Commands.CommissionAsset;
+namespace MachineryManagerEnterprise.Asset.Application.Features.Assets.Commands.ChangeAssetStatus;
 
 /// <summary>
-/// Handles <see cref="CommissionAssetCommand"/> by loading the
-/// aggregate, invoking the domain commissioning behavior, and
-/// committing the unit of work.
+/// Handles <see cref="ChangeAssetStatusCommand"/> by loading the aggregate,
+/// invoking the domain status-change behavior, and committing the unit of
+/// work.
 /// </summary>
-public sealed class CommissionAssetCommandHandler
-    : IRequestHandler<CommissionAssetCommand, Result>
+public sealed class ChangeAssetStatusCommandHandler
+    : IRequestHandler<ChangeAssetStatusCommand, Result>
 {
     private const string RequiredPermission = "Asset.Edit";
 
@@ -22,8 +22,8 @@ public sealed class CommissionAssetCommandHandler
     private readonly IPermissionEvaluator _permissionEvaluator;
     private readonly IOrganizationLookupService _organizationLookupService;
 
-    /// <summary>Initializes a new instance of the <see cref="CommissionAssetCommandHandler"/> class.</summary>
-    public CommissionAssetCommandHandler(
+    /// <summary>Initializes a new instance of the <see cref="ChangeAssetStatusCommandHandler"/> class.</summary>
+    public ChangeAssetStatusCommandHandler(
         IAssetRepository assetRepository,
         IAssetUnitOfWork unitOfWork,
         IDateTimeProvider dateTimeProvider,
@@ -39,8 +39,8 @@ public sealed class CommissionAssetCommandHandler
         _organizationLookupService = organizationLookupService;
     }
 
-    /// <summary>Executes the commissioning use case.</summary>
-    public async Task<Result> Handle(CommissionAssetCommand request, CancellationToken cancellationToken)
+    /// <summary>Executes the change-status use case.</summary>
+    public async Task<Result> Handle(ChangeAssetStatusCommand request, CancellationToken cancellationToken)
     {
         var id = global::Asset.Domain.AssetId.From(request.AssetId);
         var asset = await _assetRepository.GetByIdAsync(id, cancellationToken);
@@ -69,7 +69,7 @@ public sealed class CommissionAssetCommandHandler
             return Result.Failure(global::Asset.Domain.AssetErrors.NotAuthorized());
         }
 
-        var result = asset.Commission(_dateTimeProvider);
+        var result = asset.ChangeStatus(request.NewStatus, _dateTimeProvider);
 
         if (result.IsFailure)
         {

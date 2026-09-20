@@ -185,14 +185,13 @@ public sealed class Asset : AggregateRoot<AssetId>
         PrimaryFuelUnit = primaryFuelUnit;
         SecondaryFuelKind = secondaryFuelKind;
         SecondaryFuelUnit = secondaryFuelUnit;
-        Status = AssetStatus.Registered;
+        Status = AssetStatus.Ready;
     }
 
     /// <summary>
     /// Registers a new Asset. Single-step registration (chat, 2026-08-27):
     /// identity and model are captured together and the Asset starts
-    /// directly at <see cref="AssetStatus.Registered"/> (the Draft state
-    /// is reserved for a future two-step flow). Uniqueness of
+    /// at <see cref="AssetStatus.Ready"/> (chat, 2026-09-20). Uniqueness of
     /// <paramref name="code"/> within the Organization, existence of the
     /// referenced AssetModel/Color/Project and Organization/Holding
     /// consistency are all enforced by the caller (Application layer)
@@ -322,89 +321,29 @@ public sealed class Asset : AggregateRoot<AssetId>
         return Result.Success();
     }
 
-    /// <summary>Completes commissioning (Registered → Commissioned).</summary>
-    public Result Commission(IDateTimeProvider dateTimeProvider)
-    {
-        if (Status != AssetStatus.Registered)
-        {
-            return Result.Failure(AssetErrors.InvalidTransition(Status, AssetStatus.Commissioned));
-        }
-
-        Status = AssetStatus.Commissioned;
-        RaiseDomainEvent(new AssetCommissioned(Id, dateTimeProvider.UtcNow));
-
-        return Result.Success();
-    }
-
     /// <summary>
-    /// Places the Asset into operation (Commissioned → Operational, or
-    /// Inactive → Operational). Raises <see cref="AssetActivated"/> for
-    /// the first case and <see cref="AssetReactivated"/> for the second.
+    /// Moves the Asset to <paramref name="newStatus"/> (chat, 2026-09-20).
+    /// Any status can be changed to any other status — there is no fixed
+    /// lifecycle order, and an Asset that is <see cref="AssetStatus.OutOfFleet"/>
+    /// can be brought back. Fails if the status is undefined or is the one
+    /// the Asset already has. Raises <see cref="AssetStatusChanged"/>.
     /// </summary>
-    public Result Activate(IDateTimeProvider dateTimeProvider)
+    public Result ChangeStatus(AssetStatus newStatus, IDateTimeProvider dateTimeProvider)
     {
-        if (Status is not (AssetStatus.Commissioned or AssetStatus.Inactive))
+        if (!Enum.IsDefined(newStatus))
         {
-            return Result.Failure(AssetErrors.InvalidTransition(Status, AssetStatus.Operational));
+            return Result.Failure(AssetErrors.InvalidStatus(newStatus.ToString()));
         }
 
-        var wasInactive = Status == AssetStatus.Inactive;
-
-        Status = AssetStatus.Operational;
-
-        if (wasInactive)
+        if (newStatus == Status)
         {
-            RaiseDomainEvent(new AssetReactivated(Id, dateTimeProvider.UtcNow));
-        }
-        else
-        {
-            RaiseDomainEvent(new AssetActivated(Id, dateTimeProvider.UtcNow));
+            return Result.Failure(AssetErrors.AlreadyInStatus(newStatus));
         }
 
-        return Result.Success();
-    }
+        var previousStatus = Status;
 
-    /// <summary>Temporarily takes the Asset out of use (Operational → Inactive).</summary>
-    public Result Deactivate(IDateTimeProvider dateTimeProvider)
-    {
-        if (Status != AssetStatus.Operational)
-        {
-            return Result.Failure(AssetErrors.InvalidTransition(Status, AssetStatus.Inactive));
-        }
-
-        Status = AssetStatus.Inactive;
-        RaiseDomainEvent(new AssetDeactivated(Id, dateTimeProvider.UtcNow));
-
-        return Result.Success();
-    }
-
-    /// <summary>Permanently withdraws the Asset from use (Operational or Inactive → Retired).</summary>
-    public Result Retire(IDateTimeProvider dateTimeProvider)
-    {
-        if (Status is not (AssetStatus.Operational or AssetStatus.Inactive))
-        {
-            return Result.Failure(AssetErrors.InvalidTransition(Status, AssetStatus.Retired));
-        }
-
-        Status = AssetStatus.Retired;
-        RaiseDomainEvent(new AssetRetired(Id, dateTimeProvider.UtcNow));
-
-        return Result.Success();
-    }
-
-    /// <summary>
-    /// Marks the Asset as physically disposed of (final state; BR-004 —
-    /// history is preserved, never overwritten).
-    /// </summary>
-    public Result Dispose(IDateTimeProvider dateTimeProvider)
-    {
-        if (Status != AssetStatus.Retired)
-        {
-            return Result.Failure(AssetErrors.InvalidTransition(Status, AssetStatus.Disposed));
-        }
-
-        Status = AssetStatus.Disposed;
-        RaiseDomainEvent(new AssetDisposed(Id, dateTimeProvider.UtcNow));
+        Status = newStatus;
+        RaiseDomainEvent(new AssetStatusChanged(Id, previousStatus, newStatus, dateTimeProvider.UtcNow));
 
         return Result.Success();
     }

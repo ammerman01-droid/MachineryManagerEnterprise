@@ -1,29 +1,27 @@
 namespace Asset.Domain;
 
 /// <summary>
-/// The lifecycle state of an Asset (Section 4.9, State Machines):
-/// Draft → Registered → Commissioned → Operational ↔ Inactive → Retired → Disposed.
+/// The status of an Asset within the fleet (chat, 2026-09-20). Replaces
+/// the earlier Draft → Registered → Commissioned → Operational ↔ Inactive
+/// → Retired → Disposed state machine: there is no fixed order any more,
+/// and an Asset can be moved between ANY two of these statuses at any
+/// time (including back from <see cref="OutOfFleet"/>).
 /// </summary>
+/// <remarks>
+/// Persisted by name (see AssetConfiguration) — never rename a member
+/// without a data migration.
+/// </remarks>
 public enum AssetStatus
 {
-    /// <summary>Not yet used by this first increment (single-step registration creates directly at Registered — chat, 2026-08-27); reserved for a future two-step registration flow.</summary>
-    Draft = 0,
+    /// <summary>فعال — the Asset is in active use.</summary>
+    Active = 1,
 
-    /// <summary>Identity captured; not yet commissioned for use.</summary>
-    Registered = 1,
+    /// <summary>آماده بکار — available and ready for work, not currently in use. A newly registered Asset starts here.</summary>
+    Ready = 2,
 
-    /// <summary>Commissioning complete; not yet placed into operation.</summary>
-    Commissioned = 2,
+    /// <summary>خارج از سرویس — temporarily unavailable (e.g. breakdown or repair).</summary>
+    OutOfService = 3,
 
-    /// <summary>Actively in use.</summary>
-    Operational = 3,
-
-    /// <summary>Temporarily out of use; can return to Operational.</summary>
-    Inactive = 4,
-
-    /// <summary>Permanently withdrawn from use.</summary>
-    Retired = 5,
-
-    /// <summary>Final state — physically disposed of.</summary>
-    Disposed = 6,
+    /// <summary>خارج از ناوگان — removed from the fleet (retired, scrapped, sold, ...). It can be brought back to any other status.</summary>
+    OutOfFleet = 4,
 }

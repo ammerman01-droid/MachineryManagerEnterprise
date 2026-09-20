@@ -38,10 +38,15 @@ public static class AssetErrors
         $"Asset.{fieldName}TooLong",
         $"{fieldName} shall not exceed {maxLength} characters.");
 
-    /// <summary>Creates an error indicating an invalid lifecycle transition was attempted.</summary>
-    public static Error InvalidTransition(AssetStatus from, AssetStatus to) => Error.Conflict(
-        "Asset.InvalidTransition",
-        $"Cannot transition an Asset from '{from}' to '{to}'.");
+    /// <summary>Creates an error indicating the given value is not a valid Asset status (chat, 2026-09-20).</summary>
+    public static Error InvalidStatus(string value) => Error.Validation(
+        "Asset.InvalidStatus",
+        $"'{value}' is not a valid Asset status. Valid values: Active, Ready, OutOfService, OutOfFleet.");
+
+    /// <summary>Creates an error indicating the Asset already has the requested status (chat, 2026-09-20).</summary>
+    public static Error AlreadyInStatus(AssetStatus status) => Error.Conflict(
+        "Asset.AlreadyInStatus",
+        $"The Asset is already in status '{status}'.");
 
     /// <summary>Creates an error indicating the current user lacks permission for this action.</summary>
     public static Error NotAuthorized() => Error.Failure(

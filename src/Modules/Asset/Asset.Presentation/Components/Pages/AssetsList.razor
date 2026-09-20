@@ -80,7 +80,7 @@ else if (organizations.Count > 1)
                 <MudTd DataLabel="پلاک">@(context.LicensePlate ?? "-")</MudTd>
                 <MudTd DataLabel="سال ساخت">@(context.ManufactureYear?.ToString() ?? "-")</MudTd>
                 <MudTd DataLabel="رنگ">@GetColorName(context.ColorId)</MudTd>
-                <MudTd DataLabel="وضعیت">@TranslateStatus(context.Status)</MudTd>
+                <MudTd DataLabel="وضعیت">@AssetStatusDisplay.GetName(context.Status)</MudTd>
                 <MudTd DataLabel="عملیات">
                     <MudButton Size="Size.Small" Variant="Variant.Text" Color="Color.Primary"
                                OnClick="@(() => Navigation.NavigateTo($"/admin/assets/{context.Id}"))">
@@ -390,15 +390,4 @@ else if (organizations.Count > 1)
             // Best effort
         }
     }
-
-    private static string TranslateStatus(string status) => status switch
-    {
-        "Registered" => "ثبت‌شده",
-        "Commissioned" => "راه‌اندازی‌شده",
-        "Operational" => "در حال بهره‌برداری",
-        "Inactive" => "غیرفعال",
-        "Retired" => "بازنشسته",
-        "Disposed" => "اسقاط‌شده",
-        _ => status
-    };
 }
