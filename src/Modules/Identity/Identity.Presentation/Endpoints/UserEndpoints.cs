@@ -62,39 +62,41 @@ public static class UserEndpoints
     }
 
     private static IResult SearchUsersAsync(
-        UserManager<ApplicationUser> userManager,
-        string? search = null,
-        int page = 1,
-        int pageSize = 25)
+    UserManager<ApplicationUser> userManager,
+    string? search = null,
+    int page = 1,
+    int pageSize = 25)
+{
+    var allUsers = userManager.Users.ToList();
+
+    if (!string.IsNullOrWhiteSpace(search))
     {
-        var allUsers = userManager.Users.ToList();
-
-        var items = allUsers
-            .Skip((page - 1) * pageSize)
-            .Take(pageSize)
-            .Select(u => new UserDto(u.Id, u.UserName ?? string.Empty, IsUserActive(u)))
+        allUsers = allUsers
+            .Where(u => u.UserName != null && u.UserName.Contains(search, StringComparison.OrdinalIgnoreCase))
             .ToList();
-
-        if (!string.IsNullOrWhiteSpace(search))
-        {
-            allUsers = allUsers.Where(u => u.UserName != null && u.UserName.Contains(search, StringComparison.OrdinalIgnoreCase)).ToList();
-        }
-
-        var totalItems = allUsers.Count;
-
-        var totalPages = totalItems == 0 ? 0 : (int)Math.Ceiling(totalItems / (double)pageSize);
-
-        return Results.Ok(new
-        {
-            items,
-            page,
-            pageSize,
-            totalItems,
-            totalPages,
-            hasNextPage = page < totalPages,
-            hasPreviousPage = page > 1
-        });
     }
+
+    var totalItems = allUsers.Count;
+
+    var items = allUsers
+        .Skip((page - 1) * pageSize)
+        .Take(pageSize)
+        .Select(u => new UserDto(u.Id, u.UserName ?? string.Empty, IsUserActive(u)))
+        .ToList();
+
+    var totalPages = totalItems == 0 ? 0 : (int)Math.Ceiling(totalItems / (double)pageSize);
+
+    return Results.Ok(new
+    {
+        items,
+        page,
+        pageSize,
+        totalItems,
+        totalPages,
+        hasNextPage = page < totalPages,
+        hasPreviousPage = page > 1
+    });
+}
 
     private static async Task<IResult> CreateUserAsync(
         CreateUserRequest request,
