@@ -7,19 +7,19 @@
 
 <MudText Typo="Typo.h4" Class="mb-4">مدیریت پرسنل</MudText>
 
-<MudSelect T="Guid" Label="Holding" @bind-Value="selectedHoldingId" @bind-Value:after="OnHoldingChangedAsync" Class="mb-4">
+<MudSelect T="Guid?" Label="Holding" Placeholder="یک هلدینگ را انتخاب کنید" @bind-Value="selectedHoldingId" @bind-Value:after="OnHoldingChangedAsync" Class="mb-4">
     @foreach (var holding in holdings)
     {
-        <MudSelectItem T="Guid" Value="@holding.Id">@holding.Name</MudSelectItem>
+        <MudSelectItem T="Guid?" Value="@((Guid?)holding.Id)">@holding.Name</MudSelectItem>
     }
 </MudSelect>
 
-@if (selectedHoldingId != Guid.Empty)
+@if (selectedHoldingId is not null)
 {
-    <MudSelect T="Guid" Label="Organization" @bind-Value="selectedOrganizationId" @bind-Value:after="OnOrganizationChangedAsync" Class="mb-4">
+    <MudSelect T="Guid?" Label="Organization" Placeholder="یک سازمان را انتخاب کنید" @bind-Value="selectedOrganizationId" @bind-Value:after="OnOrganizationChangedAsync" Class="mb-4">
         @foreach (var organization in organizations)
         {
-            <MudSelectItem T="Guid" Value="@organization.Id">@organization.Name</MudSelectItem>
+            <MudSelectItem T="Guid?" Value="@((Guid?)organization.Id)">@organization.Name</MudSelectItem>
         }
     </MudSelect>
 }
@@ -29,7 +29,7 @@
     <MudAlert Severity="Severity.Error" Class="my-4">@errorMessage</MudAlert>
 }
 
-@if (selectedOrganizationId != Guid.Empty)
+@if (selectedOrganizationId is not null)
 {
     <MudButton Variant="Variant.Filled" Color="Color.Primary" Class="mb-4"
                OnClick="@(() => Navigation.NavigateTo($"/admin/personnel/create?organizationId={selectedOrganizationId}"))">
@@ -41,7 +41,7 @@
 {
     <MudProgressLinear Indeterminate="true" Class="my-4" />
 }
-else if (selectedOrganizationId != Guid.Empty && personnel.Count == 0)
+else if (selectedOrganizationId is not null && personnel.Count == 0)
 {
     <MudText Typo="Typo.body2" Class="mud-text-secondary">هیچ پرسنلی برای این Organization ثبت نشده است.</MudText>
 }
@@ -106,8 +106,8 @@ else if (personnel.Count > 0)
     private List<HoldingItem> holdings = [];
     private List<OrganizationItem> organizations = [];
     private List<PersonnelItem> personnel = [];
-    private Guid selectedHoldingId;
-    private Guid selectedOrganizationId;
+    private Guid? selectedHoldingId;
+    private Guid? selectedOrganizationId;
     private bool isLoading = true;
     private string? errorMessage;
 
@@ -144,10 +144,10 @@ else if (personnel.Count > 0)
     private async Task OnHoldingChangedAsync()
     {
         organizations = [];
-        selectedOrganizationId = Guid.Empty;
+        selectedOrganizationId = null;
         personnel = [];
 
-        if (selectedHoldingId == Guid.Empty)
+        if (selectedHoldingId is null)
         {
             return;
         }
@@ -184,7 +184,7 @@ else if (personnel.Count > 0)
     /// <summary>Reloads the Personnel list whenever the selected Organization changes.</summary>
     private async Task OnOrganizationChangedAsync()
     {
-        if (selectedOrganizationId == Guid.Empty)
+        if (selectedOrganizationId is null)
         {
             personnel = [];
             return;

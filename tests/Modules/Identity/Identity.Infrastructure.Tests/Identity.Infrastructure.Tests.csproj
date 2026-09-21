@@ -1,0 +1,58 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\..\src\Modules\Identity\Identity.Domain\Identity.Domain.csproj" />
+    <ProjectReference Include="..\..\..\..\src\Modules\Identity\Identity.Infrastructure\Identity.Infrastructure.csproj" />
+    <ProjectReference Include="..\..\..\..\src\BuildingBlocks\MachineryManagerEnterprise.SharedKernel.Abstractions\MachineryManagerEnterprise.SharedKernel.Abstractions.csproj" />
+    <!--
+      Brings in SqlServerContainerFixture — and, transitively,
+      Testcontainers.MsSql / Microsoft.EntityFrameworkCore.SqlServer —
+      so this project does NOT declare its own separate container or
+      re-pin those packages. See TestDatabaseNaming (Fixtures/) for how
+      each test class still gets its own isolated database inside that
+      one shared container.
+    -->
+    <ProjectReference Include="..\..\..\Shared\MachineryManagerEnterprise.Testing.Common\MachineryManagerEnterprise.Testing.Common.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- Standard test block (see tests/Directory.Build.props). -->
+    <PackageReference Include="Microsoft.NET.Test.Sdk" />
+    <PackageReference Include="xunit" />
+    <PackageReference Include="xunit.runner.visualstudio">
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+      <PrivateAssets>all</PrivateAssets>
+    </PackageReference>
+    <PackageReference Include="FluentAssertions" />
+    <PackageReference Include="NSubstitute" />
+
+    <!--
+      Validators and the theme-preference repository are unit-tested
+      against a real UserManager<ApplicationUser> substituted via
+      NSubstitute (its members are virtual by design, specifically to
+      support this). No database is involved for those.
+
+      IdentityDbContext / IdentityDataSeeder ARE tested against a real
+      SQL Server (via the shared Testing.Common fixture above), per
+      TE-0030 (Testing Strategy / ADR-0024) — OpenIddict's EF Core model
+      and the "identity" schema/column constraints (e.g. ThemeMode
+      nvarchar(20)) are SQL-Server-specific and not meaningfully
+      verified by a relational-agnostic provider. Deliberately NOT using
+      SQLite anywhere in this repo yet (reserved for the future mobile
+      client) — see Directory.Packages.props / chat with the product
+      owner.
+    -->
+
+    <!--
+      Explicit pin for the test-only transitive dependency pulled in by
+      NSubstitute (Castle.Core) — see the matching comment and
+      PackageVersion entry in the root Directory.Packages.props (chat,
+      2026-09-13). Required here because
+      CentralPackageTransitivePinningEnabled is turned off for /tests/.
+      (Azure.Core, needed by Testcontainers, is already pinned this way
+      inside Testing.Common's own .csproj — no need to repeat it here.)
+    -->
+    <PackageReference Include="Castle.Core" />
+  </ItemGroup>
+
+</Project>

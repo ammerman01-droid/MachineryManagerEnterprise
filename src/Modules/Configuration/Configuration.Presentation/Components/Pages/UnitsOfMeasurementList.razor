@@ -9,7 +9,7 @@
 @* The selector is only needed when the user can see more than one Holding; a single one is auto-selected. *@
 @if (holdings.Count > 1)
 {
-    <MudSelect T="Guid?" Label="انتخاب Holding" Placeholder="یک Holding را انتخاب کنید"
+    <MudSelect T="Guid?" Label="انتخاب هلدینگ" Placeholder="یک هلدینگ را انتخاب کنید"
                @bind-Value="selectedHoldingId" @bind-Value:after="OnHoldingChangedAsync" Class="mb-4">
         @foreach (var holding in holdings)
         {
@@ -139,7 +139,7 @@ else if (units.Count > 0)
             }
             else
             {
-                errorMessage = $"خطا در دریافت Holding ها: {content}";
+                errorMessage = $"خطا در دریافت هلدینگ ها: {content}";
             }
         }
         catch (Exception ex)

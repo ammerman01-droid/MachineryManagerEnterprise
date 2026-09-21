@@ -1,0 +1,52 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <ItemGroup>
+    <FrameworkReference Include="Microsoft.AspNetCore.App" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\..\src\Modules\Identity\Identity.Domain\Identity.Domain.csproj" />
+    <ProjectReference Include="..\..\..\..\src\Modules\Identity\Identity.Infrastructure\Identity.Infrastructure.csproj" />
+    <ProjectReference Include="..\..\..\..\src\Modules\Identity\Identity.Presentation\Identity.Presentation.csproj" />
+    <!-- Brings in SqlServerContainerFixture, used as the backing store for UserManager in these endpoint tests (see UserEndpointsTestHost). -->
+    <ProjectReference Include="..\..\..\Shared\MachineryManagerEnterprise.Testing.Common\MachineryManagerEnterprise.Testing.Common.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- Standard test block (see tests/Directory.Build.props). -->
+    <PackageReference Include="Microsoft.NET.Test.Sdk" />
+    <PackageReference Include="xunit" />
+    <PackageReference Include="xunit.runner.visualstudio">
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+      <PrivateAssets>all</PrivateAssets>
+    </PackageReference>
+    <PackageReference Include="FluentAssertions" />
+
+    <!--
+      Endpoint handlers (UserEndpoints) are private static methods, so
+      the only way to exercise them faithfully — including routing,
+      model binding, and the RequireAuthorization/RequireClaim policies
+      actually applied in MapIdentityUserEndpoints — is a real in-memory
+      HTTP pipeline. Per Directory.Packages.props (chat, 2026-09-13):
+      Microsoft.AspNetCore.TestHost is used to host this module's own
+      "slice" (just its endpoints + the services they need), NOT
+      WebApplicationFactory against the real Host project — this project
+      never references MachineryManagerEnterprise.Web. (Also already
+      flows in transitively via Testing.Common — kept explicit here
+      since this project uses UseTestServer()/GetTestClient() directly.)
+    -->
+    <PackageReference Include="Microsoft.AspNetCore.TestHost" />
+
+    <!--
+      Deliberately NOT using SQLite: the backing store for UserManager
+      here is a real SQL Server database (a fresh one per test class,
+      via the shared Testing.Common fixture) — same as
+      Identity.Infrastructure.Tests. SQLite is not used anywhere in this
+      repo yet (reserved for the future mobile client), and
+      Microsoft.EntityFrameworkCore.Sqlite pulls in SQLitePCLRaw, which
+      currently has an unresolved NU1903 high-severity advisory that
+      fails the build under this repo's TreatWarningsAsErrors.
+    -->
+  </ItemGroup>
+
+</Project>

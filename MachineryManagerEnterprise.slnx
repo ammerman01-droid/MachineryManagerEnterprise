@@ -69,4 +69,9 @@
     <Project Path="tests/Modules/Configuration/Configuration.Infrastructure.Tests/Configuration.Infrastructure.Tests.csproj" />
     <Project Path="tests/Modules/Configuration/Configuration.Presentation.Tests/Configuration.Presentation.Tests.csproj" />
   </Folder>
+  <Folder Name="/tests/Modules/Identity/">
+    <Project Path="tests/Modules/Identity/Identity.Domain.Tests/Identity.Domain.Tests.csproj" />
+    <Project Path="tests/Modules/Identity/Identity.Infrastructure.Tests/Identity.Infrastructure.Tests.csproj" />
+    <Project Path="tests/Modules/Identity/Identity.Presentation.Tests/Identity.Presentation.Tests.csproj" />
+  </Folder>
 </Solution>

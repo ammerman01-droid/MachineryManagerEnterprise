@@ -24,4 +24,8 @@
     <PackageReference Include="OpenIddict.Client.SystemNetHttp" />
   </ItemGroup>
 
+  <ItemGroup>
+    <InternalsVisibleTo Include="Identity.Infrastructure.Tests" />
+  </ItemGroup>
+
 </Project>

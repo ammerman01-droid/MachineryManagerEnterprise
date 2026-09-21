@@ -10,18 +10,18 @@
 </MudText>
 
 <MudStack Row="true" Spacing="3" Class="mb-4">
-    <MudSelect T="Guid" Label="Holding" @bind-Value="selectedHoldingId" @bind-Value:after="OnHoldingChangedAsync" Class="flex-grow-1">
+    <MudSelect T="Guid?" Label="Holding" Placeholder="یک هلدینگ را انتخاب کنید" @bind-Value="selectedHoldingId" @bind-Value:after="OnHoldingChangedAsync" Class="flex-grow-1">
         @foreach (var holding in holdings)
         {
-            <MudSelectItem T="Guid" Value="@holding.Id">@holding.Name</MudSelectItem>
+            <MudSelectItem T="Guid?" Value="@((Guid?)holding.Id)">@holding.Name</MudSelectItem>
         }
     </MudSelect>
 
-    <MudSelect T="Guid" Label="سازمان" @bind-Value="selectedOrganizationId" @bind-Value:after="OnOrganizationChangedAsync"
-               Disabled="@(selectedHoldingId == Guid.Empty)" Class="flex-grow-1">
+    <MudSelect T="Guid?" Label="سازمان" Placeholder="یک سازمان را انتخاب کنید" @bind-Value="selectedOrganizationId" @bind-Value:after="OnOrganizationChangedAsync"
+               Disabled="@(selectedHoldingId is null)" Class="flex-grow-1">
         @foreach (var organization in organizationsInSelectedHolding)
         {
-            <MudSelectItem T="Guid" Value="@organization.Id">@organization.Name</MudSelectItem>
+            <MudSelectItem T="Guid?" Value="@((Guid?)organization.Id)">@organization.Name</MudSelectItem>
         }
     </MudSelect>
 </MudStack>
@@ -35,7 +35,7 @@
 {
     <MudProgressLinear Indeterminate="true" Class="my-4" />
 }
-else if (selectedOrganizationId != Guid.Empty && projectsInSelectedOrganization.Count == 0)
+else if (selectedOrganizationId is not null && projectsInSelectedOrganization.Count == 0)
 {
     <MudText Typo="Typo.body2" Class="mud-text-secondary">هیچ پروژه‌ای برای این سازمان ثبت نشده است.</MudText>
 }
@@ -99,8 +99,8 @@ else if (projectsInSelectedOrganization.Count > 0)
     private List<ProjectItem> allProjects = [];
     private List<OrganizationItem> organizationsInSelectedHolding = [];
     private List<ProjectItem> projectsInSelectedOrganization = [];
-    private Guid selectedHoldingId;
-    private Guid selectedOrganizationId;
+    private Guid? selectedHoldingId;
+    private Guid? selectedOrganizationId;
     private bool isLoading = true;
     private string? errorMessage;
 
@@ -153,10 +153,10 @@ else if (projectsInSelectedOrganization.Count > 0)
 
     private Task OnHoldingChangedAsync()
     {
-        selectedOrganizationId = Guid.Empty;
+        selectedOrganizationId = null;
         projectsInSelectedOrganization = [];
 
-        organizationsInSelectedHolding = selectedHoldingId == Guid.Empty
+        organizationsInSelectedHolding = selectedHoldingId is null
             ? []
             : allOrganizations.Where(o => o.HoldingId == selectedHoldingId).ToList();
 
@@ -165,7 +165,7 @@ else if (projectsInSelectedOrganization.Count > 0)
 
     private Task OnOrganizationChangedAsync()
     {
-        projectsInSelectedOrganization = selectedOrganizationId == Guid.Empty
+        projectsInSelectedOrganization = selectedOrganizationId is null
             ? []
             : allProjects.Where(p => p.OrganizationId == selectedOrganizationId).ToList();
 
