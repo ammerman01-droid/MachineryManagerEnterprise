@@ -1,12 +1,14 @@
 @page "/admin/colors"
 @inject IHttpClientFactory HttpClientFactory
 @inject NavigationManager Navigation
+@inject ISnackbar Snackbar
 
 <PageTitle>رنگ‌ها</PageTitle>
 
 <MudText Typo="Typo.h4" Class="mb-4">مدیریت رنگ‌ها</MudText>
 
-<MudSelect T="Guid?" Label="Holding" Placeholder="یک هلدینگ را انتخاب کنید" @bind-Value="selectedHoldingId" @bind-Value:after="OnHoldingChangedAsync" Class="mb-4">
+<MudSelect T="Guid?" Label="Holding" Placeholder="یک Holding را انتخاب کنید"
+           @bind-Value="selectedHoldingId" @bind-Value:after="OnHoldingChangedAsync" Class="mb-4">
     @foreach (var holding in holdings)
     {
         <MudSelectItem T="Guid?" Value="@((Guid?)holding.Id)">@holding.Name</MudSelectItem>
@@ -39,9 +41,35 @@ else if (colors.Count > 0)
     <MudTable Items="@colors" Hover="true" Breakpoint="Breakpoint.Sm">
         <HeaderContent>
             <MudTh>نام</MudTh>
+            <MudTh>وضعیت</MudTh>
+            <MudTh>عملیات</MudTh>
         </HeaderContent>
         <RowTemplate>
             <MudTd DataLabel="نام">@context.Name</MudTd>
+            <MudTd DataLabel="وضعیت">
+                @if (context.IsActive)
+                {
+                    <MudChip T="string" Color="Color.Success" Size="Size.Small">فعال</MudChip>
+                }
+                else
+                {
+                    <MudChip T="string" Color="Color.Default" Size="Size.Small">غیرفعال</MudChip>
+                }
+            </MudTd>
+            <MudTd DataLabel="عملیات">
+                <MudIconButton Icon="@Icons.Material.Filled.Edit" Size="Size.Small"
+                               OnClick="@(() => Navigation.NavigateTo($"/admin/colors/edit/{context.Id}"))" />
+                @if (context.IsActive)
+                {
+                    <MudIconButton Icon="@Icons.Material.Filled.Block" Size="Size.Small" Color="Color.Error"
+                                   OnClick="@(() => ToggleActiveAsync(context, deactivate: true))" />
+                }
+                else
+                {
+                    <MudIconButton Icon="@Icons.Material.Filled.CheckCircle" Size="Size.Small" Color="Color.Success"
+                                   OnClick="@(() => ToggleActiveAsync(context, deactivate: false))" />
+                }
+            </MudTd>
         </RowTemplate>
     </MudTable>
 }
@@ -65,6 +93,9 @@ else if (colors.Count > 0)
 
         /// <summary>Gets or sets the Color's display name.</summary>
         public string Name { get; set; } = string.Empty;
+
+        /// <summary>Gets or sets whether the Color is currently active.</summary>
+        public bool IsActive { get; set; } = true;
     }
 
     private sealed class SearchHoldingsResult
@@ -74,6 +105,11 @@ else if (colors.Count > 0)
 
     private List<HoldingItem> holdings = [];
     private List<ColorItem> colors = [];
+
+    // Nullable so an unselected Holding renders as an empty placeholder
+    // instead of MudSelect falling back to a raw default-value string
+    // (previously Guid.Empty, shown as a run of zeros) before any
+    // Holding has been chosen (chat, 2026-09-19).
     private Guid? selectedHoldingId;
     private bool isLoading = true;
     private string? errorMessage;
@@ -118,13 +154,19 @@ else if (colors.Count > 0)
             return;
         }
 
+        await LoadColorsAsync();
+    }
+
+    /// <summary>Retrieves the selected Holding's full color catalog, including deactivated colors, for the admin management page.</summary>
+    private async Task LoadColorsAsync()
+    {
         isLoading = true;
         errorMessage = null;
 
         try
         {
             var client = HttpClientFactory.CreateClient("InternalApi");
-            var response = await client.GetAsync($"/api/v1/colors?holdingId={selectedHoldingId}");
+            var response = await client.GetAsync($"/api/v1/colors?holdingId={selectedHoldingId}&includeInactive=true");
             var content = await response.Content.ReadAsStringAsync();
 
             if (response.IsSuccessStatusCode)
@@ -143,6 +185,37 @@ else if (colors.Count > 0)
         finally
         {
             isLoading = false;
+        }
+    }
+
+    /// <summary>Deactivates or reactivates the given Color, then refreshes the list.</summary>
+    /// <param name="color">The Color row being toggled.</param>
+    /// <param name="deactivate">
+    /// <see langword="true"/> to deactivate (soft delete) the color;
+    /// <see langword="false"/> to reactivate it.
+    /// </param>
+    private async Task ToggleActiveAsync(ColorItem color, bool deactivate)
+    {
+        try
+        {
+            var client = HttpClientFactory.CreateClient("InternalApi");
+            var action = deactivate ? "deactivate" : "activate";
+            var response = await client.PatchAsync($"/api/v1/colors/{color.Id}/{action}", null);
+
+            if (response.IsSuccessStatusCode)
+            {
+                Snackbar.Add(deactivate ? "رنگ غیرفعال شد." : "رنگ فعال شد.", Severity.Success);
+                await LoadColorsAsync();
+            }
+            else
+            {
+                var content = await response.Content.ReadAsStringAsync();
+                Snackbar.Add($"خطا: {content}", Severity.Error);
+            }
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"خطا: {ex.Message}", Severity.Error);
         }
     }
 }

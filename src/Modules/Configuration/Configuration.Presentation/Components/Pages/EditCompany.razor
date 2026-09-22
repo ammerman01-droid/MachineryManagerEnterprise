@@ -1,0 +1,115 @@
+@page "/admin/companies/edit/{Id:guid}"
+@inject IHttpClientFactory HttpClientFactory
+@inject NavigationManager Navigation
+
+<PageTitle>ویرایش شرکت سازنده</PageTitle>
+
+<MudText Typo="Typo.h4" Class="mb-4">ویرایش شرکت سازنده</MudText>
+
+@if (errorMessage is not null)
+{
+    <MudAlert Severity="Severity.Error" Class="my-4">@errorMessage</MudAlert>
+}
+
+@if (isLoading)
+{
+    <MudProgressLinear Indeterminate="true" Class="my-4" />
+}
+else
+{
+    <MudPaper Class="pa-4" Style="max-width:500px;">
+        <MudForm @ref="form">
+            <MudTextField T="string" Label="نام شرکت" @bind-Value="name" Required="true" RequiredError="نام شرکت الزامی است" MaxLength="200" />
+
+            <MudButton Variant="Variant.Filled" Color="Color.Primary" Class="mt-4" OnClick="SubmitAsync" Disabled="isSubmitting">
+                @(isSubmitting ? "در حال ذخیره..." : "ذخیره")
+            </MudButton>
+            <MudButton Variant="Variant.Outlined" Color="Color.Secondary" Class="mt-4 ml-2"
+                       OnClick="@(() => Navigation.NavigateTo("/admin/companies"))">
+                انصراف
+            </MudButton>
+        </MudForm>
+    </MudPaper>
+}
+
+@code {
+    /// <summary>Gets or sets the identifier of the Company being edited, supplied via the route.</summary>
+    [Parameter]
+    public Guid Id { get; set; }
+
+    private sealed class CompanyDetails
+    {
+        public string Name { get; set; } = string.Empty;
+    }
+
+    private MudForm form = null!;
+    private string name = string.Empty;
+    private bool isLoading = true;
+    private bool isSubmitting;
+    private string? errorMessage;
+
+    /// <summary>Loads the Company's current data when the page is first rendered.</summary>
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            var client = HttpClientFactory.CreateClient("InternalApi");
+            var response = await client.GetAsync($"/api/v1/companies/{Id}");
+            var content = await response.Content.ReadAsStringAsync();
+
+            if (response.IsSuccessStatusCode)
+            {
+                var details = JsonSerializer.Deserialize<CompanyDetails>(content, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+                name = details?.Name ?? string.Empty;
+            }
+            else
+            {
+                errorMessage = $"خطا در دریافت اطلاعات شرکت: {content}";
+            }
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"خطا: {ex.Message}";
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+
+    private async Task SubmitAsync()
+    {
+        await form.Validate();
+        if (!form.IsValid)
+        {
+            return;
+        }
+
+        isSubmitting = true;
+        errorMessage = null;
+
+        try
+        {
+            var client = HttpClientFactory.CreateClient("InternalApi");
+            var response = await client.PutAsJsonAsync($"/api/v1/companies/{Id}", new { Name = name });
+            var content = await response.Content.ReadAsStringAsync();
+
+            if (response.IsSuccessStatusCode)
+            {
+                Navigation.NavigateTo("/admin/companies");
+            }
+            else
+            {
+                errorMessage = $"خطا در ذخیره شرکت: {content}";
+            }
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"خطا: {ex.Message}";
+        }
+        finally
+        {
+            isSubmitting = false;
+        }
+    }
+}

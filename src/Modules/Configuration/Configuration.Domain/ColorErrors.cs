@@ -31,4 +31,29 @@ public static class ColorErrors
     public static Error NotAuthorized() => Error.Failure(
         "Color.NotAuthorized",
         "You do not have permission to perform this action.");
+
+    /// <summary>
+    /// Creates an error indicating the requested Color does not exist.
+    /// </summary>
+    /// <param name="colorId">The requested Color identifier.</param>
+    /// <returns>A not-found <see cref="Error"/>.</returns>
+    public static Error NotFound(Guid colorId) => Error.NotFound(
+        "Color.NotFound",
+        $"Color with id {colorId} was not found.");
+
+    /// <summary>
+    /// Creates an error indicating the Color is already deactivated.
+    /// </summary>
+    /// <returns>A conflict <see cref="Error"/>.</returns>
+    public static Error AlreadyInactive() => Error.Conflict(
+        "Color.AlreadyInactive",
+        "This color is already deactivated.");
+
+    /// <summary>
+    /// Creates an error indicating the Color is already active.
+    /// </summary>
+    /// <returns>A conflict <see cref="Error"/>.</returns>
+    public static Error AlreadyActive() => Error.Conflict(
+        "Color.AlreadyActive",
+        "This color is already active.");
 }

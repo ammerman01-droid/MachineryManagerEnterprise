@@ -285,6 +285,29 @@ public sealed class UserEndpointsTests : IAsyncLifetime
         payload.HasPreviousPage.Should().BeFalse();
     }
 
+    [Fact]
+    public async Task SearchUsers_WithSearchTerm_FiltersItemsAndTotalsConsistently()
+    {
+        // Regression test for a real bug found in production code
+        // (chat, 2026-09-21): `items` was sliced from the unfiltered user
+        // list before `search` was applied, so the term affected only
+        // totalItems/totalPages, never the actual returned rows. Fixed by
+        // filtering before slicing/counting — both must now agree.
+        await SeedUserAsync("findme.alpha");
+        await SeedUserAsync("findme.beta");
+        await SeedUserAsync("other.user");
+
+        var response = await _client.SendAsync(
+            Request(HttpMethod.Get, "/api/v1/users?search=findme", authenticated: true));
+
+        response.StatusCode.Should().Be(HttpStatusCode.OK);
+        var payload = await response.Content.ReadFromJsonAsync<SearchUsersResponse>(ResponseJsonOptions);
+
+        payload!.Items.Should().HaveCount(2);
+        payload.Items.Should().OnlyContain(u => u.UserName.Contains("findme"));
+        payload.TotalItems.Should().Be(2, "totalItems must match the actually-returned, filtered items");
+    }
+
     private sealed record SearchUsersResponse(
         UserDto[] Items, int Page, int PageSize, int TotalItems, int TotalPages, bool HasNextPage, bool HasPreviousPage);
 }

@@ -54,7 +54,7 @@ public sealed class GetFuelTypesByHoldingQueryHandler
             return Result.Failure<IReadOnlyList<FuelTypeDto>>(global::Configuration.Domain.FuelTypeErrors.NotAuthorized());
         }
 
-        var fuelTypes = await _fuelTypeRepository.GetByHoldingAsync(request.HoldingId, cancellationToken);
+        var fuelTypes = await _fuelTypeRepository.GetByHoldingAsync(request.HoldingId, request.IncludeInactive, cancellationToken);
 
         return Result.Success(fuelTypes);
     }

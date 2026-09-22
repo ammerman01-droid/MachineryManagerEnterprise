@@ -35,14 +35,17 @@ public sealed class ColorRepository : IColorRepository
     public void Remove(Color aggregate) => _dbContext.Colors.Remove(aggregate);
 
     /// <inheritdoc />
-    public async Task<IReadOnlyList<ColorDto>> GetByHoldingAsync(Guid holdingId, CancellationToken cancellationToken = default)
+    public async Task<IReadOnlyList<ColorDto>> GetByHoldingAsync(
+        Guid holdingId, bool includeInactive = false, CancellationToken cancellationToken = default)
     {
         var entities = await _dbContext.Colors
             .AsNoTracking()
             .Where(c => c.HoldingId == holdingId)
+            .Where(c => includeInactive || c.IsActive)
             .OrderBy(c => c.Name)
             .ToListAsync(cancellationToken);
 
         return _mapper.Map<List<ColorDto>>(entities);
     }
 }
+

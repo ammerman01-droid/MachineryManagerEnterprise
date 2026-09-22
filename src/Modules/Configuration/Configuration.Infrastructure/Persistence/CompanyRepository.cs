@@ -36,11 +36,12 @@ public sealed class CompanyRepository : ICompanyRepository
 
     /// <inheritdoc />
     public async Task<IReadOnlyList<CompanyDto>> GetByHoldingAsync(
-        Guid holdingId, CancellationToken cancellationToken = default)
+        Guid holdingId, bool includeInactive = false, CancellationToken cancellationToken = default)
     {
         var entities = await _dbContext.Companies
             .AsNoTracking()
             .Where(c => c.HoldingId == holdingId)
+            .Where(c => includeInactive || c.IsActive)
             .OrderBy(c => c.Name)
             .ToListAsync(cancellationToken);
 
@@ -53,3 +54,4 @@ public sealed class CompanyRepository : ICompanyRepository
         _dbContext.Companies.AsNoTracking().AnyAsync(
             c => c.HoldingId == holdingId && c.Name == name, cancellationToken);
 }
+

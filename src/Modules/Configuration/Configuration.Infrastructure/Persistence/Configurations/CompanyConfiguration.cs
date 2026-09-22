@@ -30,6 +30,10 @@ public sealed class CompanyConfiguration
             .HasMaxLength(Company.MaxNameLength)
             .IsRequired();
 
+        builder.Property(c => c.IsActive)
+            .IsRequired()
+            .HasDefaultValue(true);
+
         builder.HasIndex(c => c.HoldingId);
 
         builder.HasIndex(c => new
@@ -40,3 +44,4 @@ public sealed class CompanyConfiguration
         .IsUnique();
     }
 }
+

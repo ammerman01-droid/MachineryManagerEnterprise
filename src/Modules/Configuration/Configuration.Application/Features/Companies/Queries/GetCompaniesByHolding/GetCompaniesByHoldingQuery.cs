@@ -10,4 +10,10 @@ namespace MachineryManagerEnterprise.Configuration.Application.Features.Companie
 /// and Asset forms).
 /// </summary>
 /// <param name="HoldingId">The Holding whose Company catalog should be returned.</param>
-public sealed record GetCompaniesByHoldingQuery(Guid HoldingId) : IRequest<Result<IReadOnlyList<CompanyDto>>>;
+/// <param name="IncludeInactive">
+/// When <see langword="true"/>, deactivated (soft-deleted) companies
+/// are included in the result (used by the admin management page).
+/// Defaults to <see langword="false"/>.
+/// </param>
+public sealed record GetCompaniesByHoldingQuery(Guid HoldingId, bool IncludeInactive = false)
+    : IRequest<Result<IReadOnlyList<CompanyDto>>>;

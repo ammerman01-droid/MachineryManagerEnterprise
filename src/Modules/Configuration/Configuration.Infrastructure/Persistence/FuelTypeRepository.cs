@@ -35,14 +35,17 @@ public sealed class FuelTypeRepository : IFuelTypeRepository
     public void Remove(FuelType aggregate) => _dbContext.FuelTypes.Remove(aggregate);
 
     /// <inheritdoc />
-    public async Task<IReadOnlyList<FuelTypeDto>> GetByHoldingAsync(Guid holdingId, CancellationToken cancellationToken = default)
+    public async Task<IReadOnlyList<FuelTypeDto>> GetByHoldingAsync(
+        Guid holdingId, bool includeInactive = false, CancellationToken cancellationToken = default)
     {
         var entities = await _dbContext.FuelTypes
             .AsNoTracking()
             .Where(f => f.HoldingId == holdingId)
+            .Where(f => includeInactive || f.IsActive)
             .OrderBy(f => f.Name)
             .ToListAsync(cancellationToken);
 
         return _mapper.Map<List<FuelTypeDto>>(entities);
     }
 }
+

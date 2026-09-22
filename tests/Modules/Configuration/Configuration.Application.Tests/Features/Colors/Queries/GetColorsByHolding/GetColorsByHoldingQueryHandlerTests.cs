@@ -61,8 +61,8 @@ public sealed class GetColorsByHoldingQueryHandlerTests
         var holdingId = Guid.NewGuid();
         ArrangeCurrentUser(Guid.NewGuid());
 
-        var expected = new List<ColorDto> { new(Guid.NewGuid(), "Blue"), new(Guid.NewGuid(), "Red") };
-        _colorRepository.GetByHoldingAsync(holdingId, Arg.Any<CancellationToken>()).Returns(expected);
+        var expected = new List<ColorDto> { new(Guid.NewGuid(), "Blue", true), new(Guid.NewGuid(), "Red", true) };
+        _colorRepository.GetByHoldingAsync(holdingId, Arg.Any<bool>(), Arg.Any<CancellationToken>()).Returns(expected);
 
         var result = await _sut.Handle(new GetColorsByHoldingQuery(holdingId), CancellationToken.None);
 
@@ -75,7 +75,7 @@ public sealed class GetColorsByHoldingQueryHandlerTests
     {
         var holdingId = Guid.NewGuid();
         ArrangeCurrentUser(Guid.NewGuid());
-        _colorRepository.GetByHoldingAsync(holdingId, Arg.Any<CancellationToken>())
+        _colorRepository.GetByHoldingAsync(holdingId, Arg.Any<bool>(), Arg.Any<CancellationToken>())
             .Returns(new List<ColorDto>());
 
         var result = await _sut.Handle(new GetColorsByHoldingQuery(holdingId), CancellationToken.None);

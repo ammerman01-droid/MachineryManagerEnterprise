@@ -2,15 +2,17 @@
 @using MachineryManagerEnterprise.SharedKernel
 @inject IHttpClientFactory HttpClientFactory
 @inject NavigationManager Navigation
+@inject ISnackbar Snackbar
 
 <PageTitle>انواع سوخت</PageTitle>
 
 <MudText Typo="Typo.h4" Class="mb-4">مدیریت انواع سوخت</MudText>
 
-<MudSelect T="Guid" Label="Holding" @bind-Value="selectedHoldingId" @bind-Value:after="OnHoldingChangedAsync" Class="mb-4">
+<MudSelect T="Guid?" Label="Holding" Placeholder="یک Holding را انتخاب کنید"
+           @bind-Value="selectedHoldingId" @bind-Value:after="OnHoldingChangedAsync" Class="mb-4">
     @foreach (var holding in holdings)
     {
-        <MudSelectItem T="Guid" Value="@holding.Id">@holding.Name</MudSelectItem>
+        <MudSelectItem T="Guid?" Value="@((Guid?)holding.Id)">@holding.Name</MudSelectItem>
     }
 </MudSelect>
 
@@ -19,7 +21,7 @@
     <MudAlert Severity="Severity.Error" Class="my-4">@errorMessage</MudAlert>
 }
 
-@if (selectedHoldingId != Guid.Empty)
+@if (selectedHoldingId is not null)
 {
     <MudButton Variant="Variant.Filled" Color="Color.Primary" Class="mb-4"
                OnClick="@(() => Navigation.NavigateTo($"/admin/fuel-types/create?holdingId={selectedHoldingId}"))">
@@ -31,7 +33,7 @@
 {
     <MudProgressLinear Indeterminate="true" Class="my-4" />
 }
-else if (selectedHoldingId != Guid.Empty && fuelTypes.Count == 0)
+else if (selectedHoldingId is not null && fuelTypes.Count == 0)
 {
     <MudText Typo="Typo.body2" Class="mud-text-secondary">هیچ نوع سوختی برای این Holding ثبت نشده است.</MudText>
 }
@@ -42,11 +44,37 @@ else if (fuelTypes.Count > 0)
             <MudTh>نام</MudTh>
             <MudTh>نوع</MudTh>
             <MudTh>قیمت</MudTh>
+            <MudTh>وضعیت</MudTh>
+            <MudTh>عملیات</MudTh>
         </HeaderContent>
         <RowTemplate>
             <MudTd DataLabel="نام">@context.Name</MudTd>
             <MudTd DataLabel="نوع">@TranslateKind(context.Kind)</MudTd>
             <MudTd DataLabel="قیمت">@context.Price.ToString("N0")</MudTd>
+            <MudTd DataLabel="وضعیت">
+                @if (context.IsActive)
+                {
+                    <MudChip T="string" Color="Color.Success" Size="Size.Small">فعال</MudChip>
+                }
+                else
+                {
+                    <MudChip T="string" Color="Color.Default" Size="Size.Small">غیرفعال</MudChip>
+                }
+            </MudTd>
+            <MudTd DataLabel="عملیات">
+                <MudIconButton Icon="@Icons.Material.Filled.Edit" Size="Size.Small"
+                               OnClick="@(() => Navigation.NavigateTo($"/admin/fuel-types/edit/{context.Id}"))" />
+                @if (context.IsActive)
+                {
+                    <MudIconButton Icon="@Icons.Material.Filled.Block" Size="Size.Small" Color="Color.Error"
+                                   OnClick="@(() => ToggleActiveAsync(context, deactivate: true))" />
+                }
+                else
+                {
+                    <MudIconButton Icon="@Icons.Material.Filled.CheckCircle" Size="Size.Small" Color="Color.Success"
+                                   OnClick="@(() => ToggleActiveAsync(context, deactivate: false))" />
+                }
+            </MudTd>
         </RowTemplate>
     </MudTable>
 }
@@ -82,6 +110,9 @@ else if (fuelTypes.Count > 0)
         /// unless a JsonStringEnumConverter is configured).
         /// </summary>
         public FuelKind Kind { get; set; }
+
+        /// <summary>Gets or sets whether the Fuel Type is currently active.</summary>
+        public bool IsActive { get; set; } = true;
     }
 
     private sealed class SearchHoldingsResult
@@ -91,7 +122,12 @@ else if (fuelTypes.Count > 0)
 
     private List<HoldingItem> holdings = [];
     private List<FuelTypeItem> fuelTypes = [];
-    private Guid selectedHoldingId;
+
+    // Nullable so an unselected Holding renders as an empty placeholder
+    // instead of MudSelect falling back to a raw default-value string
+    // (previously Guid.Empty, shown as a run of zeros) before any
+    // Holding has been chosen (chat, 2026-09-19).
+    private Guid? selectedHoldingId;
     private bool isLoading = true;
     private string? errorMessage;
 
@@ -129,19 +165,25 @@ else if (fuelTypes.Count > 0)
     /// <summary>Reloads the fuel type list whenever the selected Holding changes.</summary>
     private async Task OnHoldingChangedAsync()
     {
-        if (selectedHoldingId == Guid.Empty)
+        if (selectedHoldingId is null)
         {
             fuelTypes = [];
             return;
         }
 
+        await LoadFuelTypesAsync();
+    }
+
+    /// <summary>Retrieves the selected Holding's full fuel type catalog, including deactivated fuel types, for the admin management page.</summary>
+    private async Task LoadFuelTypesAsync()
+    {
         isLoading = true;
         errorMessage = null;
 
         try
         {
             var client = HttpClientFactory.CreateClient("InternalApi");
-            var response = await client.GetAsync($"/api/v1/fuel-types?holdingId={selectedHoldingId}");
+            var response = await client.GetAsync($"/api/v1/fuel-types?holdingId={selectedHoldingId}&includeInactive=true");
             var content = await response.Content.ReadAsStringAsync();
 
             if (response.IsSuccessStatusCode)
@@ -160,6 +202,37 @@ else if (fuelTypes.Count > 0)
         finally
         {
             isLoading = false;
+        }
+    }
+
+    /// <summary>Deactivates or reactivates the given Fuel Type, then refreshes the list.</summary>
+    /// <param name="fuelType">The Fuel Type row being toggled.</param>
+    /// <param name="deactivate">
+    /// <see langword="true"/> to deactivate (soft delete) the fuel
+    /// type; <see langword="false"/> to reactivate it.
+    /// </param>
+    private async Task ToggleActiveAsync(FuelTypeItem fuelType, bool deactivate)
+    {
+        try
+        {
+            var client = HttpClientFactory.CreateClient("InternalApi");
+            var action = deactivate ? "deactivate" : "activate";
+            var response = await client.PatchAsync($"/api/v1/fuel-types/{fuelType.Id}/{action}", null);
+
+            if (response.IsSuccessStatusCode)
+            {
+                Snackbar.Add(deactivate ? "نوع سوخت غیرفعال شد." : "نوع سوخت فعال شد.", Severity.Success);
+                await LoadFuelTypesAsync();
+            }
+            else
+            {
+                var content = await response.Content.ReadAsStringAsync();
+                Snackbar.Add($"خطا: {content}", Severity.Error);
+            }
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"خطا: {ex.Message}", Severity.Error);
         }
     }
 

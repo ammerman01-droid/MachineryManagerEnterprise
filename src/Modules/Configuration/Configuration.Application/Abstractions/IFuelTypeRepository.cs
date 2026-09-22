@@ -8,8 +8,14 @@ public interface IFuelTypeRepository
 {
     /// <summary>Retrieves every Fuel Type registered for the given Holding.</summary>
     /// <param name="holdingId">The Holding whose fuel type catalog should be returned.</param>
+    /// <param name="includeInactive">
+    /// When <see langword="true"/>, deactivated (soft-deleted) fuel types
+    /// are included in the result; otherwise only active fuel types are
+    /// returned. Defaults to <see langword="false"/> so existing
+    /// consumers keep seeing only active fuel types without any change.
+    /// </param>
     /// <param name="cancellationToken">Token to cancel the asynchronous operation.</param>
     /// <returns>The list of fuel types belonging to the given Holding, ordered by name.</returns>
     Task<IReadOnlyList<Features.FuelTypes.Dtos.FuelTypeDto>> GetByHoldingAsync(
-        Guid holdingId, CancellationToken cancellationToken = default);
+        Guid holdingId, bool includeInactive = false, CancellationToken cancellationToken = default);
 }

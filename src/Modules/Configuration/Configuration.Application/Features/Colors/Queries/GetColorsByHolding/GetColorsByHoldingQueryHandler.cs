@@ -49,7 +49,7 @@ public sealed class GetColorsByHoldingQueryHandler
             return Result.Failure<IReadOnlyList<ColorDto>>(global::Configuration.Domain.ColorErrors.NotAuthorized());
         }
 
-        var colors = await _colorRepository.GetByHoldingAsync(request.HoldingId, cancellationToken);
+        var colors = await _colorRepository.GetByHoldingAsync(request.HoldingId, request.IncludeInactive, cancellationToken);
 
         return Result.Success(colors);
     }

@@ -47,6 +47,7 @@ public static class PermissionCatalog
     /// <param name="action">The action name (e.g. "Create").</param>
     /// <returns>The permission string.</returns>
     public static string BuildPermission(string sectionKey, string action) => $"{sectionKey}.{action}";
+}
 
 /// <summary>A single row in the permission matrix.</summary>
 /// <param name="Key">The section's key, used to build permission strings (e.g. "Organization").</param>
@@ -66,10 +67,3 @@ public sealed record PermissionSection(
     public IReadOnlyList<string> EffectiveActions =>
         Actions ?? PermissionCatalog.Actions;
 }
-
-}
-
-/// <summary>A single row in the permission matrix.</summary>
-/// <param name="Key">The section's key, used to build permission strings (e.g. "Organization").</param>
-/// <param name="DisplayName">The section's Persian display label.</param>
-public sealed record PermissionSection(string Key, string DisplayName);

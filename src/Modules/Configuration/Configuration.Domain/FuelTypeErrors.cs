@@ -30,4 +30,20 @@ public static class FuelTypeErrors
     /// <returns>A failure-type <see cref="Error"/>.</returns>
     public static Error NotAuthorized() => Error.Failure(
         "FuelType.NotAuthorized", "You do not have permission to perform this action.");
+
+    /// <summary>Creates an error indicating the requested Fuel Type does not exist.</summary>
+    /// <param name="fuelTypeId">The requested Fuel Type identifier.</param>
+    /// <returns>A not-found <see cref="Error"/>.</returns>
+    public static Error NotFound(Guid fuelTypeId) => Error.NotFound(
+        "FuelType.NotFound", $"Fuel type with id {fuelTypeId} was not found.");
+
+    /// <summary>Creates an error indicating the Fuel Type is already deactivated.</summary>
+    /// <returns>A conflict <see cref="Error"/>.</returns>
+    public static Error AlreadyInactive() => Error.Conflict(
+        "FuelType.AlreadyInactive", "This fuel type is already deactivated.");
+
+    /// <summary>Creates an error indicating the Fuel Type is already active.</summary>
+    /// <returns>A conflict <see cref="Error"/>.</returns>
+    public static Error AlreadyActive() => Error.Conflict(
+        "FuelType.AlreadyActive", "This fuel type is already active.");
 }

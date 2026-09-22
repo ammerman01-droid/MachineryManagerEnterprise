@@ -54,7 +54,7 @@ public sealed class GetCompaniesByHoldingQueryHandler
             return Result.Failure<IReadOnlyList<CompanyDto>>(global::Configuration.Domain.CompanyErrors.NotAuthorized());
         }
 
-        var companies = await _companyRepository.GetByHoldingAsync(request.HoldingId, cancellationToken);
+        var companies = await _companyRepository.GetByHoldingAsync(request.HoldingId, request.IncludeInactive, cancellationToken);
 
         return Result.Success(companies);
     }

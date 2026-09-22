@@ -33,6 +33,11 @@ public sealed class FuelTypeConfiguration : IEntityTypeConfiguration<FuelType>
             .HasMaxLength(20)
             .IsRequired();
 
+        builder.Property(f => f.IsActive)
+            .IsRequired()
+            .HasDefaultValue(true);
+
         builder.HasIndex(f => f.HoldingId);
     }
 }
+

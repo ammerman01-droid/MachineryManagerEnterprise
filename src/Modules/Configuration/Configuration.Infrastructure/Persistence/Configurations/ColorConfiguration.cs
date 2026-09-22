@@ -23,6 +23,11 @@ public sealed class ColorConfiguration : IEntityTypeConfiguration<Color>
             .HasMaxLength(Color.MaxNameLength)
             .IsRequired();
 
+        builder.Property(c => c.IsActive)
+            .IsRequired()
+            .HasDefaultValue(true);
+
         builder.HasIndex(c => c.HoldingId);
     }
 }
+

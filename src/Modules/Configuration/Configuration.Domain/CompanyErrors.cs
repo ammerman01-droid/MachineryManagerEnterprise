@@ -33,4 +33,20 @@ public static class CompanyErrors
     public static Error NotAuthorized() => Error.Failure(
         "Company.NotAuthorized",
         "You are not authorized to access companies in this Holding.");
+
+    /// <summary>
+    /// Creates an error indicating the Company is already deactivated.
+    /// </summary>
+    /// <returns>A conflict <see cref="Error"/>.</returns>
+    public static Error AlreadyInactive() => Error.Conflict(
+        "Company.AlreadyInactive",
+        "This company is already deactivated.");
+
+    /// <summary>
+    /// Creates an error indicating the Company is already active.
+    /// </summary>
+    /// <returns>A conflict <see cref="Error"/>.</returns>
+    public static Error AlreadyActive() => Error.Conflict(
+        "Company.AlreadyActive",
+        "This company is already active.");
 }

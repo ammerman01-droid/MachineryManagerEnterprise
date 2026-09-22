@@ -23,6 +23,26 @@ namespace Configuration.Infrastructure.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
+            modelBuilder.Entity("Configuration.Domain.AssetOperationalStatus", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("HoldingId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("HoldingId");
+
+                    b.ToTable("AssetOperationalStatus", "configuration");
+                });
+
             modelBuilder.Entity("Configuration.Domain.Color", b =>
                 {
                     b.Property<Guid>("Id")
@@ -30,6 +50,11 @@ namespace Configuration.Infrastructure.Migrations
 
                     b.Property<Guid>("HoldingId")
                         .HasColumnType("uniqueidentifier");
+
+                    b.Property<bool>("IsActive")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(true);
 
                     b.Property<string>("Name")
                         .IsRequired()
@@ -50,6 +75,11 @@ namespace Configuration.Infrastructure.Migrations
 
                     b.Property<Guid>("HoldingId")
                         .HasColumnType("uniqueidentifier");
+
+                    b.Property<bool>("IsActive")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(true);
 
                     b.Property<string>("Name")
                         .IsRequired()
@@ -93,6 +123,11 @@ namespace Configuration.Infrastructure.Migrations
 
                     b.Property<Guid>("HoldingId")
                         .HasColumnType("uniqueidentifier");
+
+                    b.Property<bool>("IsActive")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(true);
 
                     b.Property<string>("Kind")
                         .IsRequired()
