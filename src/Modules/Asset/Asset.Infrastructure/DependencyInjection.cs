@@ -1,4 +1,5 @@
 using MachineryManagerEnterprise.Asset.Application.Abstractions;
+using MachineryManagerEnterprise.Asset.Infrastructure.Lookups;
 using MachineryManagerEnterprise.Asset.Infrastructure.Persistence;
 using MachineryManagerEnterprise.SharedKernel.Abstractions;
 using Microsoft.EntityFrameworkCore;
@@ -46,6 +47,10 @@ public static class DependencyInjection
         services.AddScoped<IEngineModelRepository, EngineModelRepository>();
         services.AddScoped<IAssetUnitOfWork>(serviceProvider =>
             serviceProvider.GetRequiredService<AssetDbContext>());
+
+        // Cross-module lookup for other modules — currently Consumption
+        // (chat, 2026-09-16).
+        services.AddScoped<IAssetLookupService, AssetLookupService>();
 
         return services;
     }

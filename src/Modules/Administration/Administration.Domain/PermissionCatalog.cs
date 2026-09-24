@@ -16,6 +16,10 @@ namespace Administration.Domain;
 /// read-only — only its "AuditLog.View" permission is ever enforced
 /// (by the AuditLog module's query handler). The other three actions
 /// appear in the matrix UI but are intentionally never checked.
+/// FuelConsumption section added (chat, 2026-09-22) — its four actions
+/// ("FuelConsumption.View/Create/Edit/Delete") are all genuinely
+/// enforced by the Consumption module's Command/Query Handlers, unlike
+/// AuditLog above.
 /// </remarks>
 public static class PermissionCatalog
 {
@@ -35,6 +39,7 @@ public static class PermissionCatalog
         new PermissionSection("UnitOfMeasurement", "واحدهای اندازه‌گیری"),
         new PermissionSection("Company", "شرکت‌های سازنده"),
         new PermissionSection("FuelType", "انواع سوخت"),
+        new PermissionSection("FuelConsumption", "سوخت‌گیری"),
         new PermissionSection("AuditLog", "لاگ فعالیت‌ها", ["View"]),
         new PermissionSection("Personnel", "پرسنل"),
         new PermissionSection("DrivingLicenseType", "گواهینامه‌ها"),

@@ -63,18 +63,30 @@ public sealed class ConfigurationLookupService : IConfigurationLookupService
     }
 
     /// <inheritdoc />
-public async Task<bool> AssetOperationalStatusExistsInHoldingAsync(
-    Guid operationalStatusId,
-    Guid holdingId,
-    CancellationToken cancellationToken = default)
-{
-    var id = AssetOperationalStatusId.From(operationalStatusId);
+    public async Task<bool> AssetOperationalStatusExistsInHoldingAsync(
+        Guid operationalStatusId,
+        Guid holdingId,
+        CancellationToken cancellationToken = default)
+    {
+        var id = AssetOperationalStatusId.From(operationalStatusId);
 
-    return await _dbContext.AssetOperationalStatuses
-        .AsNoTracking()
-        .AnyAsync(
-            x => x.Id == id &&
-                 x.HoldingId == holdingId,
-            cancellationToken);
-}
+        return await _dbContext.AssetOperationalStatuses
+            .AsNoTracking()
+            .AnyAsync(
+                x => x.Id == id &&
+                     x.HoldingId == holdingId,
+                cancellationToken);
+    }
+
+    /// <inheritdoc />
+    public async Task<FuelTypeSnapshot?> GetFuelTypeAsync(Guid fuelTypeId, CancellationToken cancellationToken = default)
+    {
+        var id = FuelTypeId.From(fuelTypeId);
+
+        return await _dbContext.FuelTypes
+            .AsNoTracking()
+            .Where(f => f.Id == id)
+            .Select(f => new FuelTypeSnapshot(f.Id.Value, f.HoldingId, f.Name, f.Price, f.Kind))
+            .FirstOrDefaultAsync(cancellationToken);
+    }
 }

@@ -1,0 +1,251 @@
+@page "/admin/fuel-consumptions"
+@using MachineryManagerEnterprise.SharedKernel
+@inject IHttpClientFactory HttpClientFactory
+@inject NavigationManager Navigation
+@inject IDialogService DialogService
+@inject ISnackbar Snackbar
+
+<PageTitle>سوابق سوخت‌گیری</PageTitle>
+
+<MudStack Row="true" Justify="Justify.SpaceBetween" AlignItems="AlignItems.Center" Class="mb-4">
+    <MudText Typo="Typo.h4">سوابق سوخت‌گیری</MudText>
+    <MudButton Variant="Variant.Filled" Color="Color.Primary" StartIcon="@Icons.Material.Filled.Add"
+               OnClick="@(() => Navigation.NavigateTo("/admin/fuel-consumptions/create"))">
+        ثبت سوخت‌گیری جدید
+    </MudButton>
+</MudStack>
+
+<MudPaper Class="pa-4 mb-4">
+    <MudSelect T="Guid?" Label="سازمان" Placeholder="سازمان را انتخاب کنید" @bind-Value="selectedOrganizationId"
+               @bind-Value:after="OnOrganizationChangedAsync">
+        @foreach (var organization in organizations)
+        {
+            <MudSelectItem T="Guid?" Value="@((Guid?)organization.Id)">@organization.Name</MudSelectItem>
+        }
+    </MudSelect>
+
+    <MudSelect T="Guid?" Label="دارایی" Placeholder="دارایی را انتخاب کنید" @bind-Value="selectedAssetId"
+               @bind-Value:after="@(() => LoadRecordsAsync(1))" Class="mt-2">
+        @foreach (var asset in assets)
+        {
+            <MudSelectItem T="Guid?" Value="@((Guid?)asset.Id)">@asset.Code — @asset.Name</MudSelectItem>
+        }
+    </MudSelect>
+</MudPaper>
+
+@if (errorMessage is not null)
+{
+    <MudAlert Severity="Severity.Error" Class="my-4">@errorMessage</MudAlert>
+}
+
+@if (selectedAssetId is not null)
+{
+    @if (isLoading)
+    {
+        <MudProgressLinear Indeterminate="true" />
+    }
+    else
+    {
+        <MudTable Items="records" Hover="true">
+            <HeaderContent>
+                <MudTh>تاریخ</MudTh>
+                <MudTh>جایگاه</MudTh>
+                <MudTh>نوع سوخت</MudTh>
+                <MudTh>مقدار</MudTh>
+                <MudTh>قرائت کارکرد</MudTh>
+                <MudTh>قیمت واحد</MudTh>
+                <MudTh></MudTh>
+            </HeaderContent>
+            <RowTemplate>
+                <MudTd DataLabel="تاریخ">@context.RecordedAtUtc.LocalDateTime.ToString("yyyy-MM-dd")</MudTd>
+                <MudTd DataLabel="جایگاه">@context.FuelSlot</MudTd>
+                <MudTd DataLabel="نوع سوخت">@context.FuelKind (@context.FuelUnit)</MudTd>
+                <MudTd DataLabel="مقدار">@context.Quantity.ToString("0.####")</MudTd>
+                <MudTd DataLabel="قرائت کارکرد">@context.MeterReading.ToString("0.####") @context.MeterReadingUnit</MudTd>
+                <MudTd DataLabel="قیمت واحد">@context.UnitPriceSnapshot.ToString("N0")</MudTd>
+                <MudTd>
+                    <MudIconButton Icon="@Icons.Material.Filled.Edit" Size="Size.Small"
+                                   OnClick="@(() => Navigation.NavigateTo($"/admin/fuel-consumptions/{context.Id}/edit"))" />
+                    <MudIconButton Icon="@Icons.Material.Filled.Delete" Size="Size.Small" Color="Color.Error"
+                                   OnClick="@(() => DeleteAsync(context.Id))" />
+                </MudTd>
+            </RowTemplate>
+        </MudTable>
+
+        @if (totalPages > 1)
+        {
+            <MudPagination Count="totalPages" Selected="page" SelectedChanged="@(async p => await LoadRecordsAsync(p))" Class="mt-4" />
+        }
+    }
+}
+
+@code {
+    private sealed class NameItem
+    {
+        public Guid Id { get; set; }
+        public string Name { get; set; } = string.Empty;
+    }
+
+    private sealed class AssetItem
+    {
+        public Guid Id { get; set; }
+        public string Code { get; set; } = string.Empty;
+        public string Name { get; set; } = string.Empty;
+    }
+
+    private sealed class FuelConsumptionRow
+    {
+        public Guid Id { get; set; }
+        public string FuelSlot { get; set; } = string.Empty;
+        public string FuelKind { get; set; } = string.Empty;
+        public string FuelUnit { get; set; } = string.Empty;
+        public decimal UnitPriceSnapshot { get; set; }
+        public decimal Quantity { get; set; }
+        public string MeterReadingUnit { get; set; } = string.Empty;
+        public decimal MeterReading { get; set; }
+        public DateTimeOffset RecordedAtUtc { get; set; }
+    }
+
+    private sealed class SearchFuelConsumptionsResponse
+    {
+        public List<FuelConsumptionRow> Items { get; set; } = [];
+        public int Page { get; set; }
+        public int TotalPages { get; set; }
+    }
+
+    private static readonly System.Text.Json.JsonSerializerOptions JsonOptions = new()
+    {
+        PropertyNameCaseInsensitive = true,
+        Converters = { new System.Text.Json.Serialization.JsonStringEnumConverter() },
+    };
+
+    private List<NameItem> organizations = [];
+    private List<AssetItem> assets = [];
+    private List<FuelConsumptionRow> records = [];
+
+    private Guid? selectedOrganizationId;
+    private Guid? selectedAssetId;
+    private int page = 1;
+    private int totalPages;
+    private bool isLoading;
+    private string? errorMessage;
+
+    protected override async Task OnInitializedAsync()
+    {
+        organizations = await GetListAsync<NameItem>("/api/v1/organizations?pageSize=200");
+    }
+
+    private async Task<List<T>> GetListAsync<T>(string url)
+    {
+        try
+        {
+            var client = HttpClientFactory.CreateClient("InternalApi");
+            var response = await client.GetAsync(url);
+            var content = await response.Content.ReadAsStringAsync();
+
+            if (!response.IsSuccessStatusCode)
+            {
+                errorMessage = $"خطا: {content}";
+                return [];
+            }
+
+            using var document = System.Text.Json.JsonDocument.Parse(content);
+
+            if (document.RootElement.ValueKind == System.Text.Json.JsonValueKind.Array)
+            {
+                return System.Text.Json.JsonSerializer.Deserialize<List<T>>(content, JsonOptions) ?? [];
+            }
+
+            foreach (var propertyName in new[] { "items", "Items" })
+            {
+                if (document.RootElement.TryGetProperty(propertyName, out var itemsElement))
+                {
+                    return System.Text.Json.JsonSerializer.Deserialize<List<T>>(itemsElement.GetRawText(), JsonOptions) ?? [];
+                }
+            }
+
+            return [];
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"خطا در بارگذاری اطلاعات ({url}): {ex.Message}";
+            return [];
+        }
+    }
+
+    private async Task OnOrganizationChangedAsync()
+    {
+        assets = [];
+        selectedAssetId = null;
+        records = [];
+
+        if (selectedOrganizationId is null)
+        {
+            return;
+        }
+
+        assets = await GetListAsync<AssetItem>($"/api/v1/assets?organizationId={selectedOrganizationId}&pageSize=200");
+    }
+
+    private async Task LoadRecordsAsync(int requestedPage)
+    {
+        if (selectedAssetId is null)
+        {
+            return;
+        }
+
+        isLoading = true;
+        errorMessage = null;
+
+        try
+        {
+            var client = HttpClientFactory.CreateClient("InternalApi");
+            var response = await client.GetAsync(
+                $"/api/v1/fuel-consumptions?assetId={selectedAssetId}&page={requestedPage}&pageSize=20");
+            var content = await response.Content.ReadAsStringAsync();
+
+            if (response.IsSuccessStatusCode)
+            {
+                var result = System.Text.Json.JsonSerializer.Deserialize<SearchFuelConsumptionsResponse>(content, JsonOptions);
+                records = result?.Items ?? [];
+                page = result?.Page ?? 1;
+                totalPages = result?.TotalPages ?? 0;
+            }
+            else
+            {
+                errorMessage = $"خطا: {content}";
+            }
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+
+    private async Task DeleteAsync(Guid id)
+    {
+        var confirmed = await DialogService.ShowMessageBox(
+            "حذف رکورد سوخت‌گیری",
+            "آیا از حذف این رکورد مطمئن هستید؟ این عملیات قابل بازگشت نیست.",
+            yesText: "حذف", cancelText: "انصراف");
+
+        if (confirmed != true)
+        {
+            return;
+        }
+
+        var client = HttpClientFactory.CreateClient("InternalApi");
+        var response = await client.DeleteAsync($"/api/v1/fuel-consumptions/{id}");
+
+        if (response.IsSuccessStatusCode)
+        {
+            Snackbar.Add("رکورد با موفقیت حذف شد.", Severity.Success);
+            await LoadRecordsAsync(page);
+        }
+        else
+        {
+            var content = await response.Content.ReadAsStringAsync();
+            Snackbar.Add($"خطا در حذف: {content}", Severity.Error);
+        }
+    }
+}

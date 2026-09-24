@@ -24,6 +24,10 @@ public static class DependencyInjection
         services.AddScoped<IPersonnelUnitOfWork>(sp => sp.GetRequiredService<PersonnelDbContext>());
         services.AddScoped<IPersonnelUsageLookupService, PersonnelUsageLookupService>();
 
+        // Cross-module lookup for other modules — currently Consumption
+        // (chat, 2026-09-16).
+        services.AddScoped<IPersonnelLookupService, PersonnelLookupService>();
+
         return services;
     }
 }

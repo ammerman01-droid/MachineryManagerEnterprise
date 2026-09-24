@@ -30,6 +30,8 @@
     <ProjectReference Include="..\..\Modules\WorkCalendar\WorkCalendar.Presentation\WorkCalendar.Presentation.csproj" />
     <ProjectReference Include="..\..\Modules\Personnel\Personnel.Infrastructure\Personnel.Infrastructure.csproj" />
     <ProjectReference Include="..\..\Modules\Personnel\Personnel.Presentation\Personnel.Presentation.csproj" />
+    <ProjectReference Include="..\..\Modules\Consumption\Consumption.Presentation\Consumption.Presentation.csproj" />
+    <ProjectReference Include="..\..\Modules\Consumption\Consumption.Infrastructure\Consumption.Infrastructure.csproj" />
   </ItemGroup>
 
   <ItemGroup>

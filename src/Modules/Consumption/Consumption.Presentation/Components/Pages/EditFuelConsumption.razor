@@ -1,0 +1,325 @@
+@page "/admin/fuel-consumptions/{Id:guid}/edit"
+@using MachineryManagerEnterprise.SharedKernel
+@inject IHttpClientFactory HttpClientFactory
+@inject NavigationManager Navigation
+
+<PageTitle>ویرایش سوخت‌گیری</PageTitle>
+
+<MudText Typo="Typo.h4" Class="mb-4">ویرایش رکورد سوخت‌گیری</MudText>
+
+@if (errorMessage is not null)
+{
+    <MudAlert Severity="Severity.Error" Class="my-4">@errorMessage</MudAlert>
+}
+
+@if (isLoading)
+{
+    <MudProgressLinear Indeterminate="true" Class="my-4" />
+}
+else if (record is not null)
+{
+    <MudPaper Class="pa-4" Style="max-width:650px;">
+        <MudText Typo="Typo.body2" Class="mud-text-secondary mb-2">
+            جایگاه سوخت: @record.FuelSlot — نوع سوخت (ثابت): @record.FuelKind — واحد: @record.FuelUnit
+        </MudText>
+
+        <MudForm @ref="form">
+            <MudSelect T="Guid?" Label="نوع سوخت" Placeholder="نوع سوخت را انتخاب کنید" @bind-Value="fuelTypeId"
+                       Required="true" RequiredError="انتخاب نوع سوخت الزامی است">
+                @foreach (var fuelType in visibleFuelTypes)
+                {
+                    <MudSelectItem T="Guid?" Value="@((Guid?)fuelType.Id)">@fuelType.Name (@fuelType.Price.ToString("N0"))</MudSelectItem>
+                }
+            </MudSelect>
+
+            <MudNumericField T="decimal" Label="مقدار سوخت" @bind-Value="quantity" Required="true" RequiredError="مقدار سوخت الزامی است" Min="0.01m" Format="0.####" Class="mt-2" />
+
+            <MudNumericField T="decimal?" Label="آخرین قرائت ثبت‌شده پیش از این رکورد" Value="previousMeterReading" ReadOnly="true" Disabled="true" Format="0.####" Class="mt-2" />
+
+            <MudNumericField T="decimal" Label="قرائت کارکرد" @bind-Value="meterReading" @bind-Value:after="StateHasChanged"
+                              Required="true" RequiredError="قرائت کارکرد الزامی است" Min="0" Format="0.####" Class="mt-2" />
+
+            <MudNumericField T="decimal" Label="اختلاف با قرائت قبلی" Value="meterReadingDifference" ReadOnly="true" Disabled="true" Format="0.####" Class="mt-2" />
+
+            <MudSelect T="Guid?" Label="تحویل‌دهنده سوخت" Placeholder="تحویل‌دهنده را انتخاب کنید" @bind-Value="deliveredByPersonnelId"
+                       Required="true" RequiredError="انتخاب تحویل‌دهنده الزامی است" Class="mt-2">
+                @foreach (var person in personnel)
+                {
+                    <MudSelectItem T="Guid?" Value="@((Guid?)person.Id)">@person.FullName</MudSelectItem>
+                }
+            </MudSelect>
+
+            <MudSelect T="Guid?" Label="تحویل‌گیرنده سوخت" Placeholder="تحویل‌گیرنده را انتخاب کنید" @bind-Value="receivedByPersonnelId"
+                       Required="true" RequiredError="انتخاب تحویل‌گیرنده الزامی است" Class="mt-2">
+                @foreach (var person in personnel)
+                {
+                    <MudSelectItem T="Guid?" Value="@((Guid?)person.Id)">@person.FullName</MudSelectItem>
+                }
+            </MudSelect>
+
+            <MudDatePicker Label="تاریخ سوخت‌گیری" @bind-Date="recordedAtDate" Required="true" RequiredError="تاریخ الزامی است" Class="mt-2" />
+
+            <MudButton Variant="Variant.Filled" Color="Color.Primary" Class="mt-4" OnClick="SubmitAsync" Disabled="isSubmitting">
+                @(isSubmitting ? "در حال ذخیره..." : "ذخیره تغییرات")
+            </MudButton>
+            <MudButton Variant="Variant.Outlined" Color="Color.Secondary" Class="mt-4 ml-2"
+                       OnClick="@(() => Navigation.NavigateTo($"/admin/fuel-consumptions?assetId={record.AssetId}"))">
+                انصراف
+            </MudButton>
+        </MudForm>
+    </MudPaper>
+}
+
+@code {
+    /// <summary>The fuel-consumption record's identifier, from the route.</summary>
+    [Parameter]
+    public Guid Id { get; set; }
+
+    private sealed class OrganizationItem
+    {
+        public Guid Id { get; set; }
+        public Guid? HoldingId { get; set; }
+    }
+
+    private sealed class FuelTypeItem
+    {
+        public Guid Id { get; set; }
+        public string Name { get; set; } = string.Empty;
+        public long Price { get; set; }
+        public FuelKind Kind { get; set; }
+    }
+
+    private sealed class PersonnelItem
+    {
+        public Guid Id { get; set; }
+        public string? FirstName { get; set; }
+        public string? LastName { get; set; }
+        public string? FullNameField { get; set; }
+
+        public string FullName => !string.IsNullOrWhiteSpace(FullNameField)
+            ? FullNameField!
+            : $"{FirstName} {LastName}".Trim();
+    }
+
+    /// <summary>Mirrors FuelConsumptionDto's JSON shape for deserialization.</summary>
+    private sealed class FuelConsumptionRecord
+    {
+        public Guid Id { get; set; }
+        public Guid AssetId { get; set; }
+        public Guid OrganizationId { get; set; }
+        public Guid ProjectId { get; set; }
+        public string FuelSlot { get; set; } = string.Empty;
+        public string FuelKind { get; set; } = string.Empty;
+        public string FuelUnit { get; set; } = string.Empty;
+        public Guid FuelTypeId { get; set; }
+        public decimal UnitPriceSnapshot { get; set; }
+        public decimal Quantity { get; set; }
+        public string MeterReadingUnit { get; set; } = string.Empty;
+        public decimal MeterReading { get; set; }
+        public Guid DeliveredByPersonnelId { get; set; }
+        public Guid ReceivedByPersonnelId { get; set; }
+        public DateTimeOffset RecordedAtUtc { get; set; }
+        public string? Notes { get; set; }
+    }
+
+    private sealed class FuelConsumptionRow
+    {
+        public decimal MeterReading { get; set; }
+        public DateTimeOffset RecordedAtUtc { get; set; }
+    }
+
+    private static readonly System.Text.Json.JsonSerializerOptions JsonOptions = new()
+    {
+        PropertyNameCaseInsensitive = true,
+        Converters = { new System.Text.Json.Serialization.JsonStringEnumConverter() },
+    };
+
+    private MudForm form = null!;
+    private FuelConsumptionRecord? record;
+    private List<FuelTypeItem> fuelTypes = [];
+    private List<PersonnelItem> personnel = [];
+
+    private Guid? fuelTypeId;
+    private decimal quantity;
+    private decimal meterReading;
+    private decimal? previousMeterReading;
+    private Guid? deliveredByPersonnelId;
+    private Guid? receivedByPersonnelId;
+    private DateTime? recordedAtDate;
+    private bool isLoading = true;
+    private bool isSubmitting;
+    private string? errorMessage;
+
+    // First-ever record for an Asset has no previous reading to compare
+    // against — treat the difference as zero rather than leaving it
+    // blank (chat, 2026-09-22).
+    private decimal meterReadingDifference =>
+        meterReading - (previousMeterReading ?? meterReading);
+
+    // The record's own FuelKind is fixed — the FuelType list is filtered
+    // to only that Kind, same server-invariant as on Create.
+    private IEnumerable<FuelTypeItem> visibleFuelTypes =>
+        record is null ? [] : fuelTypes.Where(f => f.Kind.ToString() == record.FuelKind);
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadRecordAsync();
+
+        if (record is not null)
+        {
+            personnel = await GetListAsync<PersonnelItem>($"/api/v1/personnel?organizationId={record.OrganizationId}");
+
+            var organization = await GetSingleAsync<OrganizationItem>($"/api/v1/organizations/{record.OrganizationId}");
+
+            if (organization?.HoldingId is { } holdingId)
+            {
+                fuelTypes = await GetListAsync<FuelTypeItem>($"/api/v1/fuel-types?holdingId={holdingId}");
+            }
+
+            await LoadPreviousMeterReadingAsync();
+        }
+
+        isLoading = false;
+    }
+
+    private async Task<List<T>> GetListAsync<T>(string url)
+    {
+        try
+        {
+            var client = HttpClientFactory.CreateClient("InternalApi");
+            var response = await client.GetAsync(url);
+            var content = await response.Content.ReadAsStringAsync();
+
+            if (!response.IsSuccessStatusCode)
+            {
+                errorMessage = $"خطا: {content}";
+                return [];
+            }
+
+            using var document = System.Text.Json.JsonDocument.Parse(content);
+
+            if (document.RootElement.ValueKind == System.Text.Json.JsonValueKind.Array)
+            {
+                return System.Text.Json.JsonSerializer.Deserialize<List<T>>(content, JsonOptions) ?? [];
+            }
+
+            foreach (var propertyName in new[] { "items", "Items" })
+            {
+                if (document.RootElement.TryGetProperty(propertyName, out var itemsElement))
+                {
+                    return System.Text.Json.JsonSerializer.Deserialize<List<T>>(itemsElement.GetRawText(), JsonOptions) ?? [];
+                }
+            }
+
+            return [];
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"خطا در بارگذاری اطلاعات ({url}): {ex.Message}";
+            return [];
+        }
+    }
+
+    private async Task<T?> GetSingleAsync<T>(string url) where T : class
+    {
+        try
+        {
+            var client = HttpClientFactory.CreateClient("InternalApi");
+            var response = await client.GetAsync(url);
+            var content = await response.Content.ReadAsStringAsync();
+
+            return response.IsSuccessStatusCode
+                ? System.Text.Json.JsonSerializer.Deserialize<T>(content, JsonOptions)
+                : null;
+        }
+        catch
+        {
+            return null;
+        }
+    }
+
+    private async Task LoadRecordAsync()
+    {
+        record = await GetSingleAsync<FuelConsumptionRecord>($"/api/v1/fuel-consumptions/{Id}");
+
+        if (record is null)
+        {
+            errorMessage = "رکورد یافت نشد.";
+            return;
+        }
+
+        fuelTypeId = record.FuelTypeId;
+        quantity = record.Quantity;
+        meterReading = record.MeterReading;
+        deliveredByPersonnelId = record.DeliveredByPersonnelId;
+        receivedByPersonnelId = record.ReceivedByPersonnelId;
+        recordedAtDate = record.RecordedAtUtc.Date;
+    }
+
+    private async Task LoadPreviousMeterReadingAsync()
+    {
+        if (record is null)
+        {
+            return;
+        }
+
+        // Excludes this record itself by taking the two most recent rows
+        // and picking whichever isn't this record's own id.
+        var rows = await GetListAsync<FuelConsumptionRow>($"/api/v1/fuel-consumptions?assetId={record.AssetId}&page=1&pageSize=5");
+        previousMeterReading = rows
+            .Where(r => r.RecordedAtUtc < record.RecordedAtUtc)
+            .OrderByDescending(r => r.RecordedAtUtc)
+            .FirstOrDefault()?.MeterReading;
+    }
+
+    private async Task SubmitAsync()
+    {
+        await form.Validate();
+        if (!form.IsValid || record is null || fuelTypeId is null || deliveredByPersonnelId is null || receivedByPersonnelId is null)
+        {
+            return;
+        }
+
+        isSubmitting = true;
+        errorMessage = null;
+
+        try
+        {
+            var combinedLocalDateTime = DateTime.SpecifyKind(
+                (recordedAtDate ?? DateTime.Today).Date + DateTime.Now.TimeOfDay,
+                DateTimeKind.Utc);
+            var recordedAtUtc = new DateTimeOffset(combinedLocalDateTime);
+
+            var client = HttpClientFactory.CreateClient("InternalApi");
+            var response = await client.PutAsJsonAsync($"/api/v1/fuel-consumptions/{Id}", new
+            {
+                FuelTypeId = fuelTypeId.Value,
+                Quantity = quantity,
+                MeterReading = meterReading,
+                DeliveredByPersonnelId = deliveredByPersonnelId.Value,
+                ReceivedByPersonnelId = receivedByPersonnelId.Value,
+                RecordedAtUtc = recordedAtUtc,
+                Notes = record.Notes,
+            });
+
+            var content = await response.Content.ReadAsStringAsync();
+
+            if (response.IsSuccessStatusCode)
+            {
+                Navigation.NavigateTo($"/admin/fuel-consumptions?assetId={record.AssetId}");
+            }
+            else
+            {
+                errorMessage = $"خطا در ذخیره تغییرات: {content}";
+            }
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"خطا: {ex.Message}";
+        }
+        finally
+        {
+            isSubmitting = false;
+        }
+    }
+}

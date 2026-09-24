@@ -31,6 +31,9 @@ using MachineryManagerEnterprise.WorkCalendar.Application;
 using MachineryManagerEnterprise.Personnel.Application;
 using MachineryManagerEnterprise.Personnel.Infrastructure;
 using MachineryManagerEnterprise.Personnel.Presentation.Endpoints;
+using MachineryManagerEnterprise.Consumption.Application;
+using MachineryManagerEnterprise.Consumption.Infrastructure;
+using MachineryManagerEnterprise.Consumption.Presentation.Endpoints;
 
 Log.Logger = new LoggerConfiguration()
     .WriteTo.Console()
@@ -97,6 +100,10 @@ try
     builder.Services.AddPersonnelApplication();
     builder.Services.AddPersonnelInfrastructure(builder.Configuration);
 
+    // Consumption module (chat, 2026-09-22 — first wiring; module previously existed but was never registered)
+    builder.Services.AddConsumptionApplication();
+    builder.Services.AddConsumptionInfrastructure(builder.Configuration);
+
 
 
     var app = builder.Build();
@@ -137,7 +144,8 @@ try
         typeof(MachineryManagerEnterprise.Configuration.Presentation.Components.Pages.ColorsList).Assembly,
         typeof(MachineryManagerEnterprise.AuditLog.Presentation.Components.Pages.AuditLogList).Assembly,
         typeof(MachineryManagerEnterprise.WorkCalendar.Presentation.Components.Pages.WorkCalendarsList).Assembly,
-        typeof(MachineryManagerEnterprise.Personnel.Presentation.Components.Pages.PersonnelList).Assembly);
+        typeof(MachineryManagerEnterprise.Personnel.Presentation.Components.Pages.PersonnelList).Assembly,
+        typeof(MachineryManagerEnterprise.Consumption.Presentation.Components.Pages.FuelConsumptionsList).Assembly);
 
     // Identity endpoints
     app.MapIdentityConnectEndpoints();
@@ -176,6 +184,9 @@ try
 
     // Personnel endpoints
     app.MapPersonnelEndpoints();
+
+    // Consumption endpoints
+    app.MapFuelConsumptionEndpoints();
 
     app.Run();
 }

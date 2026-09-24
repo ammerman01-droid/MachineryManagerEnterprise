@@ -8,8 +8,7 @@
 
     @foreach (var category in categories)
     {
-        <MudNavGroup Title="@category.Title" Icon="@category.Icon"
-                     Expanded="@(expandedCategoryKey == category.Key)"
+        <MudNavGroup Title="@category.Title" Icon="@category.Icon" Expanded="@(expandedCategoryKey == category.Key)"
                      ExpandedChanged="@((bool isExpanded) => OnGroupExpandedChanged(category.Key, isExpanded))">
             @foreach (var link in category.Links)
             {
@@ -64,6 +63,10 @@
             new("مدل‌های موتور", "admin/engine-models", Icons.Material.Filled.Settings),
             new("دارایی‌ها", "admin/assets", Icons.Material.Filled.LocalShipping),
         }),
+        new NavMenuCategory("consumption", "مصرف سوخت", Icons.Material.Filled.LocalGasStation, new List<NavMenuLink>
+        {
+         new("سوخت‌گیری‌ها", "admin/fuel-consumptions", Icons.Material.Filled.LocalGasStation),
+        }),
         new NavMenuCategory("access", "دسترسی کاربران", Icons.Material.Filled.AdminPanelSettings, new List<NavMenuLink>
         {
             new("پروفایل‌ها", "admin/profiles", Icons.Material.Filled.Security),
@@ -88,29 +91,29 @@
     }
 
     private void SetExpandedCategoryFromCurrentUri()
-{
-    var relativePath = Navigation.ToBaseRelativePath(Navigation.Uri).TrimEnd('/');
-
-    // Fix (chat, 2026-09-15): a Project's Work Calendar lives under
-    // "admin/projects/{id}/work-calendar", which is also a prefix
-    // match for the "structure" category's own "admin/projects" link.
-    // Check this more specific case first so the "work-calendar"
-    // category wins whenever the path is actually about a calendar.
-    if (relativePath.Contains("/work-calendar", StringComparison.OrdinalIgnoreCase) ||
-        relativePath.StartsWith("admin/work-calendars/", StringComparison.OrdinalIgnoreCase))
     {
-        expandedCategoryKey = "work-calendar";
-        return;
-    }
+        var relativePath = Navigation.ToBaseRelativePath(Navigation.Uri).TrimEnd('/');
 
-    var matchedCategory = categories.FirstOrDefault(category =>
-        category.Links.Any(link => MatchesCurrentPath(relativePath, link.Href)));
+        // Fix (chat, 2026-09-15): a Project's Work Calendar lives under
+        // "admin/projects/{id}/work-calendar", which is also a prefix
+        // match for the "structure" category's own "admin/projects" link.
+        // Check this more specific case first so the "work-calendar"
+        // category wins whenever the path is actually about a calendar.
+        if (relativePath.Contains("/work-calendar", StringComparison.OrdinalIgnoreCase) ||
+            relativePath.StartsWith("admin/work-calendars/", StringComparison.OrdinalIgnoreCase))
+        {
+            expandedCategoryKey = "work-calendar";
+            return;
+        }
 
-    if (matchedCategory is not null)
-    {
-        expandedCategoryKey = matchedCategory.Key;
+        var matchedCategory = categories.FirstOrDefault(category =>
+            category.Links.Any(link => MatchesCurrentPath(relativePath, link.Href)));
+
+        if (matchedCategory is not null)
+        {
+            expandedCategoryKey = matchedCategory.Key;
+        }
     }
-}
 
     private static bool MatchesCurrentPath(string relativePath, string href) =>
         relativePath.Equals(href, StringComparison.OrdinalIgnoreCase) ||
