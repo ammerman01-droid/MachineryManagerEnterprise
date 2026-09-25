@@ -13,6 +13,7 @@
   <ItemGroup>
     <ProjectReference Include="..\Consumption.Application\Consumption.Application.csproj" />
     <ProjectReference Include="..\..\..\BuildingBlocks\MachineryManagerEnterprise.SharedKernel\MachineryManagerEnterprise.SharedKernel.csproj" />
+<ProjectReference Include="..\..\..\BuildingBlocks\MachineryManagerEnterprise.UI\MachineryManagerEnterprise.UI.csproj" />
   </ItemGroup>
 
   <ItemGroup>

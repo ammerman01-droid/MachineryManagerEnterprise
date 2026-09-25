@@ -79,7 +79,7 @@
             <MudText Typo="Typo.caption" Color="Color.Warning">پرسنل فعالی برای این سازمان یافت نشد.</MudText>
         }
 
-        <MudDatePicker Label="تاریخ سوخت‌گیری" @bind-Date="recordedAtDate" Required="true" RequiredError="تاریخ الزامی است" Class="mt-2" />
+        <JalaliDatePicker Label="تاریخ سوخت‌گیری" @bind-Date="recordedAtDate" Required="true" RequiredError="تاریخ الزامی است" Class="mt-2" />
 
         <MudButton Variant="Variant.Filled" Color="Color.Primary" Class="mt-4" OnClick="SubmitAsync" Disabled="isSubmitting">
             @(isSubmitting ? "در حال ثبت..." : "ثبت")

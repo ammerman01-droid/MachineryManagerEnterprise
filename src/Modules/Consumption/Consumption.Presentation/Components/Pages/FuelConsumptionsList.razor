@@ -57,7 +57,7 @@
                 <MudTh></MudTh>
             </HeaderContent>
             <RowTemplate>
-                <MudTd DataLabel="تاریخ">@context.RecordedAtUtc.LocalDateTime.ToString("yyyy-MM-dd")</MudTd>
+                <MudTd DataLabel="تاریخ">@JalaliCalendarConverter.Format(context.RecordedAtUtc.LocalDateTime)</MudTd>
                 <MudTd DataLabel="جایگاه">@context.FuelSlot</MudTd>
                 <MudTd DataLabel="نوع سوخت">@context.FuelKind (@context.FuelUnit)</MudTd>
                 <MudTd DataLabel="مقدار">@context.Quantity.ToString("0.####")</MudTd>
