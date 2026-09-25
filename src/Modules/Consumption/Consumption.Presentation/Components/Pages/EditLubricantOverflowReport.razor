@@ -23,8 +23,8 @@ else
 {
     <MudPaper Class="pa-4" Style="max-width:900px;">
         <MudForm @ref="form">
-            <MudDatePicker Label="تاریخ گزارش" @bind-Date="reportDateAsDateTime" Required="true" Class="mb-2" />
-            <MudNumericField T="decimal" Label="قرائت کارکرد" @bind-Value="hourMeterReading" Min="0" Required="true" Class="mb-4" />
+            <JalaliDatePicker Label="تاریخ گزارش" @bind-Date="reportDateAsDateTime" Required="true" Class="mb-2" />
+            <MudNumericField T="decimal" Label="قرائت کارکرد" @bind-Value="hourMeterReading" Format="0.##" Min="0" Required="true" Class="mb-4" />
 
             <MudText Typo="Typo.h6" Class="mb-2">بخش‌های سرریز</MudText>
             @foreach (var line in lines)
@@ -48,7 +48,7 @@ else
                             </MudSelect>
                         </MudItem>
                         <MudItem xs="12" sm="2">
-                            <MudNumericField T="decimal" Label="میزان (لیتر)" @bind-Value="line.AmountInLiters" Min="0.01m" Required="true" />
+                            <MudNumericField T="decimal" Label="میزان (لیتر)" @bind-Value="line.AmountInLiters" Format="0.##" Min="0.01m" Required="true" />
                         </MudItem>
                         <MudItem xs="12" sm="3">
                             <MudTextField T="string" Label="علت سرریز" @bind-Value="line.Reason" Required="true" MaxLength="500" />
@@ -79,8 +79,11 @@ else
                         <MudItem xs="12" sm="3">
                             <MudTimePicker Label="ساعت شروع" @bind-Time="entry.StartTimeAsTimeSpan" Required="true" />
                         </MudItem>
-                        <MudItem xs="12" sm="3">
-                            <MudTimePicker Label="مدت انجام کار" @bind-Time="entry.DurationAsTimeSpan" Required="true" />
+                        <MudItem xs="6" sm="1">
+                            <MudNumericField T="int?" Label="ساعت" @bind-Value="entry.DurationHours" Min="0" Max="3" />
+                        </MudItem>
+                        <MudItem xs="6" sm="2">
+                            <MudNumericField T="int?" Label="دقیقه" @bind-Value="entry.DurationMinutes" Min="0" Max="59" />
                         </MudItem>
                         <MudItem xs="12" sm="2" Class="d-flex align-center">
                             <MudIconButton Icon="@Icons.Material.Filled.Delete" Color="Color.Error" OnClick="@(() => personnelEntries.Remove(entry))" />
@@ -141,7 +144,8 @@ else
     {
         public Guid? PersonnelId { get; set; }
         public TimeSpan? StartTimeAsTimeSpan { get; set; }
-        public TimeSpan? DurationAsTimeSpan { get; set; }
+        public int? DurationHours { get; set; }
+        public int? DurationMinutes { get; set; }
     }
 
     private sealed class ReportDetails
@@ -228,7 +232,8 @@ else
             {
                 PersonnelId = e.PersonnelId,
                 StartTimeAsTimeSpan = e.StartTime.ToTimeSpan(),
-                DurationAsTimeSpan = e.Duration,
+                DurationHours = e.Duration.Hours,
+                DurationMinutes = e.Duration.Minutes,
             }).ToList();
 
             if (canBeModified)
@@ -288,12 +293,13 @@ else
                 HourMeterReading = hourMeterReading,
                 Lines = lines.Select(l => new { OverflowComponentId = l.OverflowComponentId!.Value, LubricantTypeId = l.LubricantTypeId!.Value, l.AmountInLiters, l.Reason }),
                 PersonnelEntries = personnelEntries
-                    .Where(e => e.PersonnelId is not null && e.StartTimeAsTimeSpan is not null && e.DurationAsTimeSpan is not null)
+                    .Where(e => e.PersonnelId is not null && e.StartTimeAsTimeSpan is not null &&
+                                (e.DurationHours is > 0 || e.DurationMinutes is > 0))
                     .Select(e => new
                     {
                         PersonnelId = e.PersonnelId!.Value,
                         StartTime = TimeOnly.FromTimeSpan(e.StartTimeAsTimeSpan!.Value),
-                        Duration = e.DurationAsTimeSpan!.Value,
+                        Duration = TimeSpan.FromHours(e.DurationHours ?? 0) + TimeSpan.FromMinutes(e.DurationMinutes ?? 0),
                     }),
             };
 

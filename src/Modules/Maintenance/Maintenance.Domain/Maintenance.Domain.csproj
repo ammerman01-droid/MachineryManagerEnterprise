@@ -1,0 +1,12 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <RootNamespace>MachineryManagerEnterprise.Maintenance.Domain</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\BuildingBlocks\MachineryManagerEnterprise.SharedKernel\MachineryManagerEnterprise.SharedKernel.csproj" />
+    <ProjectReference Include="..\..\..\BuildingBlocks\MachineryManagerEnterprise.SharedKernel.Abstractions\MachineryManagerEnterprise.SharedKernel.Abstractions.csproj" />
+  </ItemGroup>
+
+</Project>

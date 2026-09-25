@@ -55,4 +55,12 @@ public sealed class PersonnelLookupService : IPersonnelLookupService
             .Select(p => (Guid?)p.OrganizationId)
             .FirstOrDefaultAsync(cancellationToken);
     }
+
+    /// <inheritdoc />
+    public async Task<string?> GetFullNameAsync(Guid personnelId, CancellationToken cancellationToken = default)
+    {
+        var id = global::MachineryManagerEnterprise.Personnel.Domain.PersonnelId.From(personnelId);
+        var personnel = await _dbContext.PersonnelRecords.AsNoTracking().FirstOrDefaultAsync(p => p.Id == id, cancellationToken);
+        return personnel is null ? null : $"{personnel.FirstName} {personnel.LastName}";
+    }
 }

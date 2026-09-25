@@ -1,0 +1,18 @@
+<Project Sdk="Microsoft.NET.Sdk.Razor">
+
+  <PropertyGroup>
+    <RootNamespace>MachineryManagerEnterprise.Maintenance.Presentation</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Maintenance.Application\Maintenance.Application.csproj" />
+    <ProjectReference Include="..\..\..\BuildingBlocks\MachineryManagerEnterprise.UI\MachineryManagerEnterprise.UI.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="MediatR" />
+    <PackageReference Include="MudBlazor" />
+    <PackageReference Include="OpenIddict.Validation.AspNetCore" />
+  </ItemGroup>
+
+</Project>

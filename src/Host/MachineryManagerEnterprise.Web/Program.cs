@@ -34,6 +34,9 @@ using MachineryManagerEnterprise.Personnel.Presentation.Endpoints;
 using MachineryManagerEnterprise.Consumption.Application;
 using MachineryManagerEnterprise.Consumption.Infrastructure;
 using MachineryManagerEnterprise.Consumption.Presentation.Endpoints;
+using MachineryManagerEnterprise.Maintenance.Application;
+using MachineryManagerEnterprise.Maintenance.Infrastructure;
+using MachineryManagerEnterprise.Maintenance.Presentation.Endpoints;
 
 Log.Logger = new LoggerConfiguration()
     .WriteTo.Console()
@@ -104,7 +107,9 @@ try
     builder.Services.AddConsumptionApplication();
     builder.Services.AddConsumptionInfrastructure(builder.Configuration);
 
-
+    // Maintenance module
+    builder.Services.AddMaintenanceApplication();
+    builder.Services.AddMaintenanceInfrastructure(builder.Configuration);
 
     var app = builder.Build();
 
@@ -145,7 +150,9 @@ try
         typeof(MachineryManagerEnterprise.AuditLog.Presentation.Components.Pages.AuditLogList).Assembly,
         typeof(MachineryManagerEnterprise.WorkCalendar.Presentation.Components.Pages.WorkCalendarsList).Assembly,
         typeof(MachineryManagerEnterprise.Personnel.Presentation.Components.Pages.PersonnelList).Assembly,
-        typeof(MachineryManagerEnterprise.Consumption.Presentation.Components.Pages.LubricantOverflowReportsList).Assembly);
+        typeof(MachineryManagerEnterprise.Consumption.Presentation.Components.Pages.LubricantOverflowReportsList).Assembly,
+        typeof(MachineryManagerEnterprise.Maintenance.Presentation.Components.Pages.WorkOrdersList).Assembly
+        );
 
     // Identity endpoints
     app.MapIdentityConnectEndpoints();
@@ -191,6 +198,9 @@ try
     app.MapFuelConsumptionEndpoints();
     app.MapLubricantOverflowReportEndpoints();
     app.MapConsumptionFreezeSettingEndpoints();
+
+    // Maintenance endpoints
+    app.MapWorkOrderEndpoints();
 
     app.Run();
 }

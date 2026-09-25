@@ -1,0 +1,298 @@
+@page "/maintenance/work-orders/{WorkOrderId:guid}"
+@using MachineryManagerEnterprise.Maintenance.Application.Features.WorkOrders.Dtos
+@using MachineryManagerEnterprise.Maintenance.Domain
+@using MachineryManagerEnterprise.Maintenance.Presentation.Contracts
+@inject HttpClient Http
+@inject NavigationManager Navigation
+@inject ISnackbar Snackbar
+@inject IDialogService DialogService
+
+<PageTitle>دستور کار @(_dto?.Number.ToString() ?? "")</PageTitle>
+
+<MudContainer MaxWidth="MaxWidth.Medium" Class="mt-4">
+    @if (_isLoading)
+    {
+        <MudProgressLinear Indeterminate="true" />
+    }
+    else if (_dto is null)
+    {
+        <MudAlert Severity="Severity.Error">دستور کار یافت نشد.</MudAlert>
+    }
+    else
+    {
+        <MudStack Row="true" Justify="Justify.SpaceBetween" AlignItems="AlignItems.Center" Class="mb-4">
+            <MudText Typo="Typo.h5">دستور کار شماره @_dto.Number</MudText>
+            <MudChip T="string" Color="@StatusColor(_dto.Status)">@TranslateStatus(_dto.Status)</MudChip>
+        </MudStack>
+
+        @if (_dto.Status == nameof(WorkOrderStatus.Open))
+        {
+            <MudStack Row="true" Class="mb-4" Spacing="2">
+                <MudButton Variant="Variant.Outlined" Color="Color.Primary" OnClick="@(() => _isEditing = !_isEditing)">
+                    @(_isEditing ? "انصراف از ویرایش" : "ویرایش")
+                </MudButton>
+                <MudButton Variant="Variant.Outlined" Color="Color.Success" OnClick="ConvertToRepairAsync">
+                    تبدیل به تعمیر
+                </MudButton>
+                <MudButton Variant="Variant.Outlined" Color="Color.Error" OnClick="OpenCancelDialogAsync">
+                    لغو دستور کار
+                </MudButton>
+            </MudStack>
+        }
+
+        @if (_isEditing)
+        {
+            <MudForm Model="@_editModel" @ref="_form">
+                <MudGrid>
+                    <MudItem xs="12" sm="6">
+                        <MudDatePicker Label="تاریخ اعلام" @bind-Date="_reportedDate" />
+                    </MudItem>
+                    <MudItem xs="12" sm="6">
+                        <MudTimePicker Label="ساعت اعلام" @bind-Time="_reportedTime" />
+                    </MudItem>
+
+                    <MudItem xs="12" sm="6">
+                        <MudSelect T="WorkOrderAssetStatus" @bind-Value="_editModel.ResultingAssetStatus" Label="وضعیت دستگاه">
+                            <MudSelectItem Value="WorkOrderAssetStatus.Active">فعال</MudSelectItem>
+                            <MudSelectItem Value="WorkOrderAssetStatus.OutOfService">خارج از سرویس</MudSelectItem>
+                        </MudSelect>
+                    </MudItem>
+                    <MudItem xs="12" sm="6">
+                        <MudNumericField T="decimal" @bind-Value="_editModel.MeterReading" Label="قرائت کنتور" Min="0" />
+                    </MudItem>
+
+                    <MudItem xs="12" sm="6">
+                        <MudSelect T="RepairPriority" @bind-Value="_editModel.Priority" Label="اولویت">
+                            <MudSelectItem Value="RepairPriority.Urgent">فوری</MudSelectItem>
+                            <MudSelectItem Value="RepairPriority.Normal">عادی</MudSelectItem>
+                        </MudSelect>
+                    </MudItem>
+                    <MudItem xs="12" sm="6">
+                        <MudSelect T="RepairType" @bind-Value="_editModel.RepairType" Label="نوع تعمیر">
+                            <MudSelectItem Value="RepairType.Major">اساسی</MudSelectItem>
+                            <MudSelectItem Value="RepairType.Minor">جزئی</MudSelectItem>
+                        </MudSelect>
+                    </MudItem>
+
+                    <MudItem xs="12" sm="6">
+                        <MudTextField T="Guid" @bind-Value="_editModel.ResponsiblePersonnelId" Label="شناسه مسئول تعمیرات" />
+                    </MudItem>
+                    <MudItem xs="12" sm="6">
+                        <MudSelect T="RepairLocation" @bind-Value="_editModel.PredictedRepairLocation" Label="محل پیش‌بینی‌شده تعمیر">
+                            <MudSelectItem Value="RepairLocation.AssetSite">محل کار دستگاه</MudSelectItem>
+                            <MudSelectItem Value="RepairLocation.SiteWorkshop">تعمیرگاه مستقر در کارگاه</MudSelectItem>
+                            <MudSelectItem Value="RepairLocation.CentralWorkshop">تعمیرگاه مرکزی</MudSelectItem>
+                            <MudSelectItem Value="RepairLocation.RegionalExternalWorkshop">تعمیرگاه خارج از شرکت در منطقه</MudSelectItem>
+                            <MudSelectItem Value="RepairLocation.ExternalWorkshop">تعمیرگاه خارج از شرکت</MudSelectItem>
+                        </MudSelect>
+                    </MudItem>
+
+                    <MudItem xs="12" sm="6">
+                        <MudSelect T="RepairablePart" @bind-Value="_editModel.PartNeedingRepair" Label="بخش نیازمند تعمیر">
+                            <MudSelectItem Value="RepairablePart.Engine">موتور</MudSelectItem>
+                            <MudSelectItem Value="RepairablePart.Gearbox">گیربکس</MudSelectItem>
+                            <MudSelectItem Value="RepairablePart.Hydraulic">هیدرولیک</MudSelectItem>
+                            <MudSelectItem Value="RepairablePart.Chassis">زیربندی</MudSelectItem>
+                            <MudSelectItem Value="RepairablePart.Electrical">برق</MudSelectItem>
+                            <MudSelectItem Value="RepairablePart.Body">بدنه</MudSelectItem>
+                            <MudSelectItem Value="RepairablePart.Other">سایر</MudSelectItem>
+                        </MudSelect>
+                    </MudItem>
+
+                    <MudItem xs="12">
+                        <MudTextField T="string" @bind-Value="_editModel.ObservationDescription" Label="شرح مشاهدات" Lines="4" />
+                    </MudItem>
+                </MudGrid>
+
+                <MudStack Row="true" Justify="Justify.FlexEnd" Class="mt-4">
+                    <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="SaveEditAsync">ذخیره</MudButton>
+                </MudStack>
+            </MudForm>
+        }
+        else
+        {
+            <MudSimpleTable>
+                <tbody>
+                    <tr><td>دارایی</td><td>@(_dto.AssetName ?? _dto.AssetCode ?? _dto.AssetId.ToString())</td></tr>
+                    <tr><td>پروژه</td><td>@_dto.ProjectId</td></tr>
+                    <tr><td>تاریخ اعلام</td><td>@_dto.ReportedAt.ToLocalTime().ToString("yyyy-MM-dd HH:mm")</td></tr>
+                    <tr><td>وضعیت دستگاه</td><td>@(_dto.ResultingAssetStatus == nameof(WorkOrderAssetStatus.Active) ? "فعال" : "خارج از سرویس")</td></tr>
+                    <tr><td>قرائت کنتور</td><td>@_dto.MeterReading</td></tr>
+                    <tr><td>اولویت</td><td>@(_dto.Priority == nameof(RepairPriority.Urgent) ? "فوری" : "عادی")</td></tr>
+                    <tr><td>نوع تعمیر</td><td>@(_dto.RepairType == nameof(RepairType.Major) ? "اساسی" : "جزئی")</td></tr>
+                    <tr><td>مسئول تعمیر</td><td>@(_dto.ResponsiblePersonnelName ?? _dto.ResponsiblePersonnelId.ToString())</td></tr>
+                    <tr><td>محل پیش‌بینی‌شده تعمیر</td><td>@_dto.PredictedRepairLocation</td></tr>
+                    <tr><td>بخش نیازمند تعمیر</td><td>@_dto.PartNeedingRepair</td></tr>
+                    <tr><td>شرح مشاهدات</td><td>@_dto.ObservationDescription</td></tr>
+                    @if (!string.IsNullOrWhiteSpace(_dto.CancellationReason))
+                    {
+                        <tr><td>دلیل لغو</td><td>@_dto.CancellationReason</td></tr>
+                    }
+                </tbody>
+            </MudSimpleTable>
+        }
+    }
+</MudContainer>
+
+@code {
+    /// <summary>The Work Order's identifier, bound from the route.</summary>
+    [Parameter]
+    public Guid WorkOrderId { get; set; }
+
+    private bool _isLoading = true;
+    private bool _isEditing;
+    private WorkOrderDto? _dto;
+    private MudForm? _form;
+    private readonly EditFormModel _editModel = new();
+    private DateTime? _reportedDate;
+    private TimeSpan? _reportedTime;
+
+    /// <inheritdoc />
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadAsync();
+    }
+
+    private async Task LoadAsync()
+    {
+        _isLoading = true;
+
+        try
+        {
+            _dto = await Http.GetFromJsonAsync<WorkOrderDto>($"/api/v1/work-orders/{WorkOrderId}");
+
+            if (_dto is not null)
+            {
+                _reportedDate = _dto.ReportedAt.LocalDateTime.Date;
+                _reportedTime = _dto.ReportedAt.LocalDateTime.TimeOfDay;
+
+                _editModel.ResultingAssetStatus = Enum.Parse<WorkOrderAssetStatus>(_dto.ResultingAssetStatus);
+                _editModel.MeterReading = _dto.MeterReading;
+                _editModel.Priority = Enum.Parse<RepairPriority>(_dto.Priority);
+                _editModel.RepairType = Enum.Parse<RepairType>(_dto.RepairType);
+                _editModel.ResponsiblePersonnelId = _dto.ResponsiblePersonnelId;
+                _editModel.ObservationDescription = _dto.ObservationDescription;
+                _editModel.PredictedRepairLocation = Enum.Parse<RepairLocation>(_dto.PredictedRepairLocation);
+                _editModel.PartNeedingRepair = Enum.Parse<RepairablePart>(_dto.PartNeedingRepair);
+            }
+        }
+        finally
+        {
+            _isLoading = false;
+        }
+    }
+
+    private async Task SaveEditAsync()
+    {
+        var reportedAt = new DateTimeOffset(
+            (_reportedDate ?? DateTime.Today).Date.Add(_reportedTime ?? TimeSpan.Zero),
+            TimeSpan.Zero);
+
+        var request = new EditWorkOrderRequest(
+            reportedAt,
+            _editModel.ResultingAssetStatus,
+            _editModel.MeterReading,
+            _editModel.Priority,
+            _editModel.RepairType,
+            _editModel.ResponsiblePersonnelId,
+            _editModel.ObservationDescription,
+            _editModel.PredictedRepairLocation,
+            _editModel.PartNeedingRepair);
+
+        var response = await Http.PutAsJsonAsync($"/api/v1/work-orders/{WorkOrderId}", request);
+
+        if (response.IsSuccessStatusCode)
+        {
+            Snackbar.Add("دستور کار به‌روزرسانی شد.", Severity.Success);
+            _isEditing = false;
+            await LoadAsync();
+        }
+        else
+        {
+            Snackbar.Add("به‌روزرسانی با خطا مواجه شد.", Severity.Error);
+        }
+    }
+
+    private async Task ConvertToRepairAsync()
+    {
+        var confirmed = await DialogService.ShowMessageBox(
+            "تبدیل به تعمیر",
+            "پس از تبدیل، این دستور کار دیگر قابل ویرایش یا لغو نخواهد بود. ادامه می‌دهید؟",
+            yesText: "بله", cancelText: "انصراف");
+
+        if (confirmed != true)
+        {
+            return;
+        }
+
+        var response = await Http.PostAsync($"/api/v1/work-orders/{WorkOrderId}/convert-to-repair", null);
+
+        if (response.IsSuccessStatusCode)
+        {
+            Snackbar.Add("دستور کار به تعمیر تبدیل شد.", Severity.Success);
+            await LoadAsync();
+        }
+        else
+        {
+            Snackbar.Add("عملیات با خطا مواجه شد.", Severity.Error);
+        }
+    }
+
+    private async Task OpenCancelDialogAsync()
+    {
+        var parameters = new DialogParameters<CancelWorkOrderDialog> { { x => x.Reason, string.Empty } };
+        var dialog = await DialogService.ShowAsync<CancelWorkOrderDialog>("لغو دستور کار", parameters);
+        var result = await dialog.Result;
+
+        if (result is null || result.Canceled || result.Data is not string reason || string.IsNullOrWhiteSpace(reason))
+        {
+            return;
+        }
+
+        var response = await Http.PostAsJsonAsync($"/api/v1/work-orders/{WorkOrderId}/cancel", new CancelWorkOrderRequest(reason));
+
+        if (response.IsSuccessStatusCode)
+        {
+            Snackbar.Add("دستور کار لغو شد.", Severity.Success);
+            await LoadAsync();
+        }
+        else
+        {
+            Snackbar.Add("لغو دستور کار با خطا مواجه شد.", Severity.Error);
+        }
+    }
+
+    private static string TranslateStatus(string status) => status switch
+    {
+        "Open" => "باز",
+        "Cancelled" => "لغو شده",
+        "InRepair" => "در حال تعمیر",
+        _ => status,
+    };
+
+    private static Color StatusColor(string status) => status switch
+    {
+        "Open" => Color.Primary,
+        "Cancelled" => Color.Error,
+        "InRepair" => Color.Success,
+        _ => Color.Default,
+    };
+
+    // Mutable form-backing class for the edit form (chat, 2026-09-22 fix)
+    // — MudBlazor's @bind-Value generates a plain property assignment
+    // (`_editModel.X = value`), which fails to compile against
+    // EditWorkOrderRequest's init-only record properties (CS8852). The
+    // immutable EditWorkOrderRequest is only constructed once, in
+    // SaveEditAsync, from this mutable model.
+    private sealed class EditFormModel
+    {
+        public WorkOrderAssetStatus ResultingAssetStatus { get; set; }
+        public decimal MeterReading { get; set; }
+        public RepairPriority Priority { get; set; }
+        public RepairType RepairType { get; set; }
+        public Guid ResponsiblePersonnelId { get; set; }
+        public string ObservationDescription { get; set; } = string.Empty;
+        public RepairLocation PredictedRepairLocation { get; set; }
+        public RepairablePart PartNeedingRepair { get; set; }
+    }
+}

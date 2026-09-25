@@ -84,8 +84,8 @@
                 <MudTh>عملیات</MudTh>
             </HeaderContent>
             <RowTemplate>
-                <MudTd DataLabel="تاریخ">@context.ReportDate.ToString("yyyy/MM/dd")</MudTd>
-                <MudTd DataLabel="قرائت کارکرد">@context.HourMeterReading</MudTd>
+                <MudTd DataLabel="تاریخ">@JalaliCalendarConverter.Format(context.ReportDate.ToDateTime(TimeOnly.MinValue))</MudTd>
+                <MudTd DataLabel="قرائت کارکرد">@context.HourMeterReading.ToString("0.##")</MudTd>
                 <MudTd DataLabel="تعداد بخش سرریز">@context.Lines.Count</MudTd>
                 <MudTd DataLabel="وضعیت">
                     @if (context.CanBeModified)
@@ -370,7 +370,7 @@
     {
         var confirmed = await DialogService.ShowMessageBox(
             "حذف",
-            $"آیا از حذف گزارش سرریز تاریخ {item.ReportDate:yyyy/MM/dd} مطمئن هستید؟",
+            $"آیا از حذف گزارش سرریز تاریخ {JalaliCalendarConverter.Format(item.ReportDate.ToDateTime(TimeOnly.MinValue))} مطمئن هستید؟",
             yesText: "حذف", cancelText: "انصراف");
 
         if (confirmed != true)

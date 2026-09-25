@@ -32,6 +32,8 @@
     <ProjectReference Include="..\..\Modules\Personnel\Personnel.Presentation\Personnel.Presentation.csproj" />
     <ProjectReference Include="..\..\Modules\Consumption\Consumption.Presentation\Consumption.Presentation.csproj" />
     <ProjectReference Include="..\..\Modules\Consumption\Consumption.Infrastructure\Consumption.Infrastructure.csproj" />
+    <ProjectReference Include="..\..\Modules\Maintenance\Maintenance.Infrastructure\Maintenance.Infrastructure.csproj" />
+    <ProjectReference Include="..\..\Modules\Maintenance\Maintenance.Presentation\Maintenance.Presentation.csproj" />
   </ItemGroup>
 
   <ItemGroup>

@@ -47,9 +47,8 @@ public static class DependencyInjection
         services.AddScoped<IAssetUnitOfWork>(serviceProvider =>
             serviceProvider.GetRequiredService<AssetDbContext>());
 
-        // Cross-module lookup for other modules — currently Consumption
-        // (chat, 2026-09-16).
         services.AddScoped<IAssetLookupService, AssetLookupService>();
+        services.AddScoped<IAssetStatusUpdateService, AssetStatusUpdateService>();
 
         return services;
     }

@@ -48,6 +48,7 @@ public static class PermissionCatalog
         new PermissionSection("LubricantType", "انواع روانکار"),
         new PermissionSection("OverflowComponent", "قسمت‌های سرریز"),
         new PermissionSection("LubricantOverflowReport", "گزارش سرریز روانکار"),
+        new PermissionSection("WorkOrder", "دستورهای کار", ["View", "Create", "Edit"]),
         new PermissionSection("ConsumptionFreezeSetting", "قفل گزارش‌های مصرف", ["View", "Edit"]),
     ];
 

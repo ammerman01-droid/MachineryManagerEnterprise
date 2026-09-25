@@ -4,8 +4,8 @@ namespace MachineryManagerEnterprise.SharedKernel.Abstractions;
 
 /// <summary>
 /// Cross-module, read-only lookup into the Asset module (chat,
-/// 2026-09-16/20), used by other modules — currently Consumption — that
-/// need to check an Asset's existence or read its consumption-relevant
+/// 2026-09-16/20/22), used by other modules — Consumption and
+/// Maintenance — that need to check an Asset's existence or read its
 /// fields without depending on Asset.Domain/Asset.Application directly
 /// (Modular Monolith boundary — same pattern as
 /// <see cref="IOrganizationLookupService"/>/<see cref="IProjectLookupService"/>).
@@ -32,9 +32,25 @@ public interface IAssetLookupService
     /// CURRENT assignment only — it is not what a Lubricant Overflow
     /// Report should permanently store (see BR-017 in the Consumption
     /// module notes); it exists so the Presentation layer can pre-fill
-    /// or sanity-check the Project field when creating a report.
+    /// or sanity-check the Project field when creating a report. Also
+    /// the single Project-lookup method Maintenance's Work Order uses
+    /// (chat, 2026-09-22) — there is deliberately no separate
+    /// "GetProjectIdAsync", to avoid two methods answering the same
+    /// question.
     /// </summary>
     Task<Guid?> GetCurrentProjectIdAsync(Guid assetId, CancellationToken cancellationToken = default);
+
+    /// <summary>Gets the Asset's identification code, for display purposes in other modules.</summary>
+    /// <param name="assetId">The Asset's identifier.</param>
+    /// <param name="cancellationToken">Token to cancel the asynchronous operation.</param>
+    /// <returns>The Asset's code, or <see langword="null"/> if the Asset does not exist.</returns>
+    Task<string?> GetCodeAsync(Guid assetId, CancellationToken cancellationToken = default);
+
+    /// <summary>Gets the Asset's display name, for display purposes in other modules.</summary>
+    /// <param name="assetId">The Asset's identifier.</param>
+    /// <param name="cancellationToken">Token to cancel the asynchronous operation.</param>
+    /// <returns>The Asset's name, or <see langword="null"/> if the Asset does not exist.</returns>
+    Task<string?> GetNameAsync(Guid assetId, CancellationToken cancellationToken = default);
 }
 
 /// <summary>

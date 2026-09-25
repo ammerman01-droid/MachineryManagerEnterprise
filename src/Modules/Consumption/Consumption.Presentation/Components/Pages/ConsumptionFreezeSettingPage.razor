@@ -25,7 +25,7 @@
     }
     else
     {
-        <MudDatePicker Label="تاریخ قفل" @bind-Date="thresholdDateAsDateTime" Class="mb-4" />
+        <JalaliDatePicker Label="تاریخ قفل" @bind-Date="thresholdDateAsDateTime" Class="mb-4" />
 
         <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="SaveAsync" Disabled="isSaving">
             @(isSaving ? "در حال ذخیره..." : "ذخیره")

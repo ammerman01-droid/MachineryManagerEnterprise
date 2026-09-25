@@ -7,10 +7,10 @@ namespace MachineryManagerEnterprise.Asset.Infrastructure;
 
 /// <summary>
 /// EF Core-backed implementation of <see cref="IAssetLookupService"/>,
-/// providing other modules (currently Consumption) with read-only,
+/// providing other modules (Consumption, Maintenance) with read-only,
 /// cross-module access to Asset data without depending on
 /// Asset.Domain/Asset.Application directly (Modular Monolith boundary —
-/// same pattern as MachineryManagerEnterprise.Organization.Infrastructure.OrganizationLookupService/>).
+/// same pattern as MachineryManagerEnterprise.Organization.Infrastructure.OrganizationLookupService).
 /// </summary>
 public sealed class AssetLookupService : IAssetLookupService
 {
@@ -23,10 +23,7 @@ public sealed class AssetLookupService : IAssetLookupService
         _dbContext = dbContext;
     }
 
-    /// <summary>Determines whether an Asset with the given identifier exists.</summary>
-    /// <param name="assetId">The identifier of the Asset to look up.</param>
-    /// <param name="cancellationToken">Token to cancel the asynchronous operation.</param>
-    /// <returns><see langword="true"/> if the Asset exists; otherwise <see langword="false"/>.</returns>
+    /// <inheritdoc />
     public async Task<bool> ExistsAsync(Guid assetId, CancellationToken cancellationToken = default)
     {
         var id = AssetId.From(assetId);
@@ -36,16 +33,7 @@ public sealed class AssetLookupService : IAssetLookupService
             .AnyAsync(a => a.Id == id, cancellationToken);
     }
 
-    /// <summary>
-    /// Retrieves the subset of an Asset's fields needed to record fuel
-    /// consumption against it.
-    /// </summary>
-    /// <param name="assetId">The identifier of the Asset to look up.</param>
-    /// <param name="cancellationToken">Token to cancel the asynchronous operation.</param>
-    /// <returns>
-    /// The Asset's consumption-relevant fields, or <see langword="null"/>
-    /// if the Asset does not exist.
-    /// </returns>
+    /// <inheritdoc />
     public async Task<AssetConsumptionSnapshot?> GetConsumptionSnapshotAsync(Guid assetId, CancellationToken cancellationToken = default)
     {
         var id = AssetId.From(assetId);
@@ -64,31 +52,49 @@ public sealed class AssetLookupService : IAssetLookupService
             .FirstOrDefaultAsync(cancellationToken);
     }
 
-        /// <inheritdoc />
+    /// <inheritdoc />
     public async Task<Guid?> GetOrganizationIdAsync(Guid assetId, CancellationToken cancellationToken = default)
     {
-        var id = global::Asset.Domain.AssetId.From(assetId);
+        var id = AssetId.From(assetId);
 
-        var organizationId = await _dbContext.Assets
+        return await _dbContext.Assets
             .AsNoTracking()
             .Where(a => a.Id == id)
             .Select(a => (Guid?)a.OrganizationId)
             .FirstOrDefaultAsync(cancellationToken);
-
-        return organizationId;
     }
 
     /// <inheritdoc />
+    /// <remarks>
+    /// The single Project-lookup method (chat, 2026-09-22) — Maintenance's
+    /// Work Order registration/edit now calls this instead of a separate
+    /// "GetProjectIdAsync", which has been removed to avoid two methods
+    /// answering the same question.
+    /// </remarks>
     public async Task<Guid?> GetCurrentProjectIdAsync(Guid assetId, CancellationToken cancellationToken = default)
     {
-        var id = global::Asset.Domain.AssetId.From(assetId);
+        var id = AssetId.From(assetId);
 
-        var projectId = await _dbContext.Assets
+        return await _dbContext.Assets
             .AsNoTracking()
             .Where(a => a.Id == id)
             .Select(a => (Guid?)a.ProjectId)
             .FirstOrDefaultAsync(cancellationToken);
+    }
 
-        return projectId;
+    /// <inheritdoc />
+    public async Task<string?> GetCodeAsync(Guid assetId, CancellationToken cancellationToken = default)
+    {
+        var id = AssetId.From(assetId);
+        var asset = await _dbContext.Assets.AsNoTracking().FirstOrDefaultAsync(a => a.Id == id, cancellationToken);
+        return asset?.Code;
+    }
+
+    /// <inheritdoc />
+    public async Task<string?> GetNameAsync(Guid assetId, CancellationToken cancellationToken = default)
+    {
+        var id = AssetId.From(assetId);
+        var asset = await _dbContext.Assets.AsNoTracking().FirstOrDefaultAsync(a => a.Id == id, cancellationToken);
+        return asset?.Name;
     }
 }

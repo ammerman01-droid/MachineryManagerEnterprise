@@ -64,6 +64,12 @@
     <Project Path="src/Modules/Consumption/Consumption.Infrastructure/Consumption.Infrastructure.csproj" />
     <Project Path="src/Modules/Consumption/Consumption.Presentation/Consumption.Presentation.csproj" />
   </Folder>
+  <Folder Name="/src/Modules/Maintenance/">
+    <Project Path="src/Modules/Maintenance/Maintenance.Application/Maintenance.Application.csproj" />
+    <Project Path="src/Modules/Maintenance/Maintenance.Domain/Maintenance.Domain.csproj" />
+    <Project Path="src/Modules/Maintenance/Maintenance.Infrastructure/Maintenance.Infrastructure.csproj" />
+    <Project Path="src/Modules/Maintenance/Maintenance.Presentation/Maintenance.Presentation.csproj" />
+  </Folder>
   <Folder Name="/tests/" />
   <Folder Name="/tests/Shared/">
     <Project Path="tests/Shared/MachineryManagerEnterprise.Testing.Common/MachineryManagerEnterprise.Testing.Common.csproj" />

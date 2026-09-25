@@ -1,0 +1,154 @@
+@page "/maintenance/work-orders"
+@using MachineryManagerEnterprise.Maintenance.Application.Features.WorkOrders.Dtos
+@using MachineryManagerEnterprise.Maintenance.Application.Features.WorkOrders.Queries.SearchWorkOrders
+@inject HttpClient Http
+@inject NavigationManager Navigation
+
+<PageTitle>دستورهای کار</PageTitle>
+
+<MudContainer MaxWidth="MaxWidth.ExtraLarge" Class="mt-4">
+    <MudStack Row="true" Justify="Justify.SpaceBetween" AlignItems="AlignItems.Center" Class="mb-4">
+        <MudText Typo="Typo.h5">دستورهای کار</MudText>
+        <MudButton Variant="Variant.Filled" Color="Color.Primary" StartIcon="@Icons.Material.Filled.Add"
+                   OnClick="@(() => Navigation.NavigateTo("/maintenance/work-orders/new"))">
+            دستور کار جدید
+        </MudButton>
+    </MudStack>
+
+    <MudGrid Class="mb-2">
+        <MudItem xs="12" sm="6">
+            <MudTextField T="Guid" @bind-Value="_organizationId" Label="شناسه سازمان" Immediate="true" />
+        </MudItem>
+        <MudItem xs="12" sm="4">
+            <MudTextField T="string" @bind-Value="_searchTerm" Label="جستجو (شماره یا شرح مشاهدات)" Immediate="true" />
+        </MudItem>
+        <MudItem xs="12" sm="2" Class="d-flex align-center">
+            <MudButton Variant="Variant.Outlined" FullWidth="true" OnClick="LoadAsync">جستجو</MudButton>
+        </MudItem>
+    </MudGrid>
+
+    @if (_isLoading)
+    {
+        <MudProgressLinear Indeterminate="true" Class="my-4" />
+    }
+    else if (_response is null || _response.Items.Count == 0)
+    {
+        <MudAlert Severity="Severity.Info" Class="mt-4">دستور کاری یافت نشد.</MudAlert>
+    }
+    else
+    {
+        <MudTable Items="@_response.Items" Hover="true" Class="mt-2">
+            <HeaderContent>
+                <MudTh>شماره</MudTh>
+                <MudTh>دارایی</MudTh>
+                <MudTh>تاریخ اعلام</MudTh>
+                <MudTh>اولویت</MudTh>
+                <MudTh>نوع تعمیر</MudTh>
+                <MudTh>مسئول تعمیر</MudTh>
+                <MudTh>وضعیت</MudTh>
+                <MudTh></MudTh>
+            </HeaderContent>
+            <RowTemplate Context="item">
+                <MudTd DataLabel="شماره">@item.Number</MudTd>
+                <MudTd DataLabel="دارایی">@(item.AssetName ?? item.AssetCode ?? item.AssetId.ToString())</MudTd>
+                <MudTd DataLabel="تاریخ اعلام">@item.ReportedAt.ToLocalTime().ToString("yyyy-MM-dd HH:mm")</MudTd>
+                <MudTd DataLabel="اولویت">@TranslatePriority(item.Priority)</MudTd>
+                <MudTd DataLabel="نوع تعمیر">@TranslateRepairType(item.RepairType)</MudTd>
+                <MudTd DataLabel="مسئول تعمیر">@(item.ResponsiblePersonnelName ?? item.ResponsiblePersonnelId.ToString())</MudTd>
+                <MudTd DataLabel="وضعیت">
+                    <MudChip T="string" Color="@StatusColor(item.Status)" Size="Size.Small">@TranslateStatus(item.Status)</MudChip>
+                </MudTd>
+                <MudTd>
+                    <MudButton Size="Size.Small" Variant="Variant.Text"
+                               OnClick="@(() => Navigation.NavigateTo($"/maintenance/work-orders/{item.Id}"))">
+                        جزئیات
+                    </MudButton>
+                </MudTd>
+            </RowTemplate>
+        </MudTable>
+
+        <MudStack Row="true" Justify="Justify.Center" Class="mt-4" Spacing="2">
+            <MudButton Disabled="@(!_response.HasPreviousPage)" OnClick="@(() => ChangePageAsync(_page - 1))">قبلی</MudButton>
+            <MudText Class="align-self-center">صفحه @_response.Page از @_response.TotalPages</MudText>
+            <MudButton Disabled="@(!_response.HasNextPage)" OnClick="@(() => ChangePageAsync(_page + 1))">بعدی</MudButton>
+        </MudStack>
+    }
+</MudContainer>
+
+@code {
+    private Guid _organizationId;
+    private string? _searchTerm;
+    private int _page = 1;
+    private const int PageSize = 25;
+    private bool _isLoading;
+    private SearchWorkOrdersResponse? _response;
+
+    private async Task LoadAsync()
+    {
+        if (_organizationId == Guid.Empty)
+        {
+            return;
+        }
+
+        _isLoading = true;
+        _page = 1;
+
+        try
+        {
+            var url = $"/api/v1/work-orders?organizationId={_organizationId}&page={_page}&pageSize={PageSize}";
+            if (!string.IsNullOrWhiteSpace(_searchTerm))
+            {
+                url += $"&search={Uri.EscapeDataString(_searchTerm)}";
+            }
+
+            _response = await Http.GetFromJsonAsync<SearchWorkOrdersResponse>(url);
+        }
+        finally
+        {
+            _isLoading = false;
+        }
+    }
+
+    private async Task ChangePageAsync(int page)
+    {
+        _page = page;
+
+        var url = $"/api/v1/work-orders?organizationId={_organizationId}&page={_page}&pageSize={PageSize}";
+        if (!string.IsNullOrWhiteSpace(_searchTerm))
+        {
+            url += $"&search={Uri.EscapeDataString(_searchTerm)}";
+        }
+
+        _response = await Http.GetFromJsonAsync<SearchWorkOrdersResponse>(url);
+    }
+
+    private static string TranslatePriority(string priority) => priority switch
+    {
+        "Urgent" => "فوری",
+        "Normal" => "عادی",
+        _ => priority,
+    };
+
+    private static string TranslateRepairType(string repairType) => repairType switch
+    {
+        "Major" => "اساسی",
+        "Minor" => "جزئی",
+        _ => repairType,
+    };
+
+    private static string TranslateStatus(string status) => status switch
+    {
+        "Open" => "باز",
+        "Cancelled" => "لغو شده",
+        "InRepair" => "در حال تعمیر",
+        _ => status,
+    };
+
+    private static Color StatusColor(string status) => status switch
+    {
+        "Open" => Color.Primary,
+        "Cancelled" => Color.Error,
+        "InRepair" => Color.Success,
+        _ => Color.Default,
+    };
+}

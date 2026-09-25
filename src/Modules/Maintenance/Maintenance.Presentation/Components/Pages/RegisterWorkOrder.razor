@@ -1,0 +1,174 @@
+@page "/maintenance/work-orders/new"
+@using MachineryManagerEnterprise.Maintenance.Domain
+@inject HttpClient Http
+@inject NavigationManager Navigation
+@inject ISnackbar Snackbar
+
+<PageTitle>دستور کار جدید</PageTitle>
+
+<MudContainer MaxWidth="MaxWidth.Medium" Class="mt-4">
+    <MudText Typo="Typo.h5" Class="mb-4">ثبت دستور کار جدید</MudText>
+
+    @* NOTE (first pass, chat 2026-09-22): Asset and responsible Personnel
+       are entered here as raw identifiers. A follow-up pass should
+       replace these with proper search/autocomplete pickers against
+       the Asset and Personnel search endpoints once this Presentation
+       layer is reviewed. *@
+
+    <MudForm Model="@_model" @ref="_form">
+        <MudGrid>
+            <MudItem xs="12" sm="6">
+                <MudTextField T="Guid" @bind-Value="_model.OrganizationId" Label="شناسه سازمان" Required="true" />
+            </MudItem>
+            <MudItem xs="12" sm="6">
+                <MudTextField T="Guid" @bind-Value="_model.AssetId" Label="شناسه دارایی (Asset)" Required="true" />
+            </MudItem>
+
+            <MudItem xs="12" sm="6">
+                <MudDatePicker Label="تاریخ اعلام خرابی/توقف" @bind-Date="_reportedDate" Required="true" />
+            </MudItem>
+            <MudItem xs="12" sm="6">
+                <MudTimePicker Label="ساعت اعلام خرابی/توقف" @bind-Time="_reportedTime" Required="true" />
+            </MudItem>
+
+            <MudItem xs="12" sm="6">
+                <MudSelect T="WorkOrderAssetStatus" @bind-Value="_resultingAssetStatus" Label="وضعیت دستگاه پس از این خرابی" Required="true">
+                    <MudSelectItem Value="WorkOrderAssetStatus.Active">فعال (بدون توقف)</MudSelectItem>
+                    <MudSelectItem Value="WorkOrderAssetStatus.OutOfService">خارج از سرویس (باعث توقف شد)</MudSelectItem>
+                </MudSelect>
+            </MudItem>
+            <MudItem xs="12" sm="6">
+                <MudNumericField T="decimal" @bind-Value="_model.MeterReading" Label="قرائت کنتور در لحظه توقف" Min="0" Required="true" />
+            </MudItem>
+
+            <MudItem xs="12" sm="6">
+                <MudSelect T="RepairPriority" @bind-Value="_priority" Label="اولویت تعمیرات" Required="true">
+                    <MudSelectItem Value="RepairPriority.Urgent">فوری</MudSelectItem>
+                    <MudSelectItem Value="RepairPriority.Normal">عادی</MudSelectItem>
+                </MudSelect>
+            </MudItem>
+            <MudItem xs="12" sm="6">
+                <MudSelect T="RepairType" @bind-Value="_repairType" Label="نوع تعمیر" Required="true">
+                    <MudSelectItem Value="RepairType.Major">اساسی</MudSelectItem>
+                    <MudSelectItem Value="RepairType.Minor">جزئی</MudSelectItem>
+                </MudSelect>
+            </MudItem>
+
+            <MudItem xs="12" sm="6">
+                <MudTextField T="Guid" @bind-Value="_model.ResponsiblePersonnelId" Label="شناسه مسئول تعمیرات (Personnel)" Required="true" />
+            </MudItem>
+            <MudItem xs="12" sm="6">
+                <MudSelect T="RepairLocation" @bind-Value="_repairLocation" Label="محل پیش‌بینی‌شده تعمیر" Required="true">
+                    <MudSelectItem Value="RepairLocation.AssetSite">محل کار دستگاه</MudSelectItem>
+                    <MudSelectItem Value="RepairLocation.SiteWorkshop">تعمیرگاه مستقر در کارگاه</MudSelectItem>
+                    <MudSelectItem Value="RepairLocation.CentralWorkshop">تعمیرگاه مرکزی</MudSelectItem>
+                    <MudSelectItem Value="RepairLocation.RegionalExternalWorkshop">تعمیرگاه خارج از شرکت در منطقه</MudSelectItem>
+                    <MudSelectItem Value="RepairLocation.ExternalWorkshop">تعمیرگاه خارج از شرکت</MudSelectItem>
+                </MudSelect>
+            </MudItem>
+
+            <MudItem xs="12" sm="6">
+                <MudSelect T="RepairablePart" @bind-Value="_partNeedingRepair" Label="بخش نیازمند تعمیر" Required="true">
+                    <MudSelectItem Value="RepairablePart.Engine">موتور</MudSelectItem>
+                    <MudSelectItem Value="RepairablePart.Gearbox">گیربکس</MudSelectItem>
+                    <MudSelectItem Value="RepairablePart.Hydraulic">هیدرولیک</MudSelectItem>
+                    <MudSelectItem Value="RepairablePart.Chassis">زیربندی</MudSelectItem>
+                    <MudSelectItem Value="RepairablePart.Electrical">برق</MudSelectItem>
+                    <MudSelectItem Value="RepairablePart.Body">بدنه</MudSelectItem>
+                    <MudSelectItem Value="RepairablePart.Other">سایر</MudSelectItem>
+                </MudSelect>
+            </MudItem>
+
+            <MudItem xs="12">
+                <MudTextField T="string" @bind-Value="_model.ObservationDescription" Label="شرح مشاهدات" Lines="4" Required="true" />
+            </MudItem>
+        </MudGrid>
+
+        <MudStack Row="true" Class="mt-4" Justify="Justify.FlexEnd" Spacing="2">
+            <MudButton Variant="Variant.Text" OnClick="@(() => Navigation.NavigateTo("/maintenance/work-orders"))">انصراف</MudButton>
+            <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="SubmitAsync" Disabled="@_isSubmitting">ثبت دستور کار</MudButton>
+        </MudStack>
+    </MudForm>
+</MudContainer>
+
+@code {
+    private MudForm? _form;
+    private bool _isSubmitting;
+    private DateTime? _reportedDate = DateTime.Today;
+    private TimeSpan? _reportedTime = DateTime.Now.TimeOfDay;
+
+    private WorkOrderAssetStatus _resultingAssetStatus = WorkOrderAssetStatus.Active;
+    private RepairPriority _priority = RepairPriority.Normal;
+    private RepairType _repairType = RepairType.Minor;
+    private RepairLocation _repairLocation = RepairLocation.AssetSite;
+    private RepairablePart _partNeedingRepair = RepairablePart.Other;
+
+    private readonly FormModel _model = new();
+
+    private async Task SubmitAsync()
+    {
+        if (_form is null)
+        {
+            return;
+        }
+
+        await _form.Validate();
+        if (!_form.IsValid)
+        {
+            return;
+        }
+
+        _isSubmitting = true;
+
+        try
+        {
+            var reportedAt = new DateTimeOffset(
+                (_reportedDate ?? DateTime.Today).Date.Add(_reportedTime ?? TimeSpan.Zero),
+                TimeSpan.Zero);
+
+            var request = new RegisterWorkOrderRequest(
+                _model.OrganizationId,
+                _model.AssetId,
+                reportedAt,
+                _resultingAssetStatus,
+                _model.MeterReading,
+                _priority,
+                _repairType,
+                _model.ResponsiblePersonnelId,
+                _model.ObservationDescription,
+                _repairLocation,
+                _partNeedingRepair);
+
+            var response = await Http.PostAsJsonAsync("/api/v1/work-orders", request);
+
+            if (response.IsSuccessStatusCode)
+            {
+                Snackbar.Add("دستور کار با موفقیت ثبت شد.", Severity.Success);
+                Navigation.NavigateTo("/maintenance/work-orders");
+            }
+            else
+            {
+                var problem = await response.Content.ReadFromJsonAsync<ProblemPayload>();
+                Snackbar.Add(problem?.Message ?? "ثبت دستور کار با خطا مواجه شد.", Severity.Error);
+            }
+        }
+        finally
+        {
+            _isSubmitting = false;
+        }
+    }
+
+    private sealed class FormModel
+    {
+        public Guid OrganizationId { get; set; }
+        public Guid AssetId { get; set; }
+        public Guid ResponsiblePersonnelId { get; set; }
+        public decimal MeterReading { get; set; }
+        public string ObservationDescription { get; set; } = string.Empty;
+    }
+
+    private sealed class ProblemPayload
+    {
+        public string? Message { get; set; }
+    }
+}

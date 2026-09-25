@@ -18,4 +18,10 @@ public interface IPersonnelLookupService
     /// to, or <see langword="null"/> if the Personnel does not exist.
     /// </summary>
     Task<Guid?> GetOrganizationIdAsync(Guid personnelId, CancellationToken cancellationToken = default);
+
+    /// <summary>Gets the Personnel's full display name (first and last name), for display purposes in other modules.</summary>
+    /// <param name="personnelId">The Personnel's identifier.</param>
+    /// <param name="cancellationToken">Token to cancel the asynchronous operation.</param>
+    /// <returns>The Personnel's full name, or <see langword="null"/> if the Personnel record does not exist.</returns>
+    Task<string?> GetFullNameAsync(Guid personnelId, CancellationToken cancellationToken = default);
 }

@@ -1,0 +1,24 @@
+<MudDialog>
+    <DialogContent>
+        <MudTextField T="string" @bind-Value="Reason" Label="دلیل لغو" Lines="3" Required="true" AutoFocus="true" />
+    </DialogContent>
+    <DialogActions>
+        <MudButton OnClick="Cancel">انصراف</MudButton>
+        <MudButton Color="Color.Error" Variant="Variant.Filled" OnClick="Submit" Disabled="@string.IsNullOrWhiteSpace(Reason)">
+            تأیید لغو
+        </MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+    /// <summary>Gets or sets the cancellation reason entered by the user.</summary>
+    [Parameter]
+    public string Reason { get; set; } = string.Empty;
+
+    [CascadingParameter]
+    private IMudDialogInstance MudDialog { get; set; } = null!;
+
+    private void Submit() => MudDialog.Close(DialogResult.Ok(Reason));
+
+    private void Cancel() => MudDialog.Cancel();
+}
