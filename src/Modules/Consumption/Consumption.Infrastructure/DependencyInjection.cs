@@ -1,6 +1,7 @@
 using MachineryManagerEnterprise.Consumption.Application.Abstractions;
 using MachineryManagerEnterprise.Consumption.Infrastructure.Persistence;
 using MachineryManagerEnterprise.SharedKernel.Infrastructure;
+using MachineryManagerEnterprise.SharedKernel.Abstractions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -41,6 +42,13 @@ public static class DependencyInjection
         services.AddScoped<IFuelConsumptionRepository, FuelConsumptionRepository>();
         services.AddScoped<IConsumptionUnitOfWork>(serviceProvider =>
             serviceProvider.GetRequiredService<ConsumptionDbContext>());
+
+        services.AddScoped<ILubricantOverflowReportRepository, LubricantOverflowReportRepository>();
+        services.AddScoped<IConsumptionFreezeSettingRepository, ConsumptionFreezeSettingRepository>();
+        services.AddScoped<IConsumptionUnitOfWork>(sp => sp.GetRequiredService<ConsumptionDbContext>());
+
+        // Consumed by Configuration's Delete handlers for LubricantType/OverflowComponent.
+        services.AddScoped<IConsumptionUsageLookupService, ConsumptionUsageLookupService>();
 
         return services;
     }

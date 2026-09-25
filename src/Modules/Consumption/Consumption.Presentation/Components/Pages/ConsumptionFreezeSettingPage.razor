@@ -1,0 +1,122 @@
+@page "/admin/consumption-freeze-setting"
+@inject IHttpClientFactory HttpClientFactory
+
+<PageTitle>قفل گزارش‌های مصرف</PageTitle>
+
+<MudText Typo="Typo.h4" Class="mb-4">قفل گزارش‌های سرریز روانکار</MudText>
+<MudText Typo="Typo.body2" Class="mb-4 mud-text-secondary">
+    گزارش‌هایی با تاریخ روی یا قبل از تاریخ زیر، دیگر توسط کاربران پروژه قابل ویرایش یا حذف نیستند.
+</MudText>
+
+@if (errorMessage is not null)
+{
+    <MudAlert Severity="Severity.Error" Class="my-4">@errorMessage</MudAlert>
+}
+
+@if (successMessage is not null)
+{
+    <MudAlert Severity="Severity.Success" Class="my-4">@successMessage</MudAlert>
+}
+
+<MudPaper Class="pa-4" Style="max-width:500px;">
+    @if (isLoading)
+    {
+        <MudProgressLinear Indeterminate="true" Class="my-4" />
+    }
+    else
+    {
+        <MudDatePicker Label="تاریخ قفل" @bind-Date="thresholdDateAsDateTime" Class="mb-4" />
+
+        <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="SaveAsync" Disabled="isSaving">
+            @(isSaving ? "در حال ذخیره..." : "ذخیره")
+        </MudButton>
+    }
+</MudPaper>
+
+@code {
+    /// <summary>Gets or sets the Organization this setting applies to, supplied via the route.</summary>
+    [SupplyParameterFromQuery]
+    public Guid OrganizationId { get; set; }
+
+    private sealed class FreezeSettingDto
+    {
+        public Guid OrganizationId { get; set; }
+        public DateOnly ThresholdDate { get; set; }
+    }
+
+    private DateTime? thresholdDateAsDateTime;
+    private bool isLoading = true;
+    private bool isSaving;
+    private string? errorMessage;
+    private string? successMessage;
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            var client = HttpClientFactory.CreateClient("InternalApi");
+            var response = await client.GetAsync($"/api/v1/consumption-freeze-setting?organizationId={OrganizationId}");
+            var content = await response.Content.ReadAsStringAsync();
+
+            if (response.IsSuccessStatusCode && !string.IsNullOrWhiteSpace(content) && content != "null")
+            {
+                var setting = JsonSerializer.Deserialize<FreezeSettingDto>(content, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+                if (setting is not null)
+                {
+                    thresholdDateAsDateTime = setting.ThresholdDate.ToDateTime(TimeOnly.MinValue);
+                }
+            }
+            else if (!response.IsSuccessStatusCode)
+            {
+                errorMessage = $"خطا در دریافت تنظیمات: {content}";
+            }
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"خطا: {ex.Message}";
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+
+    private async Task SaveAsync()
+    {
+        if (thresholdDateAsDateTime is null)
+        {
+            errorMessage = "لطفاً یک تاریخ انتخاب کنید.";
+            return;
+        }
+
+        isSaving = true;
+        errorMessage = null;
+        successMessage = null;
+
+        try
+        {
+            var client = HttpClientFactory.CreateClient("InternalApi");
+            var response = await client.PutAsJsonAsync(
+                $"/api/v1/consumption-freeze-setting?organizationId={OrganizationId}",
+                new { ThresholdDate = DateOnly.FromDateTime(thresholdDateAsDateTime.Value) });
+
+            if (response.IsSuccessStatusCode)
+            {
+                successMessage = "تنظیمات با موفقیت ذخیره شد.";
+            }
+            else
+            {
+                var content = await response.Content.ReadAsStringAsync();
+                errorMessage = $"خطا در ذخیره: {content}";
+            }
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"خطا: {ex.Message}";
+        }
+        finally
+        {
+            isSaving = false;
+        }
+    }
+}

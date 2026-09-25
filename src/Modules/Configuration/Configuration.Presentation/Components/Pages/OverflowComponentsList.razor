@@ -1,0 +1,183 @@
+@page "/admin/overflow-components"
+@inject IHttpClientFactory HttpClientFactory
+@inject NavigationManager Navigation
+@inject IDialogService DialogService
+
+<PageTitle>قسمت‌های سرریز</PageTitle>
+
+<MudText Typo="Typo.h4" Class="mb-4">مدیریت قسمت‌های سرریز</MudText>
+
+<MudSelect T="Guid?" Label="هلدینگ" Placeholder="یک هلدینگ انتخاب کنید" Value="selectedHoldingId" ValueChanged="OnHoldingChangedAsync" Class="mb-4">
+    @foreach (var holding in holdings)
+    {
+        <MudSelectItem T="Guid?" Value="@((Guid?)holding.Id)">@holding.Name</MudSelectItem>
+    }
+</MudSelect>
+
+@if (errorMessage is not null)
+{
+    <MudAlert Severity="Severity.Error" Class="my-4">@errorMessage</MudAlert>
+}
+
+@if (selectedHoldingId is not null)
+{
+    <MudButton Variant="Variant.Filled" Color="Color.Primary" Class="mb-4"
+               OnClick="@(() => Navigation.NavigateTo($"/admin/overflow-components/create?holdingId={selectedHoldingId}"))">
+        قسمت سرریز جدید
+    </MudButton>
+}
+
+@if (isLoading)
+{
+    <MudProgressLinear Indeterminate="true" Class="my-4" />
+}
+else if (selectedHoldingId is not null && overflowComponents.Count == 0)
+{
+    <MudText Typo="Typo.body2" Class="mud-text-secondary">هیچ قسمت سرریزی برای این Holding ثبت نشده است.</MudText>
+}
+else if (overflowComponents.Count > 0)
+{
+    <MudTable Items="@overflowComponents" Hover="true" Breakpoint="Breakpoint.Sm">
+        <HeaderContent>
+            <MudTh>نام</MudTh>
+            <MudTh>عملیات</MudTh>
+        </HeaderContent>
+        <RowTemplate>
+            <MudTd DataLabel="نام">@context.Name</MudTd>
+            <MudTd DataLabel="عملیات">
+                <MudIconButton Icon="@Icons.Material.Filled.Edit" Size="Size.Small"
+                               OnClick="@(() => Navigation.NavigateTo($"/admin/overflow-components/edit/{context.Id}"))" />
+                <MudIconButton Icon="@Icons.Material.Filled.Delete" Size="Size.Small" Color="Color.Error"
+                               OnClick="@(() => DeleteAsync(context))" />
+            </MudTd>
+        </RowTemplate>
+    </MudTable>
+}
+
+@code {
+    private sealed class HoldingItem
+    {
+        public Guid Id { get; set; }
+        public string Name { get; set; } = string.Empty;
+    }
+
+    private sealed class OverflowComponentItem
+    {
+        public Guid Id { get; set; }
+        public string Name { get; set; } = string.Empty;
+    }
+
+    private sealed class SearchHoldingsResult
+    {
+        public List<HoldingItem> Items { get; set; } = [];
+    }
+
+    private List<HoldingItem> holdings = [];
+    private List<OverflowComponentItem> overflowComponents = [];
+    private Guid? selectedHoldingId;
+    private bool isLoading = true;
+    private string? errorMessage;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadHoldingsAsync();
+        isLoading = false;
+    }
+
+    private async Task LoadHoldingsAsync()
+    {
+        try
+        {
+            var client = HttpClientFactory.CreateClient("InternalApi");
+            var response = await client.GetAsync("/api/v1/holdings?pageSize=200");
+            var content = await response.Content.ReadAsStringAsync();
+
+            if (response.IsSuccessStatusCode)
+            {
+                var result = JsonSerializer.Deserialize<SearchHoldingsResult>(content, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+                holdings = result?.Items ?? [];
+            }
+            else
+            {
+                errorMessage = $"خطا در دریافت Holding ها: {content}";
+            }
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"خطا: {ex.Message}";
+        }
+    }
+
+    private async Task OnHoldingChangedAsync(Guid? holdingId)
+    {
+        selectedHoldingId = holdingId;
+
+        if (selectedHoldingId is null)
+        {
+            overflowComponents = [];
+            return;
+        }
+
+        isLoading = true;
+        errorMessage = null;
+
+        try
+        {
+            var client = HttpClientFactory.CreateClient("InternalApi");
+            var response = await client.GetAsync($"/api/v1/overflow-components?holdingId={selectedHoldingId}");
+            var content = await response.Content.ReadAsStringAsync();
+
+            if (response.IsSuccessStatusCode)
+            {
+                overflowComponents = JsonSerializer.Deserialize<List<OverflowComponentItem>>(content, new JsonSerializerOptions { PropertyNameCaseInsensitive = true }) ?? [];
+            }
+            else
+            {
+                errorMessage = $"خطا در دریافت فهرست: {content}";
+            }
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"خطا: {ex.Message}";
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+
+    private async Task DeleteAsync(OverflowComponentItem item)
+    {
+        var confirmed = await DialogService.ShowMessageBox(
+            "حذف",
+            $"آیا از حذف \"{item.Name}\" مطمئن هستید؟",
+            yesText: "حذف", cancelText: "انصراف");
+
+        if (confirmed != true)
+        {
+            return;
+        }
+
+        try
+        {
+            var client = HttpClientFactory.CreateClient("InternalApi");
+            var response = await client.DeleteAsync($"/api/v1/overflow-components/{item.Id}");
+
+            if (response.IsSuccessStatusCode)
+            {
+                overflowComponents.Remove(item);
+            }
+            else
+            {
+                var content = await response.Content.ReadAsStringAsync();
+                errorMessage = response.StatusCode == System.Net.HttpStatusCode.Conflict
+                    ? "این قسمت سرریز در حال استفاده است و قابل حذف نیست."
+                    : $"خطا در حذف: {content}";
+            }
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"خطا: {ex.Message}";
+        }
+    }
+}

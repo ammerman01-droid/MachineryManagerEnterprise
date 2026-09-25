@@ -1,0 +1,403 @@
+@page "/admin/lubricant-overflow-reports"
+@inject IHttpClientFactory HttpClientFactory
+@inject NavigationManager Navigation
+@inject IDialogService DialogService
+
+<PageTitle>گزارش‌های سرریز روانکار</PageTitle>
+
+<MudText Typo="Typo.h4" Class="mb-4">گزارش‌های سرریز روانکار</MudText>
+
+@if (!string.IsNullOrEmpty(errorMessage))
+{
+    <MudAlert Severity="Severity.Error" Class="my-4">@errorMessage</MudAlert>
+}
+
+@if (AssetId is null)
+{
+    @if (isUnrestricted)
+    {
+        <MudPaper Class="pa-4 mb-4">
+            <MudSelect T="Guid?" Label="هلدینگ" Placeholder="یک هلدینگ انتخاب کنید" Value="selectedHoldingFilter" ValueChanged="OnHoldingFilterChangedAsync">
+                @foreach (var holding in holdings)
+                {
+                    <MudSelectItem T="Guid?" Value="@((Guid?)holding.Id)">@holding.Name</MudSelectItem>
+                }
+            </MudSelect>
+
+            @if (selectedHoldingFilter is not null)
+            {
+                <MudSelect T="Guid?" Label="سازمان" Placeholder="یک سازمان انتخاب کنید" Value="selectedOrganizationId" ValueChanged="OnOrganizationChangedAsync" Class="mt-4">
+                    @foreach (var organization in organizations)
+                    {
+                        <MudSelectItem T="Guid?" Value="@((Guid?)organization.Id)">@organization.Name</MudSelectItem>
+                    }
+                </MudSelect>
+            }
+        </MudPaper>
+    }
+    else if (organizations.Count > 1)
+    {
+        <MudPaper Class="pa-4 mb-4">
+            <MudSelect T="Guid?" Label="سازمان" Placeholder="یک سازمان انتخاب کنید" Value="selectedOrganizationId" ValueChanged="OnOrganizationChangedAsync">
+                @foreach (var organization in organizations)
+                {
+                    <MudSelectItem T="Guid?" Value="@((Guid?)organization.Id)">@organization.Name</MudSelectItem>
+                }
+            </MudSelect>
+        </MudPaper>
+    }
+
+    @if (selectedOrganizationId is not null)
+    {
+        <MudSelect T="Guid?" Label="دارایی" Placeholder="یک دارایی انتخاب کنید" Value="selectedAssetId" ValueChanged="OnAssetChangedAsync" Class="mb-4">
+            @foreach (var asset in assets)
+            {
+                <MudSelectItem T="Guid?" Value="@((Guid?)asset.Id)">@asset.Code — @asset.Name</MudSelectItem>
+            }
+        </MudSelect>
+    }
+}
+
+@if (selectedAssetId is not null)
+{
+    <MudButton Variant="Variant.Filled" Color="Color.Primary" Class="mb-4"
+               OnClick="@(() => Navigation.NavigateTo($"/admin/lubricant-overflow-reports/create?assetId={selectedAssetId}&holdingId={selectedHoldingId}&organizationId={selectedOrganizationId}"))">
+        ثبت گزارش سرریز جدید
+    </MudButton>
+
+    @if (isLoading)
+    {
+        <MudProgressLinear Indeterminate="true" Class="my-4" />
+    }
+    else if (reports.Count == 0)
+    {
+        <MudText Typo="Typo.body2" Class="mud-text-secondary">هیچ گزارش سرریزی برای این دارایی ثبت نشده است.</MudText>
+    }
+    else
+    {
+        <MudTable Items="@reports" Hover="true" Breakpoint="Breakpoint.Sm">
+            <HeaderContent>
+                <MudTh>تاریخ</MudTh>
+                <MudTh>قرائت کارکرد</MudTh>
+                <MudTh>تعداد بخش سرریز</MudTh>
+                <MudTh>وضعیت</MudTh>
+                <MudTh>عملیات</MudTh>
+            </HeaderContent>
+            <RowTemplate>
+                <MudTd DataLabel="تاریخ">@context.ReportDate.ToString("yyyy/MM/dd")</MudTd>
+                <MudTd DataLabel="قرائت کارکرد">@context.HourMeterReading</MudTd>
+                <MudTd DataLabel="تعداد بخش سرریز">@context.Lines.Count</MudTd>
+                <MudTd DataLabel="وضعیت">
+                    @if (context.CanBeModified)
+                    {
+                        <MudChip T="string" Color="Color.Success" Size="Size.Small">قابل ویرایش</MudChip>
+                    }
+                    else
+                    {
+                        <MudChip T="string" Color="Color.Default" Size="Size.Small">قفل‌شده</MudChip>
+                    }
+                </MudTd>
+                <MudTd DataLabel="عملیات">
+                    <MudIconButton Icon="@Icons.Material.Filled.Edit" Size="Size.Small" Disabled="!context.CanBeModified"
+                                   OnClick="@(() => Navigation.NavigateTo($"/admin/lubricant-overflow-reports/edit/{context.Id}?assetId={selectedAssetId}&holdingId={selectedHoldingId}"))" />
+                    <MudIconButton Icon="@Icons.Material.Filled.Delete" Size="Size.Small" Color="Color.Error" Disabled="!context.CanBeModified"
+                                   OnClick="@(() => DeleteAsync(context))" />
+                </MudTd>
+            </RowTemplate>
+        </MudTable>
+    }
+}
+
+@code {
+    /// <summary>Gets or sets an Asset to pre-select, bypassing the cascade (e.g. deep-linked from an Asset's own detail page).</summary>
+    [SupplyParameterFromQuery]
+    public Guid? AssetId { get; set; }
+
+    /// <summary>Gets or sets the pre-selected Asset's Holding, required together with <see cref="AssetId"/>.</summary>
+    [SupplyParameterFromQuery]
+    public Guid? HoldingId { get; set; }
+
+    /// <summary>Gets or sets the pre-selected Asset's Organization, required together with <see cref="AssetId"/>.</summary>
+    [SupplyParameterFromQuery]
+    public Guid? OrganizationId { get; set; }
+
+    private sealed class HoldingItem
+    {
+        public Guid Id { get; set; }
+        public string Name { get; set; } = string.Empty;
+    }
+
+    private sealed class OrganizationItem
+    {
+        public Guid Id { get; set; }
+        public string Name { get; set; } = string.Empty;
+        public Guid? HoldingId { get; set; }
+    }
+
+    private sealed class AssetItem
+    {
+        public Guid Id { get; set; }
+        public string Code { get; set; } = string.Empty;
+        public string Name { get; set; } = string.Empty;
+    }
+
+    private sealed class LineItem
+    {
+        public Guid Id { get; set; }
+    }
+
+    private sealed class ReportItem
+    {
+        public Guid Id { get; set; }
+        public DateOnly ReportDate { get; set; }
+        public decimal HourMeterReading { get; set; }
+        public bool CanBeModified { get; set; }
+        public List<LineItem> Lines { get; set; } = [];
+    }
+
+    private sealed class SearchOrganizationsResult
+    {
+        public List<OrganizationItem> Items { get; set; } = [];
+    }
+
+    private sealed class SearchHoldingsResult
+    {
+        public List<HoldingItem> Items { get; set; } = [];
+    }
+
+    private sealed class SearchAssetsResult
+    {
+        public List<AssetItem> Items { get; set; } = [];
+    }
+
+    // Mirrors AuthorizedScopeSet as returned by GET
+    // /api/v1/assets/authorized-scope (same endpoint AssetsList.razor
+    // uses — chat, 2026-09-14 / 2026-09-24).
+    private sealed class AuthorizedScopeDto
+    {
+        public bool IsUnrestricted { get; set; }
+        public List<Guid> HoldingIds { get; set; } = [];
+        public List<Guid> OrganizationIds { get; set; } = [];
+        public List<Guid> ProjectIds { get; set; } = [];
+    }
+
+    private static readonly JsonSerializerOptions JsonOptions = new() { PropertyNameCaseInsensitive = true };
+
+    private List<HoldingItem> holdings = [];
+    private List<OrganizationItem> allOrganizations = [];
+    private List<OrganizationItem> organizations = [];
+    private List<AssetItem> assets = [];
+    private List<ReportItem> reports = [];
+
+    private bool isUnrestricted;
+    private Guid? selectedHoldingFilter;
+    private Guid? selectedOrganizationId;
+    private Guid selectedHoldingId;
+    private Guid? selectedAssetId;
+    private bool isLoading;
+    private string? errorMessage;
+
+    /// <remarks>
+    /// NOTE (chat, 2026-09-24): scope resolution and the Holding/Organization
+    /// cascade here are copied from the real <c>AssetsList.razor</c> you
+    /// sent, reusing <c>/api/v1/assets/authorized-scope</c> — there is no
+    /// separate Consumption-specific authorized-scope endpoint.
+    /// </remarks>
+    protected override async Task OnInitializedAsync()
+    {
+        if (AssetId is { } assetId && HoldingId is { } holdingId && OrganizationId is { } organizationId)
+        {
+            // Deep-linked directly to one Asset's reports — skip the cascade entirely.
+            selectedHoldingId = holdingId;
+            selectedOrganizationId = organizationId;
+            await OnAssetChangedAsync(assetId);
+            return;
+        }
+
+        try
+        {
+            var client = HttpClientFactory.CreateClient("InternalApi");
+
+            var scopeResponse = await client.GetAsync("/api/v1/assets/authorized-scope");
+            var scopeContent = await scopeResponse.Content.ReadAsStringAsync();
+
+            if (!scopeResponse.IsSuccessStatusCode)
+            {
+                errorMessage = $"خطا در دریافت سطح دسترسی: {scopeContent}";
+                return;
+            }
+
+            var scope = JsonSerializer.Deserialize<AuthorizedScopeDto>(scopeContent, JsonOptions) ?? new AuthorizedScopeDto();
+            isUnrestricted = scope.IsUnrestricted;
+
+            var orgResponse = await client.GetAsync("/api/v1/organizations?pageSize=200");
+            var orgContent = await orgResponse.Content.ReadAsStringAsync();
+
+            if (!orgResponse.IsSuccessStatusCode)
+            {
+                errorMessage = $"خطا در دریافت سازمان‌ها: {orgContent}";
+                return;
+            }
+
+            var orgResult = JsonSerializer.Deserialize<SearchOrganizationsResult>(orgContent, JsonOptions);
+            allOrganizations = orgResult?.Items ?? [];
+
+            if (isUnrestricted)
+            {
+                var holdingResponse = await client.GetAsync("/api/v1/holdings?pageSize=200");
+                var holdingContent = await holdingResponse.Content.ReadAsStringAsync();
+
+                if (holdingResponse.IsSuccessStatusCode)
+                {
+                    var holdingResult = JsonSerializer.Deserialize<SearchHoldingsResult>(holdingContent, JsonOptions);
+                    holdings = holdingResult?.Items ?? [];
+                }
+            }
+            else
+            {
+                organizations = allOrganizations
+                    .Where(o => scope.OrganizationIds.Contains(o.Id) ||
+                                (o.HoldingId.HasValue && scope.HoldingIds.Contains(o.HoldingId.Value)))
+                    .ToList();
+
+                if (organizations.Count == 1)
+                {
+                    await OnOrganizationChangedAsync(organizations[0].Id);
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"خطا: {ex.Message}";
+        }
+    }
+
+    private Task OnHoldingFilterChangedAsync(Guid? holdingId)
+    {
+        selectedHoldingFilter = holdingId;
+        selectedOrganizationId = null;
+        selectedAssetId = null;
+        assets = [];
+        reports = [];
+
+        organizations = holdingId is { } h
+            ? allOrganizations.Where(o => o.HoldingId == h).ToList()
+            : [];
+
+        return Task.CompletedTask;
+    }
+
+    private async Task OnOrganizationChangedAsync(Guid? organizationId)
+    {
+        selectedOrganizationId = organizationId;
+        selectedHoldingId = organizations.FirstOrDefault(o => o.Id == organizationId)?.HoldingId
+            ?? allOrganizations.FirstOrDefault(o => o.Id == organizationId)?.HoldingId
+            ?? Guid.Empty;
+        selectedAssetId = null;
+        reports = [];
+
+        await LoadAssetsAsync();
+    }
+
+    private async Task LoadAssetsAsync()
+    {
+        if (selectedOrganizationId is null)
+        {
+            return;
+        }
+
+        try
+        {
+            var client = HttpClientFactory.CreateClient("InternalApi");
+            var response = await client.GetAsync($"/api/v1/assets?organizationId={selectedOrganizationId}&pageSize=200");
+            var content = await response.Content.ReadAsStringAsync();
+
+            if (response.IsSuccessStatusCode)
+            {
+                var result = JsonSerializer.Deserialize<SearchAssetsResult>(content, JsonOptions);
+                assets = result?.Items ?? [];
+            }
+            else
+            {
+                errorMessage = $"خطا در دریافت دارایی‌ها: {content}";
+            }
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"خطا: {ex.Message}";
+        }
+    }
+
+    private async Task OnAssetChangedAsync(Guid? assetId)
+    {
+        selectedAssetId = assetId;
+
+        if (assetId is null)
+        {
+            reports = [];
+            return;
+        }
+
+        isLoading = true;
+        errorMessage = null;
+
+        try
+        {
+            var client = HttpClientFactory.CreateClient("InternalApi");
+            var response = await client.GetAsync($"/api/v1/lubricant-overflow-reports?assetId={assetId}");
+            var content = await response.Content.ReadAsStringAsync();
+
+            if (response.IsSuccessStatusCode)
+            {
+                reports = JsonSerializer.Deserialize<List<ReportItem>>(content, JsonOptions) ?? [];
+            }
+            else
+            {
+                errorMessage = $"خطا در دریافت فهرست گزارش‌ها: {content}";
+            }
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"خطا: {ex.Message}";
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+
+    private async Task DeleteAsync(ReportItem item)
+    {
+        var confirmed = await DialogService.ShowMessageBox(
+            "حذف",
+            $"آیا از حذف گزارش سرریز تاریخ {item.ReportDate:yyyy/MM/dd} مطمئن هستید؟",
+            yesText: "حذف", cancelText: "انصراف");
+
+        if (confirmed != true)
+        {
+            return;
+        }
+
+        try
+        {
+            var client = HttpClientFactory.CreateClient("InternalApi");
+            var response = await client.DeleteAsync($"/api/v1/lubricant-overflow-reports/{item.Id}");
+
+            if (response.IsSuccessStatusCode)
+            {
+                reports.Remove(item);
+            }
+            else
+            {
+                var content = await response.Content.ReadAsStringAsync();
+                errorMessage = response.StatusCode == System.Net.HttpStatusCode.Conflict
+                    ? "این گزارش قفل شده و قابل حذف نیست."
+                    : $"خطا در حذف: {content}";
+            }
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"خطا: {ex.Message}";
+        }
+    }
+}

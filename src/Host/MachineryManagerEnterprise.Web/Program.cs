@@ -100,7 +100,7 @@ try
     builder.Services.AddPersonnelApplication();
     builder.Services.AddPersonnelInfrastructure(builder.Configuration);
 
-    // Consumption module (chat, 2026-09-22 — first wiring; module previously existed but was never registered)
+    // Consumption module
     builder.Services.AddConsumptionApplication();
     builder.Services.AddConsumptionInfrastructure(builder.Configuration);
 
@@ -145,7 +145,7 @@ try
         typeof(MachineryManagerEnterprise.AuditLog.Presentation.Components.Pages.AuditLogList).Assembly,
         typeof(MachineryManagerEnterprise.WorkCalendar.Presentation.Components.Pages.WorkCalendarsList).Assembly,
         typeof(MachineryManagerEnterprise.Personnel.Presentation.Components.Pages.PersonnelList).Assembly,
-        typeof(MachineryManagerEnterprise.Consumption.Presentation.Components.Pages.FuelConsumptionsList).Assembly);
+        typeof(MachineryManagerEnterprise.Consumption.Presentation.Components.Pages.LubricantOverflowReportsList).Assembly);
 
     // Identity endpoints
     app.MapIdentityConnectEndpoints();
@@ -175,6 +175,8 @@ try
     app.MapDrivingLicenseTypeEndpoints();
     app.MapJobTitleEndpoints();
     app.MapAssetOperationalStatusEndpoints();
+    app.MapLubricantTypeEndpoints();
+    app.MapOverflowComponentEndpoints();
 
     // AuditLog endpoints
     app.MapAuditLogEndpoints();
@@ -187,6 +189,8 @@ try
 
     // Consumption endpoints
     app.MapFuelConsumptionEndpoints();
+    app.MapLubricantOverflowReportEndpoints();
+    app.MapConsumptionFreezeSettingEndpoints();
 
     app.Run();
 }

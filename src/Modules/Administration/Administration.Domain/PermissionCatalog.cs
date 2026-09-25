@@ -45,6 +45,10 @@ public static class PermissionCatalog
         new PermissionSection("DrivingLicenseType", "گواهینامه‌ها"),
         new PermissionSection("JobTitle", "عناوین شغلی"),
         new PermissionSection("WorkCalendar", "تقویم کاری"),
+        new PermissionSection("LubricantType", "انواع روانکار"),
+        new PermissionSection("OverflowComponent", "قسمت‌های سرریز"),
+        new PermissionSection("LubricantOverflowReport", "گزارش سرریز روانکار"),
+        new PermissionSection("ConsumptionFreezeSetting", "قفل گزارش‌های مصرف", ["View", "Edit"]),
     ];
 
     /// <summary>Builds the canonical permission string for a section/action pair (e.g. "Organization.Create").</summary>

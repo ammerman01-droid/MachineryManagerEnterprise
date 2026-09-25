@@ -53,9 +53,17 @@ public sealed class ConfigurationDbContext : DbContext, IConfigurationUnitOfWork
     public DbSet<global::Configuration.Domain.JobTitle> JobTitles => Set<global::Configuration.Domain.JobTitle>();
 
     /// <summary>Gets the set of AssetOperationalStatus aggregates.</summary>
-public DbSet<global::Configuration.Domain.AssetOperationalStatus> AssetOperationalStatuses =>
-    Set<global::Configuration.Domain.AssetOperationalStatus>();
-    
+    public DbSet<global::Configuration.Domain.AssetOperationalStatus> AssetOperationalStatuses =>
+        Set<global::Configuration.Domain.AssetOperationalStatus>();
+
+    /// <summary>Gets the set of LubricantType aggregates. Added (chat, 2026-09-16) for the Consumption module.</summary>
+    public DbSet<global::Configuration.Domain.LubricantType> LubricantTypes =>
+        Set<global::Configuration.Domain.LubricantType>();
+
+    /// <summary>Gets the set of OverflowComponent aggregates. Added (chat, 2026-09-16) for the Consumption module.</summary>
+    public DbSet<global::Configuration.Domain.OverflowComponent> OverflowComponents =>
+        Set<global::Configuration.Domain.OverflowComponent>();
+
     /// <inheritdoc />
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

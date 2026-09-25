@@ -4,6 +4,7 @@ using MachineryManagerEnterprise.SharedKernel;
 using MachineryManagerEnterprise.SharedKernel.Abstractions;
 using MachineryManagerEnterprise.SharedKernel.Infrastructure;
 using Microsoft.EntityFrameworkCore;
+using Consumption.Domain;
 
 namespace MachineryManagerEnterprise.Consumption.Infrastructure.Persistence;
 
@@ -35,6 +36,12 @@ public sealed class ConsumptionDbContext : DbContext, IConsumptionUnitOfWork
 
     /// <summary>Gets the set of FuelConsumption aggregates.</summary>
     public DbSet<FuelConsumption> FuelConsumptions => Set<FuelConsumption>();
+
+    /// <summary>Gets the set of Lubricant Overflow Report aggregates.</summary>
+    public DbSet<LubricantOverflowReport> LubricantOverflowReports => Set<LubricantOverflowReport>();
+
+    /// <summary>Gets the set of Consumption Freeze Setting aggregates.</summary>
+    public DbSet<ConsumptionFreezeSetting> ConsumptionFreezeSettings => Set<ConsumptionFreezeSetting>();
 
     /// <summary>
     /// Gets the set of audit records captured for this module's schema.

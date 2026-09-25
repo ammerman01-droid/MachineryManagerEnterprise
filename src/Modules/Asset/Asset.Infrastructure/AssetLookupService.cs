@@ -63,4 +63,32 @@ public sealed class AssetLookupService : IAssetLookupService
                 a.SecondaryFuelUnit))
             .FirstOrDefaultAsync(cancellationToken);
     }
+
+        /// <inheritdoc />
+    public async Task<Guid?> GetOrganizationIdAsync(Guid assetId, CancellationToken cancellationToken = default)
+    {
+        var id = global::Asset.Domain.AssetId.From(assetId);
+
+        var organizationId = await _dbContext.Assets
+            .AsNoTracking()
+            .Where(a => a.Id == id)
+            .Select(a => (Guid?)a.OrganizationId)
+            .FirstOrDefaultAsync(cancellationToken);
+
+        return organizationId;
+    }
+
+    /// <inheritdoc />
+    public async Task<Guid?> GetCurrentProjectIdAsync(Guid assetId, CancellationToken cancellationToken = default)
+    {
+        var id = global::Asset.Domain.AssetId.From(assetId);
+
+        var projectId = await _dbContext.Assets
+            .AsNoTracking()
+            .Where(a => a.Id == id)
+            .Select(a => (Guid?)a.ProjectId)
+            .FirstOrDefaultAsync(cancellationToken);
+
+        return projectId;
+    }
 }

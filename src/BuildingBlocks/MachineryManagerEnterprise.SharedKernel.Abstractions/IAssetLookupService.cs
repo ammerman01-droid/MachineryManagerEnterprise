@@ -21,6 +21,20 @@ public interface IAssetLookupService
     /// does not exist.
     /// </summary>
     Task<AssetConsumptionSnapshot?> GetConsumptionSnapshotAsync(Guid assetId, CancellationToken cancellationToken = default);
+
+    /// <summary>Resolves the owning Organization's identifier for the given Asset, or <c>null</c> if the Asset does not exist.</summary>
+    Task<Guid?> GetOrganizationIdAsync(Guid assetId, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Resolves the Project the given Asset is currently assigned to, or
+    /// <c>null</c> if the Asset does not exist. Since Asset.ProjectId can
+    /// change over time (chat, 2026-09-16), this reflects the Asset's
+    /// CURRENT assignment only — it is not what a Lubricant Overflow
+    /// Report should permanently store (see BR-017 in the Consumption
+    /// module notes); it exists so the Presentation layer can pre-fill
+    /// or sanity-check the Project field when creating a report.
+    /// </summary>
+    Task<Guid?> GetCurrentProjectIdAsync(Guid assetId, CancellationToken cancellationToken = default);
 }
 
 /// <summary>

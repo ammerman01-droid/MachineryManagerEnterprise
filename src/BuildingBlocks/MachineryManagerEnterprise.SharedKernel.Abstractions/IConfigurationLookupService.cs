@@ -48,6 +48,12 @@ public interface IConfigurationLookupService
     /// <param name="cancellationToken">Token to cancel the asynchronous operation.</param>
     /// <returns>The matching <see cref="FuelTypeSnapshot"/>, or <see langword="null"/> if no FuelType with that id exists.</returns>
     Task<FuelTypeSnapshot?> GetFuelTypeAsync(Guid fuelTypeId, CancellationToken cancellationToken = default);
+
+    /// <summary>Checks whether the given Lubricant Type exists and belongs to the given Holding. Added (chat, 2026-09-16) for the Consumption module.</summary>
+    Task<bool> LubricantTypeExistsInHoldingAsync(Guid lubricantTypeId, Guid holdingId, CancellationToken cancellationToken = default);
+
+    /// <summary>Checks whether the given Overflow Component exists and belongs to the given Holding. Added (chat, 2026-09-16) for the Consumption module.</summary>
+    Task<bool> OverflowComponentExistsInHoldingAsync(Guid overflowComponentId, Guid holdingId, CancellationToken cancellationToken = default);
 }
 
 /// <summary>

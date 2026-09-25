@@ -89,4 +89,24 @@ public sealed class ConfigurationLookupService : IConfigurationLookupService
             .Select(f => new FuelTypeSnapshot(f.Id.Value, f.HoldingId, f.Name, f.Price, f.Kind))
             .FirstOrDefaultAsync(cancellationToken);
     }
+
+    /// <inheritdoc />
+    public async Task<bool> LubricantTypeExistsInHoldingAsync(Guid lubricantTypeId, Guid holdingId, CancellationToken cancellationToken = default)
+    {
+        var id = LubricantTypeId.From(lubricantTypeId);
+
+        return await _dbContext.LubricantTypes
+            .AsNoTracking()
+            .AnyAsync(l => l.Id == id && l.HoldingId == holdingId, cancellationToken);
+    }
+
+    /// <inheritdoc />
+    public async Task<bool> OverflowComponentExistsInHoldingAsync(Guid overflowComponentId, Guid holdingId, CancellationToken cancellationToken = default)
+    {
+        var id = OverflowComponentId.From(overflowComponentId);
+
+        return await _dbContext.OverflowComponents
+            .AsNoTracking()
+            .AnyAsync(o => o.Id == id && o.HoldingId == holdingId, cancellationToken);
+    }
 }

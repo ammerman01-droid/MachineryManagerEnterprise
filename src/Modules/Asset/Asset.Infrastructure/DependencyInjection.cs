@@ -1,5 +1,4 @@
 using MachineryManagerEnterprise.Asset.Application.Abstractions;
-using MachineryManagerEnterprise.Asset.Infrastructure.Lookups;
 using MachineryManagerEnterprise.Asset.Infrastructure.Persistence;
 using MachineryManagerEnterprise.SharedKernel.Abstractions;
 using Microsoft.EntityFrameworkCore;

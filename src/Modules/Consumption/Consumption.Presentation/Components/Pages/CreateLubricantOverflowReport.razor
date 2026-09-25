@@ -1,0 +1,297 @@
+@page "/admin/lubricant-overflow-reports/create"
+@inject IHttpClientFactory HttpClientFactory
+@inject NavigationManager Navigation
+
+<PageTitle>ثبت سرریز روانکار</PageTitle>
+
+<MudText Typo="Typo.h4" Class="mb-4">ثبت گزارش سرریز روانکار</MudText>
+
+@if (errorMessage is not null)
+{
+    <MudAlert Severity="Severity.Error" Class="my-4">@errorMessage</MudAlert>
+}
+
+@if (isLoadingLookups)
+{
+    <MudProgressLinear Indeterminate="true" Class="my-4" />
+}
+else
+{
+    <MudPaper Class="pa-4" Style="max-width:900px;">
+        <MudForm @ref="form">
+            @if (projects.Count > 1)
+            {
+                <MudSelect T="Guid?" Label="پروژه" Placeholder="یک پروژه انتخاب کنید" Value="projectId" ValueChanged="@(v => projectId = v)" Required="true" RequiredError="انتخاب پروژه الزامی است" Class="mb-2">
+                    @foreach (var project in projects)
+                    {
+                        <MudSelectItem T="Guid?" Value="@((Guid?)project.Id)">@project.Name</MudSelectItem>
+                    }
+                </MudSelect>
+            }
+
+            <MudDatePicker Label="تاریخ گزارش" @bind-Date="reportDateAsDateTime" Required="true" Class="mb-2" />
+            <MudNumericField T="decimal" Label="قرائت کارکرد" @bind-Value="hourMeterReading" Min="0" Required="true" Class="mb-4" />
+
+            <MudText Typo="Typo.h6" Class="mb-2">بخش‌های سرریز</MudText>
+            @foreach (var line in lines)
+            {
+                <MudPaper Outlined="true" Class="pa-3 mb-3">
+                    <MudGrid>
+                        <MudItem xs="12" sm="3">
+                            <MudSelect T="Guid?" Label="قسمت سرریز‌شده" Placeholder="انتخاب کنید" @bind-Value="line.OverflowComponentId" Required="true">
+                                @foreach (var component in overflowComponents)
+                                {
+                                    <MudSelectItem T="Guid?" Value="@((Guid?)component.Id)">@component.Name</MudSelectItem>
+                                }
+                            </MudSelect>
+                        </MudItem>
+                        <MudItem xs="12" sm="3">
+                            <MudSelect T="Guid?" Label="نوع روانکار" Placeholder="انتخاب کنید" @bind-Value="line.LubricantTypeId" Required="true">
+                                @foreach (var lubricantType in lubricantTypes)
+                                {
+                                    <MudSelectItem T="Guid?" Value="@((Guid?)lubricantType.Id)">@lubricantType.Name</MudSelectItem>
+                                }
+                            </MudSelect>
+                        </MudItem>
+                        <MudItem xs="12" sm="2">
+                            <MudNumericField T="decimal" Label="میزان (لیتر)" @bind-Value="line.AmountInLiters" Min="0.01m" Required="true" />
+                        </MudItem>
+                        <MudItem xs="12" sm="3">
+                            <MudTextField T="string" Label="علت سرریز" @bind-Value="line.Reason" Required="true" MaxLength="500" />
+                        </MudItem>
+                        <MudItem xs="12" sm="1" Class="d-flex align-center">
+                            <MudIconButton Icon="@Icons.Material.Filled.Delete" Color="Color.Error" OnClick="@(() => lines.Remove(line))" />
+                        </MudItem>
+                    </MudGrid>
+                </MudPaper>
+            }
+            <MudButton Variant="Variant.Outlined" StartIcon="@Icons.Material.Filled.Add" Class="mb-4" OnClick="@(() => lines.Add(new LineRow()))">
+                افزودن بخش سرریز
+            </MudButton>
+
+            <MudText Typo="Typo.h6" Class="mb-2">پرسنل انجام‌دهنده (اختیاری)</MudText>
+            @foreach (var entry in personnelEntries)
+            {
+                <MudPaper Outlined="true" Class="pa-3 mb-3">
+                    <MudGrid>
+                        <MudItem xs="12" sm="4">
+                            <MudSelect T="Guid?" Label="پرسنل" Placeholder="انتخاب کنید" @bind-Value="entry.PersonnelId" Required="true">
+                                @foreach (var person in personnel)
+                                {
+                                    <MudSelectItem T="Guid?" Value="@((Guid?)person.Id)">@person.FirstName @person.LastName</MudSelectItem>
+                                }
+                            </MudSelect>
+                        </MudItem>
+                        <MudItem xs="12" sm="3">
+                            <MudTimePicker Label="ساعت شروع" @bind-Time="entry.StartTimeAsTimeSpan" Required="true" />
+                        </MudItem>
+                        <MudItem xs="12" sm="3">
+                            <MudTimePicker Label="مدت انجام کار" @bind-Time="entry.DurationAsTimeSpan" Required="true" />
+                        </MudItem>
+                        <MudItem xs="12" sm="2" Class="d-flex align-center">
+                            <MudIconButton Icon="@Icons.Material.Filled.Delete" Color="Color.Error" OnClick="@(() => personnelEntries.Remove(entry))" />
+                        </MudItem>
+                    </MudGrid>
+                </MudPaper>
+            }
+            <MudButton Variant="Variant.Outlined" StartIcon="@Icons.Material.Filled.Add" Class="mb-4" OnClick="@(() => personnelEntries.Add(new PersonnelEntryRow()))">
+                افزودن پرسنل
+            </MudButton>
+
+            <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="SubmitAsync" Disabled="isSubmitting">
+                @(isSubmitting ? "در حال ثبت..." : "ثبت گزارش")
+            </MudButton>
+            <MudButton Variant="Variant.Outlined" Color="Color.Secondary" Class="ml-2"
+                       OnClick="@(() => Navigation.NavigateTo($"/admin/lubricant-overflow-reports?assetId={AssetId}&holdingId={HoldingId}&organizationId={OrganizationId}"))">
+                انصراف
+            </MudButton>
+        </MudForm>
+    </MudPaper>
+}
+
+@code {
+    /// <summary>Gets or sets the Asset this report is for, supplied via the route.</summary>
+    [SupplyParameterFromQuery]
+    public Guid AssetId { get; set; }
+
+    /// <summary>Gets or sets the owning Holding, needed to load the Overflow Component / Lubricant Type catalogs.</summary>
+    [SupplyParameterFromQuery]
+    public Guid HoldingId { get; set; }
+
+    /// <summary>Gets or sets the owning Organization, needed to load its Projects and Personnel.</summary>
+    [SupplyParameterFromQuery]
+    public Guid OrganizationId { get; set; }
+
+    private sealed class LookupItem
+    {
+        public Guid Id { get; set; }
+        public string Name { get; set; } = string.Empty;
+    }
+
+    private sealed class ProjectItem
+    {
+        public Guid Id { get; set; }
+        public string Name { get; set; } = string.Empty;
+        public Guid OrganizationId { get; set; }
+    }
+
+    private sealed class PersonnelItem
+    {
+        public Guid Id { get; set; }
+        public string FirstName { get; set; } = string.Empty;
+        public string LastName { get; set; } = string.Empty;
+    }
+
+    private sealed class SearchProjectsResult
+    {
+        public List<ProjectItem> Items { get; set; } = [];
+    }
+
+    private sealed class LineRow
+    {
+        public Guid? OverflowComponentId { get; set; }
+        public Guid? LubricantTypeId { get; set; }
+        public decimal AmountInLiters { get; set; }
+        public string Reason { get; set; } = string.Empty;
+    }
+
+    private sealed class PersonnelEntryRow
+    {
+        public Guid? PersonnelId { get; set; }
+        public TimeSpan? StartTimeAsTimeSpan { get; set; }
+        public TimeSpan? DurationAsTimeSpan { get; set; }
+    }
+
+    private static readonly JsonSerializerOptions JsonOptions = new() { PropertyNameCaseInsensitive = true };
+
+    private MudForm form = null!;
+    private List<ProjectItem> projects = [];
+    private List<LookupItem> overflowComponents = [];
+    private List<LookupItem> lubricantTypes = [];
+    private List<PersonnelItem> personnel = [];
+    private List<LineRow> lines = [new()];
+    private List<PersonnelEntryRow> personnelEntries = [];
+    private Guid? projectId;
+    private DateTime? reportDateAsDateTime = DateTime.Today;
+    private decimal hourMeterReading;
+    private bool isLoadingLookups = true;
+    private bool isSubmitting;
+    private string? errorMessage;
+
+    /// <remarks>
+    /// NOTE (chat, 2026-09-24): Projects are fetched the same way
+    /// <c>AssetsList.razor</c> does it — <c>GET /api/v1/projects?pageSize=200</c>
+    /// (wrapped in <c>{ Items: [...] }</c>), filtered client-side by
+    /// <see cref="OrganizationId"/>, since the real endpoint does not
+    /// appear to support a server-side organization filter. Personnel
+    /// (<c>GET /api/v1/personnel?organizationId=</c>) is still an
+    /// ASSUMED shape — I have not seen the real Personnel endpoint
+    /// contract; verify/adjust if it differs.
+    /// </remarks>
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            var client = HttpClientFactory.CreateClient("InternalApi");
+
+            var projectsTask = client.GetAsync("/api/v1/projects?pageSize=200");
+            var componentsTask = client.GetAsync($"/api/v1/overflow-components?holdingId={HoldingId}");
+            var lubricantTypesTask = client.GetAsync($"/api/v1/lubricant-types?holdingId={HoldingId}");
+            var personnelTask = client.GetAsync($"/api/v1/personnel?organizationId={OrganizationId}");
+
+            await Task.WhenAll(projectsTask, componentsTask, lubricantTypesTask, personnelTask);
+
+            var projectsResponse = await projectsTask;
+            if (projectsResponse.IsSuccessStatusCode)
+            {
+                var projectsContent = await projectsResponse.Content.ReadAsStringAsync();
+                var projectsResult = JsonSerializer.Deserialize<SearchProjectsResult>(projectsContent, JsonOptions);
+                projects = (projectsResult?.Items ?? []).Where(p => p.OrganizationId == OrganizationId).ToList();
+            }
+
+            overflowComponents = await DeserializeListAsync<LookupItem>(await componentsTask);
+            lubricantTypes = await DeserializeListAsync<LookupItem>(await lubricantTypesTask);
+            personnel = await DeserializeListAsync<PersonnelItem>(await personnelTask);
+
+            if (projects.Count == 1)
+            {
+                projectId = projects[0].Id;
+            }
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"خطا در بارگذاری اطلاعات پایه: {ex.Message}";
+        }
+        finally
+        {
+            isLoadingLookups = false;
+        }
+    }
+
+    private static async Task<List<T>> DeserializeListAsync<T>(HttpResponseMessage response)
+    {
+        if (!response.IsSuccessStatusCode)
+        {
+            return [];
+        }
+
+        var content = await response.Content.ReadAsStringAsync();
+        return JsonSerializer.Deserialize<List<T>>(content, JsonOptions) ?? [];
+    }
+
+    private async Task SubmitAsync()
+    {
+        await form.Validate();
+        if (!form.IsValid || projectId is null || lines.Count == 0 ||
+            lines.Any(l => l.OverflowComponentId is null || l.LubricantTypeId is null))
+        {
+            errorMessage = "لطفاً پروژه و حداقل یک بخش سرریز کامل (قسمت، نوع روانکار، میزان، علت) را مشخص کنید.";
+            return;
+        }
+
+        isSubmitting = true;
+        errorMessage = null;
+
+        try
+        {
+            var client = HttpClientFactory.CreateClient("InternalApi");
+
+            var payload = new
+            {
+                AssetId,
+                ProjectId = projectId!.Value,
+                ReportDate = DateOnly.FromDateTime(reportDateAsDateTime ?? DateTime.Today),
+                HourMeterReading = hourMeterReading,
+                Lines = lines.Select(l => new { OverflowComponentId = l.OverflowComponentId!.Value, LubricantTypeId = l.LubricantTypeId!.Value, l.AmountInLiters, l.Reason }),
+                PersonnelEntries = personnelEntries
+                    .Where(e => e.PersonnelId is not null && e.StartTimeAsTimeSpan is not null && e.DurationAsTimeSpan is not null)
+                    .Select(e => new
+                    {
+                        PersonnelId = e.PersonnelId!.Value,
+                        StartTime = TimeOnly.FromTimeSpan(e.StartTimeAsTimeSpan!.Value),
+                        Duration = e.DurationAsTimeSpan!.Value,
+                    }),
+            };
+
+            var response = await client.PostAsJsonAsync("/api/v1/lubricant-overflow-reports", payload);
+            var content = await response.Content.ReadAsStringAsync();
+
+            if (response.IsSuccessStatusCode)
+            {
+                Navigation.NavigateTo($"/admin/lubricant-overflow-reports?assetId={AssetId}&holdingId={HoldingId}&organizationId={OrganizationId}");
+            }
+            else
+            {
+                errorMessage = $"خطا در ثبت: {content}";
+            }
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"خطا: {ex.Message}";
+        }
+        finally
+        {
+            isSubmitting = false;
+        }
+    }
+}

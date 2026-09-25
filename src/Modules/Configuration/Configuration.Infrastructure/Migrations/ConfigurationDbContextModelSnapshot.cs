@@ -169,6 +169,48 @@ namespace Configuration.Infrastructure.Migrations
                     b.ToTable("JobTitle", "configuration");
                 });
 
+            modelBuilder.Entity("Configuration.Domain.LubricantType", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("HoldingId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("HoldingId", "Name")
+                        .IsUnique();
+
+                    b.ToTable("LubricantType", "configuration");
+                });
+
+            modelBuilder.Entity("Configuration.Domain.OverflowComponent", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("HoldingId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("HoldingId", "Name")
+                        .IsUnique();
+
+                    b.ToTable("OverflowComponent", "configuration");
+                });
+
             modelBuilder.Entity("Configuration.Domain.UnitOfMeasurement", b =>
                 {
                     b.Property<Guid>("Id")

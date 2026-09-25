@@ -1,0 +1,115 @@
+@page "/admin/overflow-components/edit/{Id:guid}"
+@inject IHttpClientFactory HttpClientFactory
+@inject NavigationManager Navigation
+
+<PageTitle>ویرایش قسمت سرریز</PageTitle>
+
+<MudText Typo="Typo.h4" Class="mb-4">ویرایش قسمت سرریز</MudText>
+
+@if (errorMessage is not null)
+{
+    <MudAlert Severity="Severity.Error" Class="my-4">@errorMessage</MudAlert>
+}
+
+@if (isLoading)
+{
+    <MudProgressLinear Indeterminate="true" Class="my-4" />
+}
+else
+{
+    <MudPaper Class="pa-4" Style="max-width:500px;">
+        <MudForm @ref="form">
+            <MudTextField T="string" Label="نام قسمت سرریز" @bind-Value="name" Required="true" RequiredError="نام الزامی است" MaxLength="100" />
+
+            <MudButton Variant="Variant.Filled" Color="Color.Primary" Class="mt-4" OnClick="SubmitAsync" Disabled="isSubmitting">
+                @(isSubmitting ? "در حال ذخیره..." : "ذخیره")
+            </MudButton>
+            <MudButton Variant="Variant.Outlined" Color="Color.Secondary" Class="mt-4 ml-2"
+                       OnClick="@(() => Navigation.NavigateTo("/admin/overflow-components"))">
+                انصراف
+            </MudButton>
+        </MudForm>
+    </MudPaper>
+}
+
+@code {
+    /// <summary>Gets or sets the identifier of the Lubricant Type being edited, supplied via the route.</summary>
+    [Parameter]
+    public Guid Id { get; set; }
+
+    private sealed class OverflowComponentItem
+    {
+        public Guid Id { get; set; }
+        public string Name { get; set; } = string.Empty;
+    }
+
+    private MudForm form = null!;
+    private string name = string.Empty;
+    private bool isLoading = true;
+    private bool isSubmitting;
+    private string? errorMessage;
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            var client = HttpClientFactory.CreateClient("InternalApi");
+            var response = await client.GetAsync($"/api/v1/overflow-components/{Id}");
+            var content = await response.Content.ReadAsStringAsync();
+
+            if (response.IsSuccessStatusCode)
+            {
+                var item = JsonSerializer.Deserialize<OverflowComponentItem>(content, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+                name = item?.Name ?? string.Empty;
+            }
+            else
+            {
+                errorMessage = $"خطا در دریافت اطلاعات: {content}";
+            }
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"خطا: {ex.Message}";
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+
+    private async Task SubmitAsync()
+    {
+        await form.Validate();
+        if (!form.IsValid)
+        {
+            return;
+        }
+
+        isSubmitting = true;
+        errorMessage = null;
+
+        try
+        {
+            var client = HttpClientFactory.CreateClient("InternalApi");
+            var response = await client.PutAsJsonAsync($"/api/v1/overflow-components/{Id}", new { Name = name });
+            var content = await response.Content.ReadAsStringAsync();
+
+            if (response.IsSuccessStatusCode)
+            {
+                Navigation.NavigateTo("/admin/overflow-components");
+            }
+            else
+            {
+                errorMessage = $"خطا در ذخیره: {content}";
+            }
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"خطا: {ex.Message}";
+        }
+        finally
+        {
+            isSubmitting = false;
+        }
+    }
+}

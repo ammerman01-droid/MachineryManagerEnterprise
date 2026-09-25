@@ -23,6 +23,59 @@ namespace Consumption.Infrastructure.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
+            modelBuilder.Entity("Consumption.Domain.ConsumptionFreezeSetting", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("OrganizationId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateOnly>("ThresholdDate")
+                        .HasColumnType("date");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("OrganizationId")
+                        .IsUnique();
+
+                    b.ToTable("ConsumptionFreezeSetting", "consumption");
+                });
+
+            modelBuilder.Entity("Consumption.Domain.LubricantOverflowReport", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("AssetId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<decimal>("HourMeterReading")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<Guid>("OrganizationId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("ProjectId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateOnly>("ReportDate")
+                        .HasColumnType("date");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("AssetId");
+
+                    b.HasIndex("OrganizationId");
+
+                    b.HasIndex("ProjectId");
+
+                    b.HasIndex("ReportDate");
+
+                    b.ToTable("LubricantOverflowReport", "consumption");
+                });
+
             modelBuilder.Entity("MachineryManagerEnterprise.Consumption.Domain.FuelConsumption", b =>
                 {
                     b.Property<Guid>("Id")
@@ -152,6 +205,75 @@ namespace Consumption.Infrastructure.Migrations
                         {
                             t.ExcludeFromMigrations();
                         });
+                });
+
+            modelBuilder.Entity("Consumption.Domain.LubricantOverflowReport", b =>
+                {
+                    b.OwnsMany("Consumption.Domain.LubricantOverflowLine", "Lines", b1 =>
+                        {
+                            b1.Property<Guid>("Id")
+                                .ValueGeneratedOnAdd()
+                                .HasColumnType("uniqueidentifier");
+
+                            b1.Property<decimal>("AmountInLiters")
+                                .HasPrecision(10, 2)
+                                .HasColumnType("decimal(10,2)");
+
+                            b1.Property<Guid>("LubricantOverflowReportId")
+                                .HasColumnType("uniqueidentifier");
+
+                            b1.Property<Guid>("LubricantTypeId")
+                                .HasColumnType("uniqueidentifier");
+
+                            b1.Property<Guid>("OverflowComponentId")
+                                .HasColumnType("uniqueidentifier");
+
+                            b1.Property<string>("Reason")
+                                .IsRequired()
+                                .HasMaxLength(500)
+                                .HasColumnType("nvarchar(500)");
+
+                            b1.HasKey("Id");
+
+                            b1.HasIndex("LubricantOverflowReportId");
+
+                            b1.ToTable("LubricantOverflowLine", "consumption");
+
+                            b1.WithOwner()
+                                .HasForeignKey("LubricantOverflowReportId");
+                        });
+
+                    b.OwnsMany("Consumption.Domain.LubricantOverflowReportPersonnelEntry", "PersonnelEntries", b1 =>
+                        {
+                            b1.Property<Guid>("Id")
+                                .ValueGeneratedOnAdd()
+                                .HasColumnType("uniqueidentifier");
+
+                            b1.Property<TimeSpan>("Duration")
+                                .HasColumnType("time");
+
+                            b1.Property<Guid>("LubricantOverflowReportId")
+                                .HasColumnType("uniqueidentifier");
+
+                            b1.Property<Guid>("PersonnelId")
+                                .HasColumnType("uniqueidentifier");
+
+                            b1.Property<TimeOnly>("StartTime")
+                                .HasColumnType("time");
+
+                            b1.HasKey("Id");
+
+                            b1.HasIndex("LubricantOverflowReportId");
+
+                            b1.ToTable("LubricantOverflowReportPersonnelEntry", "consumption");
+
+                            b1.WithOwner()
+                                .HasForeignKey("LubricantOverflowReportId");
+                        });
+
+                    b.Navigation("Lines");
+
+                    b.Navigation("PersonnelEntries");
                 });
 #pragma warning restore 612, 618
         }

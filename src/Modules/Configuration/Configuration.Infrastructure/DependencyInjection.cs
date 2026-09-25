@@ -36,6 +36,8 @@ public static class DependencyInjection
         services.AddScoped<IDrivingLicenseTypeRepository, DrivingLicenseTypeRepository>();
         services.AddScoped<IJobTitleRepository, JobTitleRepository>();
         services.AddScoped<IAssetOperationalStatusRepository, AssetOperationalStatusRepository>();
+        services.AddScoped<ILubricantTypeRepository, LubricantTypeRepository>();
+        services.AddScoped<IOverflowComponentRepository, OverflowComponentRepository>();
 
         return services;
     }
