@@ -73,9 +73,19 @@ public static class WorkCalendarErrors
     public static Error DayScheduleRequiresAtLeastOneShift() => Error.Validation(
         "WorkCalendar.DayScheduleRequiresAtLeastOneShift", "A working day schedule requires at least one shift.");
 
-    /// <summary>Creates an error indicating a shift's end time precedes its start time.</summary>
-    public static Error ShiftEndBeforeStart() => Error.Validation(
-        "WorkCalendar.ShiftEndBeforeStart", "A shift's end time must be after its start time.");
+    /// <summary>Creates an error indicating a shift's start and end times are identical (zero or 24-hour length is not allowed).</summary>
+    public static Error ShiftStartEqualsEnd() => Error.Validation(
+        "WorkCalendar.ShiftStartEqualsEnd", "A shift's end time must differ from its start time.");
+
+    /// <summary>Creates an error indicating a shift is longer than the permitted maximum.</summary>
+    /// <param name="maxHours">The maximum allowed shift length, in hours.</param>
+    public static Error ShiftTooLong(int maxHours) => Error.Validation(
+        "WorkCalendar.ShiftTooLong", $"A shift must not be longer than {maxHours} hours.");
+
+    /// <summary>Creates an error indicating an overnight shift overlaps a shift starting on the following day.</summary>
+    /// <param name="day">The day of the week on which the overnight shift starts.</param>
+    public static Error OvernightShiftOverlapsNextDay(DayOfWeek day) => Error.Validation(
+        "WorkCalendar.OvernightShiftOverlapsNextDay", $"The overnight shift starting on {day} overlaps a shift on the following day.");
 
     /// <summary>Creates an error indicating a break falls outside its shift's time range.</summary>
     public static Error BreakOutsideShift() => Error.Validation(
@@ -85,9 +95,9 @@ public static class WorkCalendarErrors
     public static Error OverlappingBreaks() => Error.Validation(
         "WorkCalendar.OverlappingBreaks", "Breaks within a single shift must not overlap.");
 
-    /// <summary>Creates an error indicating a break's end time precedes its start time.</summary>
-    public static Error BreakEndBeforeStart() => Error.Validation(
-        "WorkCalendar.BreakEndBeforeStart", "A break's end time must be after its start time.");
+    /// <summary>Creates an error indicating a break's start and end times are identical.</summary>
+    public static Error BreakStartEqualsEnd() => Error.Validation(
+        "WorkCalendar.BreakStartEqualsEnd", "A break's end time must differ from its start time.");
 
     /// <summary>Creates an error indicating a Work Pattern cannot be superseded because it is not currently Active.</summary>
     public static Error WorkPatternNotActive() => Error.Conflict(

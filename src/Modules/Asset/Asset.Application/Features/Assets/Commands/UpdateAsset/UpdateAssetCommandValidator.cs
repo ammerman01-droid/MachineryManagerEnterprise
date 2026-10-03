@@ -31,8 +31,9 @@ public sealed class UpdateAssetCommandValidator : AbstractValidator<UpdateAssetC
         RuleFor(x => x.PrimaryFuelKind).IsInEnum().When(x => x.PrimaryFuelKind.HasValue);
         RuleFor(x => x.SecondaryFuelKind).IsInEnum().When(x => x.SecondaryFuelKind.HasValue);
 
-        // Units are fixed enums (chat, 2026-09-19).
-        RuleFor(x => x.MeterReadingUnit).IsInEnum().When(x => x.MeterReadingUnit.HasValue);
+        // Required as of chat, 2026-09-29 (previously optional, chat 2026-09-19).
+        RuleFor(x => x.MeterReadingUnit).IsInEnum();
+
         RuleFor(x => x.PrimaryFuelUnit).IsInEnum().When(x => x.PrimaryFuelUnit.HasValue);
         RuleFor(x => x.SecondaryFuelUnit).IsInEnum().When(x => x.SecondaryFuelUnit.HasValue);
     }

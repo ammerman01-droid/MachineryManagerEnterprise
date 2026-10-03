@@ -78,7 +78,8 @@ public sealed class AssetConfiguration : IEntityTypeConfiguration<global::Asset.
         // Asset.Status and EngineModel.FuelKind.
         builder.Property(a => a.MeterReadingUnit)
             .HasConversion<string>()
-            .HasMaxLength(20);
+            .HasMaxLength(20)
+            .IsRequired();
 
         builder.Property(a => a.PrimaryFuelKind)
             .HasConversion<string>()

@@ -1,0 +1,102 @@
+@using MachineryManagerEnterprise.UI.Components
+@inject IHttpClientFactory HttpClientFactory
+
+<MudDialog>
+    <TitleContent>اصلاح مقدار خوانده‌شده</TitleContent>
+    <DialogContent>
+        @if (errorMessage is not null)
+        {
+            <MudAlert Severity="Severity.Error" Class="mb-4">@errorMessage</MudAlert>
+        }
+
+        <MudAlert Severity="Severity.Warning" Class="mb-4">
+            اصلاح این ردیف ممکن است کارکرد مولد ردیف بعدی زنجیره را هم به‌طور خودکار بازمحاسبه کند.
+        </MudAlert>
+
+        <MudField Label="تاریخ / شیفت" Class="mb-4">@EntryDate.ToString("yyyy-MM-dd") — شیفت @(ShiftIndex + 1)</MudField>
+
+        <MudField Label="مقدار فعلی" Class="mb-4">@CurrentRawReadingValue.ToString("0.##")</MudField>
+
+        <MudNumericField T="decimal?" @bind-Value="newRawReadingValue" Label="مقدار جدید" Required="true" Min="0" Class="mb-4" />
+    </DialogContent>
+    <DialogActions>
+        <MudButton OnClick="Cancel">انصراف</MudButton>
+        <MudButton Color="Color.Primary" Variant="Variant.Filled" OnClick="SubmitAsync" Disabled="@(isSubmitting || newRawReadingValue is null)">
+            ثبت اصلاحیه
+        </MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+    [CascadingParameter]
+    private IMudDialogInstance MudDialog { get; set; } = null!;
+
+    /// <summary>The kind of owner the ledger this entry belongs to.</summary>
+    [Parameter]
+    public string OwnerType { get; set; } = string.Empty;
+
+    /// <summary>The identifier of the ledger's owner.</summary>
+    [Parameter]
+    public Guid OwnerId { get; set; }
+
+    /// <summary>The unit of the ledger this entry belongs to.</summary>
+    [Parameter]
+    public string Unit { get; set; } = string.Empty;
+
+    /// <summary>The date of the shift reading being corrected.</summary>
+    [Parameter]
+    public DateOnly EntryDate { get; set; }
+
+    /// <summary>The shift index of the reading being corrected.</summary>
+    [Parameter]
+    public int ShiftIndex { get; set; }
+
+    /// <summary>The entry's raw value before correction, shown for reference.</summary>
+    [Parameter]
+    public decimal CurrentRawReadingValue { get; set; }
+
+    private decimal? newRawReadingValue;
+    private bool isSubmitting;
+    private string? errorMessage;
+
+    protected override void OnParametersSet() => newRawReadingValue ??= CurrentRawReadingValue;
+
+    private async Task SubmitAsync()
+    {
+        errorMessage = null;
+
+        if (newRawReadingValue is null)
+        {
+            errorMessage = "لطفاً مقدار جدید را وارد کنید.";
+            return;
+        }
+
+        isSubmitting = true;
+
+        try
+        {
+            var client = HttpClientFactory.CreateClient("InternalApi");
+            var response = await client.PutAsJsonAsync(
+                $"/api/v1/usage-ledgers/{OwnerType}/{OwnerId}/{Unit}/daily-usage/{EntryDate:yyyy-MM-dd}/{ShiftIndex}",
+                new { NewRawReadingValue = newRawReadingValue.Value });
+
+            if (!response.IsSuccessStatusCode)
+            {
+                errorMessage = $"خطا در اصلاح مقدار: {await response.Content.ReadAsStringAsync()}";
+                return;
+            }
+
+            MudDialog.Close(DialogResult.Ok(true));
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"خطا در اصلاح مقدار: {ex.Message}";
+        }
+        finally
+        {
+            isSubmitting = false;
+        }
+    }
+
+    private void Cancel() => MudDialog.Cancel();
+}

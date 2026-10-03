@@ -1,0 +1,166 @@
+@using MachineryManagerEnterprise.UI.Components
+@using MachineryManagerEnterprise.UI.Calendar
+@inject IHttpClientFactory HttpClientFactory
+
+<MudDialog>
+    <TitleContent>ثبت کارکرد روزانه</TitleContent>
+    <DialogContent>
+        @if (errorMessage is not null)
+        {
+            <MudAlert Severity="Severity.Error" Class="mb-4">@errorMessage</MudAlert>
+        }
+
+        <JalaliDatePicker @bind-Date="entryDate" Label="تاریخ" Required="true" Class="mb-4" />
+
+        <MudNumericField T="decimal?" @bind-Value="rawReadingValue" Label="مقدار خوانده‌شده از کنتور" Required="true" Class="mb-4" />
+
+        <MudNumericField T="decimal?" @bind-Value="nonOperationalUsageAmount" Label="کارکرد غیرقابل‌محاسبه (اختیاری)"
+                          HelperText="مقداری از افزایش خام روز که کارکرد واقعی و مولد نیست (مثلاً به‌دلیل خرابی دستگاه) — از کارکرد مولد کسر می‌شود."
+                          Min="0" Class="mb-4" />
+
+        <MudText Typo="Typo.subtitle2" Class="mb-2">تفکیک اپراتورها</MudText>
+        <MudText Typo="Typo.caption" Class="mb-2" Color="Color.Secondary">
+            مجموع «کارکرد این بازه» تمام ردیف‌ها باید دقیقاً برابر کارکرد مولد محاسبه‌شدهٔ همین روز باشد؛ در غیر این صورت سامانه هنگام ثبت خطا می‌دهد.
+        </MudText>
+
+        @foreach (var segment in segments)
+        {
+            <MudPaper Class="pa-3 mb-2" Outlined="true">
+                <MudGrid>
+                    <MudItem xs="12" sm="3">
+                        <MudTextField T="string" @bind-Value="segment.OperatorIdText" Label="شناسهٔ اپراتور" />
+                    </MudItem>
+                    <MudItem xs="6" sm="3">
+                        <MudTextField T="string" @bind-Value="segment.StartTimeText" Label="ساعت شروع (HH:mm)" Placeholder="۰۸:۰۰" />
+                    </MudItem>
+                    <MudItem xs="6" sm="3">
+                        <MudTextField T="string" @bind-Value="segment.EndTimeText" Label="ساعت پایان (HH:mm)" Placeholder="۱۶:۰۰" />
+                    </MudItem>
+                    <MudItem xs="10" sm="2">
+                        <MudNumericField T="decimal?" @bind-Value="segment.ContributedAmount" Label="کارکرد این بازه" Min="0" />
+                    </MudItem>
+                    <MudItem xs="2" sm="1" Class="d-flex align-center justify-center">
+                        <MudIconButton Icon="@Icons.Material.Filled.Delete" Size="Size.Small" Color="Color.Error"
+                                       OnClick="@(() => RemoveSegment(segment))" />
+                    </MudItem>
+                </MudGrid>
+            </MudPaper>
+        }
+
+        <MudButton Variant="Variant.Outlined" StartIcon="@Icons.Material.Filled.Add" OnClick="AddSegment" Class="mb-2">
+            افزودن اپراتور
+        </MudButton>
+    </DialogContent>
+    <DialogActions>
+        <MudButton OnClick="Cancel">انصراف</MudButton>
+        <MudButton Color="Color.Primary" Variant="Variant.Filled" OnClick="SubmitAsync" Disabled="isSubmitting">
+            ثبت کارکرد
+        </MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+    [CascadingParameter]
+    private IMudDialogInstance MudDialog { get; set; } = null!;
+
+    /// <summary>The device this day's usage is being registered for.</summary>
+    [Parameter]
+    public Guid MeterDeviceId { get; set; }
+
+    private sealed class SegmentInput
+    {
+        public string OperatorIdText { get; set; } = string.Empty;
+        public string StartTimeText { get; set; } = string.Empty;
+        public string EndTimeText { get; set; } = string.Empty;
+        public decimal? ContributedAmount { get; set; }
+    }
+
+    private DateTime? entryDate = DateTime.Today;
+    private decimal? rawReadingValue;
+    private decimal? nonOperationalUsageAmount;
+    private readonly List<SegmentInput> segments = [];
+    private bool isSubmitting;
+    private string? errorMessage;
+
+    private void AddSegment() => segments.Add(new SegmentInput());
+
+    private void RemoveSegment(SegmentInput segment) => segments.Remove(segment);
+
+    private async Task SubmitAsync()
+    {
+        errorMessage = null;
+
+        if (entryDate is null || rawReadingValue is null)
+        {
+            errorMessage = "لطفاً تاریخ و مقدار خوانده‌شده از کنتور را وارد کنید.";
+            return;
+        }
+
+        var entryDateOnly = DateOnly.FromDateTime(entryDate.Value);
+        var operatorSegments = new List<object>();
+
+        foreach (var segment in segments)
+        {
+            if (!Guid.TryParse(segment.OperatorIdText, out var operatorId) ||
+                !TimeOnly.TryParse(JalaliCalendarConverter.ToLatinDigits(segment.StartTimeText), out var startTimeOfDay) ||
+                !TimeOnly.TryParse(JalaliCalendarConverter.ToLatinDigits(segment.EndTimeText), out var endTimeOfDay) ||
+                segment.ContributedAmount is null)
+            {
+                errorMessage = "لطفاً همهٔ فیلدهای هر ردیف اپراتور را به‌درستی تکمیل کنید.";
+                return;
+            }
+
+            var startTime = new DateTimeOffset(entryDateOnly.ToDateTime(startTimeOfDay));
+            var endTime = new DateTimeOffset(entryDateOnly.ToDateTime(endTimeOfDay));
+
+            operatorSegments.Add(new
+            {
+                OperatorId = operatorId,
+                StartTime = startTime,
+                EndTime = endTime,
+                ContributedAmount = segment.ContributedAmount.Value,
+            });
+        }
+
+        isSubmitting = true;
+
+        try
+        {
+            var client = HttpClientFactory.CreateClient("InternalApi");
+
+            // ReadingTime has no dedicated UI field (chat, 2026-09-2x —
+            // simplification pending a clock-time input convention
+            // elsewhere in the app): the moment of submission is used,
+            // consistent with the entry normally being keyed in shortly
+            // after the reading is taken.
+            var response = await client.PostAsJsonAsync(
+                $"/api/v1/meter-devices/{MeterDeviceId}/daily-usage",
+                new
+                {
+                    EntryDate = entryDateOnly,
+                    RawReadingValue = rawReadingValue.Value,
+                    ReadingTime = DateTimeOffset.Now,
+                    NonOperationalUsageAmount = nonOperationalUsageAmount ?? 0m,
+                    OperatorSegments = operatorSegments,
+                });
+
+            if (!response.IsSuccessStatusCode)
+            {
+                errorMessage = $"خطا در ثبت کارکرد: {await response.Content.ReadAsStringAsync()}";
+                return;
+            }
+
+            MudDialog.Close(DialogResult.Ok(true));
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"خطا در ثبت کارکرد: {ex.Message}";
+        }
+        finally
+        {
+            isSubmitting = false;
+        }
+    }
+
+    private void Cancel() => MudDialog.Cancel();
+}

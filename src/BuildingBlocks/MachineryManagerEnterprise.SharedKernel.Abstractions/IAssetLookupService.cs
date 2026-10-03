@@ -51,7 +51,22 @@ public interface IAssetLookupService
     /// <param name="cancellationToken">Token to cancel the asynchronous operation.</param>
     /// <returns>The Asset's name, or <see langword="null"/> if the Asset does not exist.</returns>
     Task<string?> GetNameAsync(Guid assetId, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Retrieves the Asset context required by the Usage module.
+    /// </summary>
+    Task<AssetUsageContext?> GetUsageContextAsync(
+        Guid assetId,
+        CancellationToken cancellationToken = default);
 }
+
+/// <summary>
+/// Read-only snapshot of the Asset context required by the Usage module.
+/// </summary>
+public sealed record AssetUsageContext(
+    Guid OrganizationId,
+    Guid ProjectId,
+    MeterReadingUnit? MeterReadingUnit);
 
 /// <summary>
 /// Read-only snapshot of an Asset's consumption-relevant fields (chat,

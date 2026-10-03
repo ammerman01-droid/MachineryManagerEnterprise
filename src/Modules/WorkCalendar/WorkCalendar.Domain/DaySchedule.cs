@@ -9,6 +9,11 @@ namespace WorkCalendar.Domain;
 /// <see cref="WorkPattern"/>, and as the resolved schedule for a
 /// specific calendar date via <see cref="Domain.WorkCalendar.ResolveDay"/>.
 /// </summary>
+/// <remarks>
+/// A shift that crosses midnight belongs entirely to the day whose
+/// schedule contains it (the day it starts on) — its hours are never
+/// split across two dates.
+/// </remarks>
 public sealed class DaySchedule
 {
     private readonly List<Shift> _shifts;
@@ -42,9 +47,12 @@ public sealed class DaySchedule
 
         var ordered = shifts.OrderBy(s => s.StartTime).ToList();
 
+        // Compared against the previous shift's end measured from the
+        // start of the day, so an overnight shift (which ends after
+        // 24:00) correctly blocks any later shift starting before it ends.
         for (var i = 1; i < ordered.Count; i++)
         {
-            if (ordered[i].StartTime < ordered[i - 1].EndTime)
+            if (ordered[i].StartTime.ToTimeSpan() < ordered[i - 1].EndOffsetFromStartOfDay)
             {
                 return Result.Failure<DaySchedule>(WorkCalendarErrors.OverlappingShifts());
             }

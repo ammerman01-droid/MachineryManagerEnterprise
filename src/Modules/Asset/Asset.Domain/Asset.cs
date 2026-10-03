@@ -97,12 +97,14 @@ public sealed class Asset : AggregateRoot<AssetId>
 
     /// <summary>
     /// Gets the unit in which this Asset's counter/odometer is read
-    /// (hours, kilometers, or miles), if recorded (chat, 2026-09-19).
-    /// A fixed <see cref="global::MachineryManagerEnterprise.SharedKernel.MeterReadingUnit"/>
-    /// enum — no longer a reference into the Configuration module's
-    /// UnitOfMeasurement table.
+    /// (hours, kilometers, or miles) — required as of chat, 2026-09-29,
+    /// since the Usage module's <c>MeterDevice.Unit</c> is fixed for a
+    /// device's lifetime and provisioning a device for a new Asset
+    /// (<c>IUsageProvisioningService.ProvisionForNewAssetAsync</c>)
+    /// needs a unit to register it with; previously optional (chat,
+    /// 2026-09-19).
     /// </summary>
-    public MeterReadingUnit? MeterReadingUnit { get; private set; }
+    public MeterReadingUnit MeterReadingUnit { get; private set; }
 
     /// <summary>
     /// Gets the primary fuel this Asset consumes, if recorded (chat,
@@ -161,7 +163,7 @@ public sealed class Asset : AggregateRoot<AssetId>
     string? vin,
     string? licensePlate,
     int? manufactureYear,
-    MeterReadingUnit? meterReadingUnit,
+    MeterReadingUnit meterReadingUnit,
     FuelKind? primaryFuelKind,
     FuelUnit? primaryFuelUnit,
     FuelKind? secondaryFuelKind,
@@ -212,7 +214,7 @@ public sealed class Asset : AggregateRoot<AssetId>
     string? licensePlate,
     int? manufactureYear,
     IDateTimeProvider dateTimeProvider,
-    MeterReadingUnit? meterReadingUnit = null,
+    MeterReadingUnit meterReadingUnit,
     FuelKind? primaryFuelKind = null,
     FuelUnit? primaryFuelUnit = null,
     FuelKind? secondaryFuelKind = null,
@@ -259,6 +261,11 @@ public sealed class Asset : AggregateRoot<AssetId>
         if (projectId == Guid.Empty)
         {
             return Result.Failure<global::Asset.Domain.Asset>(AssetErrors.ProjectRequired());
+        }
+
+        if (!Enum.IsDefined(meterReadingUnit))
+        {
+            return Result.Failure<global::Asset.Domain.Asset>(AssetErrors.MeterReadingUnitRequired());
         }
 
         var fuelConfiguration = ValidateFuelConfiguration(
@@ -356,6 +363,9 @@ public sealed class Asset : AggregateRoot<AssetId>
     /// rule; the Asset's <see cref="AssetId"/> stays its permanent
     /// identity), as is every other identity/specification field,
     /// including the AssetModel, Color, and Project assignment.
+    /// <paramref name="meterReadingUnit"/> is required (chat,
+    /// 2026-09-29) — same as at <see cref="Register"/> time; an Asset
+    /// can never be left without one once created.
     /// Uniqueness of the new code within the Organization, and
     /// existence and cross-module consistency of
     /// AssetModelId/ColorId/ProjectId, are enforced by the caller
@@ -373,7 +383,7 @@ public sealed class Asset : AggregateRoot<AssetId>
         string? vin,
         string? licensePlate,
         int? manufactureYear,
-        MeterReadingUnit? meterReadingUnit,
+        MeterReadingUnit meterReadingUnit,
         FuelKind? primaryFuelKind,
         FuelUnit? primaryFuelUnit,
         FuelKind? secondaryFuelKind,
@@ -419,6 +429,11 @@ public sealed class Asset : AggregateRoot<AssetId>
         if (projectId == Guid.Empty)
         {
             return Result.Failure(AssetErrors.ProjectRequired());
+        }
+
+        if (!Enum.IsDefined(meterReadingUnit))
+        {
+            return Result.Failure(AssetErrors.MeterReadingUnitRequired());
         }
 
         var fuelConfiguration = ValidateFuelConfiguration(

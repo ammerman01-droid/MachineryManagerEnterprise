@@ -1,0 +1,150 @@
+@using System.Text.Json
+@inject IHttpClientFactory HttpClientFactory
+
+<MudDialog>
+    <TitleContent>نصب دستگاه روی یک مالک</TitleContent>
+    <DialogContent>
+        @if (errorMessage is not null)
+        {
+            <MudAlert Severity="Severity.Error" Class="mb-4">@errorMessage</MudAlert>
+        }
+
+        <MudSelect T="string" @bind-Value="ownerType" Label="نوع مالک" Placeholder="نوع مالک را انتخاب کنید" Class="mb-4">
+            <MudSelectItem T="string" Value="@("Asset")">دارایی</MudSelectItem>
+            <MudSelectItem T="string" Value="@("Component")" Disabled="true">
+                قطعهٔ ردیابی‌شونده (هنوز پشتیبانی نمی‌شود)
+            </MudSelectItem>
+        </MudSelect>
+
+        @if (ownerType == "Asset")
+        {
+            @if (isLoadingAssets)
+            {
+                <MudProgressLinear Indeterminate="true" Class="my-2" />
+            }
+            else
+            {
+                <MudSelect T="Guid?" @bind-Value="ownerId" Label="دارایی" Placeholder="یک دارایی را انتخاب کنید">
+                    @foreach (var asset in assets)
+                    {
+                        <MudSelectItem T="Guid?" Value="@((Guid?)asset.Id)">@asset.Name (@asset.Code)</MudSelectItem>
+                    }
+                </MudSelect>
+            }
+        }
+    </DialogContent>
+    <DialogActions>
+        <MudButton OnClick="Cancel">انصراف</MudButton>
+        <MudButton Color="Color.Primary" Variant="Variant.Filled" OnClick="SubmitAsync" Disabled="isSubmitting">
+            نصب
+        </MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+    [CascadingParameter]
+    private IMudDialogInstance MudDialog { get; set; } = null!;
+
+    /// <summary>The device to install.</summary>
+    [Parameter]
+    public Guid MeterDeviceId { get; set; }
+
+    /// <summary>The Organization to look up candidate Assets in.</summary>
+    [Parameter]
+    public Guid OrganizationId { get; set; }
+
+    private sealed class AssetItem
+    {
+        public Guid Id { get; set; }
+        public string Code { get; set; } = string.Empty;
+        public string Name { get; set; } = string.Empty;
+    }
+
+    private sealed class SearchAssetsResult
+    {
+        public List<AssetItem> Items { get; set; } = [];
+    }
+
+    private static readonly JsonSerializerOptions JsonOptions = new() { PropertyNameCaseInsensitive = true };
+
+    private List<AssetItem> assets = [];
+    private bool isLoadingAssets;
+    private bool isSubmitting;
+    private string? ownerType;
+    private Guid? ownerId;
+    private string? errorMessage;
+
+    protected override async Task OnParametersSetAsync()
+    {
+        if (ownerType == "Asset" && assets.Count == 0 && !isLoadingAssets)
+        {
+            await LoadAssetsAsync();
+        }
+    }
+
+    private async Task LoadAssetsAsync()
+    {
+        isLoadingAssets = true;
+
+        try
+        {
+            var client = HttpClientFactory.CreateClient("InternalApi");
+            var response = await client.GetAsync($"/api/v1/assets?organizationId={OrganizationId}&page=1&pageSize=200");
+
+            if (response.IsSuccessStatusCode)
+            {
+                var stream = await response.Content.ReadAsStreamAsync();
+                var result = await JsonSerializer.DeserializeAsync<SearchAssetsResult>(stream, JsonOptions);
+                assets = result?.Items ?? [];
+            }
+        }
+        catch
+        {
+            // Best-effort: an empty picker with the Placeholder still showing is an
+            // acceptable degraded state; the Submit button's own error handling covers it.
+        }
+        finally
+        {
+            isLoadingAssets = false;
+        }
+    }
+
+    private async Task SubmitAsync()
+    {
+        errorMessage = null;
+
+        if (ownerType is null || ownerId is null)
+        {
+            errorMessage = "لطفاً نوع مالک و خود مالک را انتخاب کنید.";
+            return;
+        }
+
+        isSubmitting = true;
+
+        try
+        {
+            var client = HttpClientFactory.CreateClient("InternalApi");
+            var response = await client.PostAsJsonAsync(
+                $"/api/v1/meter-devices/{MeterDeviceId}/install",
+                new { OwnerType = ownerType, OwnerId = ownerId.Value });
+
+            if (!response.IsSuccessStatusCode)
+            {
+                errorMessage = $"خطا در نصب دستگاه: {await response.Content.ReadAsStringAsync()}";
+                return;
+            }
+
+            MudDialog.Close(DialogResult.Ok(true));
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"خطا در نصب دستگاه: {ex.Message}";
+        }
+        finally
+        {
+            isSubmitting = false;
+        }
+    }
+
+    private void Cancel() => MudDialog.Cancel();
+}

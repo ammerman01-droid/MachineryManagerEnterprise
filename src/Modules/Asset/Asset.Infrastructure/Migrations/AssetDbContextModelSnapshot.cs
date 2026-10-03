@@ -55,6 +55,7 @@ namespace Asset.Infrastructure.Migrations
                         .HasColumnType("int");
 
                     b.Property<string>("MeterReadingUnit")
+                        .IsRequired()
                         .HasMaxLength(20)
                         .HasColumnType("nvarchar(20)");
 

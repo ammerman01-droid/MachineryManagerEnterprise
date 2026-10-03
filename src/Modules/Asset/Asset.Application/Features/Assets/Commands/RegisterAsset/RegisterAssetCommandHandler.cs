@@ -2,6 +2,7 @@ using MachineryManagerEnterprise.Asset.Application.Abstractions;
 using MachineryManagerEnterprise.SharedKernel;
 using MachineryManagerEnterprise.SharedKernel.Abstractions;
 using MediatR;
+using Microsoft.Extensions.Logging;
 
 namespace MachineryManagerEnterprise.Asset.Application.Features.Assets.Commands.RegisterAsset;
 
@@ -27,6 +28,9 @@ public sealed class RegisterAssetCommandHandler
     private readonly ICurrentUserService _currentUserService;
     private readonly IPermissionEvaluator _permissionEvaluator;
     private readonly IOrganizationLookupService _organizationLookupService;
+    private readonly IUsageProvisioningService _usageProvisioningService;
+    private readonly ILogger<RegisterAssetCommandHandler> _logger;
+
 
     /// <summary>Initializes a new instance of the <see cref="RegisterAssetCommandHandler"/> class.</summary>
     /// <param name="assetRepository">The Asset repository.</param>
@@ -38,6 +42,8 @@ public sealed class RegisterAssetCommandHandler
     /// <param name="currentUserService">Provides the authenticated user context.</param>
     /// <param name="permissionEvaluator">Evaluates the current user's permissions at request time.</param>
     /// <param name="organizationLookupService">Cross-module, read-only lookup into the Organization module, used to verify the target Organization exists and to resolve its Holding.</param>
+    /// <param name="usageProvisioningService">Cross-module service that provisions the Usage module's records (e.g. the usage ledger) for a newly registered Asset.</param>
+    /// <param name="logger">Logger used to record diagnostic information about the registration use case.</param>
     public RegisterAssetCommandHandler(
         IAssetRepository assetRepository,
         IAssetModelRepository assetModelRepository,
@@ -47,7 +53,9 @@ public sealed class RegisterAssetCommandHandler
         IDateTimeProvider dateTimeProvider,
         ICurrentUserService currentUserService,
         IPermissionEvaluator permissionEvaluator,
-        IOrganizationLookupService organizationLookupService)
+        IOrganizationLookupService organizationLookupService,
+        IUsageProvisioningService usageProvisioningService,
+        ILogger<RegisterAssetCommandHandler> logger)
     {
         _assetRepository = assetRepository;
         _assetModelRepository = assetModelRepository;
@@ -58,6 +66,8 @@ public sealed class RegisterAssetCommandHandler
         _currentUserService = currentUserService;
         _permissionEvaluator = permissionEvaluator;
         _organizationLookupService = organizationLookupService;
+        _usageProvisioningService = usageProvisioningService;
+        _logger = logger;
     }
 
     /// <summary>Executes the registration use case.</summary>
@@ -176,6 +186,16 @@ public sealed class RegisterAssetCommandHandler
 
         _assetRepository.Add(result.Value);
         await _unitOfWork.SaveChangesAsync(cancellationToken);
+
+        try
+        {
+            await _usageProvisioningService.ProvisionForNewAssetAsync(
+                result.Value.Id.Value, result.Value.OrganizationId, result.Value.MeterReadingUnit, cancellationToken);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Failed to provision Usage scaffolding for newly registered Asset {AssetId}", result.Value.Id.Value);
+        }
 
         return Result.Success(result.Value.Id.Value);
     }

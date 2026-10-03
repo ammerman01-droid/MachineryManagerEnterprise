@@ -82,11 +82,11 @@ else
             <MudNumericField T="int?" Label="سال ساخت" @bind-Value="manufactureYear" Min="1900" Max="2100" Class="mt-4" />
 
             <MudText Typo="Typo.subtitle1" Class="mt-6 mb-2">واحد قرائت کنتر</MudText>
-            <MudSelect T="MeterReadingUnit?" @bind-Value="meterReadingUnit" Label="واحد کنتر (ساعت، کیلومتر، مایل)"
+            <MudSelect T="MeterReadingUnit" @bind-Value="meterReadingUnit" Label="واحد کنتر (ساعت، کیلومتر، مایل)" Required="true" RequiredError="واحد کنتر الزامی است"
                        Clearable="true">
                 @foreach (var unit in Enum.GetValues<MeterReadingUnit>())
                 {
-                    <MudSelectItem T="MeterReadingUnit?" Value="@((MeterReadingUnit?)unit)">@UnitDisplayNames.GetMeterReadingUnitName(unit)</MudSelectItem>
+                    <MudSelectItem T="MeterReadingUnit" Value="@unit">@UnitDisplayNames.GetMeterReadingUnitName(unit)</MudSelectItem>
                 }
             </MudSelect>
 
@@ -182,7 +182,7 @@ else
     private string? vin;
     private string? licensePlate;
     private int? manufactureYear;
-    private MeterReadingUnit? meterReadingUnit;
+    private MeterReadingUnit meterReadingUnit;
     private FuelKind? primaryFuelKind;
     private FuelUnit? primaryFuelUnit;
     private FuelKind? secondaryFuelKind;

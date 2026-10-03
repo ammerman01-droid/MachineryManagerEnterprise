@@ -97,4 +97,21 @@ public sealed class AssetLookupService : IAssetLookupService
         var asset = await _dbContext.Assets.AsNoTracking().FirstOrDefaultAsync(a => a.Id == id, cancellationToken);
         return asset?.Name;
     }
+
+    /// <inheritdoc />
+    public async Task<AssetUsageContext?> GetUsageContextAsync(
+        Guid assetId,
+        CancellationToken cancellationToken = default)
+    {
+        var id = AssetId.From(assetId);
+
+        return await _dbContext.Assets
+            .AsNoTracking()
+            .Where(a => a.Id == id)
+            .Select(a => new AssetUsageContext(
+                a.OrganizationId,
+                a.ProjectId,
+                a.MeterReadingUnit))
+            .FirstOrDefaultAsync(cancellationToken);
+    }
 }

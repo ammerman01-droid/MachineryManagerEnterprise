@@ -21,6 +21,23 @@ public sealed class ShiftItem
 
     /// <summary>Gets or sets the unpaid breaks within this shift.</summary>
     public List<BreakItem> Breaks { get; set; } = new();
+
+    /// <summary>Gets whether the shift ends on the day after it starts (an overnight shift).</summary>
+    public bool CrossesMidnight => EndTime < StartTime;
+
+    /// <summary>Gets the gross duration of the shift, taking a midnight crossing into account (zero when start equals end).</summary>
+    public TimeSpan GrossDuration
+    {
+        get
+        {
+            var difference = EndTime.ToTimeSpan() - StartTime.ToTimeSpan();
+
+            return difference < TimeSpan.Zero ? difference + TimeSpan.FromDays(1) : difference;
+        }
+    }
+
+    /// <summary>Gets the maximum allowed shift length in hours, mirroring the domain rule.</summary>
+    public static int MaxDurationHours => global::WorkCalendar.Domain.Shift.MaxDurationHours;
 }
 
 /// <summary>Client-side projection of the API's <c>DayScheduleDto</c>, and the editable shape used while building a request.</summary>
@@ -106,3 +123,4 @@ public sealed class WorkCalendarApiError
     /// <summary>Gets or sets the human-readable error message.</summary>
     public string? Message { get; set; }
 }
+

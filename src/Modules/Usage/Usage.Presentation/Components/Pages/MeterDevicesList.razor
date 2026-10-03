@@ -1,0 +1,220 @@
+@page "/admin/meter-devices"
+@inject IHttpClientFactory HttpClientFactory
+@inject NavigationManager Navigation
+@using System.Text.Json
+@using MachineryManagerEnterprise.Usage.Presentation.Components
+
+<PageTitle>دستگاه‌های شمارشگر</PageTitle>
+
+<MudText Typo="Typo.h4" Class="mb-4">دستگاه‌های شمارشگر</MudText>
+
+@if (errorMessage is not null)
+{
+    <MudAlert Severity="Severity.Error" Class="my-4">@errorMessage</MudAlert>
+}
+
+<MudSelect T="Guid?" Label="هلدینگ" Placeholder="یک هلدینگ را انتخاب کنید" @bind-Value="selectedHoldingId" @bind-Value:after="OnHoldingChangedAsync" Class="mb-4">
+    @foreach (var holding in holdings)
+    {
+        <MudSelectItem T="Guid?" Value="@((Guid?)holding.Id)">@holding.Name</MudSelectItem>
+    }
+</MudSelect>
+
+@if (selectedHoldingId is not null)
+{
+    <MudSelect T="Guid?" Label="سازمان" Placeholder="یک سازمان را انتخاب کنید" @bind-Value="selectedOrganizationId" @bind-Value:after="OnOrganizationChangedAsync" Class="mb-4">
+        @foreach (var organization in organizations)
+        {
+            <MudSelectItem T="Guid?" Value="@((Guid?)organization.Id)">@organization.Name</MudSelectItem>
+        }
+    </MudSelect>
+}
+
+@if (selectedOrganizationId is not null)
+{
+    <MudButton Variant="Variant.Filled" Color="Color.Primary" Class="mb-4"
+               OnClick="@(() => Navigation.NavigateTo($"/admin/meter-devices/{selectedOrganizationId}/create"))">
+        ثبت دستگاه جدید
+    </MudButton>
+
+    @if (isLoading)
+    {
+        <MudProgressLinear Indeterminate="true" Class="my-4" />
+    }
+    else
+    {
+        <MudTable Items="items" Hover="true">
+            <HeaderContent>
+                <MudTh>واحد اندازه‌گیری</MudTh>
+                <MudTh>وضعیت</MudTh>
+                <MudTh>مالک فعلی</MudTh>
+                <MudTh>سقف روزانه اختصاصی</MudTh>
+                <MudTh>عملیات</MudTh>
+            </HeaderContent>
+            <RowTemplate>
+                <MudTd DataLabel="واحد اندازه‌گیری">@UsageDisplayNames.GetUnitName(context.Unit)</MudTd>
+                <MudTd DataLabel="وضعیت">
+                    <MudChip T="string" Color="MeterDeviceStatusDisplay.GetColor(context.Status)" Size="Size.Small">
+                        @MeterDeviceStatusDisplay.GetName(context.Status)
+                    </MudChip>
+                </MudTd>
+                <MudTd DataLabel="مالک فعلی">
+                    @(context.OwnerType is null ? "نصب‌نشده" : $"{UsageDisplayNames.GetOwnerTypeName(context.OwnerType)} ({context.OwnerId})")
+                </MudTd>
+                <MudTd DataLabel="سقف روزانه اختصاصی">@(context.DailyCapOverride?.ToString("0.##") ?? "پیش‌فرض سامانه")</MudTd>
+                <MudTd DataLabel="عملیات">
+                    <MudButton Size="Size.Small" Variant="Variant.Text" Color="Color.Primary"
+                               OnClick="@(() => Navigation.NavigateTo($"/admin/meter-devices/details/{context.Id}"))">
+                        جزئیات
+                    </MudButton>
+                </MudTd>
+            </RowTemplate>
+        </MudTable>
+
+        @if (items.Count == 0)
+        {
+            <MudText Class="mt-4" Color="Color.Secondary">هیچ دستگاهی برای این سازمان ثبت نشده است.</MudText>
+        }
+    }
+}
+
+@code {
+    private sealed class HoldingItem
+    {
+        public Guid Id { get; set; }
+        public string Name { get; set; } = string.Empty;
+    }
+
+    private sealed class OrganizationItem
+    {
+        public Guid Id { get; set; }
+        public string Name { get; set; } = string.Empty;
+    }
+
+    private sealed class MeterDeviceItem
+    {
+        public Guid Id { get; set; }
+        public Guid OrganizationId { get; set; }
+        public string? Unit { get; set; }
+        public string Status { get; set; } = string.Empty;
+        public string? OwnerType { get; set; }
+        public Guid? OwnerId { get; set; }
+        public decimal? DailyCapOverride { get; set; }
+    }
+
+    private sealed class SearchResult<TItem>
+    {
+        public List<TItem> Items { get; set; } = [];
+    }
+
+    private static readonly JsonSerializerOptions JsonOptions = new() { PropertyNameCaseInsensitive = true };
+
+    private List<HoldingItem> holdings = [];
+    private List<OrganizationItem> organizations = [];
+    private List<MeterDeviceItem> items = [];
+    private Guid? selectedHoldingId;
+    private Guid? selectedOrganizationId;
+    private bool isLoading;
+    private string? errorMessage;
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            var client = HttpClientFactory.CreateClient("InternalApi");
+            var response = await client.GetAsync("/api/v1/holdings?pageSize=200");
+            var content = await response.Content.ReadAsStringAsync();
+
+            if (response.IsSuccessStatusCode)
+            {
+                var result = JsonSerializer.Deserialize<SearchResult<HoldingItem>>(content, JsonOptions);
+                holdings = result?.Items ?? [];
+            }
+            else
+            {
+                errorMessage = $"خطا در دریافت هلدینگ‌ها: {content}";
+            }
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"خطا: {ex.Message}";
+        }
+    }
+
+    private async Task OnHoldingChangedAsync()
+    {
+        organizations = [];
+        selectedOrganizationId = null;
+        items = [];
+
+        if (selectedHoldingId is null)
+        {
+            return;
+        }
+
+        errorMessage = null;
+
+        try
+        {
+            var client = HttpClientFactory.CreateClient("InternalApi");
+            var response = await client.GetAsync($"/api/v1/organizations?holdingId={selectedHoldingId}");
+            var content = await response.Content.ReadAsStringAsync();
+
+            if (response.IsSuccessStatusCode)
+            {
+                var result = JsonSerializer.Deserialize<SearchResult<OrganizationItem>>(content, JsonOptions);
+                organizations = result?.Items ?? [];
+            }
+            else
+            {
+                errorMessage = $"خطا در دریافت سازمان‌ها: {content}";
+            }
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"خطا: {ex.Message}";
+        }
+    }
+
+    private async Task OnOrganizationChangedAsync()
+    {
+        if (selectedOrganizationId is null)
+        {
+            items = [];
+            return;
+        }
+
+        isLoading = true;
+        errorMessage = null;
+
+        try
+        {
+            var client = HttpClientFactory.CreateClient("InternalApi");
+            var response = await client.GetAsync($"/api/v1/meter-devices?organizationId={selectedOrganizationId}&page=1&pageSize=100");
+
+            if (!response.IsSuccessStatusCode)
+            {
+                errorMessage = $"خطا در دریافت فهرست دستگاه‌ها: {response.StatusCode}";
+                return;
+            }
+
+            var stream = await response.Content.ReadAsStreamAsync();
+            var result = await JsonSerializer.DeserializeAsync<SearchMeterDevicesResultWrapper>(stream, JsonOptions);
+            items = result?.Items ?? [];
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"خطا در دریافت فهرست دستگاه‌ها: {ex.Message}";
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+
+    private sealed class SearchMeterDevicesResultWrapper
+    {
+        public List<MeterDeviceItem> Items { get; set; } = [];
+        public int TotalCount { get; set; }
+    }
+}

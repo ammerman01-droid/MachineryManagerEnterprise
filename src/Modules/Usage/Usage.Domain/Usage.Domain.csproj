@@ -1,0 +1,8 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\BuildingBlocks\MachineryManagerEnterprise.SharedKernel\MachineryManagerEnterprise.SharedKernel.csproj" />
+    <ProjectReference Include="..\..\..\BuildingBlocks\MachineryManagerEnterprise.SharedKernel.Abstractions\MachineryManagerEnterprise.SharedKernel.Abstractions.csproj" />
+  </ItemGroup>
+
+</Project>

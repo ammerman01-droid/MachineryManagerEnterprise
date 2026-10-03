@@ -121,17 +121,25 @@ public static class AssetErrors
     "Asset.ProjectRequired",
     "Project assignment is required for every Asset.");
 
-/// <summary>Creates an error indicating no operational status was provided (chat, 2026-09-18).</summary>
-public static Error OperationalStatusRequired() => Error.Validation(
-    "Asset.OperationalStatusRequired",
-    "Operational status is required for every Asset.");
+    /// <summary>Creates an error indicating no operational status was provided (chat, 2026-09-18).</summary>
+    public static Error OperationalStatusRequired() => Error.Validation(
+        "Asset.OperationalStatusRequired",
+        "Operational status is required for every Asset.");
 
-/// <summary>
-/// Creates an error indicating the selected operational status does
-/// not exist, or does not belong to the target Organization's Holding
-/// (chat, 2026-09-18).
-/// </summary>
-public static Error OperationalStatusNotFoundInHolding(Guid operationalStatusId) => Error.NotFound(
-    "Asset.OperationalStatusNotFoundInHolding",
-    $"Operational status with id {operationalStatusId} was not found in the target Organization's Holding.");
+    /// <summary>
+    /// Creates an error indicating the selected operational status does
+    /// not exist, or does not belong to the target Organization's Holding
+    /// (chat, 2026-09-18).
+    /// </summary>
+    public static Error OperationalStatusNotFoundInHolding(Guid operationalStatusId) => Error.NotFound(
+        "Asset.OperationalStatusNotFoundInHolding",
+        $"Operational status with id {operationalStatusId} was not found in the target Organization's Holding.");
+
+    /// <summary>
+    /// Creates an error indicating no (or an undefined) meter reading
+    /// unit was supplied — required as of chat, 2026-09-29.
+    /// </summary>
+    public static Error MeterReadingUnitRequired() => Error.Validation(
+        "Asset.MeterReadingUnitRequired",
+        "A meter reading unit (Hour, Kilometer, or Mile) is required.");
 }

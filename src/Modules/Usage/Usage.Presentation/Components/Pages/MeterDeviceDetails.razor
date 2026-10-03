@@ -1,0 +1,503 @@
+@page "/admin/meter-devices/details/{MeterDeviceId:guid}"
+@inject IHttpClientFactory HttpClientFactory
+@inject NavigationManager Navigation
+@inject IDialogService DialogService
+@using System.Text.Json
+@using MachineryManagerEnterprise.UI.Components
+@using MachineryManagerEnterprise.UI.Calendar
+@using MachineryManagerEnterprise.Usage.Presentation.Components
+@using MachineryManagerEnterprise.Usage.Presentation.Components.Dialogs
+
+<PageTitle>جزئیات دستگاه شمارشگر</PageTitle>
+
+@if (errorMessage is not null)
+{
+    <MudAlert Severity="Severity.Error" Class="my-4">@errorMessage</MudAlert>
+}
+
+@if (isLoading)
+{
+    <MudProgressLinear Indeterminate="true" Class="my-4" />
+}
+else if (device is not null)
+{
+    <MudText Typo="Typo.h4" Class="mb-4">دستگاه شمارشگر</MudText>
+
+    <MudPaper Class="pa-4 mb-4">
+        <MudGrid>
+            <MudItem xs="12" sm="3">
+                <MudField Label="واحد اندازه‌گیری">@UsageDisplayNames.GetUnitName(device.Unit)</MudField>
+            </MudItem>
+            <MudItem xs="12" sm="3">
+                <MudField Label="وضعیت">
+                    <MudChip T="string" Color="MeterDeviceStatusDisplay.GetColor(device.Status)" Size="Size.Small">
+                        @MeterDeviceStatusDisplay.GetName(device.Status)
+                    </MudChip>
+                </MudField>
+            </MudItem>
+            <MudItem xs="12" sm="3">
+                <MudField Label="نوع مالک">@UsageDisplayNames.GetOwnerTypeName(device.OwnerType)</MudField>
+            </MudItem>
+            <MudItem xs="12" sm="3">
+                <MudField Label="شناسهٔ مالک">@(device.OwnerId?.ToString() ?? "—")</MudField>
+            </MudItem>
+            <MudItem xs="12" sm="3">
+                <MudField Label="سقف روزانه اختصاصی">@(device.DailyCapOverride?.ToString("0.##") ?? "پیش‌فرض سامانه")
+                </MudField>
+            </MudItem>
+        </MudGrid>
+    </MudPaper>
+
+    <MudPaper Class="pa-4 mb-4">
+        <MudText Typo="Typo.subtitle1" Class="mb-2">عملیات</MudText>
+        <div class="d-flex flex-wrap" style="gap: 8px;">
+            @if (device.Status == "Registered")
+            {
+                <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="OpenInstallDialogAsync">
+                    نصب روی یک مالک
+                </MudButton>
+            }
+
+            @if (device.Status is "Installed" or "Operational")
+            {
+                <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="OpenRegisterShiftReadingDialogAsync">
+                    ثبت کارکرد شیفت
+                </MudButton>
+                <MudButton Variant="Variant.Outlined" Color="Color.Secondary" OnClick="OpenRebaseDialogAsync">
+                    بازتنظیم شمارنده
+                </MudButton>
+                <MudButton Variant="Variant.Outlined" Color="Color.Error" OnClick="OpenDeleteLatestDialogAsync">
+                    حذف آخرین ردیف
+                </MudButton>
+                <MudButton Variant="Variant.Outlined" Color="Color.Warning" OnClick="ReportFailureAsync">
+                    اعلام خرابی
+                </MudButton>
+            }
+
+            @if (device.Status == "Failed")
+            {
+                <MudButton Variant="Variant.Filled" Color="Color.Success" OnClick="RecoverAsync">
+                    بازیابی از خرابی
+                </MudButton>
+            }
+
+            @if (device.Status is "Installed" or "Operational" or "Failed")
+            {
+                <MudButton Variant="Variant.Outlined" Color="Color.Error" OnClick="RemoveAsync">
+                    جدا کردن از مالک فعلی
+                </MudButton>
+            }
+
+            @if (device.Status == "Removed")
+            {
+                <MudButton Variant="Variant.Outlined" Color="Color.Dark" OnClick="ArchiveAsync">
+                    بایگانی نهایی
+                </MudButton>
+            }
+        </div>
+    </MudPaper>
+
+    <MudPaper Class="pa-4">
+        <MudText Typo="Typo.subtitle1" Class="mb-2">تاریخچهٔ کارکرد</MudText>
+
+        <MudGrid Class="mb-4">
+            <MudItem xs="12" sm="4" Class="d-flex align-center" style="gap: 4px;">
+                <JalaliDatePicker Date="fromDate" DateChanged="@((DateTime? d) => fromDate = d)" Label="از تاریخ" />
+                <MudIconButton Icon="@Icons.Material.Filled.Clear" Size="Size.Small" OnClick="@(() => fromDate = null)" />
+            </MudItem>
+            <MudItem xs="12" sm="4" Class="d-flex align-center" style="gap: 4px;">
+                <JalaliDatePicker Date="toDate" DateChanged="@((DateTime? d) => toDate = d)" Label="تا تاریخ" />
+                <MudIconButton Icon="@Icons.Material.Filled.Clear" Size="Size.Small" OnClick="@(() => toDate = null)" />
+            </MudItem>
+            <MudItem xs="12" sm="4">
+                <MudTextField T="string" @bind-Value="projectIdFilterText" Label="فیلتر پروژه (شناسه)"
+                              Placeholder="خالی = همهٔ پروژه‌ها" />
+            </MudItem>
+        </MudGrid>
+
+        <MudButton Variant="Variant.Filled" Color="Color.Primary" Class="mb-4" OnClick="LoadHistoryAsync">
+            اعمال فیلتر
+        </MudButton>
+
+        @if (isHistoryLoading)
+        {
+            <MudProgressLinear Indeterminate="true" Class="my-4" />
+        }
+        else
+        {
+            <MudTable Items="historyItems" Hover="true">
+                <HeaderContent>
+                    <MudTh>تاریخ</MudTh>
+                    <MudTh>شیفت</MudTh>
+                    <MudTh>نوع ردیف</MudTh>
+                    <MudTh>کارکرد مولد</MudTh>
+                    <MudTh>مقدار خام</MudTh>
+                    <MudTh>پروژه</MudTh>
+                    <MudTh>منشأ</MudTh>
+                    <MudTh>عملیات</MudTh>
+                </HeaderContent>
+                <RowTemplate>
+                    <MudTd DataLabel="تاریخ">@JalaliCalendarConverter.Format(context.EntryDate.ToDateTime(TimeOnly.MinValue))
+                    </MudTd>
+                    <MudTd DataLabel="شیفت">@(context.ShiftIndex is { } i ? (i + 1).ToString() : "—")</MudTd>
+                    <MudTd DataLabel="نوع ردیف">@UsageDisplayNames.GetEntryKindName(context.Kind)</MudTd>
+                    <MudTd DataLabel="کارکرد مولد">@context.OperationalUsageAmount.ToString("0.##")</MudTd>
+                    <MudTd DataLabel="مقدار خام">@context.RawReadingValue.ToString("0.##")</MudTd>
+                    <MudTd DataLabel="پروژه">@context.ProjectId</MudTd>
+                    <MudTd DataLabel="منشأ">
+                        @if (context.Origin == "AutoFilled")
+                        {
+                            <MudChip T="string" Size="Size.Small" Color="Color.Info">
+                                @UsageDisplayNames.GetEntryOriginName(context.Origin)</MudChip>
+                            }
+                        else
+                            {
+                                @UsageDisplayNames.GetEntryOriginName(context.Origin)
+                            }
+                        </MudTd>
+                        <MudTd DataLabel="عملیات">
+                            @if (context.Kind == "ShiftReading" && context.ShiftIndex is not null)
+                            {
+                                <MudIconButton Icon="@Icons.Material.Filled.Edit" Size="Size.Small" title="اصلاح مقدار"
+                                               OnClick="@(() => OpenCorrectEntryReadingDialogAsync(context))" />
+                                <MudIconButton Icon="@Icons.Material.Filled.Schedule" Size="Size.Small" title="اصلاح مشخصات شیفت"
+                                               OnClick="@(() => OpenCorrectEntryDetailsDialogAsync(context))" />
+                            }
+                        </MudTd>
+                    </RowTemplate>
+                </MudTable>
+
+                @if (historyItems.Count == 0)
+                {
+                    <MudText Class="mt-4" Color="Color.Secondary">کارکردی برای این بازه ثبت نشده است.</MudText>
+                }
+            }
+        </MudPaper>
+    }
+
+@code {
+    /// <summary>The device being viewed.</summary>
+    [Parameter]
+    public Guid MeterDeviceId { get; set; }
+
+    private sealed class MeterDeviceDetail
+    {
+        public Guid Id { get; set; }
+        public Guid OrganizationId { get; set; }
+        public string? Unit { get; set; }
+        public string Status { get; set; } = string.Empty;
+        public string? OwnerType { get; set; }
+        public Guid? OwnerId { get; set; }
+        public decimal? DailyCapOverride { get; set; }
+    }
+
+    private sealed class UsageHistoryItem
+    {
+        public Guid UsageLedgerId { get; set; }
+        public string OwnerType { get; set; } = string.Empty;
+        public Guid OwnerId { get; set; }
+        public DateOnly EntryDate { get; set; }
+        public string Kind { get; set; } = string.Empty;
+        public int? ShiftIndex { get; set; }
+        public TimeOnly? ShiftStartTime { get; set; }
+        public TimeOnly? ShiftEndTime { get; set; }
+        public decimal RawReadingValue { get; set; }
+        public decimal OperationalUsageAmount { get; set; }
+        public Guid? OperatorId { get; set; }
+        public Guid ProjectId { get; set; }
+        public string Origin { get; set; } = string.Empty;
+    }
+
+    private sealed class UsageHistoryResult
+    {
+        public List<UsageHistoryItem> Items { get; set; } = [];
+        public int TotalCount { get; set; }
+    }
+
+    private static readonly JsonSerializerOptions JsonOptions = new() { PropertyNameCaseInsensitive = true };
+
+    private MeterDeviceDetail? device;
+    private List<UsageHistoryItem> historyItems = [];
+    private DateTime? fromDate;
+    private DateTime? toDate;
+    private string? projectIdFilterText;
+    private bool isLoading = true;
+    private bool isHistoryLoading;
+    private string? errorMessage;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadDeviceAsync();
+        await LoadHistoryAsync();
+    }
+
+    private async Task LoadDeviceAsync()
+    {
+        isLoading = true;
+        errorMessage = null;
+
+        try
+        {
+            var client = HttpClientFactory.CreateClient("InternalApi");
+            var response = await client.GetAsync($"/api/v1/meter-devices/{MeterDeviceId}");
+
+            if (!response.IsSuccessStatusCode)
+            {
+                errorMessage = $"خطا در دریافت اطلاعات دستگاه: {response.StatusCode}";
+                return;
+            }
+
+            var stream = await response.Content.ReadAsStreamAsync();
+            device = await JsonSerializer.DeserializeAsync<MeterDeviceDetail>(stream, JsonOptions);
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"خطا در دریافت اطلاعات دستگاه: {ex.Message}";
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+
+    private async Task LoadHistoryAsync()
+    {
+        isHistoryLoading = true;
+
+        try
+        {
+            var client = HttpClientFactory.CreateClient("InternalApi");
+            var url = $"/api/v1/meter-devices/{MeterDeviceId}/usage-entries?page=1&pageSize=100";
+
+            if (fromDate is not null)
+            {
+                url += $"&fromDate={DateOnly.FromDateTime(fromDate.Value):yyyy-MM-dd}";
+            }
+
+            if (toDate is not null)
+            {
+                url += $"&toDate={DateOnly.FromDateTime(toDate.Value):yyyy-MM-dd}";
+            }
+
+            if (Guid.TryParse(projectIdFilterText, out var projectId))
+            {
+                url += $"&projectId={projectId}";
+            }
+
+            var response = await client.GetAsync(url);
+
+            if (response.IsSuccessStatusCode)
+            {
+                var stream = await response.Content.ReadAsStreamAsync();
+                var result = await JsonSerializer.DeserializeAsync<UsageHistoryResult>(stream, JsonOptions);
+                historyItems = result?.Items ?? [];
+            }
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"خطا در دریافت تاریخچهٔ کارکرد: {ex.Message}";
+        }
+        finally
+        {
+            isHistoryLoading = false;
+        }
+    }
+
+    /// <summary>
+    /// Fetches the single, absolute most recent entry for this device,
+    /// ignoring whatever date/Project filters are currently applied to
+    /// the on-screen history table (chat, 2026-09-29) — the delete
+    /// confirmation must always target the Ledger's true latest entry,
+    /// not whatever happens to be the filtered list's first row.
+    /// </summary>
+    private async Task<UsageHistoryItem?> FetchLatestEntryAsync()
+    {
+        try
+        {
+            var client = HttpClientFactory.CreateClient("InternalApi");
+            var response = await client.GetAsync($"/api/v1/meter-devices/{MeterDeviceId}/usage-entries?page=1&pageSize=1");
+
+            if (!response.IsSuccessStatusCode)
+            {
+                errorMessage = $"خطا در دریافت آخرین ردیف: {await response.Content.ReadAsStringAsync()}";
+                return null;
+            }
+
+            var stream = await response.Content.ReadAsStreamAsync();
+            var result = await JsonSerializer.DeserializeAsync<UsageHistoryResult>(stream, JsonOptions);
+            return result?.Items.FirstOrDefault();
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"خطا در دریافت آخرین ردیف: {ex.Message}";
+            return null;
+        }
+    }
+
+    private async Task OpenInstallDialogAsync()
+    {
+        if (device is null)
+        {
+            return;
+        }
+
+        var parameters = new DialogParameters<InstallMeterDeviceDialog>
+        {
+            { x => x.MeterDeviceId, MeterDeviceId },
+            { x => x.OrganizationId, device.OrganizationId },
+        };
+
+        var dialog = await DialogService.ShowAsync<InstallMeterDeviceDialog>("نصب دستگاه", parameters);
+        var result = await dialog.Result;
+
+        if (result is { Canceled: false })
+        {
+            await LoadDeviceAsync();
+        }
+    }
+
+    private async Task OpenRegisterShiftReadingDialogAsync()
+    {
+        var parameters = new DialogParameters<RegisterShiftReadingDialog> { { x => x.MeterDeviceId, MeterDeviceId } };
+        var dialog = await DialogService.ShowAsync<RegisterShiftReadingDialog>("ثبت کارکرد شیفت", parameters);
+        var result = await dialog.Result;
+
+        if (result is { Canceled: false })
+        {
+            await LoadDeviceAsync();
+            await LoadHistoryAsync();
+        }
+    }
+
+    private async Task OpenRebaseDialogAsync()
+    {
+        if (device is not { OwnerType: not null, OwnerId: not null, Unit: not null })
+        {
+            return;
+        }
+
+        var parameters = new DialogParameters<RebaseCounterDialog>
+        {
+            { x => x.OwnerType, device.OwnerType },
+            { x => x.OwnerId, device.OwnerId.Value },
+            { x => x.Unit, device.Unit },
+        };
+
+        var dialog = await DialogService.ShowAsync<RebaseCounterDialog>("بازتنظیم شمارنده", parameters);
+        var result = await dialog.Result;
+
+        if (result is { Canceled: false })
+        {
+            await LoadDeviceAsync();
+            await LoadHistoryAsync();
+        }
+    }
+
+    private async Task OpenDeleteLatestDialogAsync()
+    {
+        errorMessage = null;
+
+        var latest = await FetchLatestEntryAsync();
+
+        if (latest is null)
+        {
+            errorMessage ??= "ردیفی برای حذف وجود ندارد.";
+            return;
+        }
+
+        var parameters = new DialogParameters<DeleteLatestUsageEntryDialog>
+        {
+            { x => x.OwnerType, latest.OwnerType },
+            { x => x.OwnerId, latest.OwnerId },
+            { x => x.Unit, device?.Unit ?? string.Empty },
+            { x => x.EntryDate, latest.EntryDate },
+            { x => x.ShiftIndex, latest.ShiftIndex },
+            { x => x.OperationalUsageAmount, latest.OperationalUsageAmount },
+        };
+
+        var dialog = await DialogService.ShowAsync<DeleteLatestUsageEntryDialog>("حذف آخرین ردیف", parameters);
+        var result = await dialog.Result;
+
+        if (result is { Canceled: false })
+        {
+            await LoadHistoryAsync();
+        }
+    }
+
+    private async Task OpenCorrectEntryReadingDialogAsync(UsageHistoryItem item)
+    {
+        var parameters = new DialogParameters<CorrectEntryReadingDialog>
+        {
+            { x => x.OwnerType, item.OwnerType },
+            { x => x.OwnerId, item.OwnerId },
+            { x => x.Unit, device?.Unit ?? string.Empty },
+            { x => x.EntryDate, item.EntryDate },
+            { x => x.ShiftIndex, item.ShiftIndex!.Value },
+            { x => x.CurrentRawReadingValue, item.RawReadingValue },
+        };
+
+        var dialog = await DialogService.ShowAsync<CorrectEntryReadingDialog>("اصلاح مقدار خوانده‌شده", parameters);
+        var result = await dialog.Result;
+
+        if (result is { Canceled: false })
+        {
+            await LoadHistoryAsync();
+        }
+    }
+
+    private async Task OpenCorrectEntryDetailsDialogAsync(UsageHistoryItem item)
+    {
+        var parameters = new DialogParameters<CorrectEntryDetailsDialog>
+        {
+            { x => x.OwnerType, item.OwnerType },
+            { x => x.OwnerId, item.OwnerId },
+            { x => x.Unit, device?.Unit ?? string.Empty },
+            { x => x.EntryDate, item.EntryDate },
+            { x => x.ShiftIndex, item.ShiftIndex!.Value },
+            { x => x.CurrentOperatorId, item.OperatorId },
+            { x => x.CurrentShiftStartTime, item.ShiftStartTime ?? default },
+            { x => x.CurrentShiftEndTime, item.ShiftEndTime ?? default },
+        };
+
+        var dialog = await DialogService.ShowAsync<CorrectEntryDetailsDialog>("اصلاح مشخصات شیفت", parameters);
+        var result = await dialog.Result;
+
+        if (result is { Canceled: false })
+        {
+            await LoadHistoryAsync();
+        }
+    }
+
+    private Task ReportFailureAsync() => ExecuteLifecycleActionAsync("report-failure", "اعلام خرابی");
+
+    private Task RecoverAsync() => ExecuteLifecycleActionAsync("recover", "بازیابی از خرابی");
+
+    private Task RemoveAsync() => ExecuteLifecycleActionAsync("remove", "جدا کردن از مالک فعلی");
+
+    private Task ArchiveAsync() => ExecuteLifecycleActionAsync("archive", "بایگانی نهایی");
+
+    private async Task ExecuteLifecycleActionAsync(string actionSegment, string actionPersianName)
+    {
+        errorMessage = null;
+
+        try
+        {
+            var client = HttpClientFactory.CreateClient("InternalApi");
+            var response = await client.PostAsync(
+                $"/api/v1/meter-devices/{MeterDeviceId}/{actionSegment}",
+                new StringContent(string.Empty));
+
+            if (!response.IsSuccessStatusCode)
+            {
+                errorMessage = $"خطا در «{actionPersianName}»: {await response.Content.ReadAsStringAsync()}";
+                return;
+            }
+
+            await LoadDeviceAsync();
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"خطا در «{actionPersianName}»: {ex.Message}";
+        }
+    }
+}

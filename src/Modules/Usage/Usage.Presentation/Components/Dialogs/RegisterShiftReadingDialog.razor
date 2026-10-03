@@ -1,0 +1,182 @@
+@using System.Text.Json
+@using MachineryManagerEnterprise.UI.Components
+@using MachineryManagerEnterprise.UI.Calendar
+@inject IHttpClientFactory HttpClientFactory
+
+<MudDialog>
+    <TitleContent>ثبت کارکرد شیفت</TitleContent>
+    <DialogContent>
+        @if (errorMessage is not null)
+        {
+            <MudAlert Severity="Severity.Error" Class="mb-4">@errorMessage</MudAlert>
+        }
+
+        <JalaliDatePicker Date="entryDate" DateChanged="OnEntryDateChangedAsync" Label="تاریخ" Required="true" Class="mb-4" />
+
+        @if (isScheduleLoading)
+        {
+            <MudProgressLinear Indeterminate="true" Class="mb-4" />
+        }
+        else if (entryDate is not null && shifts.Count == 0)
+        {
+            <MudAlert Severity="Severity.Warning" Class="mb-4">
+                برای این تاریخ شیفتی در تقویم کاری یافت نشد.
+            </MudAlert>
+        }
+        else if (shifts.Count > 0)
+        {
+            <MudSelect T="int?" @bind-Value="selectedShiftIndex" Label="شیفت" Required="true" Class="mb-4">
+                @foreach (var shift in shifts)
+                {
+                    <MudSelectItem T="int?" Value="@((int?)shift.Index)">
+                        شیفت @(shift.Index + 1) — @shift.StartTime.ToString("HH:mm") تا @shift.EndTime.ToString("HH:mm")
+                    </MudSelectItem>
+                }
+            </MudSelect>
+        }
+
+        <MudNumericField T="decimal?" @bind-Value="rawReadingValue" Label="مقدار خوانده‌شده از کنتور" Required="true" Min="0" Class="mb-4" />
+
+        <MudTextField T="string" @bind-Value="operatorIdText" Label="شناسهٔ اپراتور (اختیاری)" Class="mb-4" />
+    </DialogContent>
+    <DialogActions>
+        <MudButton OnClick="Cancel">انصراف</MudButton>
+        <MudButton Color="Color.Primary" Variant="Variant.Filled" OnClick="SubmitAsync"
+                   Disabled="@(isSubmitting || selectedShiftIndex is null || rawReadingValue is null)">
+            ثبت کارکرد
+        </MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+    [CascadingParameter]
+    private IMudDialogInstance MudDialog { get; set; } = null!;
+
+    /// <summary>The device this shift's reading is being registered for.</summary>
+    [Parameter]
+    public Guid MeterDeviceId { get; set; }
+
+    private sealed record ShiftOption(int Index, TimeOnly StartTime, TimeOnly EndTime);
+
+    private sealed class DayScheduleResult
+    {
+        public bool IsWorkingDay { get; set; }
+        public List<ShiftOption> Shifts { get; set; } = [];
+    }
+
+    private static readonly JsonSerializerOptions JsonOptions = new() { PropertyNameCaseInsensitive = true };
+
+    private DateTime? entryDate = DateTime.Today;
+    private List<ShiftOption> shifts = [];
+    private int? selectedShiftIndex;
+    private decimal? rawReadingValue;
+    private string? operatorIdText;
+    private bool isScheduleLoading;
+    private bool isSubmitting;
+    private string? errorMessage;
+
+    protected override async Task OnInitializedAsync() => await LoadScheduleAsync();
+
+    private async Task OnEntryDateChangedAsync(DateTime? date)
+    {
+        entryDate = date;
+        selectedShiftIndex = null;
+        await LoadScheduleAsync();
+    }
+
+    private async Task LoadScheduleAsync()
+    {
+        shifts = [];
+
+        if (entryDate is null)
+        {
+            return;
+        }
+
+        isScheduleLoading = true;
+        errorMessage = null;
+
+        try
+        {
+            var client = HttpClientFactory.CreateClient("InternalApi");
+            var date = DateOnly.FromDateTime(entryDate.Value);
+            var response = await client.GetAsync($"/api/v1/meter-devices/{MeterDeviceId}/day-schedule?date={date:yyyy-MM-dd}");
+
+            if (!response.IsSuccessStatusCode)
+            {
+                errorMessage = $"خطا در دریافت شیفت‌های این روز: {await response.Content.ReadAsStringAsync()}";
+                return;
+            }
+
+            var stream = await response.Content.ReadAsStreamAsync();
+            var result = await JsonSerializer.DeserializeAsync<DayScheduleResult>(stream, JsonOptions);
+            shifts = result?.Shifts ?? [];
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"خطا در دریافت شیفت‌های این روز: {ex.Message}";
+        }
+        finally
+        {
+            isScheduleLoading = false;
+        }
+    }
+
+    private async Task SubmitAsync()
+    {
+        errorMessage = null;
+
+        if (entryDate is null || selectedShiftIndex is null || rawReadingValue is null)
+        {
+            errorMessage = "لطفاً تاریخ، شیفت و مقدار خوانده‌شده از کنتور را وارد کنید.";
+            return;
+        }
+
+        Guid? operatorId = null;
+
+        if (!string.IsNullOrWhiteSpace(operatorIdText))
+        {
+            if (!Guid.TryParse(operatorIdText, out var parsedOperatorId))
+            {
+                errorMessage = "شناسهٔ اپراتور نامعتبر است.";
+                return;
+            }
+
+            operatorId = parsedOperatorId;
+        }
+
+        isSubmitting = true;
+
+        try
+        {
+            var client = HttpClientFactory.CreateClient("InternalApi");
+            var response = await client.PostAsJsonAsync(
+                $"/api/v1/meter-devices/{MeterDeviceId}/shift-reading",
+                new
+                {
+                    EntryDate = DateOnly.FromDateTime(entryDate.Value),
+                    ShiftIndex = selectedShiftIndex.Value,
+                    RawReadingValue = rawReadingValue.Value,
+                    OperatorId = operatorId,
+                });
+
+            if (!response.IsSuccessStatusCode)
+            {
+                errorMessage = $"خطا در ثبت کارکرد: {await response.Content.ReadAsStringAsync()}";
+                return;
+            }
+
+            MudDialog.Close(DialogResult.Ok(true));
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"خطا در ثبت کارکرد: {ex.Message}";
+        }
+        finally
+        {
+            isSubmitting = false;
+        }
+    }
+
+    private void Cancel() => MudDialog.Cancel();
+}

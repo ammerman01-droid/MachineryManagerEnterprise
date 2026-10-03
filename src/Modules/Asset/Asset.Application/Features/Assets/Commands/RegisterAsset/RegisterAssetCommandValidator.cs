@@ -44,11 +44,11 @@ public sealed class RegisterAssetCommandValidator : AbstractValidator<RegisterAs
             .IsInEnum()
             .When(x => x.SecondaryFuelKind.HasValue);
 
-        // Units are fixed enums (chat, 2026-09-19) — reject any value
-        // outside the defined members (e.g. a raw out-of-range number).
-        RuleFor(x => x.MeterReadingUnit)
-            .IsInEnum()
-            .When(x => x.MeterReadingUnit.HasValue);
+        // Required as of chat, 2026-09-29 (previously optional, chat 2026-09-19) —
+        // the Usage module's MeterDevice.Unit is fixed for a device's
+        // lifetime, and auto-provisioning a device for a new Asset needs
+        // a unit to register it with.
+        RuleFor(x => x.MeterReadingUnit).IsInEnum();
 
         RuleFor(x => x.PrimaryFuelUnit)
             .IsInEnum()
@@ -57,7 +57,7 @@ public sealed class RegisterAssetCommandValidator : AbstractValidator<RegisterAs
         RuleFor(x => x.SecondaryFuelUnit)
             .IsInEnum()
             .When(x => x.SecondaryFuelUnit.HasValue);
-        
+
         RuleFor(x => x.ProjectId).NotEmpty();
     }
 }

@@ -1,3 +1,4 @@
+using MachineryManagerEnterprise.SharedKernel.Abstractions;
 using MachineryManagerEnterprise.WorkCalendar.Application.Abstractions;
 using MachineryManagerEnterprise.WorkCalendar.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
@@ -10,8 +11,8 @@ namespace MachineryManagerEnterprise.WorkCalendar.Infrastructure;
 public static class DependencyInjection
 {
     /// <summary>
-    /// Registers the WorkCalendar module's DbContext, repository, and
-    /// Unit of Work with the dependency injection container.
+    /// Registers the WorkCalendar module's DbContext, repository,
+    /// Unit of Work, and cross-module lookup services.
     /// </summary>
     /// <param name="services">The service collection to configure.</param>
     /// <param name="configuration">The application configuration, used to resolve the connection string.</param>
@@ -28,7 +29,10 @@ public static class DependencyInjection
                     schema: "workcalendar")));
 
         services.AddScoped<IWorkCalendarRepository, WorkCalendarRepository>();
-        services.AddScoped<IWorkCalendarUnitOfWork>(sp => sp.GetRequiredService<WorkCalendarDbContext>());
+        services.AddScoped<IWorkCalendarUnitOfWork>(
+            sp => sp.GetRequiredService<WorkCalendarDbContext>());
+
+        services.AddScoped<IWorkCalendarLookupService, WorkCalendarLookupService>();
 
         return services;
     }

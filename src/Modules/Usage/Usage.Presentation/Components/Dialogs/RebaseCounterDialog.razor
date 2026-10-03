@@ -1,0 +1,103 @@
+@using MachineryManagerEnterprise.UI.Components
+@using MachineryManagerEnterprise.UI.Calendar
+@inject IHttpClientFactory HttpClientFactory
+
+<MudDialog>
+    <TitleContent>بازتنظیم شمارنده</TitleContent>
+    <DialogContent>
+        @if (errorMessage is not null)
+        {
+            <MudAlert Severity="Severity.Error" Class="mb-4">@errorMessage</MudAlert>
+        }
+
+        <MudAlert Severity="Severity.Info" Class="mb-4">
+            دستگاه جایگزین باید از قبل روی همین مالک نصب شده باشد.
+        </MudAlert>
+
+        <MudTextField T="string" @bind-Value="newMeterDeviceIdText" Label="شناسهٔ دستگاه جایگزین" Required="true" Class="mb-4" />
+
+        <MudNumericField T="decimal?" @bind-Value="newRawReadingValue" Label="مقدار پایهٔ جدید کنتور" Required="true" Min="0" Class="mb-4" />
+
+        <JalaliDatePicker Date="targetDate" DateChanged="@((DateTime? d) => targetDate = d)" Label="تاریخ بازتنظیم" Required="true" Class="mb-4" />
+        <MudText Typo="Typo.caption" Color="Color.Secondary">تاریخ باید بعد از آخرین ردیف ثبت‌شده و حداکثر امروز باشد.</MudText>
+    </DialogContent>
+    <DialogActions>
+        <MudButton OnClick="Cancel">انصراف</MudButton>
+        <MudButton Color="Color.Primary" Variant="Variant.Filled" OnClick="SubmitAsync" Disabled="isSubmitting">
+            بازتنظیم
+        </MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+    [CascadingParameter]
+    private IMudDialogInstance MudDialog { get; set; } = null!;
+
+    /// <summary>The kind of owner the ledger being rebased belongs to.</summary>
+    [Parameter]
+    public string OwnerType { get; set; } = string.Empty;
+
+    /// <summary>The identifier of the ledger's owner.</summary>
+    [Parameter]
+    public Guid OwnerId { get; set; }
+
+    /// <summary>The unit of the ledger being rebased.</summary>
+    [Parameter]
+    public string Unit { get; set; } = string.Empty;
+
+    private string newMeterDeviceIdText = string.Empty;
+    private decimal? newRawReadingValue;
+    private DateTime? targetDate = DateTime.Today;
+    private bool isSubmitting;
+    private string? errorMessage;
+
+    private async Task SubmitAsync()
+    {
+        errorMessage = null;
+
+        if (!Guid.TryParse(newMeterDeviceIdText, out var newMeterDeviceId))
+        {
+            errorMessage = "شناسهٔ دستگاه جایگزین نامعتبر است.";
+            return;
+        }
+
+        if (newRawReadingValue is null || targetDate is null)
+        {
+            errorMessage = "لطفاً مقدار پایهٔ جدید و تاریخ بازتنظیم را وارد کنید.";
+            return;
+        }
+
+        isSubmitting = true;
+
+        try
+        {
+            var client = HttpClientFactory.CreateClient("InternalApi");
+            var response = await client.PostAsJsonAsync(
+                $"/api/v1/usage-ledgers/{OwnerType}/{OwnerId}/{Unit}/rebase",
+                new
+                {
+                    NewMeterDeviceId = newMeterDeviceId,
+                    NewRawReadingValue = newRawReadingValue.Value,
+                    TargetDate = DateOnly.FromDateTime(targetDate.Value),
+                });
+
+            if (!response.IsSuccessStatusCode)
+            {
+                errorMessage = $"خطا در بازتنظیم شمارنده: {await response.Content.ReadAsStringAsync()}";
+                return;
+            }
+
+            MudDialog.Close(DialogResult.Ok(true));
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"خطا در بازتنظیم شمارنده: {ex.Message}";
+        }
+        finally
+        {
+            isSubmitting = false;
+        }
+    }
+
+    private void Cancel() => MudDialog.Cancel();
+}

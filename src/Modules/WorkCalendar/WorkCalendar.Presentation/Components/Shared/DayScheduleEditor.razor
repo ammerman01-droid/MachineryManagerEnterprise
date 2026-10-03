@@ -25,6 +25,26 @@
                                    OnClick="@(() => RemoveShift(currentShift))" />
                 </MudStack>
 
+                <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="2" Class="mt-1">
+                    @if (currentShift.GrossDuration == TimeSpan.Zero)
+                    {
+                        <MudText Typo="Typo.caption" Color="Color.Error">ساعت شروع و پایان شیفت نباید یکسان باشد.</MudText>
+                    }
+                    else if (currentShift.GrossDuration > TimeSpan.FromHours(ShiftItem.MaxDurationHours))
+                    {
+                        <MudText Typo="Typo.caption" Color="Color.Error">طول شیفت نباید بیش از @ShiftItem.MaxDurationHours ساعت باشد.</MudText>
+                    }
+                    else
+                    {
+                        <MudText Typo="Typo.caption">مدت شیفت: @FormatDuration(currentShift.GrossDuration)</MudText>
+                    }
+
+                    @if (currentShift.CrossesMidnight)
+                    {
+                        <MudChip T="string" Size="Size.Small" Color="Color.Info" Variant="Variant.Text">پایان در روز بعد</MudChip>
+                    }
+                </MudStack>
+
                 @foreach (var breakItem in currentShift.Breaks)
                 {
                     var currentBreak = breakItem;
@@ -69,6 +89,11 @@
     public EventCallback<DayScheduleItem> ValueChanged { get; set; }
 
     private async Task NotifyChangedAsync() => await ValueChanged.InvokeAsync(Value);
+
+    private static string FormatDuration(TimeSpan duration) =>
+        duration.Minutes == 0
+            ? $"{(int)duration.TotalHours} ساعت"
+            : $"{(int)duration.TotalHours} ساعت و {duration.Minutes} دقیقه";
 
     private async Task OnWorkingDayChanged(bool isWorkingDay)
     {
@@ -146,3 +171,4 @@
         }
     }
 }
+

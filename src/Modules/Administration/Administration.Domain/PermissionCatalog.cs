@@ -20,6 +20,13 @@ namespace Administration.Domain;
 /// ("FuelConsumption.View/Create/Edit/Delete") are all genuinely
 /// enforced by the Consumption module's Command/Query Handlers, unlike
 /// AuditLog above.
+/// MeterDevice/DailyUsage sections added (chat, 2026-09-25) — both are
+/// fully enforced by the Usage module's Command/Query Handlers. Their
+/// action lists are lifecycle-specific rather than the standard
+/// View/Create/Edit/Delete set (device lifecycle:
+/// View→Create→Install→ReportFailure/Recover→Remove→Archive; daily
+/// usage: Register/Correct/Delete/Freeze/View), same reasoning as
+/// WorkOrder above.
 /// </remarks>
 public static class PermissionCatalog
 {
@@ -50,6 +57,8 @@ public static class PermissionCatalog
         new PermissionSection("LubricantOverflowReport", "گزارش سرریز روانکار"),
         new PermissionSection("WorkOrder", "دستورهای کار", ["View", "Create", "Edit"]),
         new PermissionSection("ConsumptionFreezeSetting", "قفل گزارش‌های مصرف", ["View", "Edit"]),
+        new PermissionSection("MeterDevice", "دستگاه‌های شمارشگر (کنتور)", ["View", "Create", "Install", "ReportFailure", "Recover", "Remove", "Archive"]),
+        new PermissionSection("DailyUsage", "کارکرد روزانه", ["Register", "Correct", "Delete", "Freeze", "View"]),
     ];
 
     /// <summary>Builds the canonical permission string for a section/action pair (e.g. "Organization.Create").</summary>

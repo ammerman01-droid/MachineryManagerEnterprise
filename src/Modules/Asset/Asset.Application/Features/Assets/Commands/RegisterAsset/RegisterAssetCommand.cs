@@ -17,7 +17,7 @@ public sealed record RegisterAssetCommand(
     string? LicensePlate,
     int? ManufactureYear,
     Guid ProjectId,
-    MeterReadingUnit? MeterReadingUnit,
+    MeterReadingUnit MeterReadingUnit,
     FuelKind? PrimaryFuelKind,
     FuelUnit? PrimaryFuelUnit,
     FuelKind? SecondaryFuelKind,

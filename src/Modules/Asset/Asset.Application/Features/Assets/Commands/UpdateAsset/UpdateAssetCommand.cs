@@ -17,7 +17,7 @@ public sealed record UpdateAssetCommand(
     string? Vin,
     string? LicensePlate,
     int? ManufactureYear,
-    MeterReadingUnit? MeterReadingUnit,
+    MeterReadingUnit MeterReadingUnit,
     FuelKind? PrimaryFuelKind,
     FuelUnit? PrimaryFuelUnit,
     FuelKind? SecondaryFuelKind,

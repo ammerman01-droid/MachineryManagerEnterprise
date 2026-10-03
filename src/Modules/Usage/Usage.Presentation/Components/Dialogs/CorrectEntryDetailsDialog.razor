@@ -1,0 +1,151 @@
+@using MachineryManagerEnterprise.UI.Components
+@using MachineryManagerEnterprise.UI.Calendar
+@inject IHttpClientFactory HttpClientFactory
+
+<MudDialog>
+    <TitleContent>اصلاح مشخصات شیفت</TitleContent>
+    <DialogContent>
+        @if (errorMessage is not null)
+        {
+            <MudAlert Severity="Severity.Error" Class="mb-4">@errorMessage</MudAlert>
+        }
+
+        <MudField Label="تاریخ / شیفت" Class="mb-4">@EntryDate.ToString("yyyy-MM-dd") — شیفت @(ShiftIndex + 1)</MudField>
+
+        <MudTextField T="string" @bind-Value="operatorIdText" Label="شناسهٔ اپراتور (خالی = بدون اپراتور)" Class="mb-4" />
+
+        <MudGrid Class="mb-4">
+            <MudItem xs="6">
+                <MudTextField T="string" @bind-Value="shiftStartTimeText" Label="ساعت شروع (HH:mm)" Placeholder="۰۸:۰۰" Required="true" />
+            </MudItem>
+            <MudItem xs="6">
+                <MudTextField T="string" @bind-Value="shiftEndTimeText" Label="ساعت پایان (HH:mm)" Placeholder="۱۶:۰۰" Required="true" />
+            </MudItem>
+        </MudGrid>
+
+        <MudText Typo="Typo.caption" Color="Color.Secondary">
+            این اصلاح کارکرد مولد ثبت‌شده را تغییر نمی‌دهد؛ فقط مشخصات نمایشی شیفت را عوض می‌کند.
+        </MudText>
+    </DialogContent>
+    <DialogActions>
+        <MudButton OnClick="Cancel">انصراف</MudButton>
+        <MudButton Color="Color.Primary" Variant="Variant.Filled" OnClick="SubmitAsync" Disabled="isSubmitting">
+            ثبت اصلاحیه
+        </MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+    [CascadingParameter]
+    private IMudDialogInstance MudDialog { get; set; } = null!;
+
+    /// <summary>The kind of owner the ledger this entry belongs to.</summary>
+    [Parameter]
+    public string OwnerType { get; set; } = string.Empty;
+
+    /// <summary>The identifier of the ledger's owner.</summary>
+    [Parameter]
+    public Guid OwnerId { get; set; }
+
+    /// <summary>The unit of the ledger this entry belongs to.</summary>
+    [Parameter]
+    public string Unit { get; set; } = string.Empty;
+
+    /// <summary>The date of the shift reading being corrected.</summary>
+    [Parameter]
+    public DateOnly EntryDate { get; set; }
+
+    /// <summary>The shift index of the reading being corrected.</summary>
+    [Parameter]
+    public int ShiftIndex { get; set; }
+
+    /// <summary>The entry's operator attribution before correction, shown for reference and used to prefill the field.</summary>
+    [Parameter]
+    public Guid? CurrentOperatorId { get; set; }
+
+    /// <summary>The entry's shift start time before correction, used to prefill the field.</summary>
+    [Parameter]
+    public TimeOnly CurrentShiftStartTime { get; set; }
+
+    /// <summary>The entry's shift end time before correction, used to prefill the field.</summary>
+    [Parameter]
+    public TimeOnly CurrentShiftEndTime { get; set; }
+
+    private string? operatorIdText;
+    private string shiftStartTimeText = string.Empty;
+    private string shiftEndTimeText = string.Empty;
+    private bool isInitialized;
+    private bool isSubmitting;
+    private string? errorMessage;
+
+    protected override void OnParametersSet()
+    {
+        if (isInitialized)
+        {
+            return;
+        }
+
+        operatorIdText = CurrentOperatorId?.ToString();
+        shiftStartTimeText = CurrentShiftStartTime.ToString("HH:mm");
+        shiftEndTimeText = CurrentShiftEndTime.ToString("HH:mm");
+        isInitialized = true;
+    }
+
+    private async Task SubmitAsync()
+    {
+        errorMessage = null;
+
+        Guid? operatorId = null;
+
+        if (!string.IsNullOrWhiteSpace(operatorIdText))
+        {
+            if (!Guid.TryParse(operatorIdText, out var parsedOperatorId))
+            {
+                errorMessage = "شناسهٔ اپراتور نامعتبر است.";
+                return;
+            }
+
+            operatorId = parsedOperatorId;
+        }
+
+        if (!TimeOnly.TryParse(JalaliCalendarConverter.ToLatinDigits(shiftStartTimeText), out var shiftStartTime) ||
+            !TimeOnly.TryParse(JalaliCalendarConverter.ToLatinDigits(shiftEndTimeText), out var shiftEndTime))
+        {
+            errorMessage = "ساعت شروع و پایان شیفت را به‌درستی وارد کنید.";
+            return;
+        }
+
+        isSubmitting = true;
+
+        try
+        {
+            var client = HttpClientFactory.CreateClient("InternalApi");
+            var response = await client.PutAsJsonAsync(
+                $"/api/v1/usage-ledgers/{OwnerType}/{OwnerId}/{Unit}/daily-usage/{EntryDate:yyyy-MM-dd}/{ShiftIndex}/details",
+                new
+                {
+                    OperatorId = operatorId,
+                    ShiftStartTime = shiftStartTime,
+                    ShiftEndTime = shiftEndTime,
+                });
+
+            if (!response.IsSuccessStatusCode)
+            {
+                errorMessage = $"خطا در اصلاح مشخصات: {await response.Content.ReadAsStringAsync()}";
+                return;
+            }
+
+            MudDialog.Close(DialogResult.Ok(true));
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"خطا در اصلاح مشخصات: {ex.Message}";
+        }
+        finally
+        {
+            isSubmitting = false;
+        }
+    }
+
+    private void Cancel() => MudDialog.Cancel();
+}

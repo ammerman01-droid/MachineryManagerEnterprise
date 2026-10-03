@@ -1,0 +1,109 @@
+@page "/admin/meter-devices/{OrganizationId:guid}/create"
+@inject IHttpClientFactory HttpClientFactory
+@inject NavigationManager Navigation
+@using System.Text.Json
+@using MachineryManagerEnterprise.Usage.Presentation.Components
+
+<PageTitle>ثبت دستگاه شمارشگر</PageTitle>
+
+<MudText Typo="Typo.h4" Class="mb-4">ثبت دستگاه شمارشگر جدید</MudText>
+
+@if (errorMessage is not null)
+{
+    <MudAlert Severity="Severity.Error" Class="my-4">@errorMessage</MudAlert>
+}
+
+<MudPaper Class="pa-4">
+    <MudForm @ref="form" Model="@this">
+        <MudSelect T="string" @bind-Value="unit" Label="واحد کنتر" Required="true" RequiredError="واحد کنتر الزامی است" Class="mb-4"
+                   HelperText="این واحد برای تمام عمر دستگاه ثابت می‌ماند و بعداً قابل تغییر نیست.">
+            @foreach (var unitOption in unitOptions)
+            {
+                <MudSelectItem T="string" Value="@unitOption">@UsageDisplayNames.GetUnitName(unitOption)</MudSelectItem>
+            }
+        </MudSelect>
+
+        <MudNumericField T="decimal?" @bind-Value="dailyCapOverride" Label="سقف روزانه اختصاصی (اختیاری)"
+                          Placeholder="در صورت خالی‌گذاشتن، سقف پیش‌فرض سامانه اعمال می‌شود"
+                          HelperText="مقدار حداکثر کارکرد مولد روزانهٔ این دستگاه (بر حسب واحد اندازه‌گیری‌اش)، فقط اگر بخواهید با سقف کلی سازمان متفاوت باشد."
+                          Min="0" Class="mb-4" />
+
+        <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="SubmitAsync" Disabled="@(isSubmitting || string.IsNullOrEmpty(unit))">
+            ثبت دستگاه
+        </MudButton>
+        <MudButton Variant="Variant.Text" Class="mr-2" OnClick="@(() => Navigation.NavigateTo($"/admin/meter-devices/{OrganizationId}"))">
+            انصراف
+        </MudButton>
+    </MudForm>
+</MudPaper>
+
+@code {
+    /// <summary>The Organization the new device will belong to.</summary>
+    [Parameter]
+    public Guid OrganizationId { get; set; }
+
+    private sealed class RegisterMeterDeviceRequest
+    {
+        public Guid OrganizationId { get; set; }
+        public string Unit { get; set; } = string.Empty;
+        public decimal? DailyCapOverride { get; set; }
+    }
+
+    private sealed class RegisterMeterDeviceResult
+    {
+        public Guid Id { get; set; }
+    }
+
+    private static readonly JsonSerializerOptions JsonOptions = new() { PropertyNameCaseInsensitive = true };
+    private static readonly string[] unitOptions = ["Hour", "Kilometer", "Mile"];
+
+    private MudForm form = null!;
+    private string? unit;
+    private decimal? dailyCapOverride;
+    private bool isSubmitting;
+    private string? errorMessage;
+
+    private async Task SubmitAsync()
+    {
+        errorMessage = null;
+
+        if (string.IsNullOrEmpty(unit))
+        {
+            errorMessage = "لطفاً واحد کنتر را انتخاب کنید.";
+            return;
+        }
+
+        isSubmitting = true;
+
+        try
+        {
+            var client = HttpClientFactory.CreateClient("InternalApi");
+            var response = await client.PostAsJsonAsync(
+                "/api/v1/meter-devices",
+                new RegisterMeterDeviceRequest { OrganizationId = OrganizationId, Unit = unit, DailyCapOverride = dailyCapOverride });
+
+            if (!response.IsSuccessStatusCode)
+            {
+                var problem = await response.Content.ReadAsStringAsync();
+                errorMessage = $"خطا در ثبت دستگاه: {problem}";
+                return;
+            }
+
+            var stream = await response.Content.ReadAsStreamAsync();
+            var result = await JsonSerializer.DeserializeAsync<RegisterMeterDeviceResult>(stream, JsonOptions);
+
+            if (result is not null)
+            {
+                Navigation.NavigateTo($"/admin/meter-devices/details/{result.Id}");
+            }
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"خطا در ثبت دستگاه: {ex.Message}";
+        }
+        finally
+        {
+            isSubmitting = false;
+        }
+    }
+}

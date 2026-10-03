@@ -1,0 +1,21 @@
+<Project Sdk="Microsoft.NET.Sdk.Razor">
+
+  <PropertyGroup>
+    <RootNamespace>MachineryManagerEnterprise.Usage.Presentation</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Usage.Application\Usage.Application.csproj" />
+    <ProjectReference Include="..\..\..\BuildingBlocks\MachineryManagerEnterprise.UI\MachineryManagerEnterprise.UI.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <FrameworkReference Include="Microsoft.AspNetCore.App" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="OpenIddict.Validation.AspNetCore" />
+    <PackageReference Include="MudBlazor" />
+  </ItemGroup>
+
+</Project>

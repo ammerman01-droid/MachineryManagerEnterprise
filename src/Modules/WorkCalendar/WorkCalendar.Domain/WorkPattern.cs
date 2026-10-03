@@ -51,7 +51,7 @@ public sealed class WorkPattern : Entity<WorkPatternId>
     /// </summary>
     /// <param name="startDate">The first date this pattern applies to (inclusive).</param>
     /// <param name="endDate">The last date this pattern applies to (inclusive).</param>
-    /// <param name="weeklySchedule">The template schedule for every day of the week — all seven days must be present.</param>
+    /// <param name="weeklySchedule">The template schedule for every day of the week — all seven days must be present, and no overnight shift may overlap a shift on the following day.</param>
     /// <returns>A <see cref="Result{WorkPattern}"/> containing the new entity, or a validation error.</returns>
     internal static Result<WorkPattern> Create(
         DateOnly startDate, DateOnly endDate, IReadOnlyDictionary<DayOfWeek, DaySchedule> weeklySchedule)
@@ -66,6 +66,31 @@ public sealed class WorkPattern : Entity<WorkPatternId>
         if (allDaysOfWeek.Any(day => !weeklySchedule.ContainsKey(day)))
         {
             return Result.Failure<WorkPattern>(WorkCalendarErrors.WorkPatternMissingDayOfWeek());
+        }
+
+        // An overnight shift runs into the following day of the weekly
+        // template (Saturday wraps to Sunday); it must not overlap a
+        // shift that day starts. Only the template is checked here —
+        // Day Overrides and neighbouring patterns never affect a shift
+        // that has started (it belongs entirely to its start day).
+        foreach (var day in allDaysOfWeek)
+        {
+            var spillOver = weeklySchedule[day].Shifts
+                .Select(s => s.SpillOverDuration)
+                .DefaultIfEmpty(TimeSpan.Zero)
+                .Max();
+
+            if (spillOver == TimeSpan.Zero)
+            {
+                continue;
+            }
+
+            var nextDay = (DayOfWeek)(((int)day + 1) % 7);
+
+            if (weeklySchedule[nextDay].Shifts.Any(s => s.StartTime.ToTimeSpan() < spillOver))
+            {
+                return Result.Failure<WorkPattern>(WorkCalendarErrors.OvernightShiftOverlapsNextDay(day));
+            }
         }
 
         return new WorkPattern(WorkPatternId.New(), startDate, endDate, new Dictionary<DayOfWeek, DaySchedule>(weeklySchedule));

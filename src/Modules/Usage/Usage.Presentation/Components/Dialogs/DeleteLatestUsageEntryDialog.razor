@@ -1,0 +1,98 @@
+@inject IHttpClientFactory HttpClientFactory
+
+<MudDialog>
+    <TitleContent>حذف آخرین ردیف</TitleContent>
+    <DialogContent>
+        @if (errorMessage is not null)
+        {
+            <MudAlert Severity="Severity.Error" Class="mb-4">@errorMessage</MudAlert>
+        }
+
+        <MudAlert Severity="Severity.Warning" Class="mb-4">
+            این عملیات غیرقابل بازگشت است. فقط آخرین ردیفِ زنجیره قابل حذف است — اگر این ردیف، ردیف اخیر نباشد، سامانه با خطا رد می‌کند.
+        </MudAlert>
+
+        <MudField Label="تاریخ">@EntryDate.ToString("yyyy-MM-dd")</MudField>
+        <MudField Label="نوع ردیف" Class="my-2">@(ShiftIndex is { } i ? $"ثبت شیفت — شیفت {i + 1}" : "بازتنظیم شمارنده")</MudField>
+
+        @if (ShiftIndex is not null)
+        {
+            <MudField Label="کارکرد مولد این ردیف">@OperationalUsageAmount.ToString("0.##")</MudField>
+        }
+    </DialogContent>
+    <DialogActions>
+        <MudButton OnClick="Cancel">انصراف</MudButton>
+        <MudButton Color="Color.Error" Variant="Variant.Filled" OnClick="ConfirmAsync" Disabled="isSubmitting">
+            حذف قطعی
+        </MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+    [CascadingParameter]
+    private IMudDialogInstance MudDialog { get; set; } = null!;
+
+    /// <summary>The kind of owner the ledger this entry belongs to.</summary>
+    [Parameter]
+    public string OwnerType { get; set; } = string.Empty;
+
+    /// <summary>The identifier of the ledger's owner.</summary>
+    [Parameter]
+    public Guid OwnerId { get; set; }
+
+    /// <summary>The unit of the ledger this entry belongs to.</summary>
+    [Parameter]
+    public string Unit { get; set; } = string.Empty;
+
+    /// <summary>The date of the entry expected to be the most recent one.</summary>
+    [Parameter]
+    public DateOnly EntryDate { get; set; }
+
+    /// <summary>The shift index expected on the most recent entry, or <see langword="null"/> if it is expected to be a rebase.</summary>
+    [Parameter]
+    public int? ShiftIndex { get; set; }
+
+    /// <summary>The entry's Operational Usage, shown for reference (0 for a rebase or auto-filled entry).</summary>
+    [Parameter]
+    public decimal OperationalUsageAmount { get; set; }
+
+    private bool isSubmitting;
+    private string? errorMessage;
+
+    private async Task ConfirmAsync()
+    {
+        errorMessage = null;
+        isSubmitting = true;
+
+        try
+        {
+            var client = HttpClientFactory.CreateClient("InternalApi");
+            var url = $"/api/v1/usage-ledgers/{OwnerType}/{OwnerId}/{Unit}/daily-usage/{EntryDate:yyyy-MM-dd}";
+
+            if (ShiftIndex is not null)
+            {
+                url += $"?shiftIndex={ShiftIndex}";
+            }
+
+            var response = await client.DeleteAsync(url);
+
+            if (!response.IsSuccessStatusCode)
+            {
+                errorMessage = $"خطا در حذف ردیف: {await response.Content.ReadAsStringAsync()}";
+                return;
+            }
+
+            MudDialog.Close(DialogResult.Ok(true));
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"خطا در حذف ردیف: {ex.Message}";
+        }
+        finally
+        {
+            isSubmitting = false;
+        }
+    }
+
+    private void Cancel() => MudDialog.Cancel();
+}
