@@ -3,6 +3,7 @@ using MachineryManagerEnterprise.Administration.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using MachineryManagerEnterprise.SharedKernel.Abstractions;
 
 namespace MachineryManagerEnterprise.Administration.Infrastructure;
 
@@ -36,6 +37,8 @@ public static class DependencyInjection
         services.AddScoped<IAdministrationUnitOfWork>(serviceProvider =>
             serviceProvider.GetRequiredService<AdministrationDbContext>());
         services.AddScoped<MachineryManagerEnterprise.SharedKernel.Abstractions.IPermissionEvaluator, PermissionEvaluator>();
+        services.AddScoped<IUserAuthorizationScopeResolver, UserAuthorizationScopeResolver>();
+        services.AddScoped<MachineryManagerEnterprise.SharedKernel.Abstractions.IUserAuthorizationScopeResolver,UserAuthorizationScopeResolver>();
 
         return services;
     }

@@ -1,5 +1,16 @@
+@using MachineryManagerEnterprise.Identity.Domain
+@inject ICurrentAccessTokenAccessor CurrentAccessTokenAccessor
+
+@code {
+    protected override async Task OnInitializedAsync()
+    {
+        await CurrentAccessTokenAccessor.GetAccessTokenAsync();
+    }
+}
+
 <Router AppAssembly="typeof(Program).Assembly"
-        AdditionalAssemblies="new[] { 
+        AdditionalAssemblies="new[]
+        {
             typeof(MachineryManagerEnterprise.Identity.Presentation.Components.Pages.Login).Assembly,
             typeof(MachineryManagerEnterprise.Administration.Presentation.Endpoints.ProfileEndpoints).Assembly,
             typeof(MachineryManagerEnterprise.Organization.Presentation.Components.Pages.OrganizationsList).Assembly,

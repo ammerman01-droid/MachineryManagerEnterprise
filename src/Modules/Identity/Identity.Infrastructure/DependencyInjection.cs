@@ -96,6 +96,7 @@ public static class DependencyInjection
             // Added now: AddIdentityCore alone does NOT register
             // SignInManager (unlike the full AddIdentity()). Required
             // for the interactive Login page (cookie-based sign-in).
+	.AddClaimsPrincipalFactory<ScopedClaimsPrincipalFactory>()
             .AddSignInManager();
 
         services.AddScoped<IUserThemePreferenceRepository, UserThemePreferenceRepository>();

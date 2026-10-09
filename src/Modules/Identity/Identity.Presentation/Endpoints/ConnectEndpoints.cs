@@ -29,7 +29,7 @@ public static class ConnectEndpoints
         endpoints.MapMethods("/connect/authorize", ["GET", "POST"], AuthorizeAsync);
         endpoints.MapPost("/connect/token", ExchangeAsync);
         endpoints.MapMethods("/connect/logout", ["GET", "POST"], LogoutAsync);
-        endpoints.MapMethods("/connect/userinfo", ["GET", "POST"], UserInfoAsync);
+        endpoints.MapMethods("/connect/userinfo", ["GET", "POST"], (Delegate)UserInfoAsync);
 
         return endpoints;
     }
@@ -236,9 +236,20 @@ public static class ConnectEndpoints
             case "AspNet.Identity.SecurityStamp":
                 yield break;
 
-            default:
-                yield return Destinations.AccessToken;
-                yield break;
+	    // Tenant-scope identifiers must reach BOTH tokens: the Blazor session
+	    // cookie is re-issued from the callback principal, which OpenIddict
+	    // Client builds from the identity token — claims destined only for
+	    // the access token never make it into the cookie.
+	    case "holding_id":
+	    case "organization_id":
+	    case "project_id":
+		yield return Destinations.AccessToken;
+		    yield return Destinations.IdentityToken;
+		    yield break;
+
+        default:
+            yield return Destinations.AccessToken;
+            yield break;
         }
     }
 
