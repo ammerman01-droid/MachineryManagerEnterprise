@@ -8,6 +8,12 @@ namespace MachineryManagerEnterprise.Usage.Application.Features.MeterDevices.Dto
 /// <param name="OwnerType">The kind of owner this device is mounted on, by name (Asset or Component), or <see langword="null"/> if not currently mounted.</param>
 /// <param name="OwnerId">The owner's identifier, or <see langword="null"/> if not currently mounted.</param>
 /// <param name="DailyCapOverride">This device's own override of the system-wide daily cap (BR-045), or <see langword="null"/> to use the default.</param>
+/// <param name="OwnerCode">
+/// The owning Asset's identification code, resolved from the Asset module for display purposes
+/// (chat, 2026-10-04), or <see langword="null"/> when the device is not mounted on an Asset or the
+/// row was not enriched (only <c>SearchMeterDevices</c> enriches rows).
+/// </param>
+/// <param name="OwnerName">The owning Asset's display name, resolved the same way as <paramref name="OwnerCode"/>.</param>
 public sealed record MeterDeviceListItemDto(
     Guid Id,
     Guid OrganizationId,
@@ -15,7 +21,9 @@ public sealed record MeterDeviceListItemDto(
     string Status,
     string? OwnerType,
     Guid? OwnerId,
-    decimal? DailyCapOverride);
+    decimal? DailyCapOverride,
+    string? OwnerCode = null,
+    string? OwnerName = null);
 
 /// <summary>A page of Meter Device search results, with the total count of matching rows across every page.</summary>
 /// <param name="Items">The rows on this page.</param>

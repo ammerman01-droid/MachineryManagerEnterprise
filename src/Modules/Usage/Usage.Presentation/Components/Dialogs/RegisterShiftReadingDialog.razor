@@ -1,6 +1,7 @@
 @using System.Text.Json
 @using MachineryManagerEnterprise.UI.Components
 @using MachineryManagerEnterprise.UI.Calendar
+@using MachineryManagerEnterprise.Usage.Presentation.Components
 @inject IHttpClientFactory HttpClientFactory
 
 <MudDialog>
@@ -11,38 +12,98 @@
             <MudAlert Severity="Severity.Error" Class="mb-4">@errorMessage</MudAlert>
         }
 
-        <JalaliDatePicker Date="entryDate" DateChanged="OnEntryDateChangedAsync" Label="تاریخ" Required="true" Class="mb-4" />
-
-        @if (isScheduleLoading)
+        @if (MeterDeviceId is null)
         {
-            <MudProgressLinear Indeterminate="true" Class="mb-4" />
-        }
-        else if (entryDate is not null && shifts.Count == 0)
-        {
-            <MudAlert Severity="Severity.Warning" Class="mb-4">
-                برای این تاریخ شیفتی در تقویم کاری یافت نشد.
-            </MudAlert>
-        }
-        else if (shifts.Count > 0)
-        {
-            <MudSelect T="int?" @bind-Value="selectedShiftIndex" Label="شیفت" Required="true" Class="mb-4">
-                @foreach (var shift in shifts)
-                {
-                    <MudSelectItem T="int?" Value="@((int?)shift.Index)">
-                        شیفت @(shift.Index + 1) — @shift.StartTime.ToString("HH:mm") تا @shift.EndTime.ToString("HH:mm")
-                    </MudSelectItem>
-                }
-            </MudSelect>
+            @if (isDevicesLoading)
+            {
+                <MudProgressLinear Indeterminate="true" Class="mb-4" />
+            }
+            else
+            {
+                <MudSelect T="Guid?" @bind-Value="selectedDeviceId" @bind-Value:after="OnDeviceChangedAsync" Label="دستگاه" Required="true" Class="mb-4">
+                    @foreach (var device in devices)
+                    {
+                        <MudSelectItem T="Guid?" Value="@((Guid?)device.Id)">
+                            @(device.OwnerCode ?? "—") — @(device.OwnerName ?? "دارایی نامشخص") (@UsageDisplayNames.GetUnitName(device.Unit))
+                        </MudSelectItem>
+                    }
+                </MudSelect>
+            }
         }
 
-        <MudNumericField T="decimal?" @bind-Value="rawReadingValue" Label="مقدار خوانده‌شده از کنتور" Required="true" Min="0" Class="mb-4" />
+        @if (ResolvedDeviceId is not null)
+        {
+            <JalaliDatePicker Date="entryDate" DateChanged="OnEntryDateChangedAsync" Label="تاریخ" Required="true" Class="mb-4" />
 
-        <MudTextField T="string" @bind-Value="operatorIdText" Label="شناسهٔ اپراتور (اختیاری)" Class="mb-4" />
+            @if (isScheduleLoading)
+            {
+                <MudProgressLinear Indeterminate="true" Class="mb-4" />
+            }
+            else if (entryDate is not null && shifts.Count == 0)
+            {
+                <MudAlert Severity="Severity.Warning" Class="mb-4">
+                    برای این تاریخ شیفتی در تقویم کاری یافت نشد.
+                </MudAlert>
+            }
+            else if (shifts.Count > 1)
+            {
+                <MudSelect T="int?" @bind-Value="selectedShiftIndex" @bind-Value:after="OnShiftIndexChangedAsync" Label="شیفت" Required="true" Class="mb-4">
+                    @foreach (var shift in shifts)
+                    {
+                        <MudSelectItem T="int?" Value="@((int?)shift.Index)">
+                            شیفت @(shift.Index + 1) — @shift.StartTime.ToString("HH:mm") تا @shift.EndTime.ToString("HH:mm")
+                        </MudSelectItem>
+                    }
+                </MudSelect>
+            }
+            else if (shifts.Count == 1)
+            {
+                <MudField Label="شیفت" Class="mb-4">
+                    شیفت @(shifts[0].Index + 1) — @shifts[0].StartTime.ToString("HH:mm") تا @shifts[0].EndTime.ToString("HH:mm") (تنها شیفت این روز)
+                </MudField>
+            }
+
+            @if (selectedShiftIndex is not null)
+            {
+                <MudGrid Class="mb-4">
+                    <MudItem xs="6">
+                        <MudTextField T="string" @bind-Value="shiftStartTimeText" Label="ساعت شروع (قابل ویرایش)" Placeholder="۰۸:۰۰" Required="true" />
+                    </MudItem>
+                    <MudItem xs="6">
+                        <MudTextField T="string" @bind-Value="shiftEndTimeText" Label="ساعت پایان (قابل ویرایش)" Placeholder="۱۶:۰۰" Required="true" />
+                    </MudItem>
+                </MudGrid>
+            }
+
+            <MudNumericField T="decimal?" @bind-Value="rawReadingValue" Label="مقدار خوانده‌شده از کنتور" Required="true" Min="0" Class="mb-4" />
+
+            @if (personnelError is not null)
+            {
+                <MudAlert Severity="Severity.Warning" Class="mb-4">@personnelError</MudAlert>
+            }
+
+            @if (isPersonnelLoading)
+            {
+                <MudProgressLinear Indeterminate="true" Class="mb-4" />
+            }
+            else
+            {
+                <MudSelect T="Guid?" @bind-Value="selectedOperatorId" Label="اپراتور (اختیاری)" Clearable="true" Class="mb-4"
+                           HelperText="@(personnel.Count == 0 ? "برای این سازمان پرسنلی ثبت نشده است." : null)">
+                    @foreach (var person in personnel)
+                    {
+                        <MudSelectItem T="Guid?" Value="@((Guid?)person.Id)">
+                            @person.FirstName @person.LastName (@person.PersonnelCode)
+                        </MudSelectItem>
+                    }
+                </MudSelect>
+            }
+        }
     </DialogContent>
     <DialogActions>
         <MudButton OnClick="Cancel">انصراف</MudButton>
         <MudButton Color="Color.Primary" Variant="Variant.Filled" OnClick="SubmitAsync"
-                   Disabled="@(isSubmitting || selectedShiftIndex is null || rawReadingValue is null)">
+                   Disabled="@(isSubmitting || ResolvedDeviceId is null || selectedShiftIndex is null || rawReadingValue is null)">
             ثبت کارکرد
         </MudButton>
     </DialogActions>
@@ -52,11 +113,32 @@
     [CascadingParameter]
     private IMudDialogInstance MudDialog { get; set; } = null!;
 
-    /// <summary>The device this shift's reading is being registered for.</summary>
+    /// <summary>
+    /// The device this shift's reading is being registered for, when
+    /// already known (e.g. opened from <c>MeterDeviceDetails</c>). When
+    /// <see langword="null"/>, <see cref="OrganizationId"/> must be
+    /// supplied instead and the dialog shows a device picker first
+    /// (chat, 2026-10-04 — opened from the org-wide usage list page).
+    /// </summary>
     [Parameter]
-    public Guid MeterDeviceId { get; set; }
+    public Guid? MeterDeviceId { get; set; }
+
+    /// <summary>The Organization to list devices and personnel from, when <see cref="MeterDeviceId"/> is not already known.</summary>
+    [Parameter]
+    public Guid? OrganizationId { get; set; }
+
+    private Guid? ResolvedDeviceId => MeterDeviceId ?? selectedDeviceId;
+
+    private sealed record DeviceOption(Guid Id, string? Unit, string? OwnerType, Guid? OwnerId, string? OwnerCode, string? OwnerName);
+
+    private sealed record PersonnelOption(Guid Id, string FirstName, string LastName, string PersonnelCode);
 
     private sealed record ShiftOption(int Index, TimeOnly StartTime, TimeOnly EndTime);
+
+    private sealed class DeviceHeader
+    {
+        public Guid OrganizationId { get; set; }
+    }
 
     private sealed class DayScheduleResult
     {
@@ -66,21 +148,180 @@
 
     private static readonly JsonSerializerOptions JsonOptions = new() { PropertyNameCaseInsensitive = true };
 
+    private List<DeviceOption> devices = [];
+    private List<PersonnelOption> personnel = [];
+    private Guid? selectedDeviceId;
+    private Guid? selectedOperatorId;
     private DateTime? entryDate = DateTime.Today;
     private List<ShiftOption> shifts = [];
     private int? selectedShiftIndex;
+    private string shiftStartTimeText = string.Empty;
+    private string shiftEndTimeText = string.Empty;
     private decimal? rawReadingValue;
-    private string? operatorIdText;
+    private bool isDevicesLoading;
+    private bool isPersonnelLoading;
     private bool isScheduleLoading;
     private bool isSubmitting;
     private string? errorMessage;
+    private string? personnelError;
 
-    protected override async Task OnInitializedAsync() => await LoadScheduleAsync();
+    protected override async Task OnInitializedAsync()
+    {
+        if (MeterDeviceId is not null)
+        {
+            await Task.WhenAll(LoadScheduleAsync(), LoadPersonnelForDeviceAsync());
+            return;
+        }
+
+        if (OrganizationId is null)
+        {
+            errorMessage = "دستگاه یا سازمان مشخص نشده است.";
+            return;
+        }
+
+        await Task.WhenAll(LoadDevicesAsync(), LoadPersonnelAsync(OrganizationId.Value));
+    }
+
+    private async Task LoadDevicesAsync()
+    {
+        isDevicesLoading = true;
+        errorMessage = null;
+
+        try
+        {
+            var client = HttpClientFactory.CreateClient("InternalApi");
+            var response = await client.GetAsync($"/api/v1/meter-devices?organizationId={OrganizationId}&page=1&pageSize=200");
+
+            if (!response.IsSuccessStatusCode)
+            {
+                errorMessage = $"خطا در دریافت فهرست دستگاه‌ها: {await response.Content.ReadAsStringAsync()}";
+                return;
+            }
+
+            using var document = await JsonDocument.ParseAsync(await response.Content.ReadAsStreamAsync());
+            devices = ReadItems<DeviceOption>(document.RootElement).Where(d => d.OwnerId is not null).ToList();
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"خطا در دریافت فهرست دستگاه‌ها: {ex.Message}";
+        }
+        finally
+        {
+            isDevicesLoading = false;
+        }
+    }
+
+    /// <summary>
+    /// When opened for a known device (no <see cref="OrganizationId"/> supplied),
+    /// reads the device first to learn which Organization's personnel to list.
+    /// </summary>
+    private async Task LoadPersonnelForDeviceAsync()
+    {
+        if (OrganizationId is { } organizationId)
+        {
+            await LoadPersonnelAsync(organizationId);
+            return;
+        }
+
+        try
+        {
+            var client = HttpClientFactory.CreateClient("InternalApi");
+            var response = await client.GetAsync($"/api/v1/meter-devices/{MeterDeviceId}");
+
+            if (!response.IsSuccessStatusCode)
+            {
+                return;
+            }
+
+            var header = await JsonSerializer.DeserializeAsync<DeviceHeader>(await response.Content.ReadAsStreamAsync(), JsonOptions);
+
+            if (header is not null && header.OrganizationId != Guid.Empty)
+            {
+                await LoadPersonnelAsync(header.OrganizationId);
+            }
+        }
+        catch (Exception ex)
+        {
+            personnelError = $"خطا در دریافت فهرست پرسنل: {ex.Message}";
+        }
+    }
+
+    private async Task LoadPersonnelAsync(Guid organizationId)
+    {
+        isPersonnelLoading = true;
+        personnelError = null;
+
+        try
+        {
+            var client = HttpClientFactory.CreateClient("InternalApi");
+            var response = await client.GetAsync($"/api/v1/personnel?organizationId={organizationId}");
+
+            if (!response.IsSuccessStatusCode)
+            {
+                personnelError = $"خطا در دریافت فهرست پرسنل: {await response.Content.ReadAsStringAsync()}";
+                return;
+            }
+
+            using var document = await JsonDocument.ParseAsync(await response.Content.ReadAsStreamAsync());
+            personnel = ReadItems<PersonnelOption>(document.RootElement)
+                .OrderBy(p => p.LastName)
+                .ThenBy(p => p.FirstName)
+                .ToList();
+        }
+        catch (Exception ex)
+        {
+            personnelError = $"خطا در دریافت فهرست پرسنل: {ex.Message}";
+        }
+        finally
+        {
+            isPersonnelLoading = false;
+        }
+    }
+
+    /// <summary>
+    /// Reads a list from a bare JSON array, or from an object that wraps one — the API's list
+    /// endpoints name that wrapper property differently, so the first array-valued property wins.
+    /// </summary>
+    private static List<T> ReadItems<T>(JsonElement root)
+    {
+        var array = root;
+
+        if (root.ValueKind == JsonValueKind.Object)
+        {
+            array = default;
+
+            foreach (var property in root.EnumerateObject())
+            {
+                if (property.Value.ValueKind == JsonValueKind.Array)
+                {
+                    array = property.Value;
+                    break;
+                }
+            }
+        }
+
+        return array.ValueKind == JsonValueKind.Array
+            ? array.Deserialize<List<T>>(JsonOptions) ?? []
+            : [];
+    }
+
+    private async Task OnDeviceChangedAsync()
+    {
+        selectedShiftIndex = null;
+        shifts = [];
+
+        if (selectedDeviceId is not null)
+        {
+            await LoadScheduleAsync();
+        }
+    }
 
     private async Task OnEntryDateChangedAsync(DateTime? date)
     {
         entryDate = date;
         selectedShiftIndex = null;
+        shiftStartTimeText = string.Empty;
+        shiftEndTimeText = string.Empty;
         await LoadScheduleAsync();
     }
 
@@ -88,7 +329,7 @@
     {
         shifts = [];
 
-        if (entryDate is null)
+        if (entryDate is null || ResolvedDeviceId is null)
         {
             return;
         }
@@ -100,7 +341,7 @@
         {
             var client = HttpClientFactory.CreateClient("InternalApi");
             var date = DateOnly.FromDateTime(entryDate.Value);
-            var response = await client.GetAsync($"/api/v1/meter-devices/{MeterDeviceId}/day-schedule?date={date:yyyy-MM-dd}");
+            var response = await client.GetAsync($"/api/v1/meter-devices/{ResolvedDeviceId}/day-schedule?date={date:yyyy-MM-dd}");
 
             if (!response.IsSuccessStatusCode)
             {
@@ -111,6 +352,13 @@
             var stream = await response.Content.ReadAsStreamAsync();
             var result = await JsonSerializer.DeserializeAsync<DayScheduleResult>(stream, JsonOptions);
             shifts = result?.Shifts ?? [];
+
+            // Only one shift exists for the day: select it automatically so the user doesn't have
+            // to make a trivial choice (chat, 2026-10-03). With more than one, the user must pick.
+            if (shifts.Count == 1)
+            {
+                ApplySelectedShift(shifts[0]);
+            }
         }
         catch (Exception ex)
         {
@@ -122,27 +370,40 @@
         }
     }
 
+    private void OnShiftIndexChangedAsync()
+    {
+        var shift = shifts.FirstOrDefault(s => s.Index == selectedShiftIndex);
+
+        if (shift is not null)
+        {
+            ApplySelectedShift(shift);
+        }
+    }
+
+    private void ApplySelectedShift(ShiftOption shift)
+    {
+        selectedShiftIndex = shift.Index;
+        // Prefill from the Work Calendar's scheduled time; the user may still edit these freely
+        // before submitting (chat, 2026-10-03) — they are not re-validated against the calendar.
+        shiftStartTimeText = shift.StartTime.ToString("HH:mm");
+        shiftEndTimeText = shift.EndTime.ToString("HH:mm");
+    }
+
     private async Task SubmitAsync()
     {
         errorMessage = null;
 
-        if (entryDate is null || selectedShiftIndex is null || rawReadingValue is null)
+        if (entryDate is null || ResolvedDeviceId is null || selectedShiftIndex is null || rawReadingValue is null)
         {
-            errorMessage = "لطفاً تاریخ، شیفت و مقدار خوانده‌شده از کنتور را وارد کنید.";
+            errorMessage = "لطفاً دستگاه، تاریخ، شیفت و مقدار خوانده‌شده از کنتور را وارد کنید.";
             return;
         }
 
-        Guid? operatorId = null;
-
-        if (!string.IsNullOrWhiteSpace(operatorIdText))
+        if (!TimeOnly.TryParse(JalaliCalendarConverter.ToLatinDigits(shiftStartTimeText), out var shiftStartTime) ||
+            !TimeOnly.TryParse(JalaliCalendarConverter.ToLatinDigits(shiftEndTimeText), out var shiftEndTime))
         {
-            if (!Guid.TryParse(operatorIdText, out var parsedOperatorId))
-            {
-                errorMessage = "شناسهٔ اپراتور نامعتبر است.";
-                return;
-            }
-
-            operatorId = parsedOperatorId;
+            errorMessage = "ساعت شروع و پایان شیفت را به‌درستی وارد کنید.";
+            return;
         }
 
         isSubmitting = true;
@@ -151,13 +412,15 @@
         {
             var client = HttpClientFactory.CreateClient("InternalApi");
             var response = await client.PostAsJsonAsync(
-                $"/api/v1/meter-devices/{MeterDeviceId}/shift-reading",
+                $"/api/v1/meter-devices/{ResolvedDeviceId}/shift-reading",
                 new
                 {
                     EntryDate = DateOnly.FromDateTime(entryDate.Value),
                     ShiftIndex = selectedShiftIndex.Value,
                     RawReadingValue = rawReadingValue.Value,
-                    OperatorId = operatorId,
+                    OperatorId = selectedOperatorId,
+                    ShiftStartTime = shiftStartTime,
+                    ShiftEndTime = shiftEndTime,
                 });
 
             if (!response.IsSuccessStatusCode)

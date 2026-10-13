@@ -161,12 +161,16 @@ public sealed class RegisterShiftReadingCommandHandler
             return markOperationalResult;
         }
 
-        // Step 2 (in memory only): register the shift's reading on the ledger.
+        // Step 2 (in memory only): register the shift's reading on the ledger. The shift's own
+        // start/end time is recorded as the caller supplied it (chat, 2026-10-03 — the Presentation
+        // layer defaults to the Work Calendar's scheduled time but lets the user freely override it),
+        // not re-derived from targetShift — targetShift above only confirms the shift exists and
+        // supplies the calendar's own windows for gap-fill on OTHER missed shifts.
         var registerResult = ledger.RegisterShiftReading(
             request.EntryDate,
             request.ShiftIndex,
-            targetShift.StartTime,
-            targetShift.EndTime,
+            request.ShiftStartTime,
+            request.ShiftEndTime,
             request.RawReadingValue,
             device.Id,
             request.OperatorId,

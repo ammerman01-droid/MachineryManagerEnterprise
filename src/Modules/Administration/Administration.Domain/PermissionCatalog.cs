@@ -58,7 +58,7 @@ public static class PermissionCatalog
         new PermissionSection("WorkOrder", "دستورهای کار", ["View", "Create", "Edit"]),
         new PermissionSection("ConsumptionFreezeSetting", "قفل گزارش‌های مصرف", ["View", "Edit"]),
         new PermissionSection("MeterDevice", "دستگاه‌های شمارشگر (کنتور)", ["View", "Create", "Install", "ReportFailure", "Recover", "Remove", "Archive"]),
-        new PermissionSection("DailyUsage", "کارکرد روزانه", ["Register", "Correct", "Delete", "Freeze", "View"]),
+        new PermissionSection("DailyUsage", "کارکرد روزانه", ["Register", "Rebase", "Correct", "Delete", "Freeze", "View"]),
     ];
 
     /// <summary>Builds the canonical permission string for a section/action pair (e.g. "Organization.Create").</summary>
@@ -85,4 +85,11 @@ public sealed record PermissionSection(
     /// <summary>The actions the permission matrix must render for this section.</summary>
     public IReadOnlyList<string> EffectiveActions =>
         Actions ?? PermissionCatalog.Actions;
+
+    /// <summary>
+    /// The actions beyond the four standard matrix columns (e.g. Register, Install). The permission
+    /// matrix renders each one as its own row instead of widening the table.
+    /// </summary>
+    public IReadOnlyList<string> ExtraActions =>
+        EffectiveActions.Where(action => !PermissionCatalog.Actions.Contains(action)).ToList();
 }

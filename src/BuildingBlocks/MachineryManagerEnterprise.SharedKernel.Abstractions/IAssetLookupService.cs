@@ -58,6 +58,17 @@ public interface IAssetLookupService
     Task<AssetUsageContext?> GetUsageContextAsync(
         Guid assetId,
         CancellationToken cancellationToken = default);
+
+    /// <summary>
+/// Gets the display code and name of several Assets in one round trip, for list screens in other
+/// modules that would otherwise need one call per row.
+/// </summary>
+/// <param name="assetIds">The Assets to look up.</param>
+/// <param name="cancellationToken">Token to cancel the asynchronous operation.</param>
+/// <returns>A dictionary keyed by Asset id; Assets that do not exist are simply absent.</returns>
+Task<IReadOnlyDictionary<Guid, AssetDisplayInfo>> GetDisplayInfosAsync(
+    IReadOnlyCollection<Guid> assetIds,
+    CancellationToken cancellationToken = default);
 }
 
 /// <summary>
@@ -89,3 +100,8 @@ public sealed record AssetConsumptionSnapshot(
     FuelUnit? PrimaryFuelUnit,
     FuelKind? SecondaryFuelKind,
     FuelUnit? SecondaryFuelUnit);
+
+/// <summary>Read-only display snapshot of an Asset: its identification code and name.</summary>
+/// <param name="Code">The Asset's identification code.</param>
+/// <param name="Name">The Asset's display name.</param>
+public sealed record AssetDisplayInfo(string Code, string Name);

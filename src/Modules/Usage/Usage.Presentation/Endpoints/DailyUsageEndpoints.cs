@@ -5,6 +5,7 @@ using MachineryManagerEnterprise.Usage.Application.Features.DailyUsage.Commands.
 using MachineryManagerEnterprise.Usage.Application.Features.DailyUsage.Commands.FreezeUsageUpTo;
 using MachineryManagerEnterprise.Usage.Application.Features.DailyUsage.Commands.RebaseCounter;
 using MachineryManagerEnterprise.Usage.Application.Features.DailyUsage.Queries.GetAccumulatedOperationalUsage;
+using MachineryManagerEnterprise.Usage.Application.Features.DailyUsage.Queries.ListOrganizationUsageEntries;
 using MachineryManagerEnterprise.Usage.Presentation.Contracts;
 using MediatR;
 using Microsoft.AspNetCore.Builder;
@@ -17,7 +18,9 @@ namespace MachineryManagerEnterprise.Usage.Presentation.Endpoints;
 /// <summary>
 /// Maps the Usage module's Usage Ledger REST endpoints per 07-api
 /// conventions (Section 8, mirroring <c>AssetEndpoints</c>): base path
-/// <c>/api/v1/usage-ledgers</c>. Every route is addressed by the
+/// <c>/api/v1/usage-ledgers</c>, plus the organization-wide listing
+/// endpoint under <c>/api/v1/organizations/{organizationId}/usage-entries</c>
+/// (chat, 2026-10-04). Every ledger-scoped route is addressed by the
 /// ledger's natural key (Owner + Unit) rather than by a Meter Device
 /// id, since the device that produced a given reading may since have
 /// been removed. Registering a new shift's usage lives under
@@ -59,6 +62,15 @@ public static class DailyUsageEndpoints
         group.MapGet("/accumulated-usage", GetAccumulatedOperationalUsageAsync)
             .WithName("GetAccumulatedOperationalUsage")
             .WithSummary("Sums this ledger's Operational Usage across a date range — e.g. since a Periodic Maintenance module's last service date.");
+
+        endpoints
+            .MapGet("/api/v1/organizations/{organizationId:guid}/usage-entries", ListOrganizationUsageEntriesAsync)
+            .WithTags("DailyUsage")
+            .WithName("ListOrganizationUsageEntries")
+            .WithSummary("Lists usage entries across every Meter Device in an Organization — backs the org-wide usage list page, as opposed to MeterDeviceEndpoints' single-device listing.")
+            .RequireAuthorization(policy => policy
+                .AddAuthenticationSchemes(OpenIddictValidationAspNetCoreDefaults.AuthenticationScheme)
+                .RequireAuthenticatedUser());
 
         return endpoints;
     }
@@ -231,6 +243,25 @@ public static class DailyUsageEndpoints
 
         var result = await sender.Send(
             new GetAccumulatedOperationalUsageQuery(key.Value.OwnerType, ownerId, key.Value.Unit, sinceDate, throughDate),
+            cancellationToken);
+
+        return result.IsSuccess ? Results.Ok(result.Value) : result.ToProblemResult(httpContext);
+    }
+
+    private static async Task<IResult> ListOrganizationUsageEntriesAsync(
+        Guid organizationId,
+        ISender sender,
+        HttpContext httpContext,
+        CancellationToken cancellationToken,
+        DateOnly? fromDate = null,
+        DateOnly? toDate = null,
+        Guid? projectId = null,
+        Guid? meterDeviceId = null,
+        int page = 1,
+        int pageSize = 50)
+    {
+        var result = await sender.Send(
+            new ListOrganizationUsageEntriesQuery(organizationId, fromDate, toDate, projectId, meterDeviceId, page, pageSize),
             cancellationToken);
 
         return result.IsSuccess ? Results.Ok(result.Value) : result.ToProblemResult(httpContext);

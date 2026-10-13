@@ -1,0 +1,299 @@
+@page "/admin/usage-entries"
+@inject IHttpClientFactory HttpClientFactory
+@inject IDialogService DialogService
+@using System.Text.Json
+@using MachineryManagerEnterprise.UI.Components
+@using MachineryManagerEnterprise.UI.Calendar
+@using MachineryManagerEnterprise.Usage.Presentation.Components
+@using MachineryManagerEnterprise.Usage.Presentation.Components.Dialogs
+
+<PageTitle>کارکردهای ثبت‌شده</PageTitle>
+
+<div class="d-flex align-center justify-space-between mb-4">
+    <MudText Typo="Typo.h4">کارکردهای ثبت‌شده</MudText>
+
+    @if (selectedOrganizationId is not null)
+    {
+        <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="OpenRegisterShiftReadingDialogAsync">
+            ثبت کارکرد
+        </MudButton>
+    }
+</div>
+
+@if (errorMessage is not null)
+{
+    <MudAlert Severity="Severity.Error" Class="my-4">@errorMessage</MudAlert>
+}
+
+<MudGrid Class="mb-4">
+    <MudItem xs="12" sm="4">
+        <MudSelect T="Guid?" Label="هلدینگ" Placeholder="یک هلدینگ را انتخاب کنید" @bind-Value="selectedHoldingId" @bind-Value:after="OnHoldingChangedAsync">
+            @foreach (var holding in holdings)
+            {
+                <MudSelectItem T="Guid?" Value="@((Guid?)holding.Id)">@holding.Name</MudSelectItem>
+            }
+        </MudSelect>
+    </MudItem>
+    @if (selectedHoldingId is not null)
+    {
+        <MudItem xs="12" sm="4">
+            <MudSelect T="Guid?" Label="سازمان" Placeholder="یک سازمان را انتخاب کنید" @bind-Value="selectedOrganizationId" @bind-Value:after="OnOrganizationChangedAsync">
+                @foreach (var organization in organizations)
+                {
+                    <MudSelectItem T="Guid?" Value="@((Guid?)organization.Id)">@organization.Name</MudSelectItem>
+                }
+            </MudSelect>
+        </MudItem>
+    }
+</MudGrid>
+
+@if (selectedOrganizationId is not null)
+{
+    <MudGrid Class="mb-4">
+        <MudItem xs="12" sm="4" Class="d-flex align-center" style="gap: 4px;">
+            <JalaliDatePicker Date="fromDate" DateChanged="@((DateTime? d) => fromDate = d)" Label="از تاریخ" />
+            <MudIconButton Icon="@Icons.Material.Filled.Clear" Size="Size.Small" OnClick="@(() => fromDate = null)" />
+        </MudItem>
+        <MudItem xs="12" sm="4" Class="d-flex align-center" style="gap: 4px;">
+            <JalaliDatePicker Date="toDate" DateChanged="@((DateTime? d) => toDate = d)" Label="تا تاریخ" />
+            <MudIconButton Icon="@Icons.Material.Filled.Clear" Size="Size.Small" OnClick="@(() => toDate = null)" />
+        </MudItem>
+        <MudItem xs="12" sm="4">
+            <MudTextField T="string" @bind-Value="projectIdFilterText" Label="فیلتر پروژه (شناسه)" Placeholder="خالی = همهٔ پروژه‌ها" />
+        </MudItem>
+    </MudGrid>
+
+    <MudButton Variant="Variant.Filled" Color="Color.Primary" Class="mb-4" OnClick="LoadEntriesAsync">
+        اعمال فیلتر
+    </MudButton>
+
+    @if (isLoading)
+    {
+        <MudProgressLinear Indeterminate="true" Class="my-4" />
+    }
+    else
+    {
+        <MudTable Items="entries" Hover="true">
+            <HeaderContent>
+                <MudTh>تاریخ</MudTh>
+                <MudTh>شیفت</MudTh>
+                <MudTh>نوع ردیف</MudTh>
+                <MudTh>کارکرد مولد</MudTh>
+                <MudTh>مقدار خام</MudTh>
+                <MudTh>دستگاه</MudTh>
+                <MudTh>پروژه</MudTh>
+                <MudTh>منشأ</MudTh>
+            </HeaderContent>
+            <RowTemplate>
+                <MudTd DataLabel="تاریخ">@JalaliCalendarConverter.Format(context.EntryDate.ToDateTime(TimeOnly.MinValue))</MudTd>
+                <MudTd DataLabel="شیفت">@(context.ShiftIndex is { } i ? (i + 1).ToString() : "—")</MudTd>
+                <MudTd DataLabel="نوع ردیف">@UsageDisplayNames.GetEntryKindName(context.Kind)</MudTd>
+                <MudTd DataLabel="کارکرد مولد">@context.OperationalUsageAmount.ToString("0.##")</MudTd>
+                <MudTd DataLabel="مقدار خام">@context.RawReadingValue.ToString("0.##")</MudTd>
+                <MudTd DataLabel="دستگاه">@context.MeterDeviceId</MudTd>
+                <MudTd DataLabel="پروژه">@context.ProjectId</MudTd>
+                <MudTd DataLabel="منشأ">
+                    @if (context.Origin == "AutoFilled")
+                    {
+                        <MudChip T="string" Size="Size.Small" Color="Color.Info">@UsageDisplayNames.GetEntryOriginName(context.Origin)</MudChip>
+                    }
+                    else
+                    {
+                        @UsageDisplayNames.GetEntryOriginName(context.Origin)
+                    }
+                </MudTd>
+            </RowTemplate>
+        </MudTable>
+
+        @if (entries.Count == 0)
+        {
+            <MudText Class="mt-4" Color="Color.Secondary">کارکردی برای این بازه ثبت نشده است.</MudText>
+        }
+    }
+}
+
+@code {
+    private sealed class HoldingItem
+    {
+        public Guid Id { get; set; }
+        public string Name { get; set; } = string.Empty;
+    }
+
+    private sealed class OrganizationItem
+    {
+        public Guid Id { get; set; }
+        public string Name { get; set; } = string.Empty;
+    }
+
+    private sealed class UsageEntryItem
+    {
+        public Guid UsageLedgerId { get; set; }
+        public Guid MeterDeviceId { get; set; }
+        public string OwnerType { get; set; } = string.Empty;
+        public Guid OwnerId { get; set; }
+        public DateOnly EntryDate { get; set; }
+        public string Kind { get; set; } = string.Empty;
+        public int? ShiftIndex { get; set; }
+        public decimal RawReadingValue { get; set; }
+        public decimal OperationalUsageAmount { get; set; }
+        public Guid? OperatorId { get; set; }
+        public Guid ProjectId { get; set; }
+        public string Origin { get; set; } = string.Empty;
+    }
+
+    private sealed class SearchResult<T>
+    {
+        public List<T> Items { get; set; } = [];
+        public int TotalCount { get; set; }
+    }
+
+    private static readonly JsonSerializerOptions JsonOptions = new() { PropertyNameCaseInsensitive = true };
+
+    private List<HoldingItem> holdings = [];
+    private List<OrganizationItem> organizations = [];
+    private List<UsageEntryItem> entries = [];
+    private Guid? selectedHoldingId;
+    private Guid? selectedOrganizationId;
+    private DateTime? fromDate;
+    private DateTime? toDate;
+    private string? projectIdFilterText;
+    private bool isLoading;
+    private string? errorMessage;
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            var client = HttpClientFactory.CreateClient("InternalApi");
+            var response = await client.GetAsync("/api/v1/holdings?pageSize=200");
+            var content = await response.Content.ReadAsStringAsync();
+
+            if (response.IsSuccessStatusCode)
+            {
+                var result = JsonSerializer.Deserialize<SearchResult<HoldingItem>>(content, JsonOptions);
+                holdings = result?.Items ?? [];
+            }
+            else
+            {
+                errorMessage = $"خطا در دریافت هلدینگ‌ها: {content}";
+            }
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"خطا: {ex.Message}";
+        }
+    }
+
+    private async Task OnHoldingChangedAsync()
+    {
+        organizations = [];
+        selectedOrganizationId = null;
+        entries = [];
+
+        if (selectedHoldingId is null)
+        {
+            return;
+        }
+
+        errorMessage = null;
+
+        try
+        {
+            var client = HttpClientFactory.CreateClient("InternalApi");
+            var response = await client.GetAsync($"/api/v1/organizations?holdingId={selectedHoldingId}");
+            var content = await response.Content.ReadAsStringAsync();
+
+            if (response.IsSuccessStatusCode)
+            {
+                var result = JsonSerializer.Deserialize<SearchResult<OrganizationItem>>(content, JsonOptions);
+                organizations = result?.Items ?? [];
+            }
+            else
+            {
+                errorMessage = $"خطا در دریافت سازمان‌ها: {content}";
+            }
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"خطا: {ex.Message}";
+        }
+    }
+
+    private async Task OnOrganizationChangedAsync()
+    {
+        entries = [];
+
+        if (selectedOrganizationId is not null)
+        {
+            await LoadEntriesAsync();
+        }
+    }
+
+    private async Task LoadEntriesAsync()
+    {
+        if (selectedOrganizationId is null)
+        {
+            return;
+        }
+
+        isLoading = true;
+        errorMessage = null;
+
+        try
+        {
+            var client = HttpClientFactory.CreateClient("InternalApi");
+            var url = $"/api/v1/organizations/{selectedOrganizationId}/usage-entries?page=1&pageSize=100";
+
+            if (fromDate is not null)
+            {
+                url += $"&fromDate={DateOnly.FromDateTime(fromDate.Value):yyyy-MM-dd}";
+            }
+
+            if (toDate is not null)
+            {
+                url += $"&toDate={DateOnly.FromDateTime(toDate.Value):yyyy-MM-dd}";
+            }
+
+            if (Guid.TryParse(projectIdFilterText, out var projectId))
+            {
+                url += $"&projectId={projectId}";
+            }
+
+            var response = await client.GetAsync(url);
+
+            if (!response.IsSuccessStatusCode)
+            {
+                errorMessage = $"خطا در دریافت فهرست کارکردها: {await response.Content.ReadAsStringAsync()}";
+                return;
+            }
+
+            var stream = await response.Content.ReadAsStreamAsync();
+            var result = await JsonSerializer.DeserializeAsync<SearchResult<UsageEntryItem>>(stream, JsonOptions);
+            entries = result?.Items ?? [];
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"خطا در دریافت فهرست کارکردها: {ex.Message}";
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+
+    private async Task OpenRegisterShiftReadingDialogAsync()
+    {
+        var parameters = new DialogParameters<RegisterShiftReadingDialog>
+        {
+            { x => x.OrganizationId, selectedOrganizationId },
+        };
+
+        var dialog = await DialogService.ShowAsync<RegisterShiftReadingDialog>("ثبت کارکرد شیفت", parameters);
+        var result = await dialog.Result;
+
+        if (result is { Canceled: false })
+        {
+            await LoadEntriesAsync();
+        }
+    }
+}

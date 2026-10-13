@@ -8,10 +8,19 @@ namespace MachineryManagerEnterprise.Organization.Application.Features.Organizat
 /// Query to perform a paginated search over organizations.
 /// </summary>
 /// <param name="SearchTerm">Optional text to filter by organization name.</param>
+/// <param name="HoldingId">
+/// Optional explicit filter restricting results to Organizations
+/// belonging to this Holding (chat, 2026-10-04) — distinct from the
+/// authorized-scope filtering already applied by the Handler: that
+/// restricts results to what the user is *allowed* to see, while this
+/// narrows within that to what the caller *asked* to see (e.g. a
+/// cascading Holding → Organization picker in the UI).
+/// </param>
 /// <param name="Page">The one-based page number (default 1).</param>
 /// <param name="PageSize">The number of items per page (default 25, max 200).</param>
 public sealed record SearchOrganizationsQuery(
     string? SearchTerm = null,
+    Guid? HoldingId = null,
     int Page = 1,
     int PageSize = 25)
     : IRequest<Result<SearchOrganizationsResponse>>;

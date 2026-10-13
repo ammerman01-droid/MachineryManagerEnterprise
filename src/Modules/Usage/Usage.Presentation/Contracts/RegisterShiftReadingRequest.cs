@@ -5,8 +5,12 @@ namespace MachineryManagerEnterprise.Usage.Presentation.Contracts;
 /// <param name="ShiftIndex">The Work Calendar shift index being reported.</param>
 /// <param name="RawReadingValue">The raw value shown on the device at the end of this shift.</param>
 /// <param name="OperatorId">The operator this shift is attributed to, when supplied.</param>
+/// <param name="ShiftStartTime">The shift's start time to record — the Work Calendar's scheduled time, or a user override (chat, 2026-10-03).</param>
+/// <param name="ShiftEndTime">The shift's end time to record — same override behavior as <paramref name="ShiftStartTime"/>.</param>
 public sealed record RegisterShiftReadingRequest(
     DateOnly EntryDate,
     int ShiftIndex,
     decimal RawReadingValue,
-    Guid? OperatorId);
+    Guid? OperatorId,
+    TimeOnly ShiftStartTime,
+    TimeOnly ShiftEndTime);

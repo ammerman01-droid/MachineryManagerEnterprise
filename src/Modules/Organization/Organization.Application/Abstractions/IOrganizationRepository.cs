@@ -13,9 +13,11 @@ public interface IOrganizationRepository
 {
     /// <summary>
     /// Performs a paginated search over organizations with an optional text filter,
-    /// restricted to the given authorized scope (Phase 3 — Scope-based Filtering).
+    /// restricted to the given authorized scope (Phase 3 — Scope-based Filtering),
+    /// and optionally narrowed further to a specific Holding (chat, 2026-10-04).
     /// </summary>
     /// <param name="searchTerm">Optional text to filter by organization name.</param>
+    /// <param name="holdingId">Optional explicit filter restricting results to this Holding.</param>
     /// <param name="page">The one-based page number.</param>
     /// <param name="pageSize">The number of items per page.</param>
     /// <param name="authorizedScope">The scopes the requesting user is authorized to see.</param>
@@ -23,6 +25,7 @@ public interface IOrganizationRepository
     /// <returns>A response containing the matching items and pagination metadata.</returns>
     Task<Features.Organizations.Queries.SearchOrganizations.SearchOrganizationsResponse> SearchAsync(
         string? searchTerm,
+        Guid? holdingId,
         int page,
         int pageSize,
         AuthorizedScopeSet authorizedScope,

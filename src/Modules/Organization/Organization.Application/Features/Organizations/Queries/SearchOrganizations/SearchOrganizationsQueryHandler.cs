@@ -9,7 +9,9 @@ namespace MachineryManagerEnterprise.Organization.Application.Features.Organizat
 /// <summary>
 /// Handles <see cref="SearchOrganizationsQuery"/> by resolving the current
 /// user's authorized scope and delegating to the repository search
-/// projection, restricted to that scope (Phase 3 — Scope-based Filtering).
+/// projection, restricted to that scope (Phase 3 — Scope-based Filtering)
+/// and, when supplied, to <see cref="SearchOrganizationsQuery.HoldingId"/>
+/// (chat, 2026-10-04).
 /// </summary>
 public sealed class SearchOrganizationsQueryHandler
     : IRequestHandler<SearchOrganizationsQuery, Result<SearchOrganizationsResponse>>
@@ -37,7 +39,8 @@ public sealed class SearchOrganizationsQueryHandler
     }
 
     /// <summary>
-    /// Executes the search query, restricted to the current user's authorized scope.
+    /// Executes the search query, restricted to the current user's authorized scope
+    /// and, when supplied, to a specific Holding.
     /// </summary>
     /// <param name="request">The search query parameters.</param>
     /// <param name="cancellationToken">Token to cancel the asynchronous operation.</param>
@@ -58,6 +61,7 @@ public sealed class SearchOrganizationsQueryHandler
 
         var response = await _organizationRepository.SearchAsync(
             request.SearchTerm,
+            request.HoldingId,
             request.Page,
             request.PageSize,
             authorizedScope,

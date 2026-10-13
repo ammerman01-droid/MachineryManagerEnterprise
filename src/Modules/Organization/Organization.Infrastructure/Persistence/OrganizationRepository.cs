@@ -49,6 +49,7 @@ public sealed class OrganizationRepository : IOrganizationRepository
     /// <inheritdoc />
     public async Task<SearchOrganizationsResponse> SearchAsync(
         string? searchTerm,
+        Guid? holdingId,
         int page,
         int pageSize,
         AuthorizedScopeSet authorizedScope,
@@ -59,6 +60,16 @@ public sealed class OrganizationRepository : IOrganizationRepository
         if (!string.IsNullOrWhiteSpace(searchTerm))
         {
             query = query.Where(organization => organization.Name.Contains(searchTerm));
+        }
+
+        // Explicit caller-requested filter (chat, 2026-10-04) — e.g. a cascading
+        // Holding → Organization picker in the UI. Applied in addition to, not
+        // instead of, the authorized-scope filter below: narrowing what the user
+        // asked for never widens what they are allowed to see.
+        if (holdingId is not null)
+        {
+            var requestedHoldingId = HoldingId.From(holdingId.Value);
+            query = query.Where(organization => organization.HoldingId == requestedHoldingId);
         }
 
         if (!authorizedScope.IsUnrestricted)

@@ -12,5 +12,6 @@ public sealed class RegisterShiftReadingCommandValidator : AbstractValidator<Reg
         RuleFor(x => x.EntryDate).NotEqual(default(DateOnly));
         RuleFor(x => x.ShiftIndex).GreaterThanOrEqualTo(0);
         RuleFor(x => x.RawReadingValue).GreaterThanOrEqualTo(0m);
+        RuleFor(x => x.ShiftEndTime).NotEqual(x => x.ShiftStartTime);
     }
 }

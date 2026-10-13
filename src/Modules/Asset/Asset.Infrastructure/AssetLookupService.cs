@@ -114,4 +114,25 @@ public sealed class AssetLookupService : IAssetLookupService
                 a.MeterReadingUnit))
             .FirstOrDefaultAsync(cancellationToken);
     }
+
+    /// <inheritdoc />
+    public async Task<IReadOnlyDictionary<Guid, AssetDisplayInfo>> GetDisplayInfosAsync(
+        IReadOnlyCollection<Guid> assetIds,
+        CancellationToken cancellationToken = default)
+    {
+        if (assetIds.Count == 0)
+        {
+            return new Dictionary<Guid, AssetDisplayInfo>();
+        }
+
+        var ids = assetIds.Select(AssetId.From).ToHashSet();
+
+        var rows = await _dbContext.Assets
+            .AsNoTracking()
+            .Where(a => ids.Contains(a.Id))
+            .Select(a => new { a.Id, a.Code, a.Name })
+            .ToListAsync(cancellationToken);
+
+        return rows.ToDictionary(r => r.Id.Value, r => new AssetDisplayInfo(r.Code, r.Name));
+    }
 }

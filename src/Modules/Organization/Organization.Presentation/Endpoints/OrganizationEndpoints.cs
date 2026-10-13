@@ -95,21 +95,22 @@ public static class OrganizationEndpoints
     }
 
     private static async Task<IResult> SearchOrganizationsAsync(
-        ISender sender,
-        HttpContext httpContext,
-        CancellationToken cancellationToken,
-        string? search = null,
-        int page = 1,
-        int pageSize = 25)
-    {
-        var result = await sender.Send(
-            new SearchOrganizationsQuery(search, page, pageSize),
-            cancellationToken);
+    ISender sender,
+    HttpContext httpContext,
+    CancellationToken cancellationToken,
+    string? search = null,
+    Guid? holdingId = null,
+    int page = 1,
+    int pageSize = 25)
+{
+    var result = await sender.Send(
+        new SearchOrganizationsQuery(search, holdingId, page, pageSize),
+        cancellationToken);
 
-        return result.IsSuccess
-            ? Results.Ok(result.Value)
-            : result.ToProblemResult(httpContext);
-    }
+    return result.IsSuccess
+        ? Results.Ok(result.Value)
+        : result.ToProblemResult(httpContext);
+}
 
     private static async Task<IResult> AssignOrganizationToHoldingAsync(
         Guid organizationId,

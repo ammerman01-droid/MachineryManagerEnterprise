@@ -31,26 +31,36 @@
                     {
                         <tr>
                             <td>@section.DisplayName</td>
-                                                            @foreach (var action in PermissionCatalog.Actions)
-                                {
-                                    var permission = PermissionCatalog.BuildPermission(section.Key, action);
-                                    <td style="text-align:center">
-                                        @if (section.EffectiveActions.Contains(action))
-                                        {
-                                            <MudCheckBox T="bool"
-                                                         Value="@selectedPermissions.Contains(permission)"
-                                                         ValueChanged="@((bool isChecked) => TogglePermission(permission, isChecked))" />
-                                        }
-                                        else
-                                        {
-                                            @* gam 6: this section does not offer the action
+                            @foreach (var action in PermissionCatalog.Actions)
+                            {
+                                var permission = PermissionCatalog.BuildPermission(section.Key, action);
+                                <td style="text-align:center">
+                                    @if (section.EffectiveActions.Contains(action))
+                                    {
+                                        <MudCheckBox T="bool" Value="@selectedPermissions.Contains(permission)"
+                                                     ValueChanged="@((bool isChecked) => TogglePermission(permission, isChecked))" />
+                                    }
+                                    else
+                                    {
+                                        @* gam 6: this section does not offer the action
                                                (e.g. AuditLog is View-only) — render a disabled
                                                checkbox so the row stays column-aligned. *@
-                                            <MudCheckBox T="bool" Value="false" Disabled="true" />
-                                        }
-                                    </td>
-                                }
+                                        <MudCheckBox T="bool" Value="false" Disabled="true" />
+                                    }
+                                </td>
+                            }
                         </tr>
+                        @foreach (var extraAction in section.ExtraActions)
+                        {
+                            var extraPermission = PermissionCatalog.BuildPermission(section.Key, extraAction);
+                            <tr>
+                                <td style="padding-inline-start:24px">@section.DisplayName — @ActionLabel(extraAction)</td>
+                                <td colspan="4" style="text-align:center">
+                                    <MudCheckBox T="bool" Value="@selectedPermissions.Contains(extraPermission)"
+                                                 ValueChanged="@((bool isChecked) => TogglePermission(extraPermission, isChecked))" />
+                                </td>
+                            </tr>
+                        }
                     }
                 </tbody>
             </MudSimpleTable>
@@ -107,6 +117,15 @@
         "Create" => "ایجاد",
         "Edit" => "ویرایش",
         "Delete" => "حذف",
+        "Register" => "ثبت",
+        "Rebase" => "بازتنظیم",
+        "Correct" => "اصلاح",
+        "Freeze" => "قفل",
+        "Install" => "نصب",
+        "ReportFailure" => "اعلام خرابی",
+        "Recover" => "بازیابی",
+        "Remove" => "جدا کردن",
+        "Archive" => "بایگانی",
         _ => action,
     };
 

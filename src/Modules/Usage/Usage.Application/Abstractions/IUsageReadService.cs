@@ -1,3 +1,5 @@
+using System.Text.Json.Serialization;
+
 namespace MachineryManagerEnterprise.Usage.Application.Abstractions;
 
 /// <summary>
@@ -39,6 +41,33 @@ public interface IUsageReadService
         int page,
         int pageSize,
         CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Lists usage entries across every Meter Device belonging to a
+    /// given Organization (chat, 2026-10-04) — backs the new
+    /// organization-wide "all registered usage" list page, as opposed
+    /// to <see cref="ListByMeterDeviceAsync"/>'s single-device view.
+    /// Ordered by <c>EntryDate</c> then <c>ShiftIndex</c> descending
+    /// (most recent first), optionally filtered by date range,
+    /// Project, and a specific device, and paged.
+    /// </summary>
+    /// <param name="organizationId">The Organization whose devices' entries to list.</param>
+    /// <param name="fromDate">Inclusive lower bound on <c>EntryDate</c>, or <see langword="null"/> for no lower bound.</param>
+    /// <param name="toDate">Inclusive upper bound on <c>EntryDate</c>, or <see langword="null"/> for no upper bound.</param>
+    /// <param name="projectId">Restricts results to entries snapshotted (BR-054) under this Project, or <see langword="null"/> for every Project.</param>
+    /// <param name="meterDeviceId">Restricts results to a single device, or <see langword="null"/> for every device in the Organization.</param>
+    /// <param name="page">1-based page number.</param>
+    /// <param name="pageSize">Maximum number of entries per page.</param>
+    /// <param name="cancellationToken">Token to cancel the asynchronous operation.</param>
+    Task<PagedResult<UsageEntryListItem>> ListByOrganizationAsync(
+        Guid organizationId,
+        DateOnly? fromDate,
+        DateOnly? toDate,
+        Guid? projectId,
+        Guid? meterDeviceId,
+        int page,
+        int pageSize,
+        CancellationToken cancellationToken = default);
 }
 
 /// <summary>
@@ -47,13 +76,14 @@ public interface IUsageReadService
 /// aggregate — see <see cref="IUsageReadService"/>.
 /// </summary>
 /// <param name="UsageLedgerId">The Usage Ledger this entry belongs to — a device's history may span several, across different owners over its lifetime (BR-042).</param>
+/// <param name="MeterDeviceId">The device that produced this entry's reading (BR-012).</param>
 /// <param name="OwnerType">The kind of owner the Usage Ledger belongs to (Asset or Tracked Component).</param>
 /// <param name="OwnerId">The owner's identifier.</param>
 /// <param name="EntryDate">The calendar date this entry belongs to.</param>
 /// <param name="Kind">Whether this is a normal shift reading or a counter rebase.</param>
 /// <param name="ShiftIndex">The Work Calendar shift index this entry reports on, or <see langword="null"/> for a rebase entry.</param>
-/// <param name="ShiftStartTime">The shift's scheduled start time, or <see langword="null"/> for a rebase entry — lets the Presentation layer prefill <c>CorrectEntryDetailsDialog</c>.</param>
-/// <param name="ShiftEndTime">The shift's scheduled end time, or <see langword="null"/> for a rebase entry.</param>
+/// <param name="ShiftStartTime">The shift's recorded start time, or <see langword="null"/> for a rebase entry — lets the Presentation layer prefill <c>CorrectEntryDetailsDialog</c>.</param>
+/// <param name="ShiftEndTime">The shift's recorded end time, or <see langword="null"/> for a rebase entry.</param>
 /// <param name="RawReadingValue">The raw value shown on the device for this entry.</param>
 /// <param name="OperationalUsageAmount">The Operational Usage contributed by this entry.</param>
 /// <param name="OperatorId">The operator this shift is attributed to, when supplied.</param>
@@ -61,10 +91,11 @@ public interface IUsageReadService
 /// <param name="Origin">Whether this entry was entered by a user or auto-generated to fill a missed mandatory shift (BR-044).</param>
 public sealed record UsageEntryListItem(
     Guid UsageLedgerId,
-    global::Usage.Domain.UsageOwnerType OwnerType,
+    Guid MeterDeviceId,
+    [property: JsonConverter(typeof(JsonStringEnumConverter))] global::Usage.Domain.UsageOwnerType OwnerType,
     Guid OwnerId,
     DateOnly EntryDate,
-    global::Usage.Domain.UsageEntryKind Kind,
+    [property: JsonConverter(typeof(JsonStringEnumConverter))] global::Usage.Domain.UsageEntryKind Kind,
     int? ShiftIndex,
     TimeOnly? ShiftStartTime,
     TimeOnly? ShiftEndTime,
@@ -72,7 +103,7 @@ public sealed record UsageEntryListItem(
     decimal OperationalUsageAmount,
     Guid? OperatorId,
     Guid ProjectId,
-    global::Usage.Domain.UsageEntryOrigin Origin);
+    [property: JsonConverter(typeof(JsonStringEnumConverter))] global::Usage.Domain.UsageEntryOrigin Origin);
 
 /// <summary>
 /// A single page of a larger result set, with the total count of

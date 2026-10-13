@@ -198,7 +198,13 @@ public static class MeterDeviceEndpoints
     {
         var result = await sender.Send(
             new RegisterShiftReadingCommand(
-                meterDeviceId, request.EntryDate, request.ShiftIndex, request.RawReadingValue, request.OperatorId),
+                meterDeviceId,
+                request.EntryDate,
+                request.ShiftIndex,
+                request.RawReadingValue,
+                request.OperatorId,
+                request.ShiftStartTime,
+                request.ShiftEndTime),
             cancellationToken);
 
         return result.IsSuccess ? Results.NoContent() : result.ToProblemResult(httpContext);
