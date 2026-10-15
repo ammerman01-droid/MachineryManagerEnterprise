@@ -59,7 +59,12 @@
             <MudIconButton Icon="@Icons.Material.Filled.Clear" Size="Size.Small" OnClick="@(() => toDate = null)" />
         </MudItem>
         <MudItem xs="12" sm="4">
-            <MudTextField T="string" @bind-Value="projectIdFilterText" Label="فیلتر پروژه (شناسه)" Placeholder="خالی = همهٔ پروژه‌ها" />
+            <MudSelect T="Guid?" @bind-Value="selectedProjectId" Label="پروژه" Placeholder="همهٔ پروژه‌ها" Clearable="true">
+                @foreach (var project in projects)
+                {
+                    <MudSelectItem T="Guid?" Value="@((Guid?)project.Id)">@project.Name</MudSelectItem>
+                }
+            </MudSelect>
         </MudItem>
     </MudGrid>
 
@@ -90,8 +95,8 @@
                 <MudTd DataLabel="نوع ردیف">@UsageDisplayNames.GetEntryKindName(context.Kind)</MudTd>
                 <MudTd DataLabel="کارکرد مولد">@context.OperationalUsageAmount.ToString("0.##")</MudTd>
                 <MudTd DataLabel="مقدار خام">@context.RawReadingValue.ToString("0.##")</MudTd>
-                <MudTd DataLabel="دستگاه">@context.MeterDeviceId</MudTd>
-                <MudTd DataLabel="پروژه">@context.ProjectId</MudTd>
+                <MudTd DataLabel="دستگاه">@(context.DeviceCode ?? "—")</MudTd>
+                <MudTd DataLabel="پروژه">@(context.ProjectName ?? "—")</MudTd>
                 <MudTd DataLabel="منشأ">
                     @if (context.Origin == "AutoFilled")
                     {
@@ -125,6 +130,13 @@
         public string Name { get; set; } = string.Empty;
     }
 
+    private sealed class ProjectItem
+    {
+        public Guid Id { get; set; }
+        public Guid OrganizationId { get; set; }
+        public string Name { get; set; } = string.Empty;
+    }
+
     private sealed class UsageEntryItem
     {
         public Guid UsageLedgerId { get; set; }
@@ -139,6 +151,8 @@
         public Guid? OperatorId { get; set; }
         public Guid ProjectId { get; set; }
         public string Origin { get; set; } = string.Empty;
+        public string? DeviceCode { get; set; }
+        public string? ProjectName { get; set; }
     }
 
     private sealed class SearchResult<T>
@@ -151,12 +165,13 @@
 
     private List<HoldingItem> holdings = [];
     private List<OrganizationItem> organizations = [];
+    private List<ProjectItem> projects = [];
     private List<UsageEntryItem> entries = [];
     private Guid? selectedHoldingId;
     private Guid? selectedOrganizationId;
     private DateTime? fromDate;
     private DateTime? toDate;
-    private string? projectIdFilterText;
+    private Guid? selectedProjectId;
     private bool isLoading;
     private string? errorMessage;
 
@@ -187,6 +202,8 @@
     private async Task OnHoldingChangedAsync()
     {
         organizations = [];
+        projects = [];
+        selectedProjectId = null;
         selectedOrganizationId = null;
         entries = [];
 
@@ -222,10 +239,44 @@
     private async Task OnOrganizationChangedAsync()
     {
         entries = [];
+        projects = [];
+        selectedProjectId = null;
 
         if (selectedOrganizationId is not null)
         {
+            await LoadProjectsAsync(selectedOrganizationId.Value);
             await LoadEntriesAsync();
+        }
+    }
+
+    /// <summary>
+    /// Loads the selected Organization's Projects for the filter. The Project search endpoint has no
+    /// Organization filter, so — like the Asset pages — this reads the first 200 and filters here.
+    /// </summary>
+    private async Task LoadProjectsAsync(Guid organizationId)
+    {
+        try
+        {
+            var client = HttpClientFactory.CreateClient("InternalApi");
+            var response = await client.GetAsync("/api/v1/projects?pageSize=200");
+            var content = await response.Content.ReadAsStringAsync();
+
+            if (response.IsSuccessStatusCode)
+            {
+                var result = JsonSerializer.Deserialize<SearchResult<ProjectItem>>(content, JsonOptions);
+                projects = (result?.Items ?? [])
+                    .Where(p => p.OrganizationId == organizationId)
+                    .OrderBy(p => p.Name)
+                    .ToList();
+            }
+            else
+            {
+                errorMessage = $"خطا در دریافت فهرست پروژه‌ها: {content}";
+            }
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"خطا در دریافت فهرست پروژه‌ها: {ex.Message}";
         }
     }
 
@@ -254,7 +305,7 @@
                 url += $"&toDate={DateOnly.FromDateTime(toDate.Value):yyyy-MM-dd}";
             }
 
-            if (Guid.TryParse(projectIdFilterText, out var projectId))
+            if (selectedProjectId is { } projectId)
             {
                 url += $"&projectId={projectId}";
             }

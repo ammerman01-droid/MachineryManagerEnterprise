@@ -5,6 +5,7 @@ using MachineryManagerEnterprise.Usage.Application.Features.DailyUsage.Commands.
 using MachineryManagerEnterprise.Usage.Application.Features.DailyUsage.Commands.FreezeUsageUpTo;
 using MachineryManagerEnterprise.Usage.Application.Features.DailyUsage.Commands.RebaseCounter;
 using MachineryManagerEnterprise.Usage.Application.Features.DailyUsage.Queries.GetAccumulatedOperationalUsage;
+using MachineryManagerEnterprise.Usage.Application.Features.DailyUsage.Queries.GetLastReading;
 using MachineryManagerEnterprise.Usage.Application.Features.DailyUsage.Queries.ListOrganizationUsageEntries;
 using MachineryManagerEnterprise.Usage.Presentation.Contracts;
 using MediatR;
@@ -68,6 +69,15 @@ public static class DailyUsageEndpoints
             .WithTags("DailyUsage")
             .WithName("ListOrganizationUsageEntries")
             .WithSummary("Lists usage entries across every Meter Device in an Organization — backs the org-wide usage list page, as opposed to MeterDeviceEndpoints' single-device listing.")
+            .RequireAuthorization(policy => policy
+                .AddAuthenticationSchemes(OpenIddictValidationAspNetCoreDefaults.AuthenticationScheme)
+                .RequireAuthenticatedUser());
+
+        endpoints
+            .MapGet("/api/v1/meter-devices/{meterDeviceId:guid}/last-reading", GetLastReadingAsync)
+            .WithTags("DailyUsage")
+            .WithName("GetMeterDeviceLastReading")
+            .WithSummary("Returns the most recent entry on the Usage Ledger of this device's current owner — backs the previous-reading and usage preview in the register-usage dialog.")
             .RequireAuthorization(policy => policy
                 .AddAuthenticationSchemes(OpenIddictValidationAspNetCoreDefaults.AuthenticationScheme)
                 .RequireAuthenticatedUser());
@@ -263,6 +273,17 @@ public static class DailyUsageEndpoints
         var result = await sender.Send(
             new ListOrganizationUsageEntriesQuery(organizationId, fromDate, toDate, projectId, meterDeviceId, page, pageSize),
             cancellationToken);
+
+        return result.IsSuccess ? Results.Ok(result.Value) : result.ToProblemResult(httpContext);
+    }
+
+    private static async Task<IResult> GetLastReadingAsync(
+        Guid meterDeviceId,
+        ISender sender,
+        HttpContext httpContext,
+        CancellationToken cancellationToken)
+    {
+        var result = await sender.Send(new GetLastReadingQuery(meterDeviceId), cancellationToken);
 
         return result.IsSuccess ? Results.Ok(result.Value) : result.ToProblemResult(httpContext);
     }

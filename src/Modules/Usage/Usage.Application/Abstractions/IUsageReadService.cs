@@ -89,6 +89,8 @@ public interface IUsageReadService
 /// <param name="OperatorId">The operator this shift is attributed to, when supplied.</param>
 /// <param name="ProjectId">The Project this entry was snapshotted under at registration time (BR-054).</param>
 /// <param name="Origin">Whether this entry was entered by a user or auto-generated to fill a missed mandatory shift (BR-044).</param>
+/// <param name="DeviceCode">The owning Asset's identification code, resolved from the Asset module for display (chat, 2026-10-12); <see langword="null"/> when not enriched or the owner is not an Asset.</param>
+/// <param name="ProjectName">The snapshotted Project's name, resolved from the Organization module for display; <see langword="null"/> when not enriched or the Project no longer exists.</param>
 public sealed record UsageEntryListItem(
     Guid UsageLedgerId,
     Guid MeterDeviceId,
@@ -103,7 +105,9 @@ public sealed record UsageEntryListItem(
     decimal OperationalUsageAmount,
     Guid? OperatorId,
     Guid ProjectId,
-    [property: JsonConverter(typeof(JsonStringEnumConverter))] global::Usage.Domain.UsageEntryOrigin Origin);
+    [property: JsonConverter(typeof(JsonStringEnumConverter))] global::Usage.Domain.UsageEntryOrigin Origin,
+    string? DeviceCode = null,
+    string? ProjectName = null);
 
 /// <summary>
 /// A single page of a larger result set, with the total count of

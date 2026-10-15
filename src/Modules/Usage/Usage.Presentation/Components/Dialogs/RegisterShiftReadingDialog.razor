@@ -20,14 +20,19 @@
             }
             else
             {
-                <MudSelect T="Guid?" @bind-Value="selectedDeviceId" @bind-Value:after="OnDeviceChangedAsync" Label="دستگاه" Required="true" Class="mb-4">
-                    @foreach (var device in devices)
-                    {
-                        <MudSelectItem T="Guid?" Value="@((Guid?)device.Id)">
-                            @(device.OwnerCode ?? "—") — @(device.OwnerName ?? "دارایی نامشخص") (@UsageDisplayNames.GetUnitName(device.Unit))
-                        </MudSelectItem>
-                    }
-                </MudSelect>
+                <MudAutocomplete T="DeviceOption"
+                                 @bind-Value="selectedDevice"
+                                 @bind-Value:after="OnDeviceChangedAsync"
+                                 Label="دستگاه (جستجو بر اساس کد یا نام)"
+                                 Required="true"
+                                 Class="mb-4"
+                                 SearchFunc="@SearchDevicesAsync"
+                                 ToStringFunc="@(device => device is null ? string.Empty : DeviceLabel(device))"
+                                 MinCharacters="0"
+                                 MaxItems="50"
+                                 OpenOnFocus="true"
+                                 ResetValueOnEmptyText="true"
+                                 Clearable="true" />
             }
         }
 
@@ -47,7 +52,7 @@
             }
             else if (shifts.Count > 1)
             {
-                <MudSelect T="int?" @bind-Value="selectedShiftIndex" @bind-Value:after="OnShiftIndexChangedAsync" Label="شیفت" Required="true" Class="mb-4">
+                <MudSelect T="int?" @bind-Value="selectedShiftIndex" @bind-Value:after="OnShiftIndexChanged" Label="شیفت" Required="true" Class="mb-4">
                     @foreach (var shift in shifts)
                     {
                         <MudSelectItem T="int?" Value="@((int?)shift.Index)">
@@ -75,7 +80,56 @@
                 </MudGrid>
             }
 
-            <MudNumericField T="decimal?" @bind-Value="rawReadingValue" Label="مقدار خوانده‌شده از کنتور" Required="true" Min="0" Class="mb-4" />
+            @if (SourceDeviceDiffers)
+            {
+                <MudAlert Severity="Severity.Warning" Class="mb-4">
+                    آخرین قرائت ثبت‌شده برای این دارایی با دستگاه دیگری انجام شده است. اگر کنتور تعویض شده، ابتدا از «بازتنظیم شمارنده» استفاده کنید.
+                </MudAlert>
+            }
+
+            <MudGrid Class="mb-4">
+                <MudItem xs="12" sm="4">
+                    <MudField Label="آخرین قرائت قبلی">
+                        @if (isLastReadingLoading)
+                        {
+                            <span>...</span>
+                        }
+                        else if (lastReading?.RawReadingValue is { } previousValue)
+                        {
+                            <span>@previousValue.ToString("0.##") @UsageDisplayNames.GetUnitName(lastReading.Unit)</span>
+                            <MudText Typo="Typo.caption" Color="Color.Secondary">@LastReadingCaption</MudText>
+                        }
+                        else
+                        {
+                            <span>ثبت نشده</span>
+                        }
+                    </MudField>
+                </MudItem>
+                <MudItem xs="12" sm="4">
+                    <MudNumericField T="decimal?" @bind-Value="rawReadingValue" Immediate="true"
+                                     Label="مقدار خوانده‌شده از کنتور" Required="true" Min="0" />
+                </MudItem>
+                <MudItem xs="12" sm="4">
+                    <MudField Label="کارکرد مولد">
+                        @if (UsageDelta is { } delta)
+                        {
+                            <span style="@(delta < 0 ? "color:var(--mud-palette-error)" : null)">@delta.ToString("0.##") @UsageDisplayNames.GetUnitName(lastReading?.Unit)</span>
+                            @if (delta < 0)
+                            {
+                                <MudText Typo="Typo.caption" Color="Color.Error">کمتر از قرائت قبلی است</MudText>
+                            }
+                        }
+                        else if (rawReadingValue is not null && lastReading is { RawReadingValue: null })
+                        {
+                            <span>0 (اولین ثبت؛ مبنای محاسبه)</span>
+                        }
+                        else
+                        {
+                            <span>—</span>
+                        }
+                    </MudField>
+                </MudItem>
+            </MudGrid>
 
             @if (personnelError is not null)
             {
@@ -88,15 +142,18 @@
             }
             else
             {
-                <MudSelect T="Guid?" @bind-Value="selectedOperatorId" Label="اپراتور (اختیاری)" Clearable="true" Class="mb-4"
-                           HelperText="@(personnel.Count == 0 ? "برای این سازمان پرسنلی ثبت نشده است." : null)">
-                    @foreach (var person in personnel)
-                    {
-                        <MudSelectItem T="Guid?" Value="@((Guid?)person.Id)">
-                            @person.FirstName @person.LastName (@person.PersonnelCode)
-                        </MudSelectItem>
-                    }
-                </MudSelect>
+                <MudAutocomplete T="PersonnelOption"
+                                 @bind-Value="selectedOperator"
+                                 Label="اپراتور (اختیاری؛ جستجو بر اساس نام یا کد پرسنلی)"
+                                 Class="mb-4"
+                                 SearchFunc="@SearchPersonnelAsync"
+                                 ToStringFunc="@(person => person is null ? string.Empty : PersonLabel(person))"
+                                 MinCharacters="0"
+                                 MaxItems="50"
+                                 OpenOnFocus="true"
+                                 ResetValueOnEmptyText="true"
+                                 Clearable="true"
+                                 HelperText="@(personnel.Count == 0 ? "برای این سازمان پرسنلی ثبت نشده است." : null)" />
             }
         }
     </DialogContent>
@@ -114,11 +171,10 @@
     private IMudDialogInstance MudDialog { get; set; } = null!;
 
     /// <summary>
-    /// The device this shift's reading is being registered for, when
-    /// already known (e.g. opened from <c>MeterDeviceDetails</c>). When
-    /// <see langword="null"/>, <see cref="OrganizationId"/> must be
-    /// supplied instead and the dialog shows a device picker first
-    /// (chat, 2026-10-04 — opened from the org-wide usage list page).
+    /// The device this shift's reading is being registered for, when already known (e.g. opened from
+    /// <c>MeterDeviceDetails</c>). When <see langword="null"/>, <see cref="OrganizationId"/> must be
+    /// supplied instead and the dialog shows a searchable device picker first (chat, 2026-10-04 —
+    /// opened from the org-wide usage list page).
     /// </summary>
     [Parameter]
     public Guid? MeterDeviceId { get; set; }
@@ -127,7 +183,7 @@
     [Parameter]
     public Guid? OrganizationId { get; set; }
 
-    private Guid? ResolvedDeviceId => MeterDeviceId ?? selectedDeviceId;
+    private Guid? ResolvedDeviceId => MeterDeviceId ?? selectedDevice?.Id;
 
     private sealed record DeviceOption(Guid Id, string? Unit, string? OwnerType, Guid? OwnerId, string? OwnerCode, string? OwnerName);
 
@@ -146,12 +202,22 @@
         public List<ShiftOption> Shifts { get; set; } = [];
     }
 
+    private sealed class LastReadingInfo
+    {
+        public string? Unit { get; set; }
+        public decimal? RawReadingValue { get; set; }
+        public DateOnly? EntryDate { get; set; }
+        public int? ShiftIndex { get; set; }
+        public Guid? SourceMeterDeviceId { get; set; }
+    }
+
     private static readonly JsonSerializerOptions JsonOptions = new() { PropertyNameCaseInsensitive = true };
 
     private List<DeviceOption> devices = [];
     private List<PersonnelOption> personnel = [];
-    private Guid? selectedDeviceId;
-    private Guid? selectedOperatorId;
+    private DeviceOption? selectedDevice;
+    private PersonnelOption? selectedOperator;
+    private LastReadingInfo? lastReading;
     private DateTime? entryDate = DateTime.Today;
     private List<ShiftOption> shifts = [];
     private int? selectedShiftIndex;
@@ -161,15 +227,46 @@
     private bool isDevicesLoading;
     private bool isPersonnelLoading;
     private bool isScheduleLoading;
+    private bool isLastReadingLoading;
     private bool isSubmitting;
     private string? errorMessage;
     private string? personnelError;
+
+    /// <summary>
+    /// The usage this reading would add — the difference to the previous reading. This is only a
+    /// preview: the server recomputes it when saving and remains the authority (gap-filled shifts,
+    /// device changes and so on are handled there).
+    /// </summary>
+    private decimal? UsageDelta =>
+        rawReadingValue is { } current && lastReading?.RawReadingValue is { } previous
+            ? current - previous
+            : null;
+
+    private bool SourceDeviceDiffers =>
+        lastReading?.SourceMeterDeviceId is { } source && ResolvedDeviceId is { } current && source != current;
+
+    private string LastReadingCaption
+    {
+        get
+        {
+            if (lastReading?.EntryDate is not { } date)
+            {
+                return string.Empty;
+            }
+
+            var jalali = JalaliCalendarConverter.Format(date.ToDateTime(TimeOnly.MinValue));
+
+            return lastReading.ShiftIndex is { } shift
+                ? $"{jalali} — شیفت {shift + 1}"
+                : $"{jalali} — بازتنظیم شمارنده";
+        }
+    }
 
     protected override async Task OnInitializedAsync()
     {
         if (MeterDeviceId is not null)
         {
-            await Task.WhenAll(LoadScheduleAsync(), LoadPersonnelForDeviceAsync());
+            await Task.WhenAll(LoadScheduleAsync(), LoadLastReadingAsync(), LoadPersonnelForDeviceAsync());
             return;
         }
 
@@ -180,6 +277,41 @@
         }
 
         await Task.WhenAll(LoadDevicesAsync(), LoadPersonnelAsync(OrganizationId.Value));
+    }
+
+    private static string DeviceLabel(DeviceOption device) =>
+        $"{device.OwnerCode ?? "—"} — {device.OwnerName ?? "دارایی نامشخص"} ({UsageDisplayNames.GetUnitName(device.Unit)})";
+
+    private static string PersonLabel(PersonnelOption person) =>
+        $"{person.FirstName} {person.LastName} ({person.PersonnelCode})";
+
+    private static bool ContainsTerm(string? text, string term) =>
+        text?.Contains(term, StringComparison.OrdinalIgnoreCase) == true;
+
+    private Task<IEnumerable<DeviceOption>> SearchDevicesAsync(string? value, CancellationToken cancellationToken)
+    {
+        var term = value?.Trim();
+
+        IEnumerable<DeviceOption> matches = string.IsNullOrEmpty(term)
+            ? devices
+            : devices.Where(d => ContainsTerm(d.OwnerCode, term) || ContainsTerm(d.OwnerName, term));
+
+        return Task.FromResult(matches);
+    }
+
+    private Task<IEnumerable<PersonnelOption>> SearchPersonnelAsync(string? value, CancellationToken cancellationToken)
+    {
+        var term = value?.Trim();
+
+        IEnumerable<PersonnelOption> matches = string.IsNullOrEmpty(term)
+            ? personnel
+            : personnel.Where(p =>
+                ContainsTerm(p.FirstName, term)
+                || ContainsTerm(p.LastName, term)
+                || ContainsTerm(p.PersonnelCode, term)
+                || ContainsTerm($"{p.FirstName} {p.LastName}", term));
+
+        return Task.FromResult(matches);
     }
 
     private async Task LoadDevicesAsync()
@@ -194,7 +326,7 @@
 
             if (!response.IsSuccessStatusCode)
             {
-                errorMessage = $"خطا در دریافت فهرست دستگاه‌ها: {await response.Content.ReadAsStringAsync()}";
+                errorMessage = await UsageProblemMessages.DescribeAsync(response, "خطا در دریافت فهرست دستگاه‌ها");
                 return;
             }
 
@@ -212,8 +344,8 @@
     }
 
     /// <summary>
-    /// When opened for a known device (no <see cref="OrganizationId"/> supplied),
-    /// reads the device first to learn which Organization's personnel to list.
+    /// When opened for a known device (no <see cref="OrganizationId"/> supplied), reads the device
+    /// first to learn which Organization's personnel to list.
     /// </summary>
     private async Task LoadPersonnelForDeviceAsync()
     {
@@ -258,7 +390,7 @@
 
             if (!response.IsSuccessStatusCode)
             {
-                personnelError = $"خطا در دریافت فهرست پرسنل: {await response.Content.ReadAsStringAsync()}";
+                personnelError = await UsageProblemMessages.DescribeAsync(response, "خطا در دریافت فهرست پرسنل");
                 return;
             }
 
@@ -309,10 +441,11 @@
     {
         selectedShiftIndex = null;
         shifts = [];
+        lastReading = null;
 
-        if (selectedDeviceId is not null)
+        if (selectedDevice is not null)
         {
-            await LoadScheduleAsync();
+            await Task.WhenAll(LoadScheduleAsync(), LoadLastReadingAsync());
         }
     }
 
@@ -345,7 +478,7 @@
 
             if (!response.IsSuccessStatusCode)
             {
-                errorMessage = $"خطا در دریافت شیفت‌های این روز: {await response.Content.ReadAsStringAsync()}";
+                errorMessage = await UsageProblemMessages.DescribeAsync(response, "خطا در دریافت شیفت‌های این روز");
                 return;
             }
 
@@ -370,7 +503,38 @@
         }
     }
 
-    private void OnShiftIndexChangedAsync()
+    /// <summary>Loads the previous reading shown next to the input and used for the usage preview.</summary>
+    private async Task LoadLastReadingAsync()
+    {
+        if (ResolvedDeviceId is null)
+        {
+            return;
+        }
+
+        isLastReadingLoading = true;
+
+        try
+        {
+            var client = HttpClientFactory.CreateClient("InternalApi");
+            var response = await client.GetAsync($"/api/v1/meter-devices/{ResolvedDeviceId}/last-reading");
+
+            if (response.IsSuccessStatusCode)
+            {
+                lastReading = await JsonSerializer.DeserializeAsync<LastReadingInfo>(
+                    await response.Content.ReadAsStreamAsync(), JsonOptions);
+            }
+        }
+        catch
+        {
+            // The preview is a convenience; the save itself still validates everything server-side.
+        }
+        finally
+        {
+            isLastReadingLoading = false;
+        }
+    }
+
+    private void OnShiftIndexChanged()
     {
         var shift = shifts.FirstOrDefault(s => s.Index == selectedShiftIndex);
 
@@ -418,14 +582,14 @@
                     EntryDate = DateOnly.FromDateTime(entryDate.Value),
                     ShiftIndex = selectedShiftIndex.Value,
                     RawReadingValue = rawReadingValue.Value,
-                    OperatorId = selectedOperatorId,
+                    OperatorId = selectedOperator?.Id,
                     ShiftStartTime = shiftStartTime,
                     ShiftEndTime = shiftEndTime,
                 });
 
             if (!response.IsSuccessStatusCode)
             {
-                errorMessage = $"خطا در ثبت کارکرد: {await response.Content.ReadAsStringAsync()}";
+                errorMessage = await UsageProblemMessages.DescribeAsync(response, "خطا در ثبت کارکرد");
                 return;
             }
 

@@ -1,3 +1,4 @@
+@using MachineryManagerEnterprise.Usage.Presentation.Components
 @inject IHttpClientFactory HttpClientFactory
 
 <MudDialog>
@@ -78,7 +79,7 @@
 
             if (!response.IsSuccessStatusCode)
             {
-                errorMessage = $"خطا در حذف ردیف: {await response.Content.ReadAsStringAsync()}";
+                errorMessage = await UsageProblemMessages.DescribeAsync(response, "خطا در حذف ردیف");
                 return;
             }
 

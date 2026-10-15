@@ -1,3 +1,4 @@
+@using MachineryManagerEnterprise.Usage.Presentation.Components
 @using MachineryManagerEnterprise.UI.Components
 @using MachineryManagerEnterprise.UI.Calendar
 @inject IHttpClientFactory HttpClientFactory
@@ -83,7 +84,7 @@
 
             if (!response.IsSuccessStatusCode)
             {
-                errorMessage = $"خطا در بازتنظیم شمارنده: {await response.Content.ReadAsStringAsync()}";
+                errorMessage = await UsageProblemMessages.DescribeAsync(response, "خطا در بازتنظیم شمارنده");
                 return;
             }
 
