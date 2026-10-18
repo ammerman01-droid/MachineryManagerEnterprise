@@ -12,6 +12,7 @@ public sealed class CorrectEntryReadingCommandHandler
     private const string RequiredPermission = "DailyUsage.Correct";
 
     private readonly IUsageLedgerRepository _usageLedgerRepository;
+    private readonly IMeterDeviceRepository _meterDeviceRepository;
     private readonly IUsageUnitOfWork _unitOfWork;
     private readonly IDateTimeProvider _dateTimeProvider;
     private readonly ICurrentUserService _currentUserService;
@@ -20,6 +21,7 @@ public sealed class CorrectEntryReadingCommandHandler
 
     /// <summary>Initializes a new instance of the <see cref="CorrectEntryReadingCommandHandler"/> class.</summary>
     /// <param name="usageLedgerRepository">The Usage Ledger repository.</param>
+    /// <param name="meterDeviceRepository">The Meter Device repository, used to read the source device's own daily-cap override.</param>
     /// <param name="unitOfWork">The Usage module's Unit of Work.</param>
     /// <param name="dateTimeProvider">Provides the current UTC time for the raised domain event(s).</param>
     /// <param name="currentUserService">Provides the authenticated user context.</param>
@@ -27,6 +29,7 @@ public sealed class CorrectEntryReadingCommandHandler
     /// <param name="organizationLookupService">Cross-module, read-only lookup into the Organization module, used to resolve the ledger's Holding.</param>
     public CorrectEntryReadingCommandHandler(
         IUsageLedgerRepository usageLedgerRepository,
+        IMeterDeviceRepository meterDeviceRepository,
         IUsageUnitOfWork unitOfWork,
         IDateTimeProvider dateTimeProvider,
         ICurrentUserService currentUserService,
@@ -34,6 +37,7 @@ public sealed class CorrectEntryReadingCommandHandler
         IOrganizationLookupService organizationLookupService)
     {
         _usageLedgerRepository = usageLedgerRepository;
+        _meterDeviceRepository = meterDeviceRepository;
         _unitOfWork = unitOfWork;
         _dateTimeProvider = dateTimeProvider;
         _currentUserService = currentUserService;
@@ -70,7 +74,21 @@ public sealed class CorrectEntryReadingCommandHandler
             return Result.Failure(global::Usage.Domain.UsageLedgerErrors.NotAuthorized());
         }
 
-        var correctResult = ledger.CorrectEntryReading(request.EntryDate, request.ShiftIndex, request.NewRawReadingValue, _dateTimeProvider);
+        // The daily limit comes from the device that produced the entry being corrected (its own
+        // override if it has one, else the default for the ledger's unit).
+        var sourceEntry = ledger.Entries.FirstOrDefault(entry =>
+            entry.Kind == global::Usage.Domain.UsageEntryKind.ShiftReading
+            && entry.EntryDate == request.EntryDate
+            && entry.ShiftIndex == request.ShiftIndex);
+
+        var sourceDevice = sourceEntry is null
+            ? null
+            : await _meterDeviceRepository.GetByIdAsync(sourceEntry.SourceMeterDeviceId, cancellationToken);
+
+        var dailyCap = global::Usage.Domain.UsageCapDefaults.GetDailyCap(ledger.Unit, sourceDevice?.DailyCapOverride);
+
+        var correctResult = ledger.CorrectEntryReading(
+            request.EntryDate, request.ShiftIndex, request.NewRawReadingValue, dailyCap, _dateTimeProvider);
 
         if (correctResult.IsFailure)
         {

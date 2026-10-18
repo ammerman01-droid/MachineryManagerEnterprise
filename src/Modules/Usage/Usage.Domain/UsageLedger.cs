@@ -114,6 +114,7 @@ public sealed class UsageLedger : AggregateRoot<UsageLedgerId>
     /// <param name="operatorId">The operator this shift is attributed to, when supplied.</param>
     /// <param name="projectId">The Project the owner belongs to right now, resolved by the Application layer and snapshotted onto this entry and any gap-fill entries (BR-054).</param>
     /// <param name="missedMandatoryShifts">Mandatory shifts between the last recorded entry and this one that were never reported, resolved by the Application layer from the Work Calendar, in chronological order.</param>
+    /// <param name="dailyUsageCap">The most Operational Usage a single calendar day may total on this Ledger (e.g. 24 hours, 1000 km — see <see cref="UsageCapDefaults"/>); the day's existing entries plus this reading may not exceed it (chat, 2026-10-13).</param>
     /// <param name="dateTimeProvider">Supplies the current UTC time for raised events.</param>
     public Result RegisterShiftReading(
         DateOnly entryDate,
@@ -125,6 +126,7 @@ public sealed class UsageLedger : AggregateRoot<UsageLedgerId>
         Guid? operatorId,
         Guid projectId,
         IReadOnlyList<MandatoryShift> missedMandatoryShifts,
+        decimal dailyUsageCap,
         IDateTimeProvider dateTimeProvider)
     {
         if (FrozenUpToDate is { } frozenDate && entryDate <= frozenDate)
@@ -175,6 +177,18 @@ public sealed class UsageLedger : AggregateRoot<UsageLedgerId>
                 {
                     return Result.Failure(UsageLedgerErrors.RawValueDecreased(lastEntry.RawReadingValue, rawReadingValue));
                 }
+            }
+        }
+
+        if (rawDelta > 0)
+        {
+            var dayTotal = _entries
+                .Where(e => e.EntryDate == entryDate)
+                .Sum(e => e.OperationalUsageAmount) + rawDelta;
+
+            if (dayTotal > dailyUsageCap)
+            {
+                return Result.Failure(UsageLedgerErrors.DailyCapExceeded(entryDate, dayTotal, dailyUsageCap));
             }
         }
 
@@ -323,31 +337,36 @@ public sealed class UsageLedger : AggregateRoot<UsageLedgerId>
     }
 
     /// <summary>
-    /// Corrects an already-registered shift reading's raw value
-    /// (BR-051), as long as it is not yet frozen (BR-052/BR-053). The
-    /// device that produced the reading, the Project it was
-    /// snapshotted under (BR-054), the operator, and the shift times
-    /// cannot be changed by this operation — see
-    /// <see cref="CorrectEntryDetails"/> for those.
+    /// Corrects an already-registered shift reading's raw value (BR-051, redesigned chat 2026-10-14),
+    /// as long as it is not yet frozen (BR-052/BR-053). The device that produced the reading, the
+    /// Project it was snapshotted under (BR-054), the operator, and the shift times cannot be changed
+    /// by this operation — see <see cref="CorrectEntryDetails"/> for those.
     /// <para>
-    /// Any run of auto-filled shifts (BR-044) immediately after the
-    /// corrected entry mirrors the corrected raw value forward — they
-    /// stay at zero usage. The first manually-entered shift after that
-    /// run has its Operational Usage recalculated once, since it is the
-    /// only entry whose own delta is computed from this chain's raw
-    /// value. Propagation stops at that entry, or immediately at a
-    /// <see cref="UsageEntryKind.Rebase"/> entry (which never derives
-    /// its own numbers from a previous entry).
+    /// The correction leaves every LATER entry's Operational Usage exactly as it was: all entries
+    /// after the corrected one, up to (not including) the next counter rebase, have their raw
+    /// reading moved by the same amount as the correction, so each later "previous reading → current
+    /// reading" pair keeps its difference. Only the corrected entry's own usage changes (its new
+    /// reading minus the previous reading). A <see cref="UsageEntryKind.Rebase"/> entry starts a
+    /// fresh baseline from a different counter, so propagation stops there. Auto-filled
+    /// placeholders move along with the rest and stay auto-filled; the corrected entry itself
+    /// becomes <see cref="UsageEntryOrigin.Manual"/>.
+    /// </para>
+    /// <para>
+    /// The corrected reading may not be lower than the previous one (that would be negative usage),
+    /// may not push the corrected day's total usage past <paramref name="dailyUsageCap"/>, and may
+    /// not move any later reading below zero.
     /// </para>
     /// </summary>
     /// <param name="entryDate">The date of the shift reading being corrected.</param>
     /// <param name="shiftIndex">The shift index of the reading being corrected.</param>
     /// <param name="newRawReadingValue">The corrected raw value.</param>
+    /// <param name="dailyUsageCap">The most Operational Usage a single calendar day may total on this Ledger (chat, 2026-10-13); checked for the corrected entry's day.</param>
     /// <param name="dateTimeProvider">Supplies the current UTC time for raised events.</param>
     public Result CorrectEntryReading(
         DateOnly entryDate,
         int shiftIndex,
         decimal newRawReadingValue,
+        decimal dailyUsageCap,
         IDateTimeProvider dateTimeProvider)
     {
         if (FrozenUpToDate is { } frozenDate && entryDate <= frozenDate)
@@ -369,74 +388,57 @@ public sealed class UsageLedger : AggregateRoot<UsageLedgerId>
         var entry = _entries[index];
         var previousEntry = index > 0 ? _entries[index - 1] : null;
 
-        var rawDelta = previousEntry is null || previousEntry.SourceMeterDeviceId != entry.SourceMeterDeviceId
+        // The first entry on a ledger (or the first after a device change) is a baseline: no usage.
+        var newUsage = previousEntry is null || previousEntry.SourceMeterDeviceId != entry.SourceMeterDeviceId
             ? 0m
             : newRawReadingValue - previousEntry.RawReadingValue;
 
-        if (rawDelta < 0)
+        if (newUsage < 0)
         {
             return Result.Failure(UsageLedgerErrors.RawValueDecreased(previousEntry!.RawReadingValue, newRawReadingValue));
         }
 
-        // Phase 1 — walk the dependency chain and validate every step, WITHOUT mutating anything yet.
-        var mirroredGapFills = new List<UsageEntry>();
-        UsageEntry? recalculatedRealEntry = null;
-        var recalculatedOperationalUsageAmount = 0m;
+        // Later entries keep their usage, so only the corrected entry's day can newly exceed the cap.
+        var dayTotal = _entries
+            .Where(e => e.EntryDate == entryDate && !ReferenceEquals(e, entry))
+            .Sum(e => e.OperationalUsageAmount) + newUsage;
 
-        var carriedRawValue = newRawReadingValue;
-        var cursor = index + 1;
+        if (dayTotal > dailyUsageCap)
+        {
+            return Result.Failure(UsageLedgerErrors.DailyCapExceeded(entryDate, dayTotal, dailyUsageCap));
+        }
 
-        while (cursor < _entries.Count)
+        // Phase 1 — find the entries that move with the correction and make sure none goes negative.
+        var delta = newRawReadingValue - entry.RawReadingValue;
+        var movingEntries = new List<UsageEntry>();
+
+        for (var cursor = index + 1; cursor < _entries.Count; cursor++)
         {
             var candidate = _entries[cursor];
 
             if (candidate.Kind == UsageEntryKind.Rebase)
             {
-                // A rebase never derives its own numbers from a previous entry — propagation stops here.
+                // A rebase starts a new baseline from a different counter — nothing after it depends on this reading.
                 break;
             }
 
-            if (candidate.Origin == UsageEntryOrigin.AutoFilled)
+            if (candidate.RawReadingValue + delta < 0)
             {
-                // An auto-filled shift mirrors the previous real value by construction (BR-044): keep it in sync, stay at zero, keep walking.
-                mirroredGapFills.Add(candidate);
-                cursor++;
-                continue;
+                return Result.Failure(UsageLedgerErrors.CorrectionMakesLaterReadingNegative());
             }
 
-            // First manually-entered shift after the (possibly empty) run of auto-fills: recompute once, then propagation provably stops (see method summary).
-            var candidateRawDelta = candidate.SourceMeterDeviceId != entry.SourceMeterDeviceId
-                ? 0m
-                : candidate.RawReadingValue - carriedRawValue;
-
-            if (candidateRawDelta < 0)
-            {
-                return Result.Failure(UsageLedgerErrors.RawValueDecreased(carriedRawValue, candidate.RawReadingValue));
-            }
-
-            recalculatedRealEntry = candidate;
-            recalculatedOperationalUsageAmount = candidateRawDelta;
-
-            break;
+            movingEntries.Add(candidate);
         }
 
-        // Phase 2 — every step validated; apply all changes together.
-        entry.ApplyReadingCorrection(newRawReadingValue, rawDelta);
+        // Phase 2 — everything validated; apply together.
+        entry.ApplyReadingCorrection(newRawReadingValue, newUsage);
 
-        foreach (var gapFill in mirroredGapFills)
+        foreach (var movingEntry in movingEntries)
         {
-            gapFill.ApplyReadingCorrection(carriedRawValue, 0m);
+            movingEntry.ShiftReadingBy(delta);
         }
 
-        recalculatedRealEntry?.ApplyCascadedRecalculation(recalculatedOperationalUsageAmount);
-
-        RaiseDomainEvent(new UsageEntryAdjusted(Id, OwnerType, OwnerId, entryDate, shiftIndex, rawDelta, dateTimeProvider.UtcNow));
-
-        if (recalculatedRealEntry is not null)
-        {
-            RaiseDomainEvent(new UsageEntryAdjusted(
-                Id, OwnerType, OwnerId, recalculatedRealEntry.EntryDate, recalculatedRealEntry.ShiftIndex!.Value, recalculatedOperationalUsageAmount, dateTimeProvider.UtcNow));
-        }
+        RaiseDomainEvent(new UsageEntryAdjusted(Id, OwnerType, OwnerId, entryDate, shiftIndex, newUsage, dateTimeProvider.UtcNow));
 
         return Result.Success();
     }
@@ -529,17 +531,11 @@ public sealed class UsageLedger : AggregateRoot<UsageLedgerId>
     }
 
     /// <summary>
-    /// Re-establishes ascending <see cref="UsageEntry.Sequence"/> order on the
-    /// in-memory timeline. EF Core does not guarantee the materialization
-    /// order of an owned collection, yet every cursor-based operation of this
-    /// aggregate (<see cref="RegisterShiftReading"/>, <see cref="CorrectEntryReading"/>,
-    /// <see cref="DeleteLatestEntry"/>, ...) relies on <c>_entries</c> being
-    /// sorted by <c>Sequence</c>. The persistence layer calls this immediately
-    /// after loading the aggregate (chat, 2026-09-29); it has no other effect
-    /// and raises no domain event.
+    /// Re-establishes ascending <see cref="UsageEntry.Sequence"/> order after the ORM materializes
+    /// <see cref="Entries"/> in whatever physical order the query returned — this aggregate's
+    /// cursor-based operations depend on that order. Called by the repository right after loading;
+    /// not meant for any other caller.
     /// </summary>
-    public void EnsureEntriesOrderedBySequence()
-    {
+    public void EnsureEntriesOrderedBySequence() =>
         _entries.Sort(static (left, right) => left.Sequence.CompareTo(right.Sequence));
-    }
 }

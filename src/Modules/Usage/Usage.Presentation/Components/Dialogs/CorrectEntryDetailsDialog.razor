@@ -1,32 +1,56 @@
-@using MachineryManagerEnterprise.Usage.Presentation.Components
+@using System.Text.Json
 @using MachineryManagerEnterprise.UI.Components
-@using MachineryManagerEnterprise.UI.Calendar
+@using MachineryManagerEnterprise.Usage.Presentation.Components
 @inject IHttpClientFactory HttpClientFactory
 
 <MudDialog>
     <TitleContent>اصلاح مشخصات شیفت</TitleContent>
     <DialogContent>
-        @if (errorMessage is not null)
-        {
-            <MudAlert Severity="Severity.Error" Class="mb-4">@errorMessage</MudAlert>
-        }
+        <MudStack Spacing="4">
+            @if (errorMessage is not null)
+            {
+                <MudAlert Severity="Severity.Error">@errorMessage</MudAlert>
+            }
 
-        <MudField Label="تاریخ / شیفت" Class="mb-4">@EntryDate.ToString("yyyy-MM-dd") — شیفت @(ShiftIndex + 1)</MudField>
+            <MudField Label="تاریخ / شیفت">@EntryDate.ToString("yyyy-MM-dd") — شیفت @(ShiftIndex + 1)</MudField>
 
-        <MudTextField T="string" @bind-Value="operatorIdText" Label="شناسهٔ اپراتور (خالی = بدون اپراتور)" Class="mb-4" />
+            <MudGrid Spacing="2">
+                <MudItem xs="6">
+                    <MudTimePicker Label="ساعت شروع شیفت" @bind-Time="shiftStartTime" Required="true"
+                                   AnchorOrigin="Origin.TopCenter" TransformOrigin="Origin.BottomCenter" />
+                </MudItem>
+                <MudItem xs="6">
+                    <MudTimePicker Label="ساعت پایان شیفت" @bind-Time="shiftEndTime" Required="true"
+                                   AnchorOrigin="Origin.TopCenter" TransformOrigin="Origin.BottomCenter" />
+                </MudItem>
+            </MudGrid>
 
-        <MudGrid Class="mb-4">
-            <MudItem xs="6">
-                <MudTextField T="string" @bind-Value="shiftStartTimeText" Label="ساعت شروع (HH:mm)" Placeholder="۰۸:۰۰" Required="true" />
-            </MudItem>
-            <MudItem xs="6">
-                <MudTextField T="string" @bind-Value="shiftEndTimeText" Label="ساعت پایان (HH:mm)" Placeholder="۱۶:۰۰" Required="true" />
-            </MudItem>
-        </MudGrid>
+            @if (OrganizationId is null)
+            {
+                <MudText Typo="Typo.caption" Color="Color.Secondary">اپراتور فعلی بدون تغییر می‌ماند.</MudText>
+            }
+            else if (isPersonnelLoading)
+            {
+                <MudProgressLinear Indeterminate="true" />
+            }
+            else
+            {
+                <MudAutocomplete T="PersonnelOption"
+                                 @bind-Value="selectedOperator"
+                                 Label="اپراتور (جستجو بر اساس نام یا کد پرسنلی)"
+                                 SearchFunc="@SearchPersonnelAsync"
+                                 ToStringFunc="@(person => person is null ? string.Empty : PersonLabel(person))"
+                                 MinCharacters="0"
+                                 MaxItems="50"
+                                 OpenOnFocus="true"
+                                 ResetValueOnEmptyText="true"
+                                 Clearable="true" />
+            }
 
-        <MudText Typo="Typo.caption" Color="Color.Secondary">
-            این اصلاح کارکرد مولد ثبت‌شده را تغییر نمی‌دهد؛ فقط مشخصات نمایشی شیفت را عوض می‌کند.
-        </MudText>
+            <MudText Typo="Typo.caption" Color="Color.Secondary">
+                این اصلاح کارکرد مولد ثبت‌شده را تغییر نمی‌دهد؛ فقط مشخصات نمایشی شیفت را عوض می‌کند.
+            </MudText>
+        </MudStack>
     </DialogContent>
     <DialogActions>
         <MudButton OnClick="Cancel">انصراف</MudButton>
@@ -60,61 +84,133 @@
     [Parameter]
     public int ShiftIndex { get; set; }
 
-    /// <summary>The entry's operator attribution before correction, shown for reference and used to prefill the field.</summary>
+    /// <summary>The entry's operator attribution before correction, used to preselect the operator.</summary>
     [Parameter]
     public Guid? CurrentOperatorId { get; set; }
 
-    /// <summary>The entry's shift start time before correction, used to prefill the field.</summary>
+    /// <summary>The entry's shift start time before correction, used to prefill the picker.</summary>
     [Parameter]
     public TimeOnly CurrentShiftStartTime { get; set; }
 
-    /// <summary>The entry's shift end time before correction, used to prefill the field.</summary>
+    /// <summary>The entry's shift end time before correction, used to prefill the picker.</summary>
     [Parameter]
     public TimeOnly CurrentShiftEndTime { get; set; }
 
-    private string? operatorIdText;
-    private string shiftStartTimeText = string.Empty;
-    private string shiftEndTimeText = string.Empty;
-    private bool isInitialized;
+    /// <summary>
+    /// The Organization whose personnel may be picked as operator. When <see langword="null"/> the
+    /// operator picker is hidden and the entry's current operator is kept unchanged.
+    /// </summary>
+    [Parameter]
+    public Guid? OrganizationId { get; set; }
+
+    private sealed record PersonnelOption(Guid Id, string FirstName, string LastName, string PersonnelCode);
+
+    private static readonly JsonSerializerOptions JsonOptions = new() { PropertyNameCaseInsensitive = true };
+
+    private List<PersonnelOption> personnel = [];
+    private PersonnelOption? selectedOperator;
+    private TimeSpan? shiftStartTime;
+    private TimeSpan? shiftEndTime;
+    private bool isPersonnelLoading;
     private bool isSubmitting;
     private string? errorMessage;
 
-    protected override void OnParametersSet()
+    protected override async Task OnInitializedAsync()
     {
-        if (isInitialized)
-        {
-            return;
-        }
+        shiftStartTime = CurrentShiftStartTime.ToTimeSpan();
+        shiftEndTime = CurrentShiftEndTime.ToTimeSpan();
 
-        operatorIdText = CurrentOperatorId?.ToString();
-        shiftStartTimeText = CurrentShiftStartTime.ToString("HH:mm");
-        shiftEndTimeText = CurrentShiftEndTime.ToString("HH:mm");
-        isInitialized = true;
+        if (OrganizationId is { } organizationId)
+        {
+            await LoadPersonnelAsync(organizationId);
+        }
+    }
+
+    private static string PersonLabel(PersonnelOption person) =>
+        $"{person.FirstName} {person.LastName} ({person.PersonnelCode})";
+
+    private static bool ContainsTerm(string? text, string term) =>
+        text?.Contains(term, StringComparison.OrdinalIgnoreCase) == true;
+
+    private Task<IEnumerable<PersonnelOption>> SearchPersonnelAsync(string? value, CancellationToken cancellationToken)
+    {
+        var term = value?.Trim();
+
+        IEnumerable<PersonnelOption> matches = string.IsNullOrEmpty(term)
+            ? personnel
+            : personnel.Where(p =>
+                ContainsTerm(p.FirstName, term)
+                || ContainsTerm(p.LastName, term)
+                || ContainsTerm(p.PersonnelCode, term)
+                || ContainsTerm($"{p.FirstName} {p.LastName}", term));
+
+        return Task.FromResult(matches);
+    }
+
+    private async Task LoadPersonnelAsync(Guid organizationId)
+    {
+        isPersonnelLoading = true;
+
+        try
+        {
+            var client = HttpClientFactory.CreateClient("InternalApi");
+            var response = await client.GetAsync($"/api/v1/personnel?organizationId={organizationId}");
+
+            if (!response.IsSuccessStatusCode)
+            {
+                errorMessage = await UsageProblemMessages.DescribeAsync(response, "خطا در دریافت فهرست پرسنل");
+                return;
+            }
+
+            using var document = await JsonDocument.ParseAsync(await response.Content.ReadAsStreamAsync());
+            var root = document.RootElement;
+            var array = root;
+
+            if (root.ValueKind == JsonValueKind.Object)
+            {
+                array = default;
+
+                foreach (var property in root.EnumerateObject())
+                {
+                    if (property.Value.ValueKind == JsonValueKind.Array)
+                    {
+                        array = property.Value;
+                        break;
+                    }
+                }
+            }
+
+            personnel = array.ValueKind == JsonValueKind.Array
+                ? (array.Deserialize<List<PersonnelOption>>(JsonOptions) ?? [])
+                    .OrderBy(p => p.LastName)
+                    .ThenBy(p => p.FirstName)
+                    .ToList()
+                : [];
+
+            selectedOperator = personnel.FirstOrDefault(p => p.Id == CurrentOperatorId);
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"خطا در دریافت فهرست پرسنل: {ex.Message}";
+        }
+        finally
+        {
+            isPersonnelLoading = false;
+        }
     }
 
     private async Task SubmitAsync()
     {
         errorMessage = null;
 
-        Guid? operatorId = null;
-
-        if (!string.IsNullOrWhiteSpace(operatorIdText))
+        if (shiftStartTime is null || shiftEndTime is null || shiftStartTime == shiftEndTime)
         {
-            if (!Guid.TryParse(operatorIdText, out var parsedOperatorId))
-            {
-                errorMessage = "شناسهٔ اپراتور نامعتبر است.";
-                return;
-            }
-
-            operatorId = parsedOperatorId;
-        }
-
-        if (!TimeOnly.TryParse(JalaliCalendarConverter.ToLatinDigits(shiftStartTimeText), out var shiftStartTime) ||
-            !TimeOnly.TryParse(JalaliCalendarConverter.ToLatinDigits(shiftEndTimeText), out var shiftEndTime))
-        {
-            errorMessage = "ساعت شروع و پایان شیفت را به‌درستی وارد کنید.";
+            errorMessage = "ساعت شروع و پایان شیفت را به‌درستی انتخاب کنید (این دو نباید یکسان باشند).";
             return;
         }
+
+        // Without an Organization the operator picker is hidden, so the current operator is kept.
+        var operatorId = OrganizationId is null ? CurrentOperatorId : selectedOperator?.Id;
 
         isSubmitting = true;
 
@@ -126,8 +222,8 @@
                 new
                 {
                     OperatorId = operatorId,
-                    ShiftStartTime = shiftStartTime,
-                    ShiftEndTime = shiftEndTime,
+                    ShiftStartTime = TimeOnly.FromTimeSpan(shiftStartTime.Value),
+                    ShiftEndTime = TimeOnly.FromTimeSpan(shiftEndTime.Value),
                 });
 
             if (!response.IsSuccessStatusCode)

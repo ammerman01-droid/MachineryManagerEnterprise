@@ -86,21 +86,27 @@ public sealed class UsageEntry : Entity<UsageEntryId>
         ProjectId = projectId;
     }
 
-    /// <summary>Applies a corrected raw value and its recalculated Operational Usage to this entry (used by <see cref="UsageLedger.CorrectEntryReading"/>).</summary>
+    /// <summary>
+    /// Applies a corrected raw value and its recalculated Operational Usage to this entry (used by
+    /// <see cref="UsageLedger.CorrectEntryReading"/>). A row a user has corrected by hand is no
+    /// longer a system-generated placeholder, so its <see cref="Origin"/> becomes
+    /// <see cref="UsageEntryOrigin.Manual"/> (chat, 2026-10-14).
+    /// </summary>
     internal void ApplyReadingCorrection(decimal rawReadingValue, decimal operationalUsageAmount)
     {
         RawReadingValue = rawReadingValue;
         OperationalUsageAmount = operationalUsageAmount;
+        Origin = UsageEntryOrigin.Manual;
     }
 
     /// <summary>
-    /// Applies a cascaded recalculation of Operational Usage to the
-    /// next entry after one whose reading was corrected, without
-    /// changing its own recorded raw value (BR-051).
+    /// Moves this entry's raw reading by <paramref name="delta"/> without touching its usage or
+    /// origin — used when an earlier entry is corrected, so the difference between this entry and
+    /// the one before it (its Operational Usage) stays exactly as recorded.
     /// </summary>
-    internal void ApplyCascadedRecalculation(decimal operationalUsageAmount)
+    internal void ShiftReadingBy(decimal delta)
     {
-        OperationalUsageAmount = operationalUsageAmount;
+        RawReadingValue += delta;
     }
 
     /// <summary>Applies a correction to this entry's operator attribution and shift times, without touching its reading or Operational Usage (used by <see cref="UsageLedger.CorrectEntryDetails"/>).</summary>

@@ -4,17 +4,13 @@ using Microsoft.EntityFrameworkCore;
 namespace MachineryManagerEnterprise.Usage.Infrastructure.Persistence;
 
 /// <summary>
-/// EF Core implementation of <see cref="IUsageReadService"/> —
-/// <c>AsNoTracking</c> query joining the owned <c>UsageEntry</c> table
-/// back to its owning <c>UsageLedger</c> row (via the shadow
-/// <c>UsageLedgerId</c> foreign key), same materialize-then-project
-/// convention as <c>AssetRepository.SearchAsync</c>. The two public
-/// methods share the same shape of query but are kept as separate,
-/// fully-written-out LINQ pipelines rather than factored through a
-/// shared private helper — C# anonymous types are not nominal, so a
-/// helper spanning both methods' projections would have to fall back
-/// to <c>dynamic</c> or a named DTO, neither of which EF Core can
-/// translate as cleanly as two plain, directly-composed queries.
+/// EF Core implementation of <see cref="IUsageReadService"/> — <c>AsNoTracking</c> queries over the
+/// owned <c>UsageEntry</c> rows of each <c>UsageLedger</c> (reached through <c>ledger.Entries</c>:
+/// an owned type has no DbSet of its own), same materialize-then-project convention as
+/// <c>AssetRepository.SearchAsync</c>. The two public methods share the same shape of query but are
+/// kept as separate, fully written-out LINQ pipelines — C# anonymous types are not nominal, so a
+/// helper spanning both projections would have to fall back to <c>dynamic</c> or a named DTO, neither
+/// of which EF Core translates as cleanly as two plain, directly-composed queries.
 /// </summary>
 public sealed class UsageReadService : IUsageReadService
 {
@@ -68,7 +64,7 @@ public sealed class UsageReadService : IUsageReadService
         // AssetRepository.SearchAsync).
         var rows = await query
             .OrderByDescending(x => x.entry.EntryDate)
-            .ThenByDescending(x => x.entry.ShiftIndex)
+            .ThenByDescending(x => x.entry.Sequence)
             .Skip((page - 1) * pageSize)
             .Take(pageSize)
             .Select(x => new
@@ -77,6 +73,9 @@ public sealed class UsageReadService : IUsageReadService
                 x.entry.SourceMeterDeviceId,
                 x.ledger.OwnerType,
                 x.ledger.OwnerId,
+                x.ledger.Unit,
+                x.ledger.FrozenUpToDate,
+                x.entry.Sequence,
                 x.entry.EntryDate,
                 x.entry.Kind,
                 x.entry.ShiftIndex,
@@ -90,12 +89,15 @@ public sealed class UsageReadService : IUsageReadService
             })
             .ToListAsync(cancellationToken);
 
+        var latestSequences = await LoadLatestSequencesAsync(rows.Select(r => r.LedgerId).Distinct().ToList(), cancellationToken);
+
         var items = rows
             .Select(r => new UsageEntryListItem(
                 r.LedgerId.Value,
                 r.SourceMeterDeviceId.Value,
                 r.OwnerType,
                 r.OwnerId,
+                r.Unit,
                 r.EntryDate,
                 r.Kind,
                 r.ShiftIndex,
@@ -105,7 +107,9 @@ public sealed class UsageReadService : IUsageReadService
                 r.OperationalUsageAmount,
                 r.OperatorId,
                 r.ProjectId,
-                r.Origin))
+                r.Origin,
+                r.FrozenUpToDate,
+                latestSequences.TryGetValue(r.LedgerId.Value, out var latest) && latest == r.Sequence))
             .ToList();
 
         return new PagedResult<UsageEntryListItem>(items, totalCount, page, pageSize);
@@ -155,7 +159,7 @@ public sealed class UsageReadService : IUsageReadService
 
         var rows = await query
             .OrderByDescending(x => x.entry.EntryDate)
-            .ThenByDescending(x => x.entry.ShiftIndex)
+            .ThenByDescending(x => x.entry.Sequence)
             .Skip((page - 1) * pageSize)
             .Take(pageSize)
             .Select(x => new
@@ -164,6 +168,9 @@ public sealed class UsageReadService : IUsageReadService
                 x.entry.SourceMeterDeviceId,
                 x.ledger.OwnerType,
                 x.ledger.OwnerId,
+                x.ledger.Unit,
+                x.ledger.FrozenUpToDate,
+                x.entry.Sequence,
                 x.entry.EntryDate,
                 x.entry.Kind,
                 x.entry.ShiftIndex,
@@ -177,12 +184,15 @@ public sealed class UsageReadService : IUsageReadService
             })
             .ToListAsync(cancellationToken);
 
+        var latestSequences = await LoadLatestSequencesAsync(rows.Select(r => r.LedgerId).Distinct().ToList(), cancellationToken);
+
         var items = rows
             .Select(r => new UsageEntryListItem(
                 r.LedgerId.Value,
                 r.SourceMeterDeviceId.Value,
                 r.OwnerType,
                 r.OwnerId,
+                r.Unit,
                 r.EntryDate,
                 r.Kind,
                 r.ShiftIndex,
@@ -192,9 +202,33 @@ public sealed class UsageReadService : IUsageReadService
                 r.OperationalUsageAmount,
                 r.OperatorId,
                 r.ProjectId,
-                r.Origin))
+                r.Origin,
+                r.FrozenUpToDate,
+                latestSequences.TryGetValue(r.LedgerId.Value, out var latest) && latest == r.Sequence))
             .ToList();
 
         return new PagedResult<UsageEntryListItem>(items, totalCount, page, pageSize);
+    }
+
+    /// <summary>
+    /// Finds the highest <c>Sequence</c> of each given Ledger, so a row can be flagged as its
+    /// Ledger's most recent entry — the only one that may be deleted (BR-049).
+    /// </summary>
+    private async Task<Dictionary<Guid, int?>> LoadLatestSequencesAsync(
+        IReadOnlyCollection<global::Usage.Domain.UsageLedgerId> ledgerIds,
+        CancellationToken cancellationToken)
+    {
+        if (ledgerIds.Count == 0)
+        {
+            return new Dictionary<Guid, int?>();
+        }
+
+        var latest = await _dbContext.UsageLedgers
+            .AsNoTracking()
+            .Where(ledger => ledgerIds.Contains(ledger.Id))
+            .Select(ledger => new { ledger.Id, Latest = ledger.Entries.Max(entry => (int?)entry.Sequence) })
+            .ToListAsync(cancellationToken);
+
+        return latest.ToDictionary(row => row.Id.Value, row => row.Latest);
     }
 }

@@ -56,4 +56,28 @@ public sealed class UsageLedgerRepository : IUsageLedgerRepository
         ledger?.EnsureEntriesOrderedBySequence();
         return ledger;
     }
+
+    /// <inheritdoc />
+    /// <remarks>See the ordering remark on <see cref="GetByIdAsync"/> — applies equally here.</remarks>
+    public async Task<IReadOnlyList<global::Usage.Domain.UsageLedger>> ListByOrganizationAsync(
+        Guid organizationId,
+        Guid? projectId,
+        CancellationToken cancellationToken = default)
+    {
+        var query = _dbContext.UsageLedgers.Where(ledger => ledger.OrganizationId == organizationId);
+
+        if (projectId is not null)
+        {
+            query = query.Where(ledger => ledger.Entries.Any(entry => entry.ProjectId == projectId.Value));
+        }
+
+        var ledgers = await query.ToListAsync(cancellationToken);
+
+        foreach (var ledger in ledgers)
+        {
+            ledger.EnsureEntriesOrderedBySequence();
+        }
+
+        return ledgers;
+    }
 }

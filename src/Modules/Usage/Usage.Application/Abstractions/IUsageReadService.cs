@@ -1,4 +1,5 @@
 using System.Text.Json.Serialization;
+using MachineryManagerEnterprise.SharedKernel;
 
 namespace MachineryManagerEnterprise.Usage.Application.Abstractions;
 
@@ -79,6 +80,7 @@ public interface IUsageReadService
 /// <param name="MeterDeviceId">The device that produced this entry's reading (BR-012).</param>
 /// <param name="OwnerType">The kind of owner the Usage Ledger belongs to (Asset or Tracked Component).</param>
 /// <param name="OwnerId">The owner's identifier.</param>
+/// <param name="Unit">The unit this entry's Usage Ledger tracks (Hour, Kilometer or Mile).</param>
 /// <param name="EntryDate">The calendar date this entry belongs to.</param>
 /// <param name="Kind">Whether this is a normal shift reading or a counter rebase.</param>
 /// <param name="ShiftIndex">The Work Calendar shift index this entry reports on, or <see langword="null"/> for a rebase entry.</param>
@@ -89,6 +91,8 @@ public interface IUsageReadService
 /// <param name="OperatorId">The operator this shift is attributed to, when supplied.</param>
 /// <param name="ProjectId">The Project this entry was snapshotted under at registration time (BR-054).</param>
 /// <param name="Origin">Whether this entry was entered by a user or auto-generated to fill a missed mandatory shift (BR-044).</param>
+/// <param name="FrozenUpToDate">The Ledger's freeze date: entries on or before it can no longer be corrected or deleted (BR-052/BR-053); <see langword="null"/> when nothing is frozen.</param>
+/// <param name="IsLatestInLedger">Whether this is the Ledger's most recent entry — the only one that can be deleted (BR-049).</param>
 /// <param name="DeviceCode">The owning Asset's identification code, resolved from the Asset module for display (chat, 2026-10-12); <see langword="null"/> when not enriched or the owner is not an Asset.</param>
 /// <param name="ProjectName">The snapshotted Project's name, resolved from the Organization module for display; <see langword="null"/> when not enriched or the Project no longer exists.</param>
 public sealed record UsageEntryListItem(
@@ -96,6 +100,7 @@ public sealed record UsageEntryListItem(
     Guid MeterDeviceId,
     [property: JsonConverter(typeof(JsonStringEnumConverter))] global::Usage.Domain.UsageOwnerType OwnerType,
     Guid OwnerId,
+    [property: JsonConverter(typeof(JsonStringEnumConverter))] MeterReadingUnit Unit,
     DateOnly EntryDate,
     [property: JsonConverter(typeof(JsonStringEnumConverter))] global::Usage.Domain.UsageEntryKind Kind,
     int? ShiftIndex,
@@ -106,6 +111,8 @@ public sealed record UsageEntryListItem(
     Guid? OperatorId,
     Guid ProjectId,
     [property: JsonConverter(typeof(JsonStringEnumConverter))] global::Usage.Domain.UsageEntryOrigin Origin,
+    DateOnly? FrozenUpToDate,
+    bool IsLatestInLedger,
     string? DeviceCode = null,
     string? ProjectName = null);
 

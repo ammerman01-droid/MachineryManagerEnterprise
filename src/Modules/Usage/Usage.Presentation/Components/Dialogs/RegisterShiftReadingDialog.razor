@@ -7,155 +7,148 @@
 <MudDialog>
     <TitleContent>ثبت کارکرد شیفت</TitleContent>
     <DialogContent>
-        @if (errorMessage is not null)
-        {
-            <MudAlert Severity="Severity.Error" Class="mb-4">@errorMessage</MudAlert>
-        }
-
-        @if (MeterDeviceId is null)
-        {
-            @if (isDevicesLoading)
+        <MudStack Spacing="4">
+            @if (errorMessage is not null)
             {
-                <MudProgressLinear Indeterminate="true" Class="mb-4" />
-            }
-            else
-            {
-                <MudAutocomplete T="DeviceOption"
-                                 @bind-Value="selectedDevice"
-                                 @bind-Value:after="OnDeviceChangedAsync"
-                                 Label="دستگاه (جستجو بر اساس کد یا نام)"
-                                 Required="true"
-                                 Class="mb-4"
-                                 SearchFunc="@SearchDevicesAsync"
-                                 ToStringFunc="@(device => device is null ? string.Empty : DeviceLabel(device))"
-                                 MinCharacters="0"
-                                 MaxItems="50"
-                                 OpenOnFocus="true"
-                                 ResetValueOnEmptyText="true"
-                                 Clearable="true" />
-            }
-        }
-
-        @if (ResolvedDeviceId is not null)
-        {
-            <JalaliDatePicker Date="entryDate" DateChanged="OnEntryDateChangedAsync" Label="تاریخ" Required="true" Class="mb-4" />
-
-            @if (isScheduleLoading)
-            {
-                <MudProgressLinear Indeterminate="true" Class="mb-4" />
-            }
-            else if (entryDate is not null && shifts.Count == 0)
-            {
-                <MudAlert Severity="Severity.Warning" Class="mb-4">
-                    برای این تاریخ شیفتی در تقویم کاری یافت نشد.
-                </MudAlert>
-            }
-            else if (shifts.Count > 1)
-            {
-                <MudSelect T="int?" @bind-Value="selectedShiftIndex" @bind-Value:after="OnShiftIndexChanged" Label="شیفت" Required="true" Class="mb-4">
-                    @foreach (var shift in shifts)
-                    {
-                        <MudSelectItem T="int?" Value="@((int?)shift.Index)">
-                            شیفت @(shift.Index + 1) — @shift.StartTime.ToString("HH:mm") تا @shift.EndTime.ToString("HH:mm")
-                        </MudSelectItem>
-                    }
-                </MudSelect>
-            }
-            else if (shifts.Count == 1)
-            {
-                <MudField Label="شیفت" Class="mb-4">
-                    شیفت @(shifts[0].Index + 1) — @shifts[0].StartTime.ToString("HH:mm") تا @shifts[0].EndTime.ToString("HH:mm") (تنها شیفت این روز)
-                </MudField>
+                <MudAlert Severity="Severity.Error">@errorMessage</MudAlert>
             }
 
-            @if (selectedShiftIndex is not null)
+            <MudText Typo="Typo.subtitle2" Color="Color.Primary">۱. دستگاه و زمان</MudText>
+
+            @if (MeterDeviceId is null)
             {
-                <MudGrid Class="mb-4">
-                    <MudItem xs="6">
-                        <MudTextField T="string" @bind-Value="shiftStartTimeText" Label="ساعت شروع (قابل ویرایش)" Placeholder="۰۸:۰۰" Required="true" />
+                @if (isDevicesLoading)
+                {
+                    <MudProgressLinear Indeterminate="true" />
+                }
+                else
+                {
+                    <MudAutocomplete T="DeviceOption"
+                                     @bind-Value="selectedDevice"
+                                     @bind-Value:after="OnDeviceChangedAsync"
+                                     Label="دستگاه (جستجو بر اساس کد یا نام)"
+                                     Required="true"
+                                     SearchFunc="@SearchDevicesAsync"
+                                     ToStringFunc="@(device => device is null ? string.Empty : DeviceLabel(device))"
+                                     MinCharacters="0"
+                                     MaxItems="50"
+                                     OpenOnFocus="true"
+                                     ResetValueOnEmptyText="true"
+                                     Clearable="true" />
+                }
+            }
+
+            @if (ResolvedDeviceId is not null)
+            {
+                <JalaliDatePicker Date="entryDate" DateChanged="OnEntryDateChangedAsync" Label="تاریخ" Required="true" />
+
+                @if (isScheduleLoading)
+                {
+                    <MudProgressLinear Indeterminate="true" />
+                }
+                else if (entryDate is not null && shifts.Count == 0)
+                {
+                    <MudAlert Severity="Severity.Warning">
+                        برای این تاریخ شیفتی در تقویم کاری یافت نشد.
+                    </MudAlert>
+                }
+                else if (shifts.Count > 1)
+                {
+                    <MudSelect T="int?" @bind-Value="selectedShiftIndex" @bind-Value:after="OnShiftIndexChanged"
+                               Label="شیفت" Required="true">
+                        @foreach (var shift in shifts)
+                        {
+                            <MudSelectItem T="int?" Value="@((int?)shift.Index)">
+                                شیفت @(shift.Index + 1) — @shift.StartTime.ToString("HH:mm") تا @shift.EndTime.ToString("HH:mm")
+                            </MudSelectItem>
+                        }
+                    </MudSelect>
+                }
+                else if (shifts.Count == 1)
+                {
+                    <MudTextField T="string" ReadOnly="true" Label="شیفت" Value="@SingleShiftText" />
+                }
+
+                @if (selectedShiftIndex is not null)
+                {
+                    <MudGrid Spacing="2">
+                        <MudItem xs="6">
+                            <MudTimePicker Label="ساعت شروع شیفت" @bind-Time="shiftStartTime" Required="true"
+                                           AnchorOrigin="Origin.TopCenter" TransformOrigin="Origin.BottomCenter" />
+                        </MudItem>
+                        <MudItem xs="6">
+                            <MudTimePicker Label="ساعت پایان شیفت" @bind-Time="shiftEndTime" Required="true"
+                                           AnchorOrigin="Origin.TopCenter" TransformOrigin="Origin.BottomCenter" />
+                        </MudItem>
+                    </MudGrid>
+                    <MudText Typo="Typo.caption" Color="Color.Secondary">
+                        ساعت‌ها از تقویم کاری پر شده‌اند و در صورت نیاز قابل تغییرند.
+                    </MudText>
+                }
+
+                <MudDivider />
+
+                <MudText Typo="Typo.subtitle2" Color="Color.Primary">۲. قرائت کنتور</MudText>
+
+                @if (SourceDeviceDiffers)
+                {
+                    <MudAlert Severity="Severity.Warning">
+                        آخرین قرائت ثبت‌شده برای این دارایی با دستگاه دیگری انجام شده است. اگر کنتور تعویض شده، ابتدا از «بازتنظیم شمارنده» استفاده کنید.
+                    </MudAlert>
+                }
+
+                <MudGrid Spacing="2">
+                    <MudItem xs="12" sm="4">
+                        <MudTextField T="string" ReadOnly="true" Label="آخرین قرائت قبلی" Value="@LastReadingText" />
                     </MudItem>
-                    <MudItem xs="6">
-                        <MudTextField T="string" @bind-Value="shiftEndTimeText" Label="ساعت پایان (قابل ویرایش)" Placeholder="۱۶:۰۰" Required="true" />
+                    <MudItem xs="12" sm="4">
+                        <MudNumericField T="decimal?" @bind-Value="rawReadingValue" Immediate="true" HideSpinButtons="true"
+                                         Label="قرائت فعلی کنتور" Required="true" Min="0" />
+                    </MudItem>
+                    <MudItem xs="12" sm="4">
+                        <MudTextField T="string" ReadOnly="true" Label="کارکرد مولد" Value="@UsageText" Error="@(UsageDelta is < 0)" />
                     </MudItem>
                 </MudGrid>
-            }
 
-            @if (SourceDeviceDiffers)
-            {
-                <MudAlert Severity="Severity.Warning" Class="mb-4">
-                    آخرین قرائت ثبت‌شده برای این دارایی با دستگاه دیگری انجام شده است. اگر کنتور تعویض شده، ابتدا از «بازتنظیم شمارنده» استفاده کنید.
-                </MudAlert>
-            }
+                @if (!string.IsNullOrEmpty(LastReadingCaption))
+                {
+                    <MudText Typo="Typo.caption" Color="Color.Secondary">آخرین ثبت: @LastReadingCaption</MudText>
+                }
 
-            <MudGrid Class="mb-4">
-                <MudItem xs="12" sm="4">
-                    <MudField Label="آخرین قرائت قبلی">
-                        @if (isLastReadingLoading)
-                        {
-                            <span>...</span>
-                        }
-                        else if (lastReading?.RawReadingValue is { } previousValue)
-                        {
-                            <span>@previousValue.ToString("0.##") @UsageDisplayNames.GetUnitName(lastReading.Unit)</span>
-                            <MudText Typo="Typo.caption" Color="Color.Secondary">@LastReadingCaption</MudText>
-                        }
-                        else
-                        {
-                            <span>ثبت نشده</span>
-                        }
-                    </MudField>
-                </MudItem>
-                <MudItem xs="12" sm="4">
-                    <MudNumericField T="decimal?" @bind-Value="rawReadingValue" Immediate="true"
-                                     Label="مقدار خوانده‌شده از کنتور" Required="true" Min="0" />
-                </MudItem>
-                <MudItem xs="12" sm="4">
-                    <MudField Label="کارکرد مولد">
-                        @if (UsageDelta is { } delta)
-                        {
-                            <span style="@(delta < 0 ? "color:var(--mud-palette-error)" : null)">@delta.ToString("0.##") @UsageDisplayNames.GetUnitName(lastReading?.Unit)</span>
-                            @if (delta < 0)
-                            {
-                                <MudText Typo="Typo.caption" Color="Color.Error">کمتر از قرائت قبلی است</MudText>
-                            }
-                        }
-                        else if (rawReadingValue is not null && lastReading is { RawReadingValue: null })
-                        {
-                            <span>0 (اولین ثبت؛ مبنای محاسبه)</span>
-                        }
-                        else
-                        {
-                            <span>—</span>
-                        }
-                    </MudField>
-                </MudItem>
-            </MudGrid>
+                @if (UsageDelta is < 0)
+                {
+                    <MudText Typo="Typo.caption" Color="Color.Error">قرائت فعلی از قرائت قبلی کمتر است و ثبت نمی‌شود.</MudText>
+                }
 
-            @if (personnelError is not null)
-            {
-                <MudAlert Severity="Severity.Warning" Class="mb-4">@personnelError</MudAlert>
-            }
+                <MudDivider />
 
-            @if (isPersonnelLoading)
-            {
-                <MudProgressLinear Indeterminate="true" Class="mb-4" />
+                <MudText Typo="Typo.subtitle2" Color="Color.Primary">۳. اپراتور</MudText>
+
+                @if (personnelError is not null)
+                {
+                    <MudAlert Severity="Severity.Warning">@personnelError</MudAlert>
+                }
+
+                @if (isPersonnelLoading)
+                {
+                    <MudProgressLinear Indeterminate="true" />
+                }
+                else
+                {
+                    <MudAutocomplete T="PersonnelOption"
+                                     @bind-Value="selectedOperator"
+                                     Label="اپراتور (اختیاری؛ جستجو بر اساس نام یا کد پرسنلی)"
+                                     SearchFunc="@SearchPersonnelAsync"
+                                     ToStringFunc="@(person => person is null ? string.Empty : PersonLabel(person))"
+                                     MinCharacters="0"
+                                     MaxItems="50"
+                                     OpenOnFocus="true"
+                                     ResetValueOnEmptyText="true"
+                                     Clearable="true"
+                                     HelperText="@(personnel.Count == 0 ? "برای این سازمان پرسنلی ثبت نشده است." : null)" />
+                }
             }
-            else
-            {
-                <MudAutocomplete T="PersonnelOption"
-                                 @bind-Value="selectedOperator"
-                                 Label="اپراتور (اختیاری؛ جستجو بر اساس نام یا کد پرسنلی)"
-                                 Class="mb-4"
-                                 SearchFunc="@SearchPersonnelAsync"
-                                 ToStringFunc="@(person => person is null ? string.Empty : PersonLabel(person))"
-                                 MinCharacters="0"
-                                 MaxItems="50"
-                                 OpenOnFocus="true"
-                                 ResetValueOnEmptyText="true"
-                                 Clearable="true"
-                                 HelperText="@(personnel.Count == 0 ? "برای این سازمان پرسنلی ثبت نشده است." : null)" />
-            }
-        }
+        </MudStack>
     </DialogContent>
     <DialogActions>
         <MudButton OnClick="Cancel">انصراف</MudButton>
@@ -221,8 +214,8 @@
     private DateTime? entryDate = DateTime.Today;
     private List<ShiftOption> shifts = [];
     private int? selectedShiftIndex;
-    private string shiftStartTimeText = string.Empty;
-    private string shiftEndTimeText = string.Empty;
+    private TimeSpan? shiftStartTime;
+    private TimeSpan? shiftEndTime;
     private decimal? rawReadingValue;
     private bool isDevicesLoading;
     private bool isPersonnelLoading;
@@ -241,6 +234,25 @@
         rawReadingValue is { } current && lastReading?.RawReadingValue is { } previous
             ? current - previous
             : null;
+
+    private string SingleShiftText =>
+        shifts.Count == 1
+            ? $"شیفت {shifts[0].Index + 1} — {shifts[0].StartTime:HH:mm} تا {shifts[0].EndTime:HH:mm} (تنها شیفت این روز)"
+            : string.Empty;
+
+    private string LastReadingText =>
+        isLastReadingLoading
+            ? "..."
+            : lastReading?.RawReadingValue is { } previous
+                ? $"{previous:0.####} {UsageDisplayNames.GetUnitName(lastReading.Unit)}"
+                : "ثبت نشده";
+
+    private string UsageText =>
+        UsageDelta is { } delta
+            ? $"{delta:0.####} {UsageDisplayNames.GetUnitName(lastReading?.Unit)}"
+            : rawReadingValue is not null && lastReading is { RawReadingValue: null }
+                ? "0 (اولین ثبت)"
+                : "—";
 
     private bool SourceDeviceDiffers =>
         lastReading?.SourceMeterDeviceId is { } source && ResolvedDeviceId is { } current && source != current;
@@ -453,8 +465,8 @@
     {
         entryDate = date;
         selectedShiftIndex = null;
-        shiftStartTimeText = string.Empty;
-        shiftEndTimeText = string.Empty;
+        shiftStartTime = null;
+        shiftEndTime = null;
         await LoadScheduleAsync();
     }
 
@@ -549,8 +561,8 @@
         selectedShiftIndex = shift.Index;
         // Prefill from the Work Calendar's scheduled time; the user may still edit these freely
         // before submitting (chat, 2026-10-03) — they are not re-validated against the calendar.
-        shiftStartTimeText = shift.StartTime.ToString("HH:mm");
-        shiftEndTimeText = shift.EndTime.ToString("HH:mm");
+        shiftStartTime = shift.StartTime.ToTimeSpan();
+        shiftEndTime = shift.EndTime.ToTimeSpan();
     }
 
     private async Task SubmitAsync()
@@ -563,10 +575,9 @@
             return;
         }
 
-        if (!TimeOnly.TryParse(JalaliCalendarConverter.ToLatinDigits(shiftStartTimeText), out var shiftStartTime) ||
-            !TimeOnly.TryParse(JalaliCalendarConverter.ToLatinDigits(shiftEndTimeText), out var shiftEndTime))
+        if (shiftStartTime is null || shiftEndTime is null || shiftStartTime == shiftEndTime)
         {
-            errorMessage = "ساعت شروع و پایان شیفت را به‌درستی وارد کنید.";
+            errorMessage = "ساعت شروع و پایان شیفت را به‌درستی انتخاب کنید (این دو نباید یکسان باشند).";
             return;
         }
 
@@ -583,8 +594,8 @@
                     ShiftIndex = selectedShiftIndex.Value,
                     RawReadingValue = rawReadingValue.Value,
                     OperatorId = selectedOperator?.Id,
-                    ShiftStartTime = shiftStartTime,
-                    ShiftEndTime = shiftEndTime,
+                    ShiftStartTime = TimeOnly.FromTimeSpan(shiftStartTime.Value),
+                    ShiftEndTime = TimeOnly.FromTimeSpan(shiftEndTime.Value),
                 });
 
             if (!response.IsSuccessStatusCode)

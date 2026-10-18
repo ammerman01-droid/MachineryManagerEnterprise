@@ -71,6 +71,15 @@ public static class UsageLedgerErrors
         "UsageLedger.RawValueDecreased",
         $"Raw value {attemptedValue} is lower than the previously recorded value {previousValue} for the same device.");
 
+    /// <summary>
+    /// Creates an error indicating a correction would move a later entry's reading below zero —
+    /// corrections shift every later reading by the same amount to keep their usage unchanged
+    /// (chat, 2026-10-14), and a counter cannot read a negative value.
+    /// </summary>
+    public static Error CorrectionMakesLaterReadingNegative() => Error.Validation(
+        "UsageLedger.CorrectionMakesLaterReadingNegative",
+        "This correction would move a later reading below zero.");
+
     /// <summary>Creates an error indicating only the most recently registered entry may be deleted (BR-049 — backward-only deletion).</summary>
     public static Error OnlyLatestEntryDeletable() => Error.Conflict(
         "UsageLedger.OnlyLatestEntryDeletable",
@@ -90,6 +99,15 @@ public static class UsageLedgerErrors
     public static Error FreezeBoundaryCannotMoveBackward() => Error.Conflict(
         "UsageLedger.FreezeBoundaryCannotMoveBackward",
         "The freeze boundary can only move forward in time.");
+
+    /// <summary>
+    /// Creates an error indicating a day's total Operational Usage would exceed the daily limit
+    /// (chat, 2026-10-13) — e.g. more than 24 hours or 1000 km registered for one day, which is
+    /// almost certainly a typing mistake.
+    /// </summary>
+    public static Error DailyCapExceeded(DateOnly date, decimal dayTotal, decimal dailyCap) => Error.Validation(
+        "UsageLedger.DailyCapExceeded",
+        $"Operational usage for {date:yyyy-MM-dd} would total {dayTotal}, exceeding the daily limit of {dailyCap}.");
 
     /// <summary>Creates an error indicating the current user is not authorized to perform the requested action.</summary>
     public static Error NotAuthorized() => Error.Failure(

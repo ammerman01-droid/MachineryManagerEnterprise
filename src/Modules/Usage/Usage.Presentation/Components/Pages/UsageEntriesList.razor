@@ -14,15 +14,26 @@
 
     @if (selectedOrganizationId is not null)
     {
-        <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="OpenRegisterShiftReadingDialogAsync">
-            ثبت کارکرد
-        </MudButton>
+        <MudStack Row="true" Spacing="2">
+            <MudButton Variant="Variant.Outlined" Color="Color.Error" StartIcon="@Icons.Material.Filled.Lock"
+                       OnClick="OpenFreezeDialogAsync">
+                قفل کارکردها
+            </MudButton>
+            <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="OpenRegisterShiftReadingDialogAsync">
+                ثبت کارکرد
+            </MudButton>
+        </MudStack>
     }
 </div>
 
 @if (errorMessage is not null)
 {
     <MudAlert Severity="Severity.Error" Class="my-4">@errorMessage</MudAlert>
+}
+
+@if (infoMessage is not null)
+{
+    <MudAlert Severity="Severity.Success" Class="my-4" ShowCloseIcon="true" CloseIconClicked="@(() => infoMessage = null)">@infoMessage</MudAlert>
 }
 
 <MudGrid Class="mb-4">
@@ -68,7 +79,7 @@
         </MudItem>
     </MudGrid>
 
-    <MudButton Variant="Variant.Filled" Color="Color.Primary" Class="mb-4" OnClick="LoadEntriesAsync">
+    <MudButton Variant="Variant.Filled" Color="Color.Primary" Class="mb-4" OnClick="ApplyFilterAsync">
         اعمال فیلتر
     </MudButton>
 
@@ -78,7 +89,7 @@
     }
     else
     {
-        <MudTable Items="entries" Hover="true">
+        <MudTable Items="entries" Hover="true" Dense="true">
             <HeaderContent>
                 <MudTh>تاریخ</MudTh>
                 <MudTh>شیفت</MudTh>
@@ -88,13 +99,14 @@
                 <MudTh>دستگاه</MudTh>
                 <MudTh>پروژه</MudTh>
                 <MudTh>منشأ</MudTh>
+                <MudTh>عملیات</MudTh>
             </HeaderContent>
             <RowTemplate>
                 <MudTd DataLabel="تاریخ">@JalaliCalendarConverter.Format(context.EntryDate.ToDateTime(TimeOnly.MinValue))</MudTd>
                 <MudTd DataLabel="شیفت">@(context.ShiftIndex is { } i ? (i + 1).ToString() : "—")</MudTd>
                 <MudTd DataLabel="نوع ردیف">@UsageDisplayNames.GetEntryKindName(context.Kind)</MudTd>
-                <MudTd DataLabel="کارکرد مولد">@context.OperationalUsageAmount.ToString("0.##")</MudTd>
-                <MudTd DataLabel="مقدار خام">@context.RawReadingValue.ToString("0.##")</MudTd>
+                <MudTd DataLabel="کارکرد مولد">@context.OperationalUsageAmount.ToString("0.####") @UsageDisplayNames.GetUnitName(context.Unit)</MudTd>
+                <MudTd DataLabel="مقدار خام">@context.RawReadingValue.ToString("0.####")</MudTd>
                 <MudTd DataLabel="دستگاه">@(context.DeviceCode ?? "—")</MudTd>
                 <MudTd DataLabel="پروژه">@(context.ProjectName ?? "—")</MudTd>
                 <MudTd DataLabel="منشأ">
@@ -107,6 +119,28 @@
                         @UsageDisplayNames.GetEntryOriginName(context.Origin)
                     }
                 </MudTd>
+                <MudTd DataLabel="عملیات">
+                    @if (IsFrozen(context))
+                    {
+                        <MudIcon Icon="@Icons.Material.Filled.Lock" Size="Size.Small" Color="Color.Default" title="قفل‌شده" />
+                    }
+                    else
+                    {
+                        @if (context.Kind == "ShiftReading" && context.ShiftIndex is not null)
+                        {
+                            <MudIconButton Icon="@Icons.Material.Filled.Edit" Size="Size.Small" title="اصلاح مقدار"
+                                           OnClick="@(() => OpenCorrectReadingDialogAsync(context))" />
+                            <MudIconButton Icon="@Icons.Material.Filled.Schedule" Size="Size.Small" title="اصلاح ساعت شیفت و اپراتور"
+                                           OnClick="@(() => OpenCorrectDetailsDialogAsync(context))" />
+                        }
+
+                        @if (context.IsLatestInLedger)
+                        {
+                            <MudIconButton Icon="@Icons.Material.Filled.Delete" Size="Size.Small" Color="Color.Error" title="حذف (آخرین ردیف این دارایی)"
+                                           OnClick="@(() => OpenDeleteDialogAsync(context))" />
+                        }
+                    }
+                </MudTd>
             </RowTemplate>
         </MudTable>
 
@@ -114,10 +148,34 @@
         {
             <MudText Class="mt-4" Color="Color.Secondary">کارکردی برای این بازه ثبت نشده است.</MudText>
         }
+        else
+        {
+            <div class="d-flex flex-wrap align-center justify-space-between mt-4" style="gap: 12px;">
+                <MudText Typo="Typo.caption" Color="Color.Secondary">
+                    نمایش @FirstRowNumber تا @LastRowNumber از @totalCount کارکرد
+                </MudText>
+
+                @if (TotalPages > 1)
+                {
+                    <MudPagination Count="@TotalPages" Selected="@(page)" SelectedChanged="OnPageChangedAsync"
+                                   ShowFirstButton="true" ShowLastButton="true" />
+                }
+
+                <MudSelect T="int" Value="pageSize" ValueChanged="OnPageSizeChangedAsync" Label="تعداد در هر صفحه"
+                           Variant="Variant.Outlined" Dense="true" Style="max-width: 160px;">
+                    @foreach (var size in PageSizeOptions)
+                    {
+                        <MudSelectItem T="int" Value="@size">@size</MudSelectItem>
+                    }
+                </MudSelect>
+            </div>
+        }
     }
 }
 
 @code {
+    private static readonly int[] PageSizeOptions = [25, 50, 100, 200];
+
     private sealed class HoldingItem
     {
         public Guid Id { get; set; }
@@ -143,14 +201,19 @@
         public Guid MeterDeviceId { get; set; }
         public string OwnerType { get; set; } = string.Empty;
         public Guid OwnerId { get; set; }
+        public string Unit { get; set; } = string.Empty;
         public DateOnly EntryDate { get; set; }
         public string Kind { get; set; } = string.Empty;
         public int? ShiftIndex { get; set; }
+        public TimeOnly? ShiftStartTime { get; set; }
+        public TimeOnly? ShiftEndTime { get; set; }
         public decimal RawReadingValue { get; set; }
         public decimal OperationalUsageAmount { get; set; }
         public Guid? OperatorId { get; set; }
         public Guid ProjectId { get; set; }
         public string Origin { get; set; } = string.Empty;
+        public DateOnly? FrozenUpToDate { get; set; }
+        public bool IsLatestInLedger { get; set; }
         public string? DeviceCode { get; set; }
         public string? ProjectName { get; set; }
     }
@@ -163,17 +226,33 @@
 
     private static readonly JsonSerializerOptions JsonOptions = new() { PropertyNameCaseInsensitive = true };
 
+    private static readonly DialogOptions WideDialog = new() { MaxWidth = MaxWidth.Medium, FullWidth = true };
+
     private List<HoldingItem> holdings = [];
     private List<OrganizationItem> organizations = [];
     private List<ProjectItem> projects = [];
     private List<UsageEntryItem> entries = [];
     private Guid? selectedHoldingId;
     private Guid? selectedOrganizationId;
+    private Guid? selectedProjectId;
     private DateTime? fromDate;
     private DateTime? toDate;
-    private Guid? selectedProjectId;
+    private int page = 1;
+    private int pageSize = 25;
+    private int totalCount;
     private bool isLoading;
     private string? errorMessage;
+    private string? infoMessage;
+
+    private int TotalPages => totalCount == 0 ? 0 : (int)Math.Ceiling(totalCount / (double)pageSize);
+
+    private int FirstRowNumber => totalCount == 0 ? 0 : ((page - 1) * pageSize) + 1;
+
+    private int LastRowNumber => Math.Min(page * pageSize, totalCount);
+
+    /// <summary>A row is frozen when its date is on or before its Ledger's freeze date (BR-052/BR-053).</summary>
+    private static bool IsFrozen(UsageEntryItem item) =>
+        item.FrozenUpToDate is { } frozenUpTo && item.EntryDate <= frozenUpTo;
 
     protected override async Task OnInitializedAsync()
     {
@@ -206,6 +285,7 @@
         selectedProjectId = null;
         selectedOrganizationId = null;
         entries = [];
+        totalCount = 0;
 
         if (selectedHoldingId is null)
         {
@@ -239,8 +319,10 @@
     private async Task OnOrganizationChangedAsync()
     {
         entries = [];
+        totalCount = 0;
         projects = [];
         selectedProjectId = null;
+        page = 1;
 
         if (selectedOrganizationId is not null)
         {
@@ -280,6 +362,25 @@
         }
     }
 
+    private async Task ApplyFilterAsync()
+    {
+        page = 1;
+        await LoadEntriesAsync();
+    }
+
+    private async Task OnPageChangedAsync(int newPage)
+    {
+        page = newPage;
+        await LoadEntriesAsync();
+    }
+
+    private async Task OnPageSizeChangedAsync(int newPageSize)
+    {
+        pageSize = newPageSize;
+        page = 1;
+        await LoadEntriesAsync();
+    }
+
     private async Task LoadEntriesAsync()
     {
         if (selectedOrganizationId is null)
@@ -293,7 +394,7 @@
         try
         {
             var client = HttpClientFactory.CreateClient("InternalApi");
-            var url = $"/api/v1/organizations/{selectedOrganizationId}/usage-entries?page=1&pageSize=100";
+            var url = $"/api/v1/organizations/{selectedOrganizationId}/usage-entries?page={page}&pageSize={pageSize}";
 
             if (fromDate is not null)
             {
@@ -314,13 +415,21 @@
 
             if (!response.IsSuccessStatusCode)
             {
-                errorMessage = $"خطا در دریافت فهرست کارکردها: {await response.Content.ReadAsStringAsync()}";
+                errorMessage = await UsageProblemMessages.DescribeAsync(response, "خطا در دریافت فهرست کارکردها");
                 return;
             }
 
             var stream = await response.Content.ReadAsStreamAsync();
             var result = await JsonSerializer.DeserializeAsync<SearchResult<UsageEntryItem>>(stream, JsonOptions);
             entries = result?.Items ?? [];
+            totalCount = result?.TotalCount ?? 0;
+
+            // The last page can disappear after a delete — step back to the new last page.
+            if (entries.Count == 0 && page > 1 && totalCount > 0)
+            {
+                page = TotalPages;
+                await LoadEntriesAsync();
+            }
         }
         catch (Exception ex)
         {
@@ -339,7 +448,96 @@
             { x => x.OrganizationId, selectedOrganizationId },
         };
 
-        var dialog = await DialogService.ShowAsync<RegisterShiftReadingDialog>("ثبت کارکرد شیفت", parameters);
+        var dialog = await DialogService.ShowAsync<RegisterShiftReadingDialog>("ثبت کارکرد شیفت", parameters, WideDialog);
+        var result = await dialog.Result;
+
+        if (result is { Canceled: false })
+        {
+            await LoadEntriesAsync();
+        }
+    }
+
+    private async Task OpenFreezeDialogAsync()
+    {
+        if (selectedOrganizationId is not { } organizationId)
+        {
+            return;
+        }
+
+        var parameters = new DialogParameters<FreezeUsageDialog>
+        {
+            { x => x.OrganizationId, organizationId },
+            { x => x.Projects, projects.Select(p => new KeyValuePair<Guid, string>(p.Id, p.Name)).ToList() },
+        };
+
+        var dialog = await DialogService.ShowAsync<FreezeUsageDialog>("قفل‌کردن کارکردها", parameters, WideDialog);
+        var result = await dialog.Result;
+
+        if (result is { Canceled: false })
+        {
+            infoMessage = result.Data as string;
+            await LoadEntriesAsync();
+        }
+    }
+
+    private async Task OpenCorrectReadingDialogAsync(UsageEntryItem item)
+    {
+        var parameters = new DialogParameters<CorrectEntryReadingDialog>
+        {
+            { x => x.OwnerType, item.OwnerType },
+            { x => x.OwnerId, item.OwnerId },
+            { x => x.Unit, item.Unit },
+            { x => x.EntryDate, item.EntryDate },
+            { x => x.ShiftIndex, item.ShiftIndex!.Value },
+            { x => x.CurrentRawReadingValue, item.RawReadingValue },
+        };
+
+        var dialog = await DialogService.ShowAsync<CorrectEntryReadingDialog>("اصلاح مقدار خوانده‌شده", parameters, WideDialog);
+        var result = await dialog.Result;
+
+        if (result is { Canceled: false })
+        {
+            await LoadEntriesAsync();
+        }
+    }
+
+    private async Task OpenCorrectDetailsDialogAsync(UsageEntryItem item)
+    {
+        var parameters = new DialogParameters<CorrectEntryDetailsDialog>
+        {
+            { x => x.OwnerType, item.OwnerType },
+            { x => x.OwnerId, item.OwnerId },
+            { x => x.Unit, item.Unit },
+            { x => x.EntryDate, item.EntryDate },
+            { x => x.ShiftIndex, item.ShiftIndex!.Value },
+            { x => x.CurrentOperatorId, item.OperatorId },
+            { x => x.CurrentShiftStartTime, item.ShiftStartTime ?? default },
+            { x => x.CurrentShiftEndTime, item.ShiftEndTime ?? default },
+            { x => x.OrganizationId, selectedOrganizationId },
+        };
+
+        var dialog = await DialogService.ShowAsync<CorrectEntryDetailsDialog>("اصلاح مشخصات شیفت", parameters, WideDialog);
+        var result = await dialog.Result;
+
+        if (result is { Canceled: false })
+        {
+            await LoadEntriesAsync();
+        }
+    }
+
+    private async Task OpenDeleteDialogAsync(UsageEntryItem item)
+    {
+        var parameters = new DialogParameters<DeleteLatestUsageEntryDialog>
+        {
+            { x => x.OwnerType, item.OwnerType },
+            { x => x.OwnerId, item.OwnerId },
+            { x => x.Unit, item.Unit },
+            { x => x.EntryDate, item.EntryDate },
+            { x => x.ShiftIndex, item.ShiftIndex },
+            { x => x.OperationalUsageAmount, item.OperationalUsageAmount },
+        };
+
+        var dialog = await DialogService.ShowAsync<DeleteLatestUsageEntryDialog>("حذف آخرین ردیف", parameters);
         var result = await dialog.Result;
 
         if (result is { Canceled: false })

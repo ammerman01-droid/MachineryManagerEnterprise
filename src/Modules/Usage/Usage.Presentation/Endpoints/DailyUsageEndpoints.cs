@@ -2,6 +2,7 @@ using MachineryManagerEnterprise.SharedKernel;
 using MachineryManagerEnterprise.Usage.Application.Features.DailyUsage.Commands.CorrectEntryDetails;
 using MachineryManagerEnterprise.Usage.Application.Features.DailyUsage.Commands.CorrectEntryReading;
 using MachineryManagerEnterprise.Usage.Application.Features.DailyUsage.Commands.DeleteLatestUsageEntry;
+using MachineryManagerEnterprise.Usage.Application.Features.DailyUsage.Commands.FreezeOrganizationUsage;
 using MachineryManagerEnterprise.Usage.Application.Features.DailyUsage.Commands.FreezeUsageUpTo;
 using MachineryManagerEnterprise.Usage.Application.Features.DailyUsage.Commands.RebaseCounter;
 using MachineryManagerEnterprise.Usage.Application.Features.DailyUsage.Queries.GetAccumulatedOperationalUsage;
@@ -78,6 +79,15 @@ public static class DailyUsageEndpoints
             .WithTags("DailyUsage")
             .WithName("GetMeterDeviceLastReading")
             .WithSummary("Returns the most recent entry on the Usage Ledger of this device's current owner — backs the previous-reading and usage preview in the register-usage dialog.")
+            .RequireAuthorization(policy => policy
+                .AddAuthenticationSchemes(OpenIddictValidationAspNetCoreDefaults.AuthenticationScheme)
+                .RequireAuthenticatedUser());
+
+        endpoints
+            .MapPost("/api/v1/organizations/{organizationId:guid}/usage-freeze", FreezeOrganizationUsageAsync)
+            .WithTags("DailyUsage")
+            .WithName("FreezeOrganizationUsage")
+            .WithSummary("Freezes registered usage up to a date for every Asset of an Organization (optionally one Project) — frozen days can no longer be registered, corrected or deleted.")
             .RequireAuthorization(policy => policy
                 .AddAuthenticationSchemes(OpenIddictValidationAspNetCoreDefaults.AuthenticationScheme)
                 .RequireAuthenticatedUser());
@@ -284,6 +294,20 @@ public static class DailyUsageEndpoints
         CancellationToken cancellationToken)
     {
         var result = await sender.Send(new GetLastReadingQuery(meterDeviceId), cancellationToken);
+
+        return result.IsSuccess ? Results.Ok(result.Value) : result.ToProblemResult(httpContext);
+    }
+
+    private static async Task<IResult> FreezeOrganizationUsageAsync(
+        Guid organizationId,
+        FreezeOrganizationUsageRequest request,
+        ISender sender,
+        HttpContext httpContext,
+        CancellationToken cancellationToken)
+    {
+        var result = await sender.Send(
+            new FreezeOrganizationUsageCommand(organizationId, request.ProjectId, request.FrozenUpToDate),
+            cancellationToken);
 
         return result.IsSuccess ? Results.Ok(result.Value) : result.ToProblemResult(httpContext);
     }

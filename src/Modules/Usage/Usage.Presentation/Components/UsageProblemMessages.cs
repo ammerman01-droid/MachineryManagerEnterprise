@@ -83,6 +83,10 @@ public static class UsageProblemMessages
         "UsageLedger.DifferentSourceDeviceRequiresRebase" =>
             "آخرین قرائت ثبت‌شده برای این دارایی با دستگاه دیگری انجام شده است. اگر کنتور تعویض شده، ابتدا از «بازتنظیم شمارنده» استفاده کنید.",
         "UsageLedger.EntryFrozen" => EntryFrozen(message),
+        "UsageLedger.DailyCapExceeded" => DailyCapExceeded(message),
+        "UsageLedger.CorrectionMakesLaterReadingNegative" =>
+            "با این اصلاح، قرائت یکی از ردیف‌های بعدی منفی می‌شود. مقدار جدید را بیشتر انتخاب کنید.",
+        "Usage.FreezeDateInFuture" => "تاریخ قفل نمی‌تواند در آینده باشد.",
         "UsageLedger.RebaseDateNotAfterLastEntry" =>
             "تاریخ بازتنظیم باید بعد از تاریخ آخرین ردیف ثبت‌شده باشد.",
         "UsageLedger.RebaseDateInFuture" =>
@@ -118,7 +122,7 @@ public static class UsageProblemMessages
         var match = Regex.Match(message, @"Raw value (?<new>\S+) is lower than the previously recorded value (?<old>\S+) for");
 
         return match.Success
-            ? $"مقدار واردشده ({match.Groups["new"].Value}) از آخرین قرائت ثبت‌شده ({match.Groups["old"].Value}) کمتر است. {advice}"
+            ? $"مقدار واردشده ({FormatNumber(match.Groups["new"].Value)}) از آخرین قرائت ثبت‌شده ({FormatNumber(match.Groups["old"].Value)}) کمتر است. {advice}"
             : advice;
     }
 
@@ -138,6 +142,27 @@ public static class UsageProblemMessages
         var lastShift = int.Parse(match.Groups["s2"].Value, CultureInfo.InvariantCulture) + 1;
 
         return $"شیفت‌های گزارش‌نشده از {ToJalali(match.Groups["d1"].Value)} (شیفت {firstShift}) تا {ToJalali(match.Groups["d2"].Value)} (شیفت {lastShift}) وجود دارند و مقدار کنتور تغییر کرده است. {advice}";
+    }
+
+    /// <summary>
+    /// Shows a number without the padding zeros the database scale adds (1012.0000 becomes 1012,
+    /// 1012.5000 becomes 1012.5).
+    /// </summary>
+    private static string FormatNumber(string raw) =>
+        decimal.TryParse(raw.TrimEnd('.', ','), NumberStyles.Number, CultureInfo.InvariantCulture, out var value)
+            ? value.ToString("0.####", CultureInfo.InvariantCulture)
+            : raw;
+
+    private static string DailyCapExceeded(string message)
+    {
+        const string advice = "این مقدار احتمالاً اشتباه تایپی است؛ قرائت کنتور را بررسی کنید.";
+        var match = Regex.Match(
+            message,
+            @"usage for (?<d>\d{4}-\d{2}-\d{2}) would total (?<total>\S+), exceeding the daily limit of (?<cap>\S+?)\.?$");
+
+        return match.Success
+            ? $"مجموع کارکرد مولد {ToJalali(match.Groups["d"].Value)} برابر {FormatNumber(match.Groups["total"].Value)} می‌شود که از سقف مجاز روزانه ({FormatNumber(match.Groups["cap"].Value)}) بیشتر است. {advice}"
+            : $"مجموع کارکرد مولد این روز از سقف مجاز روزانه بیشتر می‌شود. {advice}";
     }
 
     private static string EntryFrozen(string message)

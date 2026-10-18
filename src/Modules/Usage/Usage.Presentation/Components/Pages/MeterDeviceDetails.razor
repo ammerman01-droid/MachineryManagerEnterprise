@@ -457,6 +457,7 @@ else if (device is not null)
             { x => x.CurrentOperatorId, item.OperatorId },
             { x => x.CurrentShiftStartTime, item.ShiftStartTime ?? default },
             { x => x.CurrentShiftEndTime, item.ShiftEndTime ?? default },
+            { x => x.OrganizationId, device?.OrganizationId },
         };
 
         var dialog = await DialogService.ShowAsync<CorrectEntryDetailsDialog>("اصلاح مشخصات شیفت", parameters);

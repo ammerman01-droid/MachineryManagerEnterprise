@@ -1,0 +1,118 @@
+@using System.Text.Json
+@using MachineryManagerEnterprise.UI.Components
+@using MachineryManagerEnterprise.UI.Calendar
+@using MachineryManagerEnterprise.Usage.Presentation.Components
+@inject IHttpClientFactory HttpClientFactory
+
+<MudDialog>
+    <TitleContent>قفل‌کردن کارکردها</TitleContent>
+    <DialogContent>
+        <MudStack Spacing="4">
+            @if (errorMessage is not null)
+            {
+                <MudAlert Severity="Severity.Error">@errorMessage</MudAlert>
+            }
+
+            <MudAlert Severity="Severity.Warning">
+                همهٔ کارکردهای ثبت‌شده تا تاریخ انتخابی (و خود آن تاریخ) قفل می‌شوند و دیگر قابل ثبت، اصلاح یا حذف نخواهند بود.
+                این کار قابل بازگشت نیست و تاریخ قفل فقط می‌تواند به جلو برود.
+            </MudAlert>
+
+            <JalaliDatePicker Date="frozenUpToDate" DateChanged="@((DateTime? date) => frozenUpToDate = date)"
+                              Label="قفل تا تاریخ (شامل همین روز)" Required="true" />
+
+            <MudSelect T="Guid?" @bind-Value="selectedProjectId" Label="محدود به پروژه (اختیاری)"
+                       Placeholder="همهٔ پروژه‌های سازمان" Clearable="true">
+                @foreach (var project in Projects)
+                {
+                    <MudSelectItem T="Guid?" Value="@((Guid?)project.Key)">@project.Value</MudSelectItem>
+                }
+            </MudSelect>
+        </MudStack>
+    </DialogContent>
+    <DialogActions>
+        <MudButton OnClick="Cancel">انصراف</MudButton>
+        <MudButton Color="Color.Error" Variant="Variant.Filled" OnClick="SubmitAsync"
+                   Disabled="@(isSubmitting || frozenUpToDate is null)">
+            قفل کن
+        </MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+    [CascadingParameter]
+    private IMudDialogInstance MudDialog { get; set; } = null!;
+
+    /// <summary>The Organization whose usage is being frozen.</summary>
+    [Parameter]
+    public Guid OrganizationId { get; set; }
+
+    /// <summary>The Organization's Projects (id and name), offered as an optional restriction.</summary>
+    [Parameter]
+    public IReadOnlyList<KeyValuePair<Guid, string>> Projects { get; set; } = [];
+
+    private sealed class FreezeResult
+    {
+        public int FrozenLedgerCount { get; set; }
+        public int AlreadyFrozenLedgerCount { get; set; }
+    }
+
+    private static readonly JsonSerializerOptions JsonOptions = new() { PropertyNameCaseInsensitive = true };
+
+    private DateTime? frozenUpToDate = DateTime.Today;
+    private Guid? selectedProjectId;
+    private bool isSubmitting;
+    private string? errorMessage;
+
+    private async Task SubmitAsync()
+    {
+        errorMessage = null;
+
+        if (frozenUpToDate is null)
+        {
+            errorMessage = "لطفاً تاریخ قفل را انتخاب کنید.";
+            return;
+        }
+
+        isSubmitting = true;
+
+        try
+        {
+            var date = DateOnly.FromDateTime(frozenUpToDate.Value);
+            var client = HttpClientFactory.CreateClient("InternalApi");
+            var response = await client.PostAsJsonAsync(
+                $"/api/v1/organizations/{OrganizationId}/usage-freeze",
+                new { FrozenUpToDate = date, ProjectId = selectedProjectId });
+
+            if (!response.IsSuccessStatusCode)
+            {
+                errorMessage = await UsageProblemMessages.DescribeAsync(response, "خطا در قفل‌کردن کارکردها");
+                return;
+            }
+
+            var result = await JsonSerializer.DeserializeAsync<FreezeResult>(await response.Content.ReadAsStreamAsync(), JsonOptions);
+            var jalali = JalaliCalendarConverter.Format(frozenUpToDate.Value);
+
+            var message = result is { FrozenLedgerCount: > 0 }
+                ? $"کارکردها تا {jalali} برای {result.FrozenLedgerCount} دارایی قفل شد."
+                : $"چیزی برای قفل‌کردن نبود؛ کارکردها تا {jalali} (یا بعد از آن) از قبل قفل بودند.";
+
+            if (result is { FrozenLedgerCount: > 0, AlreadyFrozenLedgerCount: > 0 })
+            {
+                message += $" {result.AlreadyFrozenLedgerCount} دارایی از قبل تا تاریخ دیرتری قفل بود و دست نخورد.";
+            }
+
+            MudDialog.Close(DialogResult.Ok(message));
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"خطا در قفل‌کردن کارکردها: {ex.Message}";
+        }
+        finally
+        {
+            isSubmitting = false;
+        }
+    }
+
+    private void Cancel() => MudDialog.Cancel();
+}

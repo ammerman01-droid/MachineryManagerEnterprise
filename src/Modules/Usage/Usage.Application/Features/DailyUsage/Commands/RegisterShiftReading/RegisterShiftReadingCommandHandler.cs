@@ -176,6 +176,7 @@ public sealed class RegisterShiftReadingCommandHandler
             request.OperatorId,
             assetContext.ProjectId,
             missedShiftsResult.Value,
+            global::Usage.Domain.UsageCapDefaults.GetDailyCap(device.Unit, device.DailyCapOverride),
             _dateTimeProvider);
 
         if (registerResult.IsFailure)

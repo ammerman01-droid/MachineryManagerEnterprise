@@ -11,12 +11,12 @@
         }
 
         <MudAlert Severity="Severity.Warning" Class="mb-4">
-            اصلاح این ردیف ممکن است کارکرد مولد ردیف بعدی زنجیره را هم به‌طور خودکار بازمحاسبه کند.
+            با اصلاح این مقدار، قرائت همهٔ ردیف‌های بعدی (تا اولین بازتنظیم شمارنده) به همان اندازه جابه‌جا می‌شود تا کارکرد مولد آن‌ها تغییر نکند. فقط کارکرد مولد همین ردیف عوض می‌شود.
         </MudAlert>
 
         <MudField Label="تاریخ / شیفت" Class="mb-4">@EntryDate.ToString("yyyy-MM-dd") — شیفت @(ShiftIndex + 1)</MudField>
 
-        <MudField Label="مقدار فعلی" Class="mb-4">@CurrentRawReadingValue.ToString("0.##")</MudField>
+        <MudField Label="مقدار فعلی" Class="mb-4">@CurrentRawReadingValue.ToString("0.####")</MudField>
 
         <MudNumericField T="decimal?" @bind-Value="newRawReadingValue" Label="مقدار جدید" Required="true" Min="0" Class="mb-4" />
     </DialogContent>
@@ -60,7 +60,10 @@
     private bool isSubmitting;
     private string? errorMessage;
 
-    protected override void OnParametersSet() => newRawReadingValue ??= CurrentRawReadingValue;
+    protected override void OnParametersSet() => newRawReadingValue ??= Normalize(CurrentRawReadingValue);
+
+    /// <summary>Drops the padding zeros the database scale adds (1009.0000 becomes 1009) so the field shows only real decimals.</summary>
+    private static decimal Normalize(decimal value) => value / 1.0000000000000000000000000000m;
 
     private async Task SubmitAsync()
     {
