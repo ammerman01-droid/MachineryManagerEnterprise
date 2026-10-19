@@ -1,8 +1,6 @@
 using System.Net.Http.Headers;
 using MachineryManagerEnterprise.Identity.Domain;
-using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace MachineryManagerEnterprise.Identity.Infrastructure.Http;
@@ -31,7 +29,10 @@ public sealed class BearerTokenHandler : DelegatingHandler
         HttpRequestMessage request,
         CancellationToken cancellationToken)
     {
-        var accessToken = await ResolveAccessTokenAsync();
+        // The circuit's scope when inside a circuit; the request's scope during prerender.
+        var services = _circuitServicesAccessor.Services ?? _httpContextAccessor.HttpContext?.RequestServices;
+        var tokenAccessor = services?.GetService<ICurrentAccessTokenAccessor>();
+        var accessToken = tokenAccessor is null ? null : await tokenAccessor.GetAccessTokenAsync();
 
         if (!string.IsNullOrEmpty(accessToken))
         {
@@ -39,22 +40,5 @@ public sealed class BearerTokenHandler : DelegatingHandler
         }
 
         return await base.SendAsync(request, cancellationToken);
-    }
-
-    private async Task<string?> ResolveAccessTokenAsync()
-    {
-        // Interactive circuit: use the circuit's own scoped accessor (per user/circuit).
-        if (_circuitServicesAccessor.Services is { } circuitServices)
-        {
-            return await circuitServices
-                .GetRequiredService<ICurrentAccessTokenAccessor>()
-                .GetAccessTokenAsync();
-        }
-
-        // Prerender / plain HTTP request: read straight from the request's own cookie.
-        var httpContext = _httpContextAccessor.HttpContext;
-        return httpContext is null
-            ? null
-            : await httpContext.GetTokenAsync(IdentityConstants.ApplicationScheme, "access_token");
     }
 }

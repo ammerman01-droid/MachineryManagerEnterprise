@@ -17,6 +17,8 @@ public sealed class ActivateUserProfileAssignmentCommandHandler
     private readonly IUserProfileAssignmentRepository _assignmentRepository;
     private readonly IAdministrationUnitOfWork _unitOfWork;
     private readonly IDateTimeProvider _dateTimeProvider;
+    private readonly IUserSessionInvalidator _sessionInvalidator;
+
 
     /// <summary>
     /// Initializes a new instance of the <see cref="ActivateUserProfileAssignmentCommandHandler"/> class.
@@ -24,14 +26,17 @@ public sealed class ActivateUserProfileAssignmentCommandHandler
     /// <param name="assignmentRepository">The user-profile assignment repository.</param>
     /// <param name="unitOfWork">The unit of work for atomic persistence.</param>
     /// <param name="dateTimeProvider">Provider for deterministic UTC timestamps.</param>
+    /// <param name="sessionInvalidator">Ends the user's sessions so the new assignment takes effect.</param>
     public ActivateUserProfileAssignmentCommandHandler(
         IUserProfileAssignmentRepository assignmentRepository,
         IAdministrationUnitOfWork unitOfWork,
-        IDateTimeProvider dateTimeProvider)
+        IDateTimeProvider dateTimeProvider,
+        IUserSessionInvalidator sessionInvalidator)
     {
         _assignmentRepository = assignmentRepository;
         _unitOfWork = unitOfWork;
         _dateTimeProvider = dateTimeProvider;
+        _sessionInvalidator = sessionInvalidator;
     }
 
     /// <summary>
@@ -72,6 +77,8 @@ public sealed class ActivateUserProfileAssignmentCommandHandler
         _assignmentRepository.Update(assignment);
 
         await _unitOfWork.SaveChangesAsync(cancellationToken);
+
+        await _sessionInvalidator.InvalidateAsync(assignment.UserId, cancellationToken);
 
         return Result.Success();
     }

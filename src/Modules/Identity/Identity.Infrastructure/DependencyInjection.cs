@@ -101,6 +101,7 @@ public static class DependencyInjection
             .AddSignInManager();
 
         services.AddScoped<IUserThemePreferenceRepository, UserThemePreferenceRepository>();
+        services.AddScoped<IUserSessionInvalidator, UserSessionInvalidator>();
         services.AddScoped<IThemePreferenceStore, CompositeThemePreferenceStore>();
 
         services
@@ -150,6 +151,13 @@ public static class DependencyInjection
             options.LoginPath = "/identity/login";
         });
 
+        // Re-validate the cookie against the security stamp every minute, so rights changes,
+        // sign-outs and disabled users take effect quickly (and cookie claims are rebuilt).
+        services.Configure<SecurityStampValidatorOptions>(options =>
+            options.ValidationInterval = TimeSpan.FromMinutes(1));
+
+        services.AddHostedService<OpenIddictPruningService>();
+
         services
             .AddOpenIddict()
             .AddCore(options => options
@@ -170,6 +178,16 @@ public static class DependencyInjection
 
                 options.AllowClientCredentialsFlow();
                 options.AllowRefreshTokenFlow();
+
+                // Token policy: short-lived access tokens refreshed in memory; the refresh token is
+                // non-rolling (the sign-in cookie keeps the original, and rotating it from a Blazor
+                // circuit would desynchronize it). Reference tokens keep the cookie small and make
+                // revocation take effect immediately.
+                options.SetAccessTokenLifetime(TimeSpan.FromMinutes(15));
+                options.SetRefreshTokenLifetime(TimeSpan.FromDays(14));
+                options.DisableRollingRefreshTokens();
+                options.UseReferenceAccessTokens();
+                options.UseReferenceRefreshTokens();
 
                 options.RegisterScopes(
                     OpenIddictConstants.Scopes.OpenId,
@@ -289,7 +307,7 @@ public static class DependencyInjection
     /// <param name="services">The service collection to configure.</param>
     /// <param name="configuration">The application configuration, used to resolve the base address.</param>
     /// <returns>The same <see cref="IServiceCollection"/> for chaining.</returns>
-    public static IServiceCollection AddIdentityInternalApiClient(
+       public static IServiceCollection AddIdentityInternalApiClient(
         this IServiceCollection services,
         IConfiguration configuration)
     {
@@ -300,6 +318,11 @@ public static class DependencyInjection
 
         var baseAddress = configuration["OpenIddict:Issuer"]
             ?? throw new InvalidOperationException("OpenIddict:Issuer is not configured.");
+
+        // Plain client (NO bearer handler) used by CurrentAccessTokenAccessor to refresh tokens.
+        services.AddHttpClient(
+            Http.CurrentAccessTokenAccessor.TokenEndpointClientName,
+            client => client.BaseAddress = new Uri(baseAddress, UriKind.Absolute));
 
         services
             .AddHttpClient("InternalApi", client => client.BaseAddress = new Uri(baseAddress, UriKind.Absolute))

@@ -1,6 +1,7 @@
 using MachineryManagerEnterprise.Administration.Application.Abstractions;
 using MachineryManagerEnterprise.SharedKernel;
 using MediatR;
+using MachineryManagerEnterprise.SharedKernel.Abstractions;
 
 namespace MachineryManagerEnterprise.Administration.Application.Features.UserProfileAssignments.Commands.DeleteUserProfileAssignment;
 
@@ -14,18 +15,22 @@ public sealed class DeleteUserProfileAssignmentCommandHandler
 {
     private readonly IUserProfileAssignmentRepository _assignmentRepository;
     private readonly IAdministrationUnitOfWork _unitOfWork;
+    private readonly IUserSessionInvalidator _sessionInvalidator;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="DeleteUserProfileAssignmentCommandHandler"/> class.
     /// </summary>
     /// <param name="assignmentRepository">The user-profile assignment repository.</param>
     /// <param name="unitOfWork">The unit of work for atomic persistence.</param>
+    /// <param name="sessionInvalidator">Ends the user's sessions so the new assignment takes effect.</param>
     public DeleteUserProfileAssignmentCommandHandler(
         IUserProfileAssignmentRepository assignmentRepository,
-        IAdministrationUnitOfWork unitOfWork)
+        IAdministrationUnitOfWork unitOfWork,
+        IUserSessionInvalidator sessionInvalidator)
     {
         _assignmentRepository = assignmentRepository;
         _unitOfWork = unitOfWork;
+        _sessionInvalidator = sessionInvalidator;
     }
 
     /// <summary>
@@ -50,6 +55,8 @@ public sealed class DeleteUserProfileAssignmentCommandHandler
         _assignmentRepository.Remove(assignment);
         await _unitOfWork.SaveChangesAsync(cancellationToken);
 
+        await _sessionInvalidator.InvalidateAsync(assignment.UserId, cancellationToken);
+        
         return Result.Success();
     }
 }

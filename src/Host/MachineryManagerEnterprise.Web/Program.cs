@@ -40,6 +40,7 @@ using MachineryManagerEnterprise.Maintenance.Presentation.Endpoints;
 using MachineryManagerEnterprise.Usage.Application;
 using MachineryManagerEnterprise.Usage.Infrastructure;
 using MachineryManagerEnterprise.Usage.Presentation.Endpoints;
+using Microsoft.AspNetCore.DataProtection;
 
 Log.Logger = new LoggerConfiguration()
     .WriteTo.Console()
@@ -63,6 +64,17 @@ try
 
     builder.Services.AddRazorComponents()
         .AddInteractiveServerComponents();
+
+    // Data Protection keys must outlive restarts and be shared by every instance, otherwise
+    // all auth cookies, antiforgery tokens and prerender state become invalid at once.
+    var dataProtection = builder.Services.AddDataProtection()
+        .SetApplicationName("MachineryManagerEnterprise");
+
+    var keysPath = builder.Configuration["DataProtection:KeysPath"];
+    if (!string.IsNullOrWhiteSpace(keysPath))
+    {
+        dataProtection.PersistKeysToFileSystem(new DirectoryInfo(keysPath));
+    }
 
     builder.Services.AddMudServices();
     builder.Services.AddOpenApi();
@@ -146,21 +158,21 @@ try
     app.UseAntiforgery();
 
     app.MapStaticAssets();
-        app.MapRazorComponents<App>()
-    .AddInteractiveServerRenderMode()
-    .AddAdditionalAssemblies(
-        typeof(MachineryManagerEnterprise.Identity.Presentation.Components.Pages.Login).Assembly,
-        typeof(MachineryManagerEnterprise.Administration.Presentation.Components.Pages.ProfilesList).Assembly,
-        typeof(MachineryManagerEnterprise.Organization.Presentation.Components.Pages.OrganizationsList).Assembly,
-        typeof(MachineryManagerEnterprise.Asset.Presentation.Components.Pages.AssetModelsList).Assembly,
-        typeof(MachineryManagerEnterprise.Configuration.Presentation.Components.Pages.ColorsList).Assembly,
-        typeof(MachineryManagerEnterprise.AuditLog.Presentation.Components.Pages.AuditLogList).Assembly,
-        typeof(MachineryManagerEnterprise.WorkCalendar.Presentation.Components.Pages.WorkCalendarsList).Assembly,
-        typeof(MachineryManagerEnterprise.Personnel.Presentation.Components.Pages.PersonnelList).Assembly,
-        typeof(MachineryManagerEnterprise.Consumption.Presentation.Components.Pages.LubricantOverflowReportsList).Assembly,
-        typeof(MachineryManagerEnterprise.Maintenance.Presentation.Components.Pages.WorkOrdersList).Assembly,
-        typeof(MachineryManagerEnterprise.Usage.Presentation.Components.Pages.MeterDevicesList).Assembly
-        );
+    app.MapRazorComponents<App>()
+.AddInteractiveServerRenderMode()
+.AddAdditionalAssemblies(
+    typeof(MachineryManagerEnterprise.Identity.Presentation.Components.Pages.Login).Assembly,
+    typeof(MachineryManagerEnterprise.Administration.Presentation.Components.Pages.ProfilesList).Assembly,
+    typeof(MachineryManagerEnterprise.Organization.Presentation.Components.Pages.OrganizationsList).Assembly,
+    typeof(MachineryManagerEnterprise.Asset.Presentation.Components.Pages.AssetModelsList).Assembly,
+    typeof(MachineryManagerEnterprise.Configuration.Presentation.Components.Pages.ColorsList).Assembly,
+    typeof(MachineryManagerEnterprise.AuditLog.Presentation.Components.Pages.AuditLogList).Assembly,
+    typeof(MachineryManagerEnterprise.WorkCalendar.Presentation.Components.Pages.WorkCalendarsList).Assembly,
+    typeof(MachineryManagerEnterprise.Personnel.Presentation.Components.Pages.PersonnelList).Assembly,
+    typeof(MachineryManagerEnterprise.Consumption.Presentation.Components.Pages.LubricantOverflowReportsList).Assembly,
+    typeof(MachineryManagerEnterprise.Maintenance.Presentation.Components.Pages.WorkOrdersList).Assembly,
+    typeof(MachineryManagerEnterprise.Usage.Presentation.Components.Pages.MeterDevicesList).Assembly
+    );
 
     // Identity endpoints
     app.MapIdentityConnectEndpoints();

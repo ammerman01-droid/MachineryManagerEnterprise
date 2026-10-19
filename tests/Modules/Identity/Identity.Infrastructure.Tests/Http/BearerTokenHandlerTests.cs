@@ -45,29 +45,9 @@ public sealed class BearerTokenHandlerTests
             .BuildServiceProvider();
     }
 
-    /// <summary>Builds an HttpContext whose application-scheme cookie holds <paramref name="accessToken"/>.</summary>
-    private static HttpContext CreateHttpContextWithToken(string accessToken)
-    {
-        var properties = new AuthenticationProperties();
-        properties.StoreTokens([new AuthenticationToken { Name = "access_token", Value = accessToken }]);
-
-        var ticket = new AuthenticationTicket(
-            new ClaimsPrincipal(new ClaimsIdentity()),
-            properties,
-            IdentityConstants.ApplicationScheme);
-
-        var authenticationService = Substitute.For<IAuthenticationService>();
-        authenticationService
-            .AuthenticateAsync(Arg.Any<HttpContext>(), IdentityConstants.ApplicationScheme)
-            .Returns(AuthenticateResult.Success(ticket));
-
-        return new DefaultHttpContext
-        {
-            RequestServices = new ServiceCollection()
-                .AddSingleton(authenticationService)
-                .BuildServiceProvider(),
-        };
-    }
+    /// <summary>Builds an HttpContext whose request services expose a token accessor returning <paramref name="accessToken"/>.</summary>
+    private static HttpContext CreateHttpContextWithToken(string accessToken) =>
+        new DefaultHttpContext { RequestServices = CreateCircuitServices(accessToken) };
 
     [Fact]
     public async Task SendAsync_InsideCircuit_WhenTokenAvailable_AttachesBearerAuthorizationHeader()

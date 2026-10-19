@@ -9,6 +9,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Routing;
 using OpenIddict.Abstractions;
 using OpenIddict.Server.AspNetCore;
+using MachineryManagerEnterprise.SharedKernel.Abstractions;
 
 using static OpenIddict.Abstractions.OpenIddictConstants;
 
@@ -158,14 +159,27 @@ public static class ConnectEndpoints
         return Results.BadRequest(new { error = Errors.UnsupportedGrantType });
     }
 
-    private static async Task<IResult> LogoutAsync(SignInManager<ApplicationUser> signInManager)
-    {
-        await signInManager.SignOutAsync();
+    private static async Task<IResult> LogoutAsync(
+    HttpContext httpContext,
+    UserManager<ApplicationUser> userManager,
+    SignInManager<ApplicationUser> signInManager,
+    IUserSessionInvalidator sessionInvalidator)
+{
+    var userId = userManager.GetUserId(httpContext.User);
 
-        return Results.SignOut(
-            authenticationSchemes: [OpenIddictServerAspNetCoreDefaults.AuthenticationScheme],
-            properties: new AuthenticationProperties { RedirectUri = "/" });
+    await signInManager.SignOutAsync();
+
+    // Revoke every token of the user, so a stolen/copied access token stops working at
+    // once, and rotate the security stamp so cookies on other devices end too.
+    if (Guid.TryParse(userId, out var id))
+    {
+        await sessionInvalidator.InvalidateAsync(id, CancellationToken.None);
     }
+
+    return Results.SignOut(
+        authenticationSchemes: [OpenIddictServerAspNetCoreDefaults.AuthenticationScheme],
+        properties: new AuthenticationProperties { RedirectUri = "/" });
+}
 
     private static async Task<IResult> UserInfoAsync(
         HttpContext httpContext,
