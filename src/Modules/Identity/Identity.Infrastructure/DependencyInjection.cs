@@ -10,6 +10,7 @@ using OpenIddict.Client;
 using OpenIddict.Client.AspNetCore;
 using MachineryManagerEnterprise.SharedKernel.Abstractions;
 using MachineryManagerEnterprise.SharedKernel.Infrastructure;
+using Microsoft.AspNetCore.Components.Server.Circuits;
 
 using static OpenIddict.Abstractions.OpenIddictConstants;
 
@@ -293,6 +294,8 @@ public static class DependencyInjection
         IConfiguration configuration)
     {
         services.AddScoped<MachineryManagerEnterprise.Identity.Domain.ICurrentAccessTokenAccessor, Http.CurrentAccessTokenAccessor>();
+        services.AddSingleton<Http.CircuitServicesAccessor>();
+        services.AddScoped<CircuitHandler, Http.ServicesAccessorCircuitHandler>();
         services.AddTransient<Http.BearerTokenHandler>();
 
         var baseAddress = configuration["OpenIddict:Issuer"]
