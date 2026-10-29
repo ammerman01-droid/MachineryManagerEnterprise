@@ -4,12 +4,15 @@
 
 <PageTitle>مدیریت کاربران</PageTitle>
 
-<AdminOnly>
+<AccessGate Permission="User.View" OnLoaded="@(info => access = info)">
     <MudText Typo="Typo.h4" Class="mb-4">کاربران سامانه</MudText>
 
-    <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="@(() => Navigation.NavigateTo("/admin/users/create"))" Class="mb-4">
-        ایجاد کاربر جدید
-    </MudButton>
+    @if (access?.Has("User.Create") == true && access.ManageableLevels.Count > 0)
+    {
+        <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="@(() => Navigation.NavigateTo("/admin/users/create"))" Class="mb-4">
+            ایجاد کاربر جدید
+        </MudButton>
+    }
 
     @if (isLoading)
     {
@@ -48,9 +51,10 @@
             </RowTemplate>
         </MudTable>
     }
-</AdminOnly>
+</AccessGate>
 
 @code {
+    private AccessInfo? access;
     private List<UserItem> users = new();
     private bool isLoading = true;
     private string? errorMessage;

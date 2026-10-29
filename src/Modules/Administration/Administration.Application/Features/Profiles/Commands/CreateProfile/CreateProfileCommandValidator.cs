@@ -20,6 +20,11 @@ public sealed class CreateProfileCommandValidator : AbstractValidator<CreateProf
             .MaximumLength(maxLength)
             .WithMessage($"Profile name shall not exceed {maxLength} characters.");
 
+        RuleFor(x => x.HoldingId)
+            .NotEqual(Guid.Empty)
+            .When(x => x.HoldingId.HasValue)
+            .WithMessage("A valid Holding identifier is required.");
+
         RuleForEach(x => x.Permissions)
             .NotEmpty()
             .WithMessage("Permission cannot be empty.");

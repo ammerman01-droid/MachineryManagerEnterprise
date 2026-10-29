@@ -6,10 +6,8 @@ using MediatR;
 namespace MachineryManagerEnterprise.Administration.Application.Features.Profiles.Commands.DeleteProfile;
 
 /// <summary>
-/// Handles <see cref="DeleteProfileCommand"/> by verifying the profile
-/// has no active assignments, then permanently removing it along with
-/// any of its (already-revoked) assignment records — so no orphaned
-/// UserProfileAssignment rows are left behind (chat, 2026-08-25).
+/// Handles <see cref="DeleteProfileCommand"/>: requires <c>Profile.Delete</c> on the owning
+/// scope; system profiles and profiles with active assignments cannot be deleted.
 /// </summary>
 public sealed class DeleteProfileCommandHandler
     : IRequestHandler<DeleteProfileCommand, Result>
@@ -17,42 +15,49 @@ public sealed class DeleteProfileCommandHandler
     private readonly IProfileRepository _profileRepository;
     private readonly IUserProfileAssignmentRepository _assignmentRepository;
     private readonly IAdministrationUnitOfWork _unitOfWork;
+    private readonly IProfileAuthorizationService _authorization;
 
     /// <summary>Initializes a new instance of the <see cref="DeleteProfileCommandHandler"/> class.</summary>
     /// <param name="profileRepository">The profile repository.</param>
     /// <param name="assignmentRepository">The user-profile assignment repository.</param>
     /// <param name="unitOfWork">The unit of work for atomic persistence.</param>
+    /// <param name="authorization">Decides who may delete profiles.</param>
     public DeleteProfileCommandHandler(
         IProfileRepository profileRepository,
         IUserProfileAssignmentRepository assignmentRepository,
-        IAdministrationUnitOfWork unitOfWork)
+        IAdministrationUnitOfWork unitOfWork,
+        IProfileAuthorizationService authorization)
     {
         _profileRepository = profileRepository;
         _assignmentRepository = assignmentRepository;
         _unitOfWork = unitOfWork;
+        _authorization = authorization;
     }
 
-    /// <summary>
-    /// Executes the delete use case.
-    /// </summary>
-    /// <param name="request">The delete command.</param>
-    /// <param name="cancellationToken">Token to cancel the asynchronous operation.</param>
-    /// <returns>
-    /// A result indicating success, a Not Found error if the profile
-    /// does not exist, or a Conflict error (with a message the UI can
-    /// surface to the admin) if the profile is still assigned to users.
-    /// </returns>
+    /// <inheritdoc />
     public async Task<Result> Handle(
         DeleteProfileCommand request,
         CancellationToken cancellationToken)
     {
-        var profileId = ProfileId.From(request.ProfileId);
-        var profile = await _profileRepository.GetByIdAsync(profileId, cancellationToken);
+        var loaded = await _authorization.GetForManagementAsync(
+            request.ProfileId,
+            "Delete",
+            permissionsToGrant: null,
+            cancellationToken);
 
-        if (profile is null)
+        if (loaded.IsFailure)
         {
-            return Result.Failure(ProfileErrors.ProfileNotFound(request.ProfileId));
+            return Result.Failure(loaded.Error);
         }
+
+        var profile = loaded.Value;
+
+        if (profile.IsSystem)
+        {
+            return Result.Failure(ProfileErrors.SystemProfileImmutable());
+        }
+
+        var profileId = ProfileId.From(request.ProfileId);
 
         var hasActiveAssignments = await _assignmentRepository.HasActiveAssignmentsForProfileAsync(
             profileId,

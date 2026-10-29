@@ -1,10 +1,12 @@
 @page "/admin/users/create"
+@using MachineryManagerEnterprise.Administration.Application.Features.Profiles.Queries.SearchProfiles
+@using global::Administration.Domain
 @inject IHttpClientFactory HttpClientFactory
 @inject NavigationManager Navigation
 
 <PageTitle>ایجاد کاربر</PageTitle>
 
-<AdminOnly>
+<AccessGate Permission="User.Create" OnLoaded="OnAccessLoadedAsync">
     <MudText Typo="Typo.h4" Class="mb-4">ایجاد کاربر جدید</MudText>
 
     <MudPaper Class="pa-4" Style="max-width:600px;">
@@ -14,6 +16,60 @@
 
             <MudTextField @bind-Value="model.Password" Label="رمز عبور" Required="true"
                           RequiredError="رمز عبور الزامی است." InputType="InputType.Password" />
+
+            <MudSelect T="string" @bind-Value="selectedLevel" Label="سطح دسترسی کاربر" Class="mt-4">
+                @if (access?.IsPlatform == true)
+                {
+                    <MudSelectItem T="string" Value="@NoScope">فقط حساب کاربری (پروفایل بعداً تخصیص داده می‌شود)</MudSelectItem>
+                }
+                @foreach (var level in access?.ManageableLevels ?? Array.Empty<string>())
+                {
+                    <MudSelectItem T="string" Value="@level">@LevelLabel(level)</MudSelectItem>
+                }
+            </MudSelect>
+
+            @if (selectedLevel == "Holding" && access?.IsPlatform == true)
+            {
+                <MudAutocomplete T="LookupItem" @bind-Value="selectedHolding" Label="هلدینگ" Required="true"
+                                 RequiredError="انتخاب هلدینگ الزامی است." Class="mt-4"
+                                 SearchFunc="@(SearchLookupAsync("holdings"))" ToStringFunc="@(item => item?.Name)"
+                                 ResetValueOnEmptyText="true" MinCharacters="0" DebounceInterval="300"
+                                 CoerceText="true" Clearable="true" />
+            }
+            else if (selectedLevel == "Organization")
+            {
+                <MudAutocomplete T="LookupItem" @bind-Value="selectedOrganization" Label="شرکت" Required="true"
+                                 RequiredError="انتخاب شرکت الزامی است." Class="mt-4"
+                                 SearchFunc="@(SearchLookupAsync("organizations"))" ToStringFunc="@(item => item?.Name)"
+                                 ResetValueOnEmptyText="true" MinCharacters="0" DebounceInterval="300"
+                                 CoerceText="true" Clearable="true" />
+            }
+            else if (selectedLevel == "Project")
+            {
+                <MudAutocomplete T="LookupItem" @bind-Value="selectedProject" Label="پروژه" Required="true"
+                                 RequiredError="انتخاب پروژه الزامی است." Class="mt-4"
+                                 SearchFunc="@(SearchLookupAsync("projects"))" ToStringFunc="@(item => item?.Name)"
+                                 ResetValueOnEmptyText="true" MinCharacters="0" DebounceInterval="300"
+                                 CoerceText="true" Clearable="true" />
+            }
+
+            @if (selectedLevel != NoScope)
+            {
+                <MudSelect T="Guid?" @bind-Value="selectedProfileId" Label="پروفایل" Class="mt-4" Clearable="true">
+                    @foreach (var profile in AvailableProfiles)
+                    {
+                        <MudSelectItem T="Guid?" Value="@((Guid?)profile.Id)">@profile.Name</MudSelectItem>
+                    }
+                </MudSelect>
+
+                @if (selectedLevel == "Holding")
+                {
+                    <MudText Typo="Typo.caption" Class="mud-text-secondary">
+                        اگر این اولین کاربر سطح هلدینگ باشد و شما دسترسی کامل داشته باشید، پروفایل «دسترسی کامل هلدینگ»
+                        به‌صورت خودکار ساخته و اختصاص داده می‌شود و انتخاب شما نادیده گرفته می‌شود.
+                    </MudText>
+                }
+            }
 
             <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="SubmitAsync"
                        Disabled="@(!isValid || isSubmitting)" Class="mt-4">
@@ -39,15 +95,110 @@
         <MudAlert Severity="Severity.Error" Class="mt-4">@errorMessage</MudAlert>
     }
 
-</AdminOnly>
+</AccessGate>
 
 @code {
+    private const string NoScope = "None";
+
+    private static readonly System.Text.Json.JsonSerializerOptions JsonOptions = new()
+    {
+        PropertyNameCaseInsensitive = true
+    };
+
     private MudForm? form;
     private bool isValid;
     private bool isSubmitting;
     private string? errorMessage;
 
-    private CreateUserModel model = new();
+    private AccessInfo? access;
+    private readonly CreateUserModel model = new();
+    private string selectedLevel = NoScope;
+    private LookupItem? selectedHolding;
+    private LookupItem? selectedOrganization;
+    private LookupItem? selectedProject;
+    private Guid? selectedProfileId;
+    private List<ProfileItem> profiles = new();
+
+    private async Task OnAccessLoadedAsync(AccessInfo info)
+    {
+        access = info;
+        selectedLevel = info.IsPlatform ? NoScope : info.ManageableLevels.FirstOrDefault() ?? NoScope;
+        await LoadProfilesAsync();
+    }
+
+    /// <summary>
+    /// Profiles that may be given at the chosen level: a Holding's users see only their own
+    /// Holding's profiles; Platform users see Platform-owned profiles for Platform level and
+    /// the chosen Holding's profiles for Holding level. The server enforces the same rule.
+    /// </summary>
+    private IEnumerable<ProfileItem> AvailableProfiles =>
+        access is null ? Enumerable.Empty<ProfileItem>()
+        : !access.IsPlatform ? profiles.Where(p => p.HoldingId == access.HoldingId)
+        : selectedLevel == "Platform" ? profiles.Where(p => p.HoldingId is null)
+        : selectedLevel == "Holding" && selectedHolding is not null ? profiles.Where(p => p.HoldingId == selectedHolding.Id)
+        : profiles.Where(p => p.HoldingId is not null);
+
+    private static string LevelLabel(string level) => level switch
+    {
+        "Platform" => "پلتفرم",
+        "Holding" => "هلدینگ",
+        "Organization" => "شرکت",
+        "Project" => "پروژه",
+        _ => level,
+    };
+
+    private Func<string?, CancellationToken, Task<IEnumerable<LookupItem>>> SearchLookupAsync(string resource) =>
+        async (value, cancellationToken) =>
+        {
+            try
+            {
+                var client = HttpClientFactory.CreateClient("InternalApi");
+                var url = string.IsNullOrWhiteSpace(value)
+                    ? $"/api/v1/{resource}?pageSize=25"
+                    : $"/api/v1/{resource}?search={Uri.EscapeDataString(value)}&pageSize=25";
+                var response = await client.GetAsync(url, cancellationToken);
+
+                if (!response.IsSuccessStatusCode)
+                {
+                    return Array.Empty<LookupItem>();
+                }
+
+                var content = await response.Content.ReadAsStringAsync(cancellationToken);
+                return System.Text.Json.JsonSerializer.Deserialize<LookupSearchResponse>(content, JsonOptions)?.Items
+                    ?? Enumerable.Empty<LookupItem>();
+            }
+            catch (Exception)
+            {
+                return Array.Empty<LookupItem>();
+            }
+        };
+
+    private async Task LoadProfilesAsync()
+    {
+        try
+        {
+            var client = HttpClientFactory.CreateClient("InternalApi");
+            var response = await client.GetAsync("/api/v1/profiles?pageSize=200");
+
+            if (!response.IsSuccessStatusCode)
+            {
+                // Callers without Profile.View simply get an empty list; the server decides.
+                return;
+            }
+
+            var content = await response.Content.ReadAsStringAsync();
+            var result = System.Text.Json.JsonSerializer.Deserialize<SearchProfilesResponse>(content, JsonOptions);
+
+            profiles = result?.Items
+                .Where(p => p.IsActive)
+                .Select(p => new ProfileItem { Id = p.Id, Name = p.Name, HoldingId = p.HoldingId })
+                .ToList() ?? new List<ProfileItem>();
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"خطا در دریافت پروفایل‌ها: {ex.Message}";
+        }
+    }
 
     private async Task SubmitAsync()
     {
@@ -58,7 +209,26 @@
 
         try
         {
-            var request = new { model.UserName, model.Password, Roles = new[] { "Operator" } };
+            var roles = new[] { "Operator" };
+            MachineryManagerEnterprise.Administration.Presentation.Contracts.CreateUserRequest request;
+
+            if (selectedLevel == NoScope)
+            {
+                request = new(model.UserName, model.Password, roles);
+            }
+            else
+            {
+                var level = Enum.Parse<AuthorizationScopeLevel>(selectedLevel);
+
+                var holdingId = selectedLevel == "Holding"
+                    ? (access?.IsPlatform == true ? selectedHolding?.Id : access?.HoldingId)
+                    : null;
+                var organizationId = selectedLevel == "Organization" ? selectedOrganization?.Id : null;
+                var projectId = selectedLevel == "Project" ? selectedProject?.Id : null;
+
+                request = new(model.UserName, model.Password, roles, level, holdingId, organizationId, projectId, selectedProfileId);
+            }
+
             var client = HttpClientFactory.CreateClient("InternalApi");
             var response = await client.PostAsJsonAsync("/api/v1/users", request);
             var content = await response.Content.ReadAsStringAsync();
@@ -85,5 +255,19 @@
     {
         public string UserName { get; set; } = string.Empty;
         public string Password { get; set; } = string.Empty;
+    }
+
+    private sealed class ProfileItem
+    {
+        public Guid Id { get; set; }
+        public string Name { get; set; } = string.Empty;
+        public Guid? HoldingId { get; set; }
+    }
+
+    private sealed record LookupItem(Guid Id, string Name);
+
+    private sealed class LookupSearchResponse
+    {
+        public List<LookupItem> Items { get; set; } = new();
     }
 }

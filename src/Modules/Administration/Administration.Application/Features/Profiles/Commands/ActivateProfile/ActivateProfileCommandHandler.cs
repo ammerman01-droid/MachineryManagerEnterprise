@@ -5,50 +5,54 @@ using MediatR;
 namespace MachineryManagerEnterprise.Administration.Application.Features.Profiles.Commands.ActivateProfile;
 
 /// <summary>
-/// Handles <see cref="ActivateProfileCommand"/> by loading the aggregate,
-/// invoking domain activation, and committing the unit of work.
+/// Handles <see cref="ActivateProfileCommand"/>: requires <c>Profile.Edit</c> on the owning
+/// scope; system profiles cannot be changed.
 /// </summary>
 public sealed class ActivateProfileCommandHandler
     : IRequestHandler<ActivateProfileCommand, Result>
 {
     private readonly IProfileRepository _profileRepository;
     private readonly IAdministrationUnitOfWork _unitOfWork;
+    private readonly IProfileAuthorizationService _authorization;
 
-    /// <summary>
-    /// Initializes a new instance of the <see cref="ActivateProfileCommandHandler"/> class.
-    /// </summary>
+    /// <summary>Initializes a new instance of the <see cref="ActivateProfileCommandHandler"/> class.</summary>
     /// <param name="profileRepository">The profile repository.</param>
     /// <param name="unitOfWork">The unit of work for atomic persistence.</param>
+    /// <param name="authorization">Decides who may edit profiles.</param>
     public ActivateProfileCommandHandler(
         IProfileRepository profileRepository,
-        IAdministrationUnitOfWork unitOfWork)
+        IAdministrationUnitOfWork unitOfWork,
+        IProfileAuthorizationService authorization)
     {
         _profileRepository = profileRepository;
         _unitOfWork = unitOfWork;
+        _authorization = authorization;
     }
 
-    /// <summary>
-    /// Executes the activation use case.
-    /// </summary>
-    /// <param name="request">The activation command.</param>
-    /// <param name="cancellationToken">Token to cancel the asynchronous operation.</param>
-    /// <returns>A result indicating success or a business error.</returns>
+    /// <inheritdoc />
     public async Task<Result> Handle(
         ActivateProfileCommand request,
         CancellationToken cancellationToken)
     {
-        var profileId = global::Administration.Domain.ProfileId.From(request.ProfileId);
-        var profile = await _profileRepository.GetByIdAsync(profileId, cancellationToken);
+        var loaded = await _authorization.GetForManagementAsync(
+            request.ProfileId,
+            "Edit",
+            permissionsToGrant: null,
+            cancellationToken);
 
-        if (profile is null)
+        if (loaded.IsFailure)
         {
-            return Result.Failure(
-                Error.NotFound(
-                    "Profile.NotFound",
-                    $"Profile with id {request.ProfileId} was not found."));
+            return Result.Failure(loaded.Error);
         }
 
-        profile.Activate();
+        var profile = loaded.Value;
+        var result = profile.Activate();
+
+        if (result.IsFailure)
+        {
+            return result;
+        }
+
         _profileRepository.Update(profile);
         await _unitOfWork.SaveChangesAsync(cancellationToken);
 

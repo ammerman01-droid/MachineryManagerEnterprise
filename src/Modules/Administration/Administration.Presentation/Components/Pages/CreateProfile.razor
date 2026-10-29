@@ -5,7 +5,7 @@
 
 <PageTitle>ایجاد پروفایل</PageTitle>
 
-<AdminOnly>
+<AccessGate Permission="Profile.Create" AllowedLevels="Platform,Holding" OnLoaded="@(info => access = info)">
 
     <MudText Typo="Typo.h4" Class="mb-4">ایجاد پروفایل جدید</MudText>
 
@@ -13,6 +13,14 @@
         <MudForm @ref="form" @bind-IsValid="@isValid">
             <MudTextField @bind-Value="name" Label="نام پروفایل" Required="true"
                           RequiredError="نام پروفایل الزامی است." />
+
+            @if (access?.IsPlatform == true)
+            {
+                <MudAutocomplete T="LookupItem" @bind-Value="selectedHolding" Label="هلدینگ مالک (خالی = پروفایل سطح پلتفرم)"
+                                 Class="mt-4" SearchFunc="@SearchHoldingsAsync" ToStringFunc="@(item => item?.Name)"
+                                 ResetValueOnEmptyText="true" MinCharacters="0" DebounceInterval="300"
+                                 CoerceText="true" Clearable="true" />
+            }
 
             <MudText Typo="Typo.subtitle1" Class="mt-6 mb-2">دسترسی‌ها</MudText>
 
@@ -89,14 +97,53 @@
         <MudAlert Severity="Severity.Error" Class="mt-4">@errorMessage</MudAlert>
     }
 
-</AdminOnly>
+</AccessGate>
 
 @code {
     private MudForm? form;
     private bool isValid;
     private bool isSubmitting;
     private string? errorMessage;
+    private AccessInfo? access;
+    private LookupItem? selectedHolding;
     private string name = string.Empty;
+
+    private static readonly System.Text.Json.JsonSerializerOptions JsonOptions = new()
+    {
+        PropertyNameCaseInsensitive = true
+    };
+
+    private async Task<IEnumerable<LookupItem>> SearchHoldingsAsync(string? value, CancellationToken cancellationToken)
+    {
+        try
+        {
+            var client = HttpClientFactory.CreateClient("InternalApi");
+            var url = string.IsNullOrWhiteSpace(value)
+                ? "/api/v1/holdings?pageSize=25"
+                : $"/api/v1/holdings?search={Uri.EscapeDataString(value)}&pageSize=25";
+            var response = await client.GetAsync(url, cancellationToken);
+
+            if (!response.IsSuccessStatusCode)
+            {
+                return Array.Empty<LookupItem>();
+            }
+
+            var content = await response.Content.ReadAsStringAsync(cancellationToken);
+            return System.Text.Json.JsonSerializer.Deserialize<LookupSearchResponse>(content, JsonOptions)?.Items
+                ?? Enumerable.Empty<LookupItem>();
+        }
+        catch (Exception)
+        {
+            return Array.Empty<LookupItem>();
+        }
+    }
+
+    private sealed record LookupItem(Guid Id, string Name);
+
+    private sealed class LookupSearchResponse
+    {
+        public List<LookupItem> Items { get; set; } = new();
+    }
     private readonly HashSet<string> selectedPermissions = new();
 
     private void TogglePermission(string permission, bool isChecked)
@@ -138,7 +185,10 @@
 
         try
         {
-            var request = new { Name = name, Permissions = selectedPermissions.ToList() };
+            // Platform users choose the owning Holding (none = Platform-owned); everyone else
+            // always creates profiles for their own Holding.
+            Guid? holdingId = access?.IsPlatform == true ? selectedHolding?.Id : access?.HoldingId;
+            var request = new { Name = name, Permissions = selectedPermissions.ToList(), HoldingId = holdingId };
             var client = HttpClientFactory.CreateClient("InternalApi");
             var response = await client.PostAsJsonAsync("/api/v1/profiles", request);
             var content = await response.Content.ReadAsStringAsync();

@@ -7,11 +7,9 @@ using Organization.Domain;
 namespace MachineryManagerEnterprise.Organization.Application.Features.Organizations.Queries.SearchOrganizations;
 
 /// <summary>
-/// Handles <see cref="SearchOrganizationsQuery"/> by resolving the current
-/// user's authorized scope and delegating to the repository search
-/// projection, restricted to that scope (Phase 3 — Scope-based Filtering)
-/// and, when supplied, to <see cref="SearchOrganizationsQuery.HoldingId"/>
-/// (chat, 2026-10-04).
+/// Handles <see cref="SearchOrganizationsQuery"/> by delegating to the repository with the
+/// caller's authorized scope. The caller's own Organization is always included so that context
+/// pickers work for users who work below that level.
 /// </summary>
 public sealed class SearchOrganizationsQueryHandler
     : IRequestHandler<SearchOrganizationsQuery, Result<SearchOrganizationsResponse>>
@@ -21,30 +19,26 @@ public sealed class SearchOrganizationsQueryHandler
     private readonly IOrganizationRepository _organizationRepository;
     private readonly ICurrentUserService _currentUserService;
     private readonly IPermissionEvaluator _permissionEvaluator;
+    private readonly IUserAuthorizationScopeResolver _scopeResolver;
 
-    /// <summary>
-    /// Initializes a new instance of the <see cref="SearchOrganizationsQueryHandler"/> class.
-    /// </summary>
-    /// <param name="organizationRepository">The organization repository.</param>
-    /// <param name="currentUserService">Provides the authenticated user context.</param>
-    /// <param name="permissionEvaluator">Evaluates the current user's authorized scopes at request time.</param>
+    /// <summary>Initializes a new instance of the <see cref="SearchOrganizationsQueryHandler"/> class.</summary>
+    /// <param name="organizationRepository">The Organization repository.</param>
+    /// <param name="currentUserService">Identifies the caller.</param>
+    /// <param name="permissionEvaluator">Evaluates the caller's authorized scope.</param>
+    /// <param name="scopeResolver">Resolves the caller's own position in the tenant tree.</param>
     public SearchOrganizationsQueryHandler(
         IOrganizationRepository organizationRepository,
         ICurrentUserService currentUserService,
-        IPermissionEvaluator permissionEvaluator)
+        IPermissionEvaluator permissionEvaluator,
+        IUserAuthorizationScopeResolver scopeResolver)
     {
         _organizationRepository = organizationRepository;
         _currentUserService = currentUserService;
         _permissionEvaluator = permissionEvaluator;
+        _scopeResolver = scopeResolver;
     }
 
-    /// <summary>
-    /// Executes the search query, restricted to the current user's authorized scope
-    /// and, when supplied, to a specific Holding.
-    /// </summary>
-    /// <param name="request">The search query parameters.</param>
-    /// <param name="cancellationToken">Token to cancel the asynchronous operation.</param>
-    /// <returns>A result containing the paginated search response.</returns>
+    /// <inheritdoc />
     public async Task<Result<SearchOrganizationsResponse>> Handle(
         SearchOrganizationsQuery request,
         CancellationToken cancellationToken)
@@ -59,12 +53,14 @@ public sealed class SearchOrganizationsQueryHandler
             RequiredPermission,
             cancellationToken);
 
+        var ownScope = await _scopeResolver.ResolveAsync(userId, cancellationToken);
+
         var response = await _organizationRepository.SearchAsync(
             request.SearchTerm,
             request.HoldingId,
             request.Page,
             request.PageSize,
-            authorizedScope,
+            authorizedScope.IncludingOwnOrganization(ownScope),
             cancellationToken);
 
         return Result.Success(response);

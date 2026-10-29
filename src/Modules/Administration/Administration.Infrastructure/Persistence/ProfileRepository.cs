@@ -40,9 +40,18 @@ public sealed class ProfileRepository : IProfileRepository
         string? searchTerm,
         int page,
         int pageSize,
+        ProfileVisibility visibility,
         CancellationToken cancellationToken = default)
     {
         var query = _dbContext.Profiles.AsNoTracking().AsQueryable();
+
+        // Tenant isolation: unless the caller sees everything (Platform), only the
+        // caller's own Holding's profiles are ever returned.
+        if (!visibility.All)
+        {
+            var holdingId = visibility.HoldingId;
+            query = query.Where(p => p.HoldingId == holdingId);
+        }
 
         if (!string.IsNullOrWhiteSpace(searchTerm))
         {
@@ -77,4 +86,12 @@ public sealed class ProfileRepository : IProfileRepository
             page < totalPages,
             page > 1);
     }
+
+    /// <inheritdoc />
+    public Task<global::Administration.Domain.Profile?> GetSystemProfileByHoldingIdAsync(
+        Guid holdingId,
+        CancellationToken cancellationToken = default) =>
+        _dbContext.Profiles
+            .AsNoTracking()
+            .FirstOrDefaultAsync(p => p.HoldingId == holdingId && p.IsSystem, cancellationToken);
 }

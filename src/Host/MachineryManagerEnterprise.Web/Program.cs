@@ -178,7 +178,7 @@ try
     app.MapIdentityConnectEndpoints();
     app.MapIdentitySigninCallbackEndpoints();
     app.MapIdentityDevTokenEndpoints(app.Environment);
-    app.MapIdentityUserEndpoints();
+    app.MapAdministrationUserEndpoints();
 
     // Organization endpoints
     app.MapOrganizationEndpoints();

@@ -12,8 +12,6 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Routing;
 using OpenIddict.Validation.AspNetCore;
 
-using static OpenIddict.Abstractions.OpenIddictConstants;
-
 namespace MachineryManagerEnterprise.Administration.Presentation.Endpoints;
 
 /// <summary>Maps the Profile module's REST endpoints.</summary>
@@ -31,49 +29,29 @@ public static class ProfileEndpoints
                 .AddAuthenticationSchemes(OpenIddictValidationAspNetCoreDefaults.AuthenticationScheme)
                 .RequireAuthenticatedUser());
 
+        // Authorization is enforced by the command/query handlers (Profile.* permissions on
+        // the profile's owning scope, tenant visibility, anti-escalation), not by an
+        // Identity role: Platform users manage Platform-owned profiles, Holding users
+        // manage their own Holding's profiles.
         group.MapPost("/", CreateProfileAsync)
             .WithName("CreateProfile")
-            .WithSummary("Creates a new permission Profile.")
-            // Bootstrap-phase restriction (chat, 2026-08-20): only a
-            // Platform SuperUser (System Administrator) may create
-            // Profiles. Full scope-aware SuperUser resolution (Holding/
-            // Organization/Project) is a documented follow-up — this is
-            // NOT the final permission model, just closing the
-            // immediate privilege-escalation gap.
-            .RequireAuthorization(policy => policy
-                .AddAuthenticationSchemes(OpenIddictValidationAspNetCoreDefaults.AuthenticationScheme)
-                .RequireClaim(Claims.Role, "System Administrator"));
+            .WithSummary("Creates a new permission Profile owned by a Holding (or by the Platform).");
 
         group.MapPut("/{profileId:guid}", UpdateProfileAsync)
             .WithName("UpdateProfile")
-            .WithSummary("Updates a Profile's name and permissions.")
-            .RequireAuthorization(policy => policy
-                .AddAuthenticationSchemes(OpenIddictValidationAspNetCoreDefaults.AuthenticationScheme)
-                .RequireClaim(Claims.Role, "System Administrator"));
+            .WithSummary("Updates a Profile's name and permissions.");
 
         group.MapPost("/{profileId:guid}/deactivate", DeactivateProfileAsync)
             .WithName("DeactivateProfile")
-            .WithSummary("Deactivates a Profile.")
-            .RequireAuthorization(policy => policy
-                .AddAuthenticationSchemes(OpenIddictValidationAspNetCoreDefaults.AuthenticationScheme)
-                .RequireClaim(Claims.Role, "System Administrator"));
+            .WithSummary("Deactivates a Profile.");
 
         group.MapPost("/{profileId:guid}/activate", ActivateProfileAsync)
             .WithName("ActivateProfile")
-            .WithSummary("Activates a Profile.")
-            .RequireAuthorization(policy => policy
-                .AddAuthenticationSchemes(OpenIddictValidationAspNetCoreDefaults.AuthenticationScheme)
-                .RequireClaim(Claims.Role, "System Administrator"));
+            .WithSummary("Activates a Profile.");
 
         group.MapDelete("/{profileId:guid}", DeleteProfileAsync)
             .WithName("DeleteProfile")
-            .WithSummary("Permanently deletes a Profile. Blocked while it still has active user assignments.")
-            // Same bootstrap-phase restriction as Create/Update/Activate —
-            // deletion is an equally sensitive authorization-changing
-            // operation (chat, 2026-08-25).
-            .RequireAuthorization(policy => policy
-                .AddAuthenticationSchemes(OpenIddictValidationAspNetCoreDefaults.AuthenticationScheme)
-                .RequireClaim(Claims.Role, "System Administrator"));
+            .WithSummary("Permanently deletes a Profile. Blocked while it still has active user assignments.");
 
         group.MapGet("/{profileId:guid}", GetProfileByIdAsync)
             .WithName("GetProfileById")
@@ -93,7 +71,7 @@ public static class ProfileEndpoints
         CancellationToken cancellationToken)
     {
         var result = await sender.Send(
-            new CreateProfileCommand(request.Name, request.Permissions),
+            new CreateProfileCommand(request.Name, request.Permissions, request.HoldingId),
             cancellationToken);
 
         return result.IsSuccess

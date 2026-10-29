@@ -32,7 +32,13 @@ namespace Administration.Infrastructure.Persistence.Migrations
                     b.Property<DateTimeOffset>("CreatedAt")
                         .HasColumnType("datetimeoffset");
 
+                    b.Property<Guid?>("HoldingId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.Property<bool>("IsActive")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("IsSystem")
                         .HasColumnType("bit");
 
                     b.Property<string>("Name")
@@ -46,7 +52,40 @@ namespace Administration.Infrastructure.Persistence.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("HoldingId")
+                        .IsUnique()
+                        .HasDatabaseName("UX_Profile_HoldingId_System")
+                        .HasFilter("[IsSystem] = 1");
+
                     b.ToTable("Profile", "administration");
+                });
+
+            modelBuilder.Entity("Administration.Domain.UserHome", b =>
+                {
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<Guid?>("HoldingId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid?>("OrganizationId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid?>("ProjectId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("UserId");
+
+                    b.HasIndex("HoldingId")
+                        .HasDatabaseName("IX_UserHome_HoldingId");
+
+                    b.HasIndex("OrganizationId")
+                        .HasDatabaseName("IX_UserHome_OrganizationId");
+
+                    b.ToTable("UserHome", "administration");
                 });
 
             modelBuilder.Entity("Administration.Domain.UserProfileAssignment", b =>

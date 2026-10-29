@@ -53,6 +53,9 @@ public static IServiceCollection AddAdministrationApplication(
     services.AddSingleton(TypeAdapterConfig.GlobalSettings);
     services.AddScoped<IMapper, ServiceMapper>();
 
+    services.AddScoped<IProfileAuthorizationService, MachineryManagerEnterprise.Administration.Application.Authorization.ProfileAuthorizationService>();
+    services.AddScoped<IUserAuthorizationService, MachineryManagerEnterprise.Administration.Application.Authorization.UserAuthorizationService>();
+    services.AddScoped<IScopeChainResolver, MachineryManagerEnterprise.Administration.Application.Authorization.ScopeChainResolver>();
     return services;
 }
 }

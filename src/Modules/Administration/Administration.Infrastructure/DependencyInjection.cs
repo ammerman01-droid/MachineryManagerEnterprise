@@ -34,12 +34,13 @@ public static class DependencyInjection
 
         services.AddScoped<IProfileRepository, ProfileRepository>();
         services.AddScoped<IUserProfileAssignmentRepository, UserProfileAssignmentRepository>();
-        services.AddScoped<IAdministrationUnitOfWork>(serviceProvider =>
-            serviceProvider.GetRequiredService<AdministrationDbContext>());
+        services.AddScoped<IAdministrationUnitOfWork>(serviceProvider =>serviceProvider.GetRequiredService<AdministrationDbContext>());
         services.AddScoped<MachineryManagerEnterprise.SharedKernel.Abstractions.IPermissionEvaluator, PermissionEvaluator>();
         services.AddScoped<IUserAuthorizationScopeResolver, UserAuthorizationScopeResolver>();
         services.AddScoped<MachineryManagerEnterprise.SharedKernel.Abstractions.IUserAuthorizationScopeResolver,UserAuthorizationScopeResolver>();
-
+        services.AddScoped<IEffectivePermissionsProvider, EffectivePermissionsProvider>();
+        services.AddScoped<IUserHomeRepository, Persistence.UserHomeRepository>();
+        services.AddHostedService<UserHomeBackfillService>();
         return services;
     }
 }

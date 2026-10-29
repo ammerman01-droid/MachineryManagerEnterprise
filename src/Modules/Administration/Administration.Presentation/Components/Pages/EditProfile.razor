@@ -5,7 +5,7 @@
 
 <PageTitle>ویرایش پروفایل</PageTitle>
 
-<AdminOnly>
+<AccessGate Permission="Profile.Edit" AllowedLevels="Platform,Holding">
 
     <MudText Typo="Typo.h4" Class="mb-4">ویرایش پروفایل</MudText>
 
@@ -19,6 +19,11 @@
     }
     else
     {
+        @if (isSystem)
+        {
+            <MudAlert Severity="Severity.Info" Class="mb-4">این پروفایل سیستمی است و قابل ویرایش نیست.</MudAlert>
+        }
+
         <MudPaper Class="pa-4" Style="max-width:900px;">
             <MudForm @ref="form" @bind-IsValid="@isValid">
                 <MudTextField @bind-Value="name" Label="نام پروفایل" Required="true"
@@ -73,7 +78,7 @@
                 </MudSimpleTable>
 
                 <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="SubmitAsync"
-                           Disabled="@(!isValid || isSubmitting)" Class="mt-4">
+                           Disabled="@(!isValid || isSubmitting || isSystem)" Class="mt-4">
                     @if (isSubmitting)
                     {
                         <MudProgressCircular Size="Size.Small" Indeterminate="true" />
@@ -92,7 +97,7 @@
         </MudPaper>
     }
 
-</AdminOnly>
+</AccessGate>
 
 @code {
     /// <summary>The unique identifier of the profile being edited.</summary>
@@ -104,6 +109,7 @@
     private bool isSubmitting;
     private bool isLoading = true;
     private string? errorMessage;
+    private bool isSystem;
     private string name = string.Empty;
     private readonly HashSet<string> selectedPermissions = new();
 
@@ -139,6 +145,8 @@
             }
 
             name = result.Name;
+
+            isSystem = result.IsSystem;
             selectedPermissions.Clear();
             foreach (var permission in result.Permissions)
             {
@@ -237,6 +245,7 @@
         public string Name { get; set; } = string.Empty;
         public List<string> Permissions { get; set; } = new();
         public bool IsActive { get; set; }
+        public bool IsSystem { get; set; }
         public DateTimeOffset CreatedAt { get; set; }
     }
 }

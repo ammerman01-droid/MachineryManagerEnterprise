@@ -5,49 +5,48 @@ using MediatR;
 namespace MachineryManagerEnterprise.Administration.Application.Features.Profiles.Commands.UpdateProfile;
 
 /// <summary>
-/// Handles <see cref="UpdateProfileCommand"/> by loading the aggregate,
-/// applying the domain update, and committing the unit of work.
+/// Handles <see cref="UpdateProfileCommand"/>: the profile must be visible to the caller,
+/// who needs <c>Profile.Edit</c> on the owning scope and may only grant permissions they hold.
+/// System profiles are immutable.
 /// </summary>
 public sealed class UpdateProfileCommandHandler
     : IRequestHandler<UpdateProfileCommand, Result>
 {
     private readonly IProfileRepository _profileRepository;
     private readonly IAdministrationUnitOfWork _unitOfWork;
+    private readonly IProfileAuthorizationService _authorization;
 
-    /// <summary>
-    /// Initializes a new instance of the <see cref="UpdateProfileCommandHandler"/> class.
-    /// </summary>
+    /// <summary>Initializes a new instance of the <see cref="UpdateProfileCommandHandler"/> class.</summary>
     /// <param name="profileRepository">The profile repository.</param>
     /// <param name="unitOfWork">The unit of work for atomic persistence.</param>
+    /// <param name="authorization">Decides who may edit profiles.</param>
     public UpdateProfileCommandHandler(
         IProfileRepository profileRepository,
-        IAdministrationUnitOfWork unitOfWork)
+        IAdministrationUnitOfWork unitOfWork,
+        IProfileAuthorizationService authorization)
     {
         _profileRepository = profileRepository;
         _unitOfWork = unitOfWork;
+        _authorization = authorization;
     }
 
-    /// <summary>
-    /// Executes the update use case.
-    /// </summary>
-    /// <param name="request">The update command.</param>
-    /// <param name="cancellationToken">Token to cancel the asynchronous operation.</param>
-    /// <returns>A result indicating success or a business error.</returns>
+    /// <inheritdoc />
     public async Task<Result> Handle(
         UpdateProfileCommand request,
         CancellationToken cancellationToken)
     {
-        var profileId = global::Administration.Domain.ProfileId.From(request.ProfileId);
-        var profile = await _profileRepository.GetByIdAsync(profileId, cancellationToken);
+        var loaded = await _authorization.GetForManagementAsync(
+            request.ProfileId,
+            "Edit",
+            request.Permissions,
+            cancellationToken);
 
-        if (profile is null)
+        if (loaded.IsFailure)
         {
-            return Result.Failure(
-                Error.NotFound(
-                    "Profile.NotFound",
-                    $"Profile with id {request.ProfileId} was not found."));
+            return Result.Failure(loaded.Error);
         }
 
+        var profile = loaded.Value;
         var result = profile.UpdateInformation(request.Name, request.Permissions);
 
         if (result.IsFailure)

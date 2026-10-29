@@ -28,7 +28,22 @@ public sealed class ProfileConfiguration : IEntityTypeConfiguration<global::Admi
         builder.Property(profile => profile.CreatedAt)
             .IsRequired();
 
-                builder.Property(profile => profile.Permissions)
+        // Ownership (null = Platform-owned) and the system-managed flag.
+        builder.Property(profile => profile.HoldingId);
+
+        builder.Property(profile => profile.IsSystem)
+            .IsRequired();
+
+        builder.HasIndex(profile => profile.HoldingId)
+            .HasDatabaseName("IX_Profile_HoldingId");
+
+        // At most one system (full-access) profile per Holding.
+        builder.HasIndex(profile => profile.HoldingId)
+            .HasDatabaseName("UX_Profile_HoldingId_System")
+            .IsUnique()
+            .HasFilter("[IsSystem] = 1");
+
+        builder.Property(profile => profile.Permissions)
             .HasField("_permissions")
             .UsePropertyAccessMode(PropertyAccessMode.Field);
 

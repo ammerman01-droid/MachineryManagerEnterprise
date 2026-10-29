@@ -12,8 +12,6 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
 using OpenIddict.Validation.AspNetCore;
 
-using static OpenIddict.Abstractions.OpenIddictConstants;
-
 namespace MachineryManagerEnterprise.Administration.Presentation.Endpoints;
 
 /// <summary>Maps the UserProfileAssignment module's REST endpoints.</summary>
@@ -33,12 +31,7 @@ public static class UserProfileAssignmentEndpoints
 
         group.MapPost("/", AssignUserToProfileAsync)
             .WithName("AssignUserToProfile")
-            .WithSummary("Assigns a User to a Profile at a specific authorization scope. Automatically deactivates the user's previously active assignment, if any.")
-            // Bootstrap-phase restriction (chat, 2026-08-20) — see the
-            // same note on ProfileEndpoints.CreateProfile.
-            .RequireAuthorization(policy => policy
-                .AddAuthenticationSchemes(OpenIddictValidationAspNetCoreDefaults.AuthenticationScheme)
-                .RequireClaim(Claims.Role, "System Administrator"));
+            .WithSummary("Assigns a User to a Profile at a specific authorization scope. Automatically deactivates the user's previously active assignment, if any.");
 
         group.MapGet("/", GetAssignmentsByUserIdAsync)
             .WithName("GetUserProfileAssignments")
@@ -46,24 +39,15 @@ public static class UserProfileAssignmentEndpoints
 
         group.MapPost("/{assignmentId:guid}/deactivate", DeactivateUserProfileAssignmentAsync)
             .WithName("DeactivateUserProfileAssignment")
-            .WithSummary("Deactivates a User-Profile assignment. The record stays in the user's list and can be reactivated later.")
-            .RequireAuthorization(policy => policy
-                .AddAuthenticationSchemes(OpenIddictValidationAspNetCoreDefaults.AuthenticationScheme)
-                .RequireClaim(Claims.Role, "System Administrator"));
+            .WithSummary("Deactivates a User-Profile assignment. The record stays in the user's list and can be reactivated later.");
 
         group.MapPost("/{assignmentId:guid}/activate", ActivateUserProfileAssignmentAsync)
             .WithName("ActivateUserProfileAssignment")
-            .WithSummary("(Re)activates a User-Profile assignment, automatically deactivating whichever other assignment currently holds the user's active slot.")
-            .RequireAuthorization(policy => policy
-                .AddAuthenticationSchemes(OpenIddictValidationAspNetCoreDefaults.AuthenticationScheme)
-                .RequireClaim(Claims.Role, "System Administrator"));
+            .WithSummary("(Re)activates a User-Profile assignment, automatically deactivating whichever other assignment currently holds the user's active slot.");
 
         group.MapDelete("/{assignmentId:guid}", DeleteUserProfileAssignmentAsync)
             .WithName("DeleteUserProfileAssignment")
-            .WithSummary("Permanently removes a User-Profile assignment from the user's list.")
-            .RequireAuthorization(policy => policy
-                .AddAuthenticationSchemes(OpenIddictValidationAspNetCoreDefaults.AuthenticationScheme)
-                .RequireClaim(Claims.Role, "System Administrator"));
+            .WithSummary("Permanently removes a User-Profile assignment from the user's list.");
 
         return endpoints;
     }

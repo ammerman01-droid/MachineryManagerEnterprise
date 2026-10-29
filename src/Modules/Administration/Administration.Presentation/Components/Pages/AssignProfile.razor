@@ -9,7 +9,7 @@
 
 <PageTitle>تخصیص پروفایل</PageTitle>
 
-<AdminOnly>
+<AccessGate Permission="User.Edit" OnLoaded="OnAccessLoaded">
     <MudText Typo="Typo.h4" Class="mb-4">تخصیص پروفایل به کاربر</MudText>
 
     @if (isLoading)
@@ -26,17 +26,17 @@
             <MudForm @ref="form" @bind-IsValid="@isValid">
                 <MudSelect T="Guid?" @bind-Value="selectedProfileId" Label="پروفایل" Required="true"
                            RequiredError="انتخاب پروفایل الزامی است.">
-                    @foreach (var profile in profiles)
+                    @foreach (var profile in FilteredProfiles)
                     {
                         <MudSelectItem T="Guid?" Value="@((Guid?)profile.Id)">@profile.Name</MudSelectItem>
                     }
                 </MudSelect>
 
                 <MudSelect T="string" @bind-Value="selectedScopeLevel" Label="سطح دسترسی" Required="true" Class="mt-4">
-                    <MudSelectItem T="string" Value="@("Platform")">Platform</MudSelectItem>
-                    <MudSelectItem T="string" Value="@("Holding")">Holding</MudSelectItem>
-                    <MudSelectItem T="string" Value="@("Organization")">Organization</MudSelectItem>
-                    <MudSelectItem T="string" Value="@("Project")">Project</MudSelectItem>
+                    @foreach (var level in access?.ManageableLevels ?? Array.Empty<string>())
+                    {
+                        <MudSelectItem T="string" Value="@level">@level</MudSelectItem>
+                    }
                 </MudSelect>
 
                 @if (selectedScopeLevel == "Holding")
@@ -163,7 +163,7 @@
         }
     }
 
-</AdminOnly>
+</AccessGate>
 
 @code {
     /// <summary>
@@ -178,7 +178,27 @@
     private bool isLoading = true;
     private string? errorMessage;
 
+    private AccessInfo? access;
     private List<ProfileItem> profiles = new();
+
+    private Task OnAccessLoaded(AccessInfo info)
+    {
+        access = info;
+        selectedScopeLevel = info.ManageableLevels.FirstOrDefault() ?? "Platform";
+        return Task.CompletedTask;
+    }
+
+    /// <summary>
+    /// Profiles that may be given at the chosen scope: a Holding's users see only their own
+    /// Holding's profiles; Platform users see Platform-owned profiles for Platform scope and
+    /// the chosen Holding's profiles for Holding scope. The server enforces the same rule.
+    /// </summary>
+    private IEnumerable<ProfileItem> FilteredProfiles =>
+        access is null ? profiles
+        : !access.IsPlatform ? profiles.Where(p => p.HoldingId == access.HoldingId)
+        : selectedScopeLevel == "Platform" ? profiles.Where(p => p.HoldingId is null)
+        : selectedScopeLevel == "Holding" && selectedHolding is not null ? profiles.Where(p => p.HoldingId == selectedHolding.Id)
+        : profiles.Where(p => p.HoldingId is not null);
     private Guid? selectedProfileId;
     private string selectedScopeLevel = "Platform";
 
@@ -307,7 +327,7 @@
                 return;
             }
 
-            profiles = result.Items.Select(p => new ProfileItem { Id = p.Id, Name = p.Name }).ToList();
+            profiles = result.Items.Select(p => new ProfileItem { Id = p.Id, Name = p.Name, HoldingId = p.HoldingId }).ToList();
         }
         catch (Exception ex)
         {
@@ -523,6 +543,9 @@
         /// Gets or sets the display name of the profile.
         /// </summary>
         public string Name { get; set; } = string.Empty;
+
+        /// <summary>Gets or sets the owning Holding (null for Platform-owned profiles).</summary>
+        public Guid? HoldingId { get; set; }
     }
 
     /// <summary>

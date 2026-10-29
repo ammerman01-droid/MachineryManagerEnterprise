@@ -123,7 +123,7 @@ public sealed class PermissionEvaluator : IPermissionEvaluator
 
         return new AuthorizedScopeSet(false, holdingIds, organizationIds, projectIds);
     }
-    private static bool Covers(global::Administration.Domain.AuthorizationScope assignmentScope, ResourceScope resource)
+    internal static bool Covers(global::Administration.Domain.AuthorizationScope assignmentScope, ResourceScope resource)
     {
         return assignmentScope.Level switch
         {

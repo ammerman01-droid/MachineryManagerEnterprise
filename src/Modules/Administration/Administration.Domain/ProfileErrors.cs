@@ -70,6 +70,21 @@ public static class ProfileErrors
         "This profile has already been assigned to one or more users. " +
         "Remove it from every user's assignment list before deleting it.");
 
+    /// <summary>Creates an error indicating that the owning Holding identifier is invalid.</summary>
+    public static Error HoldingIdInvalid() => Error.Validation(
+        "Profile.HoldingIdInvalid",
+        "A valid Holding identifier is required.");
+
+    /// <summary>Creates an error indicating that the wildcard permission is reserved.</summary>
+    public static Error WildcardNotAllowed() => Error.Validation(
+        "Profile.WildcardNotAllowed",
+        "The wildcard permission '*' is reserved for Platform and system profiles.");
+
+    /// <summary>Creates an error indicating that a system-managed profile cannot be changed.</summary>
+    public static Error SystemProfileImmutable() => Error.Conflict(
+        "Profile.SystemProfileImmutable",
+        "This is a system-managed profile and cannot be edited, deactivated or deleted.");
+
     // Removed (chat, 2026-08-25 — revised): AssignmentAlreadyRevoked and
     // UserAlreadyHasActiveAssignment no longer apply. A user may now
     // hold multiple assignments with automatic single-active-slot

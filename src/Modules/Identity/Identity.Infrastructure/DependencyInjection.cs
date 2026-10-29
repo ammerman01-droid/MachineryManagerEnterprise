@@ -328,6 +328,7 @@ public static class DependencyInjection
             .AddHttpClient("InternalApi", client => client.BaseAddress = new Uri(baseAddress, UriKind.Absolute))
             .AddHttpMessageHandler<Http.BearerTokenHandler>();
 
+        services.AddScoped<IUserAccountService, UserAccountService>();
         return services;
     }
 }

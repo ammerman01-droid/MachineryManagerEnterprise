@@ -5,14 +5,17 @@
 
 <PageTitle>مدیریت پروفایل‌ها</PageTitle>
 
-<AdminOnly>
+<AccessGate Permission="Profile.View" OnLoaded="@(info => access = info)">
 
     <MudText Typo="Typo.h4" Class="mb-4">پروفایل‌های دسترسی</MudText>
 
-    <MudButton Variant="Variant.Filled" Color="Color.Primary"
-               OnClick="@(() => Navigation.NavigateTo("/admin/profiles/create"))" Class="mb-4">
-        ایجاد پروفایل جدید
-    </MudButton>
+    @if (access?.CanManageProfiles == true && access.Has("Profile.Create"))
+    {
+        <MudButton Variant="Variant.Filled" Color="Color.Primary"
+                   OnClick="@(() => Navigation.NavigateTo("/admin/profiles/create"))" Class="mb-4">
+            ایجاد پروفایل جدید
+        </MudButton>
+    }
 
     @if (isLoading)
     {
@@ -33,7 +36,17 @@
                 <MudTh>عملیات</MudTh>
             </HeaderContent>
             <RowTemplate>
-                <MudTd DataLabel="نام">@context.Name</MudTd>
+                <MudTd DataLabel="نام">
+                    @context.Name
+                    @if (context.IsSystem)
+                    {
+                        <MudChip T="string" Size="Size.Small" Color="Color.Info" Class="mr-2">سیستمی</MudChip>
+                    }
+                    else if (context.HoldingId is null && access?.IsPlatform == true)
+                    {
+                        <MudChip T="string" Size="Size.Small" Color="Color.Default" Class="mr-2">سطح پلتفرم</MudChip>
+                    }
+                </MudTd>
                 <MudTd DataLabel="دسترسی‌ها">@string.Join(", ", context.Permissions.Take(3))@(context.Permissions.Count > 3
                                     ? "..." : "")</MudTd>
                     <MudTd DataLabel="وضعیت">
@@ -43,6 +56,8 @@
                     </MudTd>
                     <MudTd DataLabel="تاریخ">@context.CreatedAt.ToLocalTime().ToString("yyyy/MM/dd HH:mm")</MudTd>
                     <MudTd>
+                    @if (access?.CanManageProfiles == true && !context.IsSystem)
+                    {
                         <MudButton Variant="Variant.Text" Color="Color.Primary"
                                    OnClick="@(() => Navigation.NavigateTo($"/admin/profiles/{context.Id}/edit"))">
                             ویرایش
@@ -71,14 +86,16 @@
                                 <span>حذف</span>
                             }
                         </MudButton>
+                    }
                     </MudTd>
                 </RowTemplate>
             </MudTable>
         }
 
-    </AdminOnly>
+    </AccessGate>
 
 @code {
+    private AccessInfo? access;
     private List<ProfileItem> profiles = new();
     private bool isLoading = true;
     private string? errorMessage;
@@ -253,6 +270,8 @@ System.Text.Json.JsonSerializerOptions
         public List<string> Permissions { get; set; } = new();
         public bool IsActive { get; set; }
         public DateTimeOffset CreatedAt { get; set; }
+        public Guid? HoldingId { get; set; }
+        public bool IsSystem { get; set; }
     }
 
     private sealed class SearchProfilesResponse
