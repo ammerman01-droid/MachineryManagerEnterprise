@@ -19,12 +19,21 @@ public sealed class PermissionEvaluator : IPermissionEvaluator
     private const string WildcardPermission = "*";
 
     private readonly Persistence.AdministrationDbContext _dbContext;
+    private readonly IOrganizationLookupService _organizationLookup;
+    private readonly IProjectLookupService _projectLookup;
 
     /// <summary>Initializes a new instance of the <see cref="PermissionEvaluator"/> class.</summary>
     /// <param name="dbContext">The Administration module's persistence context.</param>
-    public PermissionEvaluator(Persistence.AdministrationDbContext dbContext)
+    /// <param name="organizationLookup">Resolves an Organization's Holding.</param>
+    /// <param name="projectLookup">Resolves a Project's Organization.</param>
+    public PermissionEvaluator(
+        Persistence.AdministrationDbContext dbContext,
+        IOrganizationLookupService organizationLookup,
+        IProjectLookupService projectLookup)
     {
         _dbContext = dbContext;
+        _organizationLookup = organizationLookup;
+        _projectLookup = projectLookup;
     }
 
     /// <inheritdoc />
@@ -54,13 +63,53 @@ public sealed class PermissionEvaluator : IPermissionEvaluator
                 continue;
             }
 
-            if (Covers(assignment.Scope, resourceScope))
+            if (Covers(assignment.Scope, resourceScope)
+                || await CoversHoldingReferenceDataAsync(assignment.Scope, permission, resourceScope, cancellationToken))
             {
                 return true;
             }
         }
 
         return false;
+    }
+
+    /// <summary>
+    /// The one exception to the strictly top-down scope rule: Holding-level reference data (see
+    /// <see cref="global::Administration.Domain.HoldingReferenceData"/>) of the user's OWN Holding is
+    /// covered by Organization-level assignments (every action the profile grants) and by
+    /// Project-level assignments (view only, whatever the profile contains).
+    /// </summary>
+    private async Task<bool> CoversHoldingReferenceDataAsync(
+        global::Administration.Domain.AuthorizationScope assignmentScope,
+        string permission,
+        ResourceScope resource,
+        CancellationToken cancellationToken)
+    {
+        if (resource.HoldingId is not { } holdingId
+            || resource.OrganizationId is not null
+            || resource.ProjectId is not null
+            || !global::Administration.Domain.HoldingReferenceData.TryGetAction(permission, out var action))
+        {
+            return false;
+        }
+
+        switch (assignmentScope.Level)
+        {
+            case global::Administration.Domain.AuthorizationScopeLevel.Organization
+                when assignmentScope.OrganizationId is { } organizationId:
+                return await _organizationLookup.GetHoldingIdAsync(organizationId, cancellationToken) == holdingId;
+
+            case global::Administration.Domain.AuthorizationScopeLevel.Project
+                when assignmentScope.ProjectId is { } projectId
+                    && action == global::Administration.Domain.HoldingReferenceData.ReadOnlyAction:
+                var parentOrganizationId = await _projectLookup.GetOrganizationIdAsync(projectId, cancellationToken);
+
+                return parentOrganizationId is { } parent
+                    && await _organizationLookup.GetHoldingIdAsync(parent, cancellationToken) == holdingId;
+
+            default:
+                return false;
+        }
     }
 
 

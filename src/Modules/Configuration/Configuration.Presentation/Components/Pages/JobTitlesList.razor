@@ -1,4 +1,5 @@
 @page "/admin/job-titles"
+@using MachineryManagerEnterprise.Configuration.Presentation.Components
 @inject IHttpClientFactory HttpClientFactory
 @inject NavigationManager Navigation
 @inject IDialogService DialogService
@@ -19,7 +20,7 @@
     <MudAlert Severity="Severity.Error" Class="my-4">@errorMessage</MudAlert>
 }
 
-@if (selectedHoldingId != Guid.Empty)
+@if (selectedHoldingId != Guid.Empty && access.CanCreate)
 {
     <MudButton Variant="Variant.Filled" Color="Color.Primary" Class="mb-4"
                OnClick="@(() => Navigation.NavigateTo($"/admin/job-titles/create?holdingId={selectedHoldingId}"))">
@@ -45,10 +46,16 @@ else if (jobTitles.Count > 0)
         <RowTemplate>
             <MudTd DataLabel="نام">@context.Name</MudTd>
             <MudTd DataLabel="عملیات">
-                <MudIconButton Icon="@Icons.Material.Filled.Edit" Size="Size.Small"
+                @if (access.CanEdit)
+{
+    <MudIconButton Icon="@Icons.Material.Filled.Edit" Size="Size.Small"
                                OnClick="@(() => Navigation.NavigateTo($"/admin/job-titles/edit/{context.Id}"))" />
-                <MudIconButton Icon="@Icons.Material.Filled.Delete" Size="Size.Small" Color="Color.Error"
+}
+                @if (access.CanDelete)
+{
+    <MudIconButton Icon="@Icons.Material.Filled.Delete" Size="Size.Small" Color="Color.Error"
                                OnClick="@(() => DeleteAsync(context))" />
+}
             </MudTd>
         </RowTemplate>
     </MudTable>
@@ -75,11 +82,14 @@ else if (jobTitles.Count > 0)
     private List<HoldingItem> holdings = [];
     private List<JobTitleItem> jobTitles = [];
     private Guid selectedHoldingId;
+    // What the signed-in user may do with this reference data (Project-level users are read-only).
+    private AccessCapabilities access = AccessCapabilities.None;
     private bool isLoading = true;
     private string? errorMessage;
 
     protected override async Task OnInitializedAsync()
     {
+        access = await AccessCapabilities.LoadAsync(HttpClientFactory.CreateClient("InternalApi"), "JobTitle");
         await LoadHoldingsAsync();
         isLoading = false;
     }
@@ -179,3 +189,5 @@ else if (jobTitles.Count > 0)
         }
     }
 }
+
+--------------------------------------------------

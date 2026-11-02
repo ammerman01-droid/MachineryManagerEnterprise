@@ -1,4 +1,5 @@
 @page "/admin/units-of-measurement"
+@using MachineryManagerEnterprise.Configuration.Presentation.Components
 @inject IHttpClientFactory HttpClientFactory
 @inject NavigationManager Navigation
 
@@ -23,7 +24,7 @@
     <MudAlert Severity="Severity.Error" Class="my-4">@errorMessage</MudAlert>
 }
 
-@if (selectedHoldingId is not null)
+@if (selectedHoldingId is not null && access.CanCreate)
 {
     <MudButton Variant="Variant.Filled" Color="Color.Primary" Class="mb-4"
                OnClick="@(() => Navigation.NavigateTo($"/admin/units-of-measurement/create?holdingId={selectedHoldingId}"))">
@@ -51,10 +52,13 @@ else if (units.Count > 0)
             <MudTd DataLabel="نام">@context.Name</MudTd>
             <MudTd DataLabel="نوع کمیت فیزیکی">@PhysicalQuantityKindNames.GetName(context.Kind)</MudTd>
             <MudTd DataLabel="عملیات">
-                <MudButton Size="Size.Small" Variant="Variant.Text" Color="Color.Primary"
+                @if (access.CanEdit)
+{
+    <MudButton Size="Size.Small" Variant="Variant.Text" Color="Color.Primary"
                            OnClick="@(() => Navigation.NavigateTo($"/admin/units-of-measurement/{context.Id}/edit?holdingId={selectedHoldingId}"))">
                     ویرایش
                 </MudButton>
+}
             </MudTd>
         </RowTemplate>
     </MudTable>
@@ -94,12 +98,15 @@ else if (units.Count > 0)
     private List<HoldingItem> holdings = [];
     private List<UnitOfMeasurementItem> units = [];
     private Guid? selectedHoldingId;
+    // What the signed-in user may do with this reference data (Project-level users are read-only).
+    private AccessCapabilities access = AccessCapabilities.None;
     private bool isLoading = true;
     private string? errorMessage;
 
     /// <summary>Loads the list of Holdings when the page is first rendered.</summary>
     protected override async Task OnInitializedAsync()
     {
+        access = await AccessCapabilities.LoadAsync(HttpClientFactory.CreateClient("InternalApi"), "UnitOfMeasurement");
         await LoadHoldingsAsync();
 
         // Pre-select the Holding from the query string if it is one of the visible
@@ -188,3 +195,6 @@ else if (units.Count > 0)
         }
     }
 }
+
+
+--------------------------------------------------

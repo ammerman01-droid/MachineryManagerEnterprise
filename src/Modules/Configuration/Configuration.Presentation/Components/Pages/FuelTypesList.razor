@@ -1,5 +1,6 @@
 @page "/admin/fuel-types"
 @using MachineryManagerEnterprise.SharedKernel
+@using MachineryManagerEnterprise.Configuration.Presentation.Components
 @inject IHttpClientFactory HttpClientFactory
 @inject NavigationManager Navigation
 @inject ISnackbar Snackbar
@@ -21,7 +22,7 @@
     <MudAlert Severity="Severity.Error" Class="my-4">@errorMessage</MudAlert>
 }
 
-@if (selectedHoldingId is not null)
+@if (selectedHoldingId is not null && access.CanCreate)
 {
     <MudButton Variant="Variant.Filled" Color="Color.Primary" Class="mb-4"
                OnClick="@(() => Navigation.NavigateTo($"/admin/fuel-types/create?holdingId={selectedHoldingId}"))">
@@ -62,17 +63,26 @@ else if (fuelTypes.Count > 0)
                 }
             </MudTd>
             <MudTd DataLabel="عملیات">
-                <MudIconButton Icon="@Icons.Material.Filled.Edit" Size="Size.Small"
+                @if (access.CanEdit)
+{
+    <MudIconButton Icon="@Icons.Material.Filled.Edit" Size="Size.Small"
                                OnClick="@(() => Navigation.NavigateTo($"/admin/fuel-types/edit/{context.Id}"))" />
+}
                 @if (context.IsActive)
                 {
-                    <MudIconButton Icon="@Icons.Material.Filled.Block" Size="Size.Small" Color="Color.Error"
+                    if (access.CanEdit)
+{
+    <MudIconButton Icon="@Icons.Material.Filled.Block" Size="Size.Small" Color="Color.Error"
                                    OnClick="@(() => ToggleActiveAsync(context, deactivate: true))" />
+}
                 }
                 else
                 {
-                    <MudIconButton Icon="@Icons.Material.Filled.CheckCircle" Size="Size.Small" Color="Color.Success"
+                    if (access.CanEdit)
+{
+    <MudIconButton Icon="@Icons.Material.Filled.CheckCircle" Size="Size.Small" Color="Color.Success"
                                    OnClick="@(() => ToggleActiveAsync(context, deactivate: false))" />
+}
                 }
             </MudTd>
         </RowTemplate>
@@ -128,12 +138,15 @@ else if (fuelTypes.Count > 0)
     // (previously Guid.Empty, shown as a run of zeros) before any
     // Holding has been chosen (chat, 2026-09-19).
     private Guid? selectedHoldingId;
+    // What the signed-in user may do with this reference data (Project-level users are read-only).
+    private AccessCapabilities access = AccessCapabilities.None;
     private bool isLoading = true;
     private string? errorMessage;
 
     /// <summary>Loads the list of Holdings when the page is first rendered.</summary>
     protected override async Task OnInitializedAsync()
     {
+        access = await AccessCapabilities.LoadAsync(HttpClientFactory.CreateClient("InternalApi"), "FuelType");
         await LoadHoldingsAsync();
         isLoading = false;
     }
@@ -247,3 +260,6 @@ else if (fuelTypes.Count > 0)
         _ => kind.ToString(),
     };
 }
+
+
+--------------------------------------------------
