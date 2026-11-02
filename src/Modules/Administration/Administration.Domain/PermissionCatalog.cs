@@ -57,7 +57,7 @@ public static class PermissionCatalog
         new PermissionSection("LubricantOverflowReport", "گزارش سرریز روانکار"),
         new PermissionSection("WorkOrder", "دستورهای کار", ["View", "Create", "Edit"]),
         new PermissionSection("ConsumptionFreezeSetting", "قفل گزارش‌های مصرف", ["View", "Edit"]),
-        new PermissionSection("MeterDevice", "دستگاه‌های شمارشگر (کنتور)", ["View", "Create", "Install", "ReportFailure", "Recover", "Remove", "Archive"]),
+        new PermissionSection("MeterDevice", "دستگاه‌های شمارشگر (کنتور)", ["View", "Create", "Edit", "Install", "ReportFailure", "Recover", "Remove", "Archive"]),
         new PermissionSection("DailyUsage", "کارکرد روزانه", ["Register", "Rebase", "Correct", "Delete", "Freeze", "View"]),
     ];
 

@@ -7,8 +7,9 @@ namespace MachineryManagerEnterprise.Usage.Application.Features.MeterDevices.Com
 
 /// <summary>
 /// Handles <see cref="RegisterMeterDeviceCommand"/> by validating the
-/// referenced Organization exists, invoking domain registration,
-/// persisting the aggregate, and committing the unit of work.
+/// referenced Organization exists, verifying the device name is unique
+/// within it, invoking domain registration, persisting the aggregate, and
+/// committing the unit of work.
 /// </summary>
 public sealed class RegisterMeterDeviceCommandHandler
     : IRequestHandler<RegisterMeterDeviceCommand, Result<Guid>>
@@ -71,10 +72,18 @@ public sealed class RegisterMeterDeviceCommandHandler
                 $"Organization {request.OrganizationId} was not found."));
         }
 
+        var name = request.Name?.Trim() ?? string.Empty;
+
+        if (name.Length > 0 && await _meterDeviceRepository.NameExistsAsync(request.OrganizationId, name, null, cancellationToken))
+        {
+            return Result.Failure<Guid>(global::Usage.Domain.MeterDeviceErrors.NameAlreadyExists(name));
+        }
+
         var result = global::Usage.Domain.MeterDevice.Register(
-    request.OrganizationId,
-    request.Unit,
-    request.DailyCapOverride);
+            request.OrganizationId,
+            name,
+            request.Unit,
+            request.DailyCapOverride);
 
         if (result.IsFailure)
         {

@@ -10,6 +10,11 @@
 
 <PageTitle>جزئیات دستگاه شمارشگر</PageTitle>
 
+<MudButton Variant="Variant.Text" Color="Color.Primary" Class="mb-2"
+           StartIcon="@Icons.Material.Filled.ArrowForward" OnClick="GoBackToList">
+    بازگشت به فهرست دستگاه‌ها
+</MudButton>
+
 @if (errorMessage is not null)
 {
     <MudAlert Severity="Severity.Error" Class="my-4">@errorMessage</MudAlert>
@@ -21,29 +26,33 @@
 }
 else if (device is not null)
 {
-    <MudText Typo="Typo.h4" Class="mb-4">دستگاه شمارشگر</MudText>
+    <MudText Typo="Typo.h4" Class="mb-4">دستگاه شمارشگر: @device.Name</MudText>
 
     <MudPaper Class="pa-4 mb-4">
         <MudGrid>
             <MudItem xs="12" sm="3">
-                <MudField Label="واحد اندازه‌گیری">@UsageDisplayNames.GetUnitName(device.Unit)</MudField>
+                <MudField Label="نام دستگاه" Style="min-height: 60px;">@device.Name</MudField>
             </MudItem>
             <MudItem xs="12" sm="3">
-                <MudField Label="وضعیت">
-                    <MudChip T="string" Color="MeterDeviceStatusDisplay.GetColor(device.Status)" Size="Size.Small">
-                        @MeterDeviceStatusDisplay.GetName(device.Status)
-                    </MudChip>
+                <MudField Label="واحد اندازه‌گیری" Style="min-height: 60px;">@UsageDisplayNames.GetUnitName(device.Unit)</MudField>
+            </MudItem>
+            <MudItem xs="12" sm="3">
+                <MudField Label="وضعیت" Style="min-height: 60px;">
+                    <div class="d-flex align-center" style="height: 24px;">
+                        <MudChip T="string" Color="MeterDeviceStatusDisplay.GetColor(device.Status)" Size="Size.Small" Class="ma-0">
+                            @MeterDeviceStatusDisplay.GetName(device.Status)
+                        </MudChip>
+                    </div>
                 </MudField>
             </MudItem>
             <MudItem xs="12" sm="3">
-                <MudField Label="نوع مالک">@UsageDisplayNames.GetOwnerTypeName(device.OwnerType)</MudField>
+                <MudField Label="سقف روزانه اختصاصی" Style="min-height: 60px;">@(device.DailyCapOverride?.ToString("0.##") ?? "پیش‌فرض سامانه")</MudField>
             </MudItem>
             <MudItem xs="12" sm="3">
-                <MudField Label="شناسهٔ مالک">@(device.OwnerId?.ToString() ?? "—")</MudField>
+                <MudField Label="نوع مالک" Style="min-height: 60px;">@(device.OwnerType is null ? "—" : UsageDisplayNames.GetOwnerTypeName(device.OwnerType))</MudField>
             </MudItem>
-            <MudItem xs="12" sm="3">
-                <MudField Label="سقف روزانه اختصاصی">@(device.DailyCapOverride?.ToString("0.##") ?? "پیش‌فرض سامانه")
-                </MudField>
+            <MudItem xs="12" sm="9">
+                <MudField Label="مالک فعلی" Style="min-height: 60px;">@GetOwnerText()</MudField>
             </MudItem>
         </MudGrid>
     </MudPaper>
@@ -94,6 +103,16 @@ else if (device is not null)
                     بایگانی نهایی
                 </MudButton>
             }
+
+            @if (device.Status != "Archived")
+            {
+                <MudButton Variant="Variant.Outlined" Color="Color.Default" StartIcon="@Icons.Material.Filled.Edit" OnClick="OpenEditNameDialogAsync">
+                    ویرایش نام
+                </MudButton>
+                <MudButton Variant="Variant.Outlined" Color="Color.Default" StartIcon="@Icons.Material.Filled.Speed" OnClick="OpenEditDailyCapDialogAsync">
+                    ویرایش سقف روزانه
+                </MudButton>
+            }
         </div>
     </MudPaper>
 
@@ -109,9 +128,13 @@ else if (device is not null)
                 <JalaliDatePicker Date="toDate" DateChanged="@((DateTime? d) => toDate = d)" Label="تا تاریخ" />
                 <MudIconButton Icon="@Icons.Material.Filled.Clear" Size="Size.Small" OnClick="@(() => toDate = null)" />
             </MudItem>
-            <MudItem xs="12" sm="4">
-                <MudTextField T="string" @bind-Value="projectIdFilterText" Label="فیلتر پروژه (شناسه)"
-                              Placeholder="خالی = همهٔ پروژه‌ها" />
+            <MudItem xs="12" sm="4" Class="d-flex align-center">
+                <MudSelect T="Guid?" @bind-Value="selectedProjectId" Label="پروژه" Placeholder="همهٔ پروژه‌ها" Clearable="true">
+                    @foreach (var project in projects)
+                    {
+                        <MudSelectItem T="Guid?" Value="@((Guid?)project.Key)">@project.Value</MudSelectItem>
+                    }
+                </MudSelect>
             </MudItem>
         </MudGrid>
 
@@ -137,57 +160,63 @@ else if (device is not null)
                     <MudTh>عملیات</MudTh>
                 </HeaderContent>
                 <RowTemplate>
-                    <MudTd DataLabel="تاریخ">@JalaliCalendarConverter.Format(context.EntryDate.ToDateTime(TimeOnly.MinValue))
-                    </MudTd>
+                    <MudTd DataLabel="تاریخ">@JalaliCalendarConverter.Format(context.EntryDate.ToDateTime(TimeOnly.MinValue))</MudTd>
                     <MudTd DataLabel="شیفت">@(context.ShiftIndex is { } i ? (i + 1).ToString() : "—")</MudTd>
                     <MudTd DataLabel="نوع ردیف">@UsageDisplayNames.GetEntryKindName(context.Kind)</MudTd>
                     <MudTd DataLabel="کارکرد مولد">@context.OperationalUsageAmount.ToString("0.##")</MudTd>
                     <MudTd DataLabel="مقدار خام">@context.RawReadingValue.ToString("0.##")</MudTd>
-                    <MudTd DataLabel="پروژه">@context.ProjectId</MudTd>
+                    <MudTd DataLabel="پروژه">@GetProjectName(context.ProjectId)</MudTd>
                     <MudTd DataLabel="منشأ">
                         @if (context.Origin == "AutoFilled")
                         {
-                            <MudChip T="string" Size="Size.Small" Color="Color.Info">
-                                @UsageDisplayNames.GetEntryOriginName(context.Origin)</MudChip>
-                            }
+                            <MudChip T="string" Size="Size.Small" Color="Color.Info">@UsageDisplayNames.GetEntryOriginName(context.Origin)</MudChip>
+                        }
                         else
-                            {
-                                @UsageDisplayNames.GetEntryOriginName(context.Origin)
-                            }
-                        </MudTd>
-                        <MudTd DataLabel="عملیات">
-                            @if (context.Kind == "ShiftReading" && context.ShiftIndex is not null)
-                            {
-                                <MudIconButton Icon="@Icons.Material.Filled.Edit" Size="Size.Small" title="اصلاح مقدار"
-                                               OnClick="@(() => OpenCorrectEntryReadingDialogAsync(context))" />
-                                <MudIconButton Icon="@Icons.Material.Filled.Schedule" Size="Size.Small" title="اصلاح مشخصات شیفت"
-                                               OnClick="@(() => OpenCorrectEntryDetailsDialogAsync(context))" />
-                            }
-                        </MudTd>
-                    </RowTemplate>
-                </MudTable>
+                        {
+                            @UsageDisplayNames.GetEntryOriginName(context.Origin)
+                        }
+                    </MudTd>
+                    <MudTd DataLabel="عملیات">
+                        @if (context.Kind == "ShiftReading" && context.ShiftIndex is not null)
+                        {
+                            <MudIconButton Icon="@Icons.Material.Filled.Edit" Size="Size.Small" title="اصلاح مقدار"
+                                           OnClick="@(() => OpenCorrectEntryReadingDialogAsync(context))" />
+                            <MudIconButton Icon="@Icons.Material.Filled.Schedule" Size="Size.Small" title="اصلاح مشخصات شیفت"
+                                           OnClick="@(() => OpenCorrectEntryDetailsDialogAsync(context))" />
+                        }
+                    </MudTd>
+                </RowTemplate>
+            </MudTable>
 
-                @if (historyItems.Count == 0)
-                {
-                    <MudText Class="mt-4" Color="Color.Secondary">کارکردی برای این بازه ثبت نشده است.</MudText>
-                }
+            @if (historyItems.Count == 0)
+            {
+                <MudText Class="mt-4" Color="Color.Secondary">کارکردی برای این بازه ثبت نشده است.</MudText>
             }
-        </MudPaper>
-    }
+        }
+    </MudPaper>
+}
 
 @code {
     /// <summary>The device being viewed.</summary>
     [Parameter]
     public Guid MeterDeviceId { get; set; }
 
+    /// <summary>The Holding the user was working in, carried along so the list page can be restored by the back button (chat, 2026-10-28).</summary>
+    [Parameter]
+    [SupplyParameterFromQuery(Name = "holdingId")]
+    public Guid? HoldingId { get; set; }
+
     private sealed class MeterDeviceDetail
     {
         public Guid Id { get; set; }
         public Guid OrganizationId { get; set; }
+        public string Name { get; set; } = string.Empty;
         public string? Unit { get; set; }
         public string Status { get; set; } = string.Empty;
         public string? OwnerType { get; set; }
         public Guid? OwnerId { get; set; }
+        public string? OwnerCode { get; set; }
+        public string? OwnerName { get; set; }
         public decimal? DailyCapOverride { get; set; }
     }
 
@@ -214,13 +243,26 @@ else if (device is not null)
         public int TotalCount { get; set; }
     }
 
+    private sealed class ProjectItem
+    {
+        public Guid Id { get; set; }
+        public Guid OrganizationId { get; set; }
+        public string Name { get; set; } = string.Empty;
+    }
+
+    private sealed class SearchProjectsResult
+    {
+        public List<ProjectItem> Items { get; set; } = [];
+    }
+
     private static readonly JsonSerializerOptions JsonOptions = new() { PropertyNameCaseInsensitive = true };
 
     private MeterDeviceDetail? device;
     private List<UsageHistoryItem> historyItems = [];
+    private Dictionary<Guid, string> projects = [];
     private DateTime? fromDate;
     private DateTime? toDate;
-    private string? projectIdFilterText;
+    private Guid? selectedProjectId;
     private bool isLoading = true;
     private bool isHistoryLoading;
     private string? errorMessage;
@@ -228,8 +270,36 @@ else if (device is not null)
     protected override async Task OnInitializedAsync()
     {
         await LoadDeviceAsync();
+        await LoadProjectsAsync();
         await LoadHistoryAsync();
     }
+
+    private string GetListUrl()
+    {
+        var organizationId = device?.OrganizationId;
+
+        return HoldingId is { } holdingId && organizationId is { } orgId
+            ? $"/admin/meter-devices?holdingId={holdingId}&organizationId={orgId}"
+            : "/admin/meter-devices";
+    }
+
+    private void GoBackToList() => Navigation.NavigateTo(GetListUrl());
+
+    private string GetOwnerText()
+    {
+        if (device?.OwnerType is null)
+        {
+            return "نصب‌نشده";
+        }
+
+        // The Asset's code and name, never its raw identifier.
+        return device.OwnerCode is null
+            ? UsageDisplayNames.GetOwnerTypeName(device.OwnerType)
+            : $"{device.OwnerCode} - {device.OwnerName}";
+    }
+
+    private string GetProjectName(Guid projectId) =>
+        projects.TryGetValue(projectId, out var name) ? name : "—";
 
     private async Task LoadDeviceAsync()
     {
@@ -243,7 +313,7 @@ else if (device is not null)
 
             if (!response.IsSuccessStatusCode)
             {
-                errorMessage = $"خطا در دریافت اطلاعات دستگاه: {response.StatusCode}";
+                errorMessage = await UsageProblemMessages.DescribeAsync(response, "خطا در دریافت اطلاعات دستگاه");
                 return;
             }
 
@@ -257,6 +327,36 @@ else if (device is not null)
         finally
         {
             isLoading = false;
+        }
+    }
+
+    /// <summary>Loads the Organization's Projects so the history can show and filter by Project name instead of an identifier.</summary>
+    private async Task LoadProjectsAsync()
+    {
+        if (device is null)
+        {
+            return;
+        }
+
+        try
+        {
+            var client = HttpClientFactory.CreateClient("InternalApi");
+            var response = await client.GetAsync("/api/v1/projects?pageSize=200");
+
+            if (response.IsSuccessStatusCode)
+            {
+                var content = await response.Content.ReadAsStringAsync();
+                var result = JsonSerializer.Deserialize<SearchProjectsResult>(content, JsonOptions);
+
+                projects = (result?.Items ?? [])
+                    .Where(p => p.OrganizationId == device.OrganizationId)
+                    .OrderBy(p => p.Name)
+                    .ToDictionary(p => p.Id, p => p.Name);
+            }
+        }
+        catch
+        {
+            // Best effort: without names the Project column simply shows a dash.
         }
     }
 
@@ -279,7 +379,7 @@ else if (device is not null)
                 url += $"&toDate={DateOnly.FromDateTime(toDate.Value):yyyy-MM-dd}";
             }
 
-            if (Guid.TryParse(projectIdFilterText, out var projectId))
+            if (selectedProjectId is { } projectId)
             {
                 url += $"&projectId={projectId}";
             }
@@ -319,7 +419,7 @@ else if (device is not null)
 
             if (!response.IsSuccessStatusCode)
             {
-                errorMessage = $"خطا در دریافت آخرین ردیف: {await response.Content.ReadAsStringAsync()}";
+                errorMessage = await UsageProblemMessages.DescribeAsync(response, "خطا در دریافت آخرین ردیف");
                 return null;
             }
 
@@ -344,10 +444,56 @@ else if (device is not null)
         var parameters = new DialogParameters<InstallMeterDeviceDialog>
         {
             { x => x.MeterDeviceId, MeterDeviceId },
+            { x => x.DeviceName, device.Name },
             { x => x.OrganizationId, device.OrganizationId },
         };
 
         var dialog = await DialogService.ShowAsync<InstallMeterDeviceDialog>("نصب دستگاه", parameters);
+        var result = await dialog.Result;
+
+        if (result is { Canceled: false })
+        {
+            await LoadDeviceAsync();
+        }
+    }
+
+    private async Task OpenEditNameDialogAsync()
+    {
+        if (device is null)
+        {
+            return;
+        }
+
+        var parameters = new DialogParameters<EditMeterDeviceNameDialog>
+        {
+            { x => x.MeterDeviceId, MeterDeviceId },
+            { x => x.CurrentName, device.Name },
+        };
+
+        var dialog = await DialogService.ShowAsync<EditMeterDeviceNameDialog>("ویرایش نام دستگاه", parameters);
+        var result = await dialog.Result;
+
+        if (result is { Canceled: false })
+        {
+            await LoadDeviceAsync();
+        }
+    }
+
+    private async Task OpenEditDailyCapDialogAsync()
+    {
+        if (device is null)
+        {
+            return;
+        }
+
+        var parameters = new DialogParameters<EditDailyCapDialog>
+        {
+            { x => x.MeterDeviceId, MeterDeviceId },
+            { x => x.Unit, device.Unit },
+            { x => x.CurrentCap, device.DailyCapOverride },
+        };
+
+        var dialog = await DialogService.ShowAsync<EditDailyCapDialog>("ویرایش سقف روزانه", parameters);
         var result = await dialog.Result;
 
         if (result is { Canceled: false })
@@ -381,6 +527,8 @@ else if (device is not null)
             { x => x.OwnerType, device.OwnerType },
             { x => x.OwnerId, device.OwnerId.Value },
             { x => x.Unit, device.Unit },
+            { x => x.OrganizationId, device.OrganizationId },
+            { x => x.CurrentMeterDeviceId, MeterDeviceId },
         };
 
         var dialog = await DialogService.ShowAsync<RebaseCounterDialog>("بازتنظیم شمارنده", parameters);
@@ -490,7 +638,7 @@ else if (device is not null)
 
             if (!response.IsSuccessStatusCode)
             {
-                errorMessage = $"خطا در «{actionPersianName}»: {await response.Content.ReadAsStringAsync()}";
+                errorMessage = await UsageProblemMessages.DescribeAsync(response, $"خطا در «{actionPersianName}»");
                 return;
             }
 

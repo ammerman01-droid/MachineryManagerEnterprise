@@ -1,3 +1,4 @@
+@using System.Text.Json
 @using MachineryManagerEnterprise.Usage.Presentation.Components
 @using MachineryManagerEnterprise.UI.Components
 @using MachineryManagerEnterprise.UI.Calendar
@@ -12,10 +13,30 @@
         }
 
         <MudAlert Severity="Severity.Info" Class="mb-4">
-            دستگاه جایگزین باید از قبل روی همین مالک نصب شده باشد.
+            دستگاه جایگزین باید از قبل روی همین مالک نصب شده باشد و واحد اندازه‌گیری‌اش با شمارندهٔ فعلی یکی باشد.
         </MudAlert>
 
-        <MudTextField T="string" @bind-Value="newMeterDeviceIdText" Label="شناسهٔ دستگاه جایگزین" Required="true" Class="mb-4" />
+        @if (isLoadingDevices)
+        {
+            <MudProgressLinear Indeterminate="true" Class="my-2" />
+        }
+        else
+        {
+            <MudSelect T="Guid?" @bind-Value="newMeterDeviceId" Label="دستگاه جایگزین" Placeholder="یک دستگاه را انتخاب کنید"
+                       Required="true" Class="mb-4">
+                @foreach (var device in candidates)
+                {
+                    <MudSelectItem T="Guid?" Value="@((Guid?)device.Id)">@device.Name</MudSelectItem>
+                }
+            </MudSelect>
+
+            @if (candidates.Count == 0 && loadError is null)
+            {
+                <MudAlert Severity="Severity.Warning" Class="mb-4">
+                    دستگاه دیگری با همین واحد روی این مالک نصب نشده است. ابتدا دستگاه جایگزین را ثبت و روی همین دارایی نصب کنید.
+                </MudAlert>
+            }
+        }
 
         <MudNumericField T="decimal?" @bind-Value="newRawReadingValue" Label="مقدار پایهٔ جدید کنتور" Required="true" Min="0" Class="mb-4" />
 
@@ -46,19 +67,92 @@
     [Parameter]
     public string Unit { get; set; } = string.Empty;
 
-    private string newMeterDeviceIdText = string.Empty;
+    /// <summary>The Organization the owner and its devices belong to, used to list candidate replacement devices.</summary>
+    [Parameter]
+    public Guid OrganizationId { get; set; }
+
+    /// <summary>The device currently being replaced; it is excluded from the candidate list.</summary>
+    [Parameter]
+    public Guid CurrentMeterDeviceId { get; set; }
+
+    private sealed class DeviceItem
+    {
+        public Guid Id { get; set; }
+        public string Name { get; set; } = string.Empty;
+        public string Status { get; set; } = string.Empty;
+    }
+
+    private sealed class SearchDevicesResult
+    {
+        public List<DeviceItem> Items { get; set; } = [];
+    }
+
+    private static readonly JsonSerializerOptions JsonOptions = new() { PropertyNameCaseInsensitive = true };
+
+    private List<DeviceItem> candidates = [];
+    private Guid? newMeterDeviceId;
     private decimal? newRawReadingValue;
     private DateTime? targetDate = DateTime.Today;
+    private bool isLoadingDevices;
     private bool isSubmitting;
     private string? errorMessage;
+    private string? loadError;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadCandidatesAsync();
+    }
+
+    /// <summary>
+    /// Lists the devices already installed on this owner that read in the ledger's unit — the only
+    /// devices a counter can be rebased onto — so the user picks a replacement by its name instead
+    /// of typing an identifier.
+    /// </summary>
+    private async Task LoadCandidatesAsync()
+    {
+        isLoadingDevices = true;
+        loadError = null;
+
+        try
+        {
+            var client = HttpClientFactory.CreateClient("InternalApi");
+            var response = await client.GetAsync(
+                $"/api/v1/meter-devices?organizationId={OrganizationId}&ownerId={OwnerId}&unit={Unit}&page=1&pageSize=200");
+
+            if (response.IsSuccessStatusCode)
+            {
+                var stream = await response.Content.ReadAsStreamAsync();
+                var result = await JsonSerializer.DeserializeAsync<SearchDevicesResult>(stream, JsonOptions);
+
+                candidates = (result?.Items ?? [])
+                    .Where(d => d.Id != CurrentMeterDeviceId && d.Status is "Installed" or "Operational")
+                    .OrderBy(d => d.Name)
+                    .ToList();
+            }
+            else
+            {
+                loadError = await UsageProblemMessages.DescribeAsync(response, "خطا در دریافت فهرست دستگاه‌ها");
+                errorMessage = loadError;
+            }
+        }
+        catch (Exception ex)
+        {
+            loadError = $"خطا در دریافت فهرست دستگاه‌ها: {ex.Message}";
+            errorMessage = loadError;
+        }
+        finally
+        {
+            isLoadingDevices = false;
+        }
+    }
 
     private async Task SubmitAsync()
     {
         errorMessage = null;
 
-        if (!Guid.TryParse(newMeterDeviceIdText, out var newMeterDeviceId))
+        if (newMeterDeviceId is null)
         {
-            errorMessage = "شناسهٔ دستگاه جایگزین نامعتبر است.";
+            errorMessage = "لطفاً دستگاه جایگزین را انتخاب کنید.";
             return;
         }
 
@@ -77,7 +171,7 @@
                 $"/api/v1/usage-ledgers/{OwnerType}/{OwnerId}/{Unit}/rebase",
                 new
                 {
-                    NewMeterDeviceId = newMeterDeviceId,
+                    NewMeterDeviceId = newMeterDeviceId.Value,
                     NewRawReadingValue = newRawReadingValue.Value,
                     TargetDate = DateOnly.FromDateTime(targetDate.Value),
                 });

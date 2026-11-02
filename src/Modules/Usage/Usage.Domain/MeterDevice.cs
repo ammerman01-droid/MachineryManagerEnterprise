@@ -16,11 +16,20 @@ namespace Usage.Domain;
 /// at <see cref="Register"/> time (chat, 2026-09-29) — a device
 /// measuring hours can never later measure kilometers, regardless of
 /// which owner it is installed on (BR-011/BR-013).
+/// Every device also carries a human-readable <see cref="Name"/> that is
+/// mandatory, unique within its Organization and editable (chat, 2026-10-28),
+/// so users never have to deal with raw identifiers.
 /// </summary>
 public sealed class MeterDevice : AggregateRoot<MeterDeviceId>
 {
+    /// <summary>The maximum number of characters allowed in a device <see cref="Name"/>.</summary>
+    public const int MaxNameLength = 100;
+
     /// <summary>Gets the identifier of the Organization this device belongs to.</summary>
     public Guid OrganizationId { get; private set; }
+
+    /// <summary>Gets the human-readable name of this device; unique within its Organization.</summary>
+    public string Name { get; private set; } = string.Empty;
 
     /// <summary>Gets the unit this device reads in (Hour, Kilometer, or Mile), fixed at <see cref="Register"/> time.</summary>
     public MeterReadingUnit Unit { get; private set; }
@@ -42,10 +51,11 @@ public sealed class MeterDevice : AggregateRoot<MeterDeviceId>
     {
     }
 
-    private MeterDevice(MeterDeviceId id, Guid organizationId, MeterReadingUnit unit, decimal? dailyCapOverride)
+    private MeterDevice(MeterDeviceId id, Guid organizationId, string name, MeterReadingUnit unit, decimal? dailyCapOverride)
         : base(id)
     {
         OrganizationId = organizationId;
+        Name = name;
         Unit = unit;
         DailyCapOverride = dailyCapOverride;
         Status = MeterDeviceStatus.Registered;
@@ -57,13 +67,21 @@ public sealed class MeterDevice : AggregateRoot<MeterDeviceId>
     /// any owner.
     /// </summary>
     /// <param name="organizationId">The Organization this device belongs to.</param>
+    /// <param name="name">The mandatory human-readable name of the device (trimmed; unique within the Organization, which the Application layer verifies).</param>
     /// <param name="unit">The unit this device reads in; fixed for its lifetime.</param>
     /// <param name="dailyCapOverride">An optional owner-specific override for the daily Operational Usage cap (BR-045).</param>
-    public static Result<MeterDevice> Register(Guid organizationId, MeterReadingUnit unit, decimal? dailyCapOverride)
+    public static Result<MeterDevice> Register(Guid organizationId, string name, MeterReadingUnit unit, decimal? dailyCapOverride)
     {
         if (organizationId == Guid.Empty)
         {
             return Result.Failure<MeterDevice>(MeterDeviceErrors.OrganizationRequired());
+        }
+
+        var nameResult = NormalizeName(name);
+
+        if (nameResult.IsFailure)
+        {
+            return Result.Failure<MeterDevice>(nameResult.Error);
         }
 
         if (!Enum.IsDefined(unit))
@@ -76,17 +94,36 @@ public sealed class MeterDevice : AggregateRoot<MeterDeviceId>
             return Result.Failure<MeterDevice>(MeterDeviceErrors.InvalidDailyCapOverride());
         }
 
-        return new MeterDevice(MeterDeviceId.New(), organizationId, unit, dailyCapOverride);
+        return new MeterDevice(MeterDeviceId.New(), organizationId, nameResult.Value, unit, dailyCapOverride);
+    }
+
+    /// <summary>Renames this device. Uniqueness within the Organization is verified by the Application layer.</summary>
+    /// <param name="name">The new name; trimmed, mandatory, at most <see cref="MaxNameLength"/> characters.</param>
+    public Result Rename(string name)
+    {
+        var nameResult = NormalizeName(name);
+
+        if (nameResult.IsFailure)
+        {
+            return Result.Failure(nameResult.Error);
+        }
+
+        Name = nameResult.Value;
+
+        return Result.Success();
     }
 
     /// <summary>
-    /// Installs this device on an owner (Asset or Component). The
-    /// owner's configured <paramref name="ownerMeterReadingUnit"/> must
-    /// match this device's fixed <see cref="Unit"/> (BR-011/BR-013) —
-    /// moving a device to an owner configured for a different unit is
-    /// rejected outright rather than silently reinterpreted.
+    /// Installs this device on an owner (Asset or Component). Whether the
+    /// owner may carry a device of this device's <see cref="Unit"/> (an owner
+    /// may host devices of at most two different units — chat, 2026-10-28) is
+    /// decided by the Application layer, which can see the owner's other
+    /// devices; this aggregate only guards its own lifecycle.
     /// </summary>
-    public Result Install(UsageOwnerType ownerType, Guid ownerId, MeterReadingUnit ownerMeterReadingUnit, IDateTimeProvider dateTimeProvider)
+    /// <param name="ownerType">The kind of owner the device is mounted on.</param>
+    /// <param name="ownerId">The identifier of the owner.</param>
+    /// <param name="dateTimeProvider">Provides the current UTC time for the raised domain event.</param>
+    public Result Install(UsageOwnerType ownerType, Guid ownerId, IDateTimeProvider dateTimeProvider)
     {
         if (Status is not (MeterDeviceStatus.Registered or MeterDeviceStatus.Removed))
         {
@@ -96,11 +133,6 @@ public sealed class MeterDevice : AggregateRoot<MeterDeviceId>
         if (ownerId == Guid.Empty)
         {
             return Result.Failure(MeterDeviceErrors.OwnerRequired());
-        }
-
-        if (Unit != ownerMeterReadingUnit)
-        {
-            return Result.Failure(MeterDeviceErrors.UnitMismatch(Unit, ownerMeterReadingUnit));
         }
 
         OwnerType = ownerType;
@@ -132,6 +164,7 @@ public sealed class MeterDevice : AggregateRoot<MeterDeviceId>
     }
 
     /// <summary>Reports that this device has stopped producing readings (e.g. sensor failure).</summary>
+    /// <param name="dateTimeProvider">Provides the current UTC time for the raised domain event.</param>
     public Result ReportFailure(IDateTimeProvider dateTimeProvider)
     {
         if (Status is not (MeterDeviceStatus.Installed or MeterDeviceStatus.Operational))
@@ -159,6 +192,7 @@ public sealed class MeterDevice : AggregateRoot<MeterDeviceId>
     }
 
     /// <summary>Removes this device from its current owner, making it available for re-installation elsewhere.</summary>
+    /// <param name="dateTimeProvider">Provides the current UTC time for the raised domain event.</param>
     public Result Remove(IDateTimeProvider dateTimeProvider)
     {
         if (Status is not (MeterDeviceStatus.Installed or MeterDeviceStatus.Operational or MeterDeviceStatus.Failed))
@@ -179,6 +213,7 @@ public sealed class MeterDevice : AggregateRoot<MeterDeviceId>
     }
 
     /// <summary>Permanently retires a removed device.</summary>
+    /// <param name="dateTimeProvider">Provides the current UTC time for the raised domain event.</param>
     public Result Archive(IDateTimeProvider dateTimeProvider)
     {
         if (Status != MeterDeviceStatus.Removed)
@@ -193,6 +228,7 @@ public sealed class MeterDevice : AggregateRoot<MeterDeviceId>
     }
 
     /// <summary>Updates the owner-specific override for the daily Operational Usage cap (BR-045).</summary>
+    /// <param name="newValue">The new override, or <see langword="null"/> to fall back to the system default.</param>
     public Result SetDailyCapOverride(decimal? newValue)
     {
         if (newValue is <= 0)
@@ -203,5 +239,22 @@ public sealed class MeterDevice : AggregateRoot<MeterDeviceId>
         DailyCapOverride = newValue;
 
         return Result.Success();
+    }
+
+    private static Result<string> NormalizeName(string? name)
+    {
+        var trimmed = name?.Trim();
+
+        if (string.IsNullOrEmpty(trimmed))
+        {
+            return Result.Failure<string>(MeterDeviceErrors.NameRequired());
+        }
+
+        if (trimmed.Length > MaxNameLength)
+        {
+            return Result.Failure<string>(MeterDeviceErrors.NameTooLong(MaxNameLength));
+        }
+
+        return Result.Success(trimmed);
     }
 }

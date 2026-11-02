@@ -1,4 +1,5 @@
 @using System.Text.Json
+@using MachineryManagerEnterprise.Usage.Presentation.Components
 @inject IHttpClientFactory HttpClientFactory
 
 <MudDialog>
@@ -7,6 +8,11 @@
         @if (errorMessage is not null)
         {
             <MudAlert Severity="Severity.Error" Class="mb-4">@errorMessage</MudAlert>
+        }
+
+        @if (!string.IsNullOrWhiteSpace(DeviceName))
+        {
+            <MudText Typo="Typo.body2" Class="mb-4">دستگاه: <b>@DeviceName</b></MudText>
         }
 
         <MudSelect T="string" @bind-Value="ownerType" Label="نوع مالک" Placeholder="نوع مالک را انتخاب کنید" Class="mb-4">
@@ -24,12 +30,20 @@
             }
             else
             {
-                <MudSelect T="Guid?" @bind-Value="ownerId" Label="دارایی" Placeholder="یک دارایی را انتخاب کنید">
+                <MudSelect T="Guid?" @bind-Value="ownerId" Label="دارایی" Placeholder="یک دارایی را انتخاب کنید"
+                           HelperText="هر دارایی می‌تواند دستگاه‌هایی از حداکثر دو نوع مختلف (مثلاً ساعت‌شمار و کیلومترشمار) داشته باشد.">
                     @foreach (var asset in assets)
                     {
                         <MudSelectItem T="Guid?" Value="@((Guid?)asset.Id)">@asset.Name (@asset.Code)</MudSelectItem>
                     }
                 </MudSelect>
+
+                @if (assets.Count == 0 && loadError is null)
+                {
+                    <MudText Typo="Typo.caption" Color="Color.Warning" Class="mt-2">
+                        هیچ دارایی‌ای برای این سازمان پیدا نشد.
+                    </MudText>
+                }
             }
         }
     </DialogContent>
@@ -48,6 +62,10 @@
     /// <summary>The device to install.</summary>
     [Parameter]
     public Guid MeterDeviceId { get; set; }
+
+    /// <summary>The name of the device to install, shown for orientation.</summary>
+    [Parameter]
+    public string? DeviceName { get; set; }
 
     /// <summary>The Organization to look up candidate Assets in.</summary>
     [Parameter]
@@ -70,21 +88,24 @@
     private List<AssetItem> assets = [];
     private bool isLoadingAssets;
     private bool isSubmitting;
-    private string? ownerType;
+
+    // Only Assets can own a device today, so the owner type is pre-selected and the Asset
+    // list is loaded as soon as the dialog opens. (Loading it from OnParametersSetAsync, as
+    // before, never fired when the user picked the type afterwards, leaving the picker empty.)
+    private string? ownerType = "Asset";
     private Guid? ownerId;
     private string? errorMessage;
+    private string? loadError;
 
-    protected override async Task OnParametersSetAsync()
+    protected override async Task OnInitializedAsync()
     {
-        if (ownerType == "Asset" && assets.Count == 0 && !isLoadingAssets)
-        {
-            await LoadAssetsAsync();
-        }
+        await LoadAssetsAsync();
     }
 
     private async Task LoadAssetsAsync()
     {
         isLoadingAssets = true;
+        loadError = null;
 
         try
         {
@@ -95,13 +116,18 @@
             {
                 var stream = await response.Content.ReadAsStreamAsync();
                 var result = await JsonSerializer.DeserializeAsync<SearchAssetsResult>(stream, JsonOptions);
-                assets = result?.Items ?? [];
+                assets = (result?.Items ?? []).OrderBy(a => a.Code).ToList();
+            }
+            else
+            {
+                loadError = await UsageProblemMessages.DescribeAsync(response, "خطا در دریافت فهرست دارایی‌ها");
+                errorMessage = loadError;
             }
         }
-        catch
+        catch (Exception ex)
         {
-            // Best-effort: an empty picker with the Placeholder still showing is an
-            // acceptable degraded state; the Submit button's own error handling covers it.
+            loadError = $"خطا در دریافت فهرست دارایی‌ها: {ex.Message}";
+            errorMessage = loadError;
         }
         finally
         {
@@ -130,7 +156,7 @@
 
             if (!response.IsSuccessStatusCode)
             {
-                errorMessage = $"خطا در نصب دستگاه: {await response.Content.ReadAsStringAsync()}";
+                errorMessage = await UsageProblemMessages.DescribeAsync(response, "خطا در نصب دستگاه");
                 return;
             }
 

@@ -13,27 +13,32 @@
     <MudAlert Severity="Severity.Error" Class="my-4">@errorMessage</MudAlert>
 }
 
-<MudSelect T="Guid?" Label="هلدینگ" Placeholder="یک هلدینگ را انتخاب کنید" @bind-Value="selectedHoldingId" @bind-Value:after="OnHoldingChangedAsync" Class="mb-4">
-    @foreach (var holding in holdings)
+<MudGrid Class="mb-4">
+    <MudItem xs="12" sm="4">
+        <MudSelect T="Guid?" Label="هلدینگ" Placeholder="یک هلدینگ را انتخاب کنید" @bind-Value="selectedHoldingId" @bind-Value:after="OnHoldingChangedAsync">
+            @foreach (var holding in holdings)
+            {
+                <MudSelectItem T="Guid?" Value="@((Guid?)holding.Id)">@holding.Name</MudSelectItem>
+            }
+        </MudSelect>
+    </MudItem>
+    @if (selectedHoldingId is not null)
     {
-        <MudSelectItem T="Guid?" Value="@((Guid?)holding.Id)">@holding.Name</MudSelectItem>
+        <MudItem xs="12" sm="4">
+            <MudSelect T="Guid?" Label="سازمان" Placeholder="یک سازمان را انتخاب کنید" @bind-Value="selectedOrganizationId" @bind-Value:after="OnOrganizationChangedAsync">
+                @foreach (var organization in organizations)
+                {
+                    <MudSelectItem T="Guid?" Value="@((Guid?)organization.Id)">@organization.Name</MudSelectItem>
+                }
+            </MudSelect>
+        </MudItem>
     }
-</MudSelect>
-
-@if (selectedHoldingId is not null)
-{
-    <MudSelect T="Guid?" Label="سازمان" Placeholder="یک سازمان را انتخاب کنید" @bind-Value="selectedOrganizationId" @bind-Value:after="OnOrganizationChangedAsync" Class="mb-4">
-        @foreach (var organization in organizations)
-        {
-            <MudSelectItem T="Guid?" Value="@((Guid?)organization.Id)">@organization.Name</MudSelectItem>
-        }
-    </MudSelect>
-}
+</MudGrid>
 
 @if (selectedOrganizationId is not null)
 {
     <MudButton Variant="Variant.Filled" Color="Color.Primary" Class="mb-4"
-               OnClick="@(() => Navigation.NavigateTo($"/admin/meter-devices/{selectedOrganizationId}/create"))">
+               OnClick="@(() => Navigation.NavigateTo($"/admin/meter-devices/{selectedOrganizationId}/create?holdingId={selectedHoldingId}"))">
         ثبت دستگاه جدید
     </MudButton>
 
@@ -45,6 +50,7 @@
     {
         <MudTable Items="items" Hover="true">
             <HeaderContent>
+                <MudTh>نام دستگاه</MudTh>
                 <MudTh>واحد اندازه‌گیری</MudTh>
                 <MudTh>وضعیت</MudTh>
                 <MudTh>مالک فعلی</MudTh>
@@ -52,19 +58,18 @@
                 <MudTh>عملیات</MudTh>
             </HeaderContent>
             <RowTemplate>
+                <MudTd DataLabel="نام دستگاه">@context.Name</MudTd>
                 <MudTd DataLabel="واحد اندازه‌گیری">@UsageDisplayNames.GetUnitName(context.Unit)</MudTd>
                 <MudTd DataLabel="وضعیت">
                     <MudChip T="string" Color="MeterDeviceStatusDisplay.GetColor(context.Status)" Size="Size.Small">
                         @MeterDeviceStatusDisplay.GetName(context.Status)
                     </MudChip>
                 </MudTd>
-                <MudTd DataLabel="مالک فعلی">
-                    @(context.OwnerType is null ? "نصب‌نشده" : $"{UsageDisplayNames.GetOwnerTypeName(context.OwnerType)} ({context.OwnerId})")
-                </MudTd>
+                <MudTd DataLabel="مالک فعلی">@GetOwnerText(context)</MudTd>
                 <MudTd DataLabel="سقف روزانه اختصاصی">@(context.DailyCapOverride?.ToString("0.##") ?? "پیش‌فرض سامانه")</MudTd>
                 <MudTd DataLabel="عملیات">
                     <MudButton Size="Size.Small" Variant="Variant.Text" Color="Color.Primary"
-                               OnClick="@(() => Navigation.NavigateTo($"/admin/meter-devices/details/{context.Id}"))">
+                               OnClick="@(() => Navigation.NavigateTo($"/admin/meter-devices/details/{context.Id}?holdingId={selectedHoldingId}"))">
                         جزئیات
                     </MudButton>
                 </MudTd>
@@ -79,6 +84,16 @@
 }
 
 @code {
+    /// <summary>The Holding to preselect, supplied when returning from a device page (chat, 2026-10-28).</summary>
+    [Parameter]
+    [SupplyParameterFromQuery(Name = "holdingId")]
+    public Guid? HoldingIdQuery { get; set; }
+
+    /// <summary>The Organization to preselect, supplied when returning from a device page (chat, 2026-10-28).</summary>
+    [Parameter]
+    [SupplyParameterFromQuery(Name = "organizationId")]
+    public Guid? OrganizationIdQuery { get; set; }
+
     private sealed class HoldingItem
     {
         public Guid Id { get; set; }
@@ -95,10 +110,13 @@
     {
         public Guid Id { get; set; }
         public Guid OrganizationId { get; set; }
+        public string Name { get; set; } = string.Empty;
         public string? Unit { get; set; }
         public string Status { get; set; } = string.Empty;
         public string? OwnerType { get; set; }
         public Guid? OwnerId { get; set; }
+        public string? OwnerCode { get; set; }
+        public string? OwnerName { get; set; }
         public decimal? DailyCapOverride { get; set; }
     }
 
@@ -117,6 +135,19 @@
     private bool isLoading;
     private string? errorMessage;
 
+    private static string GetOwnerText(MeterDeviceItem item)
+    {
+        if (item.OwnerType is null)
+        {
+            return "نصب‌نشده";
+        }
+
+        // Show the Asset's code (and name) instead of its raw identifier.
+        return item.OwnerCode is null
+            ? UsageDisplayNames.GetOwnerTypeName(item.OwnerType)
+            : $"{item.OwnerCode} - {item.OwnerName}";
+    }
+
     protected override async Task OnInitializedAsync()
     {
         try
@@ -133,11 +164,26 @@
             else
             {
                 errorMessage = $"خطا در دریافت هلدینگ‌ها: {content}";
+                return;
             }
         }
         catch (Exception ex)
         {
             errorMessage = $"خطا: {ex.Message}";
+            return;
+        }
+
+        // Coming back from a device page: restore the Holding and Organization the user was looking at.
+        if (HoldingIdQuery is { } holdingId && holdings.Any(h => h.Id == holdingId))
+        {
+            selectedHoldingId = holdingId;
+            await OnHoldingChangedAsync();
+
+            if (OrganizationIdQuery is { } organizationId && organizations.Any(o => o.Id == organizationId))
+            {
+                selectedOrganizationId = organizationId;
+                await OnOrganizationChangedAsync();
+            }
         }
     }
 
@@ -194,12 +240,12 @@
 
             if (!response.IsSuccessStatusCode)
             {
-                errorMessage = $"خطا در دریافت فهرست دستگاه‌ها: {response.StatusCode}";
+                errorMessage = await UsageProblemMessages.DescribeAsync(response, "خطا در دریافت فهرست دستگاه‌ها");
                 return;
             }
 
             var stream = await response.Content.ReadAsStreamAsync();
-            var result = await JsonSerializer.DeserializeAsync<SearchMeterDevicesResultWrapper>(stream, JsonOptions);
+            var result = await JsonSerializer.DeserializeAsync<SearchResult<MeterDeviceItem>>(stream, JsonOptions);
             items = result?.Items ?? [];
         }
         catch (Exception ex)
@@ -210,11 +256,5 @@
         {
             isLoading = false;
         }
-    }
-
-    private sealed class SearchMeterDevicesResultWrapper
-    {
-        public List<MeterDeviceItem> Items { get; set; } = [];
-        public int TotalCount { get; set; }
     }
 }

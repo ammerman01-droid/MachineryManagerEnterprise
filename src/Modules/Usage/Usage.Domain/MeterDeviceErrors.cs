@@ -81,4 +81,36 @@ public static class MeterDeviceErrors
 public static Error AssetHasNoMeterReadingUnit(Guid assetId) => Error.Conflict(
     "MeterDevice.AssetHasNoMeterReadingUnit",
     $"Asset {assetId} has no meter reading unit configured, so a Meter Device cannot be installed on it.");
+
+    /// <summary>Creates an error indicating no name was supplied for a Meter Device.</summary>
+    public static Error NameRequired() => Error.Validation(
+        "MeterDevice.NameRequired",
+        "A Meter Device name is required.");
+
+    /// <summary>Creates an error indicating the supplied name exceeds the maximum length.</summary>
+    /// <param name="maxLength">The maximum number of characters allowed.</param>
+    public static Error NameTooLong(int maxLength) => Error.Validation(
+        "MeterDevice.NameTooLong",
+        $"A Meter Device name shall not exceed {maxLength} characters.");
+
+    /// <summary>Creates an error indicating another device in the same Organization already uses the supplied name.</summary>
+    /// <param name="name">The conflicting name.</param>
+    public static Error NameAlreadyExists(string name) => Error.Conflict(
+        "MeterDevice.NameAlreadyExists",
+        $"A Meter Device named '{name}' already exists in this Organization.");
+
+    /// <summary>Creates an error indicating the owner would end up hosting devices of more distinct units than allowed.</summary>
+    /// <param name="maxDistinctUnits">The maximum number of distinct units one owner may host.</param>
+    public static Error TooManyUnitsOnOwner(int maxDistinctUnits) => Error.Conflict(
+        "MeterDevice.TooManyUnitsOnOwner",
+        $"An owner can carry devices of at most {maxDistinctUnits} different units.");
+
+    /// <summary>Creates an error indicating the replacement device reads in a different unit than the Ledger being rebased.</summary>
+    /// <param name="ledgerUnit">The unit of the Ledger being rebased.</param>
+    /// <param name="deviceUnit">The unit of the proposed replacement device.</param>
+    public static Error ReplacementUnitMismatch(
+        global::MachineryManagerEnterprise.SharedKernel.MeterReadingUnit ledgerUnit,
+        global::MachineryManagerEnterprise.SharedKernel.MeterReadingUnit deviceUnit) => Error.Conflict(
+        "MeterDevice.ReplacementUnitMismatch",
+        $"The replacement device reads in '{deviceUnit}' but the Ledger being rebased is in '{ledgerUnit}'.");
 }

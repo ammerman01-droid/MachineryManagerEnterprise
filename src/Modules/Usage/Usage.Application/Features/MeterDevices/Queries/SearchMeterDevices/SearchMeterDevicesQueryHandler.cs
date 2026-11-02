@@ -65,7 +65,7 @@ public sealed class SearchMeterDevicesQueryHandler
         }
 
         var response = await _meterDeviceRepository.SearchAsync(
-            request.OrganizationId, request.Page, request.PageSize, cancellationToken);
+            request.OrganizationId, request.Page, request.PageSize, request.OwnerId, request.Unit, cancellationToken);
 
         // One batched lookup for the whole page — not one call per row — so a page of
         // 200 devices costs a single extra query against the Asset module.

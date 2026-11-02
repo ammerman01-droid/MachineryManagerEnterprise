@@ -8,13 +8,17 @@ namespace MachineryManagerEnterprise.Usage.Application.Features.MeterDevices.Com
 /// <summary>
 /// Handles <see cref="InstallMeterDeviceCommand"/> by loading the
 /// device, confirming the owner exists and belongs to the device's own
-/// Organization, invoking domain installation, and committing the
-/// unit of work.
+/// Organization, enforcing that the owner carries devices of at most two
+/// different units (chat, 2026-10-28), invoking domain installation, and
+/// committing the unit of work.
 /// </summary>
 public sealed class InstallMeterDeviceCommandHandler
     : IRequestHandler<InstallMeterDeviceCommand, Result>
 {
     private const string RequiredPermission = "MeterDevice.Install";
+
+    /// <summary>One owner may host devices of at most this many distinct reading units (e.g. an hour-meter plus an odometer).</summary>
+    private const int MaxDistinctUnitsPerOwner = 2;
 
     private readonly IMeterDeviceRepository _meterDeviceRepository;
     private readonly IUsageUnitOfWork _unitOfWork;
@@ -98,16 +102,23 @@ public sealed class InstallMeterDeviceCommandHandler
             return Result.Failure(global::Usage.Domain.MeterDeviceErrors.OwnerOrganizationMismatch());
         }
 
-        if (ownerContext.MeterReadingUnit is not { } ownerMeterReadingUnit)
-        {
-            return Result.Failure(global::Usage.Domain.MeterDeviceErrors.AssetHasNoMeterReadingUnit(request.OwnerId));
-        }
-
-        var result = device.Install(request.OwnerType, request.OwnerId, ownerMeterReadingUnit, _dateTimeProvider);
+        var result = device.Install(request.OwnerType, request.OwnerId, _dateTimeProvider);
 
         if (result.IsFailure)
         {
             return result;
+        }
+
+        // An owner may carry devices of different units (chat, 2026-10-28), but at most two distinct ones.
+        var otherUnits = await _meterDeviceRepository.ListUnitsOnOwnerAsync(
+            request.OwnerType, request.OwnerId, device.Id.Value, cancellationToken);
+
+        var distinctUnitCount = otherUnits.Append(device.Unit).Distinct().Count();
+
+        if (distinctUnitCount > MaxDistinctUnitsPerOwner)
+        {
+            // Nothing has been persisted yet — returning here discards the in-memory installation.
+            return Result.Failure(global::Usage.Domain.MeterDeviceErrors.TooManyUnitsOnOwner(MaxDistinctUnitsPerOwner));
         }
 
         _meterDeviceRepository.Update(device);

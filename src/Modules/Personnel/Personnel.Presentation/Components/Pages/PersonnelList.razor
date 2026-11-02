@@ -5,24 +5,25 @@
 
 <PageTitle>پرسنل</PageTitle>
 
+
 <MudText Typo="Typo.h4" Class="mb-4">مدیریت پرسنل</MudText>
+<MudStack Row="true" Spacing="3" Class="mb-4">
+    <MudSelect T="Guid?" Label="Holding" Placeholder="یک هلدینگ را انتخاب کنید" @bind-Value="selectedHoldingId"
+               @bind-Value:after="OnHoldingChangedAsync" Class="flex-grow-1">
+        @foreach (var holding in holdings)
+        {
+            <MudSelectItem T="Guid?" Value="@((Guid?)holding.Id)">@holding.Name</MudSelectItem>
+        }
+    </MudSelect>
 
-<MudSelect T="Guid?" Label="Holding" Placeholder="یک هلدینگ را انتخاب کنید" @bind-Value="selectedHoldingId" @bind-Value:after="OnHoldingChangedAsync" Class="mb-4">
-    @foreach (var holding in holdings)
-    {
-        <MudSelectItem T="Guid?" Value="@((Guid?)holding.Id)">@holding.Name</MudSelectItem>
-    }
-</MudSelect>
-
-@if (selectedHoldingId is not null)
-{
-    <MudSelect T="Guid?" Label="Organization" Placeholder="یک سازمان را انتخاب کنید" @bind-Value="selectedOrganizationId" @bind-Value:after="OnOrganizationChangedAsync" Class="mb-4">
+    <MudSelect T="Guid?" Label="سازمان" Placeholder="یک سازمان را انتخاب کنید" @bind-Value="selectedOrganizationId" @bind-Value:after="OnOrganizationChangedAsync"
+               Disabled="@(selectedHoldingId is null)" Class="flex-grow-1">
         @foreach (var organization in organizations)
         {
             <MudSelectItem T="Guid?" Value="@((Guid?)organization.Id)">@organization.Name</MudSelectItem>
         }
     </MudSelect>
-}
+</MudStack>
 
 @if (errorMessage is not null)
 {
@@ -122,7 +123,10 @@ else if (personnel.Count > 0)
 
             if (response.IsSuccessStatusCode)
             {
-                var result = JsonSerializer.Deserialize<SearchResult<HoldingItem>>(content, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+                var result = JsonSerializer.Deserialize<SearchResult<HoldingItem>>(content, new JsonSerializerOptions
+                {
+                    PropertyNameCaseInsensitive = true
+                });
                 holdings = result?.Items ?? [];
             }
             else
@@ -163,8 +167,14 @@ else if (personnel.Count > 0)
 
             if (response.IsSuccessStatusCode)
             {
-                var result = JsonSerializer.Deserialize<SearchResult<OrganizationItem>>(content, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
-                organizations = result?.Items ?? JsonSerializer.Deserialize<List<OrganizationItem>>(content, new JsonSerializerOptions { PropertyNameCaseInsensitive = true }) ?? [];
+                var result = JsonSerializer.Deserialize<SearchResult<OrganizationItem>>(content, new JsonSerializerOptions
+                {
+                    PropertyNameCaseInsensitive = true
+                });
+                organizations = result?.Items ?? JsonSerializer.Deserialize<List<OrganizationItem>>(content, new JsonSerializerOptions
+                {
+                    PropertyNameCaseInsensitive = true
+                }) ?? [];
             }
             else
             {
@@ -201,7 +211,10 @@ else if (personnel.Count > 0)
 
             if (response.IsSuccessStatusCode)
             {
-                personnel = JsonSerializer.Deserialize<List<PersonnelItem>>(content, new JsonSerializerOptions { PropertyNameCaseInsensitive = true }) ?? [];
+                personnel = JsonSerializer.Deserialize<List<PersonnelItem>>(content, new JsonSerializerOptions
+                {
+                    PropertyNameCaseInsensitive = true
+                }) ?? [];
             }
             else
             {

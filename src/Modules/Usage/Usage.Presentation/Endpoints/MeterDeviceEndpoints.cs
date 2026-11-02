@@ -7,7 +7,9 @@ using MachineryManagerEnterprise.Usage.Application.Features.MeterDevices.Command
 using MachineryManagerEnterprise.Usage.Application.Features.MeterDevices.Commands.RecoverMeterDevice;
 using MachineryManagerEnterprise.Usage.Application.Features.MeterDevices.Commands.RegisterMeterDevice;
 using MachineryManagerEnterprise.Usage.Application.Features.MeterDevices.Commands.RemoveMeterDevice;
+using MachineryManagerEnterprise.Usage.Application.Features.MeterDevices.Commands.RenameMeterDevice;
 using MachineryManagerEnterprise.Usage.Application.Features.MeterDevices.Commands.ReportMeterDeviceFailure;
+using MachineryManagerEnterprise.Usage.Application.Features.MeterDevices.Commands.SetMeterDeviceDailyCap;
 using MachineryManagerEnterprise.Usage.Application.Features.MeterDevices.Queries.GetMeterDeviceById;
 using MachineryManagerEnterprise.Usage.Application.Features.MeterDevices.Queries.SearchMeterDevices;
 using MachineryManagerEnterprise.Usage.Presentation.Contracts;
@@ -47,6 +49,14 @@ public static class MeterDeviceEndpoints
         group.MapPost("/", RegisterMeterDeviceAsync)
             .WithName("RegisterMeterDevice")
             .WithSummary("Registers a new Meter Device within an Organization (BR-041), with a fixed reading unit.");
+
+        group.MapPut("/{meterDeviceId:guid}/name", RenameMeterDeviceAsync)
+            .WithName("RenameMeterDevice")
+            .WithSummary("Renames a Meter Device; the name must be unique within its Organization.");
+
+        group.MapPut("/{meterDeviceId:guid}/daily-cap", SetMeterDeviceDailyCapAsync)
+            .WithName("SetMeterDeviceDailyCap")
+            .WithSummary("Sets or clears a Meter Device's own override of the daily Operational Usage cap (BR-045).");
 
         group.MapPost("/{meterDeviceId:guid}/install", InstallMeterDeviceAsync)
             .WithName("InstallMeterDevice")
@@ -89,9 +99,28 @@ public static class MeterDeviceEndpoints
         HttpContext httpContext,
         CancellationToken cancellationToken,
         int page = 1,
-        int pageSize = 50)
+        int pageSize = 50,
+        Guid? ownerId = null,
+        string? unit = null)
     {
-        var result = await sender.Send(new SearchMeterDevicesQuery(organizationId, page, pageSize), cancellationToken);
+        MeterReadingUnit? parsedUnit = null;
+
+        if (!string.IsNullOrWhiteSpace(unit))
+        {
+            if (!Enum.TryParse<MeterReadingUnit>(unit, ignoreCase: true, out var unitValue) || !Enum.IsDefined(unitValue))
+            {
+                return Result.Failure(Error.Validation(
+                        "MeterDevice.InvalidUnit",
+                        $"'{unit}' is not a recognized reading unit. Expected 'Hour', 'Kilometer', or 'Mile'."))
+                    .ToProblemResult(httpContext);
+            }
+
+            parsedUnit = unitValue;
+        }
+
+        var result = await sender.Send(
+            new SearchMeterDevicesQuery(organizationId, page, pageSize, ownerId, parsedUnit),
+            cancellationToken);
 
         return result.IsSuccess ? Results.Ok(result.Value) : result.ToProblemResult(httpContext);
     }
@@ -122,12 +151,38 @@ public static class MeterDeviceEndpoints
         }
 
         var result = await sender.Send(
-            new RegisterMeterDeviceCommand(request.OrganizationId, unit, request.DailyCapOverride),
+            new RegisterMeterDeviceCommand(request.OrganizationId, request.Name, unit, request.DailyCapOverride),
             cancellationToken);
 
         return result.IsSuccess
             ? Results.Created($"/api/v1/meter-devices/{result.Value}", new { id = result.Value })
             : result.ToProblemResult(httpContext);
+    }
+
+    private static async Task<IResult> RenameMeterDeviceAsync(
+        Guid meterDeviceId,
+        RenameMeterDeviceRequest request,
+        ISender sender,
+        HttpContext httpContext,
+        CancellationToken cancellationToken)
+    {
+        var result = await sender.Send(new RenameMeterDeviceCommand(meterDeviceId, request.Name), cancellationToken);
+
+        return result.IsSuccess ? Results.NoContent() : result.ToProblemResult(httpContext);
+    }
+
+    private static async Task<IResult> SetMeterDeviceDailyCapAsync(
+        Guid meterDeviceId,
+        SetMeterDeviceDailyCapRequest request,
+        ISender sender,
+        HttpContext httpContext,
+        CancellationToken cancellationToken)
+    {
+        var result = await sender.Send(
+            new SetMeterDeviceDailyCapCommand(meterDeviceId, request.DailyCapOverride),
+            cancellationToken);
+
+        return result.IsSuccess ? Results.NoContent() : result.ToProblemResult(httpContext);
     }
 
     private static async Task<IResult> InstallMeterDeviceAsync(

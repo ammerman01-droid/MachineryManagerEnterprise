@@ -1,3 +1,4 @@
+using MachineryManagerEnterprise.SharedKernel;
 using MachineryManagerEnterprise.Usage.Application.Abstractions;
 using MachineryManagerEnterprise.Usage.Application.Features.MeterDevices.Dtos;
 using Microsoft.EntityFrameworkCore;
@@ -35,11 +36,23 @@ public sealed class MeterDeviceRepository : IMeterDeviceRepository
         Guid organizationId,
         int page,
         int pageSize,
+        Guid? ownerId = null,
+        MeterReadingUnit? unit = null,
         CancellationToken cancellationToken = default)
     {
         var query = _dbContext.MeterDevices
             .AsNoTracking()
             .Where(d => d.OrganizationId == organizationId);
+
+        if (ownerId is { } filterOwnerId)
+        {
+            query = query.Where(d => d.OwnerId == filterOwnerId);
+        }
+
+        if (unit is { } filterUnit)
+        {
+            query = query.Where(d => d.Unit == filterUnit);
+        }
 
         var totalCount = await query.CountAsync(cancellationToken);
 
@@ -48,13 +61,14 @@ public sealed class MeterDeviceRepository : IMeterDeviceRepository
         // .ToString() on a converted enum inside the server-translated
         // Select (same reasoning as UsageReadService.ListByMeterDeviceAsync).
         var rows = await query
-            .OrderBy(d => d.Status)
+            .OrderBy(d => d.Name)
             .Skip((page - 1) * pageSize)
             .Take(pageSize)
             .Select(d => new
             {
                 d.Id,
                 d.OrganizationId,
+                d.Name,
                 d.Unit,
                 d.Status,
                 d.OwnerType,
@@ -67,6 +81,7 @@ public sealed class MeterDeviceRepository : IMeterDeviceRepository
             .Select(r => new MeterDeviceListItemDto(
                 r.Id.Value,
                 r.OrganizationId,
+                r.Name,
                 r.Unit.ToString(),
                 r.Status.ToString(),
                 r.OwnerType?.ToString(),
@@ -75,5 +90,42 @@ public sealed class MeterDeviceRepository : IMeterDeviceRepository
             .ToList();
 
         return new SearchMeterDevicesResponse(items, totalCount);
+    }
+
+    /// <inheritdoc />
+    public Task<bool> NameExistsAsync(
+        Guid organizationId,
+        string name,
+        Guid? excludeMeterDeviceId,
+        CancellationToken cancellationToken = default)
+    {
+        var query = _dbContext.MeterDevices
+            .AsNoTracking()
+            .Where(d => d.OrganizationId == organizationId && d.Name == name);
+
+        if (excludeMeterDeviceId is { } excludedId)
+        {
+            var excludedDeviceId = global::Usage.Domain.MeterDeviceId.From(excludedId);
+            query = query.Where(d => d.Id != excludedDeviceId);
+        }
+
+        return query.AnyAsync(cancellationToken);
+    }
+
+    /// <inheritdoc />
+    public async Task<IReadOnlyList<MeterReadingUnit>> ListUnitsOnOwnerAsync(
+        global::Usage.Domain.UsageOwnerType ownerType,
+        Guid ownerId,
+        Guid excludeMeterDeviceId,
+        CancellationToken cancellationToken = default)
+    {
+        var excludedDeviceId = global::Usage.Domain.MeterDeviceId.From(excludeMeterDeviceId);
+
+        return await _dbContext.MeterDevices
+            .AsNoTracking()
+            .Where(d => d.OwnerType == ownerType && d.OwnerId == ownerId && d.Id != excludedDeviceId)
+            .Select(d => d.Unit)
+            .Distinct()
+            .ToListAsync(cancellationToken);
     }
 }

@@ -9,6 +9,7 @@ public sealed class RegisterMeterDeviceCommandValidator : AbstractValidator<Regi
     public RegisterMeterDeviceCommandValidator()
     {
         RuleFor(x => x.OrganizationId).NotEmpty();
+        RuleFor(x => x.Name).NotEmpty().MaximumLength(global::Usage.Domain.MeterDevice.MaxNameLength);
         RuleFor(x => x.DailyCapOverride).GreaterThan(0m).When(x => x.DailyCapOverride.HasValue);
         RuleFor(x => x.Unit).IsInEnum();
     }

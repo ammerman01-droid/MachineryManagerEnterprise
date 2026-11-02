@@ -1,0 +1,83 @@
+@using MachineryManagerEnterprise.Usage.Presentation.Components
+@inject IHttpClientFactory HttpClientFactory
+
+<MudDialog>
+    <TitleContent>ویرایش سقف روزانهٔ اختصاصی</TitleContent>
+    <DialogContent>
+        @if (errorMessage is not null)
+        {
+            <MudAlert Severity="Severity.Error" Class="mb-4">@errorMessage</MudAlert>
+        }
+
+        <MudNumericField T="decimal?" @bind-Value="cap" Label="@($"سقف روزانه ({UsageDisplayNames.GetUnitName(Unit)})")"
+                         Min="0" Clearable="true"
+                         HelperText="حداکثر کارکرد مولد روزانهٔ این دستگاه. اگر خالی بماند، سقف پیش‌فرض سامانه اعمال می‌شود." />
+    </DialogContent>
+    <DialogActions>
+        <MudButton OnClick="Cancel">انصراف</MudButton>
+        <MudButton OnClick="@(() => cap = null)">بازگشت به پیش‌فرض سامانه</MudButton>
+        <MudButton Color="Color.Primary" Variant="Variant.Filled" OnClick="SubmitAsync" Disabled="isSubmitting">
+            ذخیره
+        </MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+    [CascadingParameter]
+    private IMudDialogInstance MudDialog { get; set; } = null!;
+
+    /// <summary>The device whose daily cap is being edited.</summary>
+    [Parameter]
+    public Guid MeterDeviceId { get; set; }
+
+    /// <summary>The device's reading unit, by name, shown next to the cap.</summary>
+    [Parameter]
+    public string? Unit { get; set; }
+
+    /// <summary>The device's current override, or <see langword="null"/> when the system default applies.</summary>
+    [Parameter]
+    public decimal? CurrentCap { get; set; }
+
+    private decimal? cap;
+    private bool isSubmitting;
+    private string? errorMessage;
+
+    protected override void OnInitialized() => cap = CurrentCap;
+
+    private async Task SubmitAsync()
+    {
+        errorMessage = null;
+
+        if (cap is <= 0)
+        {
+            errorMessage = "سقف روزانه باید عددی بزرگ‌تر از صفر باشد (یا خالی برای پیش‌فرض سامانه).";
+            return;
+        }
+
+        isSubmitting = true;
+
+        try
+        {
+            var client = HttpClientFactory.CreateClient("InternalApi");
+            var response = await client.PutAsJsonAsync($"/api/v1/meter-devices/{MeterDeviceId}/daily-cap", new { DailyCapOverride = cap });
+
+            if (!response.IsSuccessStatusCode)
+            {
+                errorMessage = await UsageProblemMessages.DescribeAsync(response, "خطا در ذخیرهٔ سقف روزانه");
+                return;
+            }
+
+            MudDialog.Close(DialogResult.Ok(true));
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"خطا در ذخیرهٔ سقف روزانه: {ex.Message}";
+        }
+        finally
+        {
+            isSubmitting = false;
+        }
+    }
+
+    private void Cancel() => MudDialog.Cancel();
+}

@@ -118,6 +118,11 @@ namespace Usage.Infrastructure.Migrations
                         .HasPrecision(18, 4)
                         .HasColumnType("decimal(18,4)");
 
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
                     b.Property<Guid>("OrganizationId")
                         .HasColumnType("uniqueidentifier");
 
@@ -141,6 +146,9 @@ namespace Usage.Infrastructure.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("OrganizationId");
+
+                    b.HasIndex("OrganizationId", "Name")
+                        .IsUnique();
 
                     b.HasIndex("OwnerType", "OwnerId");
 

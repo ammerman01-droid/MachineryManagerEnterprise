@@ -22,6 +22,15 @@ public sealed class MeterDeviceConfiguration : IEntityTypeConfiguration<global::
 
         builder.HasIndex(d => d.OrganizationId);
 
+        // Human-readable name (chat, 2026-10-28): mandatory, editable, and unique
+        // within the Organization so users can pick a device by name everywhere.
+        builder.Property(d => d.Name)
+            .HasMaxLength(global::Usage.Domain.MeterDevice.MaxNameLength)
+            .IsRequired();
+
+        builder.HasIndex(d => new { d.OrganizationId, d.Name })
+            .IsUnique();
+
         // Fixed for the device's lifetime as of chat, 2026-09-29 (see
         // MeterDevice.Register remarks) — same string-column convention
         // used throughout Asset (e.g. Asset.Status, Asset.MeterReadingUnit).

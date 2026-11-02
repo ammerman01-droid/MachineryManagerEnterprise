@@ -9,9 +9,11 @@ namespace MachineryManagerEnterprise.Usage.Application.Features.MeterDevices.Com
 /// never change afterward (chat, 2026-09-29); the device starts unowned.
 /// </summary>
 /// <param name="OrganizationId">The Organization this device belongs to.</param>
+/// <param name="Name">The mandatory, Organization-unique, human-readable name of the device.</param>
 /// <param name="Unit">The unit this device reads in; fixed for its lifetime.</param>
 /// <param name="DailyCapOverride">Optional owner-specific override of the daily cap (BR-045).</param>
 public sealed record RegisterMeterDeviceCommand(
     Guid OrganizationId,
+    string Name,
     MeterReadingUnit Unit,
     decimal? DailyCapOverride) : IRequest<Result<Guid>>;

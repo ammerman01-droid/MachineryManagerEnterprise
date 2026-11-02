@@ -1,0 +1,77 @@
+@using MachineryManagerEnterprise.Usage.Presentation.Components
+@inject IHttpClientFactory HttpClientFactory
+
+<MudDialog>
+    <TitleContent>ویرایش نام دستگاه</TitleContent>
+    <DialogContent>
+        @if (errorMessage is not null)
+        {
+            <MudAlert Severity="Severity.Error" Class="mb-4">@errorMessage</MudAlert>
+        }
+
+        <MudTextField T="string" @bind-Value="name" Label="نام دستگاه" Required="true" MaxLength="100"
+                      HelperText="نام باید در سطح سازمان یکتا باشد." Immediate="true" />
+    </DialogContent>
+    <DialogActions>
+        <MudButton OnClick="Cancel">انصراف</MudButton>
+        <MudButton Color="Color.Primary" Variant="Variant.Filled" OnClick="SubmitAsync" Disabled="isSubmitting">
+            ذخیره
+        </MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+    [CascadingParameter]
+    private IMudDialogInstance MudDialog { get; set; } = null!;
+
+    /// <summary>The device being renamed.</summary>
+    [Parameter]
+    public Guid MeterDeviceId { get; set; }
+
+    /// <summary>The device's current name, used as the starting value.</summary>
+    [Parameter]
+    public string CurrentName { get; set; } = string.Empty;
+
+    private string? name;
+    private bool isSubmitting;
+    private string? errorMessage;
+
+    protected override void OnInitialized() => name = CurrentName;
+
+    private async Task SubmitAsync()
+    {
+        errorMessage = null;
+
+        if (string.IsNullOrWhiteSpace(name))
+        {
+            errorMessage = "نام دستگاه الزامی است.";
+            return;
+        }
+
+        isSubmitting = true;
+
+        try
+        {
+            var client = HttpClientFactory.CreateClient("InternalApi");
+            var response = await client.PutAsJsonAsync($"/api/v1/meter-devices/{MeterDeviceId}/name", new { Name = name.Trim() });
+
+            if (!response.IsSuccessStatusCode)
+            {
+                errorMessage = await UsageProblemMessages.DescribeAsync(response, "خطا در ویرایش نام دستگاه");
+                return;
+            }
+
+            MudDialog.Close(DialogResult.Ok(true));
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"خطا در ویرایش نام دستگاه: {ex.Message}";
+        }
+        finally
+        {
+            isSubmitting = false;
+        }
+    }
+
+    private void Cancel() => MudDialog.Cancel();
+}

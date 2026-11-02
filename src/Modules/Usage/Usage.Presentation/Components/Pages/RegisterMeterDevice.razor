@@ -15,6 +15,10 @@
 
 <MudPaper Class="pa-4">
     <MudForm @ref="form" Model="@this">
+        <MudTextField T="string" @bind-Value="name" Label="نام دستگاه" Required="true" RequiredError="نام دستگاه الزامی است"
+                      MaxLength="100" Immediate="true" Class="mb-4"
+                      HelperText="نامی قابل‌فهم برای کاربر؛ باید در سطح سازمان یکتا باشد (بعداً قابل ویرایش است)." />
+
         <MudSelect T="string" @bind-Value="unit" Label="واحد کنتر" Required="true" RequiredError="واحد کنتر الزامی است" Class="mb-4"
                    HelperText="این واحد برای تمام عمر دستگاه ثابت می‌ماند و بعداً قابل تغییر نیست.">
             @foreach (var unitOption in unitOptions)
@@ -28,10 +32,11 @@
                           HelperText="مقدار حداکثر کارکرد مولد روزانهٔ این دستگاه (بر حسب واحد اندازه‌گیری‌اش)، فقط اگر بخواهید با سقف کلی سازمان متفاوت باشد."
                           Min="0" Class="mb-4" />
 
-        <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="SubmitAsync" Disabled="@(isSubmitting || string.IsNullOrEmpty(unit))">
+        <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="SubmitAsync"
+                   Disabled="@(isSubmitting || string.IsNullOrEmpty(unit) || string.IsNullOrWhiteSpace(name))">
             ثبت دستگاه
         </MudButton>
-        <MudButton Variant="Variant.Text" Class="mr-2" OnClick="@(() => Navigation.NavigateTo($"/admin/meter-devices/{OrganizationId}"))">
+        <MudButton Variant="Variant.Text" Class="mr-2" OnClick="GoBackToList">
             انصراف
         </MudButton>
     </MudForm>
@@ -42,9 +47,15 @@
     [Parameter]
     public Guid OrganizationId { get; set; }
 
+    /// <summary>The Holding the user was working in, carried along so the list page can be restored afterwards.</summary>
+    [Parameter]
+    [SupplyParameterFromQuery(Name = "holdingId")]
+    public Guid? HoldingId { get; set; }
+
     private sealed class RegisterMeterDeviceRequest
     {
         public Guid OrganizationId { get; set; }
+        public string Name { get; set; } = string.Empty;
         public string Unit { get; set; } = string.Empty;
         public decimal? DailyCapOverride { get; set; }
     }
@@ -58,14 +69,28 @@
     private static readonly string[] unitOptions = ["Hour", "Kilometer", "Mile"];
 
     private MudForm form = null!;
+    private string? name;
     private string? unit;
     private decimal? dailyCapOverride;
     private bool isSubmitting;
     private string? errorMessage;
 
+    private string GetListUrl() =>
+        HoldingId is { } holdingId
+            ? $"/admin/meter-devices?holdingId={holdingId}&organizationId={OrganizationId}"
+            : "/admin/meter-devices";
+
+    private void GoBackToList() => Navigation.NavigateTo(GetListUrl());
+
     private async Task SubmitAsync()
     {
         errorMessage = null;
+
+        if (string.IsNullOrWhiteSpace(name))
+        {
+            errorMessage = "لطفاً نام دستگاه را وارد کنید.";
+            return;
+        }
 
         if (string.IsNullOrEmpty(unit))
         {
@@ -80,12 +105,17 @@
             var client = HttpClientFactory.CreateClient("InternalApi");
             var response = await client.PostAsJsonAsync(
                 "/api/v1/meter-devices",
-                new RegisterMeterDeviceRequest { OrganizationId = OrganizationId, Unit = unit, DailyCapOverride = dailyCapOverride });
+                new RegisterMeterDeviceRequest
+                {
+                    OrganizationId = OrganizationId,
+                    Name = name.Trim(),
+                    Unit = unit,
+                    DailyCapOverride = dailyCapOverride,
+                });
 
             if (!response.IsSuccessStatusCode)
             {
-                var problem = await response.Content.ReadAsStringAsync();
-                errorMessage = $"خطا در ثبت دستگاه: {problem}";
+                errorMessage = await UsageProblemMessages.DescribeAsync(response, "خطا در ثبت دستگاه");
                 return;
             }
 
@@ -94,7 +124,8 @@
 
             if (result is not null)
             {
-                Navigation.NavigateTo($"/admin/meter-devices/details/{result.Id}");
+                var query = HoldingId is { } holdingId ? $"?holdingId={holdingId}" : string.Empty;
+                Navigation.NavigateTo($"/admin/meter-devices/details/{result.Id}{query}");
             }
         }
         catch (Exception ex)

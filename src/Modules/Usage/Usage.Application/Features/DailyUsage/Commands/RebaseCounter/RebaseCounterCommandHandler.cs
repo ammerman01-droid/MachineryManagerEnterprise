@@ -104,6 +104,12 @@ public sealed class RebaseCounterCommandHandler
                 "The replacement device must already be installed on this Ledger's owner before rebasing."));
         }
 
+        if (newDevice.Unit != request.Unit)
+        {
+            return Result.Failure(global::Usage.Domain.MeterDeviceErrors.ReplacementUnitMismatch(request.Unit, newDevice.Unit));
+        }
+
+
         if (ledger.OwnerType != global::Usage.Domain.UsageOwnerType.Asset)
         {
             return Result.Failure(Error.Failure(
